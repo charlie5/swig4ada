@@ -1,0 +1,38 @@
+project Test_Example is
+
+   for Languages use ("Ada", "C++");
+   for Main use ("tester.adb");
+   for Source_Dirs use (".", "../../../");
+
+   package Linker is
+      for Default_Switches ("ada") use ("--LINK=g++", "-g");
+      for Default_Switches ("c++") use ("-g");
+   end Linker;
+
+   package Naming is
+      for Specification_Suffix ("c++") use ".h";
+      for Implementation_Suffix ("c++") use ".cc";
+      for Implementation_Suffix ("c++") use ".cxx";
+   end Naming;
+
+   package Builder is
+      for Executable ("tester.adb") use "";
+      for Default_Switches ("ada") use ("-g", "-gnatX");
+   end Builder;
+
+   package Compiler is
+      for Default_Switches ("ada") use ("-g", "-gnat05", "-gnatdQ", "-gnato", "-fstack-check", "-gnata");
+      for Default_Switches ("c++") use ("-g");
+   end Compiler;
+
+   package Ide is
+      for Compiler_Command ("ada") use "gnatmake";
+      for Compiler_Command ("c++") use "g++";
+   end Ide;
+
+   package Binder is
+      for Default_Switches ("ada") use ("-E");
+   end Binder;
+
+end Test_Example;
+

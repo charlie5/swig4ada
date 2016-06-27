@@ -1,0 +1,38 @@
+echo
+echo removing prior build
+
+rm *.ads
+rm *.o
+rm *.ali
+rm ./tester
+
+
+
+echo
+echo generating bindings
+
+swig_gnat  -gnat  example.i
+
+
+
+
+echo
+echo compiling
+
+gprbuild tester.adb -P test_example.gpr
+
+
+
+
+echo
+echo pretty printing ...
+
+gnatpp  -rnb  -I../../..      *.ads
+
+
+
+
+echo
+echo running ...
+
+./tester

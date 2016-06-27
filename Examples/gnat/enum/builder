@@ -1,0 +1,28 @@
+#!/bin/bash
+
+set -e
+
+
+echo Cleaning.
+rm -f ./tester
+rm *.o
+rm *.ali
+
+
+echo Generating Bindings
+../../../gnat/swig_gnat  -c++  -gnat   example.i
+
+
+echo
+echo Pretty Printing
+gnatpp  -rnb  -I../../..      *.ads
+
+
+echo
+echo Compiling
+gprbuild -P test_example.gpr 
+
+
+echo
+echo Testing
+./tester

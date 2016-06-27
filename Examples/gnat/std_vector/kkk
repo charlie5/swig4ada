@@ -1,0 +1,589 @@
+debug-module stage 4
++++ module ----------------------------------------
+| name         - "example"
+| 
++++ insert ----------------------------------------
+| code         - "\n//#include \"example.h\"\n"
+| 
++++ include ----------------------------------------
+| name         - "/usr/local/share/swig/1.3.36/gnat/std_vector.i"
+
+      +++ insert ----------------------------------------
+      | code         - "\n#include <vector>\n#include <stdexcept>\n"
+      | 
+      +++ namespace ----------------------------------------
+      | sym:name     - "std"
+      | name         - "std"
+      | sym:previousSibling - 0xb7815e88
+      | csym:nextSibling - 0xa551f38
+      | sym:nextSibling - 0xa551f38
+      | typescope    - 0xa553088
+      | symtab       - 0xb7815e38
+      | sym:symtab   - 0xb77f53a8
+
+            +++ template ----------------------------------------
+            | templatetype - "class"
+            | sym:typename - "1"
+            | name         - "vector"
+            | sym:symtab   - 0xb7815e38
+            | symtab       - 0xa550a08
+            | allows_typedef - "1"
+            | kind         - "class"
+            | sym:name     - "vector"
+            | sym:overname - "__SWIG_0"
+            | templateparms - 0xa5508c8
+
+                  +++ access ----------------------------------------
+                  | kind         - "public"
+                  | 
+                  +++ cdecl ----------------------------------------
+                  | ismember     - "1"
+                  | sym:name     - "impl_M_start"
+                  | name         - "impl_M_start"
+                  | decl         - "p."
+                  | access       - "public"
+                  | kind         - "variable"
+                  | type         - "void"
+                  | sym:symtab   - 0xa550a08
+                  | sym:overname - "__SWIG_0"
+                  | 
+                  +++ cdecl ----------------------------------------
+                  | ismember     - "1"
+                  | sym:name     - "impl_M_finish"
+                  | name         - "impl_M_finish"
+                  | decl         - "p."
+                  | access       - "public"
+                  | kind         - "variable"
+                  | type         - "void"
+                  | sym:symtab   - 0xa550a08
+                  | sym:overname - "__SWIG_0"
+                  | 
+                  +++ cdecl ----------------------------------------
+                  | ismember     - "1"
+                  | sym:name     - "impl_M_end_of_storage"
+                  | name         - "impl_M_end_of_storage"
+                  | decl         - "p."
+                  | access       - "public"
+                  | kind         - "variable"
+                  | type         - "void"
+                  | sym:symtab   - 0xa550a08
+                  | sym:overname - "__SWIG_0"
+                  | 
+                  +++ cdecl ----------------------------------------
+                  | ismember     - "1"
+                  | sym:name     - "size_type"
+                  | name         - "size_type"
+                  | decl         - ""
+                  | access       - "public"
+                  | storage      - "typedef"
+                  | kind         - "typedef"
+                  | type         - "size_t"
+                  | sym:symtab   - 0xa550a08
+                  | sym:overname - "__SWIG_0"
+                  | 
+                  +++ cdecl ----------------------------------------
+                  | ismember     - "1"
+                  | sym:name     - "value_type"
+                  | name         - "value_type"
+                  | decl         - ""
+                  | access       - "public"
+                  | storage      - "typedef"
+                  | kind         - "typedef"
+                  | type         - "T"
+                  | sym:symtab   - 0xa550a08
+                  | sym:overname - "__SWIG_0"
+                  | 
+                  +++ cdecl ----------------------------------------
+                  | ismember     - "1"
+                  | sym:name     - "const_reference"
+                  | name         - "const_reference"
+                  | decl         - "r."
+                  | access       - "public"
+                  | storage      - "typedef"
+                  | kind         - "typedef"
+                  | type         - "q(const).value_type"
+                  | sym:symtab   - 0xa550a08
+                  | sym:overname - "__SWIG_0"
+                  | 
+                  +++ constructor ----------------------------------------
+                  | name         - "vector"
+                  | ismember     - "1"
+                  | sym:symtab   - 0xa550a08
+                  | sym:nextSibling - 0xa5511b8
+                  | csym:nextSibling - 0xa5511b8
+                  | sym:name     - "vector"
+                  | decl         - "f()."
+                  | access       - "public"
+                  | sym:overloaded - 0xa551078
+                  | sym:overname - "__SWIG_0"
+                  | feature:new  - "1"
+                  | 
+                  +++ constructor ----------------------------------------
+                  | name         - "vector"
+                  | ismember     - "1"
+                  | sym:symtab   - 0xa550a08
+                  | sym:previousSibling - 0xa551078
+                  | sym:name     - "vector"
+                  | decl         - "f(size_type)."
+                  | access       - "public"
+                  | sym:overloaded - 0xa551078
+                  | parms        - size_type
+                  | sym:overname - "__SWIG_1"
+                  | feature:new  - "1"
+                  | 
+                  +++ cdecl ----------------------------------------
+                  | ismember     - "1"
+                  | sym:name     - "size"
+                  | name         - "size"
+                  | decl         - "q(const).f()."
+                  | access       - "public"
+                  | kind         - "function"
+                  | type         - "size_type"
+                  | sym:symtab   - 0xa550a08
+                  | sym:overname - "__SWIG_0"
+                  | 
+                  +++ cdecl ----------------------------------------
+                  | ismember     - "1"
+                  | sym:name     - "capacity"
+                  | name         - "capacity"
+                  | decl         - "q(const).f()."
+                  | access       - "public"
+                  | kind         - "function"
+                  | type         - "size_type"
+                  | sym:symtab   - 0xa550a08
+                  | sym:overname - "__SWIG_0"
+                  | 
+                  +++ cdecl ----------------------------------------
+                  | ismember     - "1"
+                  | sym:name     - "reserve"
+                  | name         - "reserve"
+                  | decl         - "f(size_type)."
+                  | parms        - size_type
+                  | access       - "public"
+                  | kind         - "function"
+                  | type         - "void"
+                  | sym:symtab   - 0xa550a08
+                  | sym:overname - "__SWIG_0"
+                  | 
+                  +++ cdecl ----------------------------------------
+                  | ismember     - "1"
+                  | sym:name     - "isEmpty"
+                  | name         - "empty"
+                  | decl         - "q(const).f()."
+                  | access       - "public"
+                  | kind         - "function"
+                  | type         - "bool"
+                  | sym:symtab   - 0xa550a08
+                  | sym:overname - "__SWIG_0"
+                  | 
+                  +++ cdecl ----------------------------------------
+                  | ismember     - "1"
+                  | sym:name     - "clear"
+                  | name         - "clear"
+                  | decl         - "f()."
+                  | access       - "public"
+                  | kind         - "function"
+                  | type         - "void"
+                  | sym:symtab   - 0xa550a08
+                  | sym:overname - "__SWIG_0"
+                  | 
+                  +++ cdecl ----------------------------------------
+                  | ismember     - "1"
+                  | sym:name     - "add"
+                  | name         - "push_back"
+                  | decl         - "f(r.q(const).value_type)."
+                  | parms        - value_type const &
+                  | access       - "public"
+                  | kind         - "function"
+                  | type         - "void"
+                  | sym:symtab   - 0xa550a08
+                  | sym:overname - "__SWIG_0"
+                  | 
+                  +++ extend ----------------------------------------
+
+                        +++ cdecl ----------------------------------------
+                        | throw        - "1"
+                        | name         - "get"
+                        | ismember     - "1"
+                        | sym:symtab   - 0xa550a08
+                        | throws       - 0xa551a88
+                        | kind         - "function"
+                        | sym:name     - "get"
+                        | decl         - "f(int)."
+                        | feature:extend - "1"
+                        | access       - "public"
+                        | parms        - int
+                        | type         - "const_reference"
+                        | code         - "{\n                int size = int(self->size());\n                if (i>=0 && i<..."
+                        | sym:overname - "__SWIG_0"
+                        | 
+                        +++ cdecl ----------------------------------------
+                        | throw        - "1"
+                        | name         - "set"
+                        | ismember     - "1"
+                        | sym:symtab   - 0xa550a08
+                        | throws       - 0xa551cf8
+                        | kind         - "function"
+                        | sym:name     - "set"
+                        | decl         - "f(int,r.q(const).value_type)."
+                        | feature:extend - "1"
+                        | access       - "public"
+                        | parms        - int,value_type const &
+                        | type         - "void"
+                        | code         - "{\n                int size = int(self->size());\n                if (i>=0 && i<..."
+                        | sym:overname - "__SWIG_0"
+                        | 
++++ namespace ----------------------------------------
+| sym:name     - "std"
+| name         - "std"
+| sym:previousSibling - 0xa550878
+| typescope    - 0xa553088
+| symtab       - 0xb7815e38
+| sym:symtab   - 0xb77f53a8
+
+      +++ class ----------------------------------------
+      | classtype    - "std::vector< int >"
+      | name         - "std::vector<(int)>"
+      | symtab       - 0xa5520e8
+      | sym:symtab   - 0xb7815e38
+      | template     - 0xa550928
+      | allows_typedef - "1"
+      | typepass:visit - "1"
+      | allocate:visit - "1"
+      | kind         - "class"
+      | sym:name     - "int_vector"
+      | view         - "classDeclaration"
+      | allocate:default_constructor - "1"
+      | allocate:has_constructor - "1"
+      | allocate:public_constructor - "1"
+      | allocate:copy_constructor - "1"
+      | allocate:default_destructor - "1"
+      | has_destructor - "1"
+      | allocate:destructor - "1"
+      | sym:cleanconstructor - "1"
+      | has_constructor - "1"
+      | classtypeobj - "std::vector<(int)>"
+      | module       - 0xa550758
+      | sym:overname - "__SWIG_0"
+      | templateparms - 0xa552e28
+      | typescope    - 0xa553288
+
+            +++ access ----------------------------------------
+            | kind         - "public"
+            | 
+            +++ cdecl ----------------------------------------
+            | feature:except - "0"
+            | name         - "impl_M_start"
+            | ismember     - "1"
+            | sym:symtab   - 0xa5520e8
+            | kind         - "variable"
+            | sym:name     - "impl_M_start"
+            | view         - "variableHandler"
+            | wrap:parms   - 0xa6b20b0
+            | tmap:out     - "Tcl_SetObjResult(interp, SWIG_NewInstanceObj( SWIG_as_voidptr(result), SWIGTYPE_..."
+            | decl         - "p."
+            | access       - "public"
+            | wrap:action  - "result = (void *) ((arg1)->impl_M_start);"
+            | type         - "void"
+            | memberset    - "1"
+            | wrap:name    - "_wrap_int_vector_impl_M_start_get"
+            | tmap:out:noblock - "1"
+            | sym:overname - "__SWIG_0"
+            | memberget    - "1"
+            | 
+            +++ cdecl ----------------------------------------
+            | feature:except - "0"
+            | name         - "impl_M_finish"
+            | ismember     - "1"
+            | sym:symtab   - 0xa5520e8
+            | kind         - "variable"
+            | sym:name     - "impl_M_finish"
+            | view         - "variableHandler"
+            | wrap:parms   - 0xa6b2040
+            | tmap:out     - "Tcl_SetObjResult(interp, SWIG_NewInstanceObj( SWIG_as_voidptr(result), SWIGTYPE_..."
+            | decl         - "p."
+            | access       - "public"
+            | wrap:action  - "result = (void *) ((arg1)->impl_M_finish);"
+            | type         - "void"
+            | memberset    - "1"
+            | wrap:name    - "_wrap_int_vector_impl_M_finish_get"
+            | tmap:out:noblock - "1"
+            | sym:overname - "__SWIG_0"
+            | memberget    - "1"
+            | 
+            +++ cdecl ----------------------------------------
+            | feature:except - "0"
+            | name         - "impl_M_end_of_storage"
+            | ismember     - "1"
+            | sym:symtab   - 0xa5520e8
+            | kind         - "variable"
+            | sym:name     - "impl_M_end_of_storage"
+            | view         - "variableHandler"
+            | wrap:parms   - 0xa6b2930
+            | tmap:out     - "Tcl_SetObjResult(interp, SWIG_NewInstanceObj( SWIG_as_voidptr(result), SWIGTYPE_..."
+            | decl         - "p."
+            | access       - "public"
+            | wrap:action  - "result = (void *) ((arg1)->impl_M_end_of_storage);"
+            | type         - "void"
+            | memberset    - "1"
+            | wrap:name    - "_wrap_int_vector_impl_M_end_of_storage_get"
+            | tmap:out:noblock - "1"
+            | sym:overname - "__SWIG_0"
+            | memberget    - "1"
+            | 
+            +++ cdecl ----------------------------------------
+            | name         - "size_type"
+            | ismember     - "1"
+            | sym:symtab   - 0xa5520e8
+            | kind         - "typedef"
+            | sym:name     - "size_type"
+            | view         - "cDeclaration"
+            | decl         - ""
+            | access       - "public"
+            | type         - "size_t"
+            | sym:overname - "__SWIG_0"
+            | storage      - "typedef"
+            | 
+            +++ cdecl ----------------------------------------
+            | name         - "value_type"
+            | ismember     - "1"
+            | sym:symtab   - 0xa5520e8
+            | kind         - "typedef"
+            | sym:name     - "value_type"
+            | view         - "cDeclaration"
+            | decl         - ""
+            | access       - "public"
+            | type         - "int"
+            | sym:overname - "__SWIG_0"
+            | storage      - "typedef"
+            | 
+            +++ cdecl ----------------------------------------
+            | name         - "const_reference"
+            | ismember     - "1"
+            | sym:symtab   - 0xa5520e8
+            | kind         - "typedef"
+            | sym:name     - "const_reference"
+            | view         - "cDeclaration"
+            | decl         - "r."
+            | access       - "public"
+            | type         - "q(const).std::vector<(int)>::value_type"
+            | sym:overname - "__SWIG_0"
+            | storage      - "typedef"
+            | 
+            +++ constructor ----------------------------------------
+            | name         - "std::vector<(int)>"
+            | ismember     - "1"
+            | sym:symtab   - 0xa5520e8
+            | sym:nextSibling - 0xa552638
+            | csym:nextSibling - 0xa552638
+            | sym:name     - "int_vector"
+            | view         - "constructorDeclaration"
+            | decl         - "f()."
+            | tmap:out     - "Tcl_SetObjResult(interp, SWIG_NewInstanceObj( SWIG_as_voidptr(result), SWIGTYPE_..."
+            | access       - "public"
+            | sym:overloaded - 0xa5525a8
+            | wrap:action  - "result = (std::vector< int > *)new std::vector< int >();"
+            | wrap:name    - "_wrap_new_int_vector__SWIG_0"
+            | tmap:out:noblock - "1"
+            | sym:overname - "__SWIG_0"
+            | feature:new  - "1"
+            | 
+            +++ constructor ----------------------------------------
+            | name         - "std::vector<(int)>"
+            | ismember     - "1"
+            | sym:symtab   - 0xa5520e8
+            | sym:previousSibling - 0xa5525a8
+            | sym:name     - "int_vector"
+            | view         - "constructorDeclaration"
+            | wrap:parms   - 0xa6b50d0
+            | decl         - "f(size_type)."
+            | tmap:out     - "Tcl_SetObjResult(interp, SWIG_NewInstanceObj( SWIG_as_voidptr(result), SWIGTYPE_..."
+            | access       - "public"
+            | parms        - std::vector< int >::size_type
+            | sym:overloaded - 0xa5525a8
+            | wrap:action  - "result = (std::vector< int > *)new std::vector< int >(arg1);"
+            | wrap:name    - "_wrap_new_int_vector__SWIG_1"
+            | tmap:out:noblock - "1"
+            | sym:overname - "__SWIG_1"
+            | feature:new  - "1"
+            | 
+            +++ cdecl ----------------------------------------
+            | name         - "size"
+            | ismember     - "1"
+            | tmap:out:fragment - "SWIG_From_size_t"
+            | sym:symtab   - 0xa5520e8
+            | kind         - "function"
+            | sym:name     - "size"
+            | view         - "memberfunctionHandler"
+            | wrap:parms   - 0xa6b5b90
+            | decl         - "q(const).f()."
+            | tmap:out     - "Tcl_SetObjResult(interp,SWIG_From_size_t(static_cast< size_t >(result)));"
+            | access       - "public"
+            | wrap:action  - "result = ((std::vector< int > const *)arg1)->size();"
+            | type         - "std::vector<(int)>::size_type"
+            | wrap:name    - "_wrap_int_vector_size"
+            | tmap:out:noblock - "1"
+            | qualifier    - "q(const)."
+            | sym:overname - "__SWIG_0"
+            | 
+            +++ cdecl ----------------------------------------
+            | name         - "capacity"
+            | ismember     - "1"
+            | tmap:out:fragment - "SWIG_From_size_t"
+            | sym:symtab   - 0xa5520e8
+            | kind         - "function"
+            | sym:name     - "capacity"
+            | view         - "memberfunctionHandler"
+            | wrap:parms   - 0xa6b5c90
+            | decl         - "q(const).f()."
+            | tmap:out     - "Tcl_SetObjResult(interp,SWIG_From_size_t(static_cast< size_t >(result)));"
+            | access       - "public"
+            | wrap:action  - "result = ((std::vector< int > const *)arg1)->capacity();"
+            | type         - "std::vector<(int)>::size_type"
+            | wrap:name    - "_wrap_int_vector_capacity"
+            | tmap:out:noblock - "1"
+            | qualifier    - "q(const)."
+            | sym:overname - "__SWIG_0"
+            | 
+            +++ cdecl ----------------------------------------
+            | name         - "reserve"
+            | ismember     - "1"
+            | sym:symtab   - 0xa5520e8
+            | kind         - "function"
+            | sym:name     - "reserve"
+            | view         - "memberfunctionHandler"
+            | wrap:parms   - 0xa6b72b0
+            | decl         - "f(std::vector<(int)>::size_type)."
+            | tmap:out     - ""
+            | access       - "public"
+            | parms        - std::vector< int >::size_type
+            | wrap:action  - "(arg1)->reserve(arg2);"
+            | type         - "void"
+            | wrap:name    - "_wrap_int_vector_reserve"
+            | tmap:out:noblock - "1"
+            | sym:overname - "__SWIG_0"
+            | 
+            +++ cdecl ----------------------------------------
+            | name         - "empty"
+            | ismember     - "1"
+            | tmap:out:fragment - "SWIG_From_bool"
+            | sym:symtab   - 0xa5520e8
+            | kind         - "function"
+            | sym:name     - "isEmpty"
+            | view         - "memberfunctionHandler"
+            | wrap:parms   - 0xa6b6d70
+            | decl         - "q(const).f()."
+            | tmap:out     - "Tcl_SetObjResult(interp,SWIG_From_bool(static_cast< bool >(result)));"
+            | access       - "public"
+            | wrap:action  - "result = (bool)((std::vector< int > const *)arg1)->empty();"
+            | type         - "bool"
+            | wrap:name    - "_wrap_int_vector_isEmpty"
+            | tmap:out:noblock - "1"
+            | qualifier    - "q(const)."
+            | sym:overname - "__SWIG_0"
+            | 
+            +++ cdecl ----------------------------------------
+            | name         - "clear"
+            | ismember     - "1"
+            | sym:symtab   - 0xa5520e8
+            | kind         - "function"
+            | sym:name     - "clear"
+            | view         - "memberfunctionHandler"
+            | wrap:parms   - 0xa6b7e00
+            | decl         - "f()."
+            | tmap:out     - ""
+            | access       - "public"
+            | wrap:action  - "(arg1)->clear();"
+            | type         - "void"
+            | wrap:name    - "_wrap_int_vector_clear"
+            | tmap:out:noblock - "1"
+            | sym:overname - "__SWIG_0"
+            | 
+            +++ cdecl ----------------------------------------
+            | name         - "push_back"
+            | ismember     - "1"
+            | sym:symtab   - 0xa5520e8
+            | kind         - "function"
+            | sym:name     - "add"
+            | view         - "memberfunctionHandler"
+            | wrap:parms   - 0xa6b8fb0
+            | decl         - "f(r.q(const).std::vector<(int)>::value_type)."
+            | tmap:out     - ""
+            | access       - "public"
+            | parms        - std::vector< int >::value_type const &
+            | wrap:action  - "(arg1)->push_back((std::vector< int >::value_type const &)*arg2);"
+            | type         - "void"
+            | wrap:name    - "_wrap_int_vector_add"
+            | tmap:out:noblock - "1"
+            | sym:overname - "__SWIG_0"
+            | 
+            +++ extend ----------------------------------------
+
+                  +++ cdecl ----------------------------------------
+                  | throw        - "1"
+                  | wrap:code:done - "#define SWIG_init    Example_Init\n#define SWIG_name    \"example\"\n#define SWI..."
+                  | name         - "get"
+                  | ismember     - "1"
+                  | catchlist    - 0xa552bc8
+                  | wrap:code    - "SWIGINTERN std::vector< int >::const_reference std_vector_Sl_int_Sg__get(std::ve..."
+                  | tmap:out:fragment - "SWIG_From_int"
+                  | throws       - 0xa552bc8
+                  | sym:symtab   - 0xa5520e8
+                  | kind         - "function"
+                  | sym:name     - "get"
+                  | view         - "memberfunctionHandler"
+                  | wrap:parms   - 0xa6ba070
+                  | feature:extend - "1"
+                  | decl         - "f(int)."
+                  | tmap:out     - "Tcl_SetObjResult(interp,SWIG_From_int(static_cast< int >(*result)));"
+                  | access       - "public"
+                  | parms        - int
+                  | wrap:action  - "{\nstd::vector< int >::const_reference _result_ref = std_vector_Sl_int_Sg__get(a..."
+                  | type         - "std::vector<(int)>::const_reference"
+                  | wrap:name    - "_wrap_int_vector_get"
+                  | code         - "{\n                int size = int(self->size());\n                if (i>=0 && i<..."
+                  | tmap:out:noblock - "1"
+                  | sym:overname - "__SWIG_0"
+                  | 
+                  +++ cdecl ----------------------------------------
+                  | throw        - "1"
+                  | wrap:code:done - "#define SWIG_init    Example_Init\n#define SWIG_name    \"example\"\n#define SWI..."
+                  | name         - "set"
+                  | ismember     - "1"
+                  | catchlist    - 0xa552d08
+                  | wrap:code    - "SWIGINTERN void std_vector_Sl_int_Sg__set(std::vector< int > *self,int i,std::ve..."
+                  | throws       - 0xa552d08
+                  | sym:symtab   - 0xa5520e8
+                  | kind         - "function"
+                  | sym:name     - "set"
+                  | view         - "memberfunctionHandler"
+                  | wrap:parms   - 0xa6bb2d0
+                  | feature:extend - "1"
+                  | decl         - "f(int,r.q(const).std::vector<(int)>::value_type)."
+                  | tmap:out     - ""
+                  | access       - "public"
+                  | parms        - int,std::vector< int >::value_type const &
+                  | wrap:action  - "std_vector_Sl_int_Sg__set(arg1,arg2,(int const &)*arg3);"
+                  | type         - "void"
+                  | wrap:name    - "_wrap_int_vector_set"
+                  | code         - "{\n                int size = int(self->size());\n                if (i>=0 && i<..."
+                  | tmap:out:noblock - "1"
+                  | sym:overname - "__SWIG_0"
+                  | 
+            +++ access ----------------------------------------
+            | kind         - "public"
+            | 
+            +++ destructor ----------------------------------------
+            | name         - "std::vector<(int)>::~vector<(int)>"
+            | sym:symtab   - 0xa5520e8
+            | view         - "destructorDeclaration"
+            | sym:name     - "~vector<(int)>"
+            | wrap:parms   - 0xa6bb9a0
+            | decl         - "f()."
+            | tmap:out     - ""
+            | access       - "public"
+            | wrap:action  - "delete arg1;"
+            | wrap:name    - "_wrap_delete_int_vector"
+            | tmap:out:noblock - "1"
+            | sym:overname - "__SWIG_0"
+            | 

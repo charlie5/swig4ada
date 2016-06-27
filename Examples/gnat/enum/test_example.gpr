@@ -1,0 +1,25 @@
+project Test_Example is
+
+   for Languages use ("Ada", "C++");
+   for Main use ("tester.adb");
+   for Source_Dirs use (".", "../../../../swig");
+
+   package Compiler is
+      for Default_Switches ("ada") use ("-g", "-gnat05", "-gnatdQ");
+   end Compiler;
+
+   package Builder is
+      for Executable ("tester.adb") use "";
+      for Default_Switches ("ada") use ("-g", "-gnatX");
+   end Builder;
+
+   package Naming is
+      for Spec_Suffix ("c++") use ".h";
+      for Body_Suffix ("c++") use ".cxx";
+   end Naming;
+
+   package Linker is
+   end Linker;
+
+end Test_Example;
+

@@ -1,0 +1,14 @@
+## Builds the gnat version of Swig.
+#
+
+
+# build the ada binding to the swig C headers
+#
+#cd Source/ada_binding
+#./builder
+
+
+# build the gnat swig executable
+#
+cd gnat
+gprbuild -P swiggy

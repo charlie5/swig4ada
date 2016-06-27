@@ -1,0 +1,20 @@
+#!/bin/bash
+
+set -e
+
+
+./cleaner
+
+
+echo Generating bindings.
+../../../gnat/swig_gnat  -gnat  -I/usr/include   preproc.i 
+
+
+echo Pretty printing.
+gnatpp  -rnb  -I../../..   *.ads   -cargs -gnatX -gnat12
+indent  -sob  -di16                  *.c
+
+
+
+gcc -c *.c
+rm *.o

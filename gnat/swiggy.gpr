@@ -1,0 +1,53 @@
+with "gmp";
+
+project Swiggy is
+
+   for Languages use ("Ada", "C", "C++");
+   for Source_Dirs use (".", 
+                        "../Source/DOH", 
+                        "../Source/Modules", 
+                        "../Source/Swig", 
+                        "../Source/Include", 
+                        "../Source/CParse", 
+                        "../Source/Preprocessor",
+                        "../Source/Modules/ada",
+                        "../Source/Modules/ada/ada_type", 
+                        "../Source/Modules/ada/swig_binding");
+   for Main use ("swigmain.cxx");
+   for Object_Dir use "build";
+   for Exec_Dir use ".";
+
+   package Ide is
+   end Ide;
+
+   package Builder is
+      for Executable ("swigmain.cxx") use "swig_gnat";
+      for Default_Switches ("ada") use ("-g", "-gnatdQ", "-j13");
+   end Builder;
+
+   package Naming is
+      for Spec_Suffix ("c") use ".h";
+      for Body_Suffix ("c") use ".c";
+      for Spec_Suffix ("c++") use ".h";
+      for Body_Suffix ("c++") use ".cxx";
+   end Naming;
+
+   package Compiler is
+--      for Default_Switches ("ada") use ("-fstack-check", "-gnata", "-gnato", "-gnatf", "-gnatwa", "-gnatVa", "-gnaty3aAbcdefhklM200nOptx", "-gnat12", "-Wall", "-gnatX", "-g");
+      for Default_Switches ("ada") use ("-gnatVn", "-gnatf", "-gnatwa", "-gnaty3aAbCdefhklnOx", "-Wall", "-g", "-gnat12", "-gnato", "-fstack-check", "-gnata");
+      for Default_Switches ("c") use ("-g");
+      for Default_Switches ("c++") use ("-g", "-D", "GNAT_ENABLED");
+   end Compiler;
+
+   package Binder is
+      for Default_Switches ("ada") use ("-E");
+   end Binder;
+
+   package Linker is
+      for Default_Switches ("ada") use ("-g");
+      for Default_Switches ("c") use ("-g", "-lm");
+      for Default_Switches ("c++") use ("-g", "-lgmp", "-lm");
+   end Linker;
+
+end Swiggy;
+

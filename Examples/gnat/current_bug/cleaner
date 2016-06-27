@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set -e
+
+
+
+echo Cleaning.
+
+rm -f  *.ads
+rm -f  *.cxx
+rm -f  *.pp
+rm -f  *.tmp

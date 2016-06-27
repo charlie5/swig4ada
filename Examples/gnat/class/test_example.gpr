@@ -1,0 +1,31 @@
+project Test_Example is
+
+   for Languages use ("Ada", "C++");
+   for Main use ("tester.adb");
+   Prefix := external ("PREFIX", "");
+
+   package Linker is
+   end Linker;
+
+   package Naming is
+      for Specification_Suffix ("c++") use ".h";
+      for Implementation_Suffix ("c++") use ".cc";
+      for Implementation_Suffix ("c++") use ".cxx";
+   end Naming;
+
+   package Builder is
+      for Executable ("tester.adb") use "";
+      for Default_Switches ("ada") use ("-g", "-gnatX");
+   end Builder;
+
+   package Compiler is
+      for Default_Switches ("ada") use ("-g", "-gnat05", "-gnatdQ");
+   end Compiler;
+
+   package Ide is
+      for Compiler_Command ("ada") use Prefix & "gnatmake";
+      for Compiler_Command ("c++") use Prefix & "g++";
+   end Ide;
+
+end Test_Example;
+

@@ -1,0 +1,42 @@
+
+echo
+echo removing prior build
+
+rm -f ./tester
+rm *.o
+rm *.ali
+rm *.a
+rm *.ads
+
+
+echo
+echo generating bindings
+
+swig_gnat  -gnat   example.i
+//swig_gnat  -java   example.i
+
+
+
+
+echo
+echo pretty printing ...
+
+gnatpp  -rnb  -I../../..      *.ads    -cargs -gnatX
+
+
+
+
+echo
+echo compiling
+
+gprmake  -P   test_example.gpr 
+
+
+
+
+
+
+echo
+echo running tester ...
+
+./tester

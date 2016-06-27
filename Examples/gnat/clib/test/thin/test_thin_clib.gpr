@@ -1,0 +1,32 @@
+project Test_Thin_Clib is
+
+   for Languages use ("Ada", "C++");
+   for Source_Dirs use (".", "../../thin", "../../../../");
+   for Exec_Dir use "build";
+   for Main use ("test_thin.adb");
+
+   package Linker is
+      for Default_Switches ("ada") use ("-g");
+      for Default_Switches ("c++") use ("-g");
+   end Linker;
+
+   package Binder is
+      for Default_Switches ("ada") use ("-E");
+   end Binder;
+
+   package Compiler is
+      for Default_Switches ("ada") use ("-g", "-gnato", "-fstack-check", "-gnata", "-gnat05");
+      for Default_Switches ("c++") use ("-g");
+   end Compiler;
+
+   package Builder is
+      for Default_Switches ("ada") use ("-g");
+   end Builder;
+
+   package Naming is
+      for Specification_Suffix ("c++") use ".h";
+      for Implementation_Suffix ("c++") use ".cxx";
+   end Naming;
+
+end Test_Thin_Clib;
+
