@@ -3,3 +3,16 @@
 
 # Ada Library Information
 *.ali
+
+*.stderr
+*.stdout
+*.d
+
+gnatinspect.*
+
+*.a
+*.deps
+b__*.ad[sb]
+*.bexch
+*.db
+swig_gnat
