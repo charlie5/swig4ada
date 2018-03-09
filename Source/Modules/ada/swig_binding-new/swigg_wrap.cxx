@@ -177,8 +177,8 @@ DllExport void SWIGSTDCALL SWIGRegisterStringCallback_CORE_MODULE(SWIG_AdaString
 #define protected public
 #define private   public
 
-#include "doh.h"
-#include "dohint.h"
+//#include "doh.h"
+//#include "dohint.h"
 
 #include "swigconfig.h"
 #include "swigwarn.h"
@@ -2547,6 +2547,23 @@ DllExport void SWIGSTDCALL Ada_DohMemoryDebug (
 {
   DohMemoryDebug();
   
+  
+}
+
+
+
+DllExport void * SWIGSTDCALL Ada_new_DohBase (
+  )
+{
+  void * jresult ;
+  DohBase *result = 0 ;
+  
+  result = (DohBase *)new DohBase();
+  jresult = (void *) result;      
+  
+  
+  
+  return jresult;
   
 }
 
@@ -5859,7 +5876,7 @@ DllExport void * SWIGSTDCALL Ada_Swig_strip_c_comments (
   
   arg1 = (String *)jarg1; 
   
-  result = (String *)Swig_strip_c_comments((struct doh_String const *)arg1);
+  result = (String *)Swig_strip_c_comments((doh_String const *)arg1);
   jresult = (void *) result;      
   
   
@@ -5901,7 +5918,7 @@ DllExport void * SWIGSTDCALL Ada_Swig_string_mangle (
   
   arg1 = (String *)jarg1; 
   
-  result = (String *)Swig_string_mangle((struct doh_String const *)arg1);
+  result = (String *)Swig_string_mangle((doh_String const *)arg1);
   jresult = (void *) result;      
   
   
@@ -6566,7 +6583,7 @@ DllExport void * SWIGSTDCALL Ada_Swig_ref_call (
   
   arg2 = (String *)jarg2; 
   
-  result = (String *)Swig_ref_call(arg1,(struct doh_String const *)arg2);
+  result = (String *)Swig_ref_call(arg1,(doh_String const *)arg2);
   jresult = (void *) result;      
   
   
@@ -6749,7 +6766,7 @@ DllExport int SWIGSTDCALL Ada_Swig_add_extension_code (
   
   arg7 = (String *)jarg7; 
   
-  result = (int)Swig_add_extension_code(arg1,(struct doh_String const *)arg2,arg3,arg4,(doh_String const *)arg5,arg6,(doh_String const *)arg7);
+  result = (int)Swig_add_extension_code(arg1,(doh_String const *)arg2,arg3,arg4,(doh_String const *)arg5,arg6,(doh_String const *)arg7);
   jresult = result; 
   
   
@@ -12975,7 +12992,7 @@ DllExport void * SWIGSTDCALL Ada_Swig_read_file (
   
   arg1 = (void *)jarg1; 
   
-  result = (String *)Swig_read_file((FILE*)arg1);
+  result = (String *)Swig_read_file(arg1);
   jresult = (void *) result;      
   
   
@@ -14151,6 +14168,12 @@ extern "C" {
 extern DohIterator    gnat_new_DohIterator()
 {
   return DohIterator();
+}
+
+
+extern DohBase    gnat_new_DohBase()
+{
+  return DohBase();
 }
 
 
