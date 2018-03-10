@@ -670,7 +670,7 @@ is
                   append (the_Source,  to_ada_Identifier (the_parameter_Name) & " : ");
 
 
-                  if         the_Parameter          = Element (First (all_Parameters))     --
+                  if         the_Parameter          = Element (First (all_Parameters))     -- is 1st parameter
                     and then the_Parameter.Name     = "Self"                               -- is a class 'Self' parameter
                     and then parameter_type_Package = declaration_Package                  -- (tbd: simpler/clearer to add a flag to gnat_Parameter ?)
                   then
@@ -681,7 +681,7 @@ is
                      else
                         if Self.is_Function
                         then
-                           append (the_Mode, "in");
+                           append (the_Mode, "access");
                         else
                            append (the_Mode, "in out");
                         end if;

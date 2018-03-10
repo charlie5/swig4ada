@@ -46,161 +46,161 @@ type Item is new Dispatcher.item with
 
    function  construct  return swigg.Language.Item'Class;
 
-   function  emit_one (Self : in swigg.Language.Item;
+   function  emit_one (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
    procedure main (Self : in out swigg.Language.Item;
 argc : in interfaces.c.int;
 argv : in swig.pointers.chars_ptr_Pointer);
 
-   function  top (Self : in swigg.Language.Item;
+   function  top (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  applyDirective (Self : in swigg.Language.Item;
+   function  applyDirective (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  clearDirective (Self : in swigg.Language.Item;
+   function  clearDirective (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  constantDirective (Self : in swigg.Language.Item;
+   function  constantDirective (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  extendDirective (Self : in swigg.Language.Item;
+   function  extendDirective (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  fragmentDirective (Self : in swigg.Language.Item;
+   function  fragmentDirective (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  importDirective (Self : in swigg.Language.Item;
+   function  importDirective (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  includeDirective (Self : in swigg.Language.Item;
+   function  includeDirective (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  insertDirective (Self : in swigg.Language.Item;
+   function  insertDirective (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  moduleDirective (Self : in swigg.Language.Item;
+   function  moduleDirective (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  nativeDirective (Self : in swigg.Language.Item;
+   function  nativeDirective (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  pragmaDirective (Self : in swigg.Language.Item;
+   function  pragmaDirective (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  typemapDirective (Self : in swigg.Language.Item;
+   function  typemapDirective (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  typemapcopyDirective (Self : in swigg.Language.Item;
+   function  typemapcopyDirective (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  typesDirective (Self : in swigg.Language.Item;
+   function  typesDirective (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  cDeclaration (Self : in swigg.Language.Item;
+   function  cDeclaration (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  externDeclaration (Self : in swigg.Language.Item;
+   function  externDeclaration (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  enumDeclaration (Self : in swigg.Language.Item;
+   function  enumDeclaration (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  enumvalueDeclaration (Self : in swigg.Language.Item;
+   function  enumvalueDeclaration (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  enumforwardDeclaration (Self : in swigg.Language.Item;
+   function  enumforwardDeclaration (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  classDeclaration (Self : in swigg.Language.Item;
+   function  classDeclaration (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  classforwardDeclaration (Self : in swigg.Language.Item;
+   function  classforwardDeclaration (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  constructorDeclaration (Self : in swigg.Language.Item;
+   function  constructorDeclaration (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  destructorDeclaration (Self : in swigg.Language.Item;
+   function  destructorDeclaration (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  accessDeclaration (Self : in swigg.Language.Item;
+   function  accessDeclaration (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  namespaceDeclaration (Self : in swigg.Language.Item;
+   function  namespaceDeclaration (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  usingDeclaration (Self : in swigg.Language.Item;
+   function  usingDeclaration (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  functionHandler (Self : in swigg.Language.Item;
+   function  functionHandler (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  globalfunctionHandler (Self : in swigg.Language.Item;
+   function  globalfunctionHandler (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  memberfunctionHandler (Self : in swigg.Language.Item;
+   function  memberfunctionHandler (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  staticmemberfunctionHandler (Self : in swigg.Language.Item;
+   function  staticmemberfunctionHandler (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  callbackfunctionHandler (Self : in swigg.Language.Item;
+   function  callbackfunctionHandler (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  variableHandler (Self : in swigg.Language.Item;
+   function  variableHandler (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  globalvariableHandler (Self : in swigg.Language.Item;
+   function  globalvariableHandler (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  membervariableHandler (Self : in swigg.Language.Item;
+   function  membervariableHandler (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  staticmembervariableHandler (Self : in swigg.Language.Item;
+   function  staticmembervariableHandler (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  memberconstantHandler (Self : in swigg.Language.Item;
+   function  memberconstantHandler (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  constructorHandler (Self : in swigg.Language.Item;
+   function  constructorHandler (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  copyconstructorHandler (Self : in swigg.Language.Item;
+   function  copyconstructorHandler (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  destructorHandler (Self : in swigg.Language.Item;
+   function  destructorHandler (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  classHandler (Self : in swigg.Language.Item;
+   function  classHandler (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  typedefHandler (Self : in swigg.Language.Item;
+   function  typedefHandler (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  constantWrapper (Self : in swigg.Language.Item;
+   function  constantWrapper (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  variableWrapper (Self : in swigg.Language.Item;
+   function  variableWrapper (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  functionWrapper (Self : in swigg.Language.Item;
+   function  functionWrapper (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  nativeWrapper (Self : in swigg.Language.Item;
+   function  nativeWrapper (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  classDirector (Self : in swigg.Language.Item;
+   function  classDirector (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  classDirectorInit (Self : in swigg.Language.Item;
+   function  classDirectorInit (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  classDirectorEnd (Self : in swigg.Language.Item;
+   function  classDirectorEnd (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  unrollVirtualMethods (Self : in swigg.Language.Item;
+   function  unrollVirtualMethods (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer;
 parent : in swigg.Pointers.Node_Pointer;
 vm : in swigg.Pointers.List_Pointer;
@@ -208,65 +208,65 @@ default_director : in interfaces.c.int;
 virtual_destructor : in swig.pointers.int_Pointer;
 protectedbase : in interfaces.c.int) return interfaces.c.int;
 
-   function  unrollVirtualMethods (Self : in swigg.Language.Item;
+   function  unrollVirtualMethods (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer;
 parent : in swigg.Pointers.Node_Pointer;
 vm : in swigg.Pointers.List_Pointer;
 default_director : in interfaces.c.int;
 virtual_destructor : in swig.pointers.int_Pointer) return interfaces.c.int;
 
-   function  classDirectorConstructor (Self : in swigg.Language.Item;
+   function  classDirectorConstructor (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  classDirectorDefaultConstructor (Self : in swigg.Language.Item;
+   function  classDirectorDefaultConstructor (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  classDirectorMethod (Self : in swigg.Language.Item;
+   function  classDirectorMethod (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer;
 parent : in swigg.Pointers.Node_Pointer;
 super : in swigg.Pointers.String_Pointer) return interfaces.c.int;
 
-   function  classDirectorConstructors (Self : in swigg.Language.Item;
+   function  classDirectorConstructors (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  classDirectorDestructor (Self : in swigg.Language.Item;
+   function  classDirectorDestructor (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  classDirectorMethods (Self : in swigg.Language.Item;
+   function  classDirectorMethods (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  classDirectorDisown (Self : in swigg.Language.Item;
+   function  classDirectorDisown (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  validIdentifier (Self : in swigg.Language.Item;
+   function  validIdentifier (Self : access swigg.Language.Item;
 s : in swigg.Pointers.String_Pointer) return interfaces.c.int;
 
-   function  addSymbol (Self : in swigg.Language.Item;
+   function  addSymbol (Self : access swigg.Language.Item;
 s : in swigg.Pointers.String_Pointer;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  symbolLookup (Self : in swigg.Language.Item;
+   function  symbolLookup (Self : access swigg.Language.Item;
 s : in swigg.Pointers.String_Pointer) return swigg.Pointers.Node_Pointer;
 
-   function  classLookup (Self : in swigg.Language.Item;
+   function  classLookup (Self : access swigg.Language.Item;
 s : in swigg.Pointers.SwigType_Pointer) return swigg.Pointers.Node_Pointer;
 
-   function  enumLookup (Self : in swigg.Language.Item;
+   function  enumLookup (Self : access swigg.Language.Item;
 s : in swigg.Pointers.SwigType_Pointer) return swigg.Pointers.Node_Pointer;
 
-   function  abstractClassTest (Self : in swigg.Language.Item;
+   function  abstractClassTest (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  is_assignable (Self : in swigg.Language.Item;
+   function  is_assignable (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  runtimeCode (Self : in swigg.Language.Item) return swigg.Pointers.String_Pointer;
+   function  runtimeCode (Self : access swigg.Language.Item) return swigg.Pointers.String_Pointer;
 
-   function  defaultExternalRuntimeFilename (Self : in swigg.Language.Item) return swigg.Pointers.String_Pointer;
+   function  defaultExternalRuntimeFilename (Self : access swigg.Language.Item) return swigg.Pointers.String_Pointer;
 
    procedure enable_cplus_runtime_mode (Self : in out swigg.Language.Item);
 
-   function  cplus_runtime_mode (Self : in swigg.Language.Item) return interfaces.c.int;
+   function  cplus_runtime_mode (Self : access swigg.Language.Item) return interfaces.c.int;
 
    procedure allow_protected_and_private_Members (Self : in out swigg.Language.Item);
 
@@ -275,7 +275,7 @@ val : in interfaces.c.int);
 
    procedure allow_directors (Self : in out swigg.Language.Item);
 
-   function  directorsEnabled (Self : in swigg.Language.Item) return interfaces.c.int;
+   function  directorsEnabled (Self : access swigg.Language.Item) return interfaces.c.int;
 
    procedure allow_dirprot (Self : in out swigg.Language.Item;
 val : in interfaces.c.int);
@@ -287,12 +287,12 @@ val : in interfaces.c.int);
 
    procedure allow_allprotected (Self : in out swigg.Language.Item);
 
-   function  dirprot_mode (Self : in swigg.Language.Item) return interfaces.c.int;
+   function  dirprot_mode (Self : access swigg.Language.Item) return interfaces.c.int;
 
-   function  need_nonpublic_ctor (Self : in swigg.Language.Item;
+   function  need_nonpublic_ctor (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  need_nonpublic_member (Self : in swigg.Language.Item;
+   function  need_nonpublic_member (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
    procedure setSubclassInstanceCheck (Self : in out swigg.Language.Item;
@@ -312,21 +312,21 @@ val : in interfaces.c.int);
 
    procedure allow_overloading (Self : in out swigg.Language.Item);
 
-   function  is_wrapping_class (Self : in swigg.Language.Item) return interfaces.c.int;
+   function  is_wrapping_class (Self : access swigg.Language.Item) return interfaces.c.int;
 
-   function  getCurrentClass (Self : in swigg.Language.Item) return swigg.Pointers.Node_Pointer;
+   function  getCurrentClass (Self : access swigg.Language.Item) return swigg.Pointers.Node_Pointer;
 
-   function  getClassName (Self : in swigg.Language.Item) return swigg.Pointers.String_Pointer;
+   function  getClassName (Self : access swigg.Language.Item) return swigg.Pointers.String_Pointer;
 
-   function  getClassHash (Self : in swigg.Language.Item) return swigg.Pointers.Hash_Pointer;
+   function  getClassHash (Self : access swigg.Language.Item) return swigg.Pointers.Hash_Pointer;
 
-   function  getClassPrefix (Self : in swigg.Language.Item) return swigg.Pointers.String_Pointer;
+   function  getClassPrefix (Self : access swigg.Language.Item) return swigg.Pointers.String_Pointer;
 
-   function  getClassType (Self : in swigg.Language.Item) return swigg.Pointers.String_Pointer;
+   function  getClassType (Self : access swigg.Language.Item) return swigg.Pointers.String_Pointer;
 
-   function  is_smart_pointer (Self : in swigg.Language.Item) return interfaces.c.int;
+   function  is_smart_pointer (Self : access swigg.Language.Item) return interfaces.c.int;
 
-   function  extraDirectorProtectedCPPMethodsRequired (Self : in swigg.Language.Item) return swig.bool;
+   function  extraDirectorProtectedCPPMethodsRequired (Self : access swigg.Language.Item) return swig.bool;
 
 
 
@@ -415,7 +415,7 @@ private
    pragma Import (CPP, classDirectorInit, "Ada_Language_classDirectorInit");
    pragma Import (CPP, classDirectorEnd, "Ada_Language_classDirectorEnd");
 
-   function  unrollVirtualMethods_v1 (Self : in swigg.Language.Item;
+   function  unrollVirtualMethods_v1 (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer;
 parent : in swigg.Pointers.Node_Pointer;
 vm : in swigg.Pointers.List_Pointer;
@@ -425,7 +425,7 @@ protectedbase : in interfaces.c.int) return interfaces.c.int;
 
 
 
-   function  unrollVirtualMethods (Self : in swigg.Language.Item;
+   function  unrollVirtualMethods (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer;
 parent : in swigg.Pointers.Node_Pointer;
 vm : in swigg.Pointers.List_Pointer;
@@ -437,7 +437,7 @@ protectedbase : in interfaces.c.int) return interfaces.c.int
 
    pragma Import (CPP, unrollVirtualMethods_v1, "Ada_Language_unrollVirtualMethods__SWIG_0");
 
-   function  unrollVirtualMethods_v2 (Self : in swigg.Language.Item;
+   function  unrollVirtualMethods_v2 (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer;
 parent : in swigg.Pointers.Node_Pointer;
 vm : in swigg.Pointers.List_Pointer;
@@ -446,7 +446,7 @@ virtual_destructor : in swig.pointers.int_Pointer) return interfaces.c.int;
 
 
 
-   function  unrollVirtualMethods (Self : in swigg.Language.Item;
+   function  unrollVirtualMethods (Self : access swigg.Language.Item;
 n : in swigg.Pointers.Node_Pointer;
 parent : in swigg.Pointers.Node_Pointer;
 vm : in swigg.Pointers.List_Pointer;

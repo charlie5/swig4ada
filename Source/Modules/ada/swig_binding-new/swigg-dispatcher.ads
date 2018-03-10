@@ -44,100 +44,100 @@ type Item is  tagged limited
 
 
 
-   function  emit_one (Self : in swigg.Dispatcher.Item;
+   function  emit_one (Self : access swigg.Dispatcher.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  emit_children (Self : in swigg.Dispatcher.Item;
+   function  emit_children (Self : access swigg.Dispatcher.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  defaultHandler (Self : in swigg.Dispatcher.Item;
+   function  defaultHandler (Self : access swigg.Dispatcher.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  top (Self : in swigg.Dispatcher.Item;
+   function  top (Self : access swigg.Dispatcher.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  applyDirective (Self : in swigg.Dispatcher.Item;
+   function  applyDirective (Self : access swigg.Dispatcher.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  clearDirective (Self : in swigg.Dispatcher.Item;
+   function  clearDirective (Self : access swigg.Dispatcher.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  constantDirective (Self : in swigg.Dispatcher.Item;
+   function  constantDirective (Self : access swigg.Dispatcher.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  extendDirective (Self : in swigg.Dispatcher.Item;
+   function  extendDirective (Self : access swigg.Dispatcher.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  fragmentDirective (Self : in swigg.Dispatcher.Item;
+   function  fragmentDirective (Self : access swigg.Dispatcher.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  importDirective (Self : in swigg.Dispatcher.Item;
+   function  importDirective (Self : access swigg.Dispatcher.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  includeDirective (Self : in swigg.Dispatcher.Item;
+   function  includeDirective (Self : access swigg.Dispatcher.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  insertDirective (Self : in swigg.Dispatcher.Item;
+   function  insertDirective (Self : access swigg.Dispatcher.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  moduleDirective (Self : in swigg.Dispatcher.Item;
+   function  moduleDirective (Self : access swigg.Dispatcher.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  nativeDirective (Self : in swigg.Dispatcher.Item;
+   function  nativeDirective (Self : access swigg.Dispatcher.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  pragmaDirective (Self : in swigg.Dispatcher.Item;
+   function  pragmaDirective (Self : access swigg.Dispatcher.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  typemapDirective (Self : in swigg.Dispatcher.Item;
+   function  typemapDirective (Self : access swigg.Dispatcher.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  typemapitemDirective (Self : in swigg.Dispatcher.Item;
+   function  typemapitemDirective (Self : access swigg.Dispatcher.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  typemapcopyDirective (Self : in swigg.Dispatcher.Item;
+   function  typemapcopyDirective (Self : access swigg.Dispatcher.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  typesDirective (Self : in swigg.Dispatcher.Item;
+   function  typesDirective (Self : access swigg.Dispatcher.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  cDeclaration (Self : in swigg.Dispatcher.Item;
+   function  cDeclaration (Self : access swigg.Dispatcher.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  externDeclaration (Self : in swigg.Dispatcher.Item;
+   function  externDeclaration (Self : access swigg.Dispatcher.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  enumDeclaration (Self : in swigg.Dispatcher.Item;
+   function  enumDeclaration (Self : access swigg.Dispatcher.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  enumvalueDeclaration (Self : in swigg.Dispatcher.Item;
+   function  enumvalueDeclaration (Self : access swigg.Dispatcher.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  enumforwardDeclaration (Self : in swigg.Dispatcher.Item;
+   function  enumforwardDeclaration (Self : access swigg.Dispatcher.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  classDeclaration (Self : in swigg.Dispatcher.Item;
+   function  classDeclaration (Self : access swigg.Dispatcher.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  classforwardDeclaration (Self : in swigg.Dispatcher.Item;
+   function  classforwardDeclaration (Self : access swigg.Dispatcher.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  constructorDeclaration (Self : in swigg.Dispatcher.Item;
+   function  constructorDeclaration (Self : access swigg.Dispatcher.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  destructorDeclaration (Self : in swigg.Dispatcher.Item;
+   function  destructorDeclaration (Self : access swigg.Dispatcher.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  accessDeclaration (Self : in swigg.Dispatcher.Item;
+   function  accessDeclaration (Self : access swigg.Dispatcher.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  usingDeclaration (Self : in swigg.Dispatcher.Item;
+   function  usingDeclaration (Self : access swigg.Dispatcher.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  namespaceDeclaration (Self : in swigg.Dispatcher.Item;
+   function  namespaceDeclaration (Self : access swigg.Dispatcher.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  templateDeclaration (Self : in swigg.Dispatcher.Item;
+   function  templateDeclaration (Self : access swigg.Dispatcher.Item;
 n : in swigg.Pointers.Node_Pointer) return interfaces.c.int;
 
 
