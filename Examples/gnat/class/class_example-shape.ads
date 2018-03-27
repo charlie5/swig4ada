@@ -12,7 +12,7 @@ package class_example.Shape is
    -- Item
    -- 
 
-type Item is  tagged limited
+type Item is  tagggged limited
       record
          x : aliased interfaces.c.double;
          y : aliased interfaces.c.double;

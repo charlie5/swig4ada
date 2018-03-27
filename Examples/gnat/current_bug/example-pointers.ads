@@ -8,16 +8,6 @@ package example.Pointers is
 
 
 
-   -- libusb_error_Pointer
-   -- 
-   type libusb_error_Pointer is access all example.libusb_error;
-
-   -- libusb_error_Pointers
-   -- 
-   type libusb_error_Pointers is array (interfaces.C.Size_t range <>) of aliased example.Pointers.libusb_error_Pointer;
-
-
-
 
 
 

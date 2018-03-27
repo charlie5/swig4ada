@@ -357,7 +357,7 @@ is
          begin
             while has_Element (Cursor)
             loop
-               log ("Tranforming module: '" & Element (Cursor).Name & "'", Status);
+               log ("Transforming module: '" & Element (Cursor).Name & "'", Status);
 
                --   Set the 'std' C namespace mapping to this modules top level Ada package.
                --
@@ -2797,6 +2797,7 @@ is
                                                 Self.c_type_Map_of_ada_type.Element (the_c_Function.return_Type));
       the_ada_subProgram.link_Symbol    := the_c_Function.link_Symbol;
       the_ada_subProgram.is_Virtual     := the_c_Function.is_Virtual;
+      the_ada_subProgram.is_Abstract    := the_c_Function.is_Abstract;
       the_ada_subProgram.is_Constructor := the_c_Function.is_Constructor;
 
       return the_ada_subProgram;

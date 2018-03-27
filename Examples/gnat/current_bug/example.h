@@ -1,31 +1,10 @@
-enum libusb_error {
-	LIBUSB_SUCCESS = 0,
 
-	LIBUSB_ERROR_IO = -1,
+class Shape {
+public:
 
-	LIBUSB_ERROR_INVALID_PARAM = -2,
+  int xyz;
 
-	LIBUSB_ERROR_ACCESS = -3,
-
-	LIBUSB_ERROR_NO_DEVICE = -4,
-
-	LIBUSB_ERROR_NOT_FOUND = -5,
-
-	LIBUSB_ERROR_BUSY = -6,
-
-	LIBUSB_ERROR_TIMEOUT = -7,
-
-	LIBUSB_ERROR_OVERFLOW = -8,
-
-	LIBUSB_ERROR_PIPE = -9,
-
-	LIBUSB_ERROR_INTERRUPTED = -10,
-
-	LIBUSB_ERROR_NO_MEM = -11,
-
-	LIBUSB_ERROR_NOT_SUPPORTED = -12,
-
-	LIBUSB_ERROR_OTHER = -99,
+  virtual double area(void) = 0;
 };
 
 

@@ -692,7 +692,7 @@ is
                the_c_Function     : constant c_Function.view     := Element (Cursor);
                the_ada_subProgram : constant ada_subProgram.view := Self.to_ada_subProgram (the_c_Function);
             begin
-               the_ada_subProgram.Parameters  := Self.to_ada_Parameters (the_c_function.Parameters);
+               the_ada_subProgram.Parameters := Self.to_ada_Parameters (the_c_Function.Parameters);
                Result.Package_binding.add (the_ada_subProgram);
             end;
 
