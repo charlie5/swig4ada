@@ -63,7 +63,7 @@ private
 
 
 
-   pragma cpp_Class (Entity => Item);
+   pragma Import (CPP, Entity => Item);
 
 
 

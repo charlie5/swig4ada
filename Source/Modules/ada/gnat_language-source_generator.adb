@@ -561,7 +561,7 @@ is
 
             if Self.is_Virtual and then not Self.is_interface_Type
             then
-               append (the_Source,  to_String (NL & "   pragma cpp_Class (Entity => " & Self.Name & ");" & NL & NL));
+               append (the_Source,  to_String (NL & "   pragma Import (CPP, Entity => " & Self.Name & ");" & NL & NL));
             end if;
 
             return to_String (the_Source);

@@ -12,17 +12,13 @@ package class_example.Shape is
    -- Item
    -- 
 
-type Item is  tagggged limited
+type Item is  abstract tagged limited
       record
          x : aliased interfaces.c.double;
          y : aliased interfaces.c.double;
       end record;
 
 
-
-   -- Items
-   -- 
-   type Items is array (interfaces.C.Size_t range <>) of aliased class_example.Shape.Item;
 
 
 
@@ -33,9 +29,9 @@ type Item is  tagggged limited
 dx : in interfaces.c.double;
 dy : in interfaces.c.double);
 
-   function  area (Self : access class_example.Shape.Item) return interfaces.c.double;
+   function  area (Self : access class_example.Shape.Item) return interfaces.c.double is abstract;
 
-   function  perimeter (Self : access class_example.Shape.Item) return interfaces.c.double;
+   function  perimeter (Self : access class_example.Shape.Item) return interfaces.c.double is abstract;
 
 
 
@@ -65,15 +61,15 @@ private
 
 
 
-   pragma cpp_Class (Entity => Item);
+   pragma Import (CPP, Entity => Item);
 
 
 
 
 
    pragma Import (CPP, move, "Ada_Shape_move");
-   pragma Import (CPP, area, "Ada_Shape_area");
-   pragma Import (CPP, perimeter, "Ada_Shape_perimeter");
+   pragma Import (CPP, area);
+   pragma Import (CPP, perimeter);
 
 
    package conversions is new System.Address_To_Access_Conversions (Item);
