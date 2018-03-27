@@ -4,6 +4,9 @@ project Test_Example is
    for Main use ("tester.adb");
    Prefix := external ("PREFIX", "");
 
+   for Exec_Dir   use ".";
+   for Object_Dir use "build";
+
    package Linker is
    end Linker;
 
@@ -19,7 +22,7 @@ project Test_Example is
    end Builder;
 
    package Compiler is
-      for Default_Switches ("ada") use ("-g", "-gnat05", "-gnatdQ");
+      for Default_Switches ("ada") use ("-g", "-gnat12", "-gnatdQ");
    end Compiler;
 
    package Ide is

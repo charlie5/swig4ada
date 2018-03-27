@@ -11,7 +11,7 @@ rm *.ads
 echo
 echo generating bindings
 
-swig_gnat  -c++  -gnat   example.i
+../../../gnat/swig_gnat  -c++  -gnat   example.i
 
 
 

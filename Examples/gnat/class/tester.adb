@@ -19,16 +19,15 @@ begin
    put_Line ("Creating some objects:");
 
    declare
-      value : interfaces.c.Double;
-      the_Square : aliased Square.item;
-      the_Circle : aliased Circle.item;
+      the_Square : aliased Square.item := construct (5.0);
+      the_Circle : aliased Circle.item := construct;
       --the_Circle2 : aliased Circle.item;
       --the_Circle3 : aliased Circle.item;
 --      the_Square : aliased Square.item'Class := construct (10.0);
 --      the_Circle : aliased Circle.item'Class := construct (10.0);
    begin
       --put_line("   A total of " & integer'image (shape.get_nShapes) & " shapes were created.");
-      put_line("   A total of " & int'Image (shape.nshapes) & " shapes were created.");
+--        put_line("   A total of " & int'Image (shape.nshapes) & " shapes were created.");
       --put_line("   A total of " & natural'Image (shape.nshapes) & " shapes were created.");
 
       the_Circle.X := 20.0;
@@ -51,25 +50,22 @@ begin
                                 & double'image (the_Square.Y) & ")");
 
 
-      put_Line ("   circle perimeter (circle view):     " & double'Image (the_Circle.Perimeter));
-      put_Line ("   circle area      (circle view):     " & double'Image (the_Circle.Area));
-      Value := shape.item'class (the_Circle).Area ;
-      put_Line ("   circle area      (shape view):      " & double'Image (shape.item'class (the_Circle).Area));
-      put_Line ("   cirlce perimeter (shape view):      " & double'Image (shape.item'class (the_Circle).Perimeter));
-
+--        put_Line ("   circle perimeter (circle view):     " & double'Image (the_Circle.Perimeter));
+--        put_Line ("   circle area      (circle view):     " & double'Image (the_Circle.Area));
 
       new_Line;
       put_Line ("Here are some properties of the shapes:");
 
       -- below fails when it trys to destruct (?!?) the shape during call to 'Area' function ...
       --
-        declare
-           the_Shapes : array (Positive range <>) of access Shape.item'class := (the_Circle'access, the_Square'access);
-        begin
-           for each in the_Shapes'range loop
+      declare
+         the_Shapes : array (Positive range <>) of access Shape.item'Class := (the_Circle'Unchecked_Access,
+                                                                               the_Square'Unchecked_Access);
+      begin
+         for each in the_Shapes'range loop
             put_Line ("Shape" & integer'Image (each) & ":");
-            put_Line ("   area:     " & double'Image (the_Shapes (each).Area));
             put_Line ("   perimeter:" & double'Image (the_Shapes (each).Perimeter));
+            put_Line ("   area:     " & double'Image (the_Shapes (each).Area));
          end loop;
       end;
 
@@ -77,13 +73,13 @@ begin
       new_Line;
       put_Line ("Guess I'll clean up now ...");
 
-      destruct (the_Circle);
-      destruct (the_Square);
+--        destruct (the_Circle);
+--        destruct (the_Square);
    end;
    --
    -- note: end of scope causes auto-destruction of the_Circle and the_Square.
 
-   put_Line (int'Image (shape.nshapes) & " shapes remain.");
+--     put_Line (int'Image (shape.nshapes) & " shapes remain.");
 
    put_Line ("Goodbye.");
 end Tester;
