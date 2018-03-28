@@ -198,6 +198,11 @@ is
       link_Symbol : unbounded_String;
 
    begin
+      if Self.is_Abstract
+      then
+         return the_Source;
+      end if;
+
       if False    -- Self.is_Constructor then
       then
          link_Symbol := Self.member_function_link_Symbol_for (in_cpp_Mode);

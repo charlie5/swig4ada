@@ -1744,6 +1744,7 @@ is
 
       if             the_Package.models_a_virtual_cpp_Class
         and then not the_Package.models_an_interface_Type
+        and then not the_Package.cpp_class_Type.is_Abstract
       then
          append (spec_Source_private,   NL & NL & NL & "   package conversions is new System.Address_To_Access_Conversions (Item);" &  NL);
       end if;

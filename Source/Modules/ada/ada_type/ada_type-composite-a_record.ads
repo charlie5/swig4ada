@@ -42,6 +42,7 @@ is
    function  is_Limited                          (Self : access Item) return Boolean;
    function  is_tagged_Type                      (Self : access Item) return Boolean;
    function  is_Virtual                          (Self : access Item) return Boolean;
+   function  is_Abstract                         (Self : access Item) return Boolean;
 
    function  is_Union                            (Self : access Item) return Boolean;
    procedure is_Union                            (Self : access Item);

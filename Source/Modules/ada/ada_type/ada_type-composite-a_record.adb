@@ -386,6 +386,13 @@ is
    end is_Virtual;
 
 
+   function is_Abstract (Self : access Item) return Boolean
+   is
+   begin
+      return pure_virtual_member_function_Count (Self) > 0;
+   end is_Abstract;
+
+
 
    function is_tagged_Type (Self : access Item) return Boolean
    is

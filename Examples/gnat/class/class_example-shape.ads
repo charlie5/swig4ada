@@ -68,12 +68,6 @@ private
 
 
    pragma Import (CPP, move, "Ada_Shape_move");
-   pragma Import (CPP, area);
-   pragma Import (CPP, perimeter);
-
-
-   package conversions is new System.Address_To_Access_Conversions (Item);
-
 
 
 
