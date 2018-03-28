@@ -636,6 +636,8 @@ is
                   Type_is_from_limited_With : constant Boolean      := declaration_Package.Context.limited_Withs (parameter_type_Package);
                   limited_Pointer_base_Type : ada_Type.view;
 
+                  is_a_non_virtual_member_Function : Boolean;
+
 
                   function returns_virtual_Class return Boolean
                   is
@@ -669,6 +671,7 @@ is
 
                   append (the_Source,  to_ada_Identifier (the_parameter_Name) & " : ");
 
+                  is_a_non_virtual_member_Function := False;
 
                   if         the_Parameter          = Element (First (all_Parameters))     -- is 1st parameter
                     and then the_Parameter.Name     = "Self"                               -- is a class 'Self' parameter
@@ -679,6 +682,8 @@ is
                      then
                         append (the_Mode, "in");        -- for non-virtual C struct's and class's.
                      else
+                        is_a_non_virtual_member_Function := True;
+
                         if Self.is_Function
                         then
                            append (the_Mode, "access");
@@ -745,6 +750,12 @@ is
                      else
                         append (the_Source,  limited_Pointer_base_Type.qualified_Name);
                      end if;
+                  end if;
+
+                  if        is_a_non_virtual_member_Function
+                    and not Self.is_Virtual
+                  then
+                     append (the_Source,  "'Class");
                   end if;
 
 

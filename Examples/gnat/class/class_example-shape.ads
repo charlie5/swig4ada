@@ -25,7 +25,7 @@ type Item is  abstract tagged limited
 
 
 
-   procedure move (Self : in out class_example.Shape.Item;
+   procedure move (Self : in out class_example.Shape.Item'Class;
 dx : in interfaces.c.double;
 dy : in interfaces.c.double);
 
