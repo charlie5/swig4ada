@@ -339,10 +339,11 @@ private
    function current_c_Namespace  (Self : access Item) return c_nameSpace.view;
    function current_c_Class      (Self : access Item) return c_Type.view;       -- The class record curently being processed.
 
-   function new_c_Function       (Self : access Item;   the_Node          : in     doh_Node'class;
-                                                        function_name     : in     unbounded_String;
-                                                        nameSpace         : in     c_nameSpace.view;
-                                                        is_Constructor    : in     Boolean           := False) return c_Function.view;
+   function new_c_Function (Self : access Item;   the_Node       : in     doh_Node'Class;
+                                                  function_name  : in     unbounded_String;
+                                                  nameSpace      : in     c_nameSpace.view;
+                                                  is_Destructor  : in     Boolean;
+                            is_Constructor : in     Boolean         := False) return c_function.view;
 
    function to_c_Parameters      (Self : access Item;   swig_Parameters   : in     doh_ParmList'Class)         return c_parameter.Vector;
 

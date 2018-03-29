@@ -373,7 +373,7 @@ is
          log (+"");
          log (+"");
          log (+"");
-         log (+"Tranforming the main module.", Status);
+         log (+"Transforming the main module.", Status);
 
          --   Set the 'std' C namespace mapping to our top level module top Ada package.
          --
@@ -1054,7 +1054,8 @@ is
                begin
                   the_new_Function := Self.new_c_Function (the_Node,
                                                            +sym_Name,
-                                                           Self.nameSpace_std);
+                                                           Self.nameSpace_std,
+                                                           is_Destructor => False);
 
                   Self.current_Module.C.new_c_Functions   .append (the_new_Function);
                   Self.current_Module.C.new_c_Declarations.append (the_new_Function.all'Access);
@@ -1547,7 +1548,9 @@ is
          begin
             the_new_Function := Self.new_c_Function (the_Node,
                                                      +get_Attribute (the_Node,  -"sym:name"),
-                                                     Self.current_c_Class.nameSpace.all'Access);
+                                                     Self.current_c_Class.nameSpace.all'Access,
+                                                     is_Destructor => False);
+
 
             Self.prior_c_Declaration := the_new_Function.all'Access;
          end;
@@ -1708,6 +1711,7 @@ is
                the_Constructor : constant c_Function.view := Self.new_c_Function (the_Node,
                                                                                   to_unbounded_String ("construct"),
                                                                                   Self.current_c_Class.Namespace.all'Access,
+                                                                                  is_destructor  => False,
                                                                                   is_constructor => True);
             begin
                the_Constructor.is_Constructor     := True;
@@ -1747,6 +1751,7 @@ is
       end if;
 
       indent_Log;
+      log (+"'destructorHandler':");
 
       Self.current_c_Node := doh_Node (the_Node);
 
@@ -1755,6 +1760,18 @@ is
       then
          do_base_destructorHandler (Self.all,  the_node);
       end if;
+
+      declare
+         the_Destructor : constant c_Function.view := Self.new_c_Function (the_Node,
+                                                                           to_unbounded_String ("destruct"),
+                                                                           Self.current_c_Class.Namespace.all'Access,
+                                                                           is_destructor  => True,
+                                                                           is_constructor => False);
+      begin
+         the_Destructor.is_Constructor     := False;
+         the_Destructor.is_Static          := False;
+--         the_Destructor.constructor_Symbol := constructor_Symbol;
+      end;
 
       unindent_Log;
       return SWIG_OK;
@@ -2793,6 +2810,9 @@ is
    is
       the_ada_subProgram : ada_subProgram.view;
    begin
+      put_Line ("*********** the_c_Function.Name): '" & (+the_c_Function.Name) & "'");
+--      put_Line ("*********** the_c_Function.return_Type ): '" & (+the_c_Function.return_Type.Name) & "'");
+
       the_ada_subProgram := new_ada_subProgram (ada_Utility.to_ada_Identifier (the_c_Function.Name),
                                                 Self.c_type_Map_of_ada_type.Element (the_c_Function.return_Type));
       the_ada_subProgram.link_Symbol    := the_c_Function.link_Symbol;
@@ -2985,6 +3005,7 @@ is
    function new_c_Function (Self : access Item;   the_Node       : in     doh_Node'Class;
                                                   function_name  : in     unbounded_String;
                                                   nameSpace      : in     c_nameSpace.view;
+                                                  is_Destructor  : in     Boolean;
                                                   is_Constructor : in     Boolean         := False) return c_function.view
    is
       use c_parameter.Vectors;
@@ -3008,7 +3029,7 @@ is
          return null;   -- Wrappers not wanted for some methods where the parameters cannot be overloaded in Ada.
       end if;
 
-      --  The parameters
+      --  The parameters.
       --
 
       if exists (parameter_list)
@@ -3041,6 +3062,10 @@ is
       then
          the_return_Type := Self.current_c_Class.all'Access;
 
+      elsif is_Destructor
+      then
+         the_return_Type := Self.swig_type_Map_of_c_type.Element (+"void");
+
       else
          declare
             use swigg.Utility;
@@ -3052,6 +3077,7 @@ is
                log (+"covariant return types not supported in Ada ... proxy method will return " & String'(+SwigType_str (virtualtype, null_Doh)));  -- tbd: ??
             else
                strip_all_Qualifiers (the_swigType);
+               put_Line ("************* '"  & (+the_swigType) & "'");
                the_return_Type := Self.swig_type_Map_of_c_type.Element (+the_swigType);
             end if;
          end;

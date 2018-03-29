@@ -1653,6 +1653,12 @@ is
 
                      unique_function_Name :          unbounded_String;
                   begin
+                     if the_Subprogram.is_Destructor
+                     then
+                        put_Line ("DESTUCTOR ************************");
+                     end if;
+
+
                      if         the_Subprogram.access_Mode /= ada_subProgram.private_Access
                        and not (         the_Subprogram.is_Destructor
                                 and then is_interface_Type (the_Package.cpp_class_Type))    -- tbd: destructors and interface types together upsets vTable.
