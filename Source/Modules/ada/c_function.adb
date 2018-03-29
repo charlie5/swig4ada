@@ -205,7 +205,7 @@ is
       then
          link_Symbol := "_ZN" & Image (Length (declaration_Package.Name)) & declaration_Package.Name & "D1Ev";
 
-         append (the_Source,   NL & "   pragma cpp_Destructor (Entity => " & unique_function_Name & ");" & NL);
+--         append (the_Source,   NL & "   pragma cpp_Destructor (Entity => " & unique_function_Name & ");" & NL);
          append (the_Source,   NL & "   pragma Import (CPP, " & unique_function_Name & ", """ & link_Symbol & """);");
 
       else

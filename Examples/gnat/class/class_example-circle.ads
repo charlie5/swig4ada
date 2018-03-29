@@ -35,6 +35,10 @@ type Item is new Shape.item with
 
    function  perimeter (Self : access class_example.Circle.Item) return interfaces.c.double;
 
+   procedure destruct_0 (Self : in out class_example.Circle.Item);
+
+   procedure destruct (Self : in out class_example.Circle.Item);
+
 
 
 
@@ -72,6 +76,8 @@ private
    pragma cpp_Constructor (construct, "Ada_new_Circle");
    pragma Import (CPP, area, "Ada_Circle_area");
    pragma Import (CPP, perimeter, "Ada_Circle_perimeter");
+   pragma Import (CPP, destruct_0, "_ZN6CircleD1Ev");
+   pragma Import (CPP, destruct, "_ZN6CircleD1Ev");
 
 
    package conversions is new System.Address_To_Access_Conversions (Item);

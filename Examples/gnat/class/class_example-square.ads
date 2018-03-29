@@ -37,6 +37,10 @@ type Item is new Shape.item with
 
    function  perimeter (Self : access class_example.Square.Item) return interfaces.c.double;
 
+   procedure destruct_0 (Self : in out class_example.Square.Item);
+
+   procedure destruct (Self : in out class_example.Square.Item);
+
 
 
 
@@ -93,6 +97,8 @@ private
    pragma cpp_Constructor (construct_v2, "Ada_new_Square__SWIG_1");
    pragma Import (CPP, area, "Ada_Square_area");
    pragma Import (CPP, perimeter, "Ada_Square_perimeter");
+   pragma Import (CPP, destruct_0, "_ZN6SquareD1Ev");
+   pragma Import (CPP, destruct, "_ZN6SquareD1Ev");
 
 
    package conversions is new System.Address_To_Access_Conversions (Item);

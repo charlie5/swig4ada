@@ -1761,14 +1761,28 @@ is
          do_base_destructorHandler (Self.all,  the_node);
       end if;
 
+      -- Dummy hack destructor.
+      --
+      declare
+         the_Destructor : constant c_Function.view := Self.new_c_Function (the_Node,
+                                                                           to_unbounded_String ("destruct_0"),
+                                                                           Self.current_c_Class.Namespace.all'Access,
+                                                                           is_destructor => True);
+      begin
+         the_Destructor.is_Constructor     := False;
+         the_Destructor.is_Destructor      := True;
+         the_Destructor.is_Static          := False;
+--         the_Destructor.constructor_Symbol := constructor_Symbol;
+      end;
+
       declare
          the_Destructor : constant c_Function.view := Self.new_c_Function (the_Node,
                                                                            to_unbounded_String ("destruct"),
                                                                            Self.current_c_Class.Namespace.all'Access,
-                                                                           is_destructor  => True,
-                                                                           is_constructor => False);
+                                                                           is_destructor => True);
       begin
          the_Destructor.is_Constructor     := False;
+         the_Destructor.is_Destructor      := True;
          the_Destructor.is_Static          := False;
 --         the_Destructor.constructor_Symbol := constructor_Symbol;
       end;
@@ -2819,6 +2833,7 @@ is
       the_ada_subProgram.is_Virtual     := the_c_Function.is_Virtual;
       the_ada_subProgram.is_Abstract    := the_c_Function.is_Abstract;
       the_ada_subProgram.is_Constructor := the_c_Function.is_Constructor;
+      the_ada_subProgram.is_Destructor  := the_c_Function.is_Destructor;
 
       return the_ada_subProgram;
    end to_ada_subProgram;

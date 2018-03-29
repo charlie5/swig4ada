@@ -25,6 +25,10 @@ type Item is  abstract tagged limited
 
 
 
+   procedure destruct_0 (Self : in out class_example.Shape.Item);
+
+   procedure destruct (Self : in out class_example.Shape.Item);
+
    procedure move (Self : in out class_example.Shape.Item'Class;
 dx : in interfaces.c.double;
 dy : in interfaces.c.double);
@@ -67,6 +71,8 @@ private
 
 
 
+   pragma Import (CPP, destruct_0, "_ZN5ShapeD1Ev");
+   pragma Import (CPP, destruct, "_ZN5ShapeD1Ev");
    pragma Import (CPP, move, "Ada_Shape_move");
 
 
