@@ -3110,6 +3110,11 @@ is
                new_Function.is_Abstract := checkAttribute (the_Node,  -"abstract", -"1")       /= 0;
             end if;
 
+            if is_Destructor
+            then
+               new_Function.is_Virtual := True;
+            end if;
+
             nameSpace.add (new_Function.all'Access);
 
             return new_Function;
