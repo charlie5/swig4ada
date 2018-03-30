@@ -990,6 +990,12 @@ is
                                                  the_gnat_lang => the_gnat_lang));
       append (the_Source,  ";" & NL & NL);
 
+      if Self.is_Constructor
+      then
+         append (the_Source, Self.pragma_import_Source (declaration_package  => declaration_Package,
+                                                        unique_function_name => unique_function_Name,
+                                                        in_cpp_Mode          => True));
+      end if;
 
       --  provide body for public subprogram spec, by renaming the 'overloaded subprogram' with the unique name.
       --
@@ -1001,7 +1007,6 @@ is
                                                  the_gnat_lang => the_gnat_lang));
 
       append (the_Source,  NL & "   renames " & unique_function_Name & ";" & NL & NL);
-
 
 
       return the_Source;
@@ -1025,8 +1030,8 @@ is
       ic_pointer_Types    :          ada_Type.Vector;
 
 
-      spec_Source         :          unbounded_String;
-      spec_Source_private :          unbounded_String;
+      spec_Source         : aliased  unbounded_String;
+      spec_Source_private : aliased  unbounded_String;
 
       use_of_iC_Int_type_Required                 : Boolean  := False;     -- 'use type interfaces.c.Int;' is required for variables with explicit signed values.
       use_of_iC_signed_Char_type_Required         : Boolean  := False;     -- ditto
@@ -1673,25 +1678,40 @@ is
                            unique_function_Name := the_Subprogram.Name;
                         end if;
 
-                        append (spec_Source,  specification_Source (Self                => the_Subprogram,
-                                                                    declaration_package => the_Package.all'Access,
-                                                                    using_name          => the_Subprogram.Name,
-                                                                    namespace_Prefix    => null_unbounded_String,
-                                                                    the_gnat_lang       => the_gnat_lang));
-                        append (spec_Source,  ";");
-
-                        if is_overloaded
+                        if not the_Subprogram.is_Constructor
                         then
-                           append (spec_Source_private,  overload_resolution_Source (Self => the_Subprogram,
-                                                                                     declaration_package  => the_Package.all'Access,
-                                                                                     unique_function_name => unique_function_Name,
-                                                                                     namespace_Prefix     => null_unbounded_String,
-                                                                                     the_gnat_lang => the_gnat_lang));
+                           append (spec_Source,  specification_Source (Self                => the_Subprogram,
+                                                                       declaration_package => the_Package.all'Access,
+                                                                       using_name          => the_Subprogram.Name,
+                                                                       namespace_Prefix    => null_unbounded_String,
+                                                                       the_gnat_lang       => the_gnat_lang));
+                           append (spec_Source,  ";");
                         end if;
 
-                        append (spec_Source_private,  the_Subprogram.pragma_import_Source (declaration_package  => the_Package.all'Access,
-                                                                                           unique_function_name => unique_function_Name,
-                                                                                           in_cpp_Mode          => in_cpp_Mode));
+                        declare
+                           the_Source : access Unbounded_String;
+                        begin
+                           if the_Subprogram.is_Constructor
+                           then   the_Source := spec_Source        'Unchecked_Access;
+                           else   the_Source := spec_Source_private'Unchecked_Access;
+                           end if;
+
+                           if is_overloaded
+                           then
+                              append (the_Source.all,  overload_resolution_Source (Self                 => the_Subprogram,
+                                                                                   declaration_package  => the_Package.all'Access,
+                                                                                   unique_function_name => unique_function_Name,
+                                                                                   namespace_Prefix     => null_unbounded_String,
+                                                                                   the_gnat_lang        => the_gnat_lang));
+                           end if;
+
+                        if not the_Subprogram.is_Constructor
+                        then
+                           append (the_Source.all, the_Subprogram.pragma_import_Source (declaration_package  => the_Package.all'Access,
+                                                                                        unique_function_name => unique_function_Name,
+                                                                                        in_cpp_Mode          => in_cpp_Mode));
+                           end if;
+                        end;
                      end if;
                   end;
                end if;

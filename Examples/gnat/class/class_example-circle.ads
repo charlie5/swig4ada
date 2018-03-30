@@ -35,7 +35,25 @@ type Item is new Shape.item with
 
 
 
-   function  construct  return class_example.Circle.Item;
+   function  construct_v1  return class_example.Circle.Item;
+
+
+   pragma cpp_Constructor (construct_v1, "Ada_new_Circle__SWIG_0");
+
+   function  construct  return class_example.Circle.Item
+   renames construct_v1;
+
+
+
+   function  construct_v2 (r : in interfaces.c.double) return class_example.Circle.Item;
+
+
+   pragma cpp_Constructor (construct_v2, "Ada_new_Circle__SWIG_1");
+
+   function  construct (r : in interfaces.c.double) return class_example.Circle.Item
+   renames construct_v2;
+
+
 
    function  area (Self : access class_example.Circle.Item) return interfaces.c.double;
 
@@ -73,7 +91,6 @@ private
 
 
 
-   pragma cpp_Constructor (construct, "Ada_new_Circle");
    pragma Import (CPP, area, "Ada_Circle_area");
    pragma Import (CPP, perimeter, "Ada_Circle_perimeter");
    pragma Import (CPP, destruct_0, "_ZN6CircleD1Ev");

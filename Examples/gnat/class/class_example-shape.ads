@@ -35,8 +35,6 @@ type Item is  tagged limited
 
 
 
-   function  construct  return class_example.Shape.Item;
-
    procedure destruct_0 (Self : in out class_example.Shape.Item);
 
    procedure destruct (Self : in out class_example.Shape.Item);
@@ -77,7 +75,6 @@ private
 
 
 
-   pragma cpp_Constructor (construct, "Ada_new_Shape");
    pragma Import (CPP, destruct_0, "_ZN5ShapeD1Ev");
    pragma Import (CPP, destruct, "_ZN5ShapeD1Ev");
    pragma Import (CPP, move, "Ada_Shape_move");

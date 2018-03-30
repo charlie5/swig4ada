@@ -23,9 +23,9 @@ class Circle : public Shape {
 private:
   double radius;
 public:
-//  Circle(double r) : radius(r) { };
-//  Circle() : radius(0.5) { };
   Circle();
+  Circle(double r); // : radius(r) { };
+//  Circle() : radius(0.5) { };
 
   virtual double area(void);
   virtual double perimeter(void);

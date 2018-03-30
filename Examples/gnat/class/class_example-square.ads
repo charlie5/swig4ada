@@ -35,9 +35,25 @@ type Item is new Shape.item with
 
 
 
-   function  construct  return class_example.Square.Item;
+   function  construct_v1  return class_example.Square.Item;
 
-   function  construct (w : in interfaces.c.double) return class_example.Square.Item;
+
+   pragma cpp_Constructor (construct_v1, "Ada_new_Square__SWIG_0");
+
+   function  construct  return class_example.Square.Item
+   renames construct_v1;
+
+
+
+   function  construct_v2 (w : in interfaces.c.double) return class_example.Square.Item;
+
+
+   pragma cpp_Constructor (construct_v2, "Ada_new_Square__SWIG_1");
+
+   function  construct (w : in interfaces.c.double) return class_example.Square.Item
+   renames construct_v2;
+
+
 
    function  area (Self : access class_example.Square.Item) return interfaces.c.double;
 
@@ -75,26 +91,6 @@ private
 
 
 
-
-   function  construct_v1  return class_example.Square.Item;
-
-
-
-   function  construct  return class_example.Square.Item
-   renames construct_v1;
-
-
-   pragma cpp_Constructor (construct_v1, "Ada_new_Square__SWIG_0");
-
-   function  construct_v2 (w : in interfaces.c.double) return class_example.Square.Item;
-
-
-
-   function  construct (w : in interfaces.c.double) return class_example.Square.Item
-   renames construct_v2;
-
-
-   pragma cpp_Constructor (construct_v2, "Ada_new_Square__SWIG_1");
    pragma Import (CPP, area, "Ada_Square_area");
    pragma Import (CPP, perimeter, "Ada_Square_perimeter");
    pragma Import (CPP, destruct_0, "_ZN6SquareD1Ev");
