@@ -20,6 +20,12 @@ type Item is new Shape.item with
 
 
 
+
+   pragma Import (CPP, Entity => Item);
+
+
+
+
    -- Items
    -- 
    type Items is array (interfaces.C.Size_t range <>) of aliased class_example.Square.Item;
@@ -29,9 +35,9 @@ type Item is new Shape.item with
 
 
 
-   function  construct  return class_example.Square.Item'Class;
+   function  construct  return class_example.Square.Item;
 
-   function  construct (w : in interfaces.c.double) return class_example.Square.Item'Class;
+   function  construct (w : in interfaces.c.double) return class_example.Square.Item;
 
    function  area (Self : access class_example.Square.Item) return interfaces.c.double;
 
@@ -69,28 +75,22 @@ private
 
 
 
-   pragma Import (CPP, Entity => Item);
+
+   function  construct_v1  return class_example.Square.Item;
 
 
 
-
-
-
-   function  construct_v1  return class_example.Square.Item'Class;
-
-
-
-   function  construct  return class_example.Square.Item'Class
+   function  construct  return class_example.Square.Item
    renames construct_v1;
 
 
    pragma cpp_Constructor (construct_v1, "Ada_new_Square__SWIG_0");
 
-   function  construct_v2 (w : in interfaces.c.double) return class_example.Square.Item'Class;
+   function  construct_v2 (w : in interfaces.c.double) return class_example.Square.Item;
 
 
 
-   function  construct (w : in interfaces.c.double) return class_example.Square.Item'Class
+   function  construct (w : in interfaces.c.double) return class_example.Square.Item
    renames construct_v2;
 
 

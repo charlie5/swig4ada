@@ -20,6 +20,12 @@ type Item is new Shape.item with
 
 
 
+
+   pragma Import (CPP, Entity => Item);
+
+
+
+
    -- Items
    -- 
    type Items is array (interfaces.C.Size_t range <>) of aliased class_example.Circle.Item;
@@ -29,7 +35,7 @@ type Item is new Shape.item with
 
 
 
-   function  construct  return class_example.Circle.Item'Class;
+   function  construct  return class_example.Circle.Item;
 
    function  area (Self : access class_example.Circle.Item) return interfaces.c.double;
 
@@ -64,12 +70,6 @@ type Item is new Shape.item with
 
 
 private
-
-
-
-   pragma Import (CPP, Entity => Item);
-
-
 
 
 

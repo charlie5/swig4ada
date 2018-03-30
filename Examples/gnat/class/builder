@@ -15,7 +15,6 @@ echo generating bindings
 
 
 
-
 #echo
 #echo pretty printing ...  crashes gnatpp
 #
@@ -23,14 +22,10 @@ echo generating bindings
 
 
 
-
 echo
 echo compiling
 
-gprmake -P test_example.gpr 
-
-
-
+gprbuild -P test_example.gpr 
 
 
 

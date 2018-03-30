@@ -12,8 +12,10 @@ public:
   };
   double  x, y;   
   void    move(double dx, double dy);
-  virtual double area(void) = 0;
-  virtual double perimeter(void) = 0;
+//  virtual double area(void) = 0;   
+//  virtual double perimeter(void) = 0;
+  virtual double area(void) {return 0.0;};         // = 0;     Swig will not handle constructors for abstract classes.
+  virtual double perimeter(void){return 0.0;};     // = 0;
   static  int nshapes;
 };
 

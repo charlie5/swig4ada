@@ -500,13 +500,13 @@ is
       if Self.all in ada_Type.composite.a_record.item'Class
       then
          declare
-            Self : constant ada_Type.composite.a_record.view := ada_Type.composite.a_record.view (representation_Text.Self);
+            the_Record : constant ada_Type.composite.a_record.view := ada_Type.composite.a_record.view (Self);
          begin
-            if Self.contains_bit_Fields
+            if the_Record.contains_bit_Fields
             then
                append (the_Source,
                        NL & NL
-                       & "   for " & Self.Name & " use" & NL
+                       & "   for " & the_Record.Name & " use" & NL
                        & "      record"                        );
 
                declare
@@ -516,9 +516,9 @@ is
                   First         : Natural;
                   Last          : Natural;
                begin
-                  for Each in 1 .. Self.component_Count
+                  for Each in 1 .. the_Record.component_Count
                   loop
-                     the_Component := Self.Components (Each);
+                     the_Component := the_Record.Components (Each);
 
                      if the_Component.bit_Field /= -1
                      then
@@ -528,7 +528,7 @@ is
 
                         append (the_Source,  NL & "         " & the_Component.Name & " at ");
 
-                        if Self.is_Virtual
+                        if the_Record.is_Virtual
                         then
                            append (the_Source,  "system.Storage_Unit ");
 
@@ -559,9 +559,10 @@ is
             end if;
 
 
-            if Self.is_Virtual and then not Self.is_interface_Type
+            if             the_Record.is_Virtual
+              and then not the_Record.is_interface_Type
             then
-               append (the_Source,  to_String (NL & "   pragma Import (CPP, Entity => " & Self.Name & ");" & NL & NL));
+               append (the_Source,  to_String (NL & "   pragma Import (CPP, Entity => " & the_Record.Name & ");" & NL & NL));
             end if;
 
             return to_String (the_Source);
@@ -839,9 +840,10 @@ is
             end if;
 
 
-            if                 return_type_Package.cpp_class_Type           /= null
-                       and then return_type_Package.cpp_class_Type.all'Access = Self.return_Type
-                       and then return_type_Package.cpp_class_Type.total_virtual_member_function_Count  > 0
+            if         return_type_Package.cpp_class_Type /= null
+              and then return_type_Package.cpp_class_Type.all'Access = Self.return_Type   -- The return type is the main type of a class package.
+              and then return_type_Package.cpp_class_Type.is_Virtual
+              and then return_type_Package /= declaration_Package                         -- The return type is not the main type of the functions package.
             then
                append (the_Source,  "'Class");
             end if;
@@ -1417,7 +1419,7 @@ is
                begin
                   if the_representation_Text /= ""
                   then
-                     append (spec_Source_private,  the_representation_Text & NL & NL & NL);
+                     append (spec_Source,  the_representation_Text & NL & NL & NL);
                   end if;
                end;
             end if;

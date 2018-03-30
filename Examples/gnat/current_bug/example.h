@@ -4,11 +4,11 @@ public:
 
   int xyz;
 
-//  Shape () {};
-   ~Shape () {};
+//    Shape() {};
+//   ~Shape () {};
 
-  virtual double area(void) = 0;
-  virtual double area2(void) = 0;
+//  virtual double area(void) = 0;
+//    virtual double area1(void);
 };
 
 
