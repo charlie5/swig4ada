@@ -32,9 +32,23 @@ project Swiggy is
       for Body_Suffix ("c++") use ".cxx";
    end Naming;
 
+
+   Style_Options  := ("-gnatyknp",    --  Check casings: a:attribute, k:keywords, n:package Standard identifiers, p:pragma, r:identifier references.
+                      "-gnatybfhi",   --  Check b:no blanks at end of lines, f:no ff/vtabs, h: no htabs, i:if-then layout, u:no unnecessary blank lines.
+                      "-gnatyO",      --  Check that overriding subprograms are explicitly marked as such.
+                      "-gnatye",      --  Check that labels on end statements (ending subprograms), and on exit statements (exiting named loops), are present.
+                      "-gnatyx");     --  Check x:no extra parens.
+
+   Compiler_Options :=   ("-gnat12",
+                          "-gnatwa",
+                          "-fno-strict-aliasing")
+                        & Style_Options;
+
+
    package Compiler is
---      for Default_Switches ("ada") use ("-fstack-check", "-gnata", "-gnato", "-gnatf", "-gnatwa", "-gnatVa", "-gnaty3aAbcdefhklM200nOptx", "-gnat12", "-Wall", "-gnatX", "-g");
-      for Default_Switches ("ada") use ("-gnatVn", "-gnatf", "-gnatwa", "-gnaty3aAbCdefhklnOx", "-Wall", "-g", "-gnat12", "-gnato", "-fstack-check", "-gnata");
+--      for Default_Switches ("ada") use ("-gnatVn", "-gnatf", "-gnatwa", "-gnaty3aAbCdefhklnOx", "-Wall", "-g", "-gnat12", "-gnato", "-fstack-check", "-gnata");
+
+      for Default_Switches ("ada") use Compiler_Options;
       for Default_Switches ("c") use ("-g");
       for Default_Switches ("c++") use ("-g", "-D", "GNAT_ENABLED");
    end Compiler;
