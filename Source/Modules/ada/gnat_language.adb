@@ -670,13 +670,12 @@ is
             wrapper_Def          : constant doh_String'Class   := the_function_Wrapper.get_Def;
             wrapper_Code         : constant doh_String'Class   := the_function_Wrapper.get_Code;
 
-            overloaded_Name      :          unbounded_String   := to_unbounded_String  (Self.get_overloaded_Name (the_Node));
+            overloaded_Name      : constant unbounded_String   := to_unbounded_String  (Self.get_overloaded_Name (the_Node));
             wrapper_Name         : constant String             := +Swig_name_wrapper   (-overloaded_name);
 
             the_Parameters       : constant doh_parmList'Class := get_Attribute        (the_Node,   -"parms");
 
             c_return_Type        :          unbounded_String   := +Swig_typemap_lookup (-"ctype",   the_Node,  -"",  null_Wrapper);
-            im_return_Type       : constant unbounded_String   := +Swig_typemap_lookup (-"imtype",  the_Node,  -"",  null_Wrapper);
 
             is_void_return       : constant Boolean            := (c_return_Type = "void");
 
@@ -696,11 +695,6 @@ is
                replace_All (c_return_Type,  "$c_classname", +swig_type);
             else
                log (+"No ctype typemap defined for " & String'(+swig_Type));
-            end if;
-
-            if im_return_Type = ""
-            then
-               log (+"No imtype typemap defined for " & String'(+swig_Type));
             end if;
 
             if not is_void_return
