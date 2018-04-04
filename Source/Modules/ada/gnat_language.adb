@@ -981,8 +981,6 @@ is
             --  Finish C function definitions.
             --
 
-            replace_All (overloaded_name,   "_SWIG_",  "__SWIG_");
-
             print_to (wrapper_Def,  ")" & NL & "{" & NL);
 
             if not is_void_return
