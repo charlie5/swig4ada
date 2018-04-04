@@ -19,8 +19,6 @@
 %typemap (adatype_new)      void**                                                        "swig.void_ptr_Pointer"
 
 
-
-
 %typemap (ctype_new)        int                                                           "int"
 %typemap (adatype_new)      int                                                           "interfaces.c.int"
 
@@ -29,7 +27,6 @@
 
 %typemap (ctype_new)        int**                                                         "int**"
 %typemap (adatype_new)      int**                                                         "swig.int_pointer_Pointer"
-
 
 
 %typemap (adatype_new)      long                                                          "interfaces.c.long"
@@ -43,7 +40,6 @@
 
 
 
-
 %typemap (ctype_new)        char                                                          "char"
 %typemap (adatype_new)      char                                                          "interfaces.c.char"
 
@@ -52,7 +48,6 @@
 
 %typemap (ctype_new)        char**                                                        "char**"
 %typemap (adatype_new)      char**                                                        "swig.chars_ptr_Pointer"
-
 
 
 
@@ -90,7 +85,6 @@
 
 
 
-
 %typemap (ctype_new)        long long                                                     "long long"
 %typemap (adatype_new)      long long                                                     "interfaces.c.extensions.long_long"
 
@@ -108,11 +102,6 @@
 // old ...
 //
 
-
-
-// %rename(de_ref) *::operator->;          tbd:
-// %rename(ref)   *::operator*();
-// %rename(ref)   *::operator*() const;
 
 // - the 'link_symbol_code' typemap defines the c++ linkage symbol code for a given C++ type.
 // - is used to to construct the link symbol for pragma Import (C++, ...).
@@ -211,18 +200,13 @@
 
 
 
-
-
-
-
 // primitive c types
 //
 
 
-// - the ctype, imtype and adatype typemaps work together and so there should be one of each. 
+// - the ctype and adatype typemaps work together and so there should be one of each. 
 //
 // - the ctype   typemap contains the C   type used in the C/C++ code. 
-// - the imtype  typemap contains the Ada type used in the intermediary package. 
 // - the adatype typemap contains the Ada type used in the Ada proxy classes, type wrapper classes and module class.
 
 
@@ -371,8 +355,6 @@
 %typemap (ctype)      long double *,      const long double *                       "long double*"
 %typemap (ctype)      long double &,      const long double &                       "long double*"
 %typemap (ctype)      long double [],     long double [ANY]                         "long double*"
-
-
 
 
 
@@ -555,11 +537,6 @@
 
 
 
-%typemap (imtype)     std::string                                                   "swig.std_String"
-%typemap (imtype)     std::string*                                                  "swig.std_String_view"
-%typemap (imtype)     std::string&                                                  "swig.std_String_view"
-
-
 
 %typemap (in)                                        std::string
 %{ 
@@ -596,7 +573,6 @@
 %{
    return $imcall;
 %}
-
 
 
 
@@ -646,15 +622,10 @@
 
 
 
-
-
-
-
 // char * - treat as String 
 //
 
 %typemap (ctype)      char *, char[ANY], char[]                          "char *"
-%typemap (imtype)     char *, char[ANY], char[]                          "interfaces.c.strings.chars_ptr"
 
 //%typemap (adatype)    char *                                             "interfaces.c.strings.chars_ptr"
 //%typemap (adatype)    char[ANY], char[]                                  "interfaces.c.char_Array"
@@ -665,23 +636,18 @@
 
 
 
-
 // non primitive types
 
 %typemap (ctype)               SWIGTYPE                   "$c_classname"
-%typemap (imtype)              SWIGTYPE                   "system.Address"
 //%typemap (adatype)             SWIGTYPE                   "$&adaclassname"
 
 %typemap (ctype)               SWIGTYPE []                "void *"
-%typemap (imtype)              SWIGTYPE []                "system.Address"
 //%typemap (adatype)             SWIGTYPE []                "$adaclassname"
 
 %typemap (ctype)               SWIGTYPE *                 "void *"
-%typemap (imtype)              SWIGTYPE *                 "system.Address"
 //%typemap (adatype)             SWIGTYPE *                 "$adaclassname"
 
 %typemap (ctype)               SWIGTYPE &                 "void *"
-%typemap (imtype)              SWIGTYPE &                 "system.Address"
 //%typemap (adatype)             SWIGTYPE &                 "$adaclassname"
 
 
@@ -689,14 +655,7 @@
 // pointer to a class member
 
 %typemap (ctype)               SWIGTYPE (CLASS::*)         "int"
-%typemap (imtype)              SWIGTYPE (CLASS::*)         "system.Address"
 //%typemap (adatype)             SWIGTYPE (CLASS::*)         "$adaclassname"
-
-
-
-
-
-
 
 
 
@@ -716,7 +675,6 @@
 %{ 
   $1 = $input ? true : false; 
 %}
-
 
 
 %typemap (in)                  char, 
@@ -801,14 +759,6 @@
 //  temp = $input ? true : false; 
 //  $1   = &temp; 
 //%}
-
-
-
-
-
-
-
-
 
 
 
@@ -1070,14 +1020,6 @@
 
 
 
-
-
-
-
-
-
-
-
 // typecheck typemaps
 //
 // - the purpose of these is merely to issue a warning for overloaded C++ functions 
@@ -1184,9 +1126,6 @@
 
 
 
-
-
-
 // Ada specific directives
 
 #define %adaconst       (flag)               %feature ("ada:const",      "flag")
@@ -1267,15 +1206,6 @@
 
 //#define  Type      the_Type
 //#define  array     the_array
-
-
-
-
-// things to ignore
-//
-//%ignore no_unused_tds_h_warn;
-//%ignore get_tds_numeric_bytes_per_prec
-//%ignore "operator dWorldID"
 
 
 
