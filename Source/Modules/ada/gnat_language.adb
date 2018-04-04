@@ -680,8 +680,6 @@ is
 
             is_void_return       : constant Boolean            := (c_return_Type = "void");
 
-            the_imclass_Code     :          unbounded_String;     -- tbd: rename better
-
             Num_arguments        :          Natural            := 0;
             Num_required         :          Natural            := 0;
             pragma Unreferenced (Num_required);
@@ -716,7 +714,6 @@ is
 
             Self.current_linkage_Symbol := to_unbounded_String (wrapper_Name);
 
-
             emit_parameter_variables (the_Parameters,  the_function_Wrapper);                   -- Emit all local variables for holding arguments.
             emit_return_variable     (the_Node,        swig_Type, the_function_Wrapper);        --
             emit_attach_parmMaps     (the_Parameters,  the_function_Wrapper);                   -- Attach the standard typemaps.
@@ -738,23 +735,11 @@ is
                end if;
             end if;
 
-            if is_void_return
-            then
-               append (the_imclass_Code, "  procedure " & overloaded_name);
-            else
-               append (the_imclass_Code, "  function  " & overloaded_name);
-            end if;
-
 
             --  Get number of required and total arguments.
             --
             num_arguments := emit_num_arguments (the_Parameters);
             num_required  := emit_num_required  (the_Parameters);
-
-            if num_arguments > 0
-            then
-               append (the_imclass_Code,  " (");
-            end if;
 
             --  Now walk the function parameter list and generate code to get arguments.
             --
@@ -792,15 +777,6 @@ is
                      then
                         log (+"No imtype typemap defined for " & String'(+param_swigType));
                      end if;
-
-                     --  Add parameter to 'intermediary' package sub-program.
-                     --
-                     if gen_semicolon
-                     then
-                        append (the_imclass_Code,  ";" & NL);
-                     end if;
-
-                     append (the_imclass_Code,  arg & " : " & param_im_Type);
 
                      if gen_semicolon
                      then
@@ -1002,23 +978,10 @@ is
             end if;
 
 
-            --  Finish C function and intermediary class function definitions.
+            --  Finish C function definitions.
             --
-            if num_arguments > 0
-            then
-               append (the_imclass_Code,  ")");
-            end if;
 
-            if not is_void_return
-            then
-               append (the_imclass_Code,  " return " & im_return_Type);
-            end if;
-
-
-            append      (the_imclass_Code,  ";" & NL & NL);
-            append      (the_imclass_Code,  "   pragma Import (C, " & overloaded_name & ", ""Ada_");
             replace_All (overloaded_name,   "_SWIG_",  "__SWIG_");
-            append      (the_imclass_Code,  overloaded_name & """);" & NL & NL & NL);
 
             print_to (wrapper_Def,  ")" & NL & "{" & NL);
 
