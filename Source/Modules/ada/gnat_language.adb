@@ -708,9 +708,9 @@ is
 
             Self.current_linkage_Symbol := to_unbounded_String (wrapper_Name);
 
-            emit_parameter_variables (the_Parameters,  the_function_Wrapper);                   -- Emit all local variables for holding arguments.
-            emit_return_variable     (the_Node,        swig_Type, the_function_Wrapper);        --
-            emit_attach_parmMaps     (the_Parameters,  the_function_Wrapper);                   -- Attach the standard typemaps.
+            emit_parameter_variables (the_Parameters,      the_function_Wrapper);                   -- Emit all local variables for holding arguments.
+            emit_return_variable     (the_Node, swig_Type, the_function_Wrapper);                   --
+            emit_attach_parmMaps     (the_Parameters,      the_function_Wrapper);                   -- Attach the standard typemaps.
 
 
             --  Parameter overloading.
@@ -755,7 +755,6 @@ is
                      l_Name         : constant doh_String'Class   :=  get_Attribute (the_Parameter,  -"lname");
                      arg            : constant String             :=  "j" & (+l_Name);
                      param_c_Type   :          unbounded_String   := +get_Attribute (the_Parameter, -"tmap:ctype");
-                     param_im_Type  : constant String             := +get_Attribute (the_Parameter, -"tmap:imtype");
 
                   begin
                      if param_c_Type /= ""
@@ -765,11 +764,6 @@ is
                         replace_All (param_c_Type,  ")", " ");
                      else
                         log (+"No ctype typemap defined for " & String'(+param_swigType));
-                     end if;
-
-                     if param_im_Type = ""
-                     then
-                        log (+"No imtype typemap defined for " & String'(+param_swigType));
                      end if;
 
                      if gen_semicolon
