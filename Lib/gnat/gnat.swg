@@ -662,13 +662,13 @@
 
 
 
-// - the following are the in and out typemaps. 
+// - The following are the in and out typemaps. 
 //
-// - these are the c/c++ code generating typemaps for converting from 
+// - These are the c/c++ code generating typemaps for converting from 
 //   Ada to C and visa versa, in the c/c++ wrapper.
 
 
-// primitive types
+// Primitive Types
 //
 
 %typemap (in)                  bool
@@ -794,8 +794,6 @@
   temp = ($*1_ltype) *$input; 
   $1   = &temp; 
 %}
-
-
 
 
 
