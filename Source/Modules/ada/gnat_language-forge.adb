@@ -66,7 +66,6 @@ is
                                    a_namespaces           => namespace_sets.empty_Set,
 
 
-                                   proxy_Flag               => True,
                                    in_CPP_mode              => False,
                                    native_function_Flag     => False,
                                    enum_constant_Flag       => False,

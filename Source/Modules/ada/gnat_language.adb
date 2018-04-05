@@ -134,7 +134,6 @@ is
 
             elsif the_Command = "-noproxy"
             then
-               Self.proxy_Flag := False;
                Swig_mark_arg (Each);
 
             elsif the_Command = "-c++"
@@ -740,7 +739,7 @@ is
             do_Parameters :
             declare
                the_Parameter : doh_Parm'Class := the_Parameters;
-               gen_semicolon : Boolean        := False;
+               gen_Comma     : Boolean        := False;
             begin
 
                for Each in 0 .. Num_arguments - 1
@@ -766,13 +765,13 @@ is
                         log (+"No ctype typemap defined for " & String'(+param_swigType));
                      end if;
 
-                     if gen_semicolon
+                     if gen_Comma
                      then
                         Print_to (wrapper_Def,  "," & NL);
                      end if;
 
                      Print_to (wrapper_Def,  to_String (param_c_Type & " " & arg));     -- Add parameter to C function.
-                     gen_semicolon := True;
+                     gen_Comma := True;
 
                      --  Get typemap for this argument.
                      --
@@ -992,8 +991,7 @@ is
                Wrapper_print (the_function_Wrapper, Self.f_wrappers);      -- Dump the function out.
             end if;
 
-            if    not (     Self.proxy_flag
-                       and  Self.is_wrapping_class /= 0)   -- Ignore class member functions.
+            if    not (Self.is_wrapping_class /= 0)   -- Ignore class member functions.
               and not Self.enum_constant_flag
             then
                declare
@@ -1427,38 +1425,34 @@ is
 
       freshen_current_module_Package (Self, the_Node);
 
-      if Self.proxy_Flag
+      if Self.addSymbol (-class_Name, the_Node) = 0
       then
-         if Self.addSymbol (-class_Name, the_Node) = 0
-         then
-            return SWIG_ERROR;
-         end if;
-
-         Self.have_default_constructor_flag := False;
+         return SWIG_ERROR;
       end if;
+
+      Self.have_default_constructor_flag := False;
 
 
       do_base_classHandler (Self.all, the_node);           -- Process all class members.
 
 
-      if Self.proxy_Flag
-      then    -- Handle base classes.
-         declare
-            base_List     : constant doh_List'Class     := get_Attribute (the_Node, -"allbases"); -- -"bases");
-            the_Iterator  : doh_Iterator'Class := doh_First (base_List);
+      -- Handle base classes.
+      --
+      declare
+         base_List    : constant doh_List'Class     := get_Attribute (the_Node, -"allbases"); -- -"bases");
+         the_Iterator :          doh_Iterator'Class := doh_First (base_List);
 
-         begin
-            while exists (get_Item (the_Iterator))
-            loop
-               declare
-                  base_Name : constant String := +get_Attribute (get_Item (the_Iterator),  -"sym:name");  -- formerly ... getProxyName (c_baseclassname));
-               begin
-                  Self.current_c_Class.add_Base (Self.name_Map_of_c_type.Element (+base_Name));
-                  the_Iterator := doh_Next (the_Iterator);
-               end;
-            end loop;
-         end;
-      end if;
+      begin
+         while exists (get_Item (the_Iterator))
+         loop
+            declare
+               base_Name : constant String := +get_Attribute (get_Item (the_Iterator),  -"sym:name");  -- formerly ... getProxyName (c_baseclassname));
+            begin
+               Self.current_c_Class.add_Base (Self.name_Map_of_c_type.Element (+base_Name));
+               the_Iterator := doh_Next (the_Iterator);
+            end;
+         end loop;
+      end;
 
 
       --  new ...
@@ -1490,20 +1484,16 @@ is
       Self.current_c_Node := doh_Node (the_Node);
       do_base_memberfunctionHandler (Self.all, the_Node);
 
-      if Self.proxy_Flag
-      then
-         declare
-            the_new_Function : c_Function.view;
-         begin
-            the_new_Function := Self.new_c_Function (the_Node,
-                                                     +get_Attribute (the_Node,  -"sym:name"),
-                                                     Self.current_c_Class.nameSpace.all'Access,
-                                                     is_Destructor => False);
+      declare
+         the_new_Function : c_Function.view;
+      begin
+         the_new_Function := Self.new_c_Function (the_Node,
+                                                  +get_Attribute (the_Node,  -"sym:name"),
+                                                  Self.current_c_Class.nameSpace.all'Access,
+                                                  is_Destructor => False);
 
-
-            Self.prior_c_Declaration := the_new_Function.all'Access;
-         end;
-      end if;
+         Self.prior_c_Declaration := the_new_Function.all'Access;
+      end;
 
 
       --  new ...
@@ -1581,100 +1571,97 @@ is
          return SWIG_OK;
       end if;
 
-      if Self.proxy_Flag
-      then
-         declare
-            overloaded_name     : constant String             := Self.get_overloaded_Name (the_Node);
+      declare
+         overloaded_name     : constant String             := Self.get_overloaded_Name (the_Node);
 
-            constructor_Symbol  :          unbounded_String;    -- we need to build our own 'c' construction call   (tbd: move all this to functionWrapper)
-            construct_Call      :          unbounded_String;    -- since the default swig constructor returns a pointer to class
-            construct_call_Args :          unbounded_String;    -- instead of an actual solid class object.
+         constructor_Symbol  :          unbounded_String;    -- we need to build our own 'c' construction call   (tbd: move all this to functionWrapper)
+         construct_Call      :          unbounded_String;    -- since the default swig constructor returns a pointer to class
+         construct_call_Args :          unbounded_String;    -- instead of an actual solid class object.
 
-            parameter_List      : constant doh_parmList'Class := get_Attribute (the_Node, -"parms");
-            the_Parameter       :          doh_Parm'Class     := parameter_list;
-            Index               :          Natural            := 0;
-            gencomma            :          Boolean            := False;
+         parameter_List      : constant doh_parmList'Class := get_Attribute (the_Node, -"parms");
+         the_Parameter       :          doh_Parm'Class     := parameter_list;
+         Index               :          Natural            := 0;
+         gencomma            :          Boolean            := False;
 
-         begin
-            append (constructor_Symbol,  String'("gnat_" & (+Swig_name_construct (-overloaded_name))));
-            append (construct_Call,      "extern "  & Self.current_lStr & "    " & constructor_Symbol & "(");
+      begin
+         append (constructor_Symbol,  String'("gnat_" & (+Swig_name_construct (-overloaded_name))));
+         append (construct_Call,      "extern "  & Self.current_lStr & "    " & constructor_Symbol & "(");
 
-            Swig_typemap_attach_parms (-"ctype",   parameter_List, null_Wrapper);    -- attach the non-standard typemaps to the parameter list
-            Swig_typemap_attach_parms (-"in",      parameter_List, null_Wrapper);    --
+         Swig_typemap_attach_parms (-"ctype",   parameter_List, null_Wrapper);    -- attach the non-standard typemaps to the parameter list
+         Swig_typemap_attach_parms (-"in",      parameter_List, null_Wrapper);    --
 
-            emit_mark_varargs (parameter_List);
+         emit_mark_varargs (parameter_List);
 
-            while exists (the_Parameter)
-            loop
-               if check_Attribute (the_Parameter,  -"varargs:ignore",  -"1")
-               then   -- Ignored varargs.
-                  the_Parameter := next_Sibling (the_Parameter);
+         while exists (the_Parameter)
+         loop
+            if check_Attribute (the_Parameter,  -"varargs:ignore",  -"1")
+            then   -- Ignored varargs.
+               the_Parameter := next_Sibling (the_Parameter);
 
-               elsif check_Attribute (the_Parameter,  -"tmap:in:numinputs",  -"0")
-               then   -- Ignored parameters.
+            elsif check_Attribute (the_Parameter,  -"tmap:in:numinputs",  -"0")
+            then   -- Ignored parameters.
+               the_Parameter := get_Attribute (the_Parameter,  -"tmap:in:next");
+
+            else
+               declare
+                  pt         : constant doh_swigType'Class :=  get_Attribute          (the_Parameter, -"type");   -- tbd: rename
+                  the_c_Type :          unbounded_String   := +get_Attribute          (the_Parameter, -"tmap:ctype");
+                  arg        : constant String             :=  Self.makeParameterName (the_Node,       the_Parameter, Index);
+               begin
+                  if gencomma
+                  then
+                     append (construct_Call,        ",   ");
+                     append (construct_call_Args,   ",   ");
+                  end if;
+
+                  if the_c_Type /= ""
+                  then
+                     replace_All (the_c_Type,  "$c_classname",  +pt);
+
+                     append (construct_Call,       String'(+SwigType_lstr (pt, null_DOH)  &   "   "  &  arg));
+                     append (construct_call_Args,  String'(+SwigType_rcaststr (pt, -arg)));
+                  else
+                     log (+"no ctype typemap defined for "  &  String'(+pt));
+                  end if;
+
+                  gencomma      := True;
                   the_Parameter := get_Attribute (the_Parameter,  -"tmap:in:next");
-
-               else
-                  declare
-                     pt         : constant doh_swigType'Class :=  get_Attribute          (the_Parameter, -"type");   -- tbd: rename
-                     the_c_Type :          unbounded_String   := +get_Attribute          (the_Parameter, -"tmap:ctype");
-                     arg        : constant String             :=  Self.makeParameterName (the_Node,       the_Parameter, Index);
-                  begin
-                     if gencomma
-                     then
-                        append (construct_Call,        ",   ");
-                        append (construct_call_Args,   ",   ");
-                     end if;
-
-                     if the_c_Type /= ""
-                     then
-                        replace_All (the_c_Type,  "$c_classname",  +pt);
-
-                        append (construct_Call,       String'(+SwigType_lstr (pt, null_DOH)  &   "   "  &  arg));
-                        append (construct_call_Args,  String'(+SwigType_rcaststr (pt, -arg)));
-                     else
-                        log (+"no ctype typemap defined for "  &  String'(+pt));
-                     end if;
-
-                     gencomma      := True;
-                     the_Parameter := get_Attribute (the_Parameter,  -"tmap:in:next");
-                     Index         := Index + 1;
-                  end;
-               end if;
-            end loop;
-
-            append (construct_Call,  ")" & NL & "{");
-            append (construct_Call,  NL  &  "  return "  &  Self.current_lStr  &  "("  &  construct_call_Args  &  ");"  & NL);
-            append (construct_Call,  "}" & NL);
-
-
-            if not gencomma
-            then
-               Self.have_default_constructor_flag := True;
+                  Index         := Index + 1;
+               end;
             end if;
+         end loop;
+
+         append (construct_Call,  ")" & NL & "{");
+         append (construct_Call,  NL  &  "  return "  &  Self.current_lStr  &  "("  &  construct_call_Args  &  ");"  & NL);
+         append (construct_Call,  "}" & NL);
 
 
-            --  new
-            --
-            declare
-               the_Constructor : constant c_Function.view := Self.new_c_Function (the_Node,
-                                                                                  to_unbounded_String ("construct"),
-                                                                                  Self.current_c_Class.Namespace.all'Access,
-                                                                                  is_destructor  => False,
-                                                                                  is_constructor => True);
-            begin
-               the_Constructor.is_Constructor     := True;
-               the_Constructor.is_Static          := True;
-               the_Constructor.constructor_Symbol := constructor_Symbol;
-            end;
+         if not gencomma
+         then
+            Self.have_default_constructor_flag := True;
+         end if;
 
-            if not (    check_Attribute (the_Node,  -"access",  -"protected")
-                    or  check_Attribute (the_Node,  -"access",  -"private"))
-            then
-               print_to (Self.f_gnat,  construct_Call & NL);
-            end if;
+
+         --  new
+         --
+         declare
+            the_Constructor : constant c_Function.view := Self.new_c_Function (the_Node,
+                                                                               to_unbounded_String ("construct"),
+                                                                               Self.current_c_Class.Namespace.all'Access,
+                                                                               is_destructor  => False,
+                                                                               is_constructor => True);
+         begin
+            the_Constructor.is_Constructor     := True;
+            the_Constructor.is_Static          := True;
+            the_Constructor.constructor_Symbol := constructor_Symbol;
          end;
-      end if;
+
+         if not (    check_Attribute (the_Node,  -"access",  -"protected")
+                 or  check_Attribute (the_Node,  -"access",  -"private"))
+         then
+            print_to (Self.f_gnat,  construct_Call & NL);
+         end if;
+      end;
 
 
       --  new ...

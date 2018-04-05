@@ -309,7 +309,6 @@ private
 
          --  Flags
          --
-         proxy_Flag              :         Boolean           := True;        -- Flag for generating proxy classes.
          in_cpp_Mode             :         Boolean           := False;
          native_function_Flag    :         Boolean           := False;
          enum_constant_Flag      :         Boolean           := False;       -- Flag for wrapping an enum or constant.
