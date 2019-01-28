@@ -48,8 +48,8 @@ project Swiggy is
    package Compiler is
 --      for Default_Switches ("ada") use ("-gnatVn", "-gnatf", "-gnatwa", "-gnaty3aAbCdefhklnOx", "-Wall", "-g", "-gnat12", "-gnato", "-fstack-check", "-gnata");
 
-      for Default_Switches ("ada") use Compiler_Options;
-      for Default_Switches ("c") use ("-g");
+      for Default_Switches ("ada") use Compiler_Options & "-g";
+      for Default_Switches ("c") use ("-g"); -- & " -I../Source/Swig");
       for Default_Switches ("c++") use ("-g", "-D", "GNAT_ENABLED");
    end Compiler;
 

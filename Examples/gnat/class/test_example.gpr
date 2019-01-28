@@ -22,7 +22,8 @@ project Test_Example is
    end Builder;
 
    package Compiler is
-      for Default_Switches ("ada") use ("-g", "-gnat12", "-gnatdQ");
+      for Default_Switches ("ada") use ("-g", "-gnat12", "-gnatdQ", "-gnatdZ");
+      for Default_Switches ("c++") use ("-g", "-fdump-class-hierarchy");
    end Compiler;
 
    package Ide is

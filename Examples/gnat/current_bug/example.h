@@ -1,4 +1,18 @@
 
+
+#define DEG_TO_RAD	0.0174532925199	///< multiply to convert degrees to radians
+
+
+/*
+class Foo
+{
+public:
+   void bar() {int x = 0;   x++;};
+};
+*/
+
+
+/*
 class Shape {
 public:
 
@@ -10,7 +24,7 @@ public:
 //  virtual double area(void) = 0;
 //    virtual double area1(void);
 };
-
+*/
 
 
 

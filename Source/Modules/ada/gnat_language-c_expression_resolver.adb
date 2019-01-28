@@ -538,7 +538,7 @@ is
                end;
 
             elsif     Length  (Expression_pad.all)    = 1
-              or else Element (Expression_pad.all, 2) = ' '          -- nb: this disallows symbol identifier's of length 1
+              or else Element (Expression_pad.all, 2) = ' '          -- nb: this disallows symbol identifiers of length 1
             then
                begin
                   if Element (Expression_pad.all, 1) in '0' .. '9'

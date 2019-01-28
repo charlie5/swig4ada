@@ -1220,11 +1220,11 @@ is
 
          else
             Self.last_c_enum_rep_value := Value (resolved_c_integer_Expression (Self,  enum_value_Text,
-                                                                                       Self.symbol_value_Map,
+                                                                                       Self.integer_symbol_value_Map,
                                                                                        Self.current_class_namespace_Prefix));
          end if;
 
-         insert (Self.symbol_value_Map,  symName,
+         insert (Self.integer_symbol_value_Map,  symName,
                                          to_Integer (Self.last_c_enum_rep_value));
 
          Self.current_c_Enum.add_Literal (name  => symName,
@@ -1299,7 +1299,7 @@ is
             begin
                the_Value := resolved_c_integer_Expression (Self,
                                                            Value_Text,
-                                                           Self.symbol_value_Map,
+                                                           Self.integer_symbol_value_Map,
                                                            Self.current_class_namespace_Prefix);
                if    Slice (value_Text, 1, 2) = "0x"
                then
@@ -1314,7 +1314,7 @@ is
                end if;
 
                log ("inserting '" & the_Name & "' into the symbol_value_Map ... value: " & String'(Image (the_Value)));
-               insert (Self.symbol_value_Map,  the_Name, the_Value);
+               insert (Self.integer_symbol_value_Map,  the_Name, the_Value);
 
             exception
                when others =>
@@ -1335,10 +1335,6 @@ is
                      end if;
 
                      new_c_Constant.Value := value_Text;
-
-                     log ("inserting '" & the_Name & "' into the symbol_value_Map");
-                     log (+"   value: '" & String'(Image (the_Value)) & "'");
-                     insert (Self.symbol_value_Map,  the_Name, the_Value);
                   end;
             end;
          end if;
@@ -1777,7 +1773,7 @@ is
             then
                new_Variable.bit_Field := Integer (Value (resolved_c_integer_Expression (Self,
                                                                         +bit_Field,
-                                                                        Self.symbol_value_Map,
+                                                                        Self.integer_symbol_value_Map,
                                                                         Self.current_class_namespace_Prefix)));
             end if;
 
@@ -1934,7 +1930,7 @@ is
                      c_type.add_array_Dimension (new_c_Array,
                                                  upper_Bound => Integer (Value (resolved_c_integer_Expression (Self,
                                                                                                                array_dimension_Text,
-                                                                                                               Self.symbol_value_Map,
+                                                                                                               Self.integer_symbol_value_Map,
                                                                                                                Self.current_class_namespace_Prefix))) - 1);
                   end loop;
 
@@ -3100,7 +3096,7 @@ is
             resolved_array_Dimension := 0;
          else
             resolved_array_Dimension := Integer (Value (resolved_c_integer_Expression (Self,  array_dimension_Expression,
-                                                                                              Self.symbol_value_Map,
+                                                                                              Self.integer_symbol_value_Map,
                                                                                               Self.current_class_namespace_Prefix)));
          end if;
 

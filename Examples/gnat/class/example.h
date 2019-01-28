@@ -10,14 +10,19 @@ public:
   virtual ~Shape() {
     nshapes--; printf ("SHAPE DESTRUCT\n");
   };
-  double  x, y;   
+  
+  double  x, y;
   void    move(double dx, double dy);
+  
 //  virtual double area(void) = 0;   
 //  virtual double perimeter(void) = 0;
-  virtual double area(void) {return 0.0;};         // = 0;     Swig will not handle constructors for abstract classes.
-  virtual double perimeter(void){return 0.0;};     // = 0;
+  virtual double area0(void)      {return 0.0;};         // = 0;     Swig will not handle constructors for abstract classes.
+  virtual double area(void)      {return 0.0;};         // = 0;     Swig will not handle constructors for abstract classes.
+  virtual double perimeter(void) {return 0.0;};         // = 0;
   static  int nshapes;
 };
+
+
 
 class Circle : public Shape {
 private:
@@ -27,9 +32,12 @@ public:
   Circle(double r); // : radius(r) { };
 //  Circle() : radius(0.5) { };
 
+  virtual double area0(void);
   virtual double area(void);
   virtual double perimeter(void);
 };
+
+
 
 class Square : public Shape {
 private:
@@ -41,9 +49,4 @@ public:
 
   virtual double area(void);
   virtual double perimeter(void);
-};
-
-
-
-
-  
+}; 

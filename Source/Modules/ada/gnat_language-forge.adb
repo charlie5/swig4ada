@@ -78,7 +78,7 @@ is
 
                                    enum_rep_clause_required => False,
                                    anonymous_enum_Count     => 0,
-                                   symbol_value_Map         => symbol_value_maps.empty_Map,
+                                   integer_symbol_value_Map         => symbol_value_maps.empty_Map,
 
                                    f_runtime                => null_DOH,
                                    f_header                 => null_DOH,

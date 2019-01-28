@@ -20,7 +20,7 @@ begin
 
    declare
       the_Square : aliased Square.item := construct (5.0);
-      the_Circle : aliased Circle.item := construct;
+      the_Circle : aliased Circle.item; -- := construct;
       --the_Circle2 : aliased Circle.item;
       --the_Circle3 : aliased Circle.item;
 --      the_Square : aliased Square.item'Class := construct (10.0);
@@ -64,8 +64,8 @@ begin
       begin
          for each in the_Shapes'range loop
             put_Line ("Shape" & integer'Image (each) & ":");
-            put_Line ("   perimeter:" & double'Image (the_Shapes (each).Perimeter));
             put_Line ("   area:     " & double'Image (the_Shapes (each).Area));
+            put_Line ("   perimeter:" & double'Image (the_Shapes (each).Perimeter));
          end loop;
       end;
 
