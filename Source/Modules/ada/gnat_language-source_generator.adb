@@ -1029,6 +1029,10 @@ is
       main_Types          :          ada_Type.Vector;
       ic_pointer_Types    :          ada_Type.Vector;
 
+      use Ada.Containers;
+      declaration_Count   : constant Count_Type :=   Length (all_Variables)
+                                                   + Length (all_Subprograms)
+                                                   + Length (all_Types);
 
       spec_Source         : aliased  unbounded_String;
       spec_Source_private : aliased  unbounded_String;
@@ -1048,7 +1052,9 @@ is
    begin
       log ("'emit_Spec' -    package name: '" & the_Package.qualified_Name & "'");
 
-      if the_Package.is_Core then
+      if   the_Package.is_Core
+        or declaration_Count = 0
+      then
          return;
       end if;
 
