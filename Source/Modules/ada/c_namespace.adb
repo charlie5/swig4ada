@@ -30,7 +30,7 @@ is
                        a_is_Import           => False,
                        a_is_Core             => False,
                        a_is_enum_Proxy       => False,
-                       a_is_global_Namespace => False,
+--                         a_is_global_Namespace => False,
                        a_is_Unknown          => False,
 
                        a_Subprograms         => <>,
@@ -252,11 +252,11 @@ is
 
 
 
-   function  is_global_Namespace        (Self : access Item) return Boolean
-   is
-   begin
-      return Self.a_is_global_Namespace;
-   end is_global_Namespace;
+--     function  is_global_Namespace        (Self : access Item) return Boolean
+--     is
+--     begin
+--        return Self.a_is_global_Namespace;
+--     end is_global_Namespace;
 
 
 
@@ -304,11 +304,11 @@ is
 
 
 
-   procedure is_global_Namespace (Self : access Item)
-   is
-   begin
-      Self.a_is_global_Namespace := True;
-   end is_global_Namespace;
+--     procedure is_global_Namespace (Self : access Item)
+--     is
+--     begin
+--        Self.a_is_global_Namespace := True;
+--     end is_global_Namespace;
 
 
 

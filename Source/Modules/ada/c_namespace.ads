@@ -86,8 +86,8 @@ is
    procedure is_enum_Proxy              (Self : access Item);
 
 
-   procedure is_global_Namespace        (Self : access Item);
-   function  is_global_Namespace        (Self : access Item) return Boolean;
+--     procedure is_global_Namespace        (Self : access Item);
+--     function  is_global_Namespace        (Self : access Item) return Boolean;
 
 
    function  models_a_virtual_cpp_Class (Self : access Item)                                             return Boolean;
@@ -137,7 +137,7 @@ private
          a_is_Import           : Boolean := False;
          a_is_Core             : Boolean := False;
          a_is_enum_Proxy       : Boolean := False;
-         a_is_global_Namespace : Boolean := False;
+--           a_is_global_Namespace : Boolean := False;
          a_is_Unknown          : Boolean := False;
 
          a_Subprograms         : c_Function.Vector;
