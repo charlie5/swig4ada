@@ -292,7 +292,7 @@ private
          incomplete_access_to_Type_i_c_pointer_List
                                  :         ada_Type.vector;
 
-         integer_symbol_value_Map        : aliased symbol_value_maps.Map;
+         integer_symbol_value_Map : aliased symbol_value_maps.Map;
 
          --  'current' Declarations
          --

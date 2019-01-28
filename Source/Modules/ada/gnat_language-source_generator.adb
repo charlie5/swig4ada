@@ -1053,7 +1053,8 @@ is
       log ("'emit_Spec' -    package name: '" & the_Package.qualified_Name & "'");
 
       if   the_Package.is_Core
-        or declaration_Count = 0
+        or (        declaration_Count = 0
+            and not the_Package.is_global_Namespace)
       then
          return;
       end if;

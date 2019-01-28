@@ -11,6 +11,8 @@ is
       Self.Ada.Package_binding          := new_ada_Package ("Binding",            Self.Ada.Package_top);
       Self.Ada.Package_pointers         := new_ada_Package ("Pointers",           Self.Ada.Package_top);
       Self.Ada.Package_pointer_pointers := new_ada_Package ("pointer_Pointers",   Self.Ada.Package_top);
+
+      Self.Ada.Package_top.is_global_Namespace;
    end define;
 
 
