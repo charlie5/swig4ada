@@ -11,4 +11,4 @@
 # build the gnat swig executable
 #
 cd gnat
-gprbuild -P swiggy --config=/pond/eden/forge/applet/tool/swig4ada/gnat/config.cgpr
+gprbuild -P swiggy --config=/eden/forge/applet/tool/swig4ada/gnat/config.cgpr
