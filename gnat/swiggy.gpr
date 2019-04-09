@@ -11,7 +11,8 @@ project Swiggy is
                         "../Source/CParse", 
                         "../Source/Preprocessor",
                         "../Source/Modules/ada",
-                        "../Source/Modules/ada/ada_type", 
+                        "../Source/Modules/ada/ada_type",
+                        "../Source/Modules/ada/swig_binding-new/doh",
                         "../Source/Modules/ada/swig_binding");
    for Main use ("swigmain.cxx");
    for Object_Dir use "build";
@@ -49,7 +50,10 @@ project Swiggy is
 --      for Default_Switches ("ada") use ("-gnatVn", "-gnatf", "-gnatwa", "-gnaty3aAbCdefhklnOx", "-Wall", "-g", "-gnat12", "-gnato", "-fstack-check", "-gnata");
 
       for Default_Switches ("ada") use Compiler_Options & "-g";
-      for Default_Switches ("c") use ("-g"); -- & " -I../Source/Swig");
+--      for Default_Switches ("c") use ("-g", "-I../Source/Swig", "-I../Source/Include", "-I/eden/forge/applet/tool/swig4ada/Source/Include");
+      for Default_Switches ("c") use ("-g"); -- , "-I../Source/Include", "-I../Source/Swig");
+--      for Default_Switches ("c") use ("-g");
+--      for Default_Switches ("c++") use ("-g", "-D", "GNAT_ENABLED", "-I../Source/Swig", "-I../Source/Include");
       for Default_Switches ("c++") use ("-g", "-D", "GNAT_ENABLED");
    end Compiler;
 
