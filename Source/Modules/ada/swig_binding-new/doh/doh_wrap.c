@@ -160,13 +160,14 @@
   }
 */
 
-/*
+
   DOH*
   doh_Copy (DOH*    Self)
   {
     return Copy (Self);
   }
 
+/*
 
 
   // doh iterators
@@ -2197,6 +2198,27 @@ DllExport void SWIGSTDCALL Ada_DohMemoryDebug (
 {
   DohMemoryDebug();
   
+  
+}
+
+
+
+DllExport void* SWIGSTDCALL Ada_doh_Copy (
+  void* jarg1
+  )
+{
+  void* jresult ;
+  DOH *arg1 = (DOH *) 0 ;
+  DOH *result = 0 ;
+  
+  arg1 = (DOH *)jarg1; 
+  
+  result = (DOH *)doh_Copy(arg1);
+  jresult = (void *) result;      
+  
+  
+  
+  return jresult;
   
 }
 

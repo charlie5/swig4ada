@@ -254,6 +254,9 @@ package DOHs.Binding is
 
    procedure DohMemoryDebug;
 
+   function doh_Copy
+     (Self : in DOHs.Pointers.DOH_Pointer) return DOHs.Pointers.DOH_Pointer;
+
 private
 
    pragma Import (C, DohCheck, "DohCheck");
@@ -336,5 +339,6 @@ private
    pragma Import (C, DohSplit, "DohSplit");
    pragma Import (C, DohSplitLines, "DohSplitLines");
    pragma Import (C, DohMemoryDebug, "DohMemoryDebug");
+   pragma Import (C, doh_Copy, "doh_Copy");
 
 end DOHs.Binding;

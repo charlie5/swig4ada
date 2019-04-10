@@ -7,32 +7,7 @@
 %}
 
 
-//%rename (a_current)    _current;
-//%rename (a_index)      _index;
-
-
-
-//%ignore _current;
-
-
-//%rename(doh_String)        String;
-//#define String   doh_String
-
-typedef doh_String String;
-
-
-
-//#define PRIVATE                   a_PRIVATE
-//#define PROTECTED                 a_PROTECTED
-
-
-//%ignore start_line;
-
-
-
-//#define _current   a_current
-//#define _index     a_index
-
+//typedef doh_String String;
 
 
 // The headers to be wrapped.
@@ -46,17 +21,6 @@ typedef doh_String String;
 %ignore DohNone;
 
 %include "doh.h"
-
-
-//%ignore DohHashMethods;
-//%ignore DohListMethods;
-//%ignore DohFileMethods;
-//%ignore DohStringMethods;
-
-//struct  DohObjInfo;
-//%ignore DohObjInfo;
-
-//%include "dohint.h"
 
 
 // Support Functions
@@ -85,13 +49,14 @@ typedef doh_String String;
   }
 */
 
-/*
+
   DOH*
   doh_Copy (DOH*    Self)
   {
     return Copy (Self);
   }
 
+/*
 
 
   // doh iterators

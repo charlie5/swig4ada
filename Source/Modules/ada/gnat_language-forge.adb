@@ -19,9 +19,9 @@ is
    is
       use c_nameSpace,  ada_Package,  ada_Utility;
 
-      base_Language    : constant Language.item := Language.item (Language.construct);
+--        base_Language    : constant swigg_module.Language.item := swigg_module.Language.item (swigg_module.Language.construct);
       Self             : constant View
-        := new gnat_Language.item'(base_Language with
+        := new gnat_Language.item'(swigg_module.Language.construct with -- base_Language with
 
                                    new_Modules           => <>,
                                    name_Map_of_module    => <>,

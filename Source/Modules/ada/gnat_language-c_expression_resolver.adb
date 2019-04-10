@@ -1,11 +1,11 @@
 with
      GMP.discrete,
 
-     Dispatcher,
-     Wrapper,
+     swigg_module.Dispatcher,
+     swigg_module.Wrapper,
 
      ada_Utility,
-     swig_p_Doh,
+     Dohs.Pointers,         -- swig_p_Doh,
 
      ada.Strings.Maps,
      ada.Characters.handling,
@@ -15,15 +15,18 @@ with
 package body gnat_Language.c_expression_Resolver
 is
    use ada.Strings,
-       Dispatcher,
-       Wrapper,
+       swigg_module.Dispatcher,
+       swigg_module.Wrapper,
+
+       Dohs.Pointers,
 
        ada_Utility,
        ada.Strings.Maps,
        ada.Characters.Handling,
        ada.Containers;
 
-   use type swig_p_Doh.item;
+--     use type swig_p_Doh.item;
+   use type DOH_Pointer;
 
 
 

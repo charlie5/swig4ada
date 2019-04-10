@@ -5,10 +5,6 @@ with interfaces.C;
 
 package DOHs.pointer_Pointers is
 
-   -- String_Pointer_Pointer
-   --
-   type String_Pointer_Pointer is access all DOHs.Pointers.String_Pointer;
-
    -- DOH_Pointer_Pointer
    --
    type DOH_Pointer_Pointer is access all DOHs.Pointers.DOH_Pointer;

@@ -8,11 +8,11 @@ with
      ada_Utility,
 
      swigg_Module,
-     Dispatcher,
-     Wrapper,
+     swigg_module.Dispatcher,
+     swigg_module.Wrapper,
 
      swigg.Utility,
-     swig_p_Doh,
+--       swig_p_Doh,
 
      ada.Strings.fixed,
      ada.text_IO,
@@ -32,8 +32,8 @@ is
        ada_Utility,
 
        swigg_Module,
-       Dispatcher,
-       Wrapper,
+       swigg_module.Dispatcher,
+       swigg_module.Wrapper,
 
        interfaces.c.Strings,
 
@@ -42,7 +42,7 @@ is
        ada.Containers,
        ada.text_IO;
 
-   use type swig_p_Doh.item;
+--     use type swig_p_Doh.item;
 
    -----------
    --  Globals
@@ -64,7 +64,7 @@ is
    begin
       the_gnat_Language := Forge.construct;
 
-      initialize            (the_gnat_Language.all);
+      the_gnat_Language.initialize;
       swig_director_connect (the_gnat_Language.all);
 
       return getCPtr (the_gnat_Language.all);

@@ -4,16 +4,6 @@ with interfaces.C;
 
 package DOHs.Pointers is
 
-   -- String_Pointer
-   --
-   type String_Pointer is access all DOHs.String;
-
-   -- String_Pointers
-   --
-   type String_Pointers is
-     array
-       (interfaces.C.Size_t range <>) of aliased DOHs.Pointers.String_Pointer;
-
    -- DOH_Pointer
    --
    type DOH_Pointer is access all DOHs.DOH;

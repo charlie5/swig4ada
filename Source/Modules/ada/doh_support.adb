@@ -1,19 +1,21 @@
 with
-     swigg_Module,
+     swigg_Module.Binding,
+     swigg_Module.Pointers,
      System;
 
 
 package body doh_Support
 is
-   use swig_p_Doh,
-       swigg_Module,
+   use swigg_Module,
+       swigg_Module.Binding,
+       swigg_Module.Pointers,
        interfaces.C.strings;
 
 
 
-   function to_String (Self : doh_Item'Class) return String
+   function to_String (Self : doh_Item) return String
    is
-      the_C_String : constant interfaces.c.strings.chars_ptr := Node_to_CStr (Self);
+      the_C_String : constant interfaces.c.strings.chars_ptr := Node_to_CStr (Node_Pointer (Self));
    begin
       if the_C_String = null_Ptr
       then
@@ -25,7 +27,7 @@ is
 
 
 
-   function "+" (Self : in doh_Item'Class) return unbounded_String
+   function "+" (Self : in doh_Item) return unbounded_String
    is
    begin
       return to_unbounded_String (to_String (Self));
@@ -54,34 +56,36 @@ is
                                                      replace_with : in String)
    is
    begin
-      doh_replace_All (in_Source, -search_for, -replace_with);
+      doh_replace_All (in_Source,
+                       String_Pointer (-search_for),
+                       String_Pointer (-replace_with));
    end replace_All;
 
 
 
-   function exists (Self : in doh_Item'Class) return Boolean
+   function exists (Self : in doh_Item) return Boolean
    is
-      use type system.Address;
    begin
-      return getCPtr (self) /= system.null_Address;
+      return Self /= null;
    end exists;
 
 
 
-   procedure print_to (Self     : in doh_Item'Class;
+   procedure print_to (Self     : in doh_Item;
                        the_Text : in String)
    is
    begin
-      swigg_Module.print_to (Self,  new_String (the_Text));
+      print_to (String_Pointer (Self),  new_String (the_Text));
    end print_to;
 
 
 
-   procedure print_to (Self     : in doh_Item'Class;
+   procedure print_to (Self     : in doh_Item;
                        the_Text : in unbounded_String)
    is
    begin
-      print_to (Self,  new_String (to_String (the_Text)));
+      print_to (String_Pointer (Self),
+                new_String (to_String (the_Text)));
    end print_to;
 
 

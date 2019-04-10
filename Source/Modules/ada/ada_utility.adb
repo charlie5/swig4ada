@@ -1,5 +1,6 @@
 with
-     swigg_c_import,
+--       swigg_c_import,
+     swigg_module.Binding,
 
      ada.Strings.fixed,
      ada.Characters.handling,
@@ -22,7 +23,7 @@ is
    function runtime_call_Depth return Integer
    is
    begin
-      return Integer (swigg_c_import.runtime_call_Depth);
+      return Integer (swigg_module.Binding.runtime_call_Depth);
    end runtime_call_Depth;
    pragma Unreferenced (runtime_call_Depth);
 

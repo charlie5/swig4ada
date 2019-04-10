@@ -6,13 +6,6 @@ with interfaces.C;
 
 package DOHs is
 
-   -- String
-   --
-   subtype String is swig.opaque_structure;
-
-   type String_array is
-     array (interfaces.C.Size_t range <>) of aliased DOHs.String;
-
    -- DOH
    --
    subtype DOH is swig.void;

@@ -1,5 +1,6 @@
 with
-     Language,
+--     Language,
+     swigg_module.Language,
      swig_Module,
 
      c_Type,
@@ -17,13 +18,18 @@ with
 
      gmp.Discrete,
 
-     swig_p_p_char,
+     swig.Pointers,
+     swigg_module.Pointers,
+
+--     swig_p_p_char,
      doh_Support,
 
      ada.Containers.hashed_Maps,
      ada.Containers.hashed_Sets,
 
      ada.Strings.Unbounded.Hash,
+
+     interfaces.C,
 
      System;
 
@@ -44,162 +50,220 @@ is
        doh_Support,
        ada.Strings.unbounded;
 
-   type Item is new Language.item with private;
+--   type Item is new Language.item with private;
+   type Item is new swigg_Module.Language.item with private;
    type View is access all Item'class;
 
+
+--     function construct return Item;
+--     pragma CPP_Constructor (construct);
 
    ---  Operations
    --
 
-   overriding function  main_is_overridden (Self : in Item) return Boolean;
-   overriding procedure main
-     (Self : in out Item;
-      argc : in Integer;
-      argv : in swig_p_p_char.Item'Class);
+--     overriding procedure main
+--       (Self : in out Item;
+--        argc : in Integer;
+--        argv : in swig_p_p_char.Item'Class);
+
+   overriding
+   procedure main (Self : in out Item;
+                   argc : in     interfaces.c.int;
+                   argv : in     swig.pointers.chars_ptr_Pointer);
 
 
-   overriding function top_is_overridden (Self : in Item) return Boolean;
-   overriding function top
+--     overriding function top
+--       (Self : access Item;
+--        n    : in     doh_Node'Class) return Integer;
+
+   overriding
+   function top (Self : access Item;
+                 n    : in     swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
+
+
+--     overriding function classforwardDeclaration
+--       (Self : access Item;
+--        n    : in     doh_Node'Class) return Integer;
+   overriding
+   function classforwardDeclaration (Self : access Item;
+                                     n    : in     swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
+
+
+--     overriding function nativeDirective
+--       (Self : access Item;
+--        n    : in     doh_Node'Class) return Integer;
+   overriding
+   function nativeDirective (Self : access Item;
+                             n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
+
+
+--     overriding function functionWrapper
+--       (Self : access Item;
+--        n    : in     doh_Node'Class) return Integer;
+   overriding
+   function functionWrapper (Self : access Item;
+                             n    : in     swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
+
+
+--     overriding function globalvariableHandler
+--       (Self : access Item;
+--        n    : in doh_Node'Class) return Integer;
+   overriding
+   function globalvariableHandler (Self : access Item;
+                                   n    : in     swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
+
+
+--     overriding function enumDeclaration
+--       (Self : access Item;
+--        n    : in     doh_Node'Class) return Integer;
+   overriding
+   function enumDeclaration (Self : access Item;
+                             n    : in     swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
+
+
+--     overriding function enumvalueDeclaration
+--       (Self : access Item;
+--        n    : in     doh_Node'Class) return Integer;
+   overriding
+   function enumvalueDeclaration (Self : access Item;
+                                  n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
+
+
+--     overriding function constantWrapper
+--       (Self : access Item;
+--        n    : in     doh_Node'Class) return Integer;
+   overriding
+   function constantWrapper (Self : access Item;
+                             n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
+
+
+--     overriding function classHandler
+--       (Self : access Item;
+--        n    : in     doh_Node'Class) return Integer;
+   overriding
+   function classHandler (Self : access Item;
+                          n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
+
+
+--     overriding function usingDeclaration
+--       (Self : access Item;
+--        n    : in     doh_Node'Class)
+--        return Integer;
+   overriding
+   function usingDeclaration (Self : access Item;
+                              n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
+
+
+--     overriding function memberfunctionHandler
+--       (Self : access Item;
+--        n    : in     doh_Node'Class) return Integer;
+   overriding
+   function memberfunctionHandler (Self : access Item;
+                                   n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
+
+
+--     overriding function staticmemberfunctionHandler
+--       (Self : access Item;
+--        n    : in doh_Node'Class) return Integer;
+   overriding
+   function staticmemberfunctionHandler
      (Self : access Item;
-      n    : in     doh_Node'Class) return Integer;
+      n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
 
 
-   overriding function classforwardDeclaration_is_overridden (Self : in Item) return Boolean;
-   overriding function classforwardDeclaration
+--     overriding function constructorHandler
+--       (Self : access Item;
+--        n    : in doh_Node'Class) return Integer;
+   overriding
+   function constructorHandler (Self : access Item;
+                                n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
+
+
+--     overriding function destructorHandler
+--       (Self : access Item;
+--        n    : in doh_Node'Class) return Integer;
+   overriding
+   function destructorHandler (Self : access Item;
+                               n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
+
+
+--     overriding function membervariableHandler
+--       (Self : access Item;
+--        n    : in doh_Node'Class) return Integer;
+   overriding
+   function membervariableHandler (Self : access Item;
+                                   n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
+
+
+--     overriding function staticmembervariableHandler
+--       (Self : access Item;
+--        n    : in     doh_Node'Class) return Integer;
+   overriding
+   function staticmembervariableHandler
      (Self : access Item;
-      n    : in     doh_Node'Class) return Integer;
+      n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
 
 
-   overriding function nativeDirective_is_overridden (Self : in Item) return Boolean;
-   overriding function nativeDirective
-     (Self : access Item;
-      n    : in     doh_Node'Class) return Integer;
+--     overriding function memberconstantHandler
+--       (Self : access Item;
+--        n    : in doh_Node'Class) return Integer;
+   overriding
+   function memberconstantHandler (Self : access Item;
+                                   n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
 
 
-   overriding function functionWrapper_is_overridden (Self : in Item) return Boolean;
-   overriding function functionWrapper
-     (Self : access Item;
-      n    : in     doh_Node'Class) return Integer;
+--     overriding function typedefHandler
+--       (Self : access Item;
+--        n    : in     doh_Node'Class) return Integer;
+   overriding
+   function typedefHandler (Self : access Item;
+                            n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
 
 
-   overriding function globalvariableHandler_is_overridden (Self : in Item) return Boolean;
-   overriding function globalvariableHandler
-     (Self : access Item;
-      n    : in doh_Node'Class) return Integer;
+--     overriding function insertDirective
+--       (Self : access Item;
+--        n    : in doh_Node'Class) return Integer;
+   overriding
+   function insertDirective (Self : access Item;
+                             n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
 
-
-   overriding function enumDeclaration_is_overridden (Self : in Item) return Boolean;
-   overriding function enumDeclaration
-     (Self : access Item;
-      n    : in     doh_Node'Class) return Integer;
-
-
-   overriding function enumvalueDeclaration_is_overridden (Self : in Item) return Boolean;
-   overriding function enumvalueDeclaration
-     (Self : access Item;
-      n    : in     doh_Node'Class) return Integer;
-
-
-   overriding function constantWrapper_is_overridden (Self : in Item) return Boolean;
-   overriding function constantWrapper
-     (Self : access Item;
-      n    : in     doh_Node'Class) return Integer;
-
-
-   overriding function classHandler_is_overridden (Self : in Item) return Boolean;
-   overriding function classHandler
-     (Self : access Item;
-      n    : in     doh_Node'Class) return Integer;
-
-
-   overriding function usingDeclaration_is_overridden (Self : in Item) return Boolean;
-   overriding function usingDeclaration
-     (Self : access Item;
-      n    : in     doh_Node'Class)
-      return Integer;
-
-
-   overriding function memberfunctionHandler_is_overridden (Self : in Item) return Boolean;
-   overriding function memberfunctionHandler
-     (Self : access Item;
-      n    : in     doh_Node'Class) return Integer;
-
-
-   overriding function staticmemberfunctionHandler_is_overridden (Self : in Item) return Boolean;
-   overriding function staticmemberfunctionHandler
-     (Self : access Item;
-      n    : in doh_Node'Class) return Integer;
-
-
-   overriding function constructorHandler_is_overridden (Self : in Item) return Boolean;
-   overriding function constructorHandler
-     (Self : access Item;
-      n    : in doh_Node'Class) return Integer;
-
-
-   overriding function destructorHandler_is_overridden (Self : in Item) return Boolean;
-   overriding function destructorHandler
-     (Self : access Item;
-      n    : in doh_Node'Class) return Integer;
-
-
-   overriding function membervariableHandler_is_overridden (Self : in Item) return Boolean;
-   overriding function membervariableHandler
-     (Self : access Item;
-      n    : in doh_Node'Class) return Integer;
-
-
-   overriding function staticmembervariableHandler_is_overridden (Self : in Item) return Boolean;
-   overriding function staticmembervariableHandler
-     (Self : access Item;
-      n    : in     doh_Node'Class) return Integer;
-
-
-   overriding function memberconstantHandler_is_overridden (Self : in Item) return Boolean;
-   overriding function memberconstantHandler
-     (Self : access Item;
-      n    : in doh_Node'Class) return Integer;
-
-
-   overriding function typedefHandler_is_overridden (Self : in Item) return Boolean;
-   overriding function typedefHandler
-     (Self : access Item;
-      n    : in     doh_Node'Class) return Integer;
-
-
-   overriding function insertDirective_is_overridden (Self : in Item) return Boolean;
-   overriding function insertDirective
-     (Self : access Item;
-      n    : in doh_Node'Class) return Integer;
 
    --  tbd: other directive functions !!
 
-   overriding function namespaceDeclaration_is_overridden (Self : in Item) return Boolean;
-   overriding function namespaceDeclaration
-     (Self : access Item;
-      n    : in     doh_Node'Class) return Integer;
+--     overriding function namespaceDeclaration
+--       (Self : access Item;
+--        n    : in     doh_Node'Class) return Integer;
+   overriding
+   function namespaceDeclaration (Self : access Item;
+                                  n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
 
 
-   overriding function moduleDirective_is_overridden (Self : in Item) return Boolean;
-   overriding function moduleDirective
-     (Self : access Item;
-      n    : in     doh_Node'Class) return Integer;
+--     overriding function moduleDirective
+--       (Self : access Item;
+--        n    : in     doh_Node'Class) return Integer;
+   overriding
+   function moduleDirective (Self : access Item;
+                             n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
 
 
-   overriding function includeDirective_is_overridden (Self : in Item) return Boolean;
-   overriding function includeDirective
-     (Self : access Item;
-      n    : in     doh_Node'Class) return Integer;
+--     overriding function includeDirective
+--       (Self : access Item;
+--        n    : in     doh_Node'Class) return Integer;
+   overriding
+   function includeDirective (Self : access Item;
+                              n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
 
 
-   overriding function typemapDirective_is_overridden (Self : in Item) return Boolean;
-   overriding function typemapDirective
-     (Self : access Item;
-      n    : in     doh_Node'Class) return Integer;
+--     overriding function typemapDirective
+--       (Self : access Item;
+--        n    : in     doh_Node'Class) return Integer;
+   overriding
+   function typemapDirective (Self : access Item;
+                              n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
 
 
    function to_ada_subProgram (Self : access Item;   the_c_Function   : in    c_Function.view)    return ada_subProgram.View;
-   function to_Descriptor     (Self : access Item;   swig_Type        : in    doh_swigType'Class) return unbounded_String;
+   function to_Descriptor     (Self : access Item;   swig_Type        : in    doh_swigType)       return unbounded_String;
    function to_ada_Parameters (Self : access Item;   the_c_Parameters : in    c_parameter.Vector) return ada_Parameter.vector;
    function to_ada_Variable   (Self : access Item;   the_c_Variable   : in    c_Variable.view)    return ada_Variable.view;
 
@@ -247,7 +311,7 @@ private
 
    --  'gnat_Language' Item
    --
-   type Item is new Language.item with
+   type Item is new swigg_Module.Language.item with
       record
          --  Maps
          --
@@ -338,22 +402,22 @@ private
    function current_c_Namespace  (Self : access Item) return c_nameSpace.view;
    function current_c_Class      (Self : access Item) return c_Type.view;       -- The class record curently being processed.
 
-   function new_c_Function (Self : access Item;   the_Node       : in     doh_Node'Class;
+   function new_c_Function (Self : access Item;   the_Node       : in     doh_Node;
                                                   function_name  : in     unbounded_String;
                                                   nameSpace      : in     c_nameSpace.view;
                                                   is_Destructor  : in     Boolean;
                             is_Constructor : in     Boolean         := False) return c_function.view;
 
-   function to_c_Parameters      (Self : access Item;   swig_Parameters   : in     doh_ParmList'Class)         return c_parameter.Vector;
+   function to_c_Parameters      (Self : access Item;   swig_Parameters   : in     doh_ParmList) return c_parameter.Vector;
 
    procedure register (Self : access Item;   the_c_Type              : in     c_Type.view;
-                                             to_swig_Type            : in     doh_swigType'Class;
+                                             to_swig_Type            : in     doh_swigType;
                                              is_core_C_type          : in     Boolean           := False;
                                              create_array_Type       : in     Boolean           := True;
                                              add_level_3_Indirection : in     Boolean           := False);
 
    procedure add_array_Bounds_to (Self : access Item;   the_Variable      : in     c_Variable.view;
-                                                        from_swig_Type    : in     doh_swigType'Class);
+                                                        from_swig_Type    : in     doh_swigType);
 
 
    ---  Utility
@@ -362,11 +426,11 @@ private
    function fetch_ada_Type       (Self : access Item;   Named             : in     unbounded_String)  return ada_Type.view;
    function fetch_c_Type         (Self : access Item;   Named             : in     unbounded_String)   return   c_Type.view;
 
-   function demand_c_Type_for    (Self : access Item;   the_doh_swig_Type : in     doh_swigType'Class) return c_Type.view;
+   function demand_c_Type_for    (Self : access Item;   the_doh_swig_Type : in     doh_swigType) return c_Type.view;
 
    function current_Module       (Self : access Item)                                                  return swig_Module.swig_Module_view;
    function demand_Module        (Self : access Item;   Named             : in     unbounded_String)   return swig_Module.swig_Module_view;
-   function get_overloaded_Name  (Self : access Item;   for_Node          : in     doh_Node'Class)     return String;
+   function get_overloaded_Name  (Self : access Item;   for_Node          : in     doh_Node)     return String;
 
 
    procedure add_new_c_Type      (Self : access Item'Class;
@@ -378,14 +442,14 @@ private
    --  Returns the c++ prefix of the current_Class, or an empty string if there is no current_Class.
 
 
-   function my_stripped          (Self : access Item;   swig_Type         : in     doh_swigType'Class) return unbounded_String;
+   function my_stripped          (Self : access Item;   swig_Type         : in     doh_swigType) return unbounded_String;
 
    procedure add_Namespace       (Self : access Item;   Named             : in     unbounded_String);
    --
    --  The same namespace may safely be added twice (is add is ignored after the 1st)
 
-   function makeParameterName    (Self : access Item;   parameter_List    : in     doh_parmList'Class;
-                                                        the_Parameter     : in     doh_Parm    'Class;
+   function makeParameterName    (Self : access Item;   parameter_List    : in     doh_parmList;
+                                                        the_Parameter     : in     doh_Parm;
                                                         arg_num           : in     Integer)            return String;
 
    procedure associate           (Self : access Item;   the_ada_Type      : in     ada_Type.view;

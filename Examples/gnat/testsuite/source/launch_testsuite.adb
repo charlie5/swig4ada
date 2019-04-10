@@ -1,5 +1,5 @@
 with
-     lace.Environ,
+--     lace.Environ,
      ada.Strings.fixed,
      ada.Text_IO;
 

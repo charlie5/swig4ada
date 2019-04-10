@@ -14,7 +14,7 @@ is
 
    procedure strip_leading_global_namespace_Prefix (Self : in out Text);
 
-   function strip_array_Bounds (Self : in doh_SwigType'Class) return Text;
+   function strip_array_Bounds (Self : in doh_SwigType) return Text;
 
    function trim_Namespace (Self : in Text) return Text;
 
@@ -22,10 +22,10 @@ is
 
    procedure strip_all_qualifiers (Self : in out Text);
 
-   procedure strip_all_qualifiers (Self : in out doh_SwigType'Class);
+   procedure strip_all_qualifiers (Self : in out doh_SwigType);
 
-   function sibling_module_Name_of (the_Node : in doh_Node'Class) return String;
+   function sibling_module_Name_of (the_Node : in doh_Node) return String;
 
-   function owner_module_Name_of (the_Node : in doh_Node'Class) return String;
+   function owner_module_Name_of (the_Node : in doh_Node) return String;
 
 end swigg.Utility;

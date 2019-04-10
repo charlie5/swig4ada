@@ -1,4 +1,6 @@
 with
+     swigg_module.Binding,
+
      ada_type.a_Subtype,
      ada_Type.elementary.scalar.discrete.enumeration,
      ada_Type.elementary.an_access.to_type.interfaces_c_pointer,
@@ -17,11 +19,11 @@ with Ada.Characters.Handling;      use Ada.Characters.Handling;
 with ada_Context;            use ada_Context;
 
 with swigg_Module;            use swigg_Module;
-with Dispatcher;              use Dispatcher;
-with Wrapper;                 use Wrapper;
+--  with Dispatcher;              use Dispatcher;
+--  with Wrapper;                 use Wrapper;
 
 with ada_Utility;            use ada_Utility;
-with swig_p_Doh;
+--  with swig_p_Doh;
 with ada.strings.Maps;        use ada.strings.Maps;
 with ada.text_IO;             use ada.text_IO;
 with ada_Variable;            use ada_Variable;
@@ -35,7 +37,7 @@ is
        ada.Strings,
        ada_Package;
 
-   use type swig_p_Doh.item;
+--     use type swig_p_Doh.item;
 
 
 
@@ -1798,7 +1800,8 @@ is
 
       write_the_File :
       declare
-         output_directory : unbounded_String := +SWIG_output_directory;
+         use swigg_module.Binding;
+         output_directory : unbounded_String := +SWIG_output_directory.all'Access;
          lowcase_Name     : unbounded_String;
          the_File         : ada.text_io.File_type;
 

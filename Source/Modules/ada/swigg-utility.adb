@@ -1,6 +1,8 @@
 with
      ada_Utility,
-     swigg_Module;
+     DOHs.Pointers,
+     swigg_Module.Binding,
+     swigg_Module.Pointers;
 
 package body swigg.Utility
 is
@@ -84,7 +86,7 @@ is
 
 
 
-   function strip_array_Bounds (Self : in doh_SwigType'Class) return Text
+   function strip_array_Bounds (Self : in doh_SwigType) return Text
    is
       use ada.Strings;
 
@@ -164,26 +166,29 @@ is
 
 
 
-   procedure strip_all_qualifiers (Self : in out doh_SwigType'Class)
+   procedure strip_all_qualifiers (Self : in out doh_SwigType)
    is
       Pad : Text := +Self;
    begin
       strip_all_qualifiers (Pad);
-      Self := doh_SwigType'Class (to_Doh (to_String (Pad)));
+      Self := doh_SwigType (to_Doh (to_String (Pad)));
    end strip_all_qualifiers;
 
 
 
-   function sibling_module_Name_of (the_Node : in doh_Node'Class) return String
+   function sibling_module_Name_of (the_Node : in doh_Node) return String
    is
-      use swigg_Module;
-      the_Sibling : doh_Node'Class := first_Child (parent_Node (the_Node));
+      use swigg_Module.Binding,
+          swigg_Module.Pointers,
+          DOHs.Pointers;
+
+      the_Sibling : Node_Pointer := first_Child (parent_Node (Node_Pointer (the_Node)));
    begin
-      while exists (the_Sibling)
+      while exists (DOH_pointer (the_Sibling))
       loop
          if String'(+node_Type (the_Sibling)) = "module"
          then
-            return +get_Attribute (the_Sibling, -"name");
+            return +doh_Item (get_Attribute (the_Sibling, String_Pointer (-"name")));
          end if;
 
          the_Sibling := next_Sibling (the_Sibling);
@@ -194,7 +199,7 @@ is
 
 
 
-   function owner_module_Name_of (the_Node : in doh_Node'Class) return String
+   function owner_module_Name_of (the_Node : in doh_Node) return String
    is
    begin
       if sibling_module_Name_of (the_Node) /= ""
@@ -203,8 +208,11 @@ is
       end if;
 
       declare
-         use swigg_Module;
-         the_Parent : doh_Node'Class := parent_Node (the_Node);
+         use DOHs.Pointers,
+             swigg_Module,
+             swigg_Module.Binding,
+             swigg_Module.Pointers;
+         the_Parent : DOH_Pointer := DOH_Pointer (parent_Node (Node_Pointer (the_Node)));
       begin
          while exists (the_Parent)
          loop
@@ -213,7 +221,7 @@ is
                return sibling_module_Name_of (the_Parent);
             end if;
 
-            the_Parent := parent_Node (the_Parent);
+            the_Parent := DOH_Pointer (parent_Node (Node_Pointer (the_Parent)));
          end loop;
       end;
 
