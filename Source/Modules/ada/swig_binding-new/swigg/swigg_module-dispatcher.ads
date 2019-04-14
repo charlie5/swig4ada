@@ -26,9 +26,12 @@ package swigg_module.Dispatcher is
 
    pragma Import (CPP, Entity => Item);
 
-   function construct return Item'Class;
-   pragma Import (CPP, Entity => construct);
+--     function construct return Item'Class;
+--     pragma Import (CPP, Entity => construct);
 --     pragma Cpp_Constructor (construct);
+
+   function new_Dispatcher return Item'Class;
+   pragma Cpp_Constructor (new_Dispatcher, "_ZN10DispatcherC1Ev");
 
 
    type AccessMode_array is

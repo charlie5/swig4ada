@@ -6287,7 +6287,7 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_emit_one (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->emit_one(arg2);
+  result = (int)(arg1)->Dispatcher::emit_one(arg2);
   jresult = result; 
   
   
@@ -6314,7 +6314,7 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_emit_children (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->emit_children(arg2);
+  result = (int)(arg1)->Dispatcher::emit_children(arg2);
   jresult = result; 
   
   
@@ -6341,7 +6341,7 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_defaultHandler (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->defaultHandler(arg2);
+  result = (int)(arg1)->Dispatcher::defaultHandler(arg2);
   jresult = result; 
   
   
@@ -6368,10 +6368,10 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_top (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->top(arg2);
+//  result = (int)(arg1)->Dispatcher::top(arg2);
   jresult = result; 
   
-  
+  1/0;
   
   return jresult;
   
@@ -6395,7 +6395,7 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_applyDirective (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->applyDirective(arg2);
+  result = (int)(arg1)->Dispatcher::applyDirective(arg2);
   jresult = result; 
   
   
@@ -6422,7 +6422,7 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_clearDirective (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->clearDirective(arg2);
+  result = (int)(arg1)->Dispatcher::clearDirective(arg2);
   jresult = result; 
   
   
@@ -6449,7 +6449,7 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_constantDirective (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->constantDirective(arg2);
+  result = (int)(arg1)->Dispatcher::constantDirective(arg2);
   jresult = result; 
   
   
@@ -6476,7 +6476,7 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_extendDirective (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->extendDirective(arg2);
+  result = (int)(arg1)->Dispatcher::extendDirective(arg2);
   jresult = result; 
   
   
@@ -6503,7 +6503,7 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_fragmentDirective (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->fragmentDirective(arg2);
+  result = (int)(arg1)->Dispatcher::fragmentDirective(arg2);
   jresult = result; 
   
   
@@ -6530,7 +6530,7 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_importDirective (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->importDirective(arg2);
+  result = (int)(arg1)->Dispatcher::importDirective(arg2);
   jresult = result; 
   
   
@@ -6557,7 +6557,7 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_includeDirective (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->includeDirective(arg2);
+  result = (int)(arg1)->Dispatcher::includeDirective(arg2);
   jresult = result; 
   
   
@@ -6584,7 +6584,7 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_insertDirective (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->insertDirective(arg2);
+  result = (int)(arg1)->Dispatcher::insertDirective(arg2);
   jresult = result; 
   
   
@@ -6611,7 +6611,7 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_moduleDirective (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->moduleDirective(arg2);
+  result = (int)(arg1)->Dispatcher::moduleDirective(arg2);
   jresult = result; 
   
   
@@ -6638,7 +6638,7 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_nativeDirective (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->nativeDirective(arg2);
+  result = (int)(arg1)->Dispatcher::nativeDirective(arg2);
   jresult = result; 
   
   
@@ -6665,7 +6665,7 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_pragmaDirective (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->pragmaDirective(arg2);
+  result = (int)(arg1)->Dispatcher::pragmaDirective(arg2);
   jresult = result; 
   
   
@@ -6692,7 +6692,7 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_typemapDirective (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->typemapDirective(arg2);
+  result = (int)(arg1)->Dispatcher::typemapDirective(arg2);
   jresult = result; 
   
   
@@ -6719,7 +6719,7 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_typemapitemDirective (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->typemapitemDirective(arg2);
+  result = (int)(arg1)->Dispatcher::typemapitemDirective(arg2);
   jresult = result; 
   
   
@@ -6746,7 +6746,7 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_typemapcopyDirective (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->typemapcopyDirective(arg2);
+  result = (int)(arg1)->Dispatcher::typemapcopyDirective(arg2);
   jresult = result; 
   
   
@@ -6773,7 +6773,7 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_typesDirective (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->typesDirective(arg2);
+  result = (int)(arg1)->Dispatcher::typesDirective(arg2);
   jresult = result; 
   
   
@@ -6800,7 +6800,7 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_cDeclaration (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->cDeclaration(arg2);
+  result = (int)(arg1)->Dispatcher::cDeclaration(arg2);
   jresult = result; 
   
   
@@ -6827,7 +6827,7 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_externDeclaration (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->externDeclaration(arg2);
+  result = (int)(arg1)->Dispatcher::externDeclaration(arg2);
   jresult = result; 
   
   
@@ -6854,7 +6854,7 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_enumDeclaration (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->enumDeclaration(arg2);
+  result = (int)(arg1)->Dispatcher::enumDeclaration(arg2);
   jresult = result; 
   
   
@@ -6881,7 +6881,7 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_enumvalueDeclaration (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->enumvalueDeclaration(arg2);
+  result = (int)(arg1)->Dispatcher::enumvalueDeclaration(arg2);
   jresult = result; 
   
   
@@ -6908,7 +6908,7 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_enumforwardDeclaration (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->enumforwardDeclaration(arg2);
+  result = (int)(arg1)->Dispatcher::enumforwardDeclaration(arg2);
   jresult = result; 
   
   
@@ -6935,7 +6935,7 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_classDeclaration (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->classDeclaration(arg2);
+  result = (int)(arg1)->Dispatcher::classDeclaration(arg2);
   jresult = result; 
   
   
@@ -6962,7 +6962,7 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_classforwardDeclaration (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->classforwardDeclaration(arg2);
+  result = (int)(arg1)->Dispatcher::classforwardDeclaration(arg2);
   jresult = result; 
   
   
@@ -6989,7 +6989,7 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_constructorDeclaration (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->constructorDeclaration(arg2);
+  result = (int)(arg1)->Dispatcher::constructorDeclaration(arg2);
   jresult = result; 
   
   
@@ -7016,7 +7016,7 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_destructorDeclaration (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->destructorDeclaration(arg2);
+  result = (int)(arg1)->Dispatcher::destructorDeclaration(arg2);
   jresult = result; 
   
   
@@ -7043,7 +7043,7 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_accessDeclaration (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->accessDeclaration(arg2);
+  result = (int)(arg1)->Dispatcher::accessDeclaration(arg2);
   jresult = result; 
   
   
@@ -7070,7 +7070,7 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_usingDeclaration (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->usingDeclaration(arg2);
+  result = (int)(arg1)->Dispatcher::usingDeclaration(arg2);
   jresult = result; 
   
   
@@ -7097,7 +7097,7 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_namespaceDeclaration (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->namespaceDeclaration(arg2);
+  result = (int)(arg1)->Dispatcher::namespaceDeclaration(arg2);
   jresult = result; 
   
   
@@ -7124,7 +7124,7 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_templateDeclaration (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->templateDeclaration(arg2);
+  result = (int)(arg1)->Dispatcher::templateDeclaration(arg2);
   jresult = result; 
   
   
@@ -7183,7 +7183,7 @@ DllExport int SWIGSTDCALL Ada_Language_emit_one (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->emit_one(arg2);
+  result = (int)(arg1)->Language::emit_one(arg2);
   jresult = result; 
   
   
@@ -7216,7 +7216,7 @@ DllExport void SWIGSTDCALL Ada_Language_main (
   
   arg3      = (char **) jarg3; 
   
-  (arg1)->main(arg2,arg3);
+  (arg1)->Language::main(arg2,arg3);
   
   
 }
@@ -7239,7 +7239,7 @@ DllExport int SWIGSTDCALL Ada_Language_top (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->top(arg2);
+  result = (int)(arg1)->Language::top(arg2);
   jresult = result; 
   
   
@@ -7266,7 +7266,7 @@ DllExport int SWIGSTDCALL Ada_Language_applyDirective (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->applyDirective(arg2);
+  result = (int)(arg1)->Language::applyDirective(arg2);
   jresult = result; 
   
   
@@ -7293,7 +7293,7 @@ DllExport int SWIGSTDCALL Ada_Language_clearDirective (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->clearDirective(arg2);
+  result = (int)(arg1)->Language::clearDirective(arg2);
   jresult = result; 
   
   
@@ -7320,7 +7320,7 @@ DllExport int SWIGSTDCALL Ada_Language_constantDirective (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->constantDirective(arg2);
+  result = (int)(arg1)->Language::constantDirective(arg2);
   jresult = result; 
   
   
@@ -7347,7 +7347,7 @@ DllExport int SWIGSTDCALL Ada_Language_extendDirective (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->extendDirective(arg2);
+  result = (int)(arg1)->Language::extendDirective(arg2);
   jresult = result; 
   
   
@@ -7374,7 +7374,7 @@ DllExport int SWIGSTDCALL Ada_Language_fragmentDirective (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->fragmentDirective(arg2);
+  result = (int)(arg1)->Language::fragmentDirective(arg2);
   jresult = result; 
   
   
@@ -7401,7 +7401,7 @@ DllExport int SWIGSTDCALL Ada_Language_importDirective (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->importDirective(arg2);
+  result = (int)(arg1)->Language::importDirective(arg2);
   jresult = result; 
   
   
@@ -7428,7 +7428,7 @@ DllExport int SWIGSTDCALL Ada_Language_includeDirective (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->includeDirective(arg2);
+  result = (int)(arg1)->Language::includeDirective(arg2);
   jresult = result; 
   
   
@@ -7455,7 +7455,7 @@ DllExport int SWIGSTDCALL Ada_Language_insertDirective (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->insertDirective(arg2);
+  result = (int)(arg1)->Language::insertDirective(arg2);
   jresult = result; 
   
   
@@ -7482,7 +7482,7 @@ DllExport int SWIGSTDCALL Ada_Language_moduleDirective (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->moduleDirective(arg2);
+  result = (int)(arg1)->Language::moduleDirective(arg2);
   jresult = result; 
   
   
@@ -7509,7 +7509,7 @@ DllExport int SWIGSTDCALL Ada_Language_nativeDirective (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->nativeDirective(arg2);
+  result = (int)(arg1)->Language::nativeDirective(arg2);
   jresult = result; 
   
   
@@ -7536,7 +7536,7 @@ DllExport int SWIGSTDCALL Ada_Language_pragmaDirective (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->pragmaDirective(arg2);
+  result = (int)(arg1)->Language::pragmaDirective(arg2);
   jresult = result; 
   
   
@@ -7563,7 +7563,7 @@ DllExport int SWIGSTDCALL Ada_Language_typemapDirective (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->typemapDirective(arg2);
+  result = (int)(arg1)->Language::typemapDirective(arg2);
   jresult = result; 
   
   
@@ -7590,7 +7590,7 @@ DllExport int SWIGSTDCALL Ada_Language_typemapcopyDirective (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->typemapcopyDirective(arg2);
+  result = (int)(arg1)->Language::typemapcopyDirective(arg2);
   jresult = result; 
   
   
@@ -7617,7 +7617,7 @@ DllExport int SWIGSTDCALL Ada_Language_typesDirective (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->typesDirective(arg2);
+  result = (int)(arg1)->Language::typesDirective(arg2);
   jresult = result; 
   
   
@@ -7644,7 +7644,7 @@ DllExport int SWIGSTDCALL Ada_Language_cDeclaration (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->cDeclaration(arg2);
+  result = (int)(arg1)->Language::cDeclaration(arg2);
   jresult = result; 
   
   
@@ -7671,7 +7671,7 @@ DllExport int SWIGSTDCALL Ada_Language_externDeclaration (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->externDeclaration(arg2);
+  result = (int)(arg1)->Language::externDeclaration(arg2);
   jresult = result; 
   
   
@@ -7698,7 +7698,7 @@ DllExport int SWIGSTDCALL Ada_Language_enumDeclaration (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->enumDeclaration(arg2);
+  result = (int)(arg1)->Language::enumDeclaration(arg2);
   jresult = result; 
   
   
@@ -7725,7 +7725,7 @@ DllExport int SWIGSTDCALL Ada_Language_enumvalueDeclaration (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->enumvalueDeclaration(arg2);
+  result = (int)(arg1)->Language::enumvalueDeclaration(arg2);
   jresult = result; 
   
   
@@ -7752,7 +7752,7 @@ DllExport int SWIGSTDCALL Ada_Language_enumforwardDeclaration (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->enumforwardDeclaration(arg2);
+  result = (int)(arg1)->Language::enumforwardDeclaration(arg2);
   jresult = result; 
   
   
@@ -7779,7 +7779,7 @@ DllExport int SWIGSTDCALL Ada_Language_classDeclaration (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->classDeclaration(arg2);
+  result = (int)(arg1)->Language::classDeclaration(arg2);
   jresult = result; 
   
   
@@ -7806,7 +7806,7 @@ DllExport int SWIGSTDCALL Ada_Language_classforwardDeclaration (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->classforwardDeclaration(arg2);
+  result = (int)(arg1)->Language::classforwardDeclaration(arg2);
   jresult = result; 
   
   
@@ -7833,7 +7833,7 @@ DllExport int SWIGSTDCALL Ada_Language_constructorDeclaration (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->constructorDeclaration(arg2);
+  result = (int)(arg1)->Language::constructorDeclaration(arg2);
   jresult = result; 
   
   
@@ -7860,7 +7860,7 @@ DllExport int SWIGSTDCALL Ada_Language_destructorDeclaration (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->destructorDeclaration(arg2);
+  result = (int)(arg1)->Language::destructorDeclaration(arg2);
   jresult = result; 
   
   
@@ -7887,7 +7887,7 @@ DllExport int SWIGSTDCALL Ada_Language_accessDeclaration (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->accessDeclaration(arg2);
+  result = (int)(arg1)->Language::accessDeclaration(arg2);
   jresult = result; 
   
   
@@ -7914,7 +7914,7 @@ DllExport int SWIGSTDCALL Ada_Language_namespaceDeclaration (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->namespaceDeclaration(arg2);
+  result = (int)(arg1)->Language::namespaceDeclaration(arg2);
   jresult = result; 
   
   
@@ -7941,7 +7941,7 @@ DllExport int SWIGSTDCALL Ada_Language_usingDeclaration (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->usingDeclaration(arg2);
+  result = (int)(arg1)->Language::usingDeclaration(arg2);
   jresult = result; 
   
   
@@ -7968,7 +7968,7 @@ DllExport int SWIGSTDCALL Ada_Language_functionHandler (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->functionHandler(arg2);
+  result = (int)(arg1)->Language::functionHandler(arg2);
   jresult = result; 
   
   
@@ -7995,7 +7995,7 @@ DllExport int SWIGSTDCALL Ada_Language_globalfunctionHandler (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->globalfunctionHandler(arg2);
+  result = (int)(arg1)->Language::globalfunctionHandler(arg2);
   jresult = result; 
   
   
@@ -8022,7 +8022,7 @@ DllExport int SWIGSTDCALL Ada_Language_memberfunctionHandler (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->memberfunctionHandler(arg2);
+  result = (int)(arg1)->Language::memberfunctionHandler(arg2);
   jresult = result; 
   
   
@@ -8049,7 +8049,7 @@ DllExport int SWIGSTDCALL Ada_Language_staticmemberfunctionHandler (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->staticmemberfunctionHandler(arg2);
+  result = (int)(arg1)->Language::staticmemberfunctionHandler(arg2);
   jresult = result; 
   
   
@@ -8076,7 +8076,7 @@ DllExport int SWIGSTDCALL Ada_Language_callbackfunctionHandler (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->callbackfunctionHandler(arg2);
+  result = (int)(arg1)->Language::callbackfunctionHandler(arg2);
   jresult = result; 
   
   
@@ -8103,7 +8103,7 @@ DllExport int SWIGSTDCALL Ada_Language_variableHandler (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->variableHandler(arg2);
+  result = (int)(arg1)->Language::variableHandler(arg2);
   jresult = result; 
   
   
@@ -8130,7 +8130,7 @@ DllExport int SWIGSTDCALL Ada_Language_globalvariableHandler (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->globalvariableHandler(arg2);
+  result = (int)(arg1)->Language::globalvariableHandler(arg2);
   jresult = result; 
   
   
@@ -8157,7 +8157,7 @@ DllExport int SWIGSTDCALL Ada_Language_membervariableHandler (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->membervariableHandler(arg2);
+  result = (int)(arg1)->Language::membervariableHandler(arg2);
   jresult = result; 
   
   
@@ -8184,7 +8184,7 @@ DllExport int SWIGSTDCALL Ada_Language_staticmembervariableHandler (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->staticmembervariableHandler(arg2);
+  result = (int)(arg1)->Language::staticmembervariableHandler(arg2);
   jresult = result; 
   
   
@@ -8211,7 +8211,7 @@ DllExport int SWIGSTDCALL Ada_Language_memberconstantHandler (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->memberconstantHandler(arg2);
+  result = (int)(arg1)->Language::memberconstantHandler(arg2);
   jresult = result; 
   
   
@@ -8238,7 +8238,7 @@ DllExport int SWIGSTDCALL Ada_Language_constructorHandler (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->constructorHandler(arg2);
+  result = (int)(arg1)->Language::constructorHandler(arg2);
   jresult = result; 
   
   
@@ -8265,7 +8265,7 @@ DllExport int SWIGSTDCALL Ada_Language_copyconstructorHandler (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->copyconstructorHandler(arg2);
+  result = (int)(arg1)->Language::copyconstructorHandler(arg2);
   jresult = result; 
   
   
@@ -8292,7 +8292,7 @@ DllExport int SWIGSTDCALL Ada_Language_destructorHandler (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->destructorHandler(arg2);
+  result = (int)(arg1)->Language::destructorHandler(arg2);
   jresult = result; 
   
   
@@ -8319,7 +8319,7 @@ DllExport int SWIGSTDCALL Ada_Language_classHandler (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->classHandler(arg2);
+  result = (int)(arg1)->Language::classHandler(arg2);
   jresult = result; 
   
   
@@ -8346,7 +8346,7 @@ DllExport int SWIGSTDCALL Ada_Language_typedefHandler (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->typedefHandler(arg2);
+  result = (int)(arg1)->Language::typedefHandler(arg2);
   jresult = result; 
   
   
@@ -8373,7 +8373,7 @@ DllExport int SWIGSTDCALL Ada_Language_constantWrapper (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->constantWrapper(arg2);
+  result = (int)(arg1)->Language::constantWrapper(arg2);
   jresult = result; 
   
   
@@ -8400,7 +8400,7 @@ DllExport int SWIGSTDCALL Ada_Language_variableWrapper (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->variableWrapper(arg2);
+  result = (int)(arg1)->Language::variableWrapper(arg2);
   jresult = result; 
   
   
@@ -8427,7 +8427,7 @@ DllExport int SWIGSTDCALL Ada_Language_functionWrapper (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->functionWrapper(arg2);
+  result = (int)(arg1)->Language::functionWrapper(arg2);
   jresult = result; 
   
   
@@ -8454,7 +8454,7 @@ DllExport int SWIGSTDCALL Ada_Language_nativeWrapper (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->nativeWrapper(arg2);
+  result = (int)(arg1)->Language::nativeWrapper(arg2);
   jresult = result; 
   
   
@@ -8481,7 +8481,7 @@ DllExport int SWIGSTDCALL Ada_Language_classDirector (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->classDirector(arg2);
+  result = (int)(arg1)->Language::classDirector(arg2);
   jresult = result; 
   
   
@@ -8508,7 +8508,7 @@ DllExport int SWIGSTDCALL Ada_Language_classDirectorInit (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->classDirectorInit(arg2);
+  result = (int)(arg1)->Language::classDirectorInit(arg2);
   jresult = result; 
   
   
@@ -8535,7 +8535,7 @@ DllExport int SWIGSTDCALL Ada_Language_classDirectorEnd (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->classDirectorEnd(arg2);
+  result = (int)(arg1)->Language::classDirectorEnd(arg2);
   jresult = result; 
   
   
@@ -8598,7 +8598,7 @@ DllExport int SWIGSTDCALL Ada_Language_unrollVirtualMethods__SWIG_0 (
   arg7 = (int) jarg7; 
   
   
-  result = (int)(arg1)->unrollVirtualMethods(arg2,arg3,arg4,arg5,*arg6,arg7);
+  result = (int)(arg1)->Language::unrollVirtualMethods(arg2,arg3,arg4,arg5,*arg6,arg7);
   jresult = result; 
   
   
@@ -8653,7 +8653,7 @@ DllExport int SWIGSTDCALL Ada_Language_unrollVirtualMethods__SWIG_1 (
   arg6 = (int *)jarg6;
   
   
-  result = (int)(arg1)->unrollVirtualMethods(arg2,arg3,arg4,arg5,*arg6);
+  result = (int)(arg1)->Language::unrollVirtualMethods(arg2,arg3,arg4,arg5,*arg6);
   jresult = result; 
   
   
@@ -8680,7 +8680,7 @@ DllExport int SWIGSTDCALL Ada_Language_classDirectorConstructor (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->classDirectorConstructor(arg2);
+  result = (int)(arg1)->Language::classDirectorConstructor(arg2);
   jresult = result; 
   
   
@@ -8707,7 +8707,7 @@ DllExport int SWIGSTDCALL Ada_Language_classDirectorDefaultConstructor (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->classDirectorDefaultConstructor(arg2);
+  result = (int)(arg1)->Language::classDirectorDefaultConstructor(arg2);
   jresult = result; 
   
   
@@ -8746,7 +8746,7 @@ DllExport int SWIGSTDCALL Ada_Language_classDirectorMethod (
   
   arg4 = (String *)jarg4; 
   
-  result = (int)(arg1)->classDirectorMethod(arg2,arg3,arg4);
+  result = (int)(arg1)->Language::classDirectorMethod(arg2,arg3,arg4);
   jresult = result; 
   
   
@@ -8773,7 +8773,7 @@ DllExport int SWIGSTDCALL Ada_Language_classDirectorConstructors (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->classDirectorConstructors(arg2);
+  result = (int)(arg1)->Language::classDirectorConstructors(arg2);
   jresult = result; 
   
   
@@ -8800,7 +8800,7 @@ DllExport int SWIGSTDCALL Ada_Language_classDirectorDestructor (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->classDirectorDestructor(arg2);
+  result = (int)(arg1)->Language::classDirectorDestructor(arg2);
   jresult = result; 
   
   
@@ -8827,7 +8827,7 @@ DllExport int SWIGSTDCALL Ada_Language_classDirectorMethods (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->classDirectorMethods(arg2);
+  result = (int)(arg1)->Language::classDirectorMethods(arg2);
   jresult = result; 
   
   
@@ -8854,7 +8854,7 @@ DllExport int SWIGSTDCALL Ada_Language_classDirectorDisown (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->classDirectorDisown(arg2);
+  result = (int)(arg1)->Language::classDirectorDisown(arg2);
   jresult = result; 
   
   
@@ -8881,7 +8881,7 @@ DllExport int SWIGSTDCALL Ada_Language_validIdentifier (
   
   arg2 = (String *)jarg2; 
   
-  result = (int)(arg1)->validIdentifier(arg2);
+  result = (int)(arg1)->Language::validIdentifier(arg2);
   jresult = result; 
   
   
@@ -8914,7 +8914,7 @@ DllExport int SWIGSTDCALL Ada_Language_addSymbol (
   
   arg3 = (Node *)jarg3; 
   
-  result = (int)(arg1)->addSymbol((String const *)arg2,(Node const *)arg3);
+  result = (int)(arg1)->Language::addSymbol((String const *)arg2,(Node const *)arg3);
   jresult = result; 
   
   
@@ -8941,7 +8941,7 @@ DllExport void* SWIGSTDCALL Ada_Language_symbolLookup (
   
   arg2 = (String *)jarg2; 
   
-  result = (Node *)(arg1)->symbolLookup(arg2);
+  result = (Node *)(arg1)->Language::symbolLookup(arg2);
   jresult = (void *) result;      
   
   
@@ -8968,7 +8968,7 @@ DllExport void* SWIGSTDCALL Ada_Language_classLookup (
   
   arg2 = (SwigType *)jarg2; 
   
-  result = (Node *)(arg1)->classLookup(arg2);
+  result = (Node *)(arg1)->Language::classLookup(arg2);
   jresult = (void *) result;      
   
   
@@ -8995,7 +8995,7 @@ DllExport void* SWIGSTDCALL Ada_Language_enumLookup (
   
   arg2 = (SwigType *)jarg2; 
   
-  result = (Node *)(arg1)->enumLookup(arg2);
+  result = (Node *)(arg1)->Language::enumLookup(arg2);
   jresult = (void *) result;      
   
   
@@ -9022,7 +9022,7 @@ DllExport int SWIGSTDCALL Ada_Language_abstractClassTest (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->abstractClassTest(arg2);
+  result = (int)(arg1)->Language::abstractClassTest(arg2);
   jresult = result; 
   
   
@@ -9049,7 +9049,7 @@ DllExport int SWIGSTDCALL Ada_Language_is_assignable (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->is_assignable(arg2);
+  result = (int)(arg1)->Language::is_assignable(arg2);
   jresult = result; 
   
   
@@ -9070,7 +9070,7 @@ DllExport void* SWIGSTDCALL Ada_Language_runtimeCode (
   
   arg1 = (Language *)jarg1; 
   
-  result = (String *)(arg1)->runtimeCode();
+  result = (String *)(arg1)->Language::runtimeCode();
   jresult = (void *) result;      
   
   
@@ -9091,7 +9091,7 @@ DllExport void* SWIGSTDCALL Ada_Language_defaultExternalRuntimeFilename (
   
   arg1 = (Language *)jarg1; 
   
-  result = (String *)(arg1)->defaultExternalRuntimeFilename();
+  result = (String *)(arg1)->Language::defaultExternalRuntimeFilename();
   jresult = (void *) result;      
   
   
@@ -9110,7 +9110,7 @@ DllExport void SWIGSTDCALL Ada_Language_enable_cplus_runtime_mode (
   
   arg1 = (Language *)jarg1; 
   
-  (arg1)->enable_cplus_runtime_mode();
+  (arg1)->Language::enable_cplus_runtime_mode();
   
   
 }
@@ -9127,7 +9127,7 @@ DllExport int SWIGSTDCALL Ada_Language_cplus_runtime_mode (
   
   arg1 = (Language *)jarg1; 
   
-  result = (int)(arg1)->cplus_runtime_mode();
+  result = (int)(arg1)->Language::cplus_runtime_mode();
   jresult = result; 
   
   
@@ -9146,7 +9146,7 @@ DllExport void SWIGSTDCALL Ada_Language_allow_protected_and_private_Members (
   
   arg1 = (Language *)jarg1; 
   
-  (arg1)->allow_protected_and_private_Members();
+  (arg1)->Language::allow_protected_and_private_Members();
   
   
 }
@@ -9169,7 +9169,7 @@ DllExport void SWIGSTDCALL Ada_Language_allow_directors__SWIG_0 (
   arg2 = (int) jarg2; 
   
   
-  (arg1)->allow_directors(arg2);
+  (arg1)->Language::allow_directors(arg2);
   
   
 }
@@ -9184,7 +9184,7 @@ DllExport void SWIGSTDCALL Ada_Language_allow_directors__SWIG_1 (
   
   arg1 = (Language *)jarg1; 
   
-  (arg1)->allow_directors();
+  (arg1)->Language::allow_directors();
   
   
 }
@@ -9201,7 +9201,7 @@ DllExport int SWIGSTDCALL Ada_Language_directorsEnabled (
   
   arg1 = (Language *)jarg1; 
   
-  result = (int)((Language const *)arg1)->directorsEnabled();
+  result = (int)((Language const *)arg1)->Language::directorsEnabled();
   jresult = result; 
   
   
@@ -9228,7 +9228,7 @@ DllExport void SWIGSTDCALL Ada_Language_allow_dirprot__SWIG_0 (
   arg2 = (int) jarg2; 
   
   
-  (arg1)->allow_dirprot(arg2);
+  (arg1)->Language::allow_dirprot(arg2);
   
   
 }
@@ -9243,7 +9243,7 @@ DllExport void SWIGSTDCALL Ada_Language_allow_dirprot__SWIG_1 (
   
   arg1 = (Language *)jarg1; 
   
-  (arg1)->allow_dirprot();
+  (arg1)->Language::allow_dirprot();
   
   
 }
@@ -9266,7 +9266,7 @@ DllExport void SWIGSTDCALL Ada_Language_allow_allprotected__SWIG_0 (
   arg2 = (int) jarg2; 
   
   
-  (arg1)->allow_allprotected(arg2);
+  (arg1)->Language::allow_allprotected(arg2);
   
   
 }
@@ -9281,7 +9281,7 @@ DllExport void SWIGSTDCALL Ada_Language_allow_allprotected__SWIG_1 (
   
   arg1 = (Language *)jarg1; 
   
-  (arg1)->allow_allprotected();
+  (arg1)->Language::allow_allprotected();
   
   
 }
@@ -9298,7 +9298,7 @@ DllExport int SWIGSTDCALL Ada_Language_dirprot_mode (
   
   arg1 = (Language *)jarg1; 
   
-  result = (int)((Language const *)arg1)->dirprot_mode();
+  result = (int)((Language const *)arg1)->Language::dirprot_mode();
   jresult = result; 
   
   
@@ -9325,7 +9325,7 @@ DllExport int SWIGSTDCALL Ada_Language_need_nonpublic_ctor (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->need_nonpublic_ctor(arg2);
+  result = (int)(arg1)->Language::need_nonpublic_ctor(arg2);
   jresult = result; 
   
   
@@ -9352,7 +9352,7 @@ DllExport int SWIGSTDCALL Ada_Language_need_nonpublic_member (
   
   arg2 = (Node *)jarg2; 
   
-  result = (int)(arg1)->need_nonpublic_member(arg2);
+  result = (int)(arg1)->Language::need_nonpublic_member(arg2);
   jresult = result; 
   
   
@@ -9377,7 +9377,7 @@ DllExport void SWIGSTDCALL Ada_Language_setSubclassInstanceCheck (
   
   arg2 = (String *)jarg2; 
   
-  (arg1)->setSubclassInstanceCheck(arg2);
+  (arg1)->Language::setSubclassInstanceCheck(arg2);
   
   
 }
@@ -9404,7 +9404,7 @@ DllExport void SWIGSTDCALL Ada_Language_setOverloadResolutionTemplates (
   
   arg3 = (String *)jarg3; 
   
-  (arg1)->setOverloadResolutionTemplates(arg2,arg3);
+  (arg1)->Language::setOverloadResolutionTemplates(arg2,arg3);
   
   
 }
@@ -9427,7 +9427,7 @@ DllExport void SWIGSTDCALL Ada_Language_allow_multiple_input__SWIG_0 (
   arg2 = (int) jarg2; 
   
   
-  (arg1)->allow_multiple_input(arg2);
+  (arg1)->Language::allow_multiple_input(arg2);
   
   
 }
@@ -9442,7 +9442,7 @@ DllExport void SWIGSTDCALL Ada_Language_allow_multiple_input__SWIG_1 (
   
   arg1 = (Language *)jarg1; 
   
-  (arg1)->allow_multiple_input();
+  (arg1)->Language::allow_multiple_input();
   
   
 }
@@ -9465,7 +9465,7 @@ DllExport void SWIGSTDCALL Ada_Language_allow_overloading__SWIG_0 (
   arg2 = (int) jarg2; 
   
   
-  (arg1)->allow_overloading(arg2);
+  (arg1)->Language::allow_overloading(arg2);
   
   
 }
@@ -9480,7 +9480,7 @@ DllExport void SWIGSTDCALL Ada_Language_allow_overloading__SWIG_1 (
   
   arg1 = (Language *)jarg1; 
   
-  (arg1)->allow_overloading();
+  (arg1)->Language::allow_overloading();
   
   
 }
@@ -9497,7 +9497,7 @@ DllExport int SWIGSTDCALL Ada_Language_is_wrapping_class (
   
   arg1 = (Language *)jarg1; 
   
-  result = (int)(arg1)->is_wrapping_class();
+  result = (int)(arg1)->Language::is_wrapping_class();
   jresult = result; 
   
   
@@ -9518,7 +9518,7 @@ DllExport void* SWIGSTDCALL Ada_Language_getCurrentClass (
   
   arg1 = (Language *)jarg1; 
   
-  result = (Node *)((Language const *)arg1)->getCurrentClass();
+  result = (Node *)((Language const *)arg1)->Language::getCurrentClass();
   jresult = (void *) result;      
   
   
@@ -9539,7 +9539,7 @@ DllExport void* SWIGSTDCALL Ada_Language_getClassName (
   
   arg1 = (Language *)jarg1; 
   
-  result = (String *)((Language const *)arg1)->getClassName();
+  result = (String *)((Language const *)arg1)->Language::getClassName();
   jresult = (void *) result;      
   
   
@@ -9560,7 +9560,7 @@ DllExport void* SWIGSTDCALL Ada_Language_getClassHash (
   
   arg1 = (Language *)jarg1; 
   
-  result = (Hash *)((Language const *)arg1)->getClassHash();
+  result = (Hash *)((Language const *)arg1)->Language::getClassHash();
   jresult = (void *) result;      
   
   
@@ -9581,7 +9581,7 @@ DllExport void* SWIGSTDCALL Ada_Language_getClassPrefix (
   
   arg1 = (Language *)jarg1; 
   
-  result = (String *)((Language const *)arg1)->getClassPrefix();
+  result = (String *)((Language const *)arg1)->Language::getClassPrefix();
   jresult = (void *) result;      
   
   
@@ -9602,7 +9602,7 @@ DllExport void* SWIGSTDCALL Ada_Language_getClassType (
   
   arg1 = (Language *)jarg1; 
   
-  result = (String *)((Language const *)arg1)->getClassType();
+  result = (String *)((Language const *)arg1)->Language::getClassType();
   jresult = (void *) result;      
   
   
@@ -9623,7 +9623,7 @@ DllExport int SWIGSTDCALL Ada_Language_is_smart_pointer (
   
   arg1 = (Language *)jarg1; 
   
-  result = (int)((Language const *)arg1)->is_smart_pointer();
+  result = (int)((Language const *)arg1)->Language::is_smart_pointer();
   jresult = result; 
   
   
@@ -9644,7 +9644,7 @@ DllExport unsigned int SWIGSTDCALL Ada_Language_extraDirectorProtectedCPPMethods
   
   arg1 = (Language *)jarg1; 
   
-  result = (bool)((Language const *)arg1)->extraDirectorProtectedCPPMethodsRequired();
+  result = (bool)((Language const *)arg1)->Language::extraDirectorProtectedCPPMethodsRequired();
   jresult = result; 
   
   

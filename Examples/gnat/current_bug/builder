@@ -14,6 +14,7 @@ echo Generating bindings.
 echo Pretty printing.
 gnatpp  -rnb  -I../../..   *.ads   -cargs -gnatX -gnat12
 indent  -sob  -di16                  *.c
+indent  -sob  -di16                  *.cxx
 
 
 
