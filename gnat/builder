@@ -15,7 +15,7 @@ rm *.a
 echo
 echo generating bindings
 
-../../../gnat_build/swig_gnat  -gnat -c++  -cpperraswarn  -I/usr/include  example.i 
+./swig_gnat  -gnat -c++  -cpperraswarn  -I/usr/include  example.i 
 
 
 echo

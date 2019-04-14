@@ -400,8 +400,8 @@ package swigg_module is
 
 private
 
-   pragma Import (CPP, input_file, "_ZN12swigg_module10input_fileE");
-   pragma Import (CPP, line_number, "_ZN12swigg_module11line_numberE");
+   pragma Import (CPP, input_file, "input_file");
+   pragma Import (CPP, line_number, "line_number");
    pragma Import (CPP, CPlusPlus, "_ZN12swigg_module9CPlusPlusE");
    pragma Import (CPP, Extend, "_ZN12swigg_module6ExtendE");
    pragma Import (CPP, Verbose, "_ZN12swigg_module7VerboseE");

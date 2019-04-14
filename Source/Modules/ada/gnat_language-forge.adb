@@ -9,6 +9,7 @@ with
      ada_Type.composite.a_record,
      ada_Utility,
 
+     swigg_module.Binding,
      ada.Strings.Maps;
 
 
@@ -20,8 +21,9 @@ is
       use c_nameSpace,  ada_Package,  ada_Utility;
 
 --        base_Language    : constant swigg_module.Language.item := swigg_module.Language.item (swigg_module.Language.construct);
-      Self             : constant View
-        := new gnat_Language.item'(swigg_module.Language.construct with -- base_Language with
+      Self : constant View
+--          := new gnat_Language.item'(swigg_module.Language.do_construct with -- base_Language with
+        := new gnat_Language.item'(swigg_module.Language.do_construct with -- base_Language with
 
                                    new_Modules           => <>,
                                    name_Map_of_module    => <>,
@@ -53,7 +55,7 @@ is
                                    c_type_Map_of_ada_subprogram   => <>,
                                    c_namespace_Map_of_ada_Package => <>,
 
-                                   current_c_Node         => null_Doh,
+                                   current_c_Node         => null,
                                    c_class_stack          => <>,
                                    prior_c_Declaration    => <>,
 
@@ -80,11 +82,11 @@ is
                                    anonymous_enum_Count     => 0,
                                    integer_symbol_value_Map         => symbol_value_maps.empty_Map,
 
-                                   f_runtime                => null_DOH,
-                                   f_header                 => null_DOH,
-                                   f_wrappers               => null_DOH,
-                                   f_init                   => null_DOH,
-                                   f_gnat                   => null_DOH,
+                                   f_runtime                => null,
+                                   f_header                 => null,
+                                   f_wrappers               => null,
+                                   f_init                   => null,
+                                   f_gnat                   => null,
 
                                    current_linkage_Symbol   => null_unbounded_String,
                                    current_lStr             => null_unbounded_String);
@@ -119,100 +121,100 @@ is
          the_c_Type : c_Type.view;
       begin
          the_c_Type := c_type.new_standard_c_Type (Self.nameSpace_std,  +"void");
-         Self.register (the_c_Type,  to_Doh ("void"), is_core_C_type => True);
+         Self.register (the_c_Type,  doh_SwigType (-"void"), is_core_C_type => True);
 
          the_c_Type := c_type.new_standard_c_Type (Self.nameSpace_std,  +"ptrdiff_t");
-         Self.register (the_c_Type,  to_Doh ("ptrdiff_t"), is_core_C_type => True);
+         Self.register (the_c_Type,  doh_SwigType (-"ptrdiff_t"), is_core_C_type => True);
 
          the_c_Type := c_type.new_standard_c_Type (Self.nameSpace_std,  +"size_t");
-         Self.register (the_c_Type,  to_Doh ("size_t"), is_core_C_type => True);
+         Self.register (the_c_Type,  doh_SwigType (-"size_t"), is_core_C_type => True);
 
 
          the_c_Type := c_type.new_standard_c_Type (Self.nameSpace_std,  +"char");
-         Self.register (the_c_Type,  to_Doh ("char"),   is_core_C_type => True,  add_level_3_Indirection => True);
+         Self.register (the_c_Type,  doh_SwigType (-"char"),   is_core_C_type => True,  add_level_3_Indirection => True);
 
          the_c_Type := c_type.new_standard_c_Type (Self.nameSpace_std,  +"wchar_t");
-         Self.register (the_c_Type,  to_Doh ("wchar_t"), is_core_C_type => True); --,  add_level_3_Indirection => True);
+         Self.register (the_c_Type,  doh_SwigType (-"wchar_t"), is_core_C_type => True); --,  add_level_3_Indirection => True);
 
 
          the_c_Type := c_type.new_standard_c_Type (Self.nameSpace_std,  +"unsigned char");
-         Self.register (the_c_Type,  to_Doh ("unsigned char"), is_core_C_type => True);
+         Self.register (the_c_Type,  doh_SwigType (-"unsigned char"), is_core_C_type => True);
 
          the_c_Type := c_type.new_standard_c_Type (Self.nameSpace_std,  +"signed char");
-         Self.register (the_c_Type,  to_Doh ("signed char"), is_core_C_type => True);
+         Self.register (the_c_Type,  doh_SwigType (-"signed char"), is_core_C_type => True);
 
          the_c_Type := c_type.new_standard_c_Type (Self.nameSpace_std,  +"std::string");
-         Self.register (the_c_Type,  to_Doh ("std::string"), is_core_C_type => True);
+         Self.register (the_c_Type,  doh_SwigType (-"std::string"), is_core_C_type => True);
 
 
          the_c_Type := c_type.new_standard_c_Type (Self.nameSpace_std,  +"short");
-         Self.register (the_c_Type,  to_Doh ("short"), is_core_C_type => True);
+         Self.register (the_c_Type,  doh_SwigType (-"short"), is_core_C_type => True);
 
          the_c_Type := c_type.new_standard_c_Type (Self.nameSpace_std,  +"int");
-         Self.register (the_c_Type,  to_Doh ("int"),  is_core_C_type => True);
+         Self.register (the_c_Type,  doh_SwigType (-"int"),  is_core_C_type => True);
 
          the_c_Type := c_type.new_standard_c_Type (Self.nameSpace_std,  +"long");
-         Self.register (the_c_Type,  to_Doh ("long"),  is_core_C_type => True);
+         Self.register (the_c_Type,  doh_SwigType (-"long"),  is_core_C_type => True);
 
          the_c_Type := c_type.new_standard_c_Type (Self.nameSpace_std,  +"long long");
-         Self.register (the_c_Type,  to_Doh ("long long"), is_core_C_type => True);
+         Self.register (the_c_Type,  doh_SwigType (-"long long"), is_core_C_type => True);
 
 
          the_c_Type := c_type.new_standard_c_Type (Self.nameSpace_std,  +"unsigned short");
-         Self.register (the_c_Type,  to_Doh ("unsigned short"), is_core_C_type => True);
+         Self.register (the_c_Type,  doh_SwigType (-"unsigned short"), is_core_C_type => True);
 
          the_c_Type := c_type.new_standard_c_Type (Self.nameSpace_std,  +"unsigned int");
-         Self.register (the_c_Type,  to_Doh ("unsigned int"), is_core_C_type => True);
+         Self.register (the_c_Type,  doh_SwigType (-"unsigned int"), is_core_C_type => True);
 
          the_c_Type := c_type.new_standard_c_Type (Self.nameSpace_std,  +"unsigned long");
-         Self.register (the_c_Type,  to_Doh ("unsigned long"), is_core_C_type => True);
+         Self.register (the_c_Type,  doh_SwigType (-"unsigned long"), is_core_C_type => True);
 
          the_c_Type := c_type.new_standard_c_Type (Self.nameSpace_std,  +"unsigned long long");
-         Self.register (the_c_Type,  to_Doh ("unsigned long long"), is_core_C_type => True);
+         Self.register (the_c_Type,  doh_SwigType (-"unsigned long long"), is_core_C_type => True);
 
 
          the_c_Type := c_type.new_standard_c_Type (Self.nameSpace_std,  +"int8_t");
-         Self.register (the_c_Type,  to_Doh ("int8_t"), is_core_C_type => True);
+         Self.register (the_c_Type,  doh_SwigType (-"int8_t"), is_core_C_type => True);
 
          the_c_Type := c_type.new_standard_c_Type (Self.nameSpace_std,  +"int16_t");
-         Self.register (the_c_Type,  to_Doh ("int16_t"), is_core_C_type => True);
+         Self.register (the_c_Type,  doh_SwigType (-"int16_t"), is_core_C_type => True);
 
          the_c_Type := c_type.new_standard_c_Type (Self.nameSpace_std,  +"int32_t");
-         Self.register (the_c_Type,  to_Doh ("int32_t"), is_core_C_type => True);
+         Self.register (the_c_Type,  doh_SwigType (-"int32_t"), is_core_C_type => True);
 
          the_c_Type := c_type.new_standard_c_Type (Self.nameSpace_std,  +"int64_t");
-         Self.register (the_c_Type,  to_Doh ("int64_t"), is_core_C_type => True);
+         Self.register (the_c_Type,  doh_SwigType (-"int64_t"), is_core_C_type => True);
 
 
          the_c_Type := c_type.new_standard_c_Type (Self.nameSpace_std,  +"uint8_t");
-         Self.register (the_c_Type,  to_Doh ("uint8_t"), is_core_C_type => True);
+         Self.register (the_c_Type,  doh_SwigType (-"uint8_t"), is_core_C_type => True);
 
          the_c_Type := c_type.new_standard_c_Type (Self.nameSpace_std,  +"uint16_t");
-         Self.register (the_c_Type,  to_Doh ("uint16_t"), is_core_C_type => True);
+         Self.register (the_c_Type,  doh_SwigType (-"uint16_t"), is_core_C_type => True);
 
          the_c_Type := c_type.new_standard_c_Type (Self.nameSpace_std,  +"uint32_t");
-         Self.register (the_c_Type,  to_Doh ("uint32_t"), is_core_C_type => True);
+         Self.register (the_c_Type,  doh_SwigType (-"uint32_t"), is_core_C_type => True);
 
          the_c_Type := c_type.new_standard_c_Type (Self.nameSpace_std,  +"uint64_t");
-         Self.register (the_c_Type,  to_Doh ("uint64_t"), is_core_C_type => True);
+         Self.register (the_c_Type,  doh_SwigType (-"uint64_t"), is_core_C_type => True);
 
 
          the_c_Type := c_type.new_standard_c_Type (Self.nameSpace_std,  +"intptr_t");
-         Self.register (the_c_Type,  to_Doh ("intptr_t"), is_core_C_type => True);
+         Self.register (the_c_Type,  doh_SwigType (-"intptr_t"), is_core_C_type => True);
 
          the_c_Type := c_type.new_standard_c_Type (Self.nameSpace_std,  +"uintptr_t");
-         Self.register (the_c_Type,  to_Doh ("uintptr_t"), is_core_C_type => True);
+         Self.register (the_c_Type,  doh_SwigType (-"uintptr_t"), is_core_C_type => True);
 
 
          the_c_Type := c_type.new_standard_c_Type (Self.nameSpace_std,  +"float");
-         Self.register (the_c_Type,  to_Doh ("float"), is_core_C_type => True);
+         Self.register (the_c_Type,  doh_SwigType (-"float"), is_core_C_type => True);
 
          the_c_Type := c_type.new_standard_c_Type (Self.nameSpace_std,  +"double");
-         Self.register (the_c_Type,  to_Doh ("double"), is_core_C_type => True);
+         Self.register (the_c_Type,  doh_SwigType (-"double"), is_core_C_type => True);
 
 
          the_c_Type := c_type.new_standard_c_Type (Self.nameSpace_std,  +"bool");
-         Self.register (the_c_Type,  to_Doh ("bool"), is_core_C_type => True);
+         Self.register (the_c_Type,  doh_SwigType (-"bool"), is_core_C_type => True);
       end create_C_core_Types;
 
 

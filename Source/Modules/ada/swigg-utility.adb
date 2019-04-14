@@ -188,7 +188,7 @@ is
       loop
          if String'(+node_Type (the_Sibling)) = "module"
          then
-            return +doh_Item (get_Attribute (the_Sibling, String_Pointer (-"name")));
+            return +doh_Item (get_Attribute (the_Sibling, -"name"));
          end if;
 
          the_Sibling := next_Sibling (the_Sibling);
@@ -208,20 +208,19 @@ is
       end if;
 
       declare
-         use DOHs.Pointers,
-             swigg_Module,
+         use swigg_Module,
              swigg_Module.Binding,
              swigg_Module.Pointers;
-         the_Parent : DOH_Pointer := DOH_Pointer (parent_Node (Node_Pointer (the_Node)));
+         the_Parent : DOH_Node := DOH_Node (parent_Node (Node_Pointer (the_Node)));
       begin
-         while exists (the_Parent)
+         while the_Parent /= null
          loop
             if sibling_module_Name_of (the_Parent) /= ""
             then
                return sibling_module_Name_of (the_Parent);
             end if;
 
-            the_Parent := DOH_Pointer (parent_Node (Node_Pointer (the_Parent)));
+            the_Parent := parent_Node (Node_Pointer (the_Parent));
          end loop;
       end;
 

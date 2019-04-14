@@ -137,6 +137,15 @@ typedef Doh String_or_char;
   #include <execinfo.h>
 
 
+  Language
+  do_construct()
+  {
+    Language   Self;
+    return Self;
+  }
+
+
+
   int
   runtime_call_Depth ()
   {

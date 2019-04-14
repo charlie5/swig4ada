@@ -388,11 +388,11 @@ private
 
          --  C runtime
          --
-         f_runtime               :         doh_File;
-         f_header                :         doh_File;
-         f_wrappers              :         doh_File;
-         f_init                  :         doh_File;
-         f_gnat                  :         doh_File;                         -- Contains gnat specific c++ declarations and code.
+         f_runtime               :         swigg_module.Pointers.File_Pointer;
+         f_header                :         swigg_module.Pointers.File_Pointer;
+         f_wrappers              :         swigg_module.Pointers.File_Pointer;
+         f_init                  :         swigg_module.Pointers.File_Pointer;
+         f_gnat                  :         swigg_module.Pointers.File_Pointer;     -- Contains gnat specific c++ declarations and code.
 
          current_linkage_Symbol  :         unbounded_String;
          current_lStr            :         unbounded_String;

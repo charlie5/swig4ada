@@ -18,6 +18,8 @@ with
      c_Function,
      c_Variable,
 
+     DOHs.Pointers,
+
      ada.Containers.hashed_Maps,
      ada.Strings.fixed.Hash;
 
@@ -319,8 +321,9 @@ is
                         log ("adding function_Pointer '" & the_c_Type.Name & "'");
 
                         declare
+                           use DOHs.Pointers;
                            the_ada_subProgram : constant ada_subProgram.view := Self.       to_ada_subProgram (the_c_type.accessed_Function.all'Access);
-                           the_type_Name      : constant unbounded_String    := ada_Utility.to_ada_Identifier (Self.to_descriptor (to_Doh (to_String (the_c_type.Name))));
+                           the_type_Name      : constant unbounded_String    := ada_Utility.to_ada_Identifier (Self.to_descriptor (DOH_Pointer (to_Doh (to_String (the_c_type.Name)))));
                            new_ada_Type       :          ada_Type.view;
                         begin
                            the_ada_subProgram.Parameters := Self.to_ada_Parameters (the_c_type.accessed_Function.Parameters);

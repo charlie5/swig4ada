@@ -32,9 +32,17 @@ package swigg_module.Language is
 
    pragma Import (CPP, Entity => Item);
 
-
    function construct return Item'Class;
-   pragma Cpp_Constructor (construct);
+   pragma Import (CPP, Entity => construct);
+--     pragma Cpp_Constructor (construct);
+
+--     package Forge is
+      function do_construct return swigg_module.Language.Item;
+      --     pragma Import (CPP, Entity => do_construct);
+      --     pragma Cpp_Constructor (do_construct);
+      pragma Import (CPP, do_construct, "Ada_do_construct");
+--     end Forge;
+   pragma Cpp_Constructor (do_construct);
 
    -- Items
    --

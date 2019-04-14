@@ -36,15 +36,15 @@ is
 
 
 
-   function to_Doh (Self : in String) return doh_Item
+   function to_Doh (Self : in String) return String_Pointer
    is
    begin
-      return doh_Item (c_to_doh_string (new_String (Self)));
+      return c_to_doh_string (new_String (Self));
    end to_Doh;
 
 
 
-   function "-" (Self : in unbounded_String) return doh_Item
+   function "-" (Self : in unbounded_String) return String_Pointer
    is
    begin
       return to_Doh (to_String (Self));

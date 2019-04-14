@@ -19,15 +19,16 @@ package swigg_module.Dispatcher is
    -- Item
    --
 
-   type Item is abstract tagged limited record
+--     type Item is abstract tagged limited record
+   type Item is tagged limited record
       cplus_mode : aliased swigg_module.Dispatcher.AccessMode;
    end record;
 
    pragma Import (CPP, Entity => Item);
 
-
    function construct return Item'Class;
-   pragma Cpp_Constructor (construct);
+   pragma Import (CPP, Entity => construct);
+--     pragma Cpp_Constructor (construct);
 
 
    type AccessMode_array is
@@ -50,7 +51,7 @@ package swigg_module.Dispatcher is
 
    function top (Self :    access swigg_module.Dispatcher.Item;
       n : in swigg_module.Pointers.Node_Pointer) return interfaces.c
-     .int is abstract;
+     .int; -- is abstract;
 
    function applyDirective (Self :    access swigg_module.Dispatcher.Item;
       n : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
@@ -174,6 +175,7 @@ private
    pragma Import (CPP, destruct, "_ZN10DispatcherD1Ev");
    pragma Import (CPP, emit_one, "Ada_Dispatcher_emit_one");
    pragma Import (CPP, emit_children, "Ada_Dispatcher_emit_children");
+   pragma Import (CPP, top, "Ada_Dispatcher_Top");
    pragma Import (CPP, defaultHandler, "Ada_Dispatcher_defaultHandler");
    pragma Import (CPP, applyDirective, "Ada_Dispatcher_applyDirective");
    pragma Import (CPP, clearDirective, "Ada_Dispatcher_clearDirective");
