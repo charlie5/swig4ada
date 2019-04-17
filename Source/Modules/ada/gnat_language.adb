@@ -811,7 +811,7 @@ is
 
                            set_Attribute (the_Parameter,  -"emit:input", -Arg);
 
-                           print_to (wrapper_Code,  "AAA" & the_typeMap & NL);
+                           print_to (wrapper_Code,  the_typeMap & NL);
 
                            the_Parameter := get_Attribute (the_Parameter,  -"tmap:in:next");
                         else
@@ -963,7 +963,7 @@ is
                   if the_typeMap /= ""
                   then
                      replace_All (the_typeMap, "$result", "jresult");
-                     print_to (wrapper_Code,  "BBB" & the_typeMap & NL);
+                     print_to (wrapper_Code,  the_typeMap & NL);
 
                   elsif not is_void_return
                   then
