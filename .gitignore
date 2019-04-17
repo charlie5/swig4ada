@@ -16,3 +16,8 @@ b__*.ad[sb]
 *.bexch
 *.db
 swig_gnat
+
+
+Examples
+Source/Modules/ada/swig_binding-new-test
+portable_new_line_Token.tmp
