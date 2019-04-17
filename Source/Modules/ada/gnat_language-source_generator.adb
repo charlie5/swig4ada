@@ -842,10 +842,11 @@ is
             end if;
 
 
-            if         return_type_Package.cpp_class_Type /= null
-              and then return_type_Package.cpp_class_Type.all'Access = Self.return_Type   -- The return type is the main type of a class package.
-              and then return_type_Package.cpp_class_Type.is_Virtual
-              and then return_type_Package /= declaration_Package                         -- The return type is not the main type of the functions package.
+            if (        return_type_Package.cpp_class_Type /= null
+                and then return_type_Package.cpp_class_Type.all'Access = Self.return_Type    -- The return type is the main type of a class package.
+                and then return_type_Package.cpp_class_Type.is_Virtual
+                and then return_type_Package /= declaration_Package)                         -- The return type is not the main type of the functions package.
+              or Self.is_Constructor
             then
                append (the_Source,  "'Class");
             end if;
@@ -1669,12 +1670,6 @@ is
 
                      unique_function_Name :          unbounded_String;
                   begin
-                     if the_Subprogram.is_Destructor
-                     then
-                        put_Line ("DESTUCTOR ************************");
-                     end if;
-
-
                      if         the_Subprogram.access_Mode /= ada_subProgram.private_Access
                        and not (         the_Subprogram.is_Destructor
                                 and then is_interface_Type (the_Package.cpp_class_Type))    -- tbd: destructors and interface types together upsets vTable.
@@ -1687,22 +1682,24 @@ is
                            unique_function_Name := the_Subprogram.Name;
                         end if;
 
-                        if not the_Subprogram.is_Constructor
-                        then
+                        -- if not the_Subprogram.is_Constructor
+                        -- then
                            append (spec_Source,  specification_Source (Self                => the_Subprogram,
                                                                        declaration_package => the_Package.all'Access,
                                                                        using_name          => the_Subprogram.Name,
                                                                        namespace_Prefix    => null_unbounded_String,
                                                                        the_gnat_lang       => the_gnat_lang));
                            append (spec_Source,  ";");
-                        end if;
+                        -- end if;
 
                         declare
                            the_Source : access Unbounded_String;
                         begin
                            if the_Subprogram.is_Constructor
-                           then   the_Source := spec_Source        'Unchecked_Access;
-                           else   the_Source := spec_Source_private'Unchecked_Access;
+                           then
+                              the_Source := spec_Source'Unchecked_Access;
+                           else
+                              the_Source := spec_Source_private'Unchecked_Access;
                            end if;
 
                            if is_overloaded
@@ -1714,12 +1711,18 @@ is
                                                                                    the_gnat_lang        => the_gnat_lang));
                            end if;
 
-                        if not the_Subprogram.is_Constructor
-                        then
-                           append (the_Source.all, the_Subprogram.pragma_import_Source (declaration_package  => the_Package.all'Access,
+                           if the_Subprogram.is_Constructor
+                           then
+                              append (the_Source.all, the_Subprogram.pragma_CPP_Constructor_Source (declaration_package  => the_Package.all'Access,
+                                                                                                    unique_function_name => unique_function_Name,
+                                                                                                    in_cpp_Mode          => in_cpp_Mode));
+                           else
+                              append (the_Source.all, the_Subprogram.pragma_import_Source (declaration_package  => the_Package.all'Access,
                                                                                         unique_function_name => unique_function_Name,
                                                                                         in_cpp_Mode          => in_cpp_Mode));
                            end if;
+
+--                             put_Line (+the_Source.all);
                         end;
                      end if;
                   end;

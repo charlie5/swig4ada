@@ -730,7 +730,6 @@ is
             emit_attach_parmMaps     (the_Parameters,
                                       the_function_Wrapper);                   -- Attach the standard typemaps.
 
-
             --  Parameter overloading.
             --
             set_Attribute (the_Node,  -"wrap:parms",  String_Pointer (the_Parameters));
@@ -812,7 +811,7 @@ is
 
                            set_Attribute (the_Parameter,  -"emit:input", -Arg);
 
-                           print_to (wrapper_Code,  the_typeMap & NL);
+                           print_to (wrapper_Code,  "AAA" & the_typeMap & NL);
 
                            the_Parameter := get_Attribute (the_Parameter,  -"tmap:in:next");
                         else
@@ -842,7 +841,6 @@ is
                                      "$input",
                                      +doh_Item (get_Attribute (the_Parameter, -"emit:input")));
                         append (cleanup_Code,  the_typeMap & NL);
-
                         the_Parameter := get_Attribute (the_Parameter,  -"tmap:freearg:next");
                      else
                         the_Parameter := next_Sibling (the_Parameter);
@@ -850,7 +848,6 @@ is
                   end;
                end loop;
             end;
-
 
             --  Insert argument output code.
             --
@@ -919,32 +916,33 @@ is
             then
                --  Now write code to make the function call
                --
-               Swig_director_emit_dynamic_cast (n, the_function_Wrapper);   -- tbd: Probably obsolete.
+--               Swig_director_emit_dynamic_cast (n, the_function_Wrapper);   -- tbd: Probably obsolete.
 
                declare
                   actioncode : constant String_Pointer := emit_action (n);
-                  tm         : constant doh_String     := doh_String (Swig_typemap_lookup_out (String_or_char_Pointer (-"out"),
-                                                                                               n,
-                                                                                               String_or_char_Pointer (-"result"),
-                                                                                               the_function_Wrapper,
-                                                                                               actioncode));
+                  tm         :          doh_String;
+                  Status     :          C.int;
                begin
+                  tm := doh_String (Swig_typemap_lookup_out (String_or_char_Pointer (-"out"),
+                                                             n,
+                                                             String_or_char_Pointer (-"result"),
+                                                             the_function_Wrapper,
+                                                             actioncode));
                   --  Return value, if necessary.
                   --
-                  if Doh_item (tm) /= null_Doh
-                  then
-                     null;
-                  else
-                     Swig_warning (WARN_TYPEMAP_OUT_UNDEF,
-                                   String_or_char_Pointer (-Value (input_file)),
-                                   line_number,
-                                   new_String (  "Unable to use return type" & (+doh_Item (SwigType_str (SwigType_Pointer (node_Type (the_Node)),  null)))
-                                               & " in function "             & (+doh_Item (Get_attribute (n, -"name")))
-                                               & ".\n"));
-                  end if;
+--                    if Doh_item (tm) /= null_Doh
+--                    then
+--                       null;
+--                    else
+--                       Swig_warning (WARN_TYPEMAP_OUT_UNDEF,
+--                                     String_or_char_Pointer (-Value (input_file)),
+--                                     line_number,
+--                                     new_String (  "Unable to use return type" & (+doh_Item (SwigType_str (SwigType_Pointer (node_Type (the_Node)),  null)))
+--                                                 & " in function "             & (+doh_Item (Get_attribute (n, -"name")))
+--                                                 & ".\n"));
+--                    end if;
                end;
             end if;
-
 
             if String'(+node_Type (the_Node)) = "constant"
             then
@@ -965,7 +963,7 @@ is
                   if the_typeMap /= ""
                   then
                      replace_All (the_typeMap, "$result", "jresult");
-                     print_to (wrapper_Code,  the_typeMap & NL);
+                     print_to (wrapper_Code,  "BBB" & the_typeMap & NL);
 
                   elsif not is_void_return
                   then
@@ -977,7 +975,6 @@ is
                   end if;
                end;
             end if;
-
 
             print_to (wrapper_Code,  argOut_Code);       -- Output argument output code.
             print_to (wrapper_Code,  cleanup_Code);      -- Output cleanup         code.
@@ -992,7 +989,7 @@ is
                begin
                   if the_typeMap /= ""
                   then
-                     print_to (wrapper_Code,  the_typeMap & NL);
+                     print_to (wrapper_Code,  "CCC" & the_typeMap & NL);
                   end if;
                end;
             end if;
@@ -1009,7 +1006,7 @@ is
                   if the_typeMap /= ""
                   then
                      --  replace_All (the_typeMap, "$source", "result");   -- deprecated
-                     print_to (wrapper_Code,  the_typeMap & NL);
+                     put_Line ("CLEANUPO '" & (+the_typeMap) &  "'");
                   end if;
                end;
             end if;
@@ -1024,7 +1021,6 @@ is
             then
                print_to (wrapper_Code,  "    return jresult;" & NL);
             end if;
-
 
             print_to        (wrapper_Code,  "}" & NL);
             doh_replace_All (wrapper_Code,  -"$cleanup",               -cleanup_Code);                      -- Substitute the cleanup code.
@@ -1506,21 +1502,25 @@ is
       -- Handle base classes.
       --
       declare
-         base_List    : constant doh_List     := doh_List (get_Attribute (the_Node, -"allbases")); -- -"bases");
+         base_List    : constant doh_List         := doh_List  (get_Attribute (the_Node, -"allbases")); -- -"bases");
          the_Iterator :          DohIterator.item := doh_First (base_List);
       begin
-         while exists (get_Item (the_Iterator))
-         loop
-            declare
-               base_Name : constant String := +DOH_Pointer (get_Attribute (Node_Pointer (get_Item (the_Iterator)),
-                                                                           -"sym:name"));  -- formerly ... getProxyName (c_baseclassname));
-            begin
-               Self.current_c_Class.add_Base (Self.name_Map_of_c_type.Element (+base_Name));
-               the_Iterator := doh_Next (the_Iterator);
-            end;
-         end loop;
-      end;
+         if base_List /= null
+         then
+            the_Iterator := doh_First (base_List);
 
+            while exists (get_Item (the_Iterator))
+            loop
+               declare
+                  base_Name : constant String := +DOH_Pointer (get_Attribute (Node_Pointer (get_Item (the_Iterator)),
+                                                               -"sym:name"));  -- formerly ... getProxyName (c_baseclassname));
+               begin
+                  Self.current_c_Class.add_Base (Self.name_Map_of_c_type.Element (+base_Name));
+                  the_Iterator := doh_Next (the_Iterator);
+               end;
+            end loop;
+         end if;
+      end;
 
       --  new ...
       --
@@ -1541,12 +1541,17 @@ is
    is
       the_Node : Node_Pointer renames n;
       Status   : C.int;
+      function_Name : String := +DohGetattr (DOH_Pointer (the_Node), DOH_Pointer (-"name"));
    begin
       indent_Log;
       log (+"");
       log (+"memberfunctionHandler");
 
       Self.current_c_Node := doh_Node (the_Node);
+
+      Status := DohSetattr (obj   => DOH_Pointer (the_Node),
+                            name  => DOH_Pointer (-"name"),
+                            value => DOH_Pointer (-(to_String (Self.current_c_Class.Name) & "::" & function_Name)));
 
 --        do_base_memberfunctionHandler (Self.all, the_Node);
       Status := Language.item (Self.all).memberfunctionHandler (the_Node);
@@ -2830,7 +2835,7 @@ is
    is
       the_ada_subProgram : ada_subProgram.view;
    begin
-      put_Line ("*********** the_c_Function.Name): '" & (+the_c_Function.Name) & "'");
+--        put_Line ("*********** the_c_Function.Name): '" & (+the_c_Function.Name) & "'");
 --      put_Line ("*********** the_c_Function.return_Type ): '" & (+the_c_Function.return_Type.Name) & "'");
 
       the_ada_subProgram := new_ada_subProgram (ada_Utility.to_ada_Identifier (the_c_Function.Name),
@@ -3114,7 +3119,6 @@ is
                     & String'(+doh_Item (SwigType_str (SwigType_Pointer (virtualtype), null))));  -- tbd: ??
             else
                strip_all_Qualifiers (doh_Item (the_swigType));
-               put_Line ("************* '"  & (+doh_Item (the_swigType)) & "'");
                the_return_Type := Self.swig_type_Map_of_c_type.Element (+doh_Item (the_swigType));
             end if;
          end;
@@ -3128,8 +3132,15 @@ is
             new_Function : constant c_Function.view := new_c_Function (function_name,
                                                                        the_return_type);
          begin
-            new_Function.Parameters        := the_Parameters;
-            new_Function.link_Symbol       := Self.current_linkage_Symbol;
+            new_Function.Parameters     := the_Parameters;
+
+            if is_Constructor
+            then
+               new_Function.link_Symbol := Self.current_linkage_Symbol;
+            else
+               new_Function.link_Symbol := Self.current_linkage_Symbol;
+            end if;
+
             new_Function.returns_an_Access := return_by_Reference  or  return_by_Pointer;
 
             if    checkAttribute (the_Node,

@@ -3,8 +3,7 @@ with "gmp";
 project Swiggy is
 
    for Languages use ("Ada", "C", "C++");
-   for Source_Dirs use (".", 
-                        "../Source/DOH", 
+   for Source_Dirs use ("../Source/DOH", 
                         "../Source/Modules", 
                         "../Source/Swig", 
                         "../Source/Include", 

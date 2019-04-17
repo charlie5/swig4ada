@@ -175,14 +175,14 @@ template <typename T> T SwigValueInit() {
 
   #include <execinfo.h>
 
-
+/*
   Language*
   do_construct()
   {
     Language*   Self = new Language();
     return Self;
   }
-
+*/
 
 
   int
@@ -11194,26 +11194,6 @@ DllExport void SWIGSTDCALL Ada_Swig_arg_error (
 {
   Swig_arg_error();
   
-  
-}
-
-
-
-DllExport Language* SWIGSTDCALL Ada_do_construct (
-  )
-{
-  Language* jresult ;
-  Language* result;
-  
-  result = do_construct();
-  
-  jresult = result; 
-  //jresult = new Language ((Language &) result); 
-  
-  
-  
-  
-  return jresult;
   
 }
 

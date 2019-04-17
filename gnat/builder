@@ -24,19 +24,14 @@ echo pretty printing ...
 gnatpp  -rnb  -I../../..      *.ads    -cargs -gnatX
 
 
-
-
 echo
 echo compiling
 
-gprmake  -P   test_example.gpr 
-
-
-
+#gprbuild  -P   test_example.gpr 
 
 
 
 echo
 echo running tester ...
 
-./tester
+#./tester

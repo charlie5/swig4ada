@@ -95,6 +95,10 @@ is
                                                           unique_function_Name : in     unbounded_String;
                                                           in_cpp_Mode          : in     Boolean)           return unbounded_String;
 
+   function pragma_CPP_Constructor_Source (Self : access Item;   declaration_Package  : access ada_Package.item'Class;
+                                                                 unique_function_Name : in     unbounded_String;
+                                                                 in_cpp_Mode          : in     Boolean)           return unbounded_String;
+
    function member_function_link_Symbol_for
                                    (Self : access Item;   in_cpp_Mode : in     Boolean) return unbounded_String;
 

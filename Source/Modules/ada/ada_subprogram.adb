@@ -203,13 +203,12 @@ is
          return the_Source;
       end if;
 
-      if False    -- Self.is_Constructor then
+      if Self.is_Constructor
       then
          link_Symbol := Self.member_function_link_Symbol_for (in_cpp_Mode);
 
-         if  Length (Self.Parameters) = 0     -- Non-default constructors (ie those with parameters) are not yet implemented in gnat.
-           and
-             declaration_Package.models_a_virtual_cpp_Class            --
+         if    Length (Self.Parameters) = 0     -- Non-default constructors (ie those with parameters) are not yet implemented in gnat.
+           and declaration_Package.models_a_virtual_cpp_Class
          then
             append (the_Source,  NL & NL & "   pragma cpp_Constructor (Entity => " & unique_function_Name &  ", """ & link_Symbol &  """);");
          else
@@ -255,6 +254,46 @@ is
 
       return the_Source;
    end pragma_import_Source;
+
+
+
+   function pragma_CPP_Constructor_Source (Self                 : access Item;
+                                           declaration_Package  : access ada_Package.item'class;
+                                           unique_function_Name : in     unbounded_String;
+                                           in_cpp_Mode          : in     Boolean)         return unbounded_String
+   is
+      use ada.Containers;
+      the_Source  : unbounded_String;
+      link_Symbol : unbounded_String;
+
+   begin
+      --  'C' link name.
+      --
+      if not in_cpp_Mode
+      then
+         raise Constraint_Error with "Not in C++ mode";
+      end if;
+
+      --  'C++' link name.
+      --
+      if not Self.is_Constructor
+      then
+         raise Constraint_Error with "Not a constructor";
+      end if;
+
+--        link_Symbol := Self.member_function_link_Symbol_for (in_cpp_Mode);
+      link_Symbol := "_ZN" & Image (Length (declaration_Package.Name)) & declaration_Package.Name & "C1Ev";
+
+      if    Length (Self.Parameters) = 0     -- ToDo this is no longer the case -> "Non-default constructors (ie those with parameters) are not yet implemented in gnat."
+        and declaration_Package.models_a_virtual_cpp_Class
+      then
+         append (the_Source,  NL & NL & "   pragma cpp_Constructor (Entity => " & unique_function_Name &  ", """ & link_Symbol &  """);");
+      else
+         append (the_Source,  NL & NL & "   pragma Import (CPP, " & unique_function_Name & ", """ & link_Symbol & """);");
+      end if;
+
+      return the_Source;
+   end pragma_CPP_Constructor_Source;
 
 
 
