@@ -1494,7 +1494,6 @@ is
 
       Self.have_default_constructor_flag := False;
 
-
 --        do_base_classHandler (Self.all, the_node);           -- Process all class members.
       Status := Language.item (Self.all).classHandler (the_node);           -- Process all class members.
 
@@ -1502,24 +1501,23 @@ is
       -- Handle base classes.
       --
       declare
-         base_List    : constant doh_List         := doh_List  (get_Attribute (the_Node, -"allbases")); -- -"bases");
-         the_Iterator :          DohIterator.item := doh_First (base_List);
+         base_List    : constant doh_List   := doh_List  (get_Attribute (the_Node, -"allbases")); -- -"bases");
+         the_Item     :          DOH_Pointer;
+         Length       : constant C.int      := DohLen (base_List);
       begin
-         if base_List /= null
-         then
-            the_Iterator := doh_First (base_List);
+--           put_Line ("BASE_LIST: '" & (+base_List) & "'      Len: " & C.int'Image (Length));
 
-            while exists (get_Item (the_Iterator))
-            loop
-               declare
-                  base_Name : constant String := +DOH_Pointer (get_Attribute (Node_Pointer (get_Item (the_Iterator)),
-                                                               -"sym:name"));  -- formerly ... getProxyName (c_baseclassname));
-               begin
-                  Self.current_c_Class.add_Base (Self.name_Map_of_c_type.Element (+base_Name));
-                  the_Iterator := doh_Next (the_Iterator);
-               end;
-            end loop;
-         end if;
+         for i in 1 .. Length
+         loop
+            the_Item := DohGetitem (base_List, i-1);
+            declare
+               base_Name : constant String := +DOH_Pointer (get_Attribute (Node_Pointer (the_Item),
+                                                                          -"sym:name"));  -- formerly ... getProxyName (c_baseclassname));
+            begin
+--                 put_Line ("Base name: '" & base_Name & "'");
+               Self.current_c_Class.add_Base (Self.name_Map_of_c_type.Element (+base_Name));
+            end;
+         end loop;
       end;
 
       --  new ...
