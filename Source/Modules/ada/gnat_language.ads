@@ -1,6 +1,7 @@
 with
 --     Language,
-     swigg_module.Language,
+--       swigg_module.Language,
+     swigMod.Language,
      swig_Module,
 
      c_Type,
@@ -51,7 +52,8 @@ is
        ada.Strings.unbounded;
 
 --   type Item is new Language.item with private;
-   type Item is new swigg_Module.Language.item with private;
+--     type Item is new swigg_Module.Language.item with private;
+   type Item is new swigMod.Language.item with private;
    type View is access all Item'class;
 
 
@@ -311,7 +313,8 @@ private
 
    --  'gnat_Language' Item
    --
-   type Item is new swigg_Module.Language.item with
+--     type Item is new swigg_Module.Language.item with
+   type Item is new swigMod.Language.item with
       record
          --  Maps
          --

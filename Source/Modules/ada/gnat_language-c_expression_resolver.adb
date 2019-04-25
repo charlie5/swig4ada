@@ -1,7 +1,7 @@
 with
      GMP.discrete,
 
-     swigg_module.Dispatcher,
+     swigMod.Dispatcher,
      swigg_module.Wrapper,
 
      ada_Utility,
@@ -15,7 +15,7 @@ with
 package body gnat_Language.c_expression_Resolver
 is
    use ada.Strings,
-       swigg_module.Dispatcher,
+       swigMod.Dispatcher,
        swigg_module.Wrapper,
 
        Dohs.Pointers,

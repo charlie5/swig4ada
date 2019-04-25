@@ -13,7 +13,7 @@
 
 #include "swigtree.h"
 #include "swigopt.h"
-#include "swigmod.h"
+//#include "swigmod.h"
 #include "swigfile.h"
 //#include "swigwrap.h"
 %}
@@ -113,12 +113,16 @@ typedef Doh String_or_char;
 %include "preprocessor.h"
 %include "swigtree.h"
 
+
+/*
 %ignore Swig_register_module;
 %ignore Swig_find_module;
 %ignore argv_template_string;
 %ignore argc_template_string;
 
 %include "swigmod.h"
+*/
+
 
 #define FILE void
 %include "swigfile.h"
@@ -137,12 +141,15 @@ typedef Doh String_or_char;
   #include <execinfo.h>
 
 
-  Language
+
+/*
+  Language*
   do_construct()
   {
-    Language   Self;
+    Language*   Self = new Language();
     return Self;
   }
+*/
 
 
 
@@ -190,7 +197,7 @@ typedef Doh String_or_char;
 
 
 
-  bool
+  int
   check_attribute (Node*      node,
                    String*    key,
                    String*    value)
@@ -263,13 +270,13 @@ typedef Doh String_or_char;
   }
 
 
-
+/*
   DOH*
   doh_Copy (DOH*    Self)
   {
     return Copy (Self);
   }
-
+*/
 
 
   //extern int  Swig_save(const char *ns, Node *node,...);
@@ -321,13 +328,13 @@ typedef Doh String_or_char;
     return nextSibling (Self);
   }
 
-
+/*
   void
   exit_with_Fail()
   {
     SWIG_exit (EXIT_FAILURE);
   }
-
+*/
 
 
   // doh iterators
@@ -353,109 +360,6 @@ typedef Doh String_or_char;
   get_Item (DohIterator    Self)
   {
     return Self.item;
-  }
-
-
-  // the 'do_base_*' functions are a hack to overcome the swig/ada modules inability to handle calling overridden base functions.
-  //
-
-
-  void
-  do_base_top (Language*    Self,
-               Node*        node)
-  {
-    Self->Language::top (node);
-  }
-
-
-  void
-  do_base_enumDeclaration (Language*    Self,
-                           Node*        node)
-  {
-    Self->Language::enumDeclaration (node);
-  }
-
-
-  void
-  do_base_classHandler (Language*    Self,
-                        Node*        node)
-  {
-    Self->Language::classHandler (node);
-  }
-
-
-  void
-  do_base_memberfunctionHandler (Language*    Self,
-                                 Node*        node)
-  {
-    Self->Language::memberfunctionHandler (node);
-  }
-
-
-  void
-  do_base_staticmemberfunctionHandler (Language*    Self,
-                                       Node*        node)
-  {
-    Self->Language::staticmemberfunctionHandler (node);
-  }
-
-
-
-  void
-  do_base_constructorHandler (Language*    Self,
-                              Node*        node)
-  {
-    Self->Language::constructorHandler (node);
-  }
-
-
-
-  void
-  do_base_destructorHandler (Language*    Self,
-                              Node*        node)
-  {
-    Self->Language::destructorHandler (node);
-  }
-
-
-  void
-  do_base_memberconstantHandler (Language*    Self,
-                                 Node*        node)
-  {
-    Self->Language::memberconstantHandler (node);
-  }
-
-
-  int
-  do_base_insertDirective (Language*    Self,
-                           Node*        node)
-  {
-    return Self->Language::insertDirective (node);
-  }
-
-
-  int
-  do_base_typemapDirective (Language*    Self,
-                            Node*        node)
-  {
-    return Self->Language::typemapDirective (node);
-  }
-
-
-  void
-  do_base_namespaceDeclaration (Language*    Self,
-                                 Node*        node)
-  {
-    Self->Language::namespaceDeclaration (node);
-  }
-
-
-
-  void
-  do_base_includeDirective (Language*    Self,
-                            Node*        node)
-  {
-    Self->Language::includeDirective (node);
   }
 
 %}

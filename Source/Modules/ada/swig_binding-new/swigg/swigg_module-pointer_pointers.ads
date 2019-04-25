@@ -3,66 +3,95 @@
 with swigg_module.Pointers;
 with interfaces.C;
 
+
+
 package swigg_module.pointer_Pointers is
 
+
+
    -- DohObjInfo_Pointer_Pointer
-   --
-   type DohObjInfo_Pointer_Pointer is
-     access all swigg_module.Pointers.DohObjInfo_Pointer;
+   -- 
+   type DohObjInfo_Pointer_Pointer is access all swigg_module.Pointers.DohObjInfo_Pointer;
+
+
 
    -- String_Pointer_Pointer
-   --
-   type String_Pointer_Pointer is
-     access all swigg_module.Pointers.String_Pointer;
+   -- 
+   type String_Pointer_Pointer is access all swigg_module.Pointers.String_Pointer;
+
+
 
    -- Hash_Pointer_Pointer
-   --
+   -- 
    type Hash_Pointer_Pointer is access all swigg_module.Pointers.Hash_Pointer;
 
+
+
    -- List_Pointer_Pointer
-   --
+   -- 
    type List_Pointer_Pointer is access all swigg_module.Pointers.List_Pointer;
 
+
+
    -- String_or_char_Pointer_Pointer
-   --
-   type String_or_char_Pointer_Pointer is
-     access all swigg_module.Pointers.String_or_char_Pointer;
+   -- 
+   type String_or_char_Pointer_Pointer is access all swigg_module.Pointers.String_or_char_Pointer;
+
+
 
    -- File_Pointer_Pointer
-   --
+   -- 
    type File_Pointer_Pointer is access all swigg_module.Pointers.File_Pointer;
 
+
+
    -- Parm_Pointer_Pointer
-   --
+   -- 
    type Parm_Pointer_Pointer is access all swigg_module.Pointers.Parm_Pointer;
 
+
+
    -- ParmList_Pointer_Pointer
-   --
-   type ParmList_Pointer_Pointer is
-     access all swigg_module.Pointers.ParmList_Pointer;
+   -- 
+   type ParmList_Pointer_Pointer is access all swigg_module.Pointers.ParmList_Pointer;
+
+
 
    -- Node_Pointer_Pointer
-   --
+   -- 
    type Node_Pointer_Pointer is access all swigg_module.Pointers.Node_Pointer;
 
+
+
    -- Symtab_Pointer_Pointer
-   --
-   type Symtab_Pointer_Pointer is
-     access all swigg_module.Pointers.Symtab_Pointer;
+   -- 
+   type Symtab_Pointer_Pointer is access all swigg_module.Pointers.Symtab_Pointer;
+
+
 
    -- Typetab_Pointer_Pointer
-   --
-   type Typetab_Pointer_Pointer is
-     access all swigg_module.Pointers.Typetab_Pointer;
+   -- 
+   type Typetab_Pointer_Pointer is access all swigg_module.Pointers.Typetab_Pointer;
+
+
 
    -- SwigType_Pointer_Pointer
-   --
-   type SwigType_Pointer_Pointer is
-     access all swigg_module.Pointers.SwigType_Pointer;
+   -- 
+   type SwigType_Pointer_Pointer is access all swigg_module.Pointers.SwigType_Pointer;
+
+
 
    -- ErrorMessageFormat_Pointer_Pointer
-   --
-   type ErrorMessageFormat_Pointer_Pointer is
-     access all swigg_module.Pointers.ErrorMessageFormat_Pointer;
+   -- 
+   type ErrorMessageFormat_Pointer_Pointer is access all swigg_module.Pointers.ErrorMessageFormat_Pointer;
+
+
+
+
+
+
+
+
+
 
 end swigg_module.pointer_Pointers;

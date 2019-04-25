@@ -9,19 +9,14 @@ package swigg_module.Wrapper is
    -- Item
    --
 
-   type Item is limited
-      record
-         localh : access swigg_module.Hash;
-         def    : access swigg_module.String;
-         locals : access swigg_module.String;
-         code   : access swigg_module.String;
-      end record;
+   type Item is limited record
+      localh : access swigg_module.Hash;
+      def    : access swigg_module.String;
+      locals : access swigg_module.String;
+      code   : access swigg_module.String;
+   end record;
 
    pragma Import (CPP, Entity => Item);
-
---     function new_Wrapper return Item'Class;
---  --     pragma Cpp_Constructor (new_Wrapper, "_ZN11new_WrapperC1Ev");
---     pragma Cpp_Constructor (new_Wrapper, "NewWrapper");
 
    -- Items
    --

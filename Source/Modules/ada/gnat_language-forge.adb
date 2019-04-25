@@ -24,7 +24,7 @@ is
       Self : constant View
 --          := new gnat_Language.item'(swigg_module.Language.do_construct with -- base_Language with
 --          := new gnat_Language.item'(swigg_module.Language.do_construct with -- base_Language with
-        := new gnat_Language.item'(swigg_module.Language.new_Language with -- base_Language with
+        := new gnat_Language.item'(swigMod.Language.construct with -- base_Language with
 
                                    new_Modules           => <>,
                                    name_Map_of_module    => <>,

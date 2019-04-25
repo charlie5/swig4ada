@@ -20,14 +20,6 @@ is
        ada.text_IO;
 
 
-   function runtime_call_Depth return Integer
-   is
-   begin
-      return Integer (swigg_module.Binding.runtime_call_Depth);
-   end runtime_call_Depth;
-   pragma Unreferenced (runtime_call_Depth);
-
-
 
    -----------
    --  Logging

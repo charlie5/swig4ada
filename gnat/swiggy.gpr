@@ -11,9 +11,12 @@ project Swiggy is
                         "../Source/Preprocessor",
                         "../Source/Modules/ada",
                         "../Source/Modules/ada/ada_type",
+--                        "../Source/Modules/ada/swig_binding-new-test/doh",
+--                        "../Source/Modules/ada/swig_binding-new-test/swigg",
+--                        "../Source/Modules/ada/swig_binding-new-test/swigmod");
                         "../Source/Modules/ada/swig_binding-new/doh",
-                        "../Source/Modules/ada/swig_binding-new/swigg");
---                        "../Source/Modules/ada/swig_binding");
+                        "../Source/Modules/ada/swig_binding-new/swigg",
+                        "../Source/Modules/ada/swig_binding-new/swigmod");
    for Main use ("swigmain.cxx");
    for Object_Dir use "build";
    for Exec_Dir use ".";

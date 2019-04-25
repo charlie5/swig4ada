@@ -1,5 +1,6 @@
 with
      swigg_module.Binding,
+     swigMod.Binding,
 
      ada_type.a_Subtype,
      ada_Type.elementary.scalar.discrete.enumeration,
@@ -1803,7 +1804,7 @@ is
 
       write_the_File :
       declare
-         use swigg_module.Binding;
+         use swigMod.Binding;
          output_directory : unbounded_String := +SWIG_output_directory.all'Access;
          lowcase_Name     : unbounded_String;
          the_File         : ada.text_io.File_type;

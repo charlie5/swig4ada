@@ -8,7 +8,8 @@ with
      ada_Utility,
 
      swigg_Module.Binding,
-     swigg_module.Dispatcher,
+     swigMod.Binding,
+     swigMod.Dispatcher,
      swigg_module.Wrapper,
 
      swigg.Utility,
@@ -36,7 +37,8 @@ is
        swigg_Module,
        swigg_Module.Binding,
        swigg_Module.Pointers,
-       swigg_module.Dispatcher,
+       swigMod.Binding,
+       swigMod.Dispatcher,
 
        DOHs,
        DOHs.Pointers,
@@ -273,9 +275,10 @@ is
       --   As each node is processed, the base 'top' will call the relevant
       --   specialised operation in our 'gnat_Language' package.
       --
-        do_base_Top (Language.Pointer (Self), the_Node);
+      do_base_Top (swigMod.Language.Pointer (Self), the_Node);
 --          do_base_Top (Self.all'Access, the_Node);
---      the_Status := Language.item (Self.all).top (the_Node);
+--      the_Status := swigMod.Language.item (Self.all).top (the_Node);
+--        the_Status := swigMod.Dispatcher.item (Self.all).top (the_Node);
 
 
       print_to (Doh_Pointer (Self.f_wrappers), "#ifdef __cplusplus");
@@ -479,7 +482,7 @@ is
 
       unindent_Log;
 --        return do_base_typemapDirective (Self.all, the_Node);
-      return Language.item (Self.all).typemapDirective (the_Node);
+      return swigMod.Language.item (Self.all).typemapDirective (the_Node);
    end typemapDirective;
 
 
@@ -512,7 +515,7 @@ is
       indent_Log;
 
 --        do_base_includeDirective (Self.all, n);
-      Status := Language.item (Self.all).includeDirective (n);
+      Status := swigMod.Language.item (Self.all).includeDirective (n);
       unindent_Log;
 
       return SWIG_OK;
@@ -538,7 +541,7 @@ is
       end if;
 
 --        do_base_namespaceDeclaration (Self.all, n);
-      Status := Language.item (Self.all).namespaceDeclaration (the_Node);
+      Status := swigMod.Language.item (Self.all).namespaceDeclaration (the_Node);
 
       unindent_Log;
 
@@ -643,7 +646,7 @@ is
                              n    : in     swigg_module.Pointers.Node_Pointer) return interfaces.c.int
    is
       the_Node : Node_Pointer renames n;
-      use type C.unsigned_char;
+      use type C.int;
    begin
       indent_Log;
       log (+"functionWrapper: '" & String' (+doh_Item (get_Attribute (the_Node,  -"sym:name"))) & "'");
@@ -662,7 +665,6 @@ is
       declare
          sym_Name   : constant doh_String   := doh_String   (get_Attribute (the_Node,  -"sym:name"));
          swig_Type  : constant doh_swigType := doh_swigType (get_Attribute (the_Node,  -"type"));
-         use type C.int;
       begin
          if get_Attribute (the_Node, -"sym:overloaded") = null
          then
@@ -1152,7 +1154,7 @@ is
       log (+"enumDeclaration - '" & String' (+DOH_Pointer (doh_swig_Type)) & "'");
 
       if    Self.getCurrentClass /= null
-        and Self.cplus_mode      /= Dispatcher.PUBLIC
+        and Self.cplus_mode      /= swigMod.Dispatcher.PUBLIC
       then
          return SWIG_NOWRAP;
       end if;
@@ -1226,7 +1228,7 @@ is
 
 
 --        do_base_enumDeclaration (Self.all, the_Node);     -- Process each enum element (ie the enum literals).
-      Status := Language.item (Self.all).enumDeclaration (the_Node);     -- Process each enum element (ie the enum literals).
+      Status := swigMod.Language.item (Self.all).enumDeclaration (the_Node);     -- Process each enum element (ie the enum literals).
 
 
       --  new ...
@@ -1287,7 +1289,7 @@ is
       --  old ...
       --
       if    Self.getCurrentClass /= null
-        and Self.cplus_mode      /= Dispatcher.PUBLIC
+        and Self.cplus_mode      /= swigMod.Dispatcher.PUBLIC
       then
          return SWIG_NOWRAP;
       end if;  -- tbd: redundant (ie check is done in parent node) ?
@@ -1495,7 +1497,7 @@ is
       Self.have_default_constructor_flag := False;
 
 --        do_base_classHandler (Self.all, the_node);           -- Process all class members.
-      Status := Language.item (Self.all).classHandler (the_node);           -- Process all class members.
+      Status := swigMod.Language.item (Self.all).classHandler (the_node);           -- Process all class members.
 
 
       -- Handle base classes.
@@ -1552,7 +1554,7 @@ is
                             value => DOH_Pointer (-(to_String (Self.current_c_Class.Name) & "::" & function_Name)));
 
 --        do_base_memberfunctionHandler (Self.all, the_Node);
-      Status := Language.item (Self.all).memberfunctionHandler (the_Node);
+      Status := swigMod.Language.item (Self.all).memberfunctionHandler (the_Node);
 
       declare
          the_new_Function : c_Function.view;
@@ -1589,7 +1591,7 @@ is
       Self.static_Flag    := True;
 
 --        do_base_staticmemberfunctionHandler (Self.all, the_Node);
-      Status := Language.item (Self.all).staticmemberfunctionHandler (the_Node);
+      Status := swigMod.Language.item (Self.all).staticmemberfunctionHandler (the_Node);
 
       Self.static_flag := False;
 
@@ -1608,7 +1610,7 @@ is
    is
       the_Node : Node_Pointer renames n;
       Status   : C.int;
-      use type C.unsigned_char;
+      use type C.int;
    begin
       if not Self.in_cpp_Mode
       then
@@ -1632,7 +1634,7 @@ is
               or check_Attribute (the_Node,  -"access",  -"private")   /= 0)
       then
 --           do_base_constructorHandler (Self.all, the_Node);
-         Status := Language.item (Self.all).constructorHandler (the_Node);
+         Status := swigMod.Language.item (Self.all).constructorHandler (the_Node);
       end if;
 
       if get_Attribute (the_Node,  -"overload:ignore") /= null
@@ -1750,7 +1752,7 @@ is
    is
       the_Node : doh_Node renames n;
       Status   : C.int;
-      use type C.unsigned_char;
+      use type C.int;
    begin
       if not Self.in_cpp_Mode
       then
@@ -1766,7 +1768,7 @@ is
               or check_Attribute (the_Node,  -"access",  -"private")   /= 0)
       then
 --           do_base_destructorHandler (Self.all,  the_node);
-         Status := Language.item (Self.all).destructorHandler (the_node);
+         Status := swigMod.Language.item (Self.all).destructorHandler (the_node);
       end if;
 
       -- Dummy hack destructor.
@@ -1900,7 +1902,7 @@ is
 
       Self.wrapping_member_flag := True;
 --        do_base_memberconstantHandler (Self.all, the_node);
-      Status := Language.item (Self.all).memberconstantHandler (the_node);
+      Status := swigMod.Language.item (Self.all).memberconstantHandler (the_node);
       Self.wrapping_member_flag := False;
 
       --  new ...
@@ -1923,7 +1925,7 @@ is
 
       unindent_Log;
 --        return do_base_insertDirective (Self.all, the_Node);
-      return Language.item (Self.all).insertDirective (the_Node);
+      return swigMod.Language.item (Self.all).insertDirective (the_Node);
    end insertDirective;
 
 
@@ -2926,7 +2928,7 @@ is
       declare
          the_Parameter : Node_Pointer := Node_Pointer (swig_Parameters);
          Index         : Integer      := 0;
-         use type C.unsigned_char;
+         use type C.int;
       begin
          emit_mark_varargs (ParmList_Pointer (swig_Parameters));
 

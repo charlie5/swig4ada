@@ -1,6 +1,7 @@
-rm *.ads
-rm *.adb
+#rm *.ads
 
-#../../../../../gnat/swig_gnat  -gnat  -c++  -I../../../Include   -I../../../Swig  -I../../../Modules  -I../../../Preprocessor   -I../../../DOH    swigg.i 
-swig_gnat  -gnat  -c++  -I../../../../Include   -I../../../../Swig  -I../../../../Modules  -I../../../../Preprocessor   -I../../../../DOH    swigg.i 
+../../../../../gnat/swig_gnat  -gnat  -c++  -I../../../../Include   -I../../../../Swig  -I../../../../Modules  -I../../../../Preprocessor   -I../../../../DOH    swigg.i 
+
+#../../../../../gnat/swig_gnat  -gnat  -I../../../../Include   -I../../../../Swig  -I../../../../Modules  -I../../../../Preprocessor   -I../../../../DOH    swigg.i 
+
 gnatpp  -rnb  -I../../../..   *.ads
