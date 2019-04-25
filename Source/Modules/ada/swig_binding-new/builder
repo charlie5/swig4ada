@@ -1,6 +1,0 @@
-rm *.ads
-rm *.adb
-
-../../../../gnat/swig_gnat  -gnat  -c++  -I../../../Include   -I../../../Swig  -I../../../Modules  -I../../../Preprocessor   -I../../../DOH    swigg.i 
-
-gnatpp  -rnb  -I../../../..   *.ads
