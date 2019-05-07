@@ -17,5 +17,15 @@ b__*.ad[sb]
 *.db
 swig_gnat
 
+abstract_class_vtable_bug
+class-fixed_by_hand
+class-simple
+class-simplest
+Examples/gnat/class
+gnat/attic
+
 swig_binding-new-test
 Makefile
+
+
+*-loc.xml
