@@ -1,7 +1,7 @@
 // This tests shared_ptr is working okay. It also checks that there are no memory leaks in the
 // class that shared_ptr is pointing via a counting mechanism in the constructors and destructor of Klass.
 // In order to test that there are no leaks of the shared_ptr class itself (as it is created on the heap)
-// the runtime tests can be run for a long time to monitor memory leaks using memory monitor tools 
+// the runtime tests can be run for a long time to monitor memory leaks using memory monitor tools
 // like 'top'. There is a wrapper for shared_ptr in shared_ptr_wrapper.h which enables one to
 // count the instances of shared_ptr. Uncomment the SHARED_PTR_WRAPPER macro to turn this on.
 //
@@ -10,6 +10,16 @@
 %module li_boost_shared_ptr
 
 %warnfilter(SWIGWARN_TYPEMAP_SWIGTYPELEAK);
+
+#if defined(SWIGSCILAB)
+%rename(MbrVar) MemberVariables;
+%rename(MbrVal) MemberVariables::MemberValue;
+%rename(MbrPtr) MemberVariables::MemberPointer;
+%rename(MbrRef) MemberVariables::MemberReference;
+%rename(SmartMbrVal) MemberVariables::SmartMemberValue;
+%rename(SmartMbrPtr) MemberVariables::SmartMemberPointer;
+%rename(SmartMbrRef) MemberVariables::SmartMemberReference;
+#endif
 
 %inline %{
 #include "boost/shared_ptr.hpp"
@@ -34,15 +44,18 @@
 # define SWIG_SHARED_PTR_NAMESPACE SwigBoost
 #endif
 
-#if defined(SWIGJAVA) || defined(SWIGCSHARP) || defined(SWIGPYTHON)
+#if defined(SWIGJAVA) || defined(SWIGCSHARP) || defined(SWIGPYTHON) || defined(SWIGD) || defined(SWIGOCTAVE) || defined(SWIGRUBY)
 #define SHARED_PTR_WRAPPERS_IMPLEMENTED
 #endif
 
 #if defined(SHARED_PTR_WRAPPERS_IMPLEMENTED)
 
 %include <boost_shared_ptr.i>
-SWIG_SHARED_PTR(Klass, Space::Klass)
-SWIG_SHARED_PTR_DERIVED(KlassDerived, Space::Klass, Space::KlassDerived)
+%shared_ptr(Space::Klass)
+%shared_ptr(Space::KlassDerived)
+%shared_ptr(Space::Klass2ndDerived)
+%shared_ptr(Space::Klass3rdDerived)
+%shared_ptr(IgnoredMultipleInheritBase) // IgnoredMultipleInheritBase not actually used in any wrapped functions, so this isn't entirely necessary and warning 520 could instead have been suppressed.
 
 #endif
 
@@ -90,7 +103,7 @@ struct Klass {
   static int getTotal_count() { return total_count; }
 
 private:
-  // lock increment and decrement as a destructor could be called at the same time as a 
+  // lock increment and decrement as a destructor could be called at the same time as a
   // new object is being created - C# / Java, at least, have finalizers run in a separate thread
   static SwigExamples::CriticalSection critical_section;
   static void increment() { SwigExamples::Lock lock(critical_section); total_count++; if (debug_shared) cout << "      ++xxxxx Klass::increment tot: " << total_count << endl;}
@@ -101,9 +114,15 @@ private:
 };
 SwigExamples::CriticalSection Space::Klass::critical_section;
 
-struct IgnoredMultipleInheritBase { virtual ~IgnoredMultipleInheritBase() {} double d; double e;};
+struct IgnoredMultipleInheritBase {
+  IgnoredMultipleInheritBase() : d(0.0), e(0.0) {}
+  virtual ~IgnoredMultipleInheritBase() {}
+  double d;
+  double e;
+  virtual void AVirtualMethod() {}
+};
 
-// For most compilers, this use of multiple inheritance results in different derived and base class 
+// For most compilers, this use of multiple inheritance results in different derived and base class
 // pointer values ... for some more challenging tests :)
 struct KlassDerived : IgnoredMultipleInheritBase, Klass {
   KlassDerived() : Klass() {}
@@ -142,7 +161,21 @@ SwigBoost::shared_ptr<KlassDerived>*& derivedsmartptrpointerreftest(SwigBoost::s
   return kd;
 }
 
+// 3 classes in inheritance chain test
+struct Klass2ndDerived : Klass {
+  Klass2ndDerived() : Klass() {}
+  Klass2ndDerived(const std::string &val) : Klass(val) {}
+};
+struct Klass3rdDerived : IgnoredMultipleInheritBase, Klass2ndDerived {
+  Klass3rdDerived() : Klass2ndDerived() {}
+  Klass3rdDerived(const std::string &val) : Klass2ndDerived(val) {}
+  virtual ~Klass3rdDerived() {}
+  virtual std::string getValue() const { return Klass2ndDerived::getValue() + "-3rdDerived"; }
+};
 
+std::string test3rdupcast( SwigBoost::shared_ptr< Klass > k) {
+  return k->getValue();
+}
 
 
 
@@ -194,7 +227,7 @@ Klass& reftest(Klass& k) {
   k.append(" reftest");
   return k;
 }
-Klass*& pointerreftest(Klass*& k) {
+Klass *const& pointerreftest(Klass *const& k) {
   k->append(" pointerreftest");
   return k;
 }
@@ -217,15 +250,21 @@ SwigBoost::shared_ptr<Klass>* smartpointerpointerownertest() {
   return new SwigBoost::shared_ptr<Klass>(new Klass("smartpointerpointerownertest"));
 }
 
-// Provide overloads for Klass and KlassDerived as some language modules, eg Python, create an extra reference in
+// Provide overloads for Klass and derived classes as some language modules, eg Python, create an extra reference in
 // the marshalling if an upcast to a base class is required.
+long use_count(const SwigBoost::shared_ptr<Klass3rdDerived>& sptr) {
+  return sptr.use_count();
+}
+long use_count(const SwigBoost::shared_ptr<Klass2ndDerived>& sptr) {
+  return sptr.use_count();
+}
 long use_count(const SwigBoost::shared_ptr<KlassDerived>& sptr) {
   return sptr.use_count();
 }
 long use_count(const SwigBoost::shared_ptr<Klass>& sptr) {
   return sptr.use_count();
 }
-const SwigBoost::shared_ptr<Klass>& ref_1() { 
+const SwigBoost::shared_ptr<Klass>& ref_1() {
   static SwigBoost::shared_ptr<Klass> sptr;
   return sptr;
 }
@@ -241,7 +280,7 @@ std::string overload_rawbyptr(int i) { return "int"; }
 std::string overload_rawbyptr(Klass *k) { return "rawbyptr"; }
 
 std::string overload_rawbyptrref(int i) { return "int"; }
-std::string overload_rawbyptrref(Klass *&k) { return "rawbyptrref"; }
+std::string overload_rawbyptrref(Klass *const&k) { return "rawbyptrref"; }
 
 
 
@@ -289,10 +328,8 @@ Space::Klass & GlobalReference = GlobalValue;
 #if defined(SHARED_PTR_WRAPPERS_IMPLEMENTED)
 
 // Note: %template after the shared_ptr typemaps
-SWIG_SHARED_PTR(BaseIntDouble, Base<int, double>)
-// Note: cannot use Base<int, double> in the macro below because of the comma in the type, 
-// so we use a typedef instead. Alternatively use %arg(Base<int, double>). %arg is defined in swigmacros.swg.
-SWIG_SHARED_PTR_DERIVED(PairIntDouble, BaseIntDouble_t, Pair<int, double>)
+%shared_ptr(Base<int, double>)
+%shared_ptr(Pair<int, double>)
 
 #endif
 
@@ -304,11 +341,15 @@ template <class T1, class T2> struct Base {
   T2 baseVal2;
   Base(T1 t1, T2 t2) : baseVal1(t1*2), baseVal2(t2*2) {}
   virtual std::string getValue() const { return "Base<>"; };
+  virtual ~Base() {}
 };
-typedef Base<int, double> BaseIntDouble_t;
 %}
 
+#if !defined(SWIGSCILAB)
 %template(BaseIntDouble) Base<int, double>;
+#else
+%template(BaseIDbl) Base<int, double>;
+#endif
 
 %inline %{
 template <class T1, class T2> struct Pair : Base<T1, T2> {
@@ -330,9 +371,9 @@ SwigBoost::shared_ptr< Pair<int, double> > pair_id1(SwigBoost::shared_ptr< Pair<
 %inline %{
 namespace SwigBoost {
   const int NOT_COUNTING = -123456;
-  int shared_ptr_wrapper_count() { 
+  int shared_ptr_wrapper_count() {
   #ifdef SHARED_PTR_WRAPPER
-    return SwigBoost::SharedPtrWrapper::getTotalCount(); 
+    return SwigBoost::SharedPtrWrapper::getTotalCount();
   #else
     return NOT_COUNTING;
   #endif

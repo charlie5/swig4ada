@@ -1,9 +1,5 @@
 /* -----------------------------------------------------------------------------
- * See the LICENSE file for information on copyright, usage and redistribution
- * of SWIG, and the README file for authors - http://www.swig.org/release.html.
- *
  * rubyprimtypes.swg
- *
  * ----------------------------------------------------------------------------- */
 /* ------------------------------------------------------------
  * Primitive Types
@@ -128,15 +124,20 @@ SWIG_AsVal_dec(unsigned long)(VALUE obj, unsigned long *val)
 
 %fragment(SWIG_From_frag(long long),"header",
 	  fragment=SWIG_From_frag(long),
-	  fragment="<limits.h>") {
+	  fragment="SWIG_LongLongAvailable") {
+%#ifdef SWIG_LONG_LONG_AVAILABLE
 SWIGINTERNINLINE VALUE 
 SWIG_From_dec(long long)(long long value)
 {
   return LL2NUM(value);
 }
+%#endif
 }
 
-%fragment(SWIG_AsVal_frag(long long),"header",fragment="SWIG_ruby_failed") {
+%fragment(SWIG_AsVal_frag(long long),"header",
+	  fragment="SWIG_ruby_failed",
+	  fragment="SWIG_LongLongAvailable") {
+%#ifdef SWIG_LONG_LONG_AVAILABLE
 %ruby_aux_method(long long, NUM2LL, type == T_FIXNUM ? NUM2LL(obj) : rb_big2ll(obj))
 
 SWIGINTERN int
@@ -155,21 +156,26 @@ SWIG_AsVal_dec(long long)(VALUE obj, long long *val)
   }
   return SWIG_TypeError;
 }
+%#endif
 }
 
 /* unsigned long long */
 
 %fragment(SWIG_From_frag(unsigned long long),"header",
-	  fragment=SWIG_From_frag(long long),
-	  fragment="<limits.h>") {
+	  fragment="SWIG_LongLongAvailable") {
+%#ifdef SWIG_LONG_LONG_AVAILABLE
 SWIGINTERNINLINE VALUE 
 SWIG_From_dec(unsigned long long)(unsigned long long value)
 {
   return ULL2NUM(value);
 }
+%#endif
 }
 
-%fragment(SWIG_AsVal_frag(unsigned long long),"header",fragment="SWIG_ruby_failed") {
+%fragment(SWIG_AsVal_frag(unsigned long long),"header",
+	  fragment="SWIG_ruby_failed",
+	  fragment="SWIG_LongLongAvailable") {
+%#ifdef SWIG_LONG_LONG_AVAILABLE
 %ruby_aux_method(long long, NUM2ULL,  type == T_FIXNUM ? NUM2ULL(obj) : rb_big2ull(obj))
 
 SWIGINTERN int
@@ -188,6 +194,7 @@ SWIG_AsVal_dec(unsigned long long)(VALUE obj, unsigned long long *val)
   }
   return SWIG_TypeError;
 }
+%#endif
 }
 
 /* double */
@@ -197,7 +204,7 @@ SWIG_AsVal_dec(unsigned long long)(VALUE obj, unsigned long long *val)
 }
 
 %fragment(SWIG_AsVal_frag(double),"header",fragment="SWIG_ruby_failed") {
-%ruby_aux_method(double, NUM2DBL, (type == T_FLOAT ? NUM2DBL(obj) : (type == T_FIXNUM ? (double) FIX2INT(obj) : rb_big2dbl(obj))))
+%ruby_aux_method(double, NUM2DBL, NUM2DBL(obj); (void)type)
 
 SWIGINTERN int
 SWIG_AsVal_dec(double)(VALUE obj, double *val)

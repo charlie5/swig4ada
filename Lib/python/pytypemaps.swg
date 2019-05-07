@@ -5,11 +5,13 @@
 /* ------------------------------------------------------------
  *  Fragment section
  * ------------------------------------------------------------ */
-/* bool is dangerous in Python, change precedence */
+#ifdef SWIG_PYTHON_LEGACY_BOOL
+// Default prior to SWIG 3.0.0
 #undef SWIG_TYPECHECK_BOOL
 %define SWIG_TYPECHECK_BOOL             10000 %enddef
+#endif
 
-/* Include fundamental fragemt definitions */
+/* Include fundamental fragment definitions */
 %include <typemaps/fragments.swg>
 
 /* Look for user fragments file. */
@@ -51,7 +53,11 @@
 #define SWIG_AppendOutput(result, obj)  SWIG_Python_AppendOutput(result, obj)
 
 /* set constant */
-#define SWIG_SetConstant(name, obj)     SWIG_Python_SetConstant(d, name,obj) 
+#if defined(SWIGPYTHON_BUILTIN)
+#define SWIG_SetConstant(name, obj) SWIG_Python_SetConstant(d, d == md ? public_interface : NULL, name,obj) 
+#else
+#define SWIG_SetConstant(name, obj) SWIG_Python_SetConstant(d, name,obj) 
+#endif
 
 /* raise */
 #define SWIG_Raise(obj, type, desc)     SWIG_Python_Raise(obj, type, desc)
@@ -61,7 +67,7 @@
 
 
 /*  ------------------------------------------------------------
- *  Python extra typemaps
+ *  Python extra typemaps / typemap overrides
  * ------------------------------------------------------------ */
 
 /* Get the address of the 'python self' object */
@@ -73,10 +79,12 @@
 
 /* Consttab, needed for callbacks, it should be removed later */
 
-%typemap(consttab) SWIGTYPE ((*)(ANY))  
-{ SWIG_PY_POINTER, (char*)"$symname", 0, 0, (void *)($value), &$descriptor }
+%typemap(consttab) SWIGTYPE ((*)(ANY))
+{ SWIG_PY_POINTER, "$symname", 0, 0, (void *)($value), &$descriptor }
+%typemap(consttab) SWIGTYPE ((* const)(ANY)) = SWIGTYPE ((*)(ANY));
 
 %typemap(constcode) SWIGTYPE ((*)(ANY)) "";
+%typemap(constcode) SWIGTYPE ((* const)(ANY)) = SWIGTYPE ((*)(ANY));
 
 
 /* Smart Pointers */
@@ -88,11 +96,10 @@
   if ($result) {
     PyObject *robj = PyObject_CallMethod($result, (char *)"__deref__", NULL);
     if (robj && !PyErr_Occurred()) {
-      PySwigObject_append((PyObject *) SWIG_Python_GetSwigThis($result), 
+      SwigPyObject_append((PyObject *) SWIG_Python_GetSwigThis($result), 
 			  (PyObject *) SWIG_Python_GetSwigThis(robj));
       Py_DECREF(robj);
     }
   }
 }
-
 

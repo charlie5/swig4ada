@@ -2,14 +2,34 @@
 --
 with interfaces.c;
 with interfaces.c.strings;
+with swig;
+with swigg_module.Pointers;
 with interfaces.C;
 
 package swigmod is
 
+   -- DoxygenTranslator
+   --
+   subtype DoxygenTranslator is swig.incomplete_class;
+
+   type DoxygenTranslator_array is
+     array (interfaces.C.Size_t range <>) of aliased swigmod.DoxygenTranslator;
+
+   -- Status
+   --
+   type Status is (Disabled, Experimental, Supported);
+
+   for Status use (Disabled => 0, Experimental => 1, Supported => 2);
+
+   pragma Convention (C, Status);
+
+   type Status_array is
+     array (interfaces.C.Size_t range <>) of aliased swigmod.Status;
+
    NOT_VIRTUAL   : constant                                        := 0;
    PLAIN_VIRTUAL : constant                                        := 1;
    PURE_VIRTUAL  : constant                                        := 2;
-   input_file    : aliased interfaces.c.strings.chars_ptr;
+   input_file    : aliased swigg_module.Pointers.String_Pointer;
    line_number   : aliased interfaces.c.int;
    CPlusPlus     : aliased interfaces.c.int;
    Extend        : aliased interfaces.c.int;

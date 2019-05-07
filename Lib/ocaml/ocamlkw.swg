@@ -2,16 +2,17 @@
 #define OCAML_OCAMLKW_SWG_
 
 /* Warnings for Ocaml keywords */
-#define OCAMLKW(x) %namewarn("314: '" #x "' is a ocaml keyword and it will properly renamed")  #x
+#define OCAMLKW(x) %namewarn("314: '" #x "' is an ocaml keyword and it will be appropriately renamed")  #x
 
 /*
   from
-  http://caml.inria.fr/ocaml/htmlman/manual044.html
+  https://caml.inria.fr/pub/docs/manual-ocaml/lex.html
 */
 
 
 OCAMLKW(and);
 OCAMLKW(as);
+OCAMLKW(asr);
 OCAMLKW(assert);
 OCAMLKW(begin);
 OCAMLKW(class);
@@ -33,13 +34,20 @@ OCAMLKW(in);
 OCAMLKW(include);
 OCAMLKW(inherit);
 OCAMLKW(initializer);
+OCAMLKW(land);
 OCAMLKW(lazy);
 OCAMLKW(let);
+OCAMLKW(lor);
+OCAMLKW(lsl);
+OCAMLKW(lsr);
+OCAMLKW(lxor);
 OCAMLKW(match);
 OCAMLKW(method);
+OCAMLKW(mod);
 OCAMLKW(module);
 OCAMLKW(mutable);
 OCAMLKW(new);
+OCAMLKW(nonrec);
 OCAMLKW(object);
 OCAMLKW(of);
 OCAMLKW(open);

@@ -1,25 +1,28 @@
 /* ----------------------------------------------------------------------------- 
- * See the LICENSE file for information on copyright, usage and redistribution
- * of SWIG, and the README file for authors - http://www.swig.org/release.html.
+ * This file is part of SWIG, which is licensed as a whole under version 3 
+ * (or any later version) of the GNU General Public License. Some additional
+ * terms also apply to certain portions of SWIG. The full details of the SWIG
+ * license and copyrights can be found in the LICENSE and COPYRIGHT files
+ * included with the SWIG source code as distributed by the SWIG developers
+ * and at http://www.swig.org/legal.html.
  *
  * swigscan.h
  *
  * C/C++ scanner. 
  * ----------------------------------------------------------------------------- */
 
-/* $Id: swigscan.h 961 2009-03-03 14:54:44Z krischik $ */
-
 typedef struct Scanner Scanner;
 
-extern Scanner     *NewScanner();
+extern Scanner     *NewScanner(void);
 extern void         DelScanner(Scanner *);
 extern void         Scanner_clear(Scanner *);
 extern void         Scanner_push(Scanner *, String *);
-extern void         Scanner_pushtoken(Scanner *, int, const String_or_char *value);
+extern void         Scanner_pushtoken(Scanner *, int, const_String_or_char_ptr value);
 extern int          Scanner_token(Scanner *);
 extern String      *Scanner_text(Scanner *);
 extern void         Scanner_skip_line(Scanner *);
 extern int          Scanner_skip_balanced(Scanner *, int startchar, int endchar);
+extern String      *Scanner_get_raw_text_balanced(Scanner *, int startchar, int endchar);
 extern void         Scanner_set_location(Scanner *, String *file, int line);
 extern String      *Scanner_file(Scanner *);
 extern int          Scanner_line(Scanner *);
@@ -28,7 +31,7 @@ extern void         Scanner_idstart(Scanner *, const char *idchar);
 extern String      *Scanner_errmsg(Scanner *);
 extern int          Scanner_errline(Scanner *);
 extern int          Scanner_isoperator(int tokval);
-extern void         Scanner_freeze_line(Scanner *s, int val);
+extern void         Scanner_locator(Scanner *, String *loc);
 
 /* Note: Tokens in range 100+ are for C/C++ operators */
 
@@ -47,7 +50,7 @@ extern void         Scanner_freeze_line(Scanner *s, int val);
 #define   SWIG_TOKEN_COLON        12       /* : */
 #define   SWIG_TOKEN_DCOLON       13       /* :: */
 #define   SWIG_TOKEN_DCOLONSTAR   14       /* ::* */
-#define   SWIG_TOKEN_ID           15       /* identifer */
+#define   SWIG_TOKEN_ID           15       /* identifier */
 #define   SWIG_TOKEN_FLOAT        16       /* 3.1415F */
 #define   SWIG_TOKEN_DOUBLE       17       /* 3.1415 */
 #define   SWIG_TOKEN_INT          18       /* 314 */
@@ -64,6 +67,10 @@ extern void         Scanner_freeze_line(Scanner *s, int val);
 #define   SWIG_TOKEN_ULONGLONG    29       /* 314ULL */
 #define   SWIG_TOKEN_QUESTION     30       /* ? */
 #define   SWIG_TOKEN_COMMENT      31       /* C or C++ comment */
+#define   SWIG_TOKEN_BOOL         32       /* true or false */
+#define   SWIG_TOKEN_WSTRING      33       /* L"str" */
+#define   SWIG_TOKEN_WCHAR        34       /* L'c' */
+
 #define   SWIG_TOKEN_ILLEGAL      99
 #define   SWIG_TOKEN_ERROR        -1
 

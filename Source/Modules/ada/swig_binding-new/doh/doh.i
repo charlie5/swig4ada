@@ -19,6 +19,8 @@
 %ignore DohSortList;
 %ignore DohNewVoid;
 %ignore DohNone;
+%ignore DohFuncPtr;
+%ignore DohFuncPtr_t;
 
 %include "doh.h"
 

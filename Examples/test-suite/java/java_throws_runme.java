@@ -40,6 +40,16 @@ public class java_throws_runme {
       if (!pass)
         throw new RuntimeException("Test 2 failed");
 
+      // Check the exception class is used with %catches
+      pass = false;
+      try {
+        java_throws.catches_function(100);
+      }
+      catch (IllegalAccessException e) { pass = true; }
+
+      if (!pass)
+        throw new RuntimeException("Test 3 failed");
+
       // Check newfree typemap throws attribute
       try {
         TestClass tc = java_throws.makeTestClass();
@@ -83,6 +93,28 @@ public class java_throws_runme {
       if (!pass)
         throw new RuntimeException("Test 6 failed");
 
+      // Interface function
+      pass = false;
+      try {
+        InterfaceTestImpl iti = new InterfaceTestImpl();
+        iti.imethod(true);
+      }
+      catch (MyException e) { pass = true; }
+
+      if (!pass)
+        throw new RuntimeException("Test interface 1 failed");
+
+      pass = false;
+      try {
+        InterfaceTestImpl iti = new InterfaceTestImpl();
+        iti.imethod(false);
+        pass = true;
+      }
+      catch (MyException e) { pass = false; }
+
+      if (!pass)
+        throw new RuntimeException("Test interface 2 failed");
+
       // Global function
       pass = false;
       try {
@@ -94,5 +126,20 @@ public class java_throws_runme {
 
       if (!pass)
         throw new RuntimeException("Test 7 failed");
+
+      // Test %nojavaexception
+      NoExceptTest net = new NoExceptTest();
+
+      pass = false;
+      try {
+        net.exceptionPlease();
+	pass = true;
+      }
+      catch (MyException e) {}
+
+      if (!pass)
+        throw new RuntimeException("Test 8 failed");
+
+      net.noExceptionPlease();
   }
 }

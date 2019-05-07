@@ -1,14 +1,12 @@
 /* -----------------------------------------------------------------------------
- * See the LICENSE file for information on copyright, usage and redistribution
- * of SWIG, and the README file for authors - http://www.swig.org/release.html.
- *
  * luaruntime.swg
  *
  * all the runtime code for .
  * ----------------------------------------------------------------------------- */
 
-%runtime "swigrun.swg";         /* Common C API type-checking code */
-%runtime "luarun.swg";          /* Lua runtime stuff */
+%runtime "swigrun.swg"          /* Common C API type-checking code */
+%runtime "swigerrors.swg"       /* SWIG errors */
+%runtime "luarun.swg"           /* Lua runtime stuff */
 
 %insert(initbeforefunc) "swiginit.swg"
 
@@ -22,49 +20,78 @@ extern "C" {
 #endif
 /* this is the initialization function
   added at the very end of the code
-  the function is always called SWIG_init, but an eariler #define will rename it
+  the function is always called SWIG_init, but an earlier #define will rename it
 */
-SWIGEXPORT int SWIG_init(lua_State* L)
+#if ((SWIG_LUA_TARGET == SWIG_LUA_FLAVOR_ELUA) || (SWIG_LUA_TARGET == SWIG_LUA_FLAVOR_ELUAC))
+LUALIB_API int SWIG_init(lua_State* L)
+#else
+SWIGEXPORT int SWIG_init(lua_State* L) /* default Lua action */
+#endif
 {
+#if (SWIG_LUA_TARGET != SWIG_LUA_FLAVOR_ELUAC) /* valid for both Lua and eLua */
   int i;
+  int globalRegister = 0;
   /* start with global table */
-  lua_pushvalue(L,LUA_GLOBALSINDEX);
-  /* SWIG's internal initalisation */
+  lua_pushglobaltable (L);
+  /* SWIG's internal initialisation */
   SWIG_InitializeModule((void*)L);
   SWIG_PropagateClientData();
+#endif
+
+#if ((SWIG_LUA_TARGET != SWIG_LUA_FLAVOR_ELUA) && (SWIG_LUA_TARGET != SWIG_LUA_FLAVOR_ELUAC)) || defined(SWIG_LUA_ELUA_EMULATE)
   /* add a global fn */
   SWIG_Lua_add_function(L,"swig_type",SWIG_Lua_type);
-  SWIG_Lua_add_function(L,"swig_equals",SWIG_Lua_equal);
-  /* begin the module (its a table with the same name as the module) */
-  SWIG_Lua_module_begin(L,SWIG_name);
-  /* add commands/functions */
-  for (i = 0; swig_commands[i].name; i++){
-    SWIG_Lua_module_add_function(L,swig_commands[i].name,swig_commands[i].func);
-  }
-  /* add variables */
-  for (i = 0; swig_variables[i].name; i++){
-    SWIG_Lua_module_add_variable(L,swig_variables[i].name,swig_variables[i].get,swig_variables[i].set);
-  }
-  /* set up base class pointers (the hierachy) */
+  SWIG_Lua_add_function(L,"swig_equals",SWIG_Lua_class_equal);
+#endif
+
+#if (SWIG_LUA_TARGET != SWIG_LUA_FLAVOR_ELUAC)
+  /* set up base class pointers (the hierarchy) */
   for (i = 0; swig_types[i]; i++){
     if (swig_types[i]->clientdata){
       SWIG_Lua_init_base_class(L,(swig_lua_class*)(swig_types[i]->clientdata));
     }
   }
-  /* additional registration structs & classes in lua */
+#ifdef SWIG_LUA_MODULE_GLOBAL
+  globalRegister = 1;
+#endif
+
+
+#if (SWIG_LUA_TARGET == SWIG_LUA_FLAVOR_LUA)
+  SWIG_Lua_namespace_register(L,&swig_SwigModule, globalRegister);
+#endif
+
+#if (SWIG_LUA_TARGET == SWIG_LUA_FLAVOR_ELUA) || (SWIG_LUA_TARGET == SWIG_LUA_FLAVOR_ELUAC)
   for (i = 0; swig_types[i]; i++){
     if (swig_types[i]->clientdata){
-      SWIG_Lua_class_register(L,(swig_lua_class*)(swig_types[i]->clientdata));
+      SWIG_Lua_elua_class_register_instance(L,(swig_lua_class*)(swig_types[i]->clientdata));
     }
   }
-  /* constants */
-  SWIG_Lua_InstallConstants(L,swig_constants);
+#endif
+
+#if defined(SWIG_LUA_ELUA_EMULATE)
+  lua_newtable(L);
+  SWIG_Lua_elua_emulate_register(L,swig_SwigModule.ns_methods);
+  SWIG_Lua_elua_emulate_register_clear(L);
+  if(globalRegister) {
+    lua_pushstring(L,swig_SwigModule.name);
+    lua_pushvalue(L,-2);
+    lua_rawset(L,-4);
+  }
+#endif
+
+#endif
+
+#if (SWIG_LUA_TARGET != SWIG_LUA_FLAVOR_ELUAC)
   /* invoke user-specific initialization */
   SWIG_init_user(L);
   /* end module */
-  lua_pop(L,1);  /* tidy stack (remove module table)*/
-  lua_pop(L,1);  /* tidy stack (remove global table)*/
+  /* Note: We do not clean up the stack here (Lua will do this for us). At this
+     point, we have the globals table and out module table on the stack. Returning
+     one value makes the module table the result of the require command. */
   return 1;
+#else
+  return 0;
+#endif
 }
 
 #ifdef __cplusplus

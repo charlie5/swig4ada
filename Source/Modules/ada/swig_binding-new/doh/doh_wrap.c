@@ -1119,7 +1119,7 @@ DllExport int SWIGSTDCALL Ada_DohWrite (
   arg3 = (int) jarg3; 
   
   
-  result = (int)DohWrite(arg1,arg2,arg3);
+  result = (int)DohWrite(arg1,(void const *)arg2,arg3);
   jresult = result; 
   
   
@@ -1363,7 +1363,7 @@ DllExport int SWIGSTDCALL Ada_DohGetline (
   
   arg1 = (DOH *)jarg1; 
   
-  result = (int)DohGetline(arg1);
+  result = (int)DohGetline((void const *)arg1);
   jresult = result; 
   
   
@@ -1407,7 +1407,7 @@ DllExport void* SWIGSTDCALL Ada_DohGetfile (
   
   arg1 = (DOH *)jarg1; 
   
-  result = (DOH *)DohGetfile(arg1);
+  result = (DOH *)DohGetfile((void const *)arg1);
   jresult = (void *) result;      
   
   
@@ -1737,6 +1737,40 @@ DllExport int SWIGSTDCALL Ada_DohIsFile (
 
 
 
+DllExport void SWIGSTDCALL Ada_DohSetMaxHashExpand (
+  int jarg1
+  )
+{
+  int arg1 ;
+  
+  
+  arg1 = (int) jarg1; 
+  
+  
+  DohSetMaxHashExpand(arg1);
+  
+  
+}
+
+
+
+DllExport int SWIGSTDCALL Ada_DohGetMaxHashExpand (
+  )
+{
+  int jresult ;
+  int result;
+  
+  result = (int)DohGetMaxHashExpand();
+  jresult = result; 
+  
+  
+  
+  return jresult;
+  
+}
+
+
+
 DllExport void SWIGSTDCALL Ada_DohSetmark (
   void* jarg1
   ,
@@ -1993,18 +2027,24 @@ DllExport void* SWIGSTDCALL Ada_DohNewFile (
   ,
   
   char * jarg2
+  ,
+  
+  void* jarg3
   )
 {
   void* jresult ;
   DOH *arg1 = (DOH *) 0 ;
   char *arg2 = (char *) 0 ;
+  DOH *arg3 = (DOH *) 0 ;
   DOH *result = 0 ;
   
   arg1 = (DOH *)jarg1; 
   
   arg2 = jarg2; 
   
-  result = (DOH *)DohNewFile(arg1,(char const *)arg2);
+  arg3 = (DOH *)jarg3; 
+  
+  result = (DOH *)DohNewFile(arg1,(char const *)arg2,arg3);
   jresult = (void *) result;      
   
   
@@ -2048,27 +2088,6 @@ DllExport void SWIGSTDCALL Ada_DohFileErrorDisplay (
   
   DohFileErrorDisplay(arg1);
   
-  
-}
-
-
-
-DllExport int SWIGSTDCALL Ada_DohClose (
-  void* jarg1
-  )
-{
-  int jresult ;
-  DOH *arg1 = (DOH *) 0 ;
-  int result;
-  
-  arg1 = (DOH *)jarg1; 
-  
-  result = (int)DohClose(arg1);
-  jresult = result; 
-  
-  
-  
-  return jresult;
   
 }
 

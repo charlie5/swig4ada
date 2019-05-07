@@ -1,16 +1,13 @@
 /* -----------------------------------------------------------------------------
- * See the LICENSE file for information on copyright, usage and redistribution
- * of SWIG, and the README file for authors - http://www.swig.org/release.html.
- *
  * chickenrun.swg
- *
  * ----------------------------------------------------------------------------- */
 
 #include <chicken.h>
+#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#if defined(_MSC_VER) || defined(__BORLANDC__) || defined(_WATCOM)
+#if (defined(_MSC_VER) && (_MSC_VER < 1900)) || defined(__BORLANDC__) || defined(_WATCOM)
 # ifndef snprintf
 #  define snprintf _snprintf
 # endif
@@ -39,7 +36,7 @@ extern "C" {
                                               SWIG_Chicken_Barf(SWIG_BARF1_CONTRACT_ASSERT, C_text(message)); } else
 
 /* Runtime API */
-#define SWIG_GetModule(clientdata) SWIG_Chicken_GetModule()
+#define SWIG_GetModule(clientdata) SWIG_Chicken_GetModule(clientdata)
 #define SWIG_SetModule(clientdata, pointer) SWIG_Chicken_SetModule(pointer)
 
 #define C_swig_is_bool(x) C_truep (C_booleanp (x))
@@ -268,6 +265,7 @@ SWIG_Chicken_ConvertPtr(C_word s, void **result, swig_type_info *type, int flags
 
   if (s == C_SCHEME_FALSE) {
     *result = NULL;
+    return (flags & SWIG_POINTER_NO_NULL) ? SWIG_NullReferenceError : SWIG_OK;
   } else if (C_swig_is_swigpointer(s)) {
     /* try and convert type */
     from = (swig_type_info *) C_block_item(s, 1);
@@ -312,11 +310,11 @@ SWIG_Chicken_MustGetPtr (C_word s, swig_type_info *type, int argnum, int flags)
 static char *chicken_runtimevar_name = "type_pointer" SWIG_TYPE_TABLE_NAME;
 
 static swig_module_info *
-SWIG_Chicken_GetModule() {
+SWIG_Chicken_GetModule(void *SWIGUNUSEDPARM(clientdata)) {
     swig_module_info *ret = 0;
     C_word sym;
 
-    /* lookup the type pointer... it is stored in it's own symbol table */
+    /* lookup the type pointer... it is stored in its own symbol table */
     C_SYMBOL_TABLE *stable = C_find_symbol_table("swig_runtime_data" SWIG_RUNTIME_VERSION);
     if (stable != NULL) {
       sym = SWIG_Chicken_LookupSymbol(chicken_runtimevar_name, stable);
@@ -336,7 +334,7 @@ SWIG_Chicken_SetModule(swig_module_info *module) {
     C_word pointer;
     static C_word *space = 0;
     
-    /* type pointer is stored in it's own symbol table */
+    /* type pointer is stored in its own symbol table */
     stable = C_find_symbol_table("swig_runtime_data" SWIG_RUNTIME_VERSION);
     if (stable == NULL) {
       stable = C_new_symbol_table("swig_runtime_data" SWIG_RUNTIME_VERSION, 16);

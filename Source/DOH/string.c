@@ -1,16 +1,16 @@
 /* -----------------------------------------------------------------------------
+ * This file is part of SWIG, which is licensed as a whole under version 3 
+ * (or any later version) of the GNU General Public License. Some additional
+ * terms also apply to certain portions of SWIG. The full details of the SWIG
+ * license and copyrights can be found in the LICENSE and COPYRIGHT files
+ * included with the SWIG source code as distributed by the SWIG developers
+ * and at http://www.swig.org/legal.html.
+ *
  * string.c
  *
  *     Implements a string object that supports both sequence operations and
  *     file semantics.
- *
- * Author(s) : David Beazley (beazley@cs.uchicago.edu)
- *
- * Copyright (C) 1999-2000.  The University of Chicago
- * See the file LICENSE for information on usage and redistribution.	
  * ----------------------------------------------------------------------------- */
-
-char cvsroot_string_c[] = "$Id: string.c 961 2009-03-03 14:54:44Z krischik $";
 
 #include "dohint.h"
 
@@ -27,7 +27,7 @@ typedef struct String {
 } String;
 
 /* -----------------------------------------------------------------------------
- * void *String_data() - Return as a 'void *'
+ * String_data() - Return as a 'void *'
  * ----------------------------------------------------------------------------- */
 
 static void *String_data(DOH *so) {
@@ -42,7 +42,7 @@ static void *String_data(DOH *so) {
 */
 
 /* -----------------------------------------------------------------------------
- * int String_dump() - Serialize a string onto out
+ * String_dump() - Serialize a string onto out
  * ----------------------------------------------------------------------------- */
 
 static int String_dump(DOH *so, DOH *out) {
@@ -103,7 +103,7 @@ static int String_len(DOH *so) {
 
 
 /* -----------------------------------------------------------------------------
- * int String_cmp() - Compare two strings
+ * String_cmp() - Compare two strings
  * ----------------------------------------------------------------------------- */
 
 static int String_cmp(DOH *so1, DOH *so2) {
@@ -135,21 +135,21 @@ static int String_cmp(DOH *so1, DOH *so2) {
 }
 
 /* -----------------------------------------------------------------------------
- * int String_equal() - Say if two string are equal
+ * String_equal() - Say if two string are equal
  * ----------------------------------------------------------------------------- */
 
 static int String_equal(DOH *so1, DOH *so2) {
   String *s1 = (String *) ObjData(so1);
   String *s2 = (String *) ObjData(so2);
-  register int len = s1->len;
+  int len = s1->len;
   if (len != s2->len) {
     return 0;
   } else {
-    register char *c1 = s1->str;
-    register char *c2 = s2->str;
+    char *c1 = s1->str;
+    char *c2 = s2->str;
 #if 0
-    register int mlen = len >> 2;
-    register int i = mlen;
+    int mlen = len >> 2;
+    int i = mlen;
     for (; i; --i) {
       if (*(c1++) != *(c2++))
 	return 0;
@@ -172,7 +172,7 @@ static int String_equal(DOH *so1, DOH *so2) {
 }
 
 /* -----------------------------------------------------------------------------
- * int String_hash() - Compute string hash value
+ * String_hash() - Compute string hash value
  * ----------------------------------------------------------------------------- */
 
 static int String_hash(DOH *so) {
@@ -180,11 +180,11 @@ static int String_hash(DOH *so) {
   if (s->hashkey >= 0) {
     return s->hashkey;
   } else {
-    register char *c = s->str;
-    register int len = s->len > 50 ? 50 : s->len;
-    register int h = 0;
-    register int mlen = len >> 2;
-    register int i = mlen;
+    char *c = s->str;
+    unsigned int len = s->len > 50 ? 50 : s->len;
+    unsigned int h = 0;
+    unsigned int mlen = len >> 2;
+    unsigned int i = mlen;
     for (; i; --i) {
       h = (h << 5) + *(c++);
       h = (h << 5) + *(c++);
@@ -195,16 +195,16 @@ static int String_hash(DOH *so) {
       h = (h << 5) + *(c++);
     }
     h &= 0x7fffffff;
-    s->hashkey = h;
+    s->hashkey = (int)h;
     return h;
   }
 }
 
 /* -----------------------------------------------------------------------------
- * DohString_append(String *s, const char *newstr) - Append to s
+ * DohString_append() - Append to s
  * ----------------------------------------------------------------------------- */
 
-void DohString_append(DOH *so, DOH *str) {
+static void DohString_append(DOH *so, const DOHString_or_char *str) {
   int oldlen, newlen, newmaxsize, l, sp;
   char *tc;
   String *s = (String *) ObjData(so);
@@ -249,7 +249,7 @@ void DohString_append(DOH *so, DOH *str) {
 
 
 /* -----------------------------------------------------------------------------
- * void String_clear() - Clear a string
+ * String_clear() - Clear a string
  * ----------------------------------------------------------------------------- */
 
 static void String_clear(DOH *so) {
@@ -262,12 +262,11 @@ static void String_clear(DOH *so) {
 }
 
 /* -----------------------------------------------------------------------------
- * void String_insert() - Insert a string
+ * String_insert() - Insert a string
  * ----------------------------------------------------------------------------- */
 
 static int String_insert(DOH *so, int pos, DOH *str) {
   String *s;
-  char *nstr;
   int len;
   char *data;
 
@@ -287,7 +286,6 @@ static int String_insert(DOH *so, int pos, DOH *str) {
     data = (char *) (str);
     len = (int) strlen(data);
   }
-  nstr = s->str;
 
   if (pos < 0)
     pos = 0;
@@ -318,7 +316,7 @@ static int String_insert(DOH *so, int pos, DOH *str) {
 }
 
 /* -----------------------------------------------------------------------------
- * int String_delitem() - Delete a character
+ * String_delitem() - Delete a character
  * ----------------------------------------------------------------------------- */
 
 static int String_delitem(DOH *so, int pos) {
@@ -344,7 +342,7 @@ static int String_delitem(DOH *so, int pos) {
 }
 
 /* -----------------------------------------------------------------------------
- * int String_delslice() -  Delete a range
+ * String_delslice() -  Delete a range
  * ----------------------------------------------------------------------------- */
 
 static int String_delslice(DOH *so, int sindex, int eindex) {
@@ -382,7 +380,7 @@ static int String_delslice(DOH *so, int sindex, int eindex) {
 }
 
 /* -----------------------------------------------------------------------------
- * DOH *String_str() - Returns a string (used by printing commands)
+ * String_str() - Returns a string (used by printing commands)
  * ----------------------------------------------------------------------------- */
 
 static DOH *String_str(DOH *so) {
@@ -392,7 +390,7 @@ static DOH *String_str(DOH *so) {
 }
 
 /* -----------------------------------------------------------------------------
- * int String_read() - Read data from a string
+ * String_read() - Read data from a string
  * ----------------------------------------------------------------------------- */
 
 static int String_read(DOH *so, void *buffer, int len) {
@@ -415,9 +413,9 @@ static int String_read(DOH *so, void *buffer, int len) {
 }
 
 /* -----------------------------------------------------------------------------
- * int String_write() - Write data to a string
+ * String_write() - Write data to a string
  * ----------------------------------------------------------------------------- */
-static int String_write(DOH *so, void *buffer, int len) {
+static int String_write(DOH *so, const void *buffer, int len) {
   int newlen;
   String *s = (String *) ObjData(so);
   s->hashkey = -1;
@@ -439,7 +437,7 @@ static int String_write(DOH *so, void *buffer, int len) {
 }
 
 /* -----------------------------------------------------------------------------
- * int String_seek() - Seek to a new position
+ * String_seek() - Seek to a new position
  * ----------------------------------------------------------------------------- */
 
 static int String_seek(DOH *so, long offset, int whence) {
@@ -465,9 +463,9 @@ static int String_seek(DOH *so, long offset, int whence) {
 
   {
 #if 0
-    register int sp = s->sp;
-    register char *tc = s->str;
-    register int len = s->len;
+    int sp = s->sp;
+    char *tc = s->str;
+    int len = s->len;
     while (sp != nsp) {
       int prev = sp + inc;
       if (prev >= 0 && prev <= len && tc[prev] == '\n')
@@ -475,8 +473,8 @@ static int String_seek(DOH *so, long offset, int whence) {
       sp += inc;
     }
 #else
-    register int sp = s->sp;
-    register char *tc = s->str;
+    int sp = s->sp;
+    char *tc = s->str;
     if (inc > 0) {
       while (sp != nsp) {
 	if (tc[++sp] == '\n')
@@ -496,7 +494,7 @@ static int String_seek(DOH *so, long offset, int whence) {
 }
 
 /* -----------------------------------------------------------------------------
- * long String_tell() - Return current position
+ * String_tell() - Return current position
  * ----------------------------------------------------------------------------- */
 
 static long String_tell(DOH *so) {
@@ -505,17 +503,17 @@ static long String_tell(DOH *so) {
 }
 
 /* -----------------------------------------------------------------------------
- * int String_putc()
+ * String_putc()
  * ----------------------------------------------------------------------------- */
 
 static int String_putc(DOH *so, int ch) {
   String *s = (String *) ObjData(so);
-  register int len = s->len;
-  register int sp = s->sp;
+  int len = s->len;
+  int sp = s->sp;
   s->hashkey = -1;
   if (sp >= len) {
-    register int maxsize = s->maxsize;
-    register char *tc = s->str;
+    int maxsize = s->maxsize;
+    char *tc = s->str;
     if (len > (maxsize - 2)) {
       maxsize *= 2;
       tc = (char *) DohRealloc(tc, maxsize);
@@ -536,7 +534,7 @@ static int String_putc(DOH *so, int ch) {
 }
 
 /* -----------------------------------------------------------------------------
- * int String_getc()
+ * String_getc()
  * ----------------------------------------------------------------------------- */
 
 static int String_getc(DOH *so) {
@@ -552,7 +550,7 @@ static int String_getc(DOH *so) {
 }
 
 /* -----------------------------------------------------------------------------
- * int String_ungetc()
+ * String_ungetc()
  * ----------------------------------------------------------------------------- */
 
 static int String_ungetc(DOH *so, int ch) {
@@ -566,12 +564,6 @@ static int String_ungetc(DOH *so, int ch) {
     s->line--;
   return ch;
 }
-
-/* -----------------------------------------------------------------------------
- * replace_simple(String *str, char *token, char *rep, int flags, int count)
- *
- * Replaces count non-overlapping occurrences of token with rep in a string.   
- * ----------------------------------------------------------------------------- */
 
 static char *end_quote(char *s) {
   char *qs;
@@ -657,6 +649,27 @@ static char *match_identifier_end(char *base, char *s, char *token, int tokenlen
   return 0;
 }
 
+static char *match_number_end(char *base, char *s, char *token, int tokenlen) {
+  (void) base;
+  while (s) {
+    s = strstr(s, token);
+    if (!s)
+      return 0;
+    if (isdigit((int) *(s + tokenlen))) {
+      s += tokenlen;
+      continue;
+    }
+    return s;
+  }
+  return 0;
+}
+
+/* -----------------------------------------------------------------------------
+ * replace_simple()
+ *
+ * Replaces count non-overlapping occurrences of token with rep in a string.   
+ * ----------------------------------------------------------------------------- */
+
 static int replace_simple(String *str, char *token, char *rep, int flags, int count, char *(*match) (char *, char *, char *, int)) {
   int tokenlen;			/* Length of the token */
   int replen;			/* Length of the replacement */
@@ -666,7 +679,7 @@ static int replace_simple(String *str, char *token, char *rep, int flags, int co
   int noquote = 0;
   char *c, *s, *t, *first;
   char *q, *q2;
-  register char *base;
+  char *base;
   int i;
 
   /* Figure out if anything gets replaced */
@@ -674,7 +687,7 @@ static int replace_simple(String *str, char *token, char *rep, int flags, int co
     return 0;
 
   base = str->str;
-  tokenlen = strlen(token);
+  tokenlen = (int)strlen(token);
   s = (*match) (base, base, token, tokenlen);
 
   if (!s)
@@ -711,7 +724,7 @@ static int replace_simple(String *str, char *token, char *rep, int flags, int co
   }
 
   first = s;
-  replen = strlen(rep);
+  replen = (int)strlen(rep);
 
   delta = (replen - tokenlen);
 
@@ -883,10 +896,10 @@ static int replace_simple(String *str, char *token, char *rep, int flags, int co
 }
 
 /* -----------------------------------------------------------------------------
- * int String_replace()
+ * String_replace()
  * ----------------------------------------------------------------------------- */
 
-static int String_replace(DOH *stro, DOH *token, DOH *rep, int flags) {
+static int String_replace(DOH *stro, const DOHString_or_char *token, const DOHString_or_char *rep, int flags) {
   int count = -1;
   String *str = (String *) ObjData(stro);
 
@@ -899,13 +912,15 @@ static int String_replace(DOH *stro, DOH *token, DOH *rep, int flags) {
     return replace_simple(str, Char(token), Char(rep), flags, count, match_identifier_begin);
   } else if (flags & DOH_REPLACE_ID) {
     return replace_simple(str, Char(token), Char(rep), flags, count, match_identifier);
+  } else if (flags & DOH_REPLACE_NUMBER_END) {
+    return replace_simple(str, Char(token), Char(rep), flags, count, match_number_end);
   } else {
     return replace_simple(str, Char(token), Char(rep), flags, count, match_simple);
   }
 }
 
 /* -----------------------------------------------------------------------------
- * void String_chop(DOH *str)
+ * String_chop()
  * ----------------------------------------------------------------------------- */
 
 static void String_chop(DOH *so) {
@@ -1010,10 +1025,10 @@ DohObjInfo DohStringType = {
 #define INIT_MAXSIZE  16
 
 /* -----------------------------------------------------------------------------
- * NewString(const char *c) - Create a new string
+ * NewString() - Create a new string
  * ----------------------------------------------------------------------------- */
 
-DOHString *DohNewString(const DOH *so) {
+DOHString *DohNewString(const DOHString_or_char *so) {
   int l = 0, max;
   String *str;
   char *s;
@@ -1056,7 +1071,7 @@ DOHString *DohNewString(const DOH *so) {
  * NewStringEmpty() - Create a new string
  * ----------------------------------------------------------------------------- */
 
-DOHString *DohNewStringEmpty() {
+DOHString *DohNewStringEmpty(void) {
   int max = INIT_MAXSIZE;
   String *str = (String *) DohMalloc(sizeof(String));
   str->hashkey = 0;
@@ -1071,10 +1086,10 @@ DOHString *DohNewStringEmpty() {
 }
 
 /* -----------------------------------------------------------------------------
- * NewStringWithSize(const char *c, int len) - Create a new string
+ * NewStringWithSize() - Create a new string
  * ----------------------------------------------------------------------------- */
 
-DOHString *DohNewStringWithSize(const DOH *so, int len) {
+DOHString *DohNewStringWithSize(const DOHString_or_char *so, int len) {
   int l = 0, max;
   String *str;
   char *s;
@@ -1099,6 +1114,7 @@ DOHString *DohNewStringWithSize(const DOH *so, int len) {
   str->maxsize = max;
   if (s) {
     strncpy(str->str, s, len);
+    str->str[l] = 0;
     str->len = l;
     str->sp = l;
   } else {
@@ -1109,12 +1125,12 @@ DOHString *DohNewStringWithSize(const DOH *so, int len) {
 }
 
 /* -----------------------------------------------------------------------------
- * NewStringf(DOH *fmt, ...)
+ * NewStringf()
  *
  * Create a new string from a list of objects.
  * ----------------------------------------------------------------------------- */
 
-DOHString *DohNewStringf(const DOH *fmt, ...) {
+DOHString *DohNewStringf(const DOHString_or_char *fmt, ...) {
   va_list ap;
   DOH *r;
   va_start(ap, fmt);
@@ -1136,11 +1152,7 @@ DOHString *DohNewStringf(const DOH *fmt, ...) {
 int DohStrcmp(const DOHString_or_char *s1, const DOHString_or_char *s2) {
   const char *c1 = Char(s1);
   const char *c2 = Char(s2);
-  if (c1 && c2) {
-    return strcmp(c1, c2);
-  } else {
-    return c1 < c2;
-  }
+  return strcmp(c1, c2);
 }
 
 int DohStrncmp(const DOHString_or_char *s1, const DOHString_or_char *s2, int n) {

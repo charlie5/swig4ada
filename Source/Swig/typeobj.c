@@ -1,6 +1,10 @@
 /* -----------------------------------------------------------------------------
- * See the LICENSE file for information on copyright, usage and redistribution
- * of SWIG, and the README file for authors - http://www.swig.org/release.html.
+ * This file is part of SWIG, which is licensed as a whole under version 3 
+ * (or any later version) of the GNU General Public License. Some additional
+ * terms also apply to certain portions of SWIG. The full details of the SWIG
+ * license and copyrights can be found in the LICENSE and COPYRIGHT files
+ * included with the SWIG source code as distributed by the SWIG developers
+ * and at http://www.swig.org/legal.html.
  *
  * typeobj.c
  *
@@ -10,10 +14,9 @@
  * like typedef, namespaces, etc.
  * ----------------------------------------------------------------------------- */
 
-char cvsroot_typeobj_c[] = "$Id: typeobj.c 961 2009-03-03 14:54:44Z krischik $";
-
 #include "swig.h"
 #include <ctype.h>
+#include <limits.h>
 
 /* -----------------------------------------------------------------------------
  * Synopsis
@@ -40,11 +43,15 @@ char cvsroot_typeobj_c[] = "$Id: typeobj.c 961 2009-03-03 14:54:44Z krischik $";
  * All type constructors are denoted by a trailing '.':
  * 
  *  'p.'                = Pointer (*)
- *  'r.'                = Reference (&)
+ *  'r.'                = Reference or ref-qualifier (&)
+ *  'z.'                = Rvalue reference or ref-qualifier (&&)
  *  'a(n).'             = Array of size n  [n]
  *  'f(..,..).'         = Function with arguments  (args)
- *  'q(str).'           = Qualifier (such as const or volatile) (const, volatile)
- *  'm(qual).'          = Pointer to member (qual::*)
+ *  'q(str).'           = Qualifier, such as const or volatile (cv-qualifier)
+ *  'm(cls).'           = Pointer to member (cls::*)
+ *
+ *  The complete type representation for varargs is:
+ *  'v(...)'
  *
  * The encoding follows the order that you might describe a type in words.
  * For example "p.a(200).int" is "A pointer to array of int's" and
@@ -71,6 +78,7 @@ char cvsroot_typeobj_c[] = "$Id: typeobj.c 961 2009-03-03 14:54:44Z krischik $";
  *
  *       SwigType_add_pointer()
  *       SwigType_add_reference()
+ *       SwigType_add_rvalue_reference()
  *       SwigType_add_array()
  *
  * These are used to build new types.  There are also functions to undo these
@@ -78,12 +86,14 @@ char cvsroot_typeobj_c[] = "$Id: typeobj.c 961 2009-03-03 14:54:44Z krischik $";
  *
  *       SwigType_del_pointer()
  *       SwigType_del_reference()
+ *       SwigType_del_rvalue_reference()
  *       SwigType_del_array()
  *
  * In addition, there are query functions
  *
  *       SwigType_ispointer()
  *       SwigType_isreference()
+ *       SwigType_isrvalue_reference()
  *       SwigType_isarray()
  *
  * Finally, there are some data extraction functions that can be used to
@@ -110,7 +120,7 @@ char cvsroot_typeobj_c[] = "$Id: typeobj.c 961 2009-03-03 14:54:44Z krischik $";
  * ----------------------------------------------------------------------------- */
 
 #ifdef NEW
-SwigType *NewSwigType(const String_or_char *initial) {
+SwigType *NewSwigType(const_String_or_char_ptr initial) {
   return NewString(initial);
 }
 
@@ -173,6 +183,10 @@ SwigType *SwigType_del_element(SwigType *t) {
  * SwigType_pop()
  * 
  * Pop one type element off the type.
+ * For example:
+ *   t in:   q(const).p.Integer
+ *   t out:  p.Integer
+ *   result: q(const).
  * ----------------------------------------------------------------------------- */
 
 SwigType *SwigType_pop(SwigType *t) {
@@ -200,7 +214,7 @@ SwigType *SwigType_pop(SwigType *t) {
  * Returns the parameter of an operator as a string
  * ----------------------------------------------------------------------------- */
 
-String *SwigType_parm(SwigType *t) {
+String *SwigType_parm(const SwigType *t) {
   char *start, *c;
   int nparens = 0;
 
@@ -227,7 +241,7 @@ String *SwigType_parm(SwigType *t) {
 /* -----------------------------------------------------------------------------
  * SwigType_split()
  *
- * Splits a type into it's component parts and returns a list of string.
+ * Splits a type into its component parts and returns a list of string.
  * ----------------------------------------------------------------------------- */
 
 List *SwigType_split(const SwigType *t) {
@@ -348,11 +362,11 @@ SwigType *SwigType_del_pointer(SwigType *t) {
     printf("Fatal error. SwigType_del_pointer applied to non-pointer.\n");
     abort();
   }
-  Delslice(t, 0, (c - s) + 2);
+  Delslice(t, 0, (int)((c - s) + 2));
   return t;
 }
 
-int SwigType_ispointer(SwigType *t) {
+int SwigType_ispointer(const SwigType *t) {
   char *c;
   if (!t)
     return 0;
@@ -394,12 +408,47 @@ SwigType *SwigType_del_reference(SwigType *t) {
   return t;
 }
 
-int SwigType_isreference(SwigType *t) {
+int SwigType_isreference(const SwigType *t) {
   char *c;
   if (!t)
     return 0;
   c = Char(t);
   if (strncmp(c, "r.", 2) == 0) {
+    return 1;
+  }
+  return 0;
+}
+
+/* -----------------------------------------------------------------------------
+ *                                 Rvalue References
+ *
+ * SwigType_add_rvalue_reference()
+ * SwigType_del_rvalue_reference()
+ * SwigType_isrvalue_reference()
+ *
+ * Add, remove, and test if a type is a rvalue reference.  The deletion and query
+ * functions take into account qualifiers (if any).
+ * ----------------------------------------------------------------------------- */
+
+SwigType *SwigType_add_rvalue_reference(SwigType *t) {
+  Insert(t, 0, "z.");
+  return t;
+}
+
+SwigType *SwigType_del_rvalue_reference(SwigType *t) {
+  char *c = Char(t);
+  int check = strncmp(c, "z.", 2);
+  assert(check == 0);
+  Delslice(t, 0, 2);
+  return t;
+}
+
+int SwigType_isrvalue_reference(const SwigType *t) {
+  char *c;
+  if (!t)
+    return 0;
+  c = Char(t);
+  if (strncmp(c, "z.", 2) == 0) {
     return 1;
   }
   return 0;
@@ -417,62 +466,62 @@ int SwigType_isreference(SwigType *t) {
  * Repeated qualifications have no effect.  Moreover, the order of qualifications
  * is alphabetical---meaning that "const volatile" and "volatile const" are
  * stored in exactly the same way as "q(const volatile)".
+ * 'qual' can be a list of multiple qualifiers in any order, separated by spaces.
  * ----------------------------------------------------------------------------- */
 
-SwigType *SwigType_add_qualifier(SwigType *t, const String_or_char *qual) {
-  char temp[256], newq[256];
-  int sz, added = 0;
-  char *q, *cqual;
+SwigType *SwigType_add_qualifier(SwigType *t, const_String_or_char_ptr qual) {
+  List *qlist;
+  String *allq, *newq;
+  int i, sz;
+  const char *cqprev = 0;
+  const char *c = Char(t);
+  const char *cqual = Char(qual);
 
-  char *c = Char(t);
-  cqual = Char(qual);
-
-  if (!(strncmp(c, "q(", 2) == 0)) {
-    sprintf(temp, "q(%s).", cqual);
+  /* if 't' has no qualifiers and 'qual' is a single qualifier, simply add it */
+  if ((strncmp(c, "q(", 2) != 0) && (strstr(cqual, " ") == 0)) {
+    String *temp = NewStringf("q(%s).", cqual);
     Insert(t, 0, temp);
+    Delete(temp);
     return t;
   }
 
-  /* The type already has a qualifier on it.  In this case, we first check to
-     see if the qualifier is already specified.  In that case do nothing.
-     If it is a new qualifier, we add it to the qualifier list in alphabetical
-     order */
-
-  sz = element_size(c);
-  strncpy(temp, c, (sz < 256) ? sz : 256);
-
-  if (strstr(temp, cqual)) {
-    /* Qualifier already added */
-    return t;
+  /* create string of all qualifiers */
+  if (strncmp(c, "q(", 2) == 0) {
+    allq = SwigType_parm(t);
+    Append(allq, " ");
+    SwigType_del_element(t);     /* delete old qualifier list from 't' */
+  } else {
+    allq = NewStringEmpty();
   }
+  Append(allq, qual);
 
-  /* Add the qualifier to the existing list. */
+  /* create list of all qualifiers from string */
+  qlist = Split(allq, ' ', INT_MAX);
+  Delete(allq);
 
-  strcpy(newq, "q(");
-  q = temp + 2;
-  q = strtok(q, " ).");
-  while (q) {
-    if (strcmp(cqual, q) < 0) {
-      /* New qualifier is less that current qualifier.  We need to insert it */
-      strcat(newq, cqual);
-      strcat(newq, " ");
-      strcat(newq, q);
-      added = 1;
-    } else {
-      strcat(newq, q);
-    }
-    q = strtok(NULL, " ).");
-    if (q) {
-      strcat(newq, " ");
+  /* sort in alphabetical order */
+  SortList(qlist, Strcmp);
+
+  /* create new qualifier string from unique elements of list */
+  sz = Len(qlist);
+  newq = NewString("q(");
+  for (i = 0; i < sz; ++i) {
+    String *q = Getitem(qlist, i);
+    const char *cq = Char(q);
+    if (cqprev == 0 || strcmp(cqprev, cq) != 0) {
+      if (i > 0) {
+        Append(newq, " ");
+      }
+      Append(newq, q);
+      cqprev = cq;
     }
   }
-  if (!added) {
-    strcat(newq, " ");
-    strcat(newq, cqual);
-  }
-  strcat(newq, ").");
-  Delslice(t, 0, sz);
+  Append(newq, ").");
+  Delete(qlist);
+
+  /* replace qualifier string with new one */
   Insert(t, 0, newq);
+  Delete(newq);
   return t;
 }
 
@@ -484,7 +533,7 @@ SwigType *SwigType_del_qualifier(SwigType *t) {
   return t;
 }
 
-int SwigType_isqualifier(SwigType *t) {
+int SwigType_isqualifier(const SwigType *t) {
   char *c;
   if (!t)
     return 0;
@@ -499,7 +548,7 @@ int SwigType_isqualifier(SwigType *t) {
  *                                Function Pointers
  * ----------------------------------------------------------------------------- */
 
-int SwigType_isfunctionpointer(SwigType *t) {
+int SwigType_isfunctionpointer(const SwigType *t) {
   char *c;
   if (!t)
     return 0;
@@ -537,7 +586,7 @@ SwigType *SwigType_functionpointer_decompose(SwigType *t) {
  * Add, remove, and test for C++ pointer to members.
  * ----------------------------------------------------------------------------- */
 
-SwigType *SwigType_add_memberpointer(SwigType *t, const String_or_char *name) {
+SwigType *SwigType_add_memberpointer(SwigType *t, const_String_or_char_ptr name) {
   String *temp = NewStringf("m(%s).", name);
   Insert(t, 0, temp);
   Delete(temp);
@@ -552,7 +601,7 @@ SwigType *SwigType_del_memberpointer(SwigType *t) {
   return t;
 }
 
-int SwigType_ismemberpointer(SwigType *t) {
+int SwigType_ismemberpointer(const SwigType *t) {
   char *c;
   if (!t)
     return 0;
@@ -579,12 +628,12 @@ int SwigType_ismemberpointer(SwigType *t) {
  * SwigType_pop_arrays()        - Remove all arrays
  * ----------------------------------------------------------------------------- */
 
-SwigType *SwigType_add_array(SwigType *t, const String_or_char *size) {
-  char temp[512];
-  strcpy(temp, "a(");
-  strcat(temp, Char(size));
-  strcat(temp, ").");
+SwigType *SwigType_add_array(SwigType *t, const_String_or_char_ptr size) {
+  String *temp = NewString("a(");
+  Append(temp, size);
+  Append(temp, ").");
   Insert(t, 0, temp);
+  Delete(temp);
   return t;
 }
 
@@ -596,7 +645,7 @@ SwigType *SwigType_del_array(SwigType *t) {
   return t;
 }
 
-int SwigType_isarray(SwigType *t) {
+int SwigType_isarray(const SwigType *t) {
   char *c;
   if (!t)
     return 0;
@@ -612,13 +661,13 @@ int SwigType_isarray(SwigType *t) {
  * Determine if the type is a 1D array type that is treated as a pointer within SWIG
  * eg Foo[], Foo[3] return true, but Foo[3][3], Foo*[], Foo*[3], Foo**[] return false
  */
-int SwigType_prefix_is_simple_1D_array(SwigType *t) {
+int SwigType_prefix_is_simple_1D_array(const SwigType *t) {
   char *c = Char(t);
 
   if (c && (strncmp(c, "a(", 2) == 0)) {
     c = strchr(c, '.');
-    c++;
-    return (*c == 0);
+    if (c)
+      return (*(++c) == 0);
   }
   return 0;
 }
@@ -638,25 +687,29 @@ SwigType *SwigType_pop_arrays(SwigType *t) {
 }
 
 /* Return number of array dimensions */
-int SwigType_array_ndim(SwigType *t) {
+int SwigType_array_ndim(const SwigType *t) {
   int ndim = 0;
   char *c = Char(t);
 
   while (c && (strncmp(c, "a(", 2) == 0)) {
     c = strchr(c, '.');
-    c++;
-    ndim++;
+    if (c) {
+      c++;
+      ndim++;
+    }
   }
   return ndim;
 }
 
 /* Get nth array dimension */
-String *SwigType_array_getdim(SwigType *t, int n) {
+String *SwigType_array_getdim(const SwigType *t, int n) {
   char *c = Char(t);
   while (c && (strncmp(c, "a(", 2) == 0) && (n > 0)) {
     c = strchr(c, '.');
-    c++;
-    n--;
+    if (c) {
+      c++;
+      n--;
+    }
   }
   if (n == 0) {
     String *dim = SwigType_parm(c);
@@ -673,7 +726,7 @@ String *SwigType_array_getdim(SwigType *t, int n) {
 }
 
 /* Replace nth array dimension */
-void SwigType_array_setdim(SwigType *t, int n, const String_or_char *rep) {
+void SwigType_array_setdim(SwigType *t, int n, const_String_or_char_ptr rep) {
   String *result = 0;
   char temp;
   char *start;
@@ -685,8 +738,10 @@ void SwigType_array_setdim(SwigType *t, int n, const String_or_char *rep) {
 
   while (c && (strncmp(c, "a(", 2) == 0) && (n > 0)) {
     c = strchr(c, '.');
-    c++;
-    n--;
+    if (c) {
+      c++;
+      n--;
+    }
   }
   if (n == 0) {
     temp = *c;
@@ -703,7 +758,7 @@ void SwigType_array_setdim(SwigType *t, int n, const String_or_char *rep) {
 }
 
 /* Return base type of an array */
-SwigType *SwigType_array_type(SwigType *ty) {
+SwigType *SwigType_array_type(const SwigType *ty) {
   SwigType *t;
   t = Copy(ty);
   while (SwigType_isarray(t)) {
@@ -717,7 +772,6 @@ SwigType *SwigType_array_type(SwigType *ty) {
  *                                    Functions
  *
  * SwigType_add_function()
- * SwigType_del_function()
  * SwigType_isfunction()
  * SwigType_pop_function()
  *
@@ -731,7 +785,6 @@ SwigType *SwigType_add_function(SwigType *t, ParmList *parms) {
 
   Insert(t, 0, ").");
   pstr = NewString("f(");
-  p = parms;
   for (p = parms; p; p = nextSibling(p)) {
     if (p != parms)
       Putc(',', pstr);
@@ -742,12 +795,34 @@ SwigType *SwigType_add_function(SwigType *t, ParmList *parms) {
   return t;
 }
 
+/* -----------------------------------------------------------------------------
+ * SwigType_pop_function()
+ *
+ * Pop and return the function from the input type leaving the function's return
+ * type, if any.
+ * For example:
+ *   t in:   q(const).f().p.
+ *   t out:  p.
+ *   result: q(const).f().
+ * ----------------------------------------------------------------------------- */
+
 SwigType *SwigType_pop_function(SwigType *t) {
   SwigType *f = 0;
   SwigType *g = 0;
   char *c = Char(t);
-  if (strncmp(c, "q(", 2) == 0) {
+  if (strncmp(c, "r.", 2) == 0 || strncmp(c, "z.", 2) == 0) {
+    /* Remove ref-qualifier */
     f = SwigType_pop(t);
+    c = Char(t);
+  }
+  if (strncmp(c, "q(", 2) == 0) {
+    /* Remove cv-qualifier */
+    String *qual = SwigType_pop(t);
+    if (f) {
+      SwigType_push(qual, f);
+      Delete(f);
+    }
+    f = qual;
     c = Char(t);
   }
   if (strncmp(c, "f(", 2)) {
@@ -761,14 +836,54 @@ SwigType *SwigType_pop_function(SwigType *t) {
   return g;
 }
 
-int SwigType_isfunction(SwigType *t) {
+/* -----------------------------------------------------------------------------
+ * SwigType_pop_function_qualifiers()
+ *
+ * Pop and return the function qualifiers from the input type leaving the rest of
+ * function declaration. Returns NULL if no qualifiers.
+ * For example:
+ *   t in:   r.q(const).f().p.
+ *   t out:  f().p.
+ *   result: r.q(const)
+ * ----------------------------------------------------------------------------- */
+
+SwigType *SwigType_pop_function_qualifiers(SwigType *t) {
+  SwigType *qualifiers = 0;
+  char *c = Char(t);
+  if (strncmp(c, "r.", 2) == 0 || strncmp(c, "z.", 2) == 0) {
+    /* Remove ref-qualifier */
+    String *qual = SwigType_pop(t);
+    qualifiers = qual;
+    c = Char(t);
+  }
+  if (strncmp(c, "q(", 2) == 0) {
+    /* Remove cv-qualifier */
+    String *qual = SwigType_pop(t);
+    if (qualifiers) {
+      SwigType_push(qual, qualifiers);
+      Delete(qualifiers);
+    }
+    qualifiers = qual;
+  }
+  assert(Strncmp(t, "f(", 2) == 0);
+
+  return qualifiers;
+}
+
+int SwigType_isfunction(const SwigType *t) {
   char *c;
   if (!t) {
     return 0;
   }
   c = Char(t);
+  if (strncmp(c, "r.", 2) == 0 || strncmp(c, "z.", 2) == 0) {
+    /* Might be a function with a ref-qualifier, skip over */
+    c += 2;
+    if (!*c)
+      return 0;
+  }
   if (strncmp(c, "q(", 2) == 0) {
-    /* Might be a 'const' function.  Try to skip over the 'const' */
+    /* Might be a function with a cv-qualifier, skip over */
     c = strchr(c, '.');
     if (c)
       c++;
@@ -781,13 +896,15 @@ int SwigType_isfunction(SwigType *t) {
   return 0;
 }
 
-ParmList *SwigType_function_parms(SwigType *t) {
+/* Create a list of parameters from the type t, using the file_line_node Node for 
+ * file and line numbering for the parameters */
+ParmList *SwigType_function_parms(const SwigType *t, Node *file_line_node) {
   List *l = SwigType_parmlist(t);
   Hash *p, *pp = 0, *firstp = 0;
   Iterator o;
 
   for (o = First(l); o.item; o = Next(o)) {
-    p = NewParm(o.item, 0);
+    p = file_line_node ? NewParm(o.item, 0, file_line_node) : NewParmWithoutFileLineInfo(o.item, 0);
     if (!firstp)
       firstp = p;
     if (pp) {
@@ -827,7 +944,6 @@ SwigType *SwigType_add_template(SwigType *t, ParmList *parms) {
   Parm *p;
 
   Append(t, "<(");
-  p = parms;
   for (p = parms; p; p = nextSibling(p)) {
     String *v;
     if (Getattr(p, "default"))
@@ -850,17 +966,18 @@ SwigType *SwigType_add_template(SwigType *t, ParmList *parms) {
  * SwigType_templateprefix()
  *
  * Returns the prefix before the first template definition.
+ * Returns the type unmodified if not a template.
  * For example:
  *
- *     Foo<(p.int)>::bar
- *
- * returns "Foo"
+ *     Foo<(p.int)>::bar  =>  Foo
+ *     r.q(const).Foo<(p.int)>::bar => r.q(const).Foo
+ *     Foo => Foo
  * ----------------------------------------------------------------------------- */
 
 String *SwigType_templateprefix(const SwigType *t) {
   const char *s = Char(t);
   const char *c = strstr(s, "<(");
-  return c ? NewStringWithSize(s, c - s) : NewString(s);
+  return c ? NewStringWithSize(s, (int)(c - s)) : NewString(s);
 }
 
 /* -----------------------------------------------------------------------------
@@ -896,6 +1013,51 @@ String *SwigType_templatesuffix(const SwigType *t) {
 }
 
 /* -----------------------------------------------------------------------------
+ * SwigType_istemplate_templateprefix()
+ *
+ * Combines SwigType_istemplate and SwigType_templateprefix efficiently into one function.
+ * Returns the prefix before the first template definition.
+ * Returns NULL if not a template.
+ * For example:
+ *
+ *     Foo<(p.int)>::bar  =>  Foo
+ *     r.q(const).Foo<(p.int)>::bar => r.q(const).Foo
+ *     Foo => NULL
+ * ----------------------------------------------------------------------------- */
+
+String *SwigType_istemplate_templateprefix(const SwigType *t) {
+  const char *s = Char(t);
+  const char *c = strstr(s, "<(");
+  return c ? NewStringWithSize(s, (int)(c - s)) : 0;
+}
+
+/* -----------------------------------------------------------------------------
+ * SwigType_istemplate_only_templateprefix()
+ *
+ * Similar to SwigType_istemplate_templateprefix() but only returns the template
+ * prefix if the type is just the template and not a subtype/symbol within the template.
+ * Returns NULL if not a template or is a template with a symbol within the template.
+ * For example:
+ *
+ *     Foo<(p.int)>  =>  Foo
+ *     Foo<(p.int)>::bar  =>  NULL
+ *     r.q(const).Foo<(p.int)> => r.q(const).Foo
+ *     r.q(const).Foo<(p.int)>::bar => NULL
+ *     Foo => NULL
+ * ----------------------------------------------------------------------------- */
+
+String *SwigType_istemplate_only_templateprefix(const SwigType *t) {
+  int len = Len(t);
+  const char *s = Char(t);
+  if (len >= 4 && strcmp(s + len - 2, ")>") == 0) {
+    const char *c = strstr(s, "<(");
+    return c ? NewStringWithSize(s, (int)(c - s)) : 0;
+  } else {
+    return 0;
+  }
+}
+
+/* -----------------------------------------------------------------------------
  * SwigType_templateargs()
  *
  * Returns the template arguments
@@ -922,7 +1084,7 @@ String *SwigType_templateargs(const SwigType *t) {
 	  nest--;
 	c++;
       }
-      return NewStringWithSize(start, c - start);
+      return NewStringWithSize(start, (int)(c - start));
     }
     c++;
   }
@@ -937,7 +1099,8 @@ String *SwigType_templateargs(const SwigType *t) {
 
 int SwigType_istemplate(const SwigType *t) {
   char *ct = Char(t);
-  if ((ct = strstr(ct, "<(")) && (strstr(ct + 2, ")>")))
+  ct = strstr(ct, "<(");
+  if (ct && (strstr(ct + 2, ")>")))
     return 1;
   return 0;
 }
@@ -1061,7 +1224,7 @@ String *SwigType_prefix(const SwigType *t) {
  * Strip all qualifiers from a type and return a new type
  * ----------------------------------------------------------------------------- */
 
-SwigType *SwigType_strip_qualifiers(SwigType *t) {
+SwigType *SwigType_strip_qualifiers(const SwigType *t) {
   static Hash *memoize_stripped = 0;
   SwigType *r;
   List *l;
@@ -1092,3 +1255,62 @@ SwigType *SwigType_strip_qualifiers(SwigType *t) {
   }
   return r;
 }
+
+/* -----------------------------------------------------------------------------
+ * SwigType_strip_single_qualifier()
+ * 
+ * If the type contains a qualifier, strip one qualifier and return a new type.
+ * The left most qualifier is stripped first (when viewed as C source code) but
+ * this is the equivalent to the right most qualifier using SwigType notation.
+ * Example: 
+ *    r.q(const).p.q(const).int => r.q(const).p.int
+ *    r.q(const).p.int          => r.p.int
+ *    r.p.int                   => r.p.int
+ * ----------------------------------------------------------------------------- */
+
+SwigType *SwigType_strip_single_qualifier(const SwigType *t) {
+  static Hash *memoize_stripped = 0;
+  SwigType *r = 0;
+  List *l;
+  int numitems;
+
+  if (!memoize_stripped)
+    memoize_stripped = NewHash();
+  r = Getattr(memoize_stripped, t);
+  if (r)
+    return Copy(r);
+
+  l = SwigType_split(t);
+
+  numitems = Len(l);
+  if (numitems >= 2) {
+    int item;
+    /* iterate backwards from last but one item */
+    for (item = numitems - 2; item >= 0; --item) {
+      String *subtype = Getitem(l, item);
+      if (SwigType_isqualifier(subtype)) {
+	Iterator it;
+	Delitem(l, item);
+	r = NewStringEmpty();
+	for (it = First(l); it.item; it = Next(it)) {
+	  Append(r, it.item);
+	}
+	break;
+      }
+    }
+  }
+  if (!r)
+    r = Copy(t);
+
+  Delete(l);
+  {
+    String *key, *value;
+    key = Copy(t);
+    value = Copy(r);
+    Setattr(memoize_stripped, key, value);
+    Delete(key);
+    Delete(value);
+  }
+  return r;
+}
+

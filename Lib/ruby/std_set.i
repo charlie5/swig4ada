@@ -2,7 +2,7 @@
   Sets
 */
 
-%fragment("StdSetTraits","header",fragment="StdSequenceTraits")
+%fragment("StdSetTraits","header",fragment="<stddef.h>",fragment="StdSequenceTraits")
 %{
   namespace swig {
     template <class RubySeq, class T> 
@@ -152,10 +152,29 @@
   }
 %}
 
+%define %swig_sequence_methods_extra_set(Sequence...)
+  %extend {
+    %alias reject_bang "delete_if";
+    Sequence* reject_bang() {
+      if ( !rb_block_given_p() )
+	rb_raise( rb_eArgError, "no block given" );
+
+      for ( Sequence::iterator i = $self->begin(); i != $self->end(); ) {
+        VALUE r = swig::from< Sequence::value_type >(*i);
+        Sequence::iterator current = i++;
+        if ( RTEST( rb_yield(r) ) )
+          $self->erase(current);
+      }
+
+      return self;
+    }
+  }
+%enddef
 
 %define %swig_set_methods(set...)
 
   %swig_sequence_methods_common(%arg(set));
+  %swig_sequence_methods_extra_set(%arg(set));
 
   %fragment("RubyPairBoolOutputIterator","header",fragment=SWIG_From_frag(bool),fragment="RubySequence_Cont") {}
 
@@ -170,10 +189,9 @@
   %typemap(out,noblock=1,fragment="RubyPairBoolOutputIterator")
   std::pair<iterator, bool> {
     $result = rb_ary_new2(2);
-    RARRAY_PTR($result)[0] = SWIG_NewPointerObj(swig::make_set_nonconst_iterator(%static_cast($1,$type &).first),
-						swig::Iterator::descriptor(),SWIG_POINTER_OWN);    
-    RARRAY_PTR($result)[1] = SWIG_From(bool)(%static_cast($1,const $type &).second);
-    RARRAY_LEN($result) = 2;
+    rb_ary_push($result, SWIG_NewPointerObj(swig::make_set_nonconst_iterator(%static_cast($1,$type &).first),
+                                            swig::Iterator::descriptor(),SWIG_POINTER_OWN));
+    rb_ary_push($result, SWIG_From(bool)(%static_cast($1,const $type &).second));
    }
 
   %extend  {

@@ -7,6 +7,9 @@
 #ifdef do_close
   #undef do_close
 #endif
+#ifdef do_exec
+  #undef do_exec
+#endif
 #ifdef scalar
   #undef scalar
 #endif
@@ -61,9 +64,6 @@
 #ifdef eof
   #undef eof
 #endif
-#ifdef bool
-  #undef bool
-#endif
 #ifdef close
   #undef close
 #endif
@@ -91,3 +91,26 @@
 #ifdef open
   #undef open
 #endif
+#ifdef readdir
+  #undef readdir
+#endif
+#ifdef bind
+  #undef bind
+#endif
+#ifdef access
+  #undef access
+#endif
+#ifdef stat
+  #undef stat
+#endif
+#ifdef seed
+  #undef seed
+#endif
+
+#ifdef bool
+  /* Leave if macro is from C99 stdbool.h */
+  #ifndef __bool_true_false_are_defined
+    #undef bool
+  #endif
+#endif
+

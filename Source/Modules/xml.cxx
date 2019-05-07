@@ -1,13 +1,15 @@
 /* -----------------------------------------------------------------------------
- * See the LICENSE file for information on copyright, usage and redistribution
- * of SWIG, and the README file for authors - http://www.swig.org/release.html.
+ * This file is part of SWIG, which is licensed as a whole under version 3 
+ * (or any later version) of the GNU General Public License. Some additional
+ * terms also apply to certain portions of SWIG. The full details of the SWIG
+ * license and copyrights can be found in the LICENSE and COPYRIGHT files
+ * included with the SWIG source code as distributed by the SWIG developers
+ * and at http://www.swig.org/legal.html.
  *
  * xml.cxx
  *
  * An Xml parse tree generator.
  * ----------------------------------------------------------------------------- */
-
-char cvsroot_xml_cxx[] = "$Id: xml.cxx 10003 2007-10-17 21:42:11Z wsfulton $";
 
 #include "swigmod.h"
 
@@ -47,7 +49,7 @@ public:
 	iX++;
 	Swig_mark_arg(iX);
 	String *outfile = NewString(argv[iX]);
-	out = NewFile(outfile, "w");
+	out = NewFile(outfile, "w", SWIG_output_files());
 	if (!out) {
 	  FileErrorDisplay(outfile);
 	  SWIG_exit(EXIT_FAILURE);
@@ -79,10 +81,12 @@ public:
   virtual int top(Node *n) {
     if (out == 0) {
       String *outfile = Getattr(n, "outfile");
-      Replaceall(outfile, ".cxx", ".xml");
-      Replaceall(outfile, ".cpp", ".xml");
-      Replaceall(outfile, ".c", ".xml");
-      out = NewFile(outfile, "w");
+      String *ext = Swig_file_extension(outfile);
+      // If there's an extension, ext will include the ".".
+      Delslice(outfile, Len(outfile) - Len(ext), DOH_END);
+      Delete(ext);
+      Append(outfile, ".xml");
+      out = NewFile(outfile, "w", SWIG_output_files());
       if (!out) {
 	FileErrorDisplay(outfile);
 	SWIG_exit(EXIT_FAILURE);
@@ -114,7 +118,7 @@ public:
     String *k;
     indent_level += 4;
     print_indent(0);
-    Printf(out, "<attributelist id=\"%ld\" addr=\"%x\" >\n", ++id, obj);
+    Printf(out, "<attributelist id=\"%ld\" addr=\"%p\" >\n", ++id, obj);
     indent_level += 4;
     Iterator ki;
     ki = First(obj);
@@ -140,6 +144,8 @@ public:
 	Xml_print_kwargs(Getattr(obj, k));
       } else if (Cmp(k, "parms") == 0 || Cmp(k, "pattern") == 0) {
 	Xml_print_parmlist(Getattr(obj, k));
+      } else if (Cmp(k, "catchlist") == 0 || Cmp(k, "templateparms") == 0) {
+	Xml_print_parmlist(Getattr(obj, k), Char(k));
       } else {
 	DOH *o;
 	print_indent(0);
@@ -154,14 +160,14 @@ public:
 	  Replaceall(o, "\"", "&quot;");
 	  Replaceall(o, "\\", "\\\\");
 	  Replaceall(o, "\n", "&#10;");
-	  Printf(out, "<attribute name=\"%s\" value=\"%s\" id=\"%ld\" addr=\"%x\" />\n", ck, o, ++id, o);
+	  Printf(out, "<attribute name=\"%s\" value=\"%s\" id=\"%ld\" addr=\"%p\" />\n", ck, o, ++id, o);
 	  Delete(o);
 	  Delete(ck);
 	} else {
 	  o = Getattr(obj, k);
 	  String *ck = NewString(k);
 	  Replaceall(ck, ":", "_");
-	  Printf(out, "<attribute name=\"%s\" value=\"%x\" id=\"%ld\" addr=\"%x\" />\n", ck, o, ++id, o);
+	  Printf(out, "<attribute name=\"%s\" value=\"%p\" id=\"%ld\" addr=\"%p\" />\n", ck, o, ++id, o);
 	  Delete(ck);
 	}
       }
@@ -177,7 +183,7 @@ public:
     Node *cobj;
 
     print_indent(0);
-    Printf(out, "<%s id=\"%ld\" addr=\"%x\" >\n", nodeType(obj), ++id, obj);
+    Printf(out, "<%s id=\"%ld\" addr=\"%p\" >\n", nodeType(obj), ++id, obj);
     Xml_print_attributes(obj);
     cobj = firstChild(obj);
     if (cobj) {
@@ -194,10 +200,10 @@ public:
   }
 
 
-  void Xml_print_parmlist(ParmList *p) {
+  void Xml_print_parmlist(ParmList *p, const char* markup = "parmlist") {
 
     print_indent(0);
-    Printf(out, "<parmlist id=\"%ld\" addr=\"%x\" >\n", ++id, p);
+    Printf(out, "<%s id=\"%ld\" addr=\"%p\" >\n", markup, ++id, p);
     indent_level += 4;
     while (p) {
       print_indent(0);
@@ -209,19 +215,19 @@ public:
     }
     indent_level -= 4;
     print_indent(0);
-    Printf(out, "</parmlist >\n");
+    Printf(out, "</%s >\n", markup);
   }
 
   void Xml_print_baselist(List *p) {
 
     print_indent(0);
-    Printf(out, "<baselist id=\"%ld\" addr=\"%x\" >\n", ++id, p);
+    Printf(out, "<baselist id=\"%ld\" addr=\"%p\" >\n", ++id, p);
     indent_level += 4;
     Iterator s;
     for (s = First(p); s.item; s = Next(s)) {
       print_indent(0);
       String *item_name = Xml_escape_string(s.item);
-      Printf(out, "<base name=\"%s\" id=\"%ld\" addr=\"%x\" />\n", item_name, ++id, s.item);
+      Printf(out, "<base name=\"%s\" id=\"%ld\" addr=\"%p\" />\n", item_name, ++id, s.item);
       Delete(item_name);
     }
     indent_level -= 4;
@@ -245,7 +251,7 @@ public:
   void Xml_print_module(Node *p) {
 
     print_indent(0);
-    Printf(out, "<attribute name=\"module\" value=\"%s\" id=\"%ld\" addr=\"%x\" />\n", Getattr(p, "name"), ++id, p);
+    Printf(out, "<attribute name=\"module\" value=\"%s\" id=\"%ld\" addr=\"%p\" />\n", Getattr(p, "name"), ++id, p);
   }
 
   void Xml_print_kwargs(Hash *p) {
@@ -266,13 +272,13 @@ public:
   void Xml_print_hash(Hash *p, const char *markup) {
 
     print_indent(0);
-    Printf(out, "<%s id=\"%ld\" addr=\"%x\" >\n", markup, ++id, p);
+    Printf(out, "<%s id=\"%ld\" addr=\"%p\" >\n", markup, ++id, p);
     Xml_print_attributes(p);
     indent_level += 4;
     Iterator n = First(p);
     while (n.key) {
       print_indent(0);
-      Printf(out, "<%ssitem id=\"%ld\" addr=\"%x\" >\n", markup, ++id, n.item);
+      Printf(out, "<%ssitem id=\"%ld\" addr=\"%p\" >\n", markup, ++id, n.item);
       Xml_print_attributes(n.item);
       print_indent(0);
       Printf(out, "</%ssitem >\n", markup);
@@ -301,7 +307,7 @@ void Swig_print_xml(DOH *obj, String *filename) {
   if (!filename) {
     out = stdout;
   } else {
-    out = NewFile(filename, "w");
+    out = NewFile(filename, "w", SWIG_output_files());
     if (!out) {
       FileErrorDisplay(filename);
       SWIG_exit(EXIT_FAILURE);

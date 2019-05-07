@@ -232,7 +232,7 @@ typedef Doh String_or_char;
   new_File (String*    name,
             char*      mode)
   {
-    return NewFile (name, mode);
+    return NewFile (name, mode, NULL);
 
   }
 
@@ -256,7 +256,7 @@ typedef Doh String_or_char;
   void
   close_File (File*    Self)
   {
-    Close (Self);
+    DohDelete (Self);
   }
   
 

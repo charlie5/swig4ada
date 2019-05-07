@@ -3,7 +3,7 @@
 */
 %include <std_map.i>
 
-%fragment("StdMultimapTraits","header",fragment="StdSequenceTraits")
+%fragment("StdMultimapTraits","header",fragment="StdMapCommonTraits")
 {
   namespace swig {
     template <class RubySeq, class K, class T >
@@ -90,12 +90,11 @@
 
   %extend {
     VALUE __getitem__(const key_type& key) const {
-      MultiMap::const_iterator i = self->find(key);
-      if ( i != self->end() )
+      std::pair<MultiMap::const_iterator, MultiMap::const_iterator > r = $self->equal_range(key);
+      if ( r.first != r.second )
 	{
-	  MultiMap::const_iterator e = $self->upper_bound(key);
 	  VALUE ary = rb_ary_new();
-	  for ( ; i != e; ++i )
+	  for (MultiMap::const_iterator i = r.first ; i != r.second; ++i )
 	    {
 	      rb_ary_push( ary, swig::from<MultiMap::mapped_type>( i->second ) );
 	    }
@@ -115,7 +114,8 @@
     {
       MultiMap::iterator i = $self->begin();
       MultiMap::iterator e = $self->end();
-      VALUE str = rb_str_new2( swig::type_name< MultiMap >() );
+      const char *type_name = swig::type_name< MultiMap >();
+      VALUE str = rb_str_new2( type_name );
       str = rb_str_cat2( str, " {" );
       VALUE tmp;
       while ( i != e )

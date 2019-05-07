@@ -12,17 +12,18 @@ package DOHs is
 
    type DOH_array is array (interfaces.C.Size_t range <>) of aliased DOHs.DOH;
 
-   DOH_MAJOR_VERSION    : constant := 0;
-   DOH_MINOR_VERSION    : constant := 1;
-   DOH_BEGIN            : constant := -1;
-   DOH_END              : constant := -2;
-   DOH_CUR              : constant := -3;
-   DOH_CURRENT          : constant := -3;
-   DOH_REPLACE_ANY      : constant := 16#1#;
-   DOH_REPLACE_NOQUOTE  : constant := 16#2#;
-   DOH_REPLACE_ID       : constant := 16#4#;
-   DOH_REPLACE_FIRST    : constant := 16#8#;
-   DOH_REPLACE_ID_BEGIN : constant := 16#10#;
-   DOH_REPLACE_ID_END   : constant := 16#20#;
+   DOH_MAJOR_VERSION      : constant := 0;
+   DOH_MINOR_VERSION      : constant := 1;
+   DOH_BEGIN              : constant := -1;
+   DOH_END                : constant := -2;
+   DOH_CUR                : constant := -3;
+   DOH_CURRENT            : constant := -3;
+   DOH_REPLACE_ANY        : constant := 16#1#;
+   DOH_REPLACE_NOQUOTE    : constant := 16#2#;
+   DOH_REPLACE_ID         : constant := 16#4#;
+   DOH_REPLACE_FIRST      : constant := 16#8#;
+   DOH_REPLACE_ID_BEGIN   : constant := 16#10#;
+   DOH_REPLACE_ID_END     : constant := 16#20#;
+   DOH_REPLACE_NUMBER_END : constant := 16#40#;
 
 end DOHs;

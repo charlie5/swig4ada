@@ -1,7 +1,4 @@
 /* -----------------------------------------------------------------------------
- * See the LICENSE file for information on copyright, usage and redistribution
- * of SWIG, and the README file for authors - http://www.swig.org/release.html.
- *
  * typemaps.i
  * ----------------------------------------------------------------------------- */
 
@@ -23,6 +20,10 @@
 }
 
 %typemap(varin) SWIGTYPE & {
+  $1 = *(($1_ltype)SWIG_MustGetPtr($input, $descriptor, 1, 0));
+}
+
+%typemap(varin) SWIGTYPE && {
   $1 = *(($1_ltype)SWIG_MustGetPtr($input, $descriptor, 1, 0));
 }
 
@@ -57,16 +58,20 @@
   $result = SWIG_NewPointerObj((void *) &$1, $1_descriptor, 0);
 }
 
+%typemap(varout) SWIGTYPE && {
+  $result = SWIG_NewPointerObj((void *) &$1, $1_descriptor, 0);
+}
+
 /* C++ References */
 
 #ifdef __cplusplus
 
-%typemap(in) SWIGTYPE &, const SWIGTYPE & { 
+%typemap(in) SWIGTYPE &, SWIGTYPE && { 
   $1 = ($ltype) SWIG_MustGetPtr($input, $descriptor, $argnum, 0);
   if ($1 == NULL) scheme_signal_error("swig-type-error (null reference)");
 }
 
-%typemap(out) SWIGTYPE &, const SWIGTYPE & {
+%typemap(out) SWIGTYPE &, SWIGTYPE && {
   $result = SWIG_NewPointerObj ($1, $descriptor, $owner);
 }
 
@@ -282,7 +287,7 @@ REF_MAP(double, SCHEME_REALP, scheme_real_to_double,
 
 //%typemap(in) (char *STRING, int LENGTH) {
 //    int temp;
-//    $1 = ($1_ltype) gh_scm2newstr($input, &temp);
+//    $1 = ($1_ltype) SWIG_Guile_scm2newstr($input, &temp);
 //    $2 = ($2_ltype) temp;
 //}
 
@@ -324,7 +329,7 @@ REF_MAP(double, SCHEME_REALP, scheme_real_to_double,
   $1 = (SCHEME_STRINGP($input)) ? 1 : 0;
 }
 
-%typecheck(SWIG_TYPECHECK_POINTER) SWIGTYPE *, SWIGTYPE &, SWIGTYPE [] {
+%typecheck(SWIG_TYPECHECK_POINTER) SWIGTYPE *, SWIGTYPE [] {
   void *ptr;
   if (SWIG_ConvertPtr($input, (void **) &ptr, $1_descriptor, 0)) {
     $1 = 0;
@@ -333,9 +338,18 @@ REF_MAP(double, SCHEME_REALP, scheme_real_to_double,
   }
 }
 
+%typecheck(SWIG_TYPECHECK_POINTER) SWIGTYPE &, SWIGTYPE && {
+  void *ptr;
+  if (SWIG_ConvertPtr($input, (void **) &ptr, $1_descriptor, SWIG_POINTER_NO_NULL)) {
+    $1 = 0;
+  } else {
+    $1 = 1;
+  }
+}
+
 %typecheck(SWIG_TYPECHECK_POINTER) SWIGTYPE {
   void *ptr;
-  if (SWIG_ConvertPtr($input, (void **) &ptr, $&1_descriptor, 0)) {
+  if (SWIG_ConvertPtr($input, (void **) &ptr, $&1_descriptor, SWIG_POINTER_NO_NULL)) {
     $1 = 0;
   } else {
     $1 = 1;
@@ -350,5 +364,13 @@ REF_MAP(double, SCHEME_REALP, scheme_real_to_double,
     $1 = 1;
   }
 }
+
+
+/* Array reference typemaps */
+%apply SWIGTYPE & { SWIGTYPE ((&)[ANY]) }
+%apply SWIGTYPE && { SWIGTYPE ((&&)[ANY]) }
+
+/* const pointers */
+%apply SWIGTYPE * { SWIGTYPE *const }
 
 

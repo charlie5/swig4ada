@@ -1,5 +1,13 @@
 %module member_pointer
 
+%{
+#if defined(__SUNPRO_CC)
+#pragma error_messages (off, badargtype2w) /* Formal argument ... is being passed extern "C" ... */
+#pragma error_messages (off, wbadinit) /* Using extern "C" ... to initialize ... */
+#pragma error_messages (off, wbadasg) /* Assigning extern "C" ... */
+#endif
+%}
+
 %inline %{
 class Shape {
 public:
@@ -36,17 +44,22 @@ public:
   virtual double perimeter(void);
 };
 
+/* Typedef */
+typedef double (Shape::*PerimeterFunc_td)(void);
+
 extern double do_op(Shape *s, double (Shape::*m)(void));
+extern double do_op_td(Shape *s, PerimeterFunc_td m);
 
 /* Functions that return member pointers */
 
 extern double (Shape::*areapt())(void);
 extern double (Shape::*perimeterpt())(void);
+extern PerimeterFunc_td perimeterpt_td();
 
 /* Global variables that are member pointers */
 extern double (Shape::*areavar)(void);
 extern double (Shape::*perimetervar)(void);
-
+extern PerimeterFunc_td perimetervar_td;
 %}
 
 %{
@@ -80,6 +93,10 @@ double do_op(Shape *s, double (Shape::*m)(void)) {
   return (s->*m)();
 }
 
+double do_op_td(Shape *s, PerimeterFunc_td m) {
+  return (s->*m)();
+}
+
 double (Shape::*areapt())(void) {
   return &Shape::area;
 }
@@ -88,9 +105,14 @@ double (Shape::*perimeterpt())(void) {
   return &Shape::perimeter;
 }
 
+PerimeterFunc_td perimeterpt_td() {
+  return &Shape::perimeter;
+}
+
 /* Member pointer variables */
 double (Shape::*areavar)(void) = &Shape::area;
 double (Shape::*perimetervar)(void) = &Shape::perimeter;
+PerimeterFunc_td perimetervar_td = &Shape::perimeter;
 %}
 
 
@@ -98,4 +120,30 @@ double (Shape::*perimetervar)(void) = &Shape::perimeter;
 %constant double (Shape::*AREAPT)(void) = &Shape::area;
 %constant double (Shape::*PERIMPT)(void) = &Shape::perimeter;
 %constant double (Shape::*NULLPT)(void) = 0;
+
+/*
+%inline %{
+  struct Funktions {
+    void retByRef(int & (*d)(double)) {}
+  };
+  void byRef(int & (Funktions::*d)(double)) {}
+%}
+*/
+
+%inline %{
+
+struct Funktions {
+  int addByValue(const int &a, int b) { return a+b; }
+  int * addByPointer(const int &a, int b) { static int val; val = a+b; return &val; }
+  int & addByReference(const int &a, int b) { static int val; val = a+b; return val; }
+};
+
+int call1(int (Funktions::*d)(const int &, int), int a, int b) { Funktions f; return (f.*d)(a, b); }
+int call2(int * (Funktions::*d)(const int &, int), int a, int b) { Funktions f; return *(f.*d)(a, b); }
+int call3(int & (Funktions::*d)(const int &, int), int a, int b) { Funktions f; return (f.*d)(a, b); }
+%}
+
+%constant int (Funktions::*ADD_BY_VALUE)(const int &, int) = &Funktions::addByValue;
+%constant int * (Funktions::*ADD_BY_POINTER)(const int &, int) = &Funktions::addByPointer;
+%constant int & (Funktions::*ADD_BY_REFERENCE)(const int &, int) = &Funktions::addByReference;
 

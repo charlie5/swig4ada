@@ -1,7 +1,4 @@
 /* -----------------------------------------------------------------------------
- * See the LICENSE file for information on copyright, usage and redistribution
- * of SWIG, and the README file for authors - http://www.swig.org/release.html.
- *
  * Typemaps used by the STL wrappers that throw exceptions.
  * These typemaps are used when methods are declared with an STL exception
  * specification, such as:
@@ -11,6 +8,7 @@
  * ----------------------------------------------------------------------------- */
 
 %{
+#include <typeinfo>
 #include <stdexcept>
 %}
 %include <exception.i>
@@ -27,9 +25,10 @@ namespace std
   }; 
 }
 
-// normally object which are thrown are returned to interpreter as errors
-// (which potentally may have problems if they are not copied)
+// normally objects which are thrown are returned to the interpreter as errors
+// (which potentially may have problems if they are not copied)
 // therefore all classes based upon std::exception are converted to their strings & returned as errors
+%typemap(throws) std::bad_cast          "SWIG_exception(SWIG_TypeError, $1.what());"
 %typemap(throws) std::bad_exception     "SWIG_exception(SWIG_RuntimeError, $1.what());"
 %typemap(throws) std::domain_error      "SWIG_exception(SWIG_ValueError, $1.what());"
 %typemap(throws) std::exception         "SWIG_exception(SWIG_SystemError, $1.what());"

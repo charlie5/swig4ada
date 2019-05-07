@@ -2,6 +2,7 @@
 --
 with DOHs.DohIterator;
 with DOHs.Pointers;
+with DOHs.const_String_or_char_ptr;
 with interfaces.c;
 with interfaces.c.strings;
 with swig;
@@ -11,584 +12,955 @@ with swigg_module.Wrapper;
 with swigg_module.pointer_Pointers;
 with interfaces.C;
 
-
-
 package swigg_module.Binding is
 
+   function NewSwigType
+     (typecode : in interfaces.c.int) return swigg_module.Pointers
+     .SwigType_Pointer;
 
+   function SwigType_del_element
+     (t : in swigg_module.Pointers.SwigType_Pointer)
+      return swigg_module.Pointers.SwigType_Pointer;
 
+   function SwigType_add_pointer
+     (t : in swigg_module.Pointers.SwigType_Pointer)
+      return swigg_module.Pointers.SwigType_Pointer;
 
+   function SwigType_add_memberpointer
+     (t    : in swigg_module.Pointers.SwigType_Pointer;
+      qual : in DOHs.const_String_or_char_ptr.Item)
+      return swigg_module.Pointers.SwigType_Pointer;
 
+   function SwigType_del_memberpointer
+     (t : in swigg_module.Pointers.SwigType_Pointer)
+      return swigg_module.Pointers.SwigType_Pointer;
 
-   function  NewSwigType (typecode : in interfaces.c.int) return swigg_module.Pointers.SwigType_Pointer;
+   function SwigType_del_pointer
+     (t : in swigg_module.Pointers.SwigType_Pointer)
+      return swigg_module.Pointers.SwigType_Pointer;
 
-   function  SwigType_del_element (t : in swigg_module.Pointers.SwigType_Pointer) return swigg_module.Pointers.SwigType_Pointer;
+   function SwigType_add_array (t : in swigg_module.Pointers.SwigType_Pointer;
+      size                        : in DOHs.const_String_or_char_ptr.Item)
+      return swigg_module.Pointers.SwigType_Pointer;
 
-   function  SwigType_add_pointer (t : in swigg_module.Pointers.SwigType_Pointer) return swigg_module.Pointers.SwigType_Pointer;
+   function SwigType_del_array
+     (t : in swigg_module.Pointers.SwigType_Pointer)
+      return swigg_module.Pointers.SwigType_Pointer;
 
-   function  SwigType_add_memberpointer (t : in swigg_module.Pointers.SwigType_Pointer;
-qual : in swigg_module.Pointers.String_or_char_Pointer) return swigg_module.Pointers.SwigType_Pointer;
+   function SwigType_pop_arrays
+     (t : in swigg_module.Pointers.SwigType_Pointer)
+      return swigg_module.Pointers.SwigType_Pointer;
 
-   function  SwigType_del_memberpointer (t : in swigg_module.Pointers.SwigType_Pointer) return swigg_module.Pointers.SwigType_Pointer;
+   function SwigType_add_reference
+     (t : in swigg_module.Pointers.SwigType_Pointer)
+      return swigg_module.Pointers.SwigType_Pointer;
 
-   function  SwigType_del_pointer (t : in swigg_module.Pointers.SwigType_Pointer) return swigg_module.Pointers.SwigType_Pointer;
+   function SwigType_del_reference
+     (t : in swigg_module.Pointers.SwigType_Pointer)
+      return swigg_module.Pointers.SwigType_Pointer;
 
-   function  SwigType_add_array (t : in swigg_module.Pointers.SwigType_Pointer;
-size : in swigg_module.Pointers.String_or_char_Pointer) return swigg_module.Pointers.SwigType_Pointer;
+   function SwigType_add_rvalue_reference
+     (t : in swigg_module.Pointers.SwigType_Pointer)
+      return swigg_module.Pointers.SwigType_Pointer;
 
-   function  SwigType_del_array (t : in swigg_module.Pointers.SwigType_Pointer) return swigg_module.Pointers.SwigType_Pointer;
+   function SwigType_del_rvalue_reference
+     (t : in swigg_module.Pointers.SwigType_Pointer)
+      return swigg_module.Pointers.SwigType_Pointer;
 
-   function  SwigType_pop_arrays (t : in swigg_module.Pointers.SwigType_Pointer) return swigg_module.Pointers.SwigType_Pointer;
+   function SwigType_add_qualifier
+     (t    : in swigg_module.Pointers.SwigType_Pointer;
+      qual : in DOHs.const_String_or_char_ptr.Item)
+      return swigg_module.Pointers.SwigType_Pointer;
 
-   function  SwigType_add_reference (t : in swigg_module.Pointers.SwigType_Pointer) return swigg_module.Pointers.SwigType_Pointer;
+   function SwigType_del_qualifier
+     (t : in swigg_module.Pointers.SwigType_Pointer)
+      return swigg_module.Pointers.SwigType_Pointer;
 
-   function  SwigType_del_reference (t : in swigg_module.Pointers.SwigType_Pointer) return swigg_module.Pointers.SwigType_Pointer;
+   function SwigType_add_function
+     (t     : in swigg_module.Pointers.SwigType_Pointer;
+      parms : in swigg_module.Pointers.ParmList_Pointer)
+      return swigg_module.Pointers.SwigType_Pointer;
 
-   function  SwigType_add_qualifier (t : in swigg_module.Pointers.SwigType_Pointer;
-qual : in swigg_module.Pointers.String_or_char_Pointer) return swigg_module.Pointers.SwigType_Pointer;
+   function SwigType_add_template
+     (t     : in swigg_module.Pointers.SwigType_Pointer;
+      parms : in swigg_module.Pointers.ParmList_Pointer)
+      return swigg_module.Pointers.SwigType_Pointer;
 
-   function  SwigType_del_qualifier (t : in swigg_module.Pointers.SwigType_Pointer) return swigg_module.Pointers.SwigType_Pointer;
+   function SwigType_pop_function
+     (t : in swigg_module.Pointers.SwigType_Pointer)
+      return swigg_module.Pointers.SwigType_Pointer;
 
-   function  SwigType_add_function (t : in swigg_module.Pointers.SwigType_Pointer;
-parms : in swigg_module.Pointers.ParmList_Pointer) return swigg_module.Pointers.SwigType_Pointer;
+   function SwigType_pop_function_qualifiers
+     (t : in swigg_module.Pointers.SwigType_Pointer)
+      return swigg_module.Pointers.SwigType_Pointer;
 
-   function  SwigType_add_template (t : in swigg_module.Pointers.SwigType_Pointer;
-parms : in swigg_module.Pointers.ParmList_Pointer) return swigg_module.Pointers.SwigType_Pointer;
+   function SwigType_function_parms
+     (t              : in swigg_module.Pointers.SwigType_Pointer;
+      file_line_node : in swigg_module.Pointers.Node_Pointer)
+      return swigg_module.Pointers.ParmList_Pointer;
 
-   function  SwigType_pop_function (t : in swigg_module.Pointers.SwigType_Pointer) return swigg_module.Pointers.SwigType_Pointer;
+   function SwigType_split
+     (t : in swigg_module.Pointers.SwigType_Pointer)
+      return swigg_module.Pointers.List_Pointer;
 
-   function  SwigType_function_parms (t : in swigg_module.Pointers.SwigType_Pointer) return swigg_module.Pointers.ParmList_Pointer;
-
-   function  SwigType_split (t : in swigg_module.Pointers.SwigType_Pointer) return swigg_module.Pointers.List_Pointer;
-
-   function  SwigType_pop (t : in swigg_module.Pointers.SwigType_Pointer) return swigg_module.Pointers.String_Pointer;
+   function SwigType_pop
+     (t : in swigg_module.Pointers.SwigType_Pointer)
+      return swigg_module.Pointers.String_Pointer;
 
    procedure SwigType_push (t : in swigg_module.Pointers.SwigType_Pointer;
-s : in swigg_module.Pointers.SwigType_Pointer);
+      s                       : in swigg_module.Pointers.String_Pointer);
 
-   function  SwigType_parmlist (p : in swigg_module.Pointers.SwigType_Pointer) return swigg_module.Pointers.List_Pointer;
+   function SwigType_parmlist
+     (p : in swigg_module.Pointers.SwigType_Pointer)
+      return swigg_module.Pointers.List_Pointer;
 
-   function  SwigType_parm (p : in swigg_module.Pointers.String_Pointer) return swigg_module.Pointers.String_Pointer;
+   function SwigType_parm
+     (p : in swigg_module.Pointers.SwigType_Pointer)
+      return swigg_module.Pointers.String_Pointer;
 
-   function  SwigType_str (s : in swigg_module.Pointers.SwigType_Pointer;
-id : in swigg_module.Pointers.String_or_char_Pointer) return swigg_module.Pointers.String_Pointer;
+   function SwigType_str (s : in swigg_module.Pointers.SwigType_Pointer;
+      id : in DOHs.const_String_or_char_ptr.Item) return swigg_module.Pointers
+     .String_Pointer;
 
-   function  SwigType_lstr (s : in swigg_module.Pointers.SwigType_Pointer;
-id : in swigg_module.Pointers.String_or_char_Pointer) return swigg_module.Pointers.String_Pointer;
+   function SwigType_lstr (s : in swigg_module.Pointers.SwigType_Pointer;
+      id : in DOHs.const_String_or_char_ptr.Item) return swigg_module.Pointers
+     .String_Pointer;
 
-   function  SwigType_rcaststr (s : in swigg_module.Pointers.SwigType_Pointer;
-id : in swigg_module.Pointers.String_or_char_Pointer) return swigg_module.Pointers.String_Pointer;
+   function SwigType_rcaststr (s : in swigg_module.Pointers.SwigType_Pointer;
+      id : in DOHs.const_String_or_char_ptr.Item) return swigg_module.Pointers
+     .String_Pointer;
 
-   function  SwigType_lcaststr (s : in swigg_module.Pointers.SwigType_Pointer;
-id : in swigg_module.Pointers.String_or_char_Pointer) return swigg_module.Pointers.String_Pointer;
+   function SwigType_lcaststr (s : in swigg_module.Pointers.SwigType_Pointer;
+      id : in DOHs.const_String_or_char_ptr.Item) return swigg_module.Pointers
+     .String_Pointer;
 
-   function  SwigType_manglestr (t : in swigg_module.Pointers.SwigType_Pointer) return swigg_module.Pointers.String_Pointer;
+   function SwigType_manglestr
+     (t : in swigg_module.Pointers.SwigType_Pointer)
+      return swigg_module.Pointers.String_Pointer;
 
-   function  SwigType_ltype (t : in swigg_module.Pointers.SwigType_Pointer) return swigg_module.Pointers.SwigType_Pointer;
+   function SwigType_ltype
+     (t : in swigg_module.Pointers.SwigType_Pointer)
+      return swigg_module.Pointers.SwigType_Pointer;
 
-   function  SwigType_ispointer (t : in swigg_module.Pointers.SwigType_Pointer) return interfaces.c.int;
+   function SwigType_ispointer
+     (t : in swigg_module.Pointers.SwigType_Pointer) return interfaces.c.int;
 
-   function  SwigType_ispointer_return (t : in swigg_module.Pointers.SwigType_Pointer) return interfaces.c.int;
+   function SwigType_ispointer_return
+     (t : in swigg_module.Pointers.SwigType_Pointer) return interfaces.c.int;
 
-   function  SwigType_isfunctionpointer (t : in swigg_module.Pointers.SwigType_Pointer) return interfaces.c.int;
+   function SwigType_isfunctionpointer
+     (t : in swigg_module.Pointers.SwigType_Pointer) return interfaces.c.int;
 
-   function  SwigType_ismemberpointer (t : in swigg_module.Pointers.SwigType_Pointer) return interfaces.c.int;
+   function SwigType_ismemberpointer
+     (t : in swigg_module.Pointers.SwigType_Pointer) return interfaces.c.int;
 
-   function  SwigType_isreference (t : in swigg_module.Pointers.SwigType_Pointer) return interfaces.c.int;
+   function SwigType_isreference
+     (t : in swigg_module.Pointers.SwigType_Pointer) return interfaces.c.int;
 
-   function  SwigType_isreference_return (t : in swigg_module.Pointers.SwigType_Pointer) return interfaces.c.int;
+   function SwigType_isreference_return
+     (t : in swigg_module.Pointers.SwigType_Pointer) return interfaces.c.int;
 
-   function  SwigType_isarray (t : in swigg_module.Pointers.SwigType_Pointer) return interfaces.c.int;
+   function SwigType_isrvalue_reference
+     (t : in swigg_module.Pointers.SwigType_Pointer) return interfaces.c.int;
 
-   function  SwigType_prefix_is_simple_1D_array (t : in swigg_module.Pointers.SwigType_Pointer) return interfaces.c.int;
+   function SwigType_isarray
+     (t : in swigg_module.Pointers.SwigType_Pointer) return interfaces.c.int;
 
-   function  SwigType_isfunction (t : in swigg_module.Pointers.SwigType_Pointer) return interfaces.c.int;
+   function SwigType_prefix_is_simple_1D_array
+     (t : in swigg_module.Pointers.SwigType_Pointer) return interfaces.c.int;
 
-   function  SwigType_isqualifier (t : in swigg_module.Pointers.SwigType_Pointer) return interfaces.c.int;
+   function SwigType_isfunction
+     (t : in swigg_module.Pointers.SwigType_Pointer) return interfaces.c.int;
 
-   function  SwigType_isconst (t : in swigg_module.Pointers.SwigType_Pointer) return interfaces.c.int;
+   function SwigType_isqualifier
+     (t : in swigg_module.Pointers.SwigType_Pointer) return interfaces.c.int;
 
-   function  SwigType_issimple (t : in swigg_module.Pointers.SwigType_Pointer) return interfaces.c.int;
+   function SwigType_isconst
+     (t : in swigg_module.Pointers.SwigType_Pointer) return interfaces.c.int;
 
-   function  SwigType_ismutable (t : in swigg_module.Pointers.SwigType_Pointer) return interfaces.c.int;
+   function SwigType_issimple
+     (t : in swigg_module.Pointers.SwigType_Pointer) return interfaces.c.int;
 
-   function  SwigType_isvarargs (t : in swigg_module.Pointers.SwigType_Pointer) return interfaces.c.int;
+   function SwigType_ismutable
+     (t : in swigg_module.Pointers.SwigType_Pointer) return interfaces.c.int;
 
-   function  SwigType_istemplate (t : in swigg_module.Pointers.SwigType_Pointer) return interfaces.c.int;
+   function SwigType_isvarargs
+     (t : in swigg_module.Pointers.SwigType_Pointer) return interfaces.c.int;
 
-   function  SwigType_isenum (t : in swigg_module.Pointers.SwigType_Pointer) return interfaces.c.int;
+   function SwigType_istemplate
+     (t : in swigg_module.Pointers.SwigType_Pointer) return interfaces.c.int;
 
-   function  SwigType_check_decl (t : in swigg_module.Pointers.SwigType_Pointer;
-decl : in swigg_module.Pointers.String_or_char_Pointer) return interfaces.c.int;
+   function SwigType_isenum
+     (t : in swigg_module.Pointers.SwigType_Pointer) return interfaces.c.int;
 
-   function  SwigType_strip_qualifiers (t : in swigg_module.Pointers.SwigType_Pointer) return swigg_module.Pointers.SwigType_Pointer;
+   function SwigType_check_decl (t : in swigg_module.Pointers.SwigType_Pointer;
+      decl : in DOHs.const_String_or_char_ptr.Item) return interfaces.c.int;
 
-   function  SwigType_functionpointer_decompose (t : in swigg_module.Pointers.SwigType_Pointer) return swigg_module.Pointers.SwigType_Pointer;
+   function SwigType_strip_qualifiers
+     (t : in swigg_module.Pointers.SwigType_Pointer)
+      return swigg_module.Pointers.SwigType_Pointer;
 
-   function  SwigType_base (t : in swigg_module.Pointers.SwigType_Pointer) return swigg_module.Pointers.String_Pointer;
+   function SwigType_strip_single_qualifier
+     (t : in swigg_module.Pointers.SwigType_Pointer)
+      return swigg_module.Pointers.SwigType_Pointer;
 
-   function  SwigType_namestr (t : in swigg_module.Pointers.SwigType_Pointer) return swigg_module.Pointers.String_Pointer;
+   function SwigType_functionpointer_decompose
+     (t : in swigg_module.Pointers.SwigType_Pointer)
+      return swigg_module.Pointers.SwigType_Pointer;
 
-   function  SwigType_templateprefix (t : in swigg_module.Pointers.SwigType_Pointer) return swigg_module.Pointers.String_Pointer;
+   function SwigType_base
+     (t : in swigg_module.Pointers.SwigType_Pointer)
+      return swigg_module.Pointers.String_Pointer;
 
-   function  SwigType_templatesuffix (t : in swigg_module.Pointers.SwigType_Pointer) return swigg_module.Pointers.String_Pointer;
+   function SwigType_namestr
+     (t : in swigg_module.Pointers.SwigType_Pointer)
+      return swigg_module.Pointers.String_Pointer;
 
-   function  SwigType_templateargs (t : in swigg_module.Pointers.SwigType_Pointer) return swigg_module.Pointers.String_Pointer;
+   function SwigType_templateprefix
+     (t : in swigg_module.Pointers.SwigType_Pointer)
+      return swigg_module.Pointers.String_Pointer;
 
-   function  SwigType_prefix (t : in swigg_module.Pointers.SwigType_Pointer) return swigg_module.Pointers.String_Pointer;
+   function SwigType_templatesuffix
+     (t : in swigg_module.Pointers.SwigType_Pointer)
+      return swigg_module.Pointers.String_Pointer;
 
-   function  SwigType_array_ndim (t : in swigg_module.Pointers.SwigType_Pointer) return interfaces.c.int;
+   function SwigType_istemplate_templateprefix
+     (t : in swigg_module.Pointers.SwigType_Pointer)
+      return swigg_module.Pointers.String_Pointer;
 
-   function  SwigType_array_getdim (t : in swigg_module.Pointers.SwigType_Pointer;
-n : in interfaces.c.int) return swigg_module.Pointers.String_Pointer;
+   function SwigType_istemplate_only_templateprefix
+     (t : in swigg_module.Pointers.SwigType_Pointer)
+      return swigg_module.Pointers.String_Pointer;
 
-   procedure SwigType_array_setdim (t : in swigg_module.Pointers.SwigType_Pointer;
-n : in interfaces.c.int;
-rep : in swigg_module.Pointers.String_or_char_Pointer);
+   function SwigType_templateargs
+     (t : in swigg_module.Pointers.SwigType_Pointer)
+      return swigg_module.Pointers.String_Pointer;
 
-   function  SwigType_array_type (t : in swigg_module.Pointers.SwigType_Pointer) return swigg_module.Pointers.SwigType_Pointer;
+   function SwigType_prefix
+     (t : in swigg_module.Pointers.SwigType_Pointer)
+      return swigg_module.Pointers.String_Pointer;
 
-   function  SwigType_default (t : in swigg_module.Pointers.SwigType_Pointer) return swigg_module.Pointers.String_Pointer;
+   function SwigType_array_ndim
+     (t : in swigg_module.Pointers.SwigType_Pointer) return interfaces.c.int;
 
-   procedure SwigType_typename_replace (t : in swigg_module.Pointers.SwigType_Pointer;
-pat : in swigg_module.Pointers.String_Pointer;
-rep : in swigg_module.Pointers.String_Pointer);
+   function SwigType_array_getdim
+     (t : in swigg_module.Pointers.SwigType_Pointer;
+      n : in interfaces.c.int) return swigg_module.Pointers.String_Pointer;
 
-   function  SwigType_alttype (t : in swigg_module.Pointers.SwigType_Pointer;
-ltmap : in interfaces.c.int) return swigg_module.Pointers.SwigType_Pointer;
+   procedure SwigType_array_setdim
+     (t   : in swigg_module.Pointers.SwigType_Pointer; n : in interfaces.c.int;
+      rep : in DOHs.const_String_or_char_ptr.Item);
 
-   procedure SwigType_typesystem_init ;
+   function SwigType_array_type
+     (t : in swigg_module.Pointers.SwigType_Pointer)
+      return swigg_module.Pointers.SwigType_Pointer;
 
-   function  SwigType_typedef (the_type : in swigg_module.Pointers.SwigType_Pointer;
-name : in swigg_module.Pointers.String_or_char_Pointer) return interfaces.c.int;
+   function SwigType_default_create
+     (ty : in swigg_module.Pointers.SwigType_Pointer)
+      return swigg_module.Pointers.SwigType_Pointer;
 
-   function  SwigType_typedef_class (name : in swigg_module.Pointers.String_or_char_Pointer) return interfaces.c.int;
+   function SwigType_default_deduce
+     (t : in swigg_module.Pointers.SwigType_Pointer)
+      return swigg_module.Pointers.SwigType_Pointer;
 
-   function  SwigType_typedef_using (qname : in swigg_module.Pointers.String_or_char_Pointer) return interfaces.c.int;
+   procedure SwigType_typename_replace
+     (t   : in swigg_module.Pointers.SwigType_Pointer;
+      pat : in swigg_module.Pointers.String_Pointer;
+      rep : in swigg_module.Pointers.String_Pointer);
 
-   procedure SwigType_inherit (subclass : in swigg_module.Pointers.String_Pointer;
-baseclass : in swigg_module.Pointers.String_Pointer;
-cast : in swigg_module.Pointers.String_Pointer;
-conversioncode : in swigg_module.Pointers.String_Pointer);
+   function SwigType_remove_global_scope_prefix
+     (t : in swigg_module.Pointers.SwigType_Pointer)
+      return swigg_module.Pointers.SwigType_Pointer;
 
-   function  SwigType_issubtype (the_subtype : in swigg_module.Pointers.SwigType_Pointer;
-basetype : in swigg_module.Pointers.SwigType_Pointer) return interfaces.c.int;
+   function SwigType_alttype (t : in swigg_module.Pointers.SwigType_Pointer;
+      ltmap : in interfaces.c.int) return swigg_module.Pointers
+     .SwigType_Pointer;
 
-   procedure SwigType_scope_alias (aliasname : in swigg_module.Pointers.String_Pointer;
-t : in swigg_module.Pointers.Typetab_Pointer);
+   procedure SwigType_typesystem_init;
 
-   procedure SwigType_using_scope (t : in swigg_module.Pointers.Typetab_Pointer);
+   function SwigType_typedef
+     (the_type : in swigg_module.Pointers.SwigType_Pointer;
+      name : in DOHs.const_String_or_char_ptr.Item) return interfaces.c.int;
 
-   procedure SwigType_new_scope (name : in swigg_module.Pointers.String_or_char_Pointer);
+   function SwigType_typedef_class
+     (name : in DOHs.const_String_or_char_ptr.Item) return interfaces.c.int;
 
-   procedure SwigType_inherit_scope (scope : in swigg_module.Pointers.Typetab_Pointer);
+   function SwigType_typedef_using
+     (qname : in DOHs.const_String_or_char_ptr.Item) return interfaces.c.int;
 
-   function  SwigType_pop_scope  return swigg_module.Pointers.Typetab_Pointer;
+   procedure SwigType_inherit
+     (subclass       : in swigg_module.Pointers.String_Pointer;
+      baseclass      : in swigg_module.Pointers.String_Pointer;
+      cast           : in swigg_module.Pointers.String_Pointer;
+      conversioncode : in swigg_module.Pointers.String_Pointer);
 
-   function  SwigType_set_scope (h : in swigg_module.Pointers.Typetab_Pointer) return swigg_module.Pointers.Typetab_Pointer;
+   function SwigType_issubtype
+     (the_subtype : in swigg_module.Pointers.SwigType_Pointer;
+      basetype : in swigg_module.Pointers.SwigType_Pointer) return interfaces.c
+     .int;
 
-   procedure SwigType_print_scope (t : in swigg_module.Pointers.Typetab_Pointer);
+   procedure SwigType_scope_alias
+     (aliasname : in swigg_module.Pointers.String_Pointer;
+      t         : in swigg_module.Pointers.Typetab_Pointer);
 
-   function  SwigType_typedef_resolve (t : in swigg_module.Pointers.SwigType_Pointer) return swigg_module.Pointers.SwigType_Pointer;
+   procedure SwigType_using_scope
+     (t : in swigg_module.Pointers.Typetab_Pointer);
 
-   function  SwigType_typedef_resolve_all (t : in swigg_module.Pointers.SwigType_Pointer) return swigg_module.Pointers.SwigType_Pointer;
+   procedure SwigType_new_scope (name : in DOHs.const_String_or_char_ptr.Item);
 
-   function  SwigType_typedef_qualified (t : in swigg_module.Pointers.SwigType_Pointer) return swigg_module.Pointers.SwigType_Pointer;
+   procedure SwigType_inherit_scope
+     (scope : in swigg_module.Pointers.Typetab_Pointer);
 
-   function  SwigType_istypedef (t : in swigg_module.Pointers.SwigType_Pointer) return interfaces.c.int;
+   function SwigType_pop_scope return swigg_module.Pointers.Typetab_Pointer;
 
-   function  SwigType_isclass (t : in swigg_module.Pointers.SwigType_Pointer) return interfaces.c.int;
+   function SwigType_set_scope
+     (h : in swigg_module.Pointers.Typetab_Pointer)
+      return swigg_module.Pointers.Typetab_Pointer;
 
-   procedure SwigType_attach_symtab (syms : in swigg_module.Pointers.Symtab_Pointer);
+   procedure SwigType_print_scope;
+
+   function SwigType_typedef_resolve
+     (t : in swigg_module.Pointers.SwigType_Pointer)
+      return swigg_module.Pointers.SwigType_Pointer;
+
+   function SwigType_typedef_resolve_all
+     (t : in swigg_module.Pointers.SwigType_Pointer)
+      return swigg_module.Pointers.SwigType_Pointer;
+
+   function SwigType_typedef_qualified
+     (t : in swigg_module.Pointers.SwigType_Pointer)
+      return swigg_module.Pointers.SwigType_Pointer;
+
+   function SwigType_istypedef
+     (t : in swigg_module.Pointers.SwigType_Pointer) return interfaces.c.int;
+
+   function SwigType_isclass
+     (t : in swigg_module.Pointers.SwigType_Pointer) return interfaces.c.int;
+
+   procedure SwigType_attach_symtab
+     (syms : in swigg_module.Pointers.Symtab_Pointer);
 
    procedure SwigType_remember (t : in swigg_module.Pointers.SwigType_Pointer);
 
-   procedure SwigType_remember_clientdata (t : in swigg_module.Pointers.SwigType_Pointer;
-clientdata : in swigg_module.Pointers.String_or_char_Pointer);
+   procedure SwigType_remember_clientdata
+     (t          : in swigg_module.Pointers.SwigType_Pointer;
+      clientdata : in DOHs.const_String_or_char_ptr.Item);
 
-   procedure SwigType_remember_mangleddata (mangled : in swigg_module.Pointers.String_Pointer;
-clientdata : in swigg_module.Pointers.String_or_char_Pointer);
+   procedure SwigType_remember_mangleddata
+     (mangled    : in swigg_module.Pointers.String_Pointer;
+      clientdata : in DOHs.const_String_or_char_ptr.Item);
 
-   procedure SwigType_emit_type_table (f_headers : in swigg_module.Pointers.File_Pointer;
-f_table : in swigg_module.Pointers.File_Pointer);
+   procedure SwigType_emit_type_table
+     (f_headers : in swigg_module.Pointers.File_Pointer;
+      f_table   : in swigg_module.Pointers.File_Pointer);
 
-   function  SwigType_type (t : in swigg_module.Pointers.SwigType_Pointer) return interfaces.c.int;
+   function SwigType_type
+     (t : in swigg_module.Pointers.SwigType_Pointer) return interfaces.c.int;
 
-   procedure Swig_symbol_init ;
+   procedure Swig_symbol_print_tables
+     (symtab : in swigg_module.Pointers.Symtab_Pointer);
 
-   procedure Swig_symbol_setscopename (name : in swigg_module.Pointers.String_or_char_Pointer);
+   procedure Swig_symbol_print_tables_summary;
 
-   function  Swig_symbol_getscopename  return swigg_module.Pointers.String_Pointer;
+   procedure Swig_symbol_print_symbols;
 
-   function  Swig_symbol_qualifiedscopename (symtab : in swigg_module.Pointers.Symtab_Pointer) return swigg_module.Pointers.String_Pointer;
+   procedure Swig_symbol_print_csymbols;
 
-   function  Swig_symbol_newscope  return swigg_module.Pointers.Symtab_Pointer;
+   procedure Swig_symbol_init;
 
-   function  Swig_symbol_setscope (arg_1 : in swigg_module.Pointers.Symtab_Pointer) return swigg_module.Pointers.Symtab_Pointer;
+   procedure Swig_symbol_setscopename
+     (name : in DOHs.const_String_or_char_ptr.Item);
 
-   function  Swig_symbol_getscope (symname : in swigg_module.Pointers.String_or_char_Pointer) return swigg_module.Pointers.Symtab_Pointer;
+   function Swig_symbol_getscopename return swigg_module.Pointers
+     .String_Pointer;
 
-   function  Swig_symbol_current  return swigg_module.Pointers.Symtab_Pointer;
+   function Swig_symbol_qualifiedscopename
+     (symtab : in swigg_module.Pointers.Symtab_Pointer)
+      return swigg_module.Pointers.String_Pointer;
 
-   function  Swig_symbol_popscope  return swigg_module.Pointers.Symtab_Pointer;
+   function Swig_symbol_qualified_language_scopename
+     (symtab : in swigg_module.Pointers.Symtab_Pointer)
+      return swigg_module.Pointers.String_Pointer;
 
-   function  Swig_symbol_add (symname : in swigg_module.Pointers.String_or_char_Pointer;
-node : in swigg_module.Pointers.Node_Pointer) return swigg_module.Pointers.Node_Pointer;
+   function Swig_symbol_newscope return swigg_module.Pointers.Symtab_Pointer;
 
-   procedure Swig_symbol_cadd (symname : in swigg_module.Pointers.String_or_char_Pointer;
-node : in swigg_module.Pointers.Node_Pointer);
+   function Swig_symbol_setscope
+     (arg_1 : in swigg_module.Pointers.Symtab_Pointer)
+      return swigg_module.Pointers.Symtab_Pointer;
 
-   function  Swig_symbol_clookup (symname : in swigg_module.Pointers.String_or_char_Pointer;
-tab : in swigg_module.Pointers.Symtab_Pointer) return swigg_module.Pointers.Node_Pointer;
+   function Swig_symbol_getscope
+     (symname : in DOHs.const_String_or_char_ptr.Item)
+      return swigg_module.Pointers.Symtab_Pointer;
 
-   function  Swig_symbol_cscope (symname : in swigg_module.Pointers.String_or_char_Pointer;
-tab : in swigg_module.Pointers.Symtab_Pointer) return swigg_module.Pointers.Symtab_Pointer;
+   function Swig_symbol_global_scope return swigg_module.Pointers
+     .Symtab_Pointer;
 
-   function  Swig_symbol_clookup_local (symname : in swigg_module.Pointers.String_or_char_Pointer;
-tab : in swigg_module.Pointers.Symtab_Pointer) return swigg_module.Pointers.Node_Pointer;
+   function Swig_symbol_current return swigg_module.Pointers.Symtab_Pointer;
 
-   function  Swig_symbol_qualified (node : in swigg_module.Pointers.Node_Pointer) return swigg_module.Pointers.String_Pointer;
+   function Swig_symbol_popscope return swigg_module.Pointers.Symtab_Pointer;
 
-   function  Swig_symbol_isoverloaded (node : in swigg_module.Pointers.Node_Pointer) return swigg_module.Pointers.Node_Pointer;
+   function Swig_symbol_add (symname : in DOHs.const_String_or_char_ptr.Item;
+      node                           : in swigg_module.Pointers.Node_Pointer)
+      return swigg_module.Pointers.Node_Pointer;
+
+   procedure Swig_symbol_cadd (symname : in DOHs.const_String_or_char_ptr.Item;
+      node : in swigg_module.Pointers.Node_Pointer);
+
+   function Swig_symbol_clookup
+     (symname : in DOHs.const_String_or_char_ptr.Item;
+      tab     : in swigg_module.Pointers.Symtab_Pointer)
+      return swigg_module.Pointers.Node_Pointer;
+
+   function Swig_symbol_clookup_no_inherit
+     (name : in DOHs.const_String_or_char_ptr.Item;
+      n : in swigg_module.Pointers.Symtab_Pointer) return swigg_module.Pointers
+     .Node_Pointer;
+
+   function Swig_symbol_cscope
+     (symname : in DOHs.const_String_or_char_ptr.Item;
+      tab     : in swigg_module.Pointers.Symtab_Pointer)
+      return swigg_module.Pointers.Symtab_Pointer;
+
+   function Swig_symbol_clookup_local
+     (symname : in DOHs.const_String_or_char_ptr.Item;
+      tab     : in swigg_module.Pointers.Symtab_Pointer)
+      return swigg_module.Pointers.Node_Pointer;
+
+   function Swig_symbol_qualified
+     (node : in swigg_module.Pointers.Node_Pointer)
+      return swigg_module.Pointers.String_Pointer;
+
+   function Swig_symbol_isoverloaded
+     (node : in swigg_module.Pointers.Node_Pointer)
+      return swigg_module.Pointers.Node_Pointer;
 
    procedure Swig_symbol_remove (node : in swigg_module.Pointers.Node_Pointer);
 
-   procedure Swig_symbol_alias (aliasname : in swigg_module.Pointers.String_or_char_Pointer;
-tab : in swigg_module.Pointers.Symtab_Pointer);
+   procedure Swig_symbol_alias
+     (aliasname : in DOHs.const_String_or_char_ptr.Item;
+      tab       : in swigg_module.Pointers.Symtab_Pointer);
 
-   procedure Swig_symbol_inherit (tab : in swigg_module.Pointers.Symtab_Pointer);
+   procedure Swig_symbol_inherit
+     (tab : in swigg_module.Pointers.Symtab_Pointer);
 
-   function  Swig_symbol_type_qualify (ty : in swigg_module.Pointers.SwigType_Pointer;
-tab : in swigg_module.Pointers.Symtab_Pointer) return swigg_module.Pointers.SwigType_Pointer;
+   function Swig_symbol_type_qualify
+     (ty  : in swigg_module.Pointers.SwigType_Pointer;
+      tab : in swigg_module.Pointers.Symtab_Pointer)
+      return swigg_module.Pointers.SwigType_Pointer;
 
-   function  Swig_symbol_string_qualify (s : in swigg_module.Pointers.String_Pointer;
-tab : in swigg_module.Pointers.Symtab_Pointer) return swigg_module.Pointers.String_Pointer;
+   function Swig_symbol_string_qualify
+     (s   : in swigg_module.Pointers.String_Pointer;
+      tab : in swigg_module.Pointers.Symtab_Pointer)
+      return swigg_module.Pointers.String_Pointer;
 
-   function  Swig_symbol_typedef_reduce (ty : in swigg_module.Pointers.SwigType_Pointer;
-tab : in swigg_module.Pointers.Symtab_Pointer) return swigg_module.Pointers.SwigType_Pointer;
+   function Swig_symbol_typedef_reduce
+     (ty  : in swigg_module.Pointers.SwigType_Pointer;
+      tab : in swigg_module.Pointers.Symtab_Pointer)
+      return swigg_module.Pointers.SwigType_Pointer;
 
-   function  Swig_symbol_template_defargs (parms : in swigg_module.Pointers.Parm_Pointer;
-targs : in swigg_module.Pointers.Parm_Pointer;
-tscope : in swigg_module.Pointers.Symtab_Pointer;
-tsdecl : in swigg_module.Pointers.Symtab_Pointer) return swigg_module.Pointers.ParmList_Pointer;
+   function Swig_symbol_template_defargs
+     (parms  : in swigg_module.Pointers.Parm_Pointer;
+      targs  : in swigg_module.Pointers.Parm_Pointer;
+      tscope : in swigg_module.Pointers.Symtab_Pointer;
+      tsdecl : in swigg_module.Pointers.Symtab_Pointer)
+      return swigg_module.Pointers.ParmList_Pointer;
 
-   function  Swig_symbol_template_deftype (the_type : in swigg_module.Pointers.SwigType_Pointer;
-tscope : in swigg_module.Pointers.Symtab_Pointer) return swigg_module.Pointers.SwigType_Pointer;
+   function Swig_symbol_template_deftype
+     (the_type : in swigg_module.Pointers.SwigType_Pointer;
+      tscope   : in swigg_module.Pointers.Symtab_Pointer)
+      return swigg_module.Pointers.SwigType_Pointer;
 
-   function  Swig_symbol_template_param_eval (p : in swigg_module.Pointers.SwigType_Pointer;
-symtab : in swigg_module.Pointers.Symtab_Pointer) return swigg_module.Pointers.SwigType_Pointer;
+   function Swig_symbol_template_param_eval
+     (p      : in swigg_module.Pointers.SwigType_Pointer;
+      symtab : in swigg_module.Pointers.Symtab_Pointer)
+      return swigg_module.Pointers.SwigType_Pointer;
 
-   function  ParmList_errorstr (arg_1 : in swigg_module.Pointers.ParmList_Pointer) return swigg_module.Pointers.String_Pointer;
+   function ParmList_errorstr
+     (arg_1 : in swigg_module.Pointers.ParmList_Pointer)
+      return swigg_module.Pointers.String_Pointer;
 
-   function  ParmList_is_compactdefargs (p : in swigg_module.Pointers.ParmList_Pointer) return interfaces.c.int;
+   function ParmList_is_compactdefargs
+     (p : in swigg_module.Pointers.ParmList_Pointer) return interfaces.c.int;
 
-   procedure Swig_name_register (method : in swigg_module.Pointers.String_or_char_Pointer;
-format : in swigg_module.Pointers.String_or_char_Pointer);
+   procedure Swig_name_register
+     (method : in DOHs.const_String_or_char_ptr.Item;
+      format : in DOHs.const_String_or_char_ptr.Item);
 
-   procedure Swig_name_unregister (method : in swigg_module.Pointers.String_or_char_Pointer);
+   procedure Swig_name_unregister
+     (method : in DOHs.const_String_or_char_ptr.Item);
 
-   function  Swig_name_mangle (s : in swigg_module.Pointers.String_or_char_Pointer) return swigg_module.Pointers.String_Pointer;
+   function Swig_name_mangle
+     (s : in DOHs.const_String_or_char_ptr.Item) return swigg_module.Pointers
+     .String_Pointer;
 
-   function  Swig_name_wrapper (fname : in swigg_module.Pointers.String_or_char_Pointer) return swigg_module.Pointers.String_Pointer;
+   function Swig_name_wrapper
+     (fname : in DOHs.const_String_or_char_ptr.Item)
+      return swigg_module.Pointers.String_Pointer;
 
-   function  Swig_name_member (classname : in swigg_module.Pointers.String_or_char_Pointer;
-mname : in swigg_module.Pointers.String_or_char_Pointer) return swigg_module.Pointers.String_Pointer;
+   function Swig_name_member (nspace : in DOHs.const_String_or_char_ptr.Item;
+      classname                      : in DOHs.const_String_or_char_ptr.Item;
+      membername                     : in DOHs.const_String_or_char_ptr.Item)
+      return swigg_module.Pointers.String_Pointer;
 
-   function  Swig_name_get (vname : in swigg_module.Pointers.String_or_char_Pointer) return swigg_module.Pointers.String_Pointer;
+   function Swig_name_get (nspace : in DOHs.const_String_or_char_ptr.Item;
+      vname                       : in DOHs.const_String_or_char_ptr.Item)
+      return swigg_module.Pointers.String_Pointer;
 
-   function  Swig_name_set (vname : in swigg_module.Pointers.String_or_char_Pointer) return swigg_module.Pointers.String_Pointer;
+   function Swig_name_set (nspace : in DOHs.const_String_or_char_ptr.Item;
+      vname                       : in DOHs.const_String_or_char_ptr.Item)
+      return swigg_module.Pointers.String_Pointer;
 
-   function  Swig_name_construct (classname : in swigg_module.Pointers.String_or_char_Pointer) return swigg_module.Pointers.String_Pointer;
+   function Swig_name_construct
+     (nspace    : in DOHs.const_String_or_char_ptr.Item;
+      classname : in DOHs.const_String_or_char_ptr.Item)
+      return swigg_module.Pointers.String_Pointer;
 
-   function  Swig_name_copyconstructor (classname : in swigg_module.Pointers.String_or_char_Pointer) return swigg_module.Pointers.String_Pointer;
+   function Swig_name_copyconstructor
+     (nspace    : in DOHs.const_String_or_char_ptr.Item;
+      classname : in DOHs.const_String_or_char_ptr.Item)
+      return swigg_module.Pointers.String_Pointer;
 
-   function  Swig_name_destroy (classname : in swigg_module.Pointers.String_or_char_Pointer) return swigg_module.Pointers.String_Pointer;
+   function Swig_name_destroy (nspace : in DOHs.const_String_or_char_ptr.Item;
+      classname                       : in DOHs.const_String_or_char_ptr.Item)
+      return swigg_module.Pointers.String_Pointer;
 
-   function  Swig_name_disown (classname : in swigg_module.Pointers.String_or_char_Pointer) return swigg_module.Pointers.String_Pointer;
+   function Swig_name_disown (nspace : in DOHs.const_String_or_char_ptr.Item;
+      classname                      : in DOHs.const_String_or_char_ptr.Item)
+      return swigg_module.Pointers.String_Pointer;
 
-   procedure Swig_name_namewarn_add (prefix : in swigg_module.Pointers.String_Pointer;
-name : in swigg_module.Pointers.String_Pointer;
-decl : in swigg_module.Pointers.SwigType_Pointer;
-namewrn : in swigg_module.Pointers.Hash_Pointer);
+   procedure Swig_name_namewarn_add
+     (prefix  : in swigg_module.Pointers.String_Pointer;
+      name    : in swigg_module.Pointers.String_Pointer;
+      decl    : in swigg_module.Pointers.SwigType_Pointer;
+      namewrn : in swigg_module.Pointers.Hash_Pointer);
 
-   function  Swig_name_namewarn_get (n : in swigg_module.Pointers.Node_Pointer;
-prefix : in swigg_module.Pointers.String_Pointer;
-name : in swigg_module.Pointers.String_Pointer;
-decl : in swigg_module.Pointers.SwigType_Pointer) return swigg_module.Pointers.Hash_Pointer;
-
-   procedure Swig_name_rename_add (prefix : in swigg_module.Pointers.String_Pointer;
-name : in swigg_module.Pointers.String_Pointer;
-decl : in swigg_module.Pointers.SwigType_Pointer;
-namewrn : in swigg_module.Pointers.Hash_Pointer;
-declaratorparms : in swigg_module.Pointers.ParmList_Pointer);
+   procedure Swig_name_rename_add
+     (prefix          : in swigg_module.Pointers.String_Pointer;
+      name            : in swigg_module.Pointers.String_Pointer;
+      decl            : in swigg_module.Pointers.SwigType_Pointer;
+      namewrn         : in swigg_module.Pointers.Hash_Pointer;
+      declaratorparms : in swigg_module.Pointers.ParmList_Pointer);
 
    procedure Swig_name_inherit (base : in swigg_module.Pointers.String_Pointer;
-derived : in swigg_module.Pointers.String_Pointer);
+      derived : in swigg_module.Pointers.String_Pointer);
 
-   function  Swig_need_protected (n : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
+   function Swig_make_inherit_list
+     (clsname         : in swigg_module.Pointers.String_Pointer;
+      names           : in swigg_module.Pointers.List_Pointer;
+      Namespaceprefix : in swigg_module.Pointers.String_Pointer)
+      return swigg_module.Pointers.List_Pointer;
 
-   function  Swig_need_name_warning (n : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
+   procedure Swig_inherit_base_symbols
+     (bases : in swigg_module.Pointers.List_Pointer);
 
-   function  Swig_need_redefined_warn (a : in swigg_module.Pointers.Node_Pointer;
-b : in swigg_module.Pointers.Node_Pointer;
-InClass : in interfaces.c.int) return interfaces.c.int;
+   function Swig_need_protected
+     (n : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  Swig_name_make (n : in swigg_module.Pointers.Node_Pointer;
-prefix : in swigg_module.Pointers.String_Pointer;
-cname : in swigg_module.Pointers.String_or_char_Pointer;
-decl : in swigg_module.Pointers.SwigType_Pointer;
-oldname : in swigg_module.Pointers.String_Pointer) return swigg_module.Pointers.String_Pointer;
+   function Swig_need_redefined_warn
+     (a       : in swigg_module.Pointers.Node_Pointer;
+      b       : in swigg_module.Pointers.Node_Pointer;
+      InClass : in interfaces.c.int) return interfaces.c.int;
 
-   function  Swig_name_warning (n : in swigg_module.Pointers.Node_Pointer;
-prefix : in swigg_module.Pointers.String_Pointer;
-name : in swigg_module.Pointers.String_Pointer;
-decl : in swigg_module.Pointers.SwigType_Pointer) return swigg_module.Pointers.String_Pointer;
+   function Swig_name_make (n : in swigg_module.Pointers.Node_Pointer;
+      prefix                  : in swigg_module.Pointers.String_Pointer;
+      cname                   : in DOHs.const_String_or_char_ptr.Item;
+      decl                    : in swigg_module.Pointers.SwigType_Pointer;
+      oldname                 : in swigg_module.Pointers.String_Pointer)
+      return swigg_module.Pointers.String_Pointer;
 
-   function  Swig_name_decl (n : in swigg_module.Pointers.Node_Pointer) return swigg_module.Pointers.String_Pointer;
+   function Swig_name_warning (n : in swigg_module.Pointers.Node_Pointer;
+      prefix                     : in swigg_module.Pointers.String_Pointer;
+      name                       : in swigg_module.Pointers.String_Pointer;
+      decl                       : in swigg_module.Pointers.SwigType_Pointer)
+      return swigg_module.Pointers.String_Pointer;
 
-   function  Swig_name_fulldecl (n : in swigg_module.Pointers.Node_Pointer) return swigg_module.Pointers.String_Pointer;
+   function Swig_name_str
+     (n : in swigg_module.Pointers.Node_Pointer) return swigg_module.Pointers
+     .String_Pointer;
 
-   procedure Swig_name_object_set (namehash : in swigg_module.Pointers.Hash_Pointer;
-name : in swigg_module.Pointers.String_or_char_Pointer;
-decl : in swigg_module.Pointers.SwigType_Pointer;
-object : in DOHs.Pointers.DOH_Pointer);
+   function Swig_name_decl
+     (n : in swigg_module.Pointers.Node_Pointer) return swigg_module.Pointers
+     .String_Pointer;
 
-   function  Swig_name_object_get (namehash : in swigg_module.Pointers.Hash_Pointer;
-prefix : in swigg_module.Pointers.String_or_char_Pointer;
-name : in swigg_module.Pointers.String_or_char_Pointer;
-decl : in swigg_module.Pointers.SwigType_Pointer) return DOHs.Pointers.DOH_Pointer;
+   function Swig_name_fulldecl
+     (n : in swigg_module.Pointers.Node_Pointer) return swigg_module.Pointers
+     .String_Pointer;
 
-   procedure Swig_name_object_inherit (namehash : in swigg_module.Pointers.Hash_Pointer;
-base : in swigg_module.Pointers.String_Pointer;
-derived : in swigg_module.Pointers.String_Pointer);
+   procedure Swig_name_object_set
+     (namehash : in swigg_module.Pointers.Hash_Pointer;
+      name     : in swigg_module.Pointers.String_Pointer;
+      decl     : in swigg_module.Pointers.SwigType_Pointer;
+      object   : in DOHs.Pointers.DOH_Pointer);
 
-   procedure Swig_features_get (features : in swigg_module.Pointers.Hash_Pointer;
-prefix : in swigg_module.Pointers.String_or_char_Pointer;
-name : in swigg_module.Pointers.String_or_char_Pointer;
-decl : in swigg_module.Pointers.SwigType_Pointer;
-n : in swigg_module.Pointers.Node_Pointer);
+   function Swig_name_object_get
+     (namehash : in swigg_module.Pointers.Hash_Pointer;
+      prefix   : in swigg_module.Pointers.String_Pointer;
+      name     : in swigg_module.Pointers.String_Pointer;
+      decl : in swigg_module.Pointers.SwigType_Pointer) return DOHs.Pointers
+     .DOH_Pointer;
 
-   procedure Swig_feature_set (features : in swigg_module.Pointers.Hash_Pointer;
-name : in swigg_module.Pointers.String_or_char_Pointer;
-decl : in swigg_module.Pointers.SwigType_Pointer;
-featurename : in swigg_module.Pointers.String_or_char_Pointer;
-value : in swigg_module.Pointers.String_Pointer;
-featureattribs : in swigg_module.Pointers.Hash_Pointer);
+   procedure Swig_name_object_inherit
+     (namehash : in swigg_module.Pointers.Hash_Pointer;
+      base     : in swigg_module.Pointers.String_Pointer;
+      derived  : in swigg_module.Pointers.String_Pointer);
 
-   function  Swig_copy_string (c : in interfaces.c.strings.chars_ptr) return interfaces.c.strings.chars_ptr;
+   procedure Swig_features_get
+     (features : in swigg_module.Pointers.Hash_Pointer;
+      prefix   : in swigg_module.Pointers.String_Pointer;
+      name     : in swigg_module.Pointers.String_Pointer;
+      decl     : in swigg_module.Pointers.SwigType_Pointer;
+      n        : in swigg_module.Pointers.Node_Pointer);
 
-   procedure Swig_set_fakeversion (version : in interfaces.c.strings.chars_ptr);
+   procedure Swig_feature_set
+     (features       : in swigg_module.Pointers.Hash_Pointer;
+      name           : in DOHs.const_String_or_char_ptr.Item;
+      decl           : in swigg_module.Pointers.SwigType_Pointer;
+      featurename    : in DOHs.const_String_or_char_ptr.Item;
+      value          : in DOHs.const_String_or_char_ptr.Item;
+      featureattribs : in swigg_module.Pointers.Hash_Pointer);
 
-   function  Swig_package_version  return interfaces.c.strings.chars_ptr;
+   function Swig_copy_string
+     (c : in interfaces.c.strings.chars_ptr) return interfaces.c.strings
+     .chars_ptr;
+
+   procedure Swig_set_fakeversion
+     (version : in interfaces.c.strings.chars_ptr);
+
+   function Swig_package_version return interfaces.c.strings.chars_ptr;
 
    procedure Swig_banner (f : in swigg_module.Pointers.File_Pointer);
 
-   function  Swig_strip_c_comments (s : in swigg_module.Pointers.String_Pointer) return swigg_module.Pointers.String_Pointer;
+   procedure Swig_banner_target_lang
+     (f           : in swigg_module.Pointers.File_Pointer;
+      commentchar : in DOHs.const_String_or_char_ptr.Item);
 
-   function  Swig_string_escape (s : in swigg_module.Pointers.String_Pointer) return swigg_module.Pointers.String_Pointer;
+   function Swig_strip_c_comments
+     (s : in swigg_module.Pointers.String_Pointer) return swigg_module.Pointers
+     .String_Pointer;
 
-   function  Swig_string_mangle (s : in swigg_module.Pointers.String_Pointer) return swigg_module.Pointers.String_Pointer;
+   function Swig_new_subdirectory
+     (basedirectory : in swigg_module.Pointers.String_Pointer;
+      subdirectory  : in swigg_module.Pointers.String_Pointer)
+      return swigg_module.Pointers.String_Pointer;
+
+   procedure Swig_filename_correct
+     (filename : in swigg_module.Pointers.String_Pointer);
+
+   function Swig_filename_escape
+     (filename : in swigg_module.Pointers.String_Pointer)
+      return swigg_module.Pointers.String_Pointer;
+
+   procedure Swig_filename_unescape
+     (filename : in swigg_module.Pointers.String_Pointer);
+
+   function Swig_storage_isextern
+     (n : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
+
+   function Swig_storage_isexternc
+     (n : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
+
+   function Swig_storage_isstatic_custom
+     (n       : in swigg_module.Pointers.Node_Pointer;
+      storage : in DOHs.const_String_or_char_ptr.Item) return interfaces.c.int;
+
+   function Swig_storage_isstatic
+     (n : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
+
+   function Swig_string_escape
+     (s : in swigg_module.Pointers.String_Pointer) return swigg_module.Pointers
+     .String_Pointer;
+
+   function Swig_string_mangle
+     (s : in swigg_module.Pointers.String_Pointer) return swigg_module.Pointers
+     .String_Pointer;
 
    procedure Swig_scopename_split (s : in swigg_module.Pointers.String_Pointer;
-prefix : in swigg_module.pointer_Pointers.String_Pointer_Pointer;
-last : in swigg_module.pointer_Pointers.String_Pointer_Pointer);
+      prefix : in swigg_module.pointer_Pointers.String_Pointer_Pointer;
+      last : in swigg_module.pointer_Pointers.String_Pointer_Pointer);
 
-   function  Swig_scopename_prefix (s : in swigg_module.Pointers.String_Pointer) return swigg_module.Pointers.String_Pointer;
+   function Swig_scopename_prefix
+     (s : in swigg_module.Pointers.String_Pointer) return swigg_module.Pointers
+     .String_Pointer;
 
-   function  Swig_scopename_last (s : in swigg_module.Pointers.String_Pointer) return swigg_module.Pointers.String_Pointer;
+   function Swig_scopename_last
+     (s : in swigg_module.Pointers.String_Pointer) return swigg_module.Pointers
+     .String_Pointer;
 
-   function  Swig_scopename_first (s : in swigg_module.Pointers.String_Pointer) return swigg_module.Pointers.String_Pointer;
+   function Swig_scopename_first
+     (s : in swigg_module.Pointers.String_Pointer) return swigg_module.Pointers
+     .String_Pointer;
 
-   function  Swig_scopename_suffix (s : in swigg_module.Pointers.String_Pointer) return swigg_module.Pointers.String_Pointer;
+   function Swig_scopename_suffix
+     (s : in swigg_module.Pointers.String_Pointer) return swigg_module.Pointers
+     .String_Pointer;
 
-   function  Swig_scopename_check (s : in swigg_module.Pointers.String_Pointer) return interfaces.c.int;
+   function Swig_scopename_tolist
+     (s : in swigg_module.Pointers.String_Pointer) return swigg_module.Pointers
+     .List_Pointer;
 
-   function  Swig_string_lower (s : in swigg_module.Pointers.String_Pointer) return swigg_module.Pointers.String_Pointer;
+   function Swig_scopename_check
+     (s : in swigg_module.Pointers.String_Pointer) return interfaces.c.int;
 
-   function  Swig_string_upper (s : in swigg_module.Pointers.String_Pointer) return swigg_module.Pointers.String_Pointer;
+   function Swig_string_lower
+     (s : in swigg_module.Pointers.String_Pointer) return swigg_module.Pointers
+     .String_Pointer;
 
-   function  Swig_string_title (s : in swigg_module.Pointers.String_Pointer) return swigg_module.Pointers.String_Pointer;
+   function Swig_string_upper
+     (s : in swigg_module.Pointers.String_Pointer) return swigg_module.Pointers
+     .String_Pointer;
 
-   procedure Swig_init ;
+   function Swig_string_title
+     (s : in swigg_module.Pointers.String_Pointer) return swigg_module.Pointers
+     .String_Pointer;
 
-   procedure Swig_warn (filename : in interfaces.c.strings.chars_ptr;
-line : in interfaces.c.int;
-msg : in interfaces.c.strings.chars_ptr);
+   procedure Swig_offset_string (s : in swigg_module.Pointers.String_Pointer;
+      number                       : in interfaces.c.int);
 
-   function  Swig_value_wrapper_mode (mode : in interfaces.c.int) return interfaces.c.int;
+   function Swig_pcre_version return swigg_module.Pointers.String_Pointer;
+
+   procedure Swig_init;
+
+   function Swig_value_wrapper_mode
+     (mode : in interfaces.c.int) return interfaces.c.int;
+
+   function Swig_is_generated_overload
+     (n : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
 
    procedure Swig_warning (num : in interfaces.c.int;
-filename : in swigg_module.Pointers.String_or_char_Pointer;
-line : in interfaces.c.int;
-fmt : in interfaces.c.strings.chars_ptr);
+      filename                 : in DOHs.const_String_or_char_ptr.Item;
+      line : in interfaces.c.int; fmt : in interfaces.c.strings.chars_ptr);
 
-   procedure Swig_error_file (filename : in swigg_module.Pointers.String_or_char_Pointer;
-line : in interfaces.c.int;
-fmt : in interfaces.c.strings.chars_ptr);
+   procedure Swig_error_file (filename : in DOHs.const_String_or_char_ptr.Item;
+      line : in interfaces.c.int; fmt : in interfaces.c.strings.chars_ptr);
 
-   function  Swig_error_count  return interfaces.c.int;
+   function Swig_error_count return interfaces.c.int;
 
    procedure Swig_error_silent (s : in interfaces.c.int);
 
-   procedure Swig_warnfilter (wlist : in swigg_module.Pointers.String_or_char_Pointer;
-val : in interfaces.c.int);
+   procedure Swig_warnfilter (wlist : in DOHs.const_String_or_char_ptr.Item;
+      val                           : in interfaces.c.int);
 
-   procedure Swig_warnall ;
+   procedure Swig_warnall;
 
-   function  Swig_warn_count  return interfaces.c.int;
+   function Swig_warn_count return interfaces.c.int;
 
-   procedure Swig_error_msg_format (format : in swigg_module.ErrorMessageFormat);
+   procedure Swig_error_msg_format
+     (format : in swigg_module.ErrorMessageFormat);
 
-   function  Swig_cparm_name (p : in swigg_module.Pointers.Parm_Pointer;
-i : in interfaces.c.int) return swigg_module.Pointers.String_Pointer;
+   procedure Swig_diagnostic (filename : in DOHs.const_String_or_char_ptr.Item;
+      line : in interfaces.c.int; fmt : in interfaces.c.strings.chars_ptr);
 
-   function  Swig_wrapped_var_type (t : in swigg_module.Pointers.SwigType_Pointer;
-varcref : in interfaces.c.int) return swigg_module.Pointers.String_Pointer;
+   function Swig_stringify_with_location
+     (object : in DOHs.Pointers.DOH_Pointer) return swigg_module.Pointers
+     .String_Pointer;
 
-   function  Swig_cargs (w : in swigg_module.Wrapper.Pointer;
-l : in swigg_module.Pointers.ParmList_Pointer) return interfaces.c.int;
+   procedure Swig_cresult_name_set
+     (new_name : in interfaces.c.strings.chars_ptr);
 
-   function  Swig_cresult (t : in swigg_module.Pointers.SwigType_Pointer;
-name : in swigg_module.Pointers.String_or_char_Pointer;
-decl : in swigg_module.Pointers.String_or_char_Pointer) return swigg_module.Pointers.String_Pointer;
+   function Swig_cresult_name return interfaces.c.strings.chars_ptr;
 
-   function  Swig_cfunction_call (name : in swigg_module.Pointers.String_or_char_Pointer;
-parms : in swigg_module.Pointers.ParmList_Pointer) return swigg_module.Pointers.String_Pointer;
+   function Swig_cparm_name (p : in swigg_module.Pointers.Parm_Pointer;
+      i : in interfaces.c.int) return swigg_module.Pointers.String_Pointer;
 
-   function  Swig_cconstructor_call (name : in swigg_module.Pointers.String_or_char_Pointer) return swigg_module.Pointers.String_Pointer;
+   function Swig_wrapped_var_type
+     (t       : in swigg_module.Pointers.SwigType_Pointer;
+      varcref : in interfaces.c.int) return swigg_module.Pointers
+     .String_Pointer;
 
-   function  Swig_cppconstructor_call (name : in swigg_module.Pointers.String_or_char_Pointer;
-parms : in swigg_module.Pointers.ParmList_Pointer) return swigg_module.Pointers.String_Pointer;
+   function Swig_cargs (w : in swigg_module.Wrapper.Pointer;
+      l : in swigg_module.Pointers.ParmList_Pointer) return interfaces.c.int;
 
-   function  Swig_unref_call (n : in swigg_module.Pointers.Node_Pointer) return swigg_module.Pointers.String_Pointer;
+   function Swig_cresult (t : in swigg_module.Pointers.SwigType_Pointer;
+      name                  : in DOHs.const_String_or_char_ptr.Item;
+      decl                  : in DOHs.const_String_or_char_ptr.Item)
+      return swigg_module.Pointers.String_Pointer;
 
-   function  Swig_ref_call (n : in swigg_module.Pointers.Node_Pointer;
-lname : in swigg_module.Pointers.String_Pointer) return swigg_module.Pointers.String_Pointer;
+   function Swig_cfunction_call (name : in DOHs.const_String_or_char_ptr.Item;
+      parms : in swigg_module.Pointers.ParmList_Pointer)
+      return swigg_module.Pointers.String_Pointer;
 
-   function  Swig_cdestructor_call (n : in swigg_module.Pointers.Node_Pointer) return swigg_module.Pointers.String_Pointer;
+   function Swig_cconstructor_call
+     (name : in DOHs.const_String_or_char_ptr.Item)
+      return swigg_module.Pointers.String_Pointer;
 
-   function  Swig_cppdestructor_call (n : in swigg_module.Pointers.Node_Pointer) return swigg_module.Pointers.String_Pointer;
+   function Swig_cppconstructor_call
+     (name  : in DOHs.const_String_or_char_ptr.Item;
+      parms : in swigg_module.Pointers.ParmList_Pointer)
+      return swigg_module.Pointers.String_Pointer;
 
-   function  Swig_cmemberset_call (name : in swigg_module.Pointers.String_or_char_Pointer;
-the_type : in swigg_module.Pointers.SwigType_Pointer;
-self : in swigg_module.Pointers.String_or_char_Pointer;
-varcref : in interfaces.c.int) return swigg_module.Pointers.String_Pointer;
+   function Swig_unref_call
+     (n : in swigg_module.Pointers.Node_Pointer) return swigg_module.Pointers
+     .String_Pointer;
 
-   function  Swig_cmemberget_call (name : in swigg_module.Pointers.String_or_char_Pointer;
-t : in swigg_module.Pointers.SwigType_Pointer;
-self : in swigg_module.Pointers.String_or_char_Pointer;
-varcref : in interfaces.c.int) return swigg_module.Pointers.String_Pointer;
+   function Swig_ref_call (n : in swigg_module.Pointers.Node_Pointer;
+      lname                  : in swigg_module.Pointers.String_Pointer)
+      return swigg_module.Pointers.String_Pointer;
 
-   function  Swig_add_extension_code (n : in swigg_module.Pointers.Node_Pointer;
-function_name : in swigg_module.Pointers.String_Pointer;
-parms : in swigg_module.Pointers.ParmList_Pointer;
-return_type : in swigg_module.Pointers.SwigType_Pointer;
-code : in swigg_module.Pointers.String_Pointer;
-cplusplus : in interfaces.c.int;
-self : in swigg_module.Pointers.String_Pointer) return interfaces.c.int;
+   function Swig_cdestructor_call
+     (n : in swigg_module.Pointers.Node_Pointer) return swigg_module.Pointers
+     .String_Pointer;
 
-   function  Swig_MethodToFunction (n : in swigg_module.Pointers.Node_Pointer;
-classname : in swigg_module.Pointers.String_Pointer;
-flags : in interfaces.c.int;
-director_type : in swigg_module.Pointers.SwigType_Pointer;
-is_director : in interfaces.c.int) return interfaces.c.int;
+   function Swig_cppdestructor_call
+     (n : in swigg_module.Pointers.Node_Pointer) return swigg_module.Pointers
+     .String_Pointer;
 
-   function  Swig_ConstructorToFunction (n : in swigg_module.Pointers.Node_Pointer;
-classname : in swigg_module.Pointers.String_Pointer;
-none_comparison : in swigg_module.Pointers.String_Pointer;
-director_ctor : in swigg_module.Pointers.String_Pointer;
-cplus : in interfaces.c.int;
-flags : in interfaces.c.int) return interfaces.c.int;
+   function Swig_cmemberset_call (name : in DOHs.const_String_or_char_ptr.Item;
+      the_type : in swigg_module.Pointers.SwigType_Pointer;
+      self : in swigg_module.Pointers.String_Pointer;
+      varcref : in interfaces.c.int) return swigg_module.Pointers
+     .String_Pointer;
 
-   function  Swig_DestructorToFunction (n : in swigg_module.Pointers.Node_Pointer;
-classname : in swigg_module.Pointers.String_Pointer;
-cplus : in interfaces.c.int;
-flags : in interfaces.c.int) return interfaces.c.int;
+   function Swig_cmemberget_call (name : in DOHs.const_String_or_char_ptr.Item;
+      t : in swigg_module.Pointers.SwigType_Pointer;
+      self : in swigg_module.Pointers.String_Pointer;
+      varcref : in interfaces.c.int) return swigg_module.Pointers
+     .String_Pointer;
 
-   function  Swig_MembersetToFunction (n : in swigg_module.Pointers.Node_Pointer;
-classname : in swigg_module.Pointers.String_Pointer;
-flags : in interfaces.c.int) return interfaces.c.int;
+   function Swig_add_extension_code (n : in swigg_module.Pointers.Node_Pointer;
+      function_name : in swigg_module.Pointers.String_Pointer;
+      parms : in swigg_module.Pointers.ParmList_Pointer;
+      return_type : in swigg_module.Pointers.SwigType_Pointer;
+      code : in swigg_module.Pointers.String_Pointer;
+      cplusplus                        : in interfaces.c.int;
+      self : in swigg_module.Pointers.String_Pointer) return interfaces.c.int;
 
-   function  Swig_MembergetToFunction (n : in swigg_module.Pointers.Node_Pointer;
-classname : in swigg_module.Pointers.String_Pointer;
-flags : in interfaces.c.int) return interfaces.c.int;
+   procedure Swig_replace_special_variables
+     (n          : in swigg_module.Pointers.Node_Pointer;
+      parentnode : in swigg_module.Pointers.Node_Pointer;
+      code       : in swigg_module.Pointers.String_Pointer);
 
-   function  Swig_VargetToFunction (n : in swigg_module.Pointers.Node_Pointer;
-flags : in interfaces.c.int) return interfaces.c.int;
+   function Swig_MethodToFunction (n : in swigg_module.Pointers.Node_Pointer;
+      nspace                         : in DOHs.const_String_or_char_ptr.Item;
+      classname                      : in swigg_module.Pointers.String_Pointer;
+      flags                          : in interfaces.c.int;
+      director_type : in swigg_module.Pointers.SwigType_Pointer;
+      is_director : in interfaces.c.int) return interfaces.c.int;
 
-   function  Swig_VarsetToFunction (n : in swigg_module.Pointers.Node_Pointer;
-flags : in interfaces.c.int) return interfaces.c.int;
+   function Swig_ConstructorToFunction
+     (n               : in swigg_module.Pointers.Node_Pointer;
+      nspace          : in DOHs.const_String_or_char_ptr.Item;
+      classname       : in swigg_module.Pointers.String_Pointer;
+      none_comparison : in swigg_module.Pointers.String_Pointer;
+      director_ctor   : in swigg_module.Pointers.String_Pointer;
+      cplus           : in interfaces.c.int; flags : in interfaces.c.int;
+      directorname    : in swigg_module.Pointers.String_Pointer)
+      return interfaces.c.int;
 
-   function  Swig_methodclass (n : in swigg_module.Pointers.Node_Pointer) return swigg_module.Pointers.Node_Pointer;
+   function Swig_DestructorToFunction
+     (n         : in swigg_module.Pointers.Node_Pointer;
+      nspace    : in DOHs.const_String_or_char_ptr.Item;
+      classname : in swigg_module.Pointers.String_Pointer;
+      cplus     : in interfaces.c.int;
+      flags     : in interfaces.c.int) return interfaces.c.int;
 
-   function  Swig_directorclass (n : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
+   function Swig_MembersetToFunction
+     (n         : in swigg_module.Pointers.Node_Pointer;
+      classname : in swigg_module.Pointers.String_Pointer;
+      flags     : in interfaces.c.int) return interfaces.c.int;
 
-   function  Swig_directormap (n : in swigg_module.Pointers.Node_Pointer;
-the_type : in swigg_module.Pointers.String_Pointer) return swigg_module.Pointers.Node_Pointer;
+   function Swig_MembergetToFunction
+     (n         : in swigg_module.Pointers.Node_Pointer;
+      classname : in swigg_module.Pointers.String_Pointer;
+      flags     : in interfaces.c.int) return interfaces.c.int;
 
-   procedure Swig_typemap_init ;
+   function Swig_VargetToFunction (n : in swigg_module.Pointers.Node_Pointer;
+      flags : in interfaces.c.int) return interfaces.c.int;
 
-   procedure Swig_typemap_register (op : in swigg_module.Pointers.String_or_char_Pointer;
-pattern : in swigg_module.Pointers.ParmList_Pointer;
-code : in swigg_module.Pointers.String_or_char_Pointer;
-locals : in swigg_module.Pointers.ParmList_Pointer;
-kwargs : in swigg_module.Pointers.ParmList_Pointer);
+   function Swig_VarsetToFunction (n : in swigg_module.Pointers.Node_Pointer;
+      flags : in interfaces.c.int) return interfaces.c.int;
 
-   function  Swig_typemap_copy (op : in swigg_module.Pointers.String_or_char_Pointer;
-srcpattern : in swigg_module.Pointers.ParmList_Pointer;
-pattern : in swigg_module.Pointers.ParmList_Pointer) return interfaces.c.int;
+   function Swig_methodclass
+     (n : in swigg_module.Pointers.Node_Pointer) return swigg_module.Pointers
+     .Node_Pointer;
 
-   procedure Swig_typemap_clear (op : in swigg_module.Pointers.String_or_char_Pointer;
-pattern : in swigg_module.Pointers.ParmList_Pointer);
+   function Swig_directorclass
+     (n : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function  Swig_typemap_apply (srcpat : in swigg_module.Pointers.ParmList_Pointer;
-destpat : in swigg_module.Pointers.ParmList_Pointer) return interfaces.c.int;
+   function Swig_directormap (n : in swigg_module.Pointers.Node_Pointer;
+      the_type                  : in swigg_module.Pointers.String_Pointer)
+      return swigg_module.Pointers.Node_Pointer;
 
-   procedure Swig_typemap_clear_apply (pattern : in swigg_module.Pointers.ParmList_Pointer);
+   procedure Swig_typemap_init;
 
-   procedure Swig_typemap_debug ;
+   procedure Swig_typemap_register
+     (tmap_method : in DOHs.const_String_or_char_ptr.Item;
+      pattern     : in swigg_module.Pointers.ParmList_Pointer;
+      code        : in DOHs.const_String_or_char_ptr.Item;
+      locals      : in swigg_module.Pointers.ParmList_Pointer;
+      kwargs      : in swigg_module.Pointers.ParmList_Pointer);
 
-   function  Swig_typemap_search (op : in swigg_module.Pointers.String_or_char_Pointer;
-the_type : in swigg_module.Pointers.SwigType_Pointer;
-pname : in swigg_module.Pointers.String_or_char_Pointer;
-matchtype : in swigg_module.pointer_Pointers.SwigType_Pointer_Pointer) return swigg_module.Pointers.Hash_Pointer;
+   function Swig_typemap_copy
+     (tmap_method : in DOHs.const_String_or_char_ptr.Item;
+      srcpattern  : in swigg_module.Pointers.ParmList_Pointer;
+      pattern : in swigg_module.Pointers.ParmList_Pointer) return interfaces.c
+     .int;
 
-   function  Swig_typemap_search_multi (op : in swigg_module.Pointers.String_or_char_Pointer;
-parms : in swigg_module.Pointers.ParmList_Pointer;
-nmatch : in swig.pointers.int_Pointer) return swigg_module.Pointers.Hash_Pointer;
+   procedure Swig_typemap_clear
+     (tmap_method : in DOHs.const_String_or_char_ptr.Item;
+      pattern     : in swigg_module.Pointers.ParmList_Pointer);
 
-   function  Swig_typemap_lookup (op : in swigg_module.Pointers.String_or_char_Pointer;
-n : in swigg_module.Pointers.Node_Pointer;
-lname : in swigg_module.Pointers.String_or_char_Pointer;
-f : in swigg_module.Wrapper.Pointer) return swigg_module.Pointers.String_Pointer;
+   function Swig_typemap_apply
+     (srcpat  : in swigg_module.Pointers.ParmList_Pointer;
+      destpat : in swigg_module.Pointers.ParmList_Pointer) return interfaces.c
+     .int;
 
-   function  Swig_typemap_lookup_out (op : in swigg_module.Pointers.String_or_char_Pointer;
-n : in swigg_module.Pointers.Node_Pointer;
-lname : in swigg_module.Pointers.String_or_char_Pointer;
-f : in swigg_module.Wrapper.Pointer;
-actioncode : in swigg_module.Pointers.String_Pointer) return swigg_module.Pointers.String_Pointer;
+   procedure Swig_typemap_clear_apply
+     (pattern : in swigg_module.Pointers.ParmList_Pointer);
 
-   procedure Swig_typemap_attach_kwargs (tm : in swigg_module.Pointers.Hash_Pointer;
-op : in swigg_module.Pointers.String_or_char_Pointer;
-p : in swigg_module.Pointers.Parm_Pointer);
+   procedure Swig_typemap_replace_embedded_typemap
+     (s              : in swigg_module.Pointers.String_Pointer;
+      file_line_node : in swigg_module.Pointers.Node_Pointer);
 
-   procedure Swig_typemap_new_scope ;
+   procedure Swig_typemap_debug;
 
-   function  Swig_typemap_pop_scope  return swigg_module.Pointers.Hash_Pointer;
+   procedure Swig_typemap_search_debug_set;
 
-   procedure Swig_typemap_attach_parms (op : in swigg_module.Pointers.String_or_char_Pointer;
-parms : in swigg_module.Pointers.ParmList_Pointer;
-f : in swigg_module.Wrapper.Pointer);
+   procedure Swig_typemap_used_debug_set;
 
-   procedure Swig_fragment_register (fragment : in swigg_module.Pointers.Node_Pointer);
+   procedure Swig_typemap_register_debug_set;
 
-   procedure Swig_fragment_emit (name : in swigg_module.Pointers.String_Pointer);
+   function Swig_typemap_lookup
+     (tmap_method : in DOHs.const_String_or_char_ptr.Item;
+      n           : in swigg_module.Pointers.Node_Pointer;
+      lname       : in DOHs.const_String_or_char_ptr.Item;
+      f : in swigg_module.Wrapper.Pointer) return swigg_module.Pointers
+     .String_Pointer;
 
-   function  Swig_director_mode  return interfaces.c.int;
+   function Swig_typemap_lookup_out
+     (tmap_method : in DOHs.const_String_or_char_ptr.Item;
+      n           : in swigg_module.Pointers.Node_Pointer;
+      lname       : in DOHs.const_String_or_char_ptr.Item;
+      f           : in swigg_module.Wrapper.Pointer;
+      actioncode  : in swigg_module.Pointers.String_Pointer)
+      return swigg_module.Pointers.String_Pointer;
 
-   function  Swig_director_protected_mode  return interfaces.c.int;
+   procedure Swig_typemap_attach_parms
+     (tmap_method : in DOHs.const_String_or_char_ptr.Item;
+      parms       : in swigg_module.Pointers.ParmList_Pointer;
+      f           : in swigg_module.Wrapper.Pointer);
 
-   function  Swig_all_protected_mode  return interfaces.c.int;
+   procedure Swig_fragment_register
+     (fragment : in swigg_module.Pointers.Node_Pointer);
+
+   procedure Swig_fragment_emit
+     (name : in swigg_module.Pointers.String_Pointer);
+
+   function Swig_extend_hash return swigg_module.Pointers.Hash_Pointer;
+
+   procedure Swig_extend_merge (cls : in swigg_module.Pointers.Node_Pointer;
+      am                            : in swigg_module.Pointers.Node_Pointer);
+
+   procedure Swig_extend_append_previous
+     (cls : in swigg_module.Pointers.Node_Pointer;
+      am  : in swigg_module.Pointers.Node_Pointer);
+
+   procedure Swig_extend_unused_check;
+
+   function Swig_director_mode return interfaces.c.int;
+
+   function Swig_director_protected_mode return interfaces.c.int;
+
+   function Swig_all_protected_mode return interfaces.c.int;
 
    procedure Wrapper_director_mode_set (arg_1 : in interfaces.c.int);
 
@@ -596,52 +968,69 @@ f : in swigg_module.Wrapper.Pointer);
 
    procedure Wrapper_all_protected_mode_set (arg_1 : in interfaces.c.int);
 
-   procedure SwigType_template_init ;
+   procedure Language_replace_special_variables
+     (method : in swigg_module.Pointers.String_Pointer;
+      tm     : in swigg_module.Pointers.String_Pointer;
+      parm   : in swigg_module.Pointers.Parm_Pointer);
 
-   function  NewWrapper  return swigg_module.Wrapper.Pointer;
+   procedure Swig_print (object : in DOHs.Pointers.DOH_Pointer;
+      count                     : in interfaces.c.int);
+
+   procedure Swig_print_with_location (object : in DOHs.Pointers.DOH_Pointer;
+      count                                   : in interfaces.c.int);
+
+   procedure SwigType_template_init;
+
+   function NewWrapper return swigg_module.Wrapper.Pointer;
 
    procedure DelWrapper (w : in swigg_module.Wrapper.Pointer);
 
    procedure Wrapper_compact_print_mode_set (flag : in interfaces.c.int);
 
-   procedure Wrapper_pretty_print (str : in swigg_module.Pointers.String_Pointer;
-f : in swigg_module.Pointers.File_Pointer);
+   procedure Wrapper_pretty_print
+     (str : in swigg_module.Pointers.String_Pointer;
+      f   : in swigg_module.Pointers.File_Pointer);
 
-   procedure Wrapper_compact_print (str : in swigg_module.Pointers.String_Pointer;
-f : in swigg_module.Pointers.File_Pointer);
+   procedure Wrapper_compact_print
+     (str : in swigg_module.Pointers.String_Pointer;
+      f   : in swigg_module.Pointers.File_Pointer);
 
    procedure Wrapper_print (w : in swigg_module.Wrapper.Pointer;
-f : in swigg_module.Pointers.File_Pointer);
+      f                       : in swigg_module.Pointers.File_Pointer);
 
-   function  Wrapper_add_local (w : in swigg_module.Wrapper.Pointer;
-name : in swigg_module.Pointers.String_or_char_Pointer;
-decl : in swigg_module.Pointers.String_or_char_Pointer) return interfaces.c.int;
+   function Wrapper_add_local (w : in swigg_module.Wrapper.Pointer;
+      name                       : in DOHs.const_String_or_char_ptr.Item;
+      decl : in DOHs.const_String_or_char_ptr.Item) return interfaces.c.int;
 
-   function  Wrapper_add_localv (w : in swigg_module.Wrapper.Pointer;
-name : in swigg_module.Pointers.String_or_char_Pointer) return interfaces.c.int;
+   function Wrapper_add_localv (w : in swigg_module.Wrapper.Pointer;
+      name : in DOHs.const_String_or_char_ptr.Item) return interfaces.c.int;
 
-   function  Wrapper_check_local (w : in swigg_module.Wrapper.Pointer;
-name : in swigg_module.Pointers.String_or_char_Pointer) return interfaces.c.int;
+   function Wrapper_check_local (w : in swigg_module.Wrapper.Pointer;
+      name : in DOHs.const_String_or_char_ptr.Item) return interfaces.c.int;
 
-   function  Wrapper_new_local (w : in swigg_module.Wrapper.Pointer;
-name : in swigg_module.Pointers.String_or_char_Pointer;
-decl : in swigg_module.Pointers.String_or_char_Pointer) return interfaces.c.strings.chars_ptr;
+   function Wrapper_new_local (w : in swigg_module.Wrapper.Pointer;
+      name                       : in DOHs.const_String_or_char_ptr.Item;
+      decl : in DOHs.const_String_or_char_ptr.Item) return interfaces.c.strings
+     .chars_ptr;
 
-   function  Preprocessor_expr (s : in swigg_module.Pointers.String_Pointer;
-error : in swig.pointers.int_Pointer) return interfaces.c.int;
+   function Preprocessor_expr (s : in swigg_module.Pointers.String_Pointer;
+      error : in swig.pointers.int_Pointer) return interfaces.c.int;
 
-   function  Preprocessor_expr_error  return interfaces.c.strings.chars_ptr;
+   function Preprocessor_expr_error return interfaces.c.strings.chars_ptr;
 
-   function  Preprocessor_define (str : in swigg_module.Pointers.String_or_char_Pointer;
-swigmacro : in interfaces.c.int) return swigg_module.Pointers.Hash_Pointer;
+   function Preprocessor_define (str : in DOHs.const_String_or_char_ptr.Item;
+      swigmacro : in interfaces.c.int) return swigg_module.Pointers
+     .Hash_Pointer;
 
-   procedure Preprocessor_undef (name : in swigg_module.Pointers.String_or_char_Pointer);
+   procedure Preprocessor_undef (name : in DOHs.const_String_or_char_ptr.Item);
 
-   procedure Preprocessor_init ;
+   procedure Preprocessor_init;
 
-   procedure Preprocessor_delete ;
+   procedure Preprocessor_delete;
 
-   function  Preprocessor_parse (s : in swigg_module.Pointers.String_Pointer) return swigg_module.Pointers.String_Pointer;
+   function Preprocessor_parse
+     (s : in swigg_module.Pointers.String_Pointer) return swigg_module.Pointers
+     .String_Pointer;
 
    procedure Preprocessor_include_all (arg_1 : in interfaces.c.int);
 
@@ -651,459 +1040,575 @@ swigmacro : in interfaces.c.int) return swigg_module.Pointers.Hash_Pointer;
 
    procedure Preprocessor_error_as_warning (arg_1 : in interfaces.c.int);
 
-   function  Preprocessor_depend  return swigg_module.Pointers.List_Pointer;
+   function Preprocessor_depend return swigg_module.Pointers.List_Pointer;
 
-   procedure Preprocessor_expr_init ;
+   procedure Preprocessor_expr_init;
 
-   procedure Preprocessor_expr_delete ;
+   procedure Preprocessor_expr_delete;
 
-   function  checkAttribute (obj : in swigg_module.Pointers.Node_Pointer;
-name : in swigg_module.Pointers.String_or_char_Pointer;
-value : in swigg_module.Pointers.String_or_char_Pointer) return interfaces.c.int;
+   function checkAttribute (obj : in swigg_module.Pointers.Node_Pointer;
+      name                      : in DOHs.const_String_or_char_ptr.Item;
+      value : in DOHs.const_String_or_char_ptr.Item) return interfaces.c.int;
 
    procedure appendChild (node : in swigg_module.Pointers.Node_Pointer;
-child : in swigg_module.Pointers.Node_Pointer);
+      child                    : in swigg_module.Pointers.Node_Pointer);
 
    procedure prependChild (node : in swigg_module.Pointers.Node_Pointer;
-child : in swigg_module.Pointers.Node_Pointer);
+      child                     : in swigg_module.Pointers.Node_Pointer);
 
    procedure removeNode (node : in swigg_module.Pointers.Node_Pointer);
 
-   function  copyNode (node : in swigg_module.Pointers.Node_Pointer) return swigg_module.Pointers.Node_Pointer;
+   function copyNode
+     (node : in swigg_module.Pointers.Node_Pointer)
+      return swigg_module.Pointers.Node_Pointer;
+
+   procedure appendSibling (node : in swigg_module.Pointers.Node_Pointer;
+      child                      : in swigg_module.Pointers.Node_Pointer);
 
    procedure Swig_require (ns : in interfaces.c.strings.chars_ptr;
-node : in swigg_module.Pointers.Node_Pointer);
+      node                    : in swigg_module.Pointers.Node_Pointer);
 
    procedure Swig_save (ns : in interfaces.c.strings.chars_ptr;
-node : in swigg_module.Pointers.Node_Pointer);
+      node                 : in swigg_module.Pointers.Node_Pointer);
 
    procedure Swig_restore (node : in swigg_module.Pointers.Node_Pointer);
 
    procedure Swig_print_tags (obj : in swigg_module.Pointers.File_Pointer;
-root : in swigg_module.Pointers.Node_Pointer);
+      root                        : in swigg_module.Pointers.Node_Pointer);
 
    procedure Swig_print_tree (obj : in swigg_module.Pointers.Node_Pointer);
 
    procedure Swig_print_node (obj : in swigg_module.Pointers.Node_Pointer);
 
-   function  Swig_add_directory (dirname : in swigg_module.Pointers.String_or_char_Pointer) return swigg_module.Pointers.List_Pointer;
+   function Swig_add_directory
+     (dirname : in DOHs.const_String_or_char_ptr.Item)
+      return swigg_module.Pointers.List_Pointer;
 
-   procedure Swig_push_directory (dirname : in swigg_module.Pointers.String_or_char_Pointer);
+   procedure Swig_push_directory
+     (dirname : in DOHs.const_String_or_char_ptr.Item);
 
-   procedure Swig_pop_directory ;
+   procedure Swig_pop_directory;
 
-   function  Swig_last_file  return swigg_module.Pointers.String_Pointer;
+   function Swig_last_file return swigg_module.Pointers.String_Pointer;
 
-   function  Swig_search_path  return swigg_module.Pointers.List_Pointer;
+   function Swig_search_path return swigg_module.Pointers.List_Pointer;
 
-   function  Swig_open (name : in swigg_module.Pointers.String_or_char_Pointer) return swig.void_ptr;
+   function Swig_include_open
+     (name : in DOHs.const_String_or_char_ptr.Item) return swig.void_ptr;
 
-   function  Swig_read_file (f : in swig.void_ptr) return swigg_module.Pointers.String_Pointer;
+   function Swig_open
+     (name : in DOHs.const_String_or_char_ptr.Item) return swig.void_ptr;
 
-   function  Swig_include (name : in swigg_module.Pointers.String_or_char_Pointer) return swigg_module.Pointers.String_Pointer;
+   function Swig_read_file
+     (f : in swig.void_ptr) return swigg_module.Pointers.String_Pointer;
 
-   function  Swig_include_sys (name : in swigg_module.Pointers.String_or_char_Pointer) return swigg_module.Pointers.String_Pointer;
+   function Swig_include
+     (name : in DOHs.const_String_or_char_ptr.Item)
+      return swigg_module.Pointers.String_Pointer;
 
-   function  Swig_insert_file (name : in swigg_module.Pointers.String_or_char_Pointer;
-outfile : in swigg_module.Pointers.File_Pointer) return interfaces.c.int;
+   function Swig_include_sys
+     (name : in DOHs.const_String_or_char_ptr.Item)
+      return swigg_module.Pointers.String_Pointer;
+
+   function Swig_insert_file (name : in DOHs.const_String_or_char_ptr.Item;
+      outfile : in swigg_module.Pointers.File_Pointer) return interfaces.c.int;
 
    procedure Swig_set_push_dir (dopush : in interfaces.c.int);
 
-   function  Swig_get_push_dir  return interfaces.c.int;
+   function Swig_get_push_dir return interfaces.c.int;
 
-   procedure Swig_register_filebyname (filename : in swigg_module.Pointers.String_or_char_Pointer;
-outfile : in swigg_module.Pointers.File_Pointer);
+   procedure Swig_register_filebyname
+     (filename : in DOHs.const_String_or_char_ptr.Item;
+      outfile  : in swigg_module.Pointers.File_Pointer);
 
-   function  Swig_filebyname (filename : in swigg_module.Pointers.String_or_char_Pointer) return swigg_module.Pointers.File_Pointer;
+   function Swig_filebyname
+     (filename : in DOHs.const_String_or_char_ptr.Item)
+      return swigg_module.Pointers.File_Pointer;
 
-   function  Swig_file_suffix (filename : in swigg_module.Pointers.String_or_char_Pointer) return interfaces.c.strings.chars_ptr;
+   function Swig_file_extension
+     (filename : in DOHs.const_String_or_char_ptr.Item)
+      return swigg_module.Pointers.String_Pointer;
 
-   function  Swig_file_basename (filename : in swigg_module.Pointers.String_or_char_Pointer) return interfaces.c.strings.chars_ptr;
+   function Swig_file_basename
+     (filename : in DOHs.const_String_or_char_ptr.Item)
+      return swigg_module.Pointers.String_Pointer;
 
-   function  Swig_file_filename (filename : in swigg_module.Pointers.String_or_char_Pointer) return interfaces.c.strings.chars_ptr;
+   function Swig_file_filename
+     (filename : in DOHs.const_String_or_char_ptr.Item)
+      return swigg_module.Pointers.String_Pointer;
 
-   function  Swig_file_dirname (filename : in swigg_module.Pointers.String_or_char_Pointer) return interfaces.c.strings.chars_ptr;
+   function Swig_file_dirname
+     (filename : in DOHs.const_String_or_char_ptr.Item)
+      return swigg_module.Pointers.String_Pointer;
+
+   procedure Swig_file_debug_set;
 
    procedure Swig_init_args (argc : in interfaces.c.int;
-argv : in swig.pointers.chars_ptr_Pointer);
+      argv                        : in swig.pointers.chars_ptr_Pointer);
 
    procedure Swig_mark_arg (n : in interfaces.c.int);
 
-   function  Swig_check_marked (n : in interfaces.c.int) return interfaces.c.int;
+   function Swig_check_marked
+     (n : in interfaces.c.int) return interfaces.c.int;
 
    procedure Swig_check_options (check_input : in interfaces.c.int);
 
-   procedure Swig_arg_error ;
+   procedure Swig_arg_error;
 
-   function  runtime_call_Depth  return interfaces.c.int;
+   function runtime_call_Depth return interfaces.c.int;
 
-   function  String_in (the_string_Array : in swig.pointers.chars_ptr_Pointer;
-at_Index : in interfaces.c.int) return interfaces.c.strings.chars_ptr;
+   function String_in (the_string_Array : in swig.pointers.chars_ptr_Pointer;
+      at_Index : in interfaces.c.int) return interfaces.c.strings.chars_ptr;
 
-   function  c_to_doh_String (c_String : in interfaces.c.strings.chars_ptr) return swigg_module.Pointers.String_Pointer;
+   function c_to_doh_String
+     (c_String : in interfaces.c.strings.chars_ptr)
+      return swigg_module.Pointers.String_Pointer;
 
-   function  get_attribute (node : in swigg_module.Pointers.Node_Pointer;
-key : in swigg_module.Pointers.String_Pointer) return swigg_module.Pointers.Node_Pointer;
+   function get_attribute (node : in swigg_module.Pointers.Node_Pointer;
+      key                       : in swigg_module.Pointers.String_Pointer)
+      return swigg_module.Pointers.Node_Pointer;
 
    procedure set_attribute (node : in swigg_module.Pointers.Node_Pointer;
-key : in swigg_module.Pointers.String_Pointer;
-value : in swigg_module.Pointers.String_Pointer);
+      key                        : in swigg_module.Pointers.String_Pointer;
+      value                      : in swigg_module.Pointers.String_Pointer);
 
-   function  check_attribute (node : in swigg_module.Pointers.Node_Pointer;
-key : in swigg_module.Pointers.String_Pointer;
-value : in swigg_module.Pointers.String_Pointer) return interfaces.c.int;
+   function check_attribute (node : in swigg_module.Pointers.Node_Pointer;
+      key                         : in swigg_module.Pointers.String_Pointer;
+      value : in swigg_module.Pointers.String_Pointer) return interfaces.c.int;
 
-   function  Node_to_CStr (node : in swigg_module.Pointers.Node_Pointer) return interfaces.c.strings.chars_ptr;
+   function Node_to_CStr
+     (node : in swigg_module.Pointers.Node_Pointer) return interfaces.c.strings
+     .chars_ptr;
 
-   function  node_Type (node : in swigg_module.Pointers.Node_Pointer) return DOHs.Pointers.DOH_Pointer;
+   function node_Type
+     (node : in swigg_module.Pointers.Node_Pointer) return DOHs.Pointers
+     .DOH_Pointer;
 
-   function  parent_Node (node : in swigg_module.Pointers.Node_Pointer) return swigg_module.Pointers.Node_Pointer;
+   function parent_Node
+     (node : in swigg_module.Pointers.Node_Pointer)
+      return swigg_module.Pointers.Node_Pointer;
 
-   function  new_File (name : in swigg_module.Pointers.String_Pointer;
-mode : in interfaces.c.strings.chars_ptr) return swigg_module.Pointers.File_Pointer;
+   function new_File (name : in swigg_module.Pointers.String_Pointer;
+      mode : in interfaces.c.strings.chars_ptr) return swigg_module.Pointers
+     .File_Pointer;
 
    procedure Print_to (Self : in swigg_module.Pointers.String_Pointer;
-the_Text : in interfaces.c.strings.chars_ptr);
+      the_Text              : in interfaces.c.strings.chars_ptr);
 
    procedure dump (from : in swigg_module.Pointers.File_Pointer;
-to : in swigg_module.Pointers.File_Pointer);
+      to                : in swigg_module.Pointers.File_Pointer);
 
    procedure close_File (Self : in swigg_module.Pointers.File_Pointer);
 
    procedure doh_replace_All (Self : in DOHs.Pointers.DOH_Pointer;
-Pattern : in swigg_module.Pointers.String_Pointer;
-Substitute : in swigg_module.Pointers.String_Pointer);
+      Pattern                      : in swigg_module.Pointers.String_Pointer;
+      Substitute                   : in swigg_module.Pointers.String_Pointer);
 
    procedure Swig_save_1 (name_Space : in interfaces.c.strings.chars_ptr;
-the_Node : in swigg_module.Pointers.Node_Pointer;
-Value : in interfaces.c.strings.chars_ptr);
+      the_Node                       : in swigg_module.Pointers.Node_Pointer;
+      Value                          : in interfaces.c.strings.chars_ptr);
 
    procedure Swig_require_2 (name_Space : in interfaces.c.strings.chars_ptr;
-the_Node : in swigg_module.Pointers.Node_Pointer;
-Value_1 : in swigg_module.Pointers.String_Pointer;
-Value_2 : in swigg_module.Pointers.String_Pointer);
+      the_Node : in swigg_module.Pointers.Node_Pointer;
+      Value_1 : in swigg_module.Pointers.String_Pointer;
+      Value_2 : in swigg_module.Pointers.String_Pointer);
 
-   procedure Wrapper_add_local_2 (the_Wrapper : in swigg_module.Wrapper.Pointer;
-Name : in swigg_module.Pointers.String_or_char_Pointer;
-Item_1 : in interfaces.c.strings.chars_ptr;
-Item_2 : in interfaces.c.strings.chars_ptr);
+   procedure Wrapper_add_local_2
+     (the_Wrapper : in swigg_module.Wrapper.Pointer;
+      Name        : in swigg_module.Pointers.String_or_char_Pointer;
+      Item_1      : in interfaces.c.strings.chars_ptr;
+      Item_2      : in interfaces.c.strings.chars_ptr);
 
-   function  first_Child (Self : in swigg_module.Pointers.Node_Pointer) return swigg_module.Pointers.Node_Pointer;
+   function first_Child
+     (Self : in swigg_module.Pointers.Node_Pointer)
+      return swigg_module.Pointers.Node_Pointer;
 
-   function  next_Sibling (Self : in swigg_module.Pointers.Node_Pointer) return swigg_module.Pointers.Node_Pointer;
+   function next_Sibling
+     (Self : in swigg_module.Pointers.Node_Pointer)
+      return swigg_module.Pointers.Node_Pointer;
 
-   function  doh_First (obj : in DOHs.Pointers.DOH_Pointer) return DOHs.DohIterator.Item;
+   function doh_First
+     (obj : in DOHs.Pointers.DOH_Pointer) return DOHs.DohIterator.Item;
 
-   function  doh_Next (iter : in DOHs.DohIterator.Item) return DOHs.DohIterator.Item;
+   function doh_Next
+     (iter : in DOHs.DohIterator.Item) return DOHs.DohIterator.Item;
 
-   function  get_Item (Self : in DOHs.DohIterator.Item) return DOHs.Pointers.DOH_Pointer;
-
-
-
-
-
-
-
-
+   function get_Item
+     (Self : in DOHs.DohIterator.Item) return DOHs.Pointers.DOH_Pointer;
 
 private
 
-
-
-   pragma Import (C, NewSwigType, "Ada_NewSwigType");
-   pragma Import (C, SwigType_del_element, "Ada_SwigType_del_element");
-   pragma Import (C, SwigType_add_pointer, "Ada_SwigType_add_pointer");
-   pragma Import (C, SwigType_add_memberpointer, "Ada_SwigType_add_memberpointer");
-   pragma Import (C, SwigType_del_memberpointer, "Ada_SwigType_del_memberpointer");
-   pragma Import (C, SwigType_del_pointer, "Ada_SwigType_del_pointer");
-   pragma Import (C, SwigType_add_array, "Ada_SwigType_add_array");
-   pragma Import (C, SwigType_del_array, "Ada_SwigType_del_array");
-   pragma Import (C, SwigType_pop_arrays, "Ada_SwigType_pop_arrays");
-   pragma Import (C, SwigType_add_reference, "Ada_SwigType_add_reference");
-   pragma Import (C, SwigType_del_reference, "Ada_SwigType_del_reference");
-   pragma Import (C, SwigType_add_qualifier, "Ada_SwigType_add_qualifier");
-   pragma Import (C, SwigType_del_qualifier, "Ada_SwigType_del_qualifier");
-   pragma Import (C, SwigType_add_function, "Ada_SwigType_add_function");
-   pragma Import (C, SwigType_add_template, "Ada_SwigType_add_template");
-   pragma Import (C, SwigType_pop_function, "Ada_SwigType_pop_function");
-   pragma Import (C, SwigType_function_parms, "Ada_SwigType_function_parms");
-   pragma Import (C, SwigType_split, "Ada_SwigType_split");
-   pragma Import (C, SwigType_pop, "Ada_SwigType_pop");
-   pragma Import (C, SwigType_push, "Ada_SwigType_push");
-   pragma Import (C, SwigType_parmlist, "Ada_SwigType_parmlist");
-   pragma Import (C, SwigType_parm, "Ada_SwigType_parm");
-   pragma Import (C, SwigType_str, "Ada_SwigType_str");
-   pragma Import (C, SwigType_lstr, "Ada_SwigType_lstr");
-   pragma Import (C, SwigType_rcaststr, "Ada_SwigType_rcaststr");
-   pragma Import (C, SwigType_lcaststr, "Ada_SwigType_lcaststr");
-   pragma Import (C, SwigType_manglestr, "Ada_SwigType_manglestr");
-   pragma Import (C, SwigType_ltype, "Ada_SwigType_ltype");
-   pragma Import (C, SwigType_ispointer, "Ada_SwigType_ispointer");
-   pragma Import (C, SwigType_ispointer_return, "Ada_SwigType_ispointer_return");
-   pragma Import (C, SwigType_isfunctionpointer, "Ada_SwigType_isfunctionpointer");
-   pragma Import (C, SwigType_ismemberpointer, "Ada_SwigType_ismemberpointer");
-   pragma Import (C, SwigType_isreference, "Ada_SwigType_isreference");
-   pragma Import (C, SwigType_isreference_return, "Ada_SwigType_isreference_return");
-   pragma Import (C, SwigType_isarray, "Ada_SwigType_isarray");
-   pragma Import (C, SwigType_prefix_is_simple_1D_array, "Ada_SwigType_prefix_is_simple_1D_array");
-   pragma Import (C, SwigType_isfunction, "Ada_SwigType_isfunction");
-   pragma Import (C, SwigType_isqualifier, "Ada_SwigType_isqualifier");
-   pragma Import (C, SwigType_isconst, "Ada_SwigType_isconst");
-   pragma Import (C, SwigType_issimple, "Ada_SwigType_issimple");
-   pragma Import (C, SwigType_ismutable, "Ada_SwigType_ismutable");
-   pragma Import (C, SwigType_isvarargs, "Ada_SwigType_isvarargs");
-   pragma Import (C, SwigType_istemplate, "Ada_SwigType_istemplate");
-   pragma Import (C, SwigType_isenum, "Ada_SwigType_isenum");
-   pragma Import (C, SwigType_check_decl, "Ada_SwigType_check_decl");
-   pragma Import (C, SwigType_strip_qualifiers, "Ada_SwigType_strip_qualifiers");
-   pragma Import (C, SwigType_functionpointer_decompose, "Ada_SwigType_functionpointer_decompose");
-   pragma Import (C, SwigType_base, "Ada_SwigType_base");
-   pragma Import (C, SwigType_namestr, "Ada_SwigType_namestr");
-   pragma Import (C, SwigType_templateprefix, "Ada_SwigType_templateprefix");
-   pragma Import (C, SwigType_templatesuffix, "Ada_SwigType_templatesuffix");
-   pragma Import (C, SwigType_templateargs, "Ada_SwigType_templateargs");
-   pragma Import (C, SwigType_prefix, "Ada_SwigType_prefix");
-   pragma Import (C, SwigType_array_ndim, "Ada_SwigType_array_ndim");
-   pragma Import (C, SwigType_array_getdim, "Ada_SwigType_array_getdim");
-   pragma Import (C, SwigType_array_setdim, "Ada_SwigType_array_setdim");
-   pragma Import (C, SwigType_array_type, "Ada_SwigType_array_type");
-   pragma Import (C, SwigType_default, "Ada_SwigType_default");
-   pragma Import (C, SwigType_typename_replace, "Ada_SwigType_typename_replace");
-   pragma Import (C, SwigType_alttype, "Ada_SwigType_alttype");
-   pragma Import (C, SwigType_typesystem_init, "Ada_SwigType_typesystem_init");
-   pragma Import (C, SwigType_typedef, "Ada_SwigType_typedef");
-   pragma Import (C, SwigType_typedef_class, "Ada_SwigType_typedef_class");
-   pragma Import (C, SwigType_typedef_using, "Ada_SwigType_typedef_using");
-   pragma Import (C, SwigType_inherit, "Ada_SwigType_inherit");
-   pragma Import (C, SwigType_issubtype, "Ada_SwigType_issubtype");
-   pragma Import (C, SwigType_scope_alias, "Ada_SwigType_scope_alias");
-   pragma Import (C, SwigType_using_scope, "Ada_SwigType_using_scope");
-   pragma Import (C, SwigType_new_scope, "Ada_SwigType_new_scope");
-   pragma Import (C, SwigType_inherit_scope, "Ada_SwigType_inherit_scope");
-   pragma Import (C, SwigType_pop_scope, "Ada_SwigType_pop_scope");
-   pragma Import (C, SwigType_set_scope, "Ada_SwigType_set_scope");
-   pragma Import (C, SwigType_print_scope, "Ada_SwigType_print_scope");
-   pragma Import (C, SwigType_typedef_resolve, "Ada_SwigType_typedef_resolve");
-   pragma Import (C, SwigType_typedef_resolve_all, "Ada_SwigType_typedef_resolve_all");
-   pragma Import (C, SwigType_typedef_qualified, "Ada_SwigType_typedef_qualified");
-   pragma Import (C, SwigType_istypedef, "Ada_SwigType_istypedef");
-   pragma Import (C, SwigType_isclass, "Ada_SwigType_isclass");
-   pragma Import (C, SwigType_attach_symtab, "Ada_SwigType_attach_symtab");
-   pragma Import (C, SwigType_remember, "Ada_SwigType_remember");
-   pragma Import (C, SwigType_remember_clientdata, "Ada_SwigType_remember_clientdata");
-   pragma Import (C, SwigType_remember_mangleddata, "Ada_SwigType_remember_mangleddata");
-   pragma Import (C, SwigType_emit_type_table, "Ada_SwigType_emit_type_table");
-   pragma Import (C, SwigType_type, "Ada_SwigType_type");
-   pragma Import (C, Swig_symbol_init, "Ada_Swig_symbol_init");
-   pragma Import (C, Swig_symbol_setscopename, "Ada_Swig_symbol_setscopename");
-   pragma Import (C, Swig_symbol_getscopename, "Ada_Swig_symbol_getscopename");
-   pragma Import (C, Swig_symbol_qualifiedscopename, "Ada_Swig_symbol_qualifiedscopename");
-   pragma Import (C, Swig_symbol_newscope, "Ada_Swig_symbol_newscope");
-   pragma Import (C, Swig_symbol_setscope, "Ada_Swig_symbol_setscope");
-   pragma Import (C, Swig_symbol_getscope, "Ada_Swig_symbol_getscope");
-   pragma Import (C, Swig_symbol_current, "Ada_Swig_symbol_current");
-   pragma Import (C, Swig_symbol_popscope, "Ada_Swig_symbol_popscope");
-   pragma Import (C, Swig_symbol_add, "Ada_Swig_symbol_add");
-   pragma Import (C, Swig_symbol_cadd, "Ada_Swig_symbol_cadd");
-   pragma Import (C, Swig_symbol_clookup, "Ada_Swig_symbol_clookup");
-   pragma Import (C, Swig_symbol_cscope, "Ada_Swig_symbol_cscope");
-   pragma Import (C, Swig_symbol_clookup_local, "Ada_Swig_symbol_clookup_local");
-   pragma Import (C, Swig_symbol_qualified, "Ada_Swig_symbol_qualified");
-   pragma Import (C, Swig_symbol_isoverloaded, "Ada_Swig_symbol_isoverloaded");
-   pragma Import (C, Swig_symbol_remove, "Ada_Swig_symbol_remove");
-   pragma Import (C, Swig_symbol_alias, "Ada_Swig_symbol_alias");
-   pragma Import (C, Swig_symbol_inherit, "Ada_Swig_symbol_inherit");
-   pragma Import (C, Swig_symbol_type_qualify, "Ada_Swig_symbol_type_qualify");
-   pragma Import (C, Swig_symbol_string_qualify, "Ada_Swig_symbol_string_qualify");
-   pragma Import (C, Swig_symbol_typedef_reduce, "Ada_Swig_symbol_typedef_reduce");
-   pragma Import (C, Swig_symbol_template_defargs, "Ada_Swig_symbol_template_defargs");
-   pragma Import (C, Swig_symbol_template_deftype, "Ada_Swig_symbol_template_deftype");
-   pragma Import (C, Swig_symbol_template_param_eval, "Ada_Swig_symbol_template_param_eval");
-   pragma Import (C, ParmList_errorstr, "Ada_ParmList_errorstr");
-   pragma Import (C, ParmList_is_compactdefargs, "Ada_ParmList_is_compactdefargs");
-   pragma Import (C, Swig_name_register, "Ada_Swig_name_register");
-   pragma Import (C, Swig_name_unregister, "Ada_Swig_name_unregister");
-   pragma Import (C, Swig_name_mangle, "Ada_Swig_name_mangle");
-   pragma Import (C, Swig_name_wrapper, "Ada_Swig_name_wrapper");
-   pragma Import (C, Swig_name_member, "Ada_Swig_name_member");
-   pragma Import (C, Swig_name_get, "Ada_Swig_name_get");
-   pragma Import (C, Swig_name_set, "Ada_Swig_name_set");
-   pragma Import (C, Swig_name_construct, "Ada_Swig_name_construct");
-   pragma Import (C, Swig_name_copyconstructor, "Ada_Swig_name_copyconstructor");
-   pragma Import (C, Swig_name_destroy, "Ada_Swig_name_destroy");
-   pragma Import (C, Swig_name_disown, "Ada_Swig_name_disown");
-   pragma Import (C, Swig_name_namewarn_add, "Ada_Swig_name_namewarn_add");
-   pragma Import (C, Swig_name_namewarn_get, "Ada_Swig_name_namewarn_get");
-   pragma Import (C, Swig_name_rename_add, "Ada_Swig_name_rename_add");
-   pragma Import (C, Swig_name_inherit, "Ada_Swig_name_inherit");
-   pragma Import (C, Swig_need_protected, "Ada_Swig_need_protected");
-   pragma Import (C, Swig_need_name_warning, "Ada_Swig_need_name_warning");
-   pragma Import (C, Swig_need_redefined_warn, "Ada_Swig_need_redefined_warn");
-   pragma Import (C, Swig_name_make, "Ada_Swig_name_make");
-   pragma Import (C, Swig_name_warning, "Ada_Swig_name_warning");
-   pragma Import (C, Swig_name_decl, "Ada_Swig_name_decl");
-   pragma Import (C, Swig_name_fulldecl, "Ada_Swig_name_fulldecl");
-   pragma Import (C, Swig_name_object_set, "Ada_Swig_name_object_set");
-   pragma Import (C, Swig_name_object_get, "Ada_Swig_name_object_get");
-   pragma Import (C, Swig_name_object_inherit, "Ada_Swig_name_object_inherit");
-   pragma Import (C, Swig_features_get, "Ada_Swig_features_get");
-   pragma Import (C, Swig_feature_set, "Ada_Swig_feature_set");
-   pragma Import (C, Swig_copy_string, "Ada_Swig_copy_string");
-   pragma Import (C, Swig_set_fakeversion, "Ada_Swig_set_fakeversion");
-   pragma Import (C, Swig_package_version, "Ada_Swig_package_version");
-   pragma Import (C, Swig_banner, "Ada_Swig_banner");
-   pragma Import (C, Swig_strip_c_comments, "Ada_Swig_strip_c_comments");
-   pragma Import (C, Swig_string_escape, "Ada_Swig_string_escape");
-   pragma Import (C, Swig_string_mangle, "Ada_Swig_string_mangle");
-   pragma Import (C, Swig_scopename_split, "Ada_Swig_scopename_split");
-   pragma Import (C, Swig_scopename_prefix, "Ada_Swig_scopename_prefix");
-   pragma Import (C, Swig_scopename_last, "Ada_Swig_scopename_last");
-   pragma Import (C, Swig_scopename_first, "Ada_Swig_scopename_first");
-   pragma Import (C, Swig_scopename_suffix, "Ada_Swig_scopename_suffix");
-   pragma Import (C, Swig_scopename_check, "Ada_Swig_scopename_check");
-   pragma Import (C, Swig_string_lower, "Ada_Swig_string_lower");
-   pragma Import (C, Swig_string_upper, "Ada_Swig_string_upper");
-   pragma Import (C, Swig_string_title, "Ada_Swig_string_title");
-   pragma Import (C, Swig_init, "Ada_Swig_init");
-   pragma Import (C, Swig_warn, "Ada_Swig_warn");
-   pragma Import (C, Swig_value_wrapper_mode, "Ada_Swig_value_wrapper_mode");
-   pragma Import (C, Swig_warning, "Ada_Swig_warning");
-   pragma Import (C, Swig_error_file, "Ada_Swig_error_file");
-   pragma Import (C, Swig_error_count, "Ada_Swig_error_count");
-   pragma Import (C, Swig_error_silent, "Ada_Swig_error_silent");
-   pragma Import (C, Swig_warnfilter, "Ada_Swig_warnfilter");
-   pragma Import (C, Swig_warnall, "Ada_Swig_warnall");
-   pragma Import (C, Swig_warn_count, "Ada_Swig_warn_count");
-   pragma Import (C, Swig_error_msg_format, "Ada_Swig_error_msg_format");
-   pragma Import (C, Swig_cparm_name, "Ada_Swig_cparm_name");
-   pragma Import (C, Swig_wrapped_var_type, "Ada_Swig_wrapped_var_type");
-   pragma Import (C, Swig_cargs, "Ada_Swig_cargs");
-   pragma Import (C, Swig_cresult, "Ada_Swig_cresult");
-   pragma Import (C, Swig_cfunction_call, "Ada_Swig_cfunction_call");
-   pragma Import (C, Swig_cconstructor_call, "Ada_Swig_cconstructor_call");
-   pragma Import (C, Swig_cppconstructor_call, "Ada_Swig_cppconstructor_call");
-   pragma Import (C, Swig_unref_call, "Ada_Swig_unref_call");
-   pragma Import (C, Swig_ref_call, "Ada_Swig_ref_call");
-   pragma Import (C, Swig_cdestructor_call, "Ada_Swig_cdestructor_call");
-   pragma Import (C, Swig_cppdestructor_call, "Ada_Swig_cppdestructor_call");
-   pragma Import (C, Swig_cmemberset_call, "Ada_Swig_cmemberset_call");
-   pragma Import (C, Swig_cmemberget_call, "Ada_Swig_cmemberget_call");
-   pragma Import (C, Swig_add_extension_code, "Ada_Swig_add_extension_code");
-   pragma Import (C, Swig_MethodToFunction, "Ada_Swig_MethodToFunction");
-   pragma Import (C, Swig_ConstructorToFunction, "Ada_Swig_ConstructorToFunction");
-   pragma Import (C, Swig_DestructorToFunction, "Ada_Swig_DestructorToFunction");
-   pragma Import (C, Swig_MembersetToFunction, "Ada_Swig_MembersetToFunction");
-   pragma Import (C, Swig_MembergetToFunction, "Ada_Swig_MembergetToFunction");
-   pragma Import (C, Swig_VargetToFunction, "Ada_Swig_VargetToFunction");
-   pragma Import (C, Swig_VarsetToFunction, "Ada_Swig_VarsetToFunction");
-   pragma Import (C, Swig_methodclass, "Ada_Swig_methodclass");
-   pragma Import (C, Swig_directorclass, "Ada_Swig_directorclass");
-   pragma Import (C, Swig_directormap, "Ada_Swig_directormap");
-   pragma Import (C, Swig_typemap_init, "Ada_Swig_typemap_init");
-   pragma Import (C, Swig_typemap_register, "Ada_Swig_typemap_register");
-   pragma Import (C, Swig_typemap_copy, "Ada_Swig_typemap_copy");
-   pragma Import (C, Swig_typemap_clear, "Ada_Swig_typemap_clear");
-   pragma Import (C, Swig_typemap_apply, "Ada_Swig_typemap_apply");
-   pragma Import (C, Swig_typemap_clear_apply, "Ada_Swig_typemap_clear_apply");
-   pragma Import (C, Swig_typemap_debug, "Ada_Swig_typemap_debug");
-   pragma Import (C, Swig_typemap_search, "Ada_Swig_typemap_search");
-   pragma Import (C, Swig_typemap_search_multi, "Ada_Swig_typemap_search_multi");
-   pragma Import (C, Swig_typemap_lookup, "Ada_Swig_typemap_lookup");
-   pragma Import (C, Swig_typemap_lookup_out, "Ada_Swig_typemap_lookup_out");
-   pragma Import (C, Swig_typemap_attach_kwargs, "Ada_Swig_typemap_attach_kwargs");
-   pragma Import (C, Swig_typemap_new_scope, "Ada_Swig_typemap_new_scope");
-   pragma Import (C, Swig_typemap_pop_scope, "Ada_Swig_typemap_pop_scope");
-   pragma Import (C, Swig_typemap_attach_parms, "Ada_Swig_typemap_attach_parms");
-   pragma Import (C, Swig_fragment_register, "Ada_Swig_fragment_register");
-   pragma Import (C, Swig_fragment_emit, "Ada_Swig_fragment_emit");
-   pragma Import (C, Swig_director_mode, "Ada_Swig_director_mode");
-   pragma Import (C, Swig_director_protected_mode, "Ada_Swig_director_protected_mode");
-   pragma Import (C, Swig_all_protected_mode, "Ada_Swig_all_protected_mode");
-   pragma Import (C, Wrapper_director_mode_set, "Ada_Wrapper_director_mode_set");
-   pragma Import (C, Wrapper_director_protected_mode_set, "Ada_Wrapper_director_protected_mode_set");
-   pragma Import (C, Wrapper_all_protected_mode_set, "Ada_Wrapper_all_protected_mode_set");
-   pragma Import (C, SwigType_template_init, "Ada_SwigType_template_init");
-   pragma Import (C, NewWrapper, "Ada_NewWrapper");
-   pragma Import (C, DelWrapper, "Ada_DelWrapper");
-   pragma Import (C, Wrapper_compact_print_mode_set, "Ada_Wrapper_compact_print_mode_set");
-   pragma Import (C, Wrapper_pretty_print, "Ada_Wrapper_pretty_print");
-   pragma Import (C, Wrapper_compact_print, "Ada_Wrapper_compact_print");
-   pragma Import (C, Wrapper_print, "Ada_Wrapper_print");
-   pragma Import (C, Wrapper_add_local, "Ada_Wrapper_add_local");
-   pragma Import (C, Wrapper_add_localv, "Ada_Wrapper_add_localv");
-   pragma Import (C, Wrapper_check_local, "Ada_Wrapper_check_local");
-   pragma Import (C, Wrapper_new_local, "Ada_Wrapper_new_local");
-   pragma Import (C, Preprocessor_expr, "Ada_Preprocessor_expr");
-   pragma Import (C, Preprocessor_expr_error, "Ada_Preprocessor_expr_error");
-   pragma Import (C, Preprocessor_define, "Ada_Preprocessor_define");
-   pragma Import (C, Preprocessor_undef, "Ada_Preprocessor_undef");
-   pragma Import (C, Preprocessor_init, "Ada_Preprocessor_init");
-   pragma Import (C, Preprocessor_delete, "Ada_Preprocessor_delete");
-   pragma Import (C, Preprocessor_parse, "Ada_Preprocessor_parse");
-   pragma Import (C, Preprocessor_include_all, "Ada_Preprocessor_include_all");
-   pragma Import (C, Preprocessor_import_all, "Ada_Preprocessor_import_all");
-   pragma Import (C, Preprocessor_ignore_missing, "Ada_Preprocessor_ignore_missing");
-   pragma Import (C, Preprocessor_error_as_warning, "Ada_Preprocessor_error_as_warning");
-   pragma Import (C, Preprocessor_depend, "Ada_Preprocessor_depend");
-   pragma Import (C, Preprocessor_expr_init, "Ada_Preprocessor_expr_init");
-   pragma Import (C, Preprocessor_expr_delete, "Ada_Preprocessor_expr_delete");
-   pragma Import (C, checkAttribute, "Ada_checkAttribute");
-   pragma Import (C, appendChild, "Ada_appendChild");
-   pragma Import (C, prependChild, "Ada_prependChild");
-   pragma Import (C, removeNode, "Ada_removeNode");
-   pragma Import (C, copyNode, "Ada_copyNode");
-   pragma Import (C, Swig_require, "Ada_Swig_require");
-   pragma Import (C, Swig_save, "Ada_Swig_save");
-   pragma Import (C, Swig_restore, "Ada_Swig_restore");
-   pragma Import (C, Swig_print_tags, "Ada_Swig_print_tags");
-   pragma Import (C, Swig_print_tree, "Ada_Swig_print_tree");
-   pragma Import (C, Swig_print_node, "Ada_Swig_print_node");
-   pragma Import (C, Swig_add_directory, "Ada_Swig_add_directory");
-   pragma Import (C, Swig_push_directory, "Ada_Swig_push_directory");
-   pragma Import (C, Swig_pop_directory, "Ada_Swig_pop_directory");
-   pragma Import (C, Swig_last_file, "Ada_Swig_last_file");
-   pragma Import (C, Swig_search_path, "Ada_Swig_search_path");
-   pragma Import (C, Swig_open, "Ada_Swig_open");
-   pragma Import (C, Swig_read_file, "Ada_Swig_read_file");
-   pragma Import (C, Swig_include, "Ada_Swig_include");
-   pragma Import (C, Swig_include_sys, "Ada_Swig_include_sys");
-   pragma Import (C, Swig_insert_file, "Ada_Swig_insert_file");
-   pragma Import (C, Swig_set_push_dir, "Ada_Swig_set_push_dir");
-   pragma Import (C, Swig_get_push_dir, "Ada_Swig_get_push_dir");
-   pragma Import (C, Swig_register_filebyname, "Ada_Swig_register_filebyname");
-   pragma Import (C, Swig_filebyname, "Ada_Swig_filebyname");
-   pragma Import (C, Swig_file_suffix, "Ada_Swig_file_suffix");
-   pragma Import (C, Swig_file_basename, "Ada_Swig_file_basename");
-   pragma Import (C, Swig_file_filename, "Ada_Swig_file_filename");
-   pragma Import (C, Swig_file_dirname, "Ada_Swig_file_dirname");
-   pragma Import (C, Swig_init_args, "Ada_Swig_init_args");
-   pragma Import (C, Swig_mark_arg, "Ada_Swig_mark_arg");
-   pragma Import (C, Swig_check_marked, "Ada_Swig_check_marked");
-   pragma Import (C, Swig_check_options, "Ada_Swig_check_options");
-   pragma Import (C, Swig_arg_error, "Ada_Swig_arg_error");
-   pragma Import (C, runtime_call_Depth, "Ada_runtime_call_Depth");
-   pragma Import (C, String_in, "Ada_String_in");
-   pragma Import (C, c_to_doh_String, "Ada_c_to_doh_String");
-   pragma Import (C, get_attribute, "Ada_get_attribute");
-   pragma Import (C, set_attribute, "Ada_set_attribute");
-   pragma Import (C, check_attribute, "Ada_check_attribute");
-   pragma Import (C, Node_to_CStr, "Ada_Node_to_CStr");
-   pragma Import (C, node_Type, "Ada_node_Type");
-   pragma Import (C, parent_Node, "Ada_parent_Node");
-   pragma Import (C, new_File, "Ada_new_File");
-   pragma Import (C, Print_to, "Ada_Print_to");
-   pragma Import (C, dump, "Ada_dump");
-   pragma Import (C, close_File, "Ada_close_File");
-   pragma Import (C, doh_replace_All, "Ada_doh_replace_All");
-   pragma Import (C, Swig_save_1, "Ada_Swig_save_1");
-   pragma Import (C, Swig_require_2, "Ada_Swig_require_2");
-   pragma Import (C, Wrapper_add_local_2, "Ada_Wrapper_add_local_2");
-   pragma Import (C, first_Child, "Ada_first_Child");
-   pragma Import (C, next_Sibling, "Ada_next_Sibling");
-   pragma Import (C, doh_First, "Ada_doh_First");
-   pragma Import (C, doh_Next, "Ada_doh_Next");
-   pragma Import (C, get_Item, "Ada_get_Item");
-
-
+   pragma Import (C, NewSwigType, "NewSwigType");
+   pragma Import (C, SwigType_del_element, "SwigType_del_element");
+   pragma Import (C, SwigType_add_pointer, "SwigType_add_pointer");
+   pragma Import (C, SwigType_add_memberpointer, "SwigType_add_memberpointer");
+   pragma Import (C, SwigType_del_memberpointer, "SwigType_del_memberpointer");
+   pragma Import (C, SwigType_del_pointer, "SwigType_del_pointer");
+   pragma Import (C, SwigType_add_array, "SwigType_add_array");
+   pragma Import (C, SwigType_del_array, "SwigType_del_array");
+   pragma Import (C, SwigType_pop_arrays, "SwigType_pop_arrays");
+   pragma Import (C, SwigType_add_reference, "SwigType_add_reference");
+   pragma Import (C, SwigType_del_reference, "SwigType_del_reference");
+   pragma Import (C, SwigType_add_rvalue_reference,
+      "SwigType_add_rvalue_reference");
+   pragma Import (C, SwigType_del_rvalue_reference,
+      "SwigType_del_rvalue_reference");
+   pragma Import (C, SwigType_add_qualifier, "SwigType_add_qualifier");
+   pragma Import (C, SwigType_del_qualifier, "SwigType_del_qualifier");
+   pragma Import (C, SwigType_add_function, "SwigType_add_function");
+   pragma Import (C, SwigType_add_template, "SwigType_add_template");
+   pragma Import (C, SwigType_pop_function, "SwigType_pop_function");
+   pragma Import (C, SwigType_pop_function_qualifiers,
+      "SwigType_pop_function_qualifiers");
+   pragma Import (C, SwigType_function_parms, "SwigType_function_parms");
+   pragma Import (C, SwigType_split, "SwigType_split");
+   pragma Import (C, SwigType_pop, "SwigType_pop");
+   pragma Import (C, SwigType_push, "SwigType_push");
+   pragma Import (C, SwigType_parmlist, "SwigType_parmlist");
+   pragma Import (C, SwigType_parm, "SwigType_parm");
+   pragma Import (C, SwigType_str, "SwigType_str");
+   pragma Import (C, SwigType_lstr, "SwigType_lstr");
+   pragma Import (C, SwigType_rcaststr, "SwigType_rcaststr");
+   pragma Import (C, SwigType_lcaststr, "SwigType_lcaststr");
+   pragma Import (C, SwigType_manglestr, "SwigType_manglestr");
+   pragma Import (C, SwigType_ltype, "SwigType_ltype");
+   pragma Import (C, SwigType_ispointer, "SwigType_ispointer");
+   pragma Import (C, SwigType_ispointer_return, "SwigType_ispointer_return");
+   pragma Import (C, SwigType_isfunctionpointer, "SwigType_isfunctionpointer");
+   pragma Import (C, SwigType_ismemberpointer, "SwigType_ismemberpointer");
+   pragma Import (C, SwigType_isreference, "SwigType_isreference");
+   pragma Import (C, SwigType_isreference_return,
+      "SwigType_isreference_return");
+   pragma Import (C, SwigType_isrvalue_reference,
+      "SwigType_isrvalue_reference");
+   pragma Import (C, SwigType_isarray, "SwigType_isarray");
+   pragma Import (C, SwigType_prefix_is_simple_1D_array,
+      "SwigType_prefix_is_simple_1D_array");
+   pragma Import (C, SwigType_isfunction, "SwigType_isfunction");
+   pragma Import (C, SwigType_isqualifier, "SwigType_isqualifier");
+   pragma Import (C, SwigType_isconst, "SwigType_isconst");
+   pragma Import (C, SwigType_issimple, "SwigType_issimple");
+   pragma Import (C, SwigType_ismutable, "SwigType_ismutable");
+   pragma Import (C, SwigType_isvarargs, "SwigType_isvarargs");
+   pragma Import (C, SwigType_istemplate, "SwigType_istemplate");
+   pragma Import (C, SwigType_isenum, "SwigType_isenum");
+   pragma Import (C, SwigType_check_decl, "SwigType_check_decl");
+   pragma Import (C, SwigType_strip_qualifiers, "SwigType_strip_qualifiers");
+   pragma Import (C, SwigType_strip_single_qualifier,
+      "SwigType_strip_single_qualifier");
+   pragma Import (C, SwigType_functionpointer_decompose,
+      "SwigType_functionpointer_decompose");
+   pragma Import (C, SwigType_base, "SwigType_base");
+   pragma Import (C, SwigType_namestr, "SwigType_namestr");
+   pragma Import (C, SwigType_templateprefix, "SwigType_templateprefix");
+   pragma Import (C, SwigType_templatesuffix, "SwigType_templatesuffix");
+   pragma Import (C, SwigType_istemplate_templateprefix,
+      "SwigType_istemplate_templateprefix");
+   pragma Import (C, SwigType_istemplate_only_templateprefix,
+      "SwigType_istemplate_only_templateprefix");
+   pragma Import (C, SwigType_templateargs, "SwigType_templateargs");
+   pragma Import (C, SwigType_prefix, "SwigType_prefix");
+   pragma Import (C, SwigType_array_ndim, "SwigType_array_ndim");
+   pragma Import (C, SwigType_array_getdim, "SwigType_array_getdim");
+   pragma Import (C, SwigType_array_setdim, "SwigType_array_setdim");
+   pragma Import (C, SwigType_array_type, "SwigType_array_type");
+   pragma Import (C, SwigType_default_create, "SwigType_default_create");
+   pragma Import (C, SwigType_default_deduce, "SwigType_default_deduce");
+   pragma Import (C, SwigType_typename_replace, "SwigType_typename_replace");
+   pragma Import (C, SwigType_remove_global_scope_prefix,
+      "SwigType_remove_global_scope_prefix");
+   pragma Import (C, SwigType_alttype, "SwigType_alttype");
+   pragma Import (C, SwigType_typesystem_init, "SwigType_typesystem_init");
+   pragma Import (C, SwigType_typedef, "SwigType_typedef");
+   pragma Import (C, SwigType_typedef_class, "SwigType_typedef_class");
+   pragma Import (C, SwigType_typedef_using, "SwigType_typedef_using");
+   pragma Import (C, SwigType_inherit, "SwigType_inherit");
+   pragma Import (C, SwigType_issubtype, "SwigType_issubtype");
+   pragma Import (C, SwigType_scope_alias, "SwigType_scope_alias");
+   pragma Import (C, SwigType_using_scope, "SwigType_using_scope");
+   pragma Import (C, SwigType_new_scope, "SwigType_new_scope");
+   pragma Import (C, SwigType_inherit_scope, "SwigType_inherit_scope");
+   pragma Import (C, SwigType_pop_scope, "SwigType_pop_scope");
+   pragma Import (C, SwigType_set_scope, "SwigType_set_scope");
+   pragma Import (C, SwigType_print_scope, "SwigType_print_scope");
+   pragma Import (C, SwigType_typedef_resolve, "SwigType_typedef_resolve");
+   pragma Import (C, SwigType_typedef_resolve_all,
+      "SwigType_typedef_resolve_all");
+   pragma Import (C, SwigType_typedef_qualified, "SwigType_typedef_qualified");
+   pragma Import (C, SwigType_istypedef, "SwigType_istypedef");
+   pragma Import (C, SwigType_isclass, "SwigType_isclass");
+   pragma Import (C, SwigType_attach_symtab, "SwigType_attach_symtab");
+   pragma Import (C, SwigType_remember, "SwigType_remember");
+   pragma Import (C, SwigType_remember_clientdata,
+      "SwigType_remember_clientdata");
+   pragma Import (C, SwigType_remember_mangleddata,
+      "SwigType_remember_mangleddata");
+   pragma Import (C, SwigType_emit_type_table, "SwigType_emit_type_table");
+   pragma Import (C, SwigType_type, "SwigType_type");
+   pragma Import (C, Swig_symbol_print_tables, "Swig_symbol_print_tables");
+   pragma Import (C, Swig_symbol_print_tables_summary,
+      "Swig_symbol_print_tables_summary");
+   pragma Import (C, Swig_symbol_print_symbols, "Swig_symbol_print_symbols");
+   pragma Import (C, Swig_symbol_print_csymbols, "Swig_symbol_print_csymbols");
+   pragma Import (C, Swig_symbol_init, "Swig_symbol_init");
+   pragma Import (C, Swig_symbol_setscopename, "Swig_symbol_setscopename");
+   pragma Import (C, Swig_symbol_getscopename, "Swig_symbol_getscopename");
+   pragma Import (C, Swig_symbol_qualifiedscopename,
+      "Swig_symbol_qualifiedscopename");
+   pragma Import (C, Swig_symbol_qualified_language_scopename,
+      "Swig_symbol_qualified_language_scopename");
+   pragma Import (C, Swig_symbol_newscope, "Swig_symbol_newscope");
+   pragma Import (C, Swig_symbol_setscope, "Swig_symbol_setscope");
+   pragma Import (C, Swig_symbol_getscope, "Swig_symbol_getscope");
+   pragma Import (C, Swig_symbol_global_scope, "Swig_symbol_global_scope");
+   pragma Import (C, Swig_symbol_current, "Swig_symbol_current");
+   pragma Import (C, Swig_symbol_popscope, "Swig_symbol_popscope");
+   pragma Import (C, Swig_symbol_add, "Swig_symbol_add");
+   pragma Import (C, Swig_symbol_cadd, "Swig_symbol_cadd");
+   pragma Import (C, Swig_symbol_clookup, "Swig_symbol_clookup");
+   pragma Import (C, Swig_symbol_clookup_no_inherit,
+      "Swig_symbol_clookup_no_inherit");
+   pragma Import (C, Swig_symbol_cscope, "Swig_symbol_cscope");
+   pragma Import (C, Swig_symbol_clookup_local, "Swig_symbol_clookup_local");
+   pragma Import (C, Swig_symbol_qualified, "Swig_symbol_qualified");
+   pragma Import (C, Swig_symbol_isoverloaded, "Swig_symbol_isoverloaded");
+   pragma Import (C, Swig_symbol_remove, "Swig_symbol_remove");
+   pragma Import (C, Swig_symbol_alias, "Swig_symbol_alias");
+   pragma Import (C, Swig_symbol_inherit, "Swig_symbol_inherit");
+   pragma Import (C, Swig_symbol_type_qualify, "Swig_symbol_type_qualify");
+   pragma Import (C, Swig_symbol_string_qualify, "Swig_symbol_string_qualify");
+   pragma Import (C, Swig_symbol_typedef_reduce, "Swig_symbol_typedef_reduce");
+   pragma Import (C, Swig_symbol_template_defargs,
+      "Swig_symbol_template_defargs");
+   pragma Import (C, Swig_symbol_template_deftype,
+      "Swig_symbol_template_deftype");
+   pragma Import (C, Swig_symbol_template_param_eval,
+      "Swig_symbol_template_param_eval");
+   pragma Import (C, ParmList_errorstr, "ParmList_errorstr");
+   pragma Import (C, ParmList_is_compactdefargs, "ParmList_is_compactdefargs");
+   pragma Import (C, Swig_name_register, "Swig_name_register");
+   pragma Import (C, Swig_name_unregister, "Swig_name_unregister");
+   pragma Import (C, Swig_name_mangle, "Swig_name_mangle");
+   pragma Import (C, Swig_name_wrapper, "Swig_name_wrapper");
+   pragma Import (C, Swig_name_member, "Swig_name_member");
+   pragma Import (C, Swig_name_get, "Swig_name_get");
+   pragma Import (C, Swig_name_set, "Swig_name_set");
+   pragma Import (C, Swig_name_construct, "Swig_name_construct");
+   pragma Import (C, Swig_name_copyconstructor, "Swig_name_copyconstructor");
+   pragma Import (C, Swig_name_destroy, "Swig_name_destroy");
+   pragma Import (C, Swig_name_disown, "Swig_name_disown");
+   pragma Import (C, Swig_name_namewarn_add, "Swig_name_namewarn_add");
+   pragma Import (C, Swig_name_rename_add, "Swig_name_rename_add");
+   pragma Import (C, Swig_name_inherit, "Swig_name_inherit");
+   pragma Import (C, Swig_make_inherit_list, "Swig_make_inherit_list");
+   pragma Import (C, Swig_inherit_base_symbols, "Swig_inherit_base_symbols");
+   pragma Import (C, Swig_need_protected, "Swig_need_protected");
+   pragma Import (C, Swig_need_redefined_warn, "Swig_need_redefined_warn");
+   pragma Import (C, Swig_name_make, "Swig_name_make");
+   pragma Import (C, Swig_name_warning, "Swig_name_warning");
+   pragma Import (C, Swig_name_str, "Swig_name_str");
+   pragma Import (C, Swig_name_decl, "Swig_name_decl");
+   pragma Import (C, Swig_name_fulldecl, "Swig_name_fulldecl");
+   pragma Import (C, Swig_name_object_set, "Swig_name_object_set");
+   pragma Import (C, Swig_name_object_get, "Swig_name_object_get");
+   pragma Import (C, Swig_name_object_inherit, "Swig_name_object_inherit");
+   pragma Import (C, Swig_features_get, "Swig_features_get");
+   pragma Import (C, Swig_feature_set, "Swig_feature_set");
+   pragma Import (C, Swig_copy_string, "Swig_copy_string");
+   pragma Import (C, Swig_set_fakeversion, "Swig_set_fakeversion");
+   pragma Import (C, Swig_package_version, "Swig_package_version");
+   pragma Import (C, Swig_banner, "Swig_banner");
+   pragma Import (C, Swig_banner_target_lang, "Swig_banner_target_lang");
+   pragma Import (C, Swig_strip_c_comments, "Swig_strip_c_comments");
+   pragma Import (C, Swig_new_subdirectory, "Swig_new_subdirectory");
+   pragma Import (C, Swig_filename_correct, "Swig_filename_correct");
+   pragma Import (C, Swig_filename_escape, "Swig_filename_escape");
+   pragma Import (C, Swig_filename_unescape, "Swig_filename_unescape");
+   pragma Import (C, Swig_storage_isextern, "Swig_storage_isextern");
+   pragma Import (C, Swig_storage_isexternc, "Swig_storage_isexternc");
+   pragma Import (C, Swig_storage_isstatic_custom,
+      "Swig_storage_isstatic_custom");
+   pragma Import (C, Swig_storage_isstatic, "Swig_storage_isstatic");
+   pragma Import (C, Swig_string_escape, "Swig_string_escape");
+   pragma Import (C, Swig_string_mangle, "Swig_string_mangle");
+   pragma Import (C, Swig_scopename_split, "Swig_scopename_split");
+   pragma Import (C, Swig_scopename_prefix, "Swig_scopename_prefix");
+   pragma Import (C, Swig_scopename_last, "Swig_scopename_last");
+   pragma Import (C, Swig_scopename_first, "Swig_scopename_first");
+   pragma Import (C, Swig_scopename_suffix, "Swig_scopename_suffix");
+   pragma Import (C, Swig_scopename_tolist, "Swig_scopename_tolist");
+   pragma Import (C, Swig_scopename_check, "Swig_scopename_check");
+   pragma Import (C, Swig_string_lower, "Swig_string_lower");
+   pragma Import (C, Swig_string_upper, "Swig_string_upper");
+   pragma Import (C, Swig_string_title, "Swig_string_title");
+   pragma Import (C, Swig_offset_string, "Swig_offset_string");
+   pragma Import (C, Swig_pcre_version, "Swig_pcre_version");
+   pragma Import (C, Swig_init, "Swig_init");
+   pragma Import (C, Swig_value_wrapper_mode, "Swig_value_wrapper_mode");
+   pragma Import (C, Swig_is_generated_overload, "Swig_is_generated_overload");
+   pragma Import (C, Swig_warning, "Swig_warning");
+   pragma Import (C, Swig_error_file, "Swig_error_file");
+   pragma Import (C, Swig_error_count, "Swig_error_count");
+   pragma Import (C, Swig_error_silent, "Swig_error_silent");
+   pragma Import (C, Swig_warnfilter, "Swig_warnfilter");
+   pragma Import (C, Swig_warnall, "Swig_warnall");
+   pragma Import (C, Swig_warn_count, "Swig_warn_count");
+   pragma Import (C, Swig_error_msg_format, "Swig_error_msg_format");
+   pragma Import (C, Swig_diagnostic, "Swig_diagnostic");
+   pragma Import (C, Swig_stringify_with_location,
+      "Swig_stringify_with_location");
+   pragma Import (C, Swig_cresult_name_set, "Swig_cresult_name_set");
+   pragma Import (C, Swig_cresult_name, "Swig_cresult_name");
+   pragma Import (C, Swig_cparm_name, "Swig_cparm_name");
+   pragma Import (C, Swig_wrapped_var_type, "Swig_wrapped_var_type");
+   pragma Import (C, Swig_cargs, "Swig_cargs");
+   pragma Import (C, Swig_cresult, "Swig_cresult");
+   pragma Import (C, Swig_cfunction_call, "Swig_cfunction_call");
+   pragma Import (C, Swig_cconstructor_call, "Swig_cconstructor_call");
+   pragma Import (C, Swig_cppconstructor_call, "Swig_cppconstructor_call");
+   pragma Import (C, Swig_unref_call, "Swig_unref_call");
+   pragma Import (C, Swig_ref_call, "Swig_ref_call");
+   pragma Import (C, Swig_cdestructor_call, "Swig_cdestructor_call");
+   pragma Import (C, Swig_cppdestructor_call, "Swig_cppdestructor_call");
+   pragma Import (C, Swig_cmemberset_call, "Swig_cmemberset_call");
+   pragma Import (C, Swig_cmemberget_call, "Swig_cmemberget_call");
+   pragma Import (C, Swig_add_extension_code, "Swig_add_extension_code");
+   pragma Import (C, Swig_replace_special_variables,
+      "Swig_replace_special_variables");
+   pragma Import (C, Swig_MethodToFunction, "Swig_MethodToFunction");
+   pragma Import (C, Swig_ConstructorToFunction, "Swig_ConstructorToFunction");
+   pragma Import (C, Swig_DestructorToFunction, "Swig_DestructorToFunction");
+   pragma Import (C, Swig_MembersetToFunction, "Swig_MembersetToFunction");
+   pragma Import (C, Swig_MembergetToFunction, "Swig_MembergetToFunction");
+   pragma Import (C, Swig_VargetToFunction, "Swig_VargetToFunction");
+   pragma Import (C, Swig_VarsetToFunction, "Swig_VarsetToFunction");
+   pragma Import (C, Swig_methodclass, "Swig_methodclass");
+   pragma Import (C, Swig_directorclass, "Swig_directorclass");
+   pragma Import (C, Swig_directormap, "Swig_directormap");
+   pragma Import (C, Swig_typemap_init, "Swig_typemap_init");
+   pragma Import (C, Swig_typemap_register, "Swig_typemap_register");
+   pragma Import (C, Swig_typemap_copy, "Swig_typemap_copy");
+   pragma Import (C, Swig_typemap_clear, "Swig_typemap_clear");
+   pragma Import (C, Swig_typemap_apply, "Swig_typemap_apply");
+   pragma Import (C, Swig_typemap_clear_apply, "Swig_typemap_clear_apply");
+   pragma Import (C, Swig_typemap_replace_embedded_typemap,
+      "Swig_typemap_replace_embedded_typemap");
+   pragma Import (C, Swig_typemap_debug, "Swig_typemap_debug");
+   pragma Import (C, Swig_typemap_search_debug_set,
+      "Swig_typemap_search_debug_set");
+   pragma Import (C, Swig_typemap_used_debug_set,
+      "Swig_typemap_used_debug_set");
+   pragma Import (C, Swig_typemap_register_debug_set,
+      "Swig_typemap_register_debug_set");
+   pragma Import (C, Swig_typemap_lookup, "Swig_typemap_lookup");
+   pragma Import (C, Swig_typemap_lookup_out, "Swig_typemap_lookup_out");
+   pragma Import (C, Swig_typemap_attach_parms, "Swig_typemap_attach_parms");
+   pragma Import (C, Swig_fragment_register, "Swig_fragment_register");
+   pragma Import (C, Swig_fragment_emit, "Swig_fragment_emit");
+   pragma Import (C, Swig_extend_hash, "Swig_extend_hash");
+   pragma Import (C, Swig_extend_merge, "Swig_extend_merge");
+   pragma Import (C, Swig_extend_append_previous,
+      "Swig_extend_append_previous");
+   pragma Import (C, Swig_extend_unused_check, "Swig_extend_unused_check");
+   pragma Import (C, Swig_director_mode, "Swig_director_mode");
+   pragma Import (C, Swig_director_protected_mode,
+      "Swig_director_protected_mode");
+   pragma Import (C, Swig_all_protected_mode, "Swig_all_protected_mode");
+   pragma Import (C, Wrapper_director_mode_set, "Wrapper_director_mode_set");
+   pragma Import (C, Wrapper_director_protected_mode_set,
+      "Wrapper_director_protected_mode_set");
+   pragma Import (C, Wrapper_all_protected_mode_set,
+      "Wrapper_all_protected_mode_set");
+   pragma Import (C, Language_replace_special_variables,
+      "Language_replace_special_variables");
+   pragma Import (C, Swig_print, "Swig_print");
+   pragma Import (C, Swig_print_with_location, "Swig_print_with_location");
+   pragma Import (C, SwigType_template_init, "SwigType_template_init");
+   pragma Import (C, NewWrapper, "NewWrapper");
+   pragma Import (C, DelWrapper, "DelWrapper");
+   pragma Import (C, Wrapper_compact_print_mode_set,
+      "Wrapper_compact_print_mode_set");
+   pragma Import (C, Wrapper_pretty_print, "Wrapper_pretty_print");
+   pragma Import (C, Wrapper_compact_print, "Wrapper_compact_print");
+   pragma Import (C, Wrapper_print, "Wrapper_print");
+   pragma Import (C, Wrapper_add_local, "Wrapper_add_local");
+   pragma Import (C, Wrapper_add_localv, "Wrapper_add_localv");
+   pragma Import (C, Wrapper_check_local, "Wrapper_check_local");
+   pragma Import (C, Wrapper_new_local, "Wrapper_new_local");
+   pragma Import (C, Preprocessor_expr, "Preprocessor_expr");
+   pragma Import (C, Preprocessor_expr_error, "Preprocessor_expr_error");
+   pragma Import (C, Preprocessor_define, "Preprocessor_define");
+   pragma Import (C, Preprocessor_undef, "Preprocessor_undef");
+   pragma Import (C, Preprocessor_init, "Preprocessor_init");
+   pragma Import (C, Preprocessor_delete, "Preprocessor_delete");
+   pragma Import (C, Preprocessor_parse, "Preprocessor_parse");
+   pragma Import (C, Preprocessor_include_all, "Preprocessor_include_all");
+   pragma Import (C, Preprocessor_import_all, "Preprocessor_import_all");
+   pragma Import (C, Preprocessor_ignore_missing,
+      "Preprocessor_ignore_missing");
+   pragma Import (C, Preprocessor_error_as_warning,
+      "Preprocessor_error_as_warning");
+   pragma Import (C, Preprocessor_depend, "Preprocessor_depend");
+   pragma Import (C, Preprocessor_expr_init, "Preprocessor_expr_init");
+   pragma Import (C, Preprocessor_expr_delete, "Preprocessor_expr_delete");
+   pragma Import (C, checkAttribute, "checkAttribute");
+   pragma Import (C, appendChild, "appendChild");
+   pragma Import (C, prependChild, "prependChild");
+   pragma Import (C, removeNode, "removeNode");
+   pragma Import (C, copyNode, "copyNode");
+   pragma Import (C, appendSibling, "appendSibling");
+   pragma Import (C, Swig_require, "Swig_require");
+   pragma Import (C, Swig_save, "Swig_save");
+   pragma Import (C, Swig_restore, "Swig_restore");
+   pragma Import (C, Swig_print_tags, "Swig_print_tags");
+   pragma Import (C, Swig_print_tree, "Swig_print_tree");
+   pragma Import (C, Swig_print_node, "Swig_print_node");
+   pragma Import (C, Swig_add_directory, "Swig_add_directory");
+   pragma Import (C, Swig_push_directory, "Swig_push_directory");
+   pragma Import (C, Swig_pop_directory, "Swig_pop_directory");
+   pragma Import (C, Swig_last_file, "Swig_last_file");
+   pragma Import (C, Swig_search_path, "Swig_search_path");
+   pragma Import (C, Swig_include_open, "Swig_include_open");
+   pragma Import (C, Swig_open, "Swig_open");
+   pragma Import (C, Swig_read_file, "Swig_read_file");
+   pragma Import (C, Swig_include, "Swig_include");
+   pragma Import (C, Swig_include_sys, "Swig_include_sys");
+   pragma Import (C, Swig_insert_file, "Swig_insert_file");
+   pragma Import (C, Swig_set_push_dir, "Swig_set_push_dir");
+   pragma Import (C, Swig_get_push_dir, "Swig_get_push_dir");
+   pragma Import (C, Swig_register_filebyname, "Swig_register_filebyname");
+   pragma Import (C, Swig_filebyname, "Swig_filebyname");
+   pragma Import (C, Swig_file_extension, "Swig_file_extension");
+   pragma Import (C, Swig_file_basename, "Swig_file_basename");
+   pragma Import (C, Swig_file_filename, "Swig_file_filename");
+   pragma Import (C, Swig_file_dirname, "Swig_file_dirname");
+   pragma Import (C, Swig_file_debug_set, "Swig_file_debug_set");
+   pragma Import (C, Swig_init_args, "Swig_init_args");
+   pragma Import (C, Swig_mark_arg, "Swig_mark_arg");
+   pragma Import (C, Swig_check_marked, "Swig_check_marked");
+   pragma Import (C, Swig_check_options, "Swig_check_options");
+   pragma Import (C, Swig_arg_error, "Swig_arg_error");
+   pragma Import (C, runtime_call_Depth, "runtime_call_Depth");
+   pragma Import (C, String_in, "String_in");
+   pragma Import (C, c_to_doh_String, "c_to_doh_String");
+   pragma Import (C, get_attribute, "get_attribute");
+   pragma Import (C, set_attribute, "set_attribute");
+   pragma Import (C, check_attribute, "check_attribute");
+   pragma Import (C, Node_to_CStr, "Node_to_CStr");
+   pragma Import (C, node_Type, "node_Type");
+   pragma Import (C, parent_Node, "parent_Node");
+   pragma Import (C, new_File, "new_File");
+   pragma Import (C, Print_to, "Print_to");
+   pragma Import (C, dump, "dump");
+   pragma Import (C, close_File, "close_File");
+   pragma Import (C, doh_replace_All, "doh_replace_All");
+   pragma Import (C, Swig_save_1, "Swig_save_1");
+   pragma Import (C, Swig_require_2, "Swig_require_2");
+   pragma Import (C, Wrapper_add_local_2, "Wrapper_add_local_2");
+   pragma Import (C, first_Child, "first_Child");
+   pragma Import (C, next_Sibling, "next_Sibling");
+   pragma Import (C, doh_First, "doh_First");
+   pragma Import (C, doh_Next, "doh_Next");
+   pragma Import (C, get_Item, "get_Item");
 
 end swigg_module.Binding;

@@ -4,7 +4,9 @@ import("li_std_string")	-- import lib
 for k,v in pairs(li_std_string) do _G[k]=v end -- move to global
 
 -- catch "undefined" global variables
-setmetatable(getfenv(),{__index=function (t,i) error("undefined global variable `"..i.."'",2) end})
+local env = _ENV -- Lua 5.2
+if not env then env = getfenv () end -- Lua 5.1
+setmetatable(env, {__index=function (t,i) error("undefined global variable `"..i.."'",2) end})
 
 -- helper to check type
 function is_std_string(s) 
@@ -30,8 +32,8 @@ assert(is_std_string(cobj) and cobj:c_str()=="x")	-- check type & value
 
 test_const_pointer(cobj)
 
--- this shouldnt work, but it does
--- swig doesnt appear to diff between const object ptrs & object ptrs very well
+-- this shouldn't work, but it does
+-- swig doesn't appear to diff between const object ptrs & object ptrs very well
 test_pointer(cobj)	-- this wants an non const object (give it a const one!)
 
 -- refs are also wrappered as ptrs (unless the correct typemaps are applied)

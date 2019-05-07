@@ -1,7 +1,4 @@
 /* -----------------------------------------------------------------------------
- * See the LICENSE file for information on copyright, usage and redistribution
- * of SWIG, and the README file for authors - http://www.swig.org/release.html.
- *
  * attribute.i
  *
  * SWIG library file for implementing attributes.
@@ -14,7 +11,7 @@
 #define %attribute_exception(code,msg) printf("%s\n",msg)
 
 #ifndef %arg
-#define %arg(x) x
+#define %arg(x...) x
 #endif
 
 #ifndef %mangle

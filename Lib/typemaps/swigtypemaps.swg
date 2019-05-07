@@ -1,7 +1,4 @@
 /* -----------------------------------------------------------------------------
- * See the LICENSE file for information on copyright, usage and redistribution
- * of SWIG, and the README file for authors - http://www.swig.org/release.html.
- *
  * swigtypemaps.swg
  *
  * Unified Typemap Library frontend
@@ -15,7 +12,7 @@
   and then include this file.
 
   Typically you will create a 'mytypemaps.swg' file in each target
-  languge, where you will have the following sections:
+  language, where you will have the following sections:
 
     === mytypemaps.swg ===
 

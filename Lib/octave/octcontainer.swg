@@ -1,14 +1,10 @@
 /* -----------------------------------------------------------------------------
- * See the LICENSE file for information on copyright, usage and redistribution
- * of SWIG, and the README file for authors - http://www.swig.org/release.html.
- *
  * octcontainer.swg
  *
  * Octave cell <-> C++ container wrapper
  *
  * This wrapper, and its iterator, allows a general use (and reuse) of
- * the the mapping between C++ and Octave, thanks to the C++
- * templates.
+ * the mapping between C++ and Octave, thanks to the C++ templates.
  *
  * Of course, it needs the C++ compiler to support templates, but
  * since we will use this wrapper with the STL containers, that should
@@ -16,6 +12,7 @@
  * ----------------------------------------------------------------------------- */
 
 %{
+#include <climits>
 #include <iostream>
 %}
 
@@ -30,9 +27,7 @@
 
 // The Octave C++ Wrap
 
-%insert(header) %{
-#include <stdexcept>
-%}
+%fragment("<stdexcept>");
 
 %include <std_except.i>
 
@@ -67,13 +62,13 @@ namespace swig {
 }
 }
 
-%fragment("OctSequence_Base","header")
+%fragment("OctSequence_Base","header",fragment="<stddef.h>")
 {
 %#include <functional>
 
 namespace std {
   template <>
-  struct less <octave_value>: public binary_function<octave_value, octave_value, bool>
+  struct less <octave_value>
   {
     bool
     operator()(const octave_value& v, const octave_value& w) const
@@ -204,11 +199,11 @@ namespace swig
     
     operator T () const
     {
-      //      swig::PyObject_var item = OctSequence_GetItem(_seq, _index);
+      //      swig::SwigVar_PyObject item = OctSequence_GetItem(_seq, _index);
       octave_value item; // * todo
       try {
-	return swig::as<T>(item, true);
-      } catch (std::exception& e) {
+	return swig::as<T>(item);
+      } catch (const std::exception& e) {
 	char msg[1024];
 	sprintf(msg, "in sequence element %d ", _index);
 	if (!Octave_Error_Occurred()) {
@@ -410,7 +405,7 @@ namespace swig
     {
       int s = size();
       for (int i = 0; i < s; ++i) {
-	//	swig::PyObject_var item = OctSequence_GetItem(_seq, i);
+	//	swig::SwigVar_PyObject item = OctSequence_GetItem(_seq, i);
 	octave_value item; // * todo
 	if (!swig::check<value_type>(item)) {
 	  if (set_err) {
@@ -453,7 +448,7 @@ namespace swig
     $result = Cell(tmpc);
   }
 
-  %fragment("PyPairBoolOutputIterator","header",fragment=SWIG_From_frag(bool),fragment="OctSequence_Cont") {}
+  %fragment("SwigPyPairBoolOutputIterator","header",fragment=SWIG_From_frag(bool),fragment="OctSequence_Cont") {}
 
   %typemap(out,fragment="OctPairBoolOutputIterator")
     std::pair<iterator, bool>, std::pair<const_iterator, bool> {
@@ -513,11 +508,11 @@ namespace swig
       return x;
     }
 
-    value_type __paren(difference_type i) throw (std::out_of_range) {
+    value_type __paren__(difference_type i) throw (std::out_of_range) {
       return *(swig::cgetpos(self, i));
     }
 
-    void __paren_asgn(difference_type i, value_type x) throw (std::out_of_range) {
+    void __paren_asgn__(difference_type i, value_type x) throw (std::out_of_range) {
       *(swig::getpos(self,i)) = x;
     }
 
@@ -567,12 +562,16 @@ namespace swig {
     static int asptr(const octave_value& obj, sequence **seq) {
       if (!obj.is_defined() || Swig::swig_value_deref(obj)) {
 	sequence *p;
-	if (SWIG_ConvertPtr(obj,(void**)&p,
-			    swig::type_info<sequence>(),0) == SWIG_OK) {
+	swig_type_info *descriptor = swig::type_info<sequence>();
+	if (descriptor && SWIG_IsOK(SWIG_ConvertPtr(obj, (void **)&p, descriptor, 0))) {
 	  if (seq) *seq = p;
 	  return SWIG_OLDOBJ;
 	}
+%#if SWIG_OCTAVE_PREREQ(4,4,0)
+      } else if (obj.iscell()) {
+%#else
       } else if (obj.is_cell()) {
+%#endif
 	try {
 	  OctSequence_Cont<value_type> octseq(obj);
 	  if (seq) {

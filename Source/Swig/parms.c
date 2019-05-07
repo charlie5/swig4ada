@@ -1,23 +1,40 @@
 /* -----------------------------------------------------------------------------
- * See the LICENSE file for information on copyright, usage and redistribution
- * of SWIG, and the README file for authors - http://www.swig.org/release.html.
+ * This file is part of SWIG, which is licensed as a whole under version 3 
+ * (or any later version) of the GNU General Public License. Some additional
+ * terms also apply to certain portions of SWIG. The full details of the SWIG
+ * license and copyrights can be found in the LICENSE and COPYRIGHT files
+ * included with the SWIG source code as distributed by the SWIG developers
+ * and at http://www.swig.org/legal.html.
  *
  * parms.c
  *
  * Parameter list class.
  * ----------------------------------------------------------------------------- */
 
-char cvsroot_parms_c[] = "$Id: parms.c 961 2009-03-03 14:54:44Z krischik $";
-
 #include "swig.h"
 
 /* ------------------------------------------------------------------------
  * NewParm()
  *
- * Create a new parameter from datatype 'type' and name 'name'.
+ * Create a new parameter from datatype 'type' and name 'name' copying
+ * the file and line number from the Node from_node.
  * ------------------------------------------------------------------------ */
 
-Parm *NewParm(SwigType *type, const String_or_char *name) {
+Parm *NewParm(SwigType *type, const_String_or_char_ptr name, Node *from_node) {
+  Parm *p = NewParmWithoutFileLineInfo(type, name);
+  Setfile(p, Getfile(from_node));
+  Setline(p, Getline(from_node));
+  return p;
+}
+
+/* ------------------------------------------------------------------------
+ * NewParmWithoutFileLineInfo()
+ *
+ * Create a new parameter from datatype 'type' and name 'name' without any
+ * file / line numbering information.
+ * ------------------------------------------------------------------------ */
+
+Parm *NewParmWithoutFileLineInfo(SwigType *type, const_String_or_char_ptr name) {
   Parm *p = NewHash();
   set_nodeType(p, "parm");
   if (type) {
@@ -26,6 +43,20 @@ Parm *NewParm(SwigType *type, const String_or_char *name) {
     Delete(ntype);
   }
   Setattr(p, "name", name);
+  return p;
+}
+
+/* ------------------------------------------------------------------------
+ * NewParmNode()
+ *
+ * Create a new parameter from datatype 'type' and name and symbol table as
+ * well as file and line number from the 'from_node'.
+ * The resulting Parm will be similar to a Node used for typemap lookups.
+ * ------------------------------------------------------------------------ */
+
+Parm *NewParmNode(SwigType *type, Node *from_node) {
+  Parm *p = NewParm(type, Getattr(from_node, "name"), from_node);
+  Setattr(p, "sym:symtab", Getattr(from_node, "sym:symtab"));
   return p;
 }
 
@@ -115,6 +146,14 @@ int ParmList_len(ParmList *p) {
 }
 
 /* ---------------------------------------------------------------------
+ * get_empty_type()
+ * ---------------------------------------------------------------------- */
+
+static SwigType *get_empty_type() {
+  return NewStringEmpty();
+}
+
+/* ---------------------------------------------------------------------
  * ParmList_str()
  *
  * Generates a string of parameters
@@ -123,7 +162,8 @@ int ParmList_len(ParmList *p) {
 String *ParmList_str(ParmList *p) {
   String *out = NewStringEmpty();
   while (p) {
-    String *pstr = SwigType_str(Getattr(p, "type"), Getattr(p, "name"));
+    String *type = Getattr(p, "type");
+    String *pstr = SwigType_str(type ? type : get_empty_type(), Getattr(p, "name"));
     Append(out, pstr);
     p = nextSibling(p);
     if (p) {
@@ -144,7 +184,8 @@ String *ParmList_str_defaultargs(ParmList *p) {
   String *out = NewStringEmpty();
   while (p) {
     String *value = Getattr(p, "value");
-    String *pstr = SwigType_str(Getattr(p, "type"), Getattr(p, "name"));
+    String *type = Getattr(p, "type");
+    String *pstr = SwigType_str(type ? type : get_empty_type(), Getattr(p, "name"));
     Append(out, pstr);
     if (value) {
       Printf(out, "=%s", value);
@@ -158,6 +199,24 @@ String *ParmList_str_defaultargs(ParmList *p) {
   return out;
 }
 
+/* -----------------------------------------------------------------------------
+ * ParmList_str_multibrackets()
+ *
+ * Generates a string of parameters including default arguments adding brackets
+ * if more than one parameter
+ * ----------------------------------------------------------------------------- */
+
+String *ParmList_str_multibrackets(ParmList *p) {
+  String *out;
+  String *parm_str = ParmList_str_defaultargs(p);
+  if (ParmList_len(p) > 1)
+    out = NewStringf("(%s)", parm_str);
+  else
+    out = NewStringf("%s", parm_str);
+  Delete(parm_str);
+  return out;
+}
+
 /* ---------------------------------------------------------------------
  * ParmList_protostr()
  *
@@ -167,7 +226,8 @@ String *ParmList_str_defaultargs(ParmList *p) {
 String *ParmList_protostr(ParmList *p) {
   String *out = NewStringEmpty();
   while (p) {
-    String *pstr = SwigType_str(Getattr(p, "type"), 0);
+    String *type = Getattr(p, "type");
+    String *pstr = SwigType_str(type ? type : get_empty_type(), 0);
     Append(out, pstr);
     p = nextSibling(p);
     if (p) {
@@ -193,4 +253,20 @@ int ParmList_has_defaultargs(ParmList *p) {
     p = nextSibling(p);
   }
   return 0;
+}
+
+/* ---------------------------------------------------------------------
+ * ParmList_has_varargs()
+ *
+ * Returns 1 if the parameter list passed in has varargs.
+ * Otherwise returns 0.
+ * ---------------------------------------------------------------------- */
+
+int ParmList_has_varargs(ParmList *p) {
+  Parm *lp = 0;
+  while (p) {
+    lp = p;
+    p = nextSibling(p);
+  }
+  return lp ? SwigType_isvarargs(Getattr(lp, "type")) : 0;
 }

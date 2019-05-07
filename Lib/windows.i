@@ -1,7 +1,4 @@
 /* -----------------------------------------------------------------------------
- * See the LICENSE file for information on copyright, usage and redistribution
- * of SWIG, and the README file for authors - http://www.swig.org/release.html.
- *
  * windows.i
  *
  * SWIG library file to support types found in windows.h as well as Microsoft
@@ -115,6 +112,9 @@ typedef unsigned __int64 DWORD64, *PDWORD64;
 // Types from winnt.h
 typedef void *PVOID;
 typedef void *PVOID64;
+#ifndef VOID
+#define VOID void
+#endif
 typedef char CHAR;
 typedef short SHORT;
 typedef long LONG;

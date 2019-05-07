@@ -1,7 +1,4 @@
 /* -----------------------------------------------------------------------------
- * See the LICENSE file for information on copyright, usage and redistribution
- * of SWIG, and the README file for authors - http://www.swig.org/release.html.
- *
  * std_pair.i
  *
  * std::pair typemaps for LUA
@@ -10,21 +7,6 @@
 %{
 #include <utility>
 %}
-/*
-A really cut down version of the pair class.
-
-this is not useful on its owns is it needs a %template definition with it
-
-eg.
-namespace std {
-    %template(IntPair) pair<int, int>;
-    %template(make_IntPair) make_pair<int, int>;
-}
-
-
-*/
-
-
 
 namespace std {
   template <class T, class U > struct pair {
@@ -33,13 +15,12 @@ namespace std {
 
     pair();
     pair(T first, U second);
-    pair(const pair& p);
+    pair(const pair& other);
 
     T first;
     U second;
   };
 
   template <class T, class U >
-  pair<T,U> make_pair(const T&,const U&);
-
+  pair<T,U> make_pair(const T& first, const U& second);
 }

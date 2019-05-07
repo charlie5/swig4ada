@@ -18,7 +18,11 @@ SWIGINTERNINLINE octave_value
 SWIGINTERN int
 SWIG_AsVal_dec(bool)(const octave_value& ov, bool *val)
 {
+%#if SWIG_OCTAVE_PREREQ(4,4,0)
+  if (!ov.islogical())
+%#else
   if (!ov.is_bool_type())
+%#endif
     return SWIG_ERROR;
   if (val)
     *val = ov.bool_value();
@@ -97,15 +101,20 @@ SWIG_AsVal_dec(bool)(const octave_value& ov, bool *val)
 
 // long long
 
-%fragment(SWIG_From_frag(long long),"header") {
+%fragment(SWIG_From_frag(long long),"header",
+	  fragment="SWIG_LongLongAvailable") {
+%#ifdef SWIG_LONG_LONG_AVAILABLE
   SWIGINTERNINLINE octave_value SWIG_From_dec(long long)  (long long value)
     {    
       return octave_int64(value);
     }
+%#endif
 }
 
 
-%fragment(SWIG_AsVal_frag(long long),"header") {
+%fragment(SWIG_AsVal_frag(long long),"header",
+	  fragment="SWIG_LongLongAvailable") {
+%#ifdef SWIG_LONG_LONG_AVAILABLE
   SWIGINTERN int SWIG_AsVal_dec(long long)(const octave_value& ov, long long* val)
     {
       if (!ov.is_scalar_type())
@@ -127,16 +136,22 @@ SWIG_AsVal_dec(bool)(const octave_value& ov, bool *val)
       }
       return SWIG_OK;
     }
+%#endif
 }
 
-%fragment(SWIG_From_frag(unsigned long long),"header") {
+%fragment(SWIG_From_frag(unsigned long long),"header",
+	  fragment="SWIG_LongLongAvailable") {
+%#ifdef SWIG_LONG_LONG_AVAILABLE
   SWIGINTERNINLINE octave_value SWIG_From_dec(unsigned long long)  (unsigned long long value)
     {    
       return octave_uint64(value);
     }
+%#endif
 }
 
-%fragment(SWIG_AsVal_frag(unsigned long long),"header") {
+%fragment(SWIG_AsVal_frag(unsigned long long),"header",
+	  fragment="SWIG_LongLongAvailable") {
+%#ifdef SWIG_LONG_LONG_AVAILABLE
   SWIGINTERN int SWIG_AsVal_dec(unsigned long long)(const octave_value& ov, unsigned long long* val)
     {
       if (!ov.is_scalar_type())
@@ -171,6 +186,7 @@ SWIG_AsVal_dec(bool)(const octave_value& ov, bool *val)
       }
       return SWIG_OK;
     }
+%#endif
 }
 
 // double
@@ -202,7 +218,13 @@ SWIG_AsVal_dec(bool)(const octave_value& ov, bool *val)
 SWIGINTERN int
 SWIG_AsCharPtrAndSize(octave_value ov, char** cptr, size_t* psize, int *alloc)
 {
-  if (ov.is_cell() && ov.rows() == 1 && ov.columns() == 1)
+  if (
+%#if SWIG_OCTAVE_PREREQ(4,4,0)
+    ov.iscell()
+%#else
+    ov.is_cell()
+%#endif
+    && ov.rows() == 1 && ov.columns() == 1)
     ov = ov.cell_value()(0);
   if (!ov.is_string())
     return SWIG_TypeError;

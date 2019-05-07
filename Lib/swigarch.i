@@ -1,7 +1,4 @@
 /* -----------------------------------------------------------------------------
- * See the LICENSE file for information on copyright, usage and redistribution
- * of SWIG, and the README file for authors - http://www.swig.org/release.html.
- *
  * swigarch.i
  *
  * SWIG library file for 32bit/64bit code specialization and checking.
@@ -45,7 +42,7 @@
 #include <limits.h>
 #endif
 #if (__WORDSIZE == 64) || (LONG_MAX != INT_MAX)
-# error "SWIG wrapped code invalid in 64 bit architecture, regenarete code using -DSWIGWORDSIZE64"
+# error "SWIG wrapped code invalid in 64 bit architecture, regenerate code using -DSWIGWORDSIZE64"
 #endif
 %}
 #endif
@@ -57,7 +54,7 @@
 #include <limits.h>
 #endif
 #if (__WORDSIZE == 32) || (LONG_MAX == INT_MAX)
-# error "SWIG wrapped code invalid in 32 bit architecture, regenarete code using -DSWIGWORDSIZE32"
+# error "SWIG wrapped code invalid in 32 bit architecture, regenerate code using -DSWIGWORDSIZE32"
 #endif
 %}
 #endif

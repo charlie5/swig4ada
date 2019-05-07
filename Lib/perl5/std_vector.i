@@ -1,7 +1,4 @@
 /* -----------------------------------------------------------------------------
- * See the LICENSE file for information on copyright, usage and redistribution
- * of SWIG, and the README file for authors - http://www.swig.org/release.html.
- *
  * std_vector.i
  *
  * SWIG typemaps for std::vector types
@@ -35,9 +32,9 @@
 
 %{
 #include <vector>
-#include <algorithm>
-#include <stdexcept>
 %}
+%fragment("<algorithm>");
+%fragment("<stdexcept>");
 
 // exported class
 
@@ -105,9 +102,9 @@ namespace std {
             }
         }
         %typemap(out) vector<T> {
-            int len = $1.size();
+            size_t len = $1.size();
             SV **svs = new SV*[len];
-            for (unsigned int i=0; i<len; i++) {
+            for (size_t i=0; i<len; i++) {
                 T* ptr = new T($1[i]);
                 svs[i] = sv_newmortal();
                 SWIG_MakePtr(svs[i], (void*) ptr, 
@@ -122,7 +119,7 @@ namespace std {
         %typecheck(SWIG_TYPECHECK_VECTOR) vector<T> {
             {
                 /* wrapped vector? */
-                std::vector<T >* v;
+                std::vector< T >* v;
                 if (SWIG_ConvertPtr($input,(void **) &v, 
                                     $&1_descriptor,0) != -1) {
                     $1 = 1;
@@ -154,7 +151,7 @@ namespace std {
                                           const vector<T>* {
             {
                 /* wrapped vector? */
-                std::vector<T >* v;
+                std::vector< T >* v;
                 if (SWIG_ConvertPtr($input,(void **) &v, 
                                     $1_descriptor,0) != -1) {
                     $1 = 1;
@@ -183,9 +180,17 @@ namespace std {
             }
         }
       public:
+        typedef size_t size_type;
+        typedef ptrdiff_t difference_type;
+        typedef T value_type;
+        typedef value_type* pointer;
+        typedef const value_type* const_pointer;
+        typedef value_type& reference;
+        typedef const value_type& const_reference;
+
         vector(unsigned int size = 0);
         vector(unsigned int size, const T& value);
-        vector(const vector<T> &);
+        vector(const vector& other);
 
         unsigned int size() const;
         bool empty() const;
@@ -292,7 +297,7 @@ namespace std {
         %typecheck(SWIG_TYPECHECK_VECTOR) vector<T *> {
             {
                 /* wrapped vector? */
-                std::vector<T *>* v;
+                std::vector< T *>* v;
 		int res = SWIG_ConvertPtr($input,(void **) &v, $&1_descriptor,0);
                 if (SWIG_IsOK(res)) {
                     $1 = 1;
@@ -323,7 +328,7 @@ namespace std {
         %typecheck(SWIG_TYPECHECK_VECTOR) const vector<T *>&,const vector<T *>* {
             {
                 /* wrapped vector? */
-                std::vector<T *> *v;
+                std::vector< T *> *v;
 		int res = SWIG_ConvertPtr($input,%as_voidptrptr(&v), $1_descriptor,0);
                 if (SWIG_IsOK(res)) {
                     $1 = 1;
@@ -352,9 +357,17 @@ namespace std {
             }
         }
       public:
+        typedef size_t size_type;
+        typedef ptrdiff_t difference_type;
+        typedef T* value_type;
+        typedef value_type* pointer;
+        typedef const value_type* const_pointer;
+        typedef value_type& reference;
+        typedef const value_type& const_reference;
+
         vector(unsigned int size = 0);
         vector(unsigned int size, T *value);
-        vector(const vector<T *> &);
+        vector(const vector& other);
 
         unsigned int size() const;
         bool empty() const;
@@ -463,7 +476,7 @@ namespace std {
         %typecheck(SWIG_TYPECHECK_VECTOR) vector<T> {
             {
                 /* wrapped vector? */
-                std::vector<T >* v;
+                std::vector< T >* v;
                 if (SWIG_ConvertPtr($input,(void **) &v, 
                                     $&1_descriptor,0) != -1) {
                     $1 = 1;
@@ -493,7 +506,7 @@ namespace std {
                                           const vector<T>* {
             {
                 /* wrapped vector? */
-                std::vector<T >* v;
+                std::vector< T >* v;
                 if (SWIG_ConvertPtr($input,(void **) &v, 
                                     $1_descriptor,0) != -1) {
                     $1 = 1;
@@ -520,9 +533,17 @@ namespace std {
             }
         }
       public:
+        typedef size_t size_type;
+        typedef ptrdiff_t difference_type;
+        typedef T value_type;
+        typedef value_type* pointer;
+        typedef const value_type* const_pointer;
+        typedef value_type& reference;
+        typedef const value_type& const_reference;
+
         vector(unsigned int size = 0);
         vector(unsigned int size, T value);
-        vector(const vector<T> &);
+        vector(const vector& other);
 
         unsigned int size() const;
         bool empty() const;

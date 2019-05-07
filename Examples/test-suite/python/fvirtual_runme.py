@@ -1,9 +1,8 @@
 from fvirtual import *
 
-sw = Switch()
+sw = NodeSwitch()
 n = Node()
-i = sw.addChild(n);
+i = sw.addChild(n)
 
 if i != 2:
-  raise RuntimeError, "addChild"
-
+    raise RuntimeError, "addChild"

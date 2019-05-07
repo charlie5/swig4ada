@@ -17,7 +17,7 @@ with
 
      DOHs.Binding,
      DOHs.Pointers,
-     DOHs.DohIterator,
+     DOHs.const_String_or_char_ptr,
 
      ada.Strings.fixed,
      ada.text_IO,
@@ -167,16 +167,16 @@ is
 
 
       declare
-         Unused : Hash_Pointer := Preprocessor_define (String_or_char_Pointer (-"SWIGGNAT 1"),  0);   -- Add a symbol to the parser for conditional compilation.
+         Unused : Hash_Pointer := Preprocessor_define (const_String_or_char_ptr.item (-"SWIGGNAT 1"),  0);   -- Add a symbol to the parser for conditional compilation.
          pragma Unreferenced (Unused);
       begin
          SWIG_typemap_lang (new_String ("gnat"));                             -- Add typemap definitions.
-         SWIG_config_file    (String_or_char_Pointer (-"gnat.swg"));
+         SWIG_config_file    (DOHs.const_String_or_char_ptr.item (-"gnat.swg"));
       end;
 
 
       Self.allow_Overloading;
-      Self.allow_protected_and_private_Members;
+--      Self.allow_protected_and_private_Members;
 
       unindent_Log;
    end main;
@@ -227,11 +227,11 @@ is
       Self.f_wrappers := File_Pointer (-(""));
       Self.f_gnat     := File_Pointer (-(""));
 
-      Swig_register_filebyname (String_or_char_Pointer (-"header"),        Self.f_header);              -- Register file targets with the SWIG file handler.
-      Swig_register_filebyname (String_or_char_Pointer (-"wrapper"),       Self.f_wrappers);
-      Swig_register_filebyname (String_or_char_Pointer (-"runtime"),       Self.f_runtime);
-      Swig_register_filebyname (String_or_char_Pointer (-"init"),          Self.f_init);
-      Swig_register_filebyname (String_or_char_Pointer (-"gnat_support"),  Self.f_gnat);
+      Swig_register_filebyname (const_String_or_char_ptr.item (-"header"),        Self.f_header);              -- Register file targets with the SWIG file handler.
+      Swig_register_filebyname (const_String_or_char_ptr.item (-"wrapper"),       Self.f_wrappers);
+      Swig_register_filebyname (const_String_or_char_ptr.item (-"runtime"),       Self.f_runtime);
+      Swig_register_filebyname (const_String_or_char_ptr.item (-"init"),          Self.f_init);
+      Swig_register_filebyname (const_String_or_char_ptr.item (-"gnat_support"),  Self.f_gnat);
 
       --  Setup the principal namespace and module package names.
       --
@@ -256,10 +256,10 @@ is
       declare
          wrapper_Name : constant String := "Ada_%f"; -- & to_String (Self.imclass_Name);
       begin
-         Swig_name_register (String_or_char_Pointer (-"wrapper"), String_or_char_Pointer (-wrapper_Name));
-         Swig_name_register (String_or_char_Pointer (-"set"),     String_or_char_Pointer (-"set_%v"));
-         Swig_name_register (String_or_char_Pointer (-"get"),     String_or_char_Pointer (-"get_%v"));
-         Swig_name_register (String_or_char_Pointer (-"member"),  String_or_char_Pointer (-"%c_%m"));
+         Swig_name_register (const_String_or_char_ptr.item (-"wrapper"), const_String_or_char_ptr.item (-wrapper_Name));
+         Swig_name_register (const_String_or_char_ptr.item (-"set"),     const_String_or_char_ptr.item (-"set_%v"));
+         Swig_name_register (const_String_or_char_ptr.item (-"get"),     const_String_or_char_ptr.item (-"get_%v"));
+         Swig_name_register (const_String_or_char_ptr.item (-"member"),  const_String_or_char_ptr.item (-"%c_%m"));
       end;
 
       print_to (Doh_Pointer (Self.f_wrappers), "#ifdef __cplusplus ");
@@ -324,7 +324,8 @@ is
                               raw_swigType           : constant doh_SwigType := doh_Copy (Doh_Pointer (Pad));
                               the_Function           : constant doh_SwigType := doh_SwigType (SwigType_pop_function   (SwigType_Pointer (raw_swigType)));
                               function_return_Type   : constant doh_SwigType := doh_Copy (raw_swigType);
-                              function_Parameters    : constant doh_ParmList := doh_ParmList (SwigType_function_parms (SwigType_Pointer (the_Function)));
+                              function_Parameters    : constant doh_ParmList := doh_ParmList (SwigType_function_parms (SwigType_Pointer (the_Function),
+                                                                                                                       null));
 
                               new_c_Function         :          c_Function.view;
                               new_c_function_Pointer :          c_Type.view;
@@ -684,13 +685,13 @@ is
             wrapper_Code         : constant doh_String      := the_function_Wrapper.Code;
 
             overloaded_Name      : constant unbounded_String := to_unbounded_String (Self.get_overloaded_Name (the_Node));
-            wrapper_Name         : constant String           := +(doh_Item (Swig_name_wrapper (String_or_char_Pointer (-overloaded_name))));
+            wrapper_Name         : constant String           := +(doh_Item (Swig_name_wrapper (const_String_or_char_ptr.item (-overloaded_name))));
 
             the_Parameters       : constant ParmList_Pointer := ParmList_Pointer (get_Attribute (the_Node, -"parms"));
 
-            c_return_Type        :          unbounded_String := +doh_Item (Swig_typemap_lookup (String_or_char_Pointer (-"ctype"),
+            c_return_Type        :          unbounded_String := +doh_Item (Swig_typemap_lookup (const_String_or_char_ptr.item (-"ctype"),
                                                                                                 the_Node,
-                                                                                                String_or_char_Pointer (-""),
+                                                                                                const_String_or_char_ptr.item (-""),
                                                                                                 null));
 
             is_void_return       : constant Boolean          := (c_return_Type = "void");
@@ -703,8 +704,8 @@ is
             cleanup_Code         :          unbounded_String;
 
          begin
-            Swig_typemap_attach_parms (String_or_char_Pointer (-"ctype"),  the_Parameters, the_function_Wrapper);  -- Attach the non-standard typemaps to the parameter list.
-            Swig_typemap_attach_parms (String_or_char_Pointer (-"imtype"), the_Parameters, the_function_Wrapper);  --
+            Swig_typemap_attach_parms (const_String_or_char_ptr.item (-"ctype"),  the_Parameters, the_function_Wrapper);  -- Attach the non-standard typemaps to the parameter list.
+            Swig_typemap_attach_parms (const_String_or_char_ptr.item (-"imtype"), the_Parameters, the_function_Wrapper);  --
 
             if c_return_Type /= ""
             then
@@ -883,8 +884,9 @@ is
                Swig_save_1 (to_C ("functionWrapper"),  the_Node,  to_C ("wrap:action"));      -- Wrapping a constant hack; (tbd: this is usual swig hack)
 
                declare      -- below based on Swig_VargetToFunction()
+                  use swigmod.Language;
                   the_Type : constant SwigType_Pointer := SwigType_Pointer (Swig_wrapped_var_type (SwigType_Pointer (get_Attribute (the_Node, -"type")),
-                                                                                                   use_naturalvar_mode (the_Node)));
+                                                                                                   Self.use_naturalvar_mode (the_Node)));
                begin
                   set_Attribute (the_Node,   -"wrap:action",
                                              -String' (  "result = ("
@@ -925,9 +927,9 @@ is
                   tm         :          doh_String;
                   Status     :          C.int;
                begin
-                  tm := doh_String (Swig_typemap_lookup_out (String_or_char_Pointer (-"out"),
+                  tm := doh_String (Swig_typemap_lookup_out (const_String_or_char_ptr.item (-"out"),
                                                              n,
-                                                             String_or_char_Pointer (-"result"),
+                                                             const_String_or_char_ptr.item (-"result"),
                                                              the_function_Wrapper,
                                                              actioncode));
                   --  Return value, if necessary.
@@ -954,9 +956,9 @@ is
             if not Self.native_function_flag
             then     -- Return 'result' value, if necessary.
                declare
-                  the_typeMap : unbounded_String := +doh_Item (Swig_typemap_lookup (String_or_char_Pointer (-"out"),
+                  the_typeMap : unbounded_String := +doh_Item (Swig_typemap_lookup (const_String_or_char_ptr.item (-"out"),
                                                                                     the_Node,
-                                                                                    String_or_char_Pointer (-"result"),
+                                                                                    const_String_or_char_ptr.item (-"result"),
                                                                                     null));
                begin
                   log (+"TYPEMAP");
@@ -984,9 +986,9 @@ is
             if get_Attribute (the_Node, -"feature:new") /= null
             then   -- Look to see if there is any newfree cleanup code.
                declare
-                  the_typeMap : constant unbounded_String := +doh_Item (Swig_typemap_lookup (String_or_char_Pointer (-"newfree"),
+                  the_typeMap : constant unbounded_String := +doh_Item (Swig_typemap_lookup (const_String_or_char_ptr.item (-"newfree"),
                                                                                              the_Node,
-                                                                                             String_or_char_Pointer (-"result"),
+                                                                                             const_String_or_char_ptr.item (-"result"),
                                                                                              null));
                begin
                   if the_typeMap /= ""
@@ -1000,9 +1002,9 @@ is
             if not Self.native_function_flag
             then   -- See if there is any return cleanup code.
                declare
-                  the_typeMap : constant unbounded_String := +doh_Item (Swig_typemap_lookup (String_or_char_Pointer (-"ret"),
+                  the_typeMap : constant unbounded_String := +doh_Item (Swig_typemap_lookup (const_String_or_char_ptr.item (-"ret"),
                                                                                              the_Node,
-                                                                                             String_or_char_Pointer (-"result"),
+                                                                                             const_String_or_char_ptr.item (-"result"),
                                                                                              null));
                begin
                   if the_typeMap /= ""
@@ -1656,11 +1658,12 @@ is
          gencomma            :          Boolean          := False;
 
       begin
-         append (constructor_Symbol,  String'("gnat_" & (+doh_Item (Swig_name_construct (String_or_char_Pointer (-overloaded_name))))));
+         append (constructor_Symbol,  String'("gnat_" & (+doh_Item (Swig_name_construct (const_String_or_char_ptr.item (-Self.current_c_Namespace.qualified_Name),
+                                                                                         const_String_or_char_ptr.item (-overloaded_name))))));
          append (construct_Call,      "extern "  & Self.current_lStr & "    " & constructor_Symbol & "(");
 
-         Swig_typemap_attach_parms (String_or_char_Pointer (-"ctype"), parameter_List, null);    -- attach the non-standard typemaps to the parameter list
-         Swig_typemap_attach_parms (String_or_char_Pointer (-"in"),    parameter_List, null);    --
+         Swig_typemap_attach_parms (const_String_or_char_ptr.item (-"ctype"), parameter_List, null);    -- attach the non-standard typemaps to the parameter list
+         Swig_typemap_attach_parms (const_String_or_char_ptr.item (-"in"),    parameter_List, null);    --
 
          emit_mark_varargs (parameter_List);
 
@@ -1693,7 +1696,7 @@ is
                      replace_All (the_c_Type,  "$c_classname",  +doh_Item (pt));
 
                      append (construct_Call,       String' (+doh_Item (SwigType_lstr     (pt, null))  &   "   "  &  arg));
-                     append (construct_call_Args,  String' (+doh_Item (SwigType_rcaststr (pt, String_or_char_Pointer (-arg)))));
+                     append (construct_call_Args,  String' (+doh_Item (SwigType_rcaststr (pt, const_String_or_char_ptr.item (-arg)))));
                   else
                      log (+"no ctype typemap defined for "  &  String'(+doh_Item (pt)));
                   end if;
@@ -2015,7 +2018,7 @@ is
                   raw_swigType         : constant SwigType_Pointer := SwigType_Pointer (doh_Copy (doh_Item (the_doh_swigType)));
                   the_Function         : constant SwigType_Pointer := SwigType_pop_function (raw_swigType);
                   function_return_Type : constant SwigType_Pointer := SwigType_Pointer (doh_Copy (doh_Item (raw_swigType)));
-                  function_Parameters  : constant doh_ParmList     := doh_ParmList (SwigType_function_parms (the_Function));
+                  function_Parameters  : constant doh_ParmList     := doh_ParmList (SwigType_function_parms (the_Function, the_Node));
 
                   new_c_Function         : c_Function.view;
                   new_c_function_Pointer : c_Type.view;
@@ -2038,7 +2041,7 @@ is
                declare
                   the_Function          : constant SwigType_Pointer := SwigType_pop_function   (the_doh_swigType);
                   function_return_Type  : constant unbounded_String := +doh_Copy (doh_Item (the_doh_swigType));
-                  function_Parameters   : constant doh_ParmList     := doh_ParmList (SwigType_function_parms (the_Function));
+                  function_Parameters   : constant doh_ParmList     := doh_ParmList (SwigType_function_parms (the_Function, the_Node));
 
                   new_c_Function        : constant c_Function.view  := c_function.new_c_Function (to_unbounded_String ("anonymous"),
                                                                                                   Self.swig_type_Map_of_c_type.Element (function_return_Type));
@@ -2292,7 +2295,7 @@ is
             declare   -- Register pointer to 'const'.
                the_pointer_to_const_swigType : constant doh_swigType
                  := doh_swigType (swigtype_add_Pointer (swigtype_add_Qualifier (SwigType_Pointer (doh_copy (the_swig_Type)),
-                                                                               String_or_char_Pointer (to_Doh ("const")))));
+                                                                               const_String_or_char_ptr.item (to_Doh ("const")))));
                the_c_pointer_to_const_Name   : constant unbounded_String   := "const " & the_c_Type.Name & "*";
             begin
                Self.swig_type_Map_of_c_type.insert (+the_pointer_to_const_swigType, the_c_type_Pointer);
@@ -2327,7 +2330,7 @@ is
             declare   -- register reference to 'const'
                the_reference_to_const_swigType : constant doh_swigType
                  := doh_swigType (SwigType_add_reference (swigtype_add_Qualifier (SwigType_Pointer (doh_copy (the_swig_Type)),
-                                                                                 String_or_char_Pointer (to_Doh ("const")))));
+                                                                                 const_String_or_char_ptr.item (to_Doh ("const")))));
                the_c_reference_to_const_Name   : constant unbounded_String   := "const " & the_c_Type.Name & "&";
             begin
                Self.swig_type_Map_of_c_type.insert (+the_reference_to_const_swigType, the_c_type_Pointer);
@@ -2392,7 +2395,7 @@ is
          declare   -- Register pointer pointer to 'const'.
             the_pointer_to_pointer_to_const_swigType : constant doh_swigType
               := doh_SwigType (swigtype_add_Pointer (swigtype_add_Pointer (swigtype_add_Qualifier (SwigType_Pointer (doh_copy (the_swig_Type)),
-                                                                                                  String_or_char_Pointer (to_Doh ("const"))))));
+                                                                                                  const_String_or_char_ptr.item (to_Doh ("const"))))));
             the_c_pointer_to_pointer_to_const_Name   : constant unbounded_String   := "const " & the_c_Type.Name & "**";
          begin
             Self.swig_type_Map_of_c_type.insert (+the_pointer_to_pointer_to_const_swigType, the_c_type_pointer_Pointer);
@@ -2510,7 +2513,7 @@ is
             declare      -- Register pointer to 'const'.
                the_pointer_to_const_swigType : constant doh_swigType
                  := doh_SwigType (swigtype_add_Pointer (swigtype_add_Qualifier (SwigType_Pointer (doh_copy (the_swig_Type)),
-                                                                               String_or_char_Pointer (to_Doh ("const")))));
+                                                                               const_String_or_char_ptr.item (to_Doh ("const")))));
             begin
                Self.swig_type_Map_of_c_type.insert (+the_pointer_to_const_swigType,  my_view_Type);
                Self.     name_Map_of_c_type.insert ("const " & proxy_Name & "*",     my_view_Type);
@@ -2525,7 +2528,7 @@ is
                declare   -- Register reference to 'const'.
                   the_reference_to_const_swigType : constant doh_swigType
                     := doh_SwigType (SwigType_add_reference (swigtype_add_Qualifier (SwigType_Pointer (doh_copy (the_swig_Type)),
-                                                                                    String_or_char_Pointer (to_Doh ("const")))));
+                                                                                    const_String_or_char_ptr.item (to_Doh ("const")))));
                begin
                   Self.swig_type_Map_of_c_type.insert (+the_reference_to_const_swigType,  my_view_Type);
                   Self.name_Map_of_c_type     .insert ("const " & proxy_Name & "&",       my_view_Type);
@@ -2919,11 +2922,11 @@ is
    begin
       -- Attach the non-standard typemaps to the parameter list.
       --
-      Swig_typemap_attach_parms (String_or_char_Pointer (-"in"),               ParmList_Pointer (swig_Parameters), null);
-      Swig_typemap_attach_parms (String_or_char_Pointer (-"adatype"),          ParmList_Pointer (swig_Parameters), null);
-      Swig_typemap_attach_parms (String_or_char_Pointer (-"adain"),            ParmList_Pointer (swig_Parameters), null);
-      Swig_typemap_attach_parms (String_or_char_Pointer (-"imtype"),           ParmList_Pointer (swig_Parameters), null);
-      Swig_typemap_attach_parms (String_or_char_Pointer (-"link_symbol_code"), ParmList_Pointer (swig_Parameters), null);
+      Swig_typemap_attach_parms (const_String_or_char_ptr.item (-"in"),               ParmList_Pointer (swig_Parameters), null);
+      Swig_typemap_attach_parms (const_String_or_char_ptr.item (-"adatype"),          ParmList_Pointer (swig_Parameters), null);
+      Swig_typemap_attach_parms (const_String_or_char_ptr.item (-"adain"),            ParmList_Pointer (swig_Parameters), null);
+      Swig_typemap_attach_parms (const_String_or_char_ptr.item (-"imtype"),           ParmList_Pointer (swig_Parameters), null);
+      Swig_typemap_attach_parms (const_String_or_char_ptr.item (-"link_symbol_code"), ParmList_Pointer (swig_Parameters), null);
 
       declare
          the_Parameter : Node_Pointer := Node_Pointer (swig_Parameters);
@@ -2946,7 +2949,6 @@ is
                if not (Self.variable_wrapper_flag  and  Index = 0)
                then   -- Ignore the 'this' argument for variable wrappers.
                   declare
-                     use type C.int;
                      use c_Parameter.Vectors,
                          swigg.Utility;
 
@@ -3144,20 +3146,20 @@ is
             new_Function.returns_an_Access := return_by_Reference  or  return_by_Pointer;
 
             if    checkAttribute (the_Node,
-                                  String_or_char_Pointer (-"access"),
-                                  String_or_char_Pointer (-"public"))    /= 0
+                                  const_String_or_char_ptr.item (-"access"),
+                                  const_String_or_char_ptr.item (-"public"))    /= 0
             then
                new_Function.access_Mode := public_access;
 
             elsif checkAttribute (the_Node,
-                                  String_or_char_Pointer (-"access"),
-                                  String_or_char_Pointer (-"protected")) /= 0
+                                  const_String_or_char_ptr.item (-"access"),
+                                  const_String_or_char_ptr.item (-"protected")) /= 0
             then
                new_Function.access_Mode := protected_access;
 
             elsif checkAttribute (the_Node,
-                                  String_or_char_Pointer (-"access"),
-                                  String_or_char_Pointer (-"private"))   /= 0
+                                  const_String_or_char_ptr.item (-"access"),
+                                  const_String_or_char_ptr.item (-"private"))   /= 0
             then
                new_Function.access_Mode := private_access;
 
@@ -3171,11 +3173,11 @@ is
             else
                new_Function.is_Static   := Self.static_flag;
                new_Function.is_Virtual  := checkAttribute (the_Node,
-                                                           String_or_char_Pointer (-"storage"),
-                                                           String_or_char_Pointer (-"virtual")) /= 0;
+                                                           const_String_or_char_ptr.item (-"storage"),
+                                                           const_String_or_char_ptr.item (-"virtual")) /= 0;
                new_Function.is_Abstract := checkAttribute (the_Node,
-                                                           String_or_char_Pointer (-"abstract"),
-                                                           String_or_char_Pointer (-"1"))       /= 0;
+                                                           const_String_or_char_ptr.item (-"abstract"),
+                                                           const_String_or_char_ptr.item (-"1"))       /= 0;
             end if;
 
             if is_Destructor

@@ -1,5 +1,10 @@
- %module(directors="1") director_basic
- #pragma SWIG nowarn=SWIGWARN_TYPEMAP_THREAD_UNSAFE,SWIGWARN_TYPEMAP_DIRECTOROUT_PTR
+%module(directors="1") director_basic
+
+#ifdef SWIGOCAML
+%warnfilter(SWIGWARN_PARSE_KEYWORD) method;
+#endif
+
+%warnfilter(SWIGWARN_TYPEMAP_THREAD_UNSAFE,SWIGWARN_TYPEMAP_DIRECTOROUT_PTR) MyClass::pmethod;
 
  %{
  #include <string>
@@ -10,7 +15,7 @@
    virtual std::string ping() { return "Foo::ping()"; }
    virtual std::string pong() { return "Foo::pong();" + ping(); }
 
-   static Foo* get_self(Foo *self) {return self;}
+   static Foo* get_self(Foo *slf) {return slf;}
    
  };
 
@@ -27,7 +32,7 @@
    virtual std::string ping();
    virtual std::string pong();
    
-   static Foo* get_self(Foo *self);
+   static Foo* get_self(Foo *slf);
    
  };
 
@@ -64,6 +69,14 @@
 
  %}
 
+ %typemap(cscode) MyClass %{
+   public void testSwigDerivedClassHasMethod() {
+     if (SwigDerivedClassHasMethod("nonVirtual", swigMethodTypes3))
+       throw new global::System.Exception("non-overriding non-virtual method would be when connecting director");
+     if (SwigDerivedClassHasMethod("nonOverride", swigMethodTypes4))
+       throw new global::System.Exception("non-overriding virtual method would be when connecting director");
+   }
+ %}
 
  %feature("director") MyClass;
 
@@ -112,12 +125,37 @@ public:
     return vmethod(b);
   }  
 
-
   static MyClass *get_self(MyClass *c) 
   {
     return c;
   }
-  
+
+  static Bar * call_pmethod(MyClass *myclass, Bar *b) {
+    return myclass->pmethod(b);
+  }
+
+  virtual int nonVirtual()
+  {
+    return 100;
+  }
+
+  virtual int nonOverride()
+  {
+    return 101;
+  }
+
+  static int call_nonVirtual(MyClass *myclass)
+  {
+    return myclass->nonVirtual();
+  }
+
+  static int call_nonOverride(MyClass *myclass)
+  {
+    return myclass->nonOverride();
+  }
+
+  // Collisions with generated method names
+  virtual void Connect() { }
 };
 
 template<class T>

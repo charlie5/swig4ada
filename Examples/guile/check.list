@@ -1,7 +1,9 @@
 # see top-level Makefile.in
 constants
-matrix
-simple
+class
 port
+simple
+std_vector
+matrix
 multimap
 multivalue

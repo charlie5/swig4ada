@@ -1,13 +1,15 @@
 /* ----------------------------------------------------------------------------- 
- * See the LICENSE file for information on copyright, usage and redistribution
- * of SWIG, and the README file for authors - http://www.swig.org/release.html.
+ * This file is part of SWIG, which is licensed as a whole under version 3 
+ * (or any later version) of the GNU General Public License. Some additional
+ * terms also apply to certain portions of SWIG. The full details of the SWIG
+ * license and copyrights can be found in the LICENSE and COPYRIGHT files
+ * included with the SWIG source code as distributed by the SWIG developers
+ * and at http://www.swig.org/legal.html.
  *
  * contract.cxx
  *
  * Support for Wrap by Contract in SWIG.
  * ----------------------------------------------------------------------------- */
-
-char cvsroot_contract_cxx[] = "$Id: contract.cxx 10440 2008-05-11 20:25:12Z wsfulton $";
 
 #include "swigmod.h"
 
@@ -46,6 +48,7 @@ public:
   int extendDirective(Node *n);
   int importDirective(Node *n);
   int includeDirective(Node *n);
+  int namespaceDeclaration(Node *n);
   int classDeclaration(Node *n);
   virtual int top(Node *n);
 };
@@ -208,7 +211,7 @@ String *Contracts::make_expression(String *s, Node *n) {
   for (ei = First(list_assert); ei.item; ei = Next(ei)) {
     expr = ei.item;
     if (Len(expr)) {
-      Replaceid(expr, Getattr(n, "name"), "result");
+      Replaceid(expr, Getattr(n, "name"), Swig_cresult_name());
       if (Len(str_assert))
 	Append(str_assert, "&&");
       Printf(str_assert, "(%s)", expr);
@@ -304,7 +307,7 @@ int Contracts::cDeclaration(Node *n) {
     return SWIG_OK;
 
   if (Getattr(n, "feature:contract"))
-    ret = emit_contract(n, (InClass && !checkAttribute(n, "storage", "static")));
+    ret = emit_contract(n, InClass && !Swig_storage_isstatic(n));
   return ret;
 }
 
@@ -320,23 +323,32 @@ int Contracts::constructorDeclaration(Node *n) {
 int Contracts::externDeclaration(Node *n) {
   return emit_children(n);
 }
+
 int Contracts::extendDirective(Node *n) {
   return emit_children(n);
 }
+
 int Contracts::importDirective(Node *n) {
   return emit_children(n);
 }
+
 int Contracts::includeDirective(Node *n) {
+  return emit_children(n);
+}
+
+int Contracts::namespaceDeclaration(Node *n) {
   return emit_children(n);
 }
 
 int Contracts::classDeclaration(Node *n) {
   int ret = SWIG_OK;
+  int oldInClass = InClass;
+  Node *oldClass = CurrentClass;
   InClass = 1;
   CurrentClass = n;
   emit_children(n);
-  InClass = 0;
-  CurrentClass = 0;
+  InClass = oldInClass;
+  CurrentClass = oldClass;
   return ret;
 }
 

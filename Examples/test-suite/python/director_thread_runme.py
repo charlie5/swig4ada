@@ -1,6 +1,8 @@
 from director_thread import Foo
 
-class Derived(Foo) :
+
+class Derived(Foo):
+
     def __init__(self):
         Foo.__init__(self)
 
@@ -14,3 +16,5 @@ d.run()
 if d.val >= 0:
     print d.val
     raise RuntimeError
+
+d.stop()

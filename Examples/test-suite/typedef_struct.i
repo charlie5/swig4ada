@@ -1,6 +1,13 @@
 %module typedef_struct
 
 %inline %{
+
+#if __GNUC__ >= 5 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 8)
+/* for anonymous enums */
+/* dereferencing type-punned pointer will break strict-aliasing rules [-Werror=strict-aliasing] */
+#pragma GCC diagnostic ignored "-Wstrict-aliasing"
+#endif
+
   typedef struct {
     int numpoints;
   } LineObj;
@@ -41,3 +48,22 @@ B_t make_b() {
     return make_a();
 }
 %} 
+
+
+%inline %{
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+typedef struct _Foo {
+  enum { NONAME1, NONAME2 } enumvar;
+  int foovar;
+  void (*fptr)(int);
+} Foo;
+
+#ifdef __cplusplus
+}
+#endif
+
+%}

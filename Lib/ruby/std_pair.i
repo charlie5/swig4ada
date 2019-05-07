@@ -31,7 +31,7 @@
 	  int res2 = swig::asval((VALUE)second, psecond);
 	  if (!SWIG_IsOK(res2)) return res2;
 	  return res1 > res2 ? res1 : res2;
-	}	
+	}
       }
 
       static int asval(VALUE obj, std::pair<T,U> *val) {
@@ -44,8 +44,8 @@
 	  }
 	} else {
 	  value_type *p;
-	  res = SWIG_ConvertPtr(obj,(void**)&p,
-				swig::type_info<value_type>(),0);
+	  swig_type_info *descriptor = swig::type_info<value_type>();
+	  res = descriptor ? SWIG_ConvertPtr(obj, (void **)&p, descriptor, 0) : SWIG_ERROR;
 	  if (SWIG_IsOK(res) && val)  *val = *p;
 	}
 	return res;
@@ -63,10 +63,16 @@
 	  value_type *vp = %new_instance(std::pair<T,U>);
 	  T *pfirst = &(vp->first);
 	  int res1 = swig::asval((VALUE)first, pfirst);
-	  if (!SWIG_IsOK(res1)) return res1;
+	  if (!SWIG_IsOK(res1)) {
+	    %delete(vp);
+	    return res1;
+	  }
 	  U *psecond = &(vp->second);
 	  int res2 = swig::asval((VALUE)second, psecond);
-	  if (!SWIG_IsOK(res2)) return res2;
+	  if (!SWIG_IsOK(res2)) {
+	    %delete(vp);
+	    return res2;
+	  }
 	  *val = vp;
 	  return SWIG_AddNewMask(res1 > res2 ? res1 : res2);
 	} else {
@@ -77,7 +83,7 @@
 	  int res2 = swig::asval((VALUE)second, psecond);
 	  if (!SWIG_IsOK(res2)) return res2;
 	  return res1 > res2 ? res1 : res2;
-	}	
+	}
       }
 
       static int asptr(VALUE obj, std::pair<T,U> **val) {
@@ -90,8 +96,8 @@
 	  }
 	} else {
 	  value_type *p;
-	  res = SWIG_ConvertPtr(obj,(void**)&p,
-				swig::type_info<value_type>(),0);
+	  swig_type_info *descriptor = swig::type_info<value_type>();
+	  res = descriptor ? SWIG_ConvertPtr(obj, (void **)&p, descriptor, 0) : SWIG_ERROR;
 	  if (SWIG_IsOK(res) && val)  *val = p;
 	}
 	return res;
@@ -118,13 +124,11 @@
 
       static VALUE from(const std::pair<T,U>& val) {
 	VALUE obj = rb_ary_new2(2);
-	RARRAY_PTR(obj)[0] = swig::from< 
-	  typename swig::noconst_traits<T >::noconst_type>(val.first);
-	RARRAY_PTR(obj)[1] = swig::from(val.second);
-	RARRAY_LEN(obj) = 2;
-	rb_define_singleton_method(obj, "second",  
+	rb_ary_push(obj, swig::from<typename swig::noconst_traits<T >::noconst_type>(val.first));
+	rb_ary_push(obj, swig::from(val.second));
+	rb_define_singleton_method(obj, "second",
 				   VALUEFUNC(_wrap_pair_second), 0 );
-	rb_define_singleton_method(obj, "second=", 
+	rb_define_singleton_method(obj, "second=",
 				   VALUEFUNC(_wrap_pair_second_eq), 1 );
 	rb_obj_freeze(obj); // treat as immutable tuple
 	return obj;
@@ -148,7 +152,8 @@
   VALUE inspect() const
     {
       VALUE tmp;
-      VALUE str = rb_str_new2( swig::type_name< pair >() );
+      const char *type_name = swig::type_name< pair >();
+      VALUE str = rb_str_new2( type_name );
       str = rb_str_cat2( str, " (" );
       tmp = swig::from( $self->first );
       tmp = rb_obj_as_string( tmp );

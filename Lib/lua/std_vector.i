@@ -1,7 +1,4 @@
 /* -----------------------------------------------------------------------------
- * See the LICENSE file for information on copyright, usage and redistribution
- * of SWIG, and the README file for authors - http://www.swig.org/release.html.
- *
  * std_vector.i
  *
  * std::vector typemaps for LUA
@@ -10,7 +7,7 @@
 %{
 #include <vector>
 %}
-%include <std_except.i> // the general exepctions
+%include <std_except.i> // the general exceptions
 /*
 A really cut down version of the vector class.
 
@@ -28,10 +25,19 @@ namespace std {
 	template<class T>
     class vector {
       public:
+        typedef size_t size_type;
+        typedef ptrdiff_t difference_type;
+        typedef T value_type;
+        typedef value_type* pointer;
+        typedef const value_type* const_pointer;
+        typedef value_type& reference;
+        typedef const value_type& const_reference;
+
         vector();
         vector(unsigned int);
-        vector(const vector&);
+        vector(const vector& other);
         vector(unsigned int,T);
+
         unsigned int size() const;
         unsigned int max_size() const;
         bool empty() const;

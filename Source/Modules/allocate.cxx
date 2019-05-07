@@ -1,6 +1,10 @@
 /* ----------------------------------------------------------------------------- 
- * See the LICENSE file for information on copyright, usage and redistribution
- * of SWIG, and the README file for authors - http://www.swig.org/release.html.
+ * This file is part of SWIG, which is licensed as a whole under version 3 
+ * (or any later version) of the GNU General Public License. Some additional
+ * terms also apply to certain portions of SWIG. The full details of the SWIG
+ * license and copyrights can be found in the LICENSE and COPYRIGHT files
+ * included with the SWIG source code as distributed by the SWIG developers
+ * and at http://www.swig.org/legal.html.
  *
  * allocate.cxx
  *
@@ -10,8 +14,6 @@
  * and non-default constructors in base classes.  See the ARM or
  * Doc/Manual/SWIGPlus.html for details.
  * ----------------------------------------------------------------------------- */
-
-char cvsroot_allocate_cxx[] = "$Id: allocate.cxx 10281 2008-02-28 23:14:07Z wsfulton $";
 
 #include "swigmod.h"
 #include "cparse.h"
@@ -39,7 +41,7 @@ extern "C" {
 	  SwigType *decl1 = SwigType_typedef_resolve_all(decl);
 	  SwigType *decl2 = SwigType_pop_function(decl1);
 	  if (Strcmp(decl2, search_decl) == 0) {
-	    if (!Getattr(n, "abstract")) {
+	    if (!GetFlag(n, "abstract")) {
 	      Delete(decl1);
 	      Delete(decl2);
 	      return 1;
@@ -195,15 +197,17 @@ class Allocate:public Dispatcher {
 	      // Found a polymorphic method.
 	      // Mark the polymorphic method, in case the virtual keyword was not used.
 	      Setattr(n, "storage", "virtual");
-
-	      if (both_have_public_access || both_have_protected_access) {
-		if (!is_non_public_base(inclass, b))
-		  Setattr(n, "override", base);	// Note C# definition of override, ie access must be the same
-	      } else if (!both_have_private_access) {
-		// Different access
-		if (this_wrapping_protected_members || base_wrapping_protected_members)
+	      if (!Getattr(b, "feature:interface")) { // interface implementation neither hides nor overrides
+		if (both_have_public_access || both_have_protected_access) {
 		  if (!is_non_public_base(inclass, b))
-		    Setattr(n, "hides", base);	// Note C# definition of hiding, ie hidden if access is different
+		    Setattr(n, "override", base);	// Note C# definition of override, ie access must be the same
+		}
+		else if (!both_have_private_access) {
+		  // Different access
+		  if (this_wrapping_protected_members || base_wrapping_protected_members)
+		    if (!is_non_public_base(inclass, b))
+		      Setattr(n, "hides", base);	// Note C# definition of hiding, ie hidden if access is different
+		}
 	      }
 	      // Try and find the most base's covariant return type
 	      SwigType *most_base_covariant_type = Getattr(base, "covariant");
@@ -212,7 +216,7 @@ class Allocate:public Dispatcher {
 
 	      if (!most_base_covariant_type) {
 		// Eliminate the derived virtual method.
-		if (virtual_elimination_mode)
+		if (virtual_elimination_mode && !is_member_director(n))
 		  if (both_have_public_access)
 		    if (!is_non_public_base(inclass, b))
 		      if (!Swig_symbol_isoverloaded(n)) {
@@ -323,38 +327,36 @@ class Allocate:public Dispatcher {
       Swig_symbol_setscope(oldtab);
       return ret;
     }
-    List *abstract = Getattr(base, "abstract");
-    if (abstract) {
+    List *abstracts = Getattr(base, "abstracts");
+    if (abstracts) {
       int dabstract = 0;
-      int len = Len(abstract);
+      int len = Len(abstracts);
       for (int i = 0; i < len; i++) {
-	Node *nn = Getitem(abstract, i);
+	Node *nn = Getitem(abstracts, i);
 	String *name = Getattr(nn, "name");
 	if (!name)
 	  continue;
+	if (Strchr(name, '~'))
+	  continue;		/* Don't care about destructors */
 	String *base_decl = Getattr(nn, "decl");
 	if (base_decl)
 	  base_decl = SwigType_typedef_resolve_all(base_decl);
-	if (Strchr(name, '~'))
-	  continue;		/* Don't care about destructors */
-
-	if (SwigType_isfunction(base_decl)) {
+	if (SwigType_isfunction(base_decl))
 	  search_decl = SwigType_pop_function(base_decl);
-	}
 	Node *dn = Swig_symbol_clookup_local_check(name, 0, check_implemented);
 	Delete(search_decl);
 	Delete(base_decl);
 
 	if (!dn) {
-	  List *nabstract = Getattr(n, "abstract");
-	  if (!nabstract) {
-	    nabstract = NewList();
-	    Setattr(n, "abstract", nabstract);
-	    Delete(nabstract);
+	  List *nabstracts = Getattr(n, "abstracts");
+	  if (!nabstracts) {
+	    nabstracts = NewList();
+	    Setattr(n, "abstracts", nabstracts);
+	    Delete(nabstracts);
 	  }
-	  Append(nabstract, nn);
-	  if (!Getattr(n, "abstract:firstnode")) {
-	    Setattr(n, "abstract:firstnode", nn);
+	  Append(nabstracts, nn);
+	  if (!Getattr(n, "abstracts:firstnode")) {
+	    Setattr(n, "abstracts:firstnode", nn);
 	  }
 	  dabstract = base != n;
 	}
@@ -382,10 +384,6 @@ class Allocate:public Dispatcher {
     }
 
     Node *c = firstChild(cls);
-    String *kind = Getattr(cls, "kind");
-    int mode = PUBLIC;
-    if (kind && (Strcmp(kind, "class") == 0))
-      mode = PRIVATE;
 
     while (c) {
       if (Getattr(c, "error") || GetFlag(c, "feature:ignore")) {
@@ -415,7 +413,7 @@ class Allocate:public Dispatcher {
 		  match = 1;
 		  break;
 		}
-		if ((!symname || (!Getattr(e, "sym:name"))) && (Cmp(name, Getattr(e, "name")) == 0)) {
+		if (!Getattr(e, "sym:name") && (Cmp(name, Getattr(e, "name")) == 0)) {
 		  match = 1;
 		  break;
 		}
@@ -425,7 +423,7 @@ class Allocate:public Dispatcher {
 		while (cc) {
 		  Node *cp = cc;
 		  if (classname) {
-		    Setattr(cp, "classname", classname);
+		    Setattr(cp, "extendsmartclassname", classname);
 		  }
 		  Setattr(cp, "allocate:smartpointeraccess", "1");
 		  /* If constant, we have to be careful */
@@ -453,13 +451,6 @@ class Allocate:public Dispatcher {
 	}
       }
 
-      if (Strcmp(nodeType(c), "access") == 0) {
-	kind = Getattr(c, "kind");
-	if (Strcmp(kind, "public") == 0)
-	  mode = PUBLIC;
-	else
-	  mode = PRIVATE;
-      }
       c = nextSibling(c);
     }
     /* Look for methods in base classes */
@@ -513,12 +504,12 @@ class Allocate:public Dispatcher {
 
        in emit.cxx
 
-       and is either constructued from the "feature:catches" feature
+       and is either constructed from the "feature:catches" feature
        or copied from the node "throws" list.
      */
     String *scatchlist = Getattr(n, "feature:catches");
     if (scatchlist) {
-      catchlist = Swig_cparse_parms(scatchlist);
+      catchlist = Swig_cparse_parms(scatchlist, n);
       if (catchlist) {
 	Setattr(n, "catchlist", catchlist);
 	mark_exception_classes(catchlist);
@@ -527,8 +518,7 @@ class Allocate:public Dispatcher {
     }
     ParmList *throws = Getattr(n, "throws");
     if (throws) {
-      /* if there is no an explicit catchlist, 
-         we catch everything in the throwlist */
+      /* if there is no explicit catchlist, we catch everything in the throws list */
       if (!catchlist) {
 	Setattr(n, "catchlist", throws);
       }
@@ -571,7 +561,11 @@ Allocate():
   virtual int classDeclaration(Node *n) {
     Symtab *symtab = Swig_symbol_current();
     Swig_symbol_setscope(Getattr(n, "symtab"));
-
+    save_value<Node*> oldInclass(inclass);
+    save_value<AccessMode> oldAcessMode(cplus_mode);
+    save_value<int> oldExtendMode(extendmode);
+    if (Getattr(n, "template"))
+      extendmode = 0;
     if (!CPlusPlus) {
       /* Always have default constructors/destructors in C */
       Setattr(n, "allocate:default_constructor", "1");
@@ -592,7 +586,6 @@ Allocate():
 	}
       }
     }
-
     inclass = n;
     String *kind = Getattr(n, "kind");
     if (Strcmp(kind, "class") == 0) {
@@ -606,19 +599,19 @@ Allocate():
     /* Check if the class is abstract via inheritance.   This might occur if a class didn't have
        any pure virtual methods of its own, but it didn't implement all of the pure methods in
        a base class */
-    if (!Getattr(n, "abstract") && is_abstract_inherit(n)) {
+    if (!Getattr(n, "abstracts") && is_abstract_inherit(n)) {
       if (((Getattr(n, "allocate:public_constructor") || (!GetFlag(n, "feature:nodefault") && !Getattr(n, "allocate:has_constructor"))))) {
 	if (!GetFlag(n, "feature:notabstract")) {
-	  Node *na = Getattr(n, "abstract:firstnode");
+	  Node *na = Getattr(n, "abstracts:firstnode");
 	  if (na) {
 	    Swig_warning(WARN_TYPE_ABSTRACT, Getfile(n), Getline(n),
 			 "Class '%s' might be abstract, " "no constructors generated,\n", SwigType_namestr(Getattr(n, "name")));
 	    Swig_warning(WARN_TYPE_ABSTRACT, Getfile(na), Getline(na), "Method %s might not be implemented.\n", Swig_name_decl(na));
-	    if (!Getattr(n, "abstract")) {
-	      List *abstract = NewList();
-	      Append(abstract, na);
-	      Setattr(n, "abstract", abstract);
-	      Delete(abstract);
+	    if (!Getattr(n, "abstracts")) {
+	      List *abstracts = NewList();
+	      Append(abstracts, na);
+	      Setattr(n, "abstracts", abstracts);
+	      Delete(abstracts);
 	    }
 	  }
 	}
@@ -628,7 +621,7 @@ Allocate():
     if (!Getattr(n, "allocate:has_constructor")) {
       /* No constructor is defined.  We need to check a few things */
       /* If class is abstract.  No default constructor. Sorry */
-      if (Getattr(n, "abstract")) {
+      if (Getattr(n, "abstracts")) {
 	Delattr(n, "allocate:default_constructor");
       }
       if (!Getattr(n, "allocate:default_constructor")) {
@@ -649,7 +642,7 @@ Allocate():
       }
     }
     if (!Getattr(n, "allocate:has_copy_constructor")) {
-      if (Getattr(n, "abstract")) {
+      if (Getattr(n, "abstracts")) {
 	Delattr(n, "allocate:copy_constructor");
       }
       if (!Getattr(n, "allocate:copy_constructor")) {
@@ -671,7 +664,7 @@ Allocate():
     }
 
     if (!Getattr(n, "allocate:has_destructor")) {
-      /* No destructor was defined.  We need to check a few things here too */
+      /* No destructor was defined */
       List *bases = Getattr(n, "allbases");
       int allows_destruct = 1;
 
@@ -688,13 +681,13 @@ Allocate():
     }
 
     if (!Getattr(n, "allocate:has_assign")) {
-      /* No destructor was defined.  We need to check a few things here too */
+      /* No assignment operator was defined */
       List *bases = Getattr(n, "allbases");
       int allows_assign = 1;
 
       for (int i = 0; i < Len(bases); i++) {
 	Node *n = Getitem(bases, i);
-	/* If base class does not allow default destructor, we don't allow it either */
+	/* If base class does not allow assignment, we don't allow it either */
 	if (Getattr(n, "allocate:has_assign")) {
 	  allows_assign = !Getattr(n, "allocate:noassign");
 	}
@@ -705,13 +698,13 @@ Allocate():
     }
 
     if (!Getattr(n, "allocate:has_new")) {
-      /* No destructor was defined.  We need to check a few things here too */
+      /* No new operator was defined */
       List *bases = Getattr(n, "allbases");
       int allows_new = 1;
 
       for (int i = 0; i < Len(bases); i++) {
 	Node *n = Getitem(bases, i);
-	/* If base class does not allow default destructor, we don't allow it either */
+	/* If base class does not allow new operator, we don't allow it either */
 	if (Getattr(n, "allocate:has_new")) {
 	  allows_new = !Getattr(n, "allocate:nonew");
 	}
@@ -723,7 +716,7 @@ Allocate():
 
     /* Check if base classes allow smart pointers, but might be hidden */
     if (!Getattr(n, "allocate:smartpointer")) {
-      Node *sp = Swig_symbol_clookup((char *) "operator ->", 0);
+      Node *sp = Swig_symbol_clookup("operator ->", 0);
       if (sp) {
 	/* Look for parent */
 	Node *p = parentNode(sp);
@@ -738,9 +731,10 @@ Allocate():
       }
     }
 
+    Swig_interface_propagate_methods(n);
+
     /* Only care about default behavior.  Remove temporary values */
     Setattr(n, "allocate:visit", "1");
-    inclass = 0;
     Swig_symbol_setscope(symtab);
     return SWIG_OK;
   }
@@ -783,7 +777,7 @@ Allocate():
       /* Check to see if this is a static member or not.  If so, we add an attribute
          cplus:staticbase that saves the current class */
 
-      if (checkAttribute(n, "storage", "static")) {
+      if (Swig_storage_isstatic(n)) {
 	Setattr(n, "cplus:staticbase", inclass);
       }
 
@@ -791,18 +785,26 @@ Allocate():
       if (cplus_mode != PUBLIC) {
 	if (Strcmp(name, "operator =") == 0) {
 	  /* Look for a private assignment operator */
-	  Setattr(inclass, "allocate:has_assign", "1");
+	  if (!GetFlag(n, "deleted"))
+	    Setattr(inclass, "allocate:has_assign", "1");
 	  Setattr(inclass, "allocate:noassign", "1");
 	} else if (Strcmp(name, "operator new") == 0) {
 	  /* Look for a private new operator */
-	  Setattr(inclass, "allocate:has_new", "1");
+	  if (!GetFlag(n, "deleted"))
+	    Setattr(inclass, "allocate:has_new", "1");
 	  Setattr(inclass, "allocate:nonew", "1");
 	}
       } else {
 	if (Strcmp(name, "operator =") == 0) {
-	  Setattr(inclass, "allocate:has_assign", "1");
+	  if (!GetFlag(n, "deleted"))
+	    Setattr(inclass, "allocate:has_assign", "1");
+	  else
+	    Setattr(inclass, "allocate:noassign", "1");
 	} else if (Strcmp(name, "operator new") == 0) {
-	  Setattr(inclass, "allocate:has_new", "1");
+	  if (!GetFlag(n, "deleted"))
+	    Setattr(inclass, "allocate:has_new", "1");
+	  else
+	    Setattr(inclass, "allocate:nonew", "1");
 	}
 	/* Look for smart pointer operator */
 	if ((Strcmp(name, "operator ->") == 0) && (!GetFlag(n, "feature:ignore"))) {
@@ -821,19 +823,21 @@ Allocate():
 		  int isconst = 0;
 		  Delete(SwigType_pop(type));
 		  if (SwigType_isconst(type)) {
-		    isconst = 1;
+		    isconst = !Getattr(inclass, "allocate:smartpointermutable");
 		    Setattr(inclass, "allocate:smartpointerconst", "1");
+		  }
+		  else {
+		    Setattr(inclass, "allocate:smartpointermutable", "1");
 		  }
 		  List *methods = smart_pointer_methods(sc, 0, isconst);
 		  Setattr(inclass, "allocate:smartpointer", methods);
-		  Setattr(inclass, "allocate:smartpointerbase", base);
+		  Setattr(inclass, "allocate:smartpointerpointeeclassname", Getattr(sc, "name"));
 		} else {
 		  /* Hmmm.  The return value is not a pointer.  If the type is a value
 		     or reference.  We're going to chase it to see if another operator->()
 		     can be found */
-
 		  if ((SwigType_check_decl(type, "")) || (SwigType_check_decl(type, "r."))) {
-		    Node *nn = Swig_symbol_clookup((char *) "operator ->", Getattr(sc, "symtab"));
+		    Node *nn = Swig_symbol_clookup("operator ->", Getattr(sc, "symtab"));
 		    if (nn) {
 		      Delete(base);
 		      Delete(type);
@@ -941,7 +945,12 @@ Allocate():
 	Setattr(inclass, "allocate:default_destructor", "1");
       } else if (cplus_mode == PROTECTED) {
 	Setattr(inclass, "allocate:default_base_destructor", "1");
+      } else if (cplus_mode == PRIVATE) {
+	Setattr(inclass, "allocate:private_destructor", "1");
       }
+    } else {
+      Setattr(inclass, "allocate:has_destructor", "1");
+      Setattr(inclass, "allocate:default_destructor", "1");
     }
     return SWIG_OK;
   }

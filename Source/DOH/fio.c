@@ -1,16 +1,16 @@
 /* ----------------------------------------------------------------------------- 
+ * This file is part of SWIG, which is licensed as a whole under version 3 
+ * (or any later version) of the GNU General Public License. Some additional
+ * terms also apply to certain portions of SWIG. The full details of the SWIG
+ * license and copyrights can be found in the LICENSE and COPYRIGHT files
+ * included with the SWIG source code as distributed by the SWIG developers
+ * and at http://www.swig.org/legal.html.
+ *
  * fio.c
  *
  *     This file implements a number of standard I/O operations included
  *     formatted output, readline, and splitting.
- * 
- * Author(s) : David Beazley (beazley@cs.uchicago.edu)
- *
- * Copyright (C) 1999-2000.  The University of Chicago
- * See the file LICENSE for information on usage and redistribution.	
  * ----------------------------------------------------------------------------- */
-
-char cvsroot_fio_c[] = "$Id: fio.c 961 2009-03-03 14:54:44Z krischik $";
 
 #include "dohint.h"
 
@@ -21,7 +21,7 @@ static DOH *encodings = 0;	/* Encoding hash */
 /* -----------------------------------------------------------------------------
  * Writen()
  *
- * Write's N characters of output and retries until all characters are
+ * Writes N characters of output and retries until all characters are
  * written.  This is useful should a write operation encounter a spurious signal.
  * ----------------------------------------------------------------------------- */
 
@@ -45,16 +45,20 @@ static int Writen(DOH *out, void *buffer, int len) {
  * two file-like objects and operate as a filter.
  * ----------------------------------------------------------------------------- */
 
-void DohEncoding(char *name, DOH *(*fn) (DOH *s)) {
+void DohEncoding(const char *name, DOH *(*fn) (DOH *s)) {
+  DohFuncPtr_t fp;
+
   if (!encodings)
     encodings = NewHash();
-  Setattr(encodings, (void *) name, NewVoid((void *) fn, 0));
+
+  fp.func = fn;
+  Setattr(encodings, (void *) name, NewVoid(fp.p, 0));
 }
 
 /* internal function for processing an encoding */
 static DOH *encode(char *name, DOH *s) {
   DOH *handle, *ns;
-  DOH *(*fn) (DOH *);
+  DohFuncPtr_t fp;
   long pos;
   char *cfmt = strchr(name, ':');
   DOH *tmp = 0;
@@ -72,9 +76,11 @@ static DOH *encode(char *name, DOH *s) {
     s = tmp;
   pos = Tell(s);
   Seek(s, 0, SEEK_SET);
-  fn = (DOH *(*)(DOH *)) Data(handle);
-  ns = (*fn) (s);
-  Seek(s, pos, SEEK_SET);
+
+  fp.p = Data(handle);
+  ns = (*fp.func) (s);
+  assert(pos != -1);
+  (void)Seek(s, pos, SEEK_SET);
   if (tmp)
     Delete(tmp);
   return ns;
@@ -99,7 +105,7 @@ static DOH *encode(char *name, DOH *s) {
  * ----------------------------------------------------------------------------- */
 
 int DohvPrintf(DOH *so, const char *format, va_list ap) {
-  static char *fmt_codes = "dioxXucsSfeEgGpn";
+  static const char *fmt_codes = "dioxXucsSfeEgGpn";
   int state = 0;
   const char *p = format;
   char newformat[256];
@@ -298,9 +304,9 @@ int DohvPrintf(DOH *so, const char *format, va_list ap) {
 	  }
 	  if (strlen(encoder)) {
 	    enc = encode(encoder, Sval);
-	    maxwidth = maxwidth + strlen(newformat) + Len(enc);
+	    maxwidth = maxwidth + (int)strlen(newformat) + Len(enc);
 	  } else {
-	    maxwidth = maxwidth + strlen(newformat) + Len(Sval);
+	    maxwidth = maxwidth + (int)strlen(newformat) + Len(Sval);
 	  }
 	  *(fmt++) = 's';
 	  *fmt = 0;
@@ -314,7 +320,7 @@ int DohvPrintf(DOH *so, const char *format, va_list ap) {
 	  } else {
 	    nbytes += sprintf(stemp, newformat, Data(Sval));
 	  }
-	  if (Writen(so, stemp, strlen(stemp)) < 0)
+	  if (Writen(so, stemp, (int)strlen(stemp)) < 0)
 	    return -1;
 	  if ((DOH *) Sval != doh) {
 	    Delete(Sval);
@@ -340,7 +346,7 @@ int DohvPrintf(DOH *so, const char *format, va_list ap) {
 	  } else {
 	    enc = 0;
 	  }
-	  maxwidth = maxwidth + strlen(newformat) + strlen((char *) doh);
+	  maxwidth = maxwidth + (int)strlen(newformat) + (int)strlen((char *) doh);
 	  *(fmt++) = 's';
 	  *fmt = 0;
 	  if ((maxwidth + 1) < OBUFLEN) {
@@ -349,7 +355,7 @@ int DohvPrintf(DOH *so, const char *format, va_list ap) {
 	    stemp = (char *) DohMalloc(maxwidth + 1);
 	  }
 	  nbytes += sprintf(stemp, newformat, doh);
-	  if (Writen(so, stemp, strlen(stemp)) < 0)
+	  if (Writen(so, stemp, (int)strlen(stemp)) < 0)
 	    return -1;
 	  if (stemp != obuffer) {
 	    DohFree(stemp);
@@ -360,7 +366,7 @@ int DohvPrintf(DOH *so, const char *format, va_list ap) {
       } else {
 	*(fmt++) = *p;
 	*fmt = 0;
-	maxwidth = maxwidth + strlen(newformat) + 64;
+	maxwidth = maxwidth + (int)strlen(newformat) + 64;
 
 	/* Only allocate a buffer if it is too big to fit.  Shouldn't have to do
 	   this very often */
@@ -395,7 +401,7 @@ int DohvPrintf(DOH *so, const char *format, va_list ap) {
 	default:
 	  break;
 	}
-	if (Writen(so, stemp, strlen(stemp)) < 0)
+	if (Writen(so, stemp, (int)strlen(stemp)) < 0)
 	  return -1;
 	if (stemp != obuffer)
 	  DohFree(stemp);
@@ -408,7 +414,7 @@ int DohvPrintf(DOH *so, const char *format, va_list ap) {
   if (state) {
     int r;
     *fmt = 0;
-    r = Writen(so, fmt, strlen(fmt));
+    r = Writen(so, fmt, (int)strlen(fmt));
     if (r < 0)
       return -1;
     nbytes += r;
@@ -449,7 +455,7 @@ int DohPrintv(DOHFile * f, ...) {
     if (DohCheck(obj)) {
       ret += DohDump(obj, f);
     } else {
-      ret += DohWrite(f, obj, strlen((char *) obj));
+      ret += DohWrite(f, obj, (int)strlen((char *) obj));
     }
   }
   va_end(ap);
@@ -478,16 +484,19 @@ int DohCopyto(DOH *in, DOH *out) {
       cw = buffer;
       while (nwrite) {
 	wret = Write(out, cw, nwrite);
-	if (wret < 0)
-	  return -1;
+	if (wret < 0) {
+	  nbytes = -1;
+	  break;
+	}
 	nwrite = nwrite - wret;
 	cw += wret;
       }
       nbytes += ret;
     } else {
-      return nbytes;
+      break;
     }
   }
+  return nbytes;
 }
 
 
@@ -575,15 +584,16 @@ DOH *DohReadline(DOH *in) {
     if (Read(in, &c, 1) < 0) {
       if (n == 0) {
 	Delete(s);
-	return 0;
+	s = 0;
       }
-      return s;
+      break;
     }
     if (c == '\n')
-      return s;
+      break;
     if (c == '\r')
       continue;
     Putc(c, s);
     n++;
   }
+  return s;
 }

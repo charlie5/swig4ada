@@ -1,7 +1,4 @@
 /* -----------------------------------------------------------------------------
- * See the LICENSE file for information on copyright, usage and redistribution
- * of SWIG, and the README file for authors - http://www.swig.org/release.html.
- *
  * std_pair.i
  *
  * SWIG typemaps for std::pair
@@ -21,12 +18,14 @@
 namespace std {
 
   template<class T, class U> struct pair {
+    typedef T first_type;
+    typedef U second_type;
 
     pair();
     pair(T first, U second);
-    pair(const pair& p);
+    pair(const pair& other);
 
-    template <class U1, class U2> pair(const pair<U1, U2> &p);
+    template <class U1, class U2> pair(const pair<U1, U2> &other);
 
     T first;
     U second;

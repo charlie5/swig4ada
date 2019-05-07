@@ -1,7 +1,4 @@
 /* -----------------------------------------------------------------------------
- * See the LICENSE file for information on copyright, usage and redistribution
- * of SWIG, and the README file for authors - http://www.swig.org/release.html.
- *
  * std_except.i
  *
  * Typemaps used by the STL wrappers that throw exceptions.
@@ -10,6 +7,7 @@
  * ----------------------------------------------------------------------------- */
 
 %{
+#include <typeinfo>
 #include <stdexcept>
 %}
 
@@ -19,6 +17,7 @@ namespace std
   struct exception {};
 }
 
+%typemap(throws) std::bad_cast          "SWIG_JavaThrowException(jenv, SWIG_JavaRuntimeException, $1.what());\n return $null;"
 %typemap(throws) std::bad_exception     "SWIG_JavaThrowException(jenv, SWIG_JavaRuntimeException, $1.what());\n return $null;"
 %typemap(throws) std::domain_error      "SWIG_JavaThrowException(jenv, SWIG_JavaRuntimeException, $1.what());\n return $null;"
 %typemap(throws) std::exception         "SWIG_JavaThrowException(jenv, SWIG_JavaRuntimeException, $1.what());\n return $null;"

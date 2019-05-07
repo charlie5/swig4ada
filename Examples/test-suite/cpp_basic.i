@@ -8,6 +8,12 @@
 
 %newobject Bar::testFoo;
 
+%{
+#if defined(__SUNPRO_CC)
+#pragma error_messages (off, wbadasg) /* Assigning extern "C" ... */
+#endif
+%}
+
 %inline %{
 
 class Foo {
@@ -24,6 +30,19 @@ class Foo {
     }
     
     int (Foo::*func_ptr)(int);
+
+    const char* __str__() const { return "Foo"; }
+};
+
+class FooSub : public Foo {
+  public:
+    FooSub() :Foo(42) {}
+};
+
+class FooSubSub : public FooSub {
+  public:
+    FooSubSub() : FooSub() {}
+    const char* __str__() const { return "FooSubSub"; }
 };
 
 %}
@@ -55,6 +74,8 @@ class Bar {
     Foo *testFoo(int a, Foo *f) {
       return new Foo(2 * a + (f ? f->num : 0) + fval.num);
     }
+private:
+    Bar& operator=(const Bar&);
 };
 
 %}

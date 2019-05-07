@@ -1,6 +1,10 @@
 /* ----------------------------------------------------------------------------- 
- * See the LICENSE file for information on copyright, usage and redistribution
- * of SWIG, and the README file for authors - http://www.swig.org/release.html.
+ * This file is part of SWIG, which is licensed as a whole under version 3 
+ * (or any later version) of the GNU General Public License. Some additional
+ * terms also apply to certain portions of SWIG. The full details of the SWIG
+ * license and copyrights can be found in the LICENSE and COPYRIGHT files
+ * included with the SWIG source code as distributed by the SWIG developers
+ * and at http://www.swig.org/legal.html.
  *
  * include.c
  *
@@ -9,14 +13,13 @@
  * are provided.
  * ----------------------------------------------------------------------------- */
 
-char cvsroot_include_c[] = "$Id: include.c 961 2009-03-03 14:54:44Z krischik $";
-
 #include "swig.h"
 
 static List   *directories = 0;	        /* List of include directories */
 static String *lastpath = 0;	        /* Last file that was included */
 static List   *pdirectories = 0;        /* List of pushed directories  */
 static int     dopush = 1;		/* Whether to push directories */
+static int file_debug = 0;
 
 /* This functions determine whether to push/pop dirs in the preprocessor */
 void Swig_set_push_dir(int push) {
@@ -33,7 +36,7 @@ int Swig_get_push_dir(void) {
  * Adds a directory to the SWIG search path.
  * ----------------------------------------------------------------------------- */
 
-List *Swig_add_directory(const String_or_char *dirname) {
+List *Swig_add_directory(const_String_or_char_ptr dirname) {
   String *adirname;
   if (!directories)
     directories = NewList();
@@ -53,7 +56,7 @@ List *Swig_add_directory(const String_or_char *dirname) {
  * the preprocessor to grab files in the same directory as other included files.
  * ----------------------------------------------------------------------------- */
 
-void Swig_push_directory(const String_or_char *dirname) {
+void Swig_push_directory(const_String_or_char_ptr dirname) {
   String *pdirname;
   if (!Swig_get_push_dir())
     return;
@@ -73,7 +76,7 @@ void Swig_push_directory(const String_or_char *dirname) {
  * the preprocessor.
  * ----------------------------------------------------------------------------- */
 
-void Swig_pop_directory() {
+void Swig_pop_directory(void) {
   if (!Swig_get_push_dir())
     return;
   if (!pdirectories)
@@ -87,13 +90,13 @@ void Swig_pop_directory() {
  * Returns the full pathname of the last file opened. 
  * ----------------------------------------------------------------------------- */
 
-String *Swig_last_file() {
+String *Swig_last_file(void) {
   assert(lastpath);
   return lastpath;
 }
 
 /* -----------------------------------------------------------------------------
- * Swig_search_path() 
+ * Swig_search_path_any() 
  * 
  * Returns a list of the current search paths.
  * ----------------------------------------------------------------------------- */
@@ -151,15 +154,17 @@ List *Swig_search_path() {
 /* -----------------------------------------------------------------------------
  * Swig_open()
  *
- * Looks for a file and open it.  Returns an open  FILE * on success.
+ * open a file, optionally looking for it in the include path.  Returns an open  
+ * FILE * on success.
  * ----------------------------------------------------------------------------- */
 
-static FILE *Swig_open_any(const String_or_char *name, int sysfile) {
+static FILE *Swig_open_file(const_String_or_char_ptr name, int sysfile, int use_include_path) {
   FILE *f;
   String *filename;
   List *spath = 0;
   char *cname;
-  int i, ilen;
+  int i, ilen, nbytes;
+  char bom[3];
 
   if (!directories)
     directories = NewList();
@@ -168,13 +173,19 @@ static FILE *Swig_open_any(const String_or_char *name, int sysfile) {
   cname = Char(name);
   filename = NewString(cname);
   assert(filename);
+  if (file_debug) {
+    Printf(stdout, "  Open: %s\n", filename);
+  }
   f = fopen(Char(filename), "r");
-  if (!f) {
+  if (!f && use_include_path) {
     spath = Swig_search_path_any(sysfile);
     ilen = Len(spath);
     for (i = 0; i < ilen; i++) {
       Clear(filename);
       Printf(filename, "%s%s", Getitem(spath, i), cname);
+
+//      Printf(stdout, "  Open: '%s'\n", filename);
+      
       f = fopen(Char(filename), "r");
       if (f)
 	break;
@@ -182,19 +193,28 @@ static FILE *Swig_open_any(const String_or_char *name, int sysfile) {
     Delete(spath);
   }
   if (f) {
-#if defined(_WIN32)		/* Note not on Cygwin else filename is displayed with double '/' */
-    Replaceall(filename, "\\\\", "\\");	/* remove double '\' in case any already present */
-    Replaceall(filename, "\\", "\\\\");
-#endif
     Delete(lastpath);
-    lastpath = Copy(filename);
+    lastpath = filename;
+
+    /* Skip the UTF-8 BOM if it's present */
+    nbytes = (int)fread(bom, 1, 3, f);
+    if (nbytes == 3 && bom[0] == (char)0xEF && bom[1] == (char)0xBB && bom[2] == (char)0xBF) {
+      /* skip */
+    } else {
+      fseek(f, 0, SEEK_SET);
+    }
   }
-  Delete(filename);
   return f;
 }
 
-FILE *Swig_open(const String_or_char *name) {
-  return Swig_open_any(name, 0);
+/* Open a file - searching the include paths to find it */
+FILE *Swig_include_open(const_String_or_char_ptr name) {
+  return Swig_open_file(name, 0, 1);
+}
+
+/* Open a file - does not use include paths to find it */
+FILE *Swig_open(const_String_or_char_ptr name) {
+  return Swig_open_file(name, 0, 0);
 }
 
 
@@ -215,6 +235,8 @@ String *Swig_read_file(FILE *f) {
     Append(str, buffer);
   }
   len = Len(str);
+  /* Add a newline if not present on last line -- the preprocessor seems to 
+   * rely on \n and not EOF terminating lines */
   if (len) {
     char *cstr = Char(str);
     if (cstr[len - 1] != '\n') {
@@ -230,29 +252,29 @@ String *Swig_read_file(FILE *f) {
  * Opens a file and returns it as a string.
  * ----------------------------------------------------------------------------- */
 
-static String *Swig_include_any(const String_or_char *name, int sysfile) {
+static String *Swig_include_any(const_String_or_char_ptr name, int sysfile) {
   FILE *f;
   String *str;
   String *file;
 
-  f = Swig_open_any(name, sysfile);
+  f = Swig_open_file(name, sysfile, 1);
   if (!f)
     return 0;
   str = Swig_read_file(f);
   fclose(f);
   Seek(str, 0, SEEK_SET);
-  file = Copy(lastpath);
+  file = Copy(Swig_last_file());
   Setfile(str, file);
   Delete(file);
   Setline(str, 1);
   return str;
 }
 
-String *Swig_include(const String_or_char *name) {
+String *Swig_include(const_String_or_char_ptr name) {
   return Swig_include_any(name, 0);
 }
 
-String *Swig_include_sys(const String_or_char *name) {
+String *Swig_include_sys(const_String_or_char_ptr name) {
   return Swig_include_any(name, 1);
 }
 
@@ -262,16 +284,17 @@ String *Swig_include_sys(const String_or_char *name) {
  * Copies the contents of a file into another file
  * ----------------------------------------------------------------------------- */
 
-int Swig_insert_file(const String_or_char *filename, File *outfile) {
+int Swig_insert_file(const_String_or_char_ptr filename, File *outfile) {
   char buffer[4096];
   int nbytes;
-  FILE *f = Swig_open(filename);
+  FILE *f = Swig_include_open(filename);
 
   if (!f)
     return -1;
   while ((nbytes = Read(f, buffer, 4096)) > 0) {
     Write(outfile, buffer, nbytes);
   }
+  fclose(f);
   return 0;
 }
 
@@ -286,7 +309,7 @@ int Swig_insert_file(const String_or_char *filename, File *outfile) {
 
 static Hash *named_files = 0;
 
-void Swig_register_filebyname(const String_or_char *filename, File *outfile) {
+void Swig_register_filebyname(const_String_or_char_ptr filename, File *outfile) {
   if (!named_files)
     named_files = NewHash();
   Setattr(named_files, filename, outfile);
@@ -298,64 +321,48 @@ void Swig_register_filebyname(const String_or_char *filename, File *outfile) {
  * Get a named file
  * ----------------------------------------------------------------------------- */
 
-File *Swig_filebyname(const String_or_char *filename) {
+File *Swig_filebyname(const_String_or_char_ptr filename) {
   if (!named_files)
     return 0;
   return Getattr(named_files, filename);
 }
 
 /* -----------------------------------------------------------------------------
- * Swig_file_suffix()
+ * Swig_file_extension()
  *
- * Returns the suffix of a file
+ * Returns the extension of a file
  * ----------------------------------------------------------------------------- */
 
-char *Swig_file_suffix(const String_or_char *filename) {
-  char *d;
-  char *c = Char(filename);
-  int len = Len(filename);
-  if (strlen(c)) {
-    d = c + len - 1;
-    while (d != c) {
-      if (*d == '.')
-	return d;
-      d--;
-    }
-    return c + len;
-  }
-  return c;
+String *Swig_file_extension(const_String_or_char_ptr filename) {
+  String *name = Swig_file_filename(filename);
+  const char *c = strrchr(Char(name), '.');
+  String *extension = c ? NewString(c) : NewString("");
+  Delete(name);
+  return extension;
 }
 
 /* -----------------------------------------------------------------------------
  * Swig_file_basename()
  *
- * Returns the filename with no suffix attached.
+ * Returns the filename with the extension removed.
  * ----------------------------------------------------------------------------- */
 
-char *Swig_file_basename(const String_or_char *filename) {
-  static char tmp[1024];
-  char *c;
-  strcpy(tmp, Char(filename));
-  c = Swig_file_suffix(tmp);
-  *c = 0;
-  return tmp;
+String *Swig_file_basename(const_String_or_char_ptr filename) {
+  String *extension = Swig_file_extension(filename);
+  String *basename = NewStringWithSize(filename, Len(filename) - Len(extension));
+  Delete(extension);
+  return basename;
 }
 
 /* -----------------------------------------------------------------------------
  * Swig_file_filename()
  *
- * Return the file with any leading path stripped off
+ * Return the file name with any leading path stripped off
  * ----------------------------------------------------------------------------- */
-char *Swig_file_filename(const String_or_char *filename) {
-  static char tmp[1024];
+String *Swig_file_filename(const_String_or_char_ptr filename) {
   const char *delim = SWIG_FILE_DELIMITER;
-  char *c;
-
-  strcpy(tmp, Char(filename));
-  if ((c = strrchr(tmp, *delim)))
-    return c + 1;
-  else
-    return tmp;
+  const char *c = strrchr(Char(filename), *delim);
+  return c ? NewString(c + 1) : NewString(filename);
 }
 
 /* -----------------------------------------------------------------------------
@@ -363,17 +370,15 @@ char *Swig_file_filename(const String_or_char *filename) {
  *
  * Return the name of the directory associated with a file
  * ----------------------------------------------------------------------------- */
-char *Swig_file_dirname(const String_or_char *filename) {
-  static char tmp[1024];
+String *Swig_file_dirname(const_String_or_char_ptr filename) {
   const char *delim = SWIG_FILE_DELIMITER;
-  char *c;
-  strcpy(tmp, Char(filename));
-  if (!strstr(tmp, delim)) {
-    return "";
-  }
-  c = tmp + strlen(tmp) - 1;
-  while (*c != *delim)
-    c--;
-  *(++c) = 0;
-  return tmp;
+  const char *c = strrchr(Char(filename), *delim);
+  return c ? NewStringWithSize(filename, (int)(c - Char(filename) + 1)) : NewString("");
+}
+
+/*
+ * Swig_file_debug()
+ */
+void Swig_file_debug_set() {
+  file_debug = 1;
 }

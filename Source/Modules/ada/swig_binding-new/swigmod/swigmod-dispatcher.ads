@@ -130,6 +130,9 @@ package swigmod.Dispatcher is
    function templateDeclaration (Self :    access swigmod.Dispatcher.Item;
       n : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
 
+   function lambdaDeclaration (Self :    access swigmod.Dispatcher.Item;
+      n : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
+
    -- Pointer
    --
    type Pointer is access all swigmod.Dispatcher.Item;
@@ -204,5 +207,6 @@ private
       "Ada_Dispatcher_namespaceDeclaration");
    pragma Import (CPP, templateDeclaration,
       "Ada_Dispatcher_templateDeclaration");
+   pragma Import (CPP, lambdaDeclaration, "Ada_Dispatcher_lambdaDeclaration");
 
 end swigmod.Dispatcher;

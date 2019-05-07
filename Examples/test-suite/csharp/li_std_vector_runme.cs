@@ -83,14 +83,6 @@ public class li_std_vector_runme {
       }
     }
     {
-      double[,] outputarray = new double[collectionSize,collectionSize];
-      try {
-        vect.CopyTo(outputarray);
-        throw new Exception("CopyTo (5) test failed");
-      } catch (ArgumentException) {
-      }
-    }
-    {
       StructVector inputvector = new StructVector();
       int arrayLen = 10;
       for (int i=0; i<arrayLen; i++) {
@@ -129,7 +121,7 @@ public class li_std_vector_runme {
       throw new Exception("Contains test 4 failed");
 
     {
-      // ICollection constructor
+      // IEnumerable constructor
       double[] doubleArray = new double[] { 0.0, 11.1, 22.2, 33.3, 44.4, 55.5, 33.3 };
       DoubleVector dv = new DoubleVector(doubleArray);
       if (doubleArray.Length != dv.Count)
@@ -150,9 +142,13 @@ public class li_std_vector_runme {
         }
       }
       try {
-        new DoubleVector(null);
+        new DoubleVector((System.Collections.ICollection)null);
         throw new Exception("ICollection constructor null test failed");
       } catch (ArgumentNullException) {
+      }
+      {
+        // Collection initializer test, requires C# 3.0
+//        myDoubleVector = new DoubleVector() { 123.4, 567.8, 901.2 };
       }
 
       // IndexOf() test
@@ -174,6 +170,24 @@ public class li_std_vector_runme {
         throw new Exception("LastIndexOf non-existent test failed");
       if (dv.LastIndexOf(33.3) != 6)
         throw new Exception("LastIndexOf position test failed");
+
+      // Copy constructor test
+      DoubleVector dvCopy = new DoubleVector(dv);
+      for (int i=0; i<doubleArray.Length; i++) {
+        if (doubleArray[i] != dvCopy[i])
+          throw new Exception("Copy constructor failed, index:" + i);
+      }
+      if (dvCopy.Count != doubleArray.Length)
+        throw new Exception("Copy constructor lengths mismatch");
+
+      // ToArray test
+      double[] dvArray = dv.ToArray();
+      for (int i=0; i<doubleArray.Length; i++) {
+        if (doubleArray[i] != dvArray[i])
+          throw new Exception("ToArray failed, index:" + i);
+      }
+      if (dvArray.Length != doubleArray.Length)
+        throw new Exception("ToArray lengths mismatch");
     }
     {
       // Repeat() test
@@ -187,10 +201,19 @@ public class li_std_vector_runme {
         throw new Exception("Repeat count test failed");
       
       // Also tests enumerator
-      System.Collections.IEnumerator myEnumerator = dv.GetEnumerator();
-      while ( myEnumerator.MoveNext() ) {
-         if ((double)myEnumerator.Current != 77.7)
-           throw new Exception("Repeat test failed");
+      {
+        System.Collections.IEnumerator myEnumerator = dv.GetEnumerator();
+        while ( myEnumerator.MoveNext() ) {
+           if ((double)myEnumerator.Current != 77.7)
+             throw new Exception("Repeat (1) test failed");
+        }
+      }
+      {
+        System.Collections.Generic.IEnumerator<double> myEnumerator = dv.GetEnumerator();
+        while ( myEnumerator.MoveNext() ) {
+           if (myEnumerator.Current != 77.7)
+             throw new Exception("Repeat (2) test failed");
+        }
       }
     }
 
@@ -516,6 +539,13 @@ public class li_std_vector_runme {
       li_std_vector.halve_in_place(dvec);
     }
 
+    // Dispose()
+    {
+      using (StructVector vs = new StructVector( new Struct[] { new Struct(0.0), new Struct(11.1) } ) )
+      using (DoubleVector vd = new DoubleVector( new double[] { 0.0, 11.1 } ) ) {
+      }
+    }
+
     // More wrapped methods
     {
       RealVector v0 = li_std_vector.vecreal(new RealVector());
@@ -600,6 +630,55 @@ public class li_std_vector_runme {
       }
     }
 
+    // Test construction
+    {
+      string[] one_two_three = new string[] { "one", "two", "three" };
+
+      // Test construction from array
+      {
+        string[] collection = one_two_three;
+        check123(new StringVector(collection));
+      }
+
+      // Test construction from IEnumerable
+      {
+        global::System.Collections.IEnumerable collection = one_two_three;
+        check123(new StringVector(collection));
+      }
+
+      // Test construction from IEnumerable<>
+      {
+        global::System.Collections.Generic.IEnumerable<string> collection = one_two_three;
+        check123(new StringVector(collection));
+      }
+
+      // Test construction from IList<>
+      {
+        global::System.Collections.Generic.IList<string> collection = one_two_three;
+        check123(new StringVector(collection));
+      }
+
+      // Test construction from ICollection
+      {
+        global::System.Collections.ICollection collection = one_two_three;
+        check123(new StringVector(collection));
+      }
+
+      // Test construction from ICollection<>
+      {
+        global::System.Collections.Generic.ICollection<string> collection = new global::System.Collections.Generic.List<string>(one_two_three);
+        check123(new StringVector(collection));
+      }
+    }
+
+  }
+
+  private static void check123(StringVector stringv) {
+    string concatenated = "";
+    foreach (string s in stringv)
+      concatenated = concatenated + s;
+    if (concatenated != "onetwothree")
+      throw new Exception("concatenated string failed: " + concatenated);
   }
 
 }

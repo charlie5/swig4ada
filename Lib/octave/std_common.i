@@ -11,17 +11,17 @@
 	    fragment=SWIG_From_frag(Type),
 	    fragment="StdTraits") {
 namespace swig {
-  template <> struct traits<Type > {
+  template <> struct traits< Type > {
     typedef value_category category;
     static const char* type_name() { return  #Type; }
-  };  
-  template <>  struct traits_asval<Type > {   
+  };
+  template <>  struct traits_asval< Type > {
     typedef Type value_type;
-    static int asval(octave_value obj, value_type *val) { 
+    static int asval(octave_value obj, value_type *val) {
       return SWIG_AsVal(Type)(obj, val);
     }
   };
-  template <>  struct traits_from<Type > {
+  template <>  struct traits_from< Type > {
     typedef Type value_type;
     static octave_value from(const value_type& val) {
       return SWIG_From(Type)(val);
@@ -30,6 +30,37 @@ namespace swig {
 }
 }
 %enddef
+
+/* Traits for enums. This is bit of a sneaky trick needed because a generic template specialization of enums
+   is not possible (unless using template meta-programming which SWIG doesn't support because of the explicit
+   instantiations required using %template). The STL containers define the 'front' method and the typemap
+   below is used whenever the front method is wrapped returning an enum. This typemap simply picks up the
+   standard enum typemap, but additionally drags in a fragment containing the traits_asval and traits_from
+   required in the generated code for enums. */
+
+%define %traits_enum(Type...)
+  %fragment("SWIG_Traits_enum_"{Type},"header",
+	    fragment=SWIG_AsVal_frag(int),
+	    fragment=SWIG_From_frag(int),
+	    fragment="StdTraits") {
+namespace swig {
+  template <>  struct traits_asval< Type > {
+    typedef Type value_type;
+    static int asval(octave_value obj, value_type *val) {
+      return SWIG_AsVal(int)(obj, (int *)val);
+    }
+  };
+  template <>  struct traits_from< Type > {
+    typedef Type value_type;
+    static octave_value from(const value_type& val) {
+      return SWIG_From(int)((int)val);
+    }
+  };
+}
+}
+%typemap(out, fragment="SWIG_Traits_enum_"{Type}) const enum SWIGTYPE& front %{$typemap(out, const enum SWIGTYPE&)%}
+%enddef
+
 
 %include <std/std_common.i>
 

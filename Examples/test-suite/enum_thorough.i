@@ -43,7 +43,15 @@
 %warnfilter(SWIGWARN_RUBY_WRONG_NAME) Instances::memberinstance2;
 %warnfilter(SWIGWARN_RUBY_WRONG_NAME) Instances::memberinstance3;
 
+%warnfilter(SWIGWARN_GO_NAME_CONFLICT);                       /* Ignoring 'one' due to Go name ('ObscureOne') conflict with 'Obscure::One' */
+
 %inline %{
+
+#if __GNUC__ >= 5 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 8)
+/* for anonymous enums */
+/* dereferencing type-punned pointer will break strict-aliasing rules [-Werror=strict-aliasing] */
+#pragma GCC diagnostic ignored "-Wstrict-aliasing"
+#endif
 
 enum { AnonEnum1, AnonEnum2 = 100 };
 enum { ReallyAnInteger = 200 };
@@ -81,6 +89,8 @@ struct SpeedClass {
   const colour myColour2;
   speedtd1 mySpeedtd1;
   SpeedClass() : myColour2(red), mySpeedtd1(slow) { }
+private:
+  SpeedClass& operator=(const SpeedClass&);
 };
 
 int                            speedTest0(int s) { return s; }
@@ -271,6 +281,18 @@ OldNameStruct::simple               renameTest4(OldNameStruct::simple e) { retur
 OldNameStruct::doublename           renameTest5(OldNameStruct::doublename e) { return e; }
 OldNameStruct::doublenametag        renameTest6(OldNameStruct::doublenametag e) { return e; }
 OldNameStruct::singlename           renameTest7(OldNameStruct::singlename e) { return e; }
+%}
+
+%rename(Clash1_di1) Clash1::di1;
+%rename(Clash1_di2) Clash1::di2;
+%rename(Clash1_di3) Clash1::di3;
+%inline %{
+namespace Clash1 {
+  enum DuplicateItems1 { di1, di2 = 10, di3 };
+}
+namespace Clash2 {
+  enum DuplicateItems2 { di1, di2 = 10, di3 };
+}
 %}
 
 %inline %{
@@ -485,13 +507,54 @@ struct Instances {
 // Repeated values
 #if defined(SWIGJAVA)
 %javaconst(1);
+// needed for typesafe and proper enums only
+%javaconst(0) ignoreA_three;
+%javaconst(0) ignoreA_thirteen;
 #elif defined(SWIGCSHARP)
+// needed for typesafe enums only
+#ifdef SWIG_TEST_NOCSCONST
+  %csconst(0) ignoreA_three;
+  %csconst(0) ignoreA_thirteen;
+#endif
 %csconst(1);
 #endif
 
-#if defined(SWIGPERL)
-%inline %{
+%ignore ignoreA_one;
+%ignore ignoreA_two;
+%ignore ignoreA_twelve;
+%ignore ignoreA_thirty_one;
 
+%ignore ignoreB_ten;
+%ignore ignoreB_twenty;
+%ignore ignoreB_thirty;
+%ignore ignoreB_forty;
+
+%ignore ignoreC_eleven;
+%ignore ignoreC_thirty_one;
+%ignore ignoreC_forty_one;
+
+%ignore ignoreD_ten;
+%ignore ignoreD_twenty;
+
+%ignore ignoreE_twenty;
+
+%inline %{
+struct IgnoreTest {
+  enum IgnoreA { ignoreA_zero, ignoreA_one, ignoreA_two, ignoreA_three, ignoreA_ten=10, ignoreA_eleven, ignoreA_twelve, ignoreA_thirteen, ignoreA_fourteen, ignoreA_twenty=20, ignoreA_thirty=30, ignoreA_thirty_one, ignoreA_thirty_two, ignoreA_thirty_three };
+  enum IgnoreB { ignoreB_ten=10, ignoreB_eleven, ignoreB_twelve, ignoreB_twenty=20, ignoreB_thirty=30, ignoreB_thirty_one, ignoreB_thirty_two, ignoreB_forty=40, ignoreB_forty_one, ignoreB_forty_two };
+  enum IgnoreC { ignoreC_ten=10, ignoreC_eleven, ignoreC_twelve, ignoreC_twenty=20, ignoreC_thirty=30, ignoreC_thirty_one, ignoreC_thirty_two, ignoreC_forty=40, ignoreC_forty_one, ignoreC_forty_two };
+  enum IgnoreD { ignoreD_ten=10, ignoreD_twenty=20, ignoreD_twenty_one, ignoreD_twenty_two };
+  enum IgnoreE { ignoreE_zero, ignoreE_twenty=20, ignoreE_twenty_one, ignoreE_twenty_two };
+};
+
+IgnoreTest::IgnoreA ignoreATest(IgnoreTest::IgnoreA n) { return n; }
+IgnoreTest::IgnoreB ignoreBTest(IgnoreTest::IgnoreB n) { return n; }
+IgnoreTest::IgnoreC ignoreCTest(IgnoreTest::IgnoreC n) { return n; }
+IgnoreTest::IgnoreD ignoreDTest(IgnoreTest::IgnoreD n) { return n; }
+IgnoreTest::IgnoreE ignoreETest(IgnoreTest::IgnoreE n) { return n; }
+%}
+
+%inline %{
 namespace RepeatSpace {
 typedef enum
 {
@@ -504,27 +567,174 @@ typedef enum
 } repeat;
 repeat repeatTest(repeat e) { return e; }
 }
-
 %}
 
-#else
 %inline %{
-
-namespace RepeatSpace {
-typedef enum
-{
-   one = 1,
-   initial = one,
-   two,
-   three,
-   last = three,
-   end = last
-} repeat;
-repeat repeatTest(repeat e) { return e; }
+namespace EnumWithMacro {
+#define PACK(C1,C2,C3,C4) ((C1<<24)|(C2<<16)|(C3<<8)|C4)
+typedef enum {
+  ABCD = PACK('A','B','C','D'),
+  ABCD2 = ABCD
+} enumWithMacro;
+enumWithMacro enumWithMacroTest(enumWithMacro e) { return e; }
 }
-
 %}
 
+%inline %{
+namespace DifferentSpace {
+enum DifferentTypes {
+  typeint = 10,
+  typeboolfalse = false,
+  typebooltrue = true,
+  typebooltwo,
+  typechar = 'C',
+  typedefaultint,
+  typecharcompound='A'+1,
+  typecharcompound2='B' << 2
+};
+DifferentTypes differentTypesTest(DifferentTypes n) { return n; }
 
+enum {
+  global_typeint = 10,
+  global_typeboolfalse = false,
+  global_typebooltrue = true,
+  global_typebooltwo,
+  global_typechar = 'C',
+  global_typedefaultint,
+  global_typecharcompound='A'+1,
+  global_typecharcompound2='B' << 2
+};
+int globalDifferentTypesTest(int n) { return n; }
+}
+%}
+
+#if defined(SWIGCSHARP)
+%csconstvalue("1") globalenumchar1;
+%csconstvalue("'B'") globalenumcharB;
+%csconstvalue("1") enumchar1;
+%csconstvalue("'B'") enumcharB;
+#endif
+%inline %{
+#if defined(__clang__)
+#pragma clang diagnostic push
+// Suppress: illegal character encoding in character literal
+#pragma clang diagnostic ignored "-Winvalid-source-encoding"
 #endif
 
+enum {
+  globalenumchar0 = '\0',
+  globalenumchar1 = '\1',
+  globalenumchar2 = '\n',
+  globalenumcharA = 'A',
+  globalenumcharB = '\102', // B
+  globalenumcharC = '\x43', // C
+  globalenumcharD = 0x44, // D
+  globalenumcharE = 69,  // E
+  globalenumcharAE1 = 'Æ', // AE (latin1 encoded)
+  globalenumcharAE2 = '\306', // AE (latin1 encoded)
+  globalenumcharAE3 = '\xC6' // AE (latin1 encoded)
+};
+enum EnumChar {
+  enumchar0 = '\0',
+  enumchar1 = '\1',
+  enumchar2 = '\n',
+  enumcharA = 'A',
+  enumcharB = '\102', // B
+  enumcharC = '\x43', // C
+  enumcharD = 0x44, // D
+  enumcharE = 69, // E
+  enumcharAE1 = 'Æ', // AE (latin1 encoded)
+  enumcharAE2 = '\306', // AE (latin1 encoded)
+  enumcharAE3 = '\xC6' // AE (latin1 encoded)
+};
+struct EnumCharStruct {
+  enum EnumChar {
+    enumchar0 = '\0',
+    enumchar1 = '\1',
+    enumchar2 = '\n',
+    enumcharA = 'A',
+    enumcharB = '\102', // B
+    enumcharC = '\x43', // C
+    enumcharD = 0x44, // D
+    enumcharE = 69, // E
+    enumcharAE1 = 'Æ', // AE (latin1 encoded)
+    enumcharAE2 = '\306', // AE (latin1 encoded)
+    enumcharAE3 = '\xC6' // AE (latin1 encoded)
+  };
+};
+%}
+
+#if defined(SWIGJAVA)
+%javaconst(0);
+#elif defined(SWIGCSHARP)
+%csconst(0);
+#endif
+
+%inline %{
+enum {
+  x_globalenumchar0 = '\0',
+  x_globalenumchar1 = '\1',
+  x_globalenumchar2 = '\n',
+  x_globalenumcharA = 'A',
+  x_globalenumcharB = '\102', // B
+  x_globalenumcharC = '\x43', // C
+  x_globalenumcharD = 0x44, // D
+  x_globalenumcharE = 69,  // E
+  x_globalenumcharAE1 = 'Æ', // AE (latin1 encoded)
+  x_globalenumcharAE2 = '\306', // AE (latin1 encoded)
+  x_globalenumcharAE3 = '\xC6' // AE (latin1 encoded)
+};
+enum X_EnumChar {
+  x_enumchar0 = '\0',
+  x_enumchar1 = '\1',
+  x_enumchar2 = '\n',
+  x_enumcharA = 'A',
+  x_enumcharB = '\102', // B
+  x_enumcharC = '\x43', // C
+  x_enumcharD = 0x44, // D
+  x_enumcharE = 69, // E
+  x_enumcharAE1 = 'Æ', // AE (latin1 encoded)
+  x_enumcharAE2 = '\306', // AE (latin1 encoded)
+  x_enumcharAE3 = '\xC6' // AE (latin1 encoded)
+};
+struct X_EnumCharStruct {
+  enum X_EnumChar {
+    enumchar0 = '\0',
+    enumchar1 = '\1',
+    enumchar2 = '\n',
+    enumcharA = 'A',
+    enumcharB = '\102', // B
+    enumcharC = '\x43', // C
+    enumcharD = 0x44, // D
+    enumcharE = 69, // E
+    enumcharAE1 = 'Æ', // AE (latin1 encoded)
+    enumcharAE2 = '\306', // AE (latin1 encoded)
+    enumcharAE3 = '\xC6' // AE (latin1 encoded)
+  };
+};
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
+%}
+
+%inline %{
+namespace DifferentSpace {
+enum DifferentTypesNoConst {
+  typeint_noconst = 10,
+  typeboolfalse_noconst = false,
+  typebooltrue_noconst = true,
+  typebooltwo_noconst,
+  typechar_noconst = 'C',
+  typedefaultint_noconst
+};
+
+enum {
+  global_typeint_noconst = 10,
+  global_typeboolfalse_noconst = false,
+  global_typebooltrue_noconst = true,
+  global_typebooltwo_noconst,
+  global_typechar_noconst = 'C',
+  global_typedefaultint_noconst
+};
+}
+%}

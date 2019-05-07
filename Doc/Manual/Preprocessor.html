@@ -1,12 +1,13 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
 <title>SWIG Preprocessor</title>
 <link rel="stylesheet" type="text/css" href="style.css">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
 </head>
 
 <body bgcolor="#ffffff">
-<H1><a name="Preprocessor"></a>7 Preprocessing</H1>
+<H1><a name="Preprocessor">10 Preprocessing</a></H1>
 <!-- INDEX -->
 <div class="sectiontoc">
 <ul>
@@ -16,8 +17,11 @@
 <li><a href="#Preprocessor_nn5">Macro Expansion</a>
 <li><a href="#Preprocessor_nn6">SWIG Macros</a>
 <li><a href="#Preprocessor_nn7">C99 and GNU Extensions</a>
+<li><a href="#Preprocessor_delimiters">Preprocessing and delimiters</a>
+<ul>
 <li><a href="#Preprocessor_nn8">Preprocessing and %{ ... %} &amp; " ... " delimiters</a>
 <li><a href="#Preprocessor_nn9">Preprocessing and { ... } delimiters</a>
+</ul>
 <li><a href="#Preprocessor_typemap_delimiters">Preprocessor and Typemaps</a>
 <li><a href="#Preprocessor_nn10">Viewing preprocessor output</a>
 <li><a href="#Preprocessor_warning_error">The #error and #warning directives</a>
@@ -34,7 +38,7 @@ However, a number of modifications and enhancements have been made.  This
 chapter describes some of these modifications.
 </p>
 
-<H2><a name="Preprocessor_nn2"></a>7.1 File inclusion</H2>
+<H2><a name="Preprocessor_nn2">10.1 File inclusion</a></H2>
 
 
 <p>
@@ -60,7 +64,7 @@ By default, the <tt>#include</tt> is ignored unless you run SWIG with the
 is that you often don't want SWIG to try and wrap everything included
 in standard header system headers and auxiliary files.
 
-<H2><a name="Preprocessor_nn3"></a>7.2 File imports</H2>
+<H2><a name="Preprocessor_nn3">10.2 File imports</a></H2>
 
 
 <p>
@@ -81,7 +85,7 @@ Such information generally includes type declarations (e.g., <tt>typedef</tt>) a
 C++ classes that might be used as base-classes for class declarations in the interface.
 The use of <tt>%import</tt> is also important when SWIG is used to generate
 extensions as a collection of related modules.   This is an advanced topic and is described
-in a later chapter.
+in later in the <a href="Modules.html#Modules">Working with Modules</a> chapter.
 </p>
 
 <P>
@@ -89,7 +93,7 @@ The <tt>-importall</tt> directive tells SWIG to follow all <tt>#include</tt> sta
 as imports.    This might be useful if you want to extract type definitions from system 
 header files without generating any wrappers.
 
-<H2><a name="Preprocessor_condition_compilation"></a>7.3 Conditional Compilation</H2>
+<H2><a name="Preprocessor_condition_compilation">10.3 Conditional Compilation</a></H2>
 
 
 <p>
@@ -102,30 +106,27 @@ by SWIG when it is parsing the interface:
 <div class="code"><pre>
 SWIG                            Always defined when SWIG is processing a file
 SWIGIMPORTED                    Defined when SWIG is importing a file with <tt>%import</tt>
-SWIGMAC                         Defined when running SWIG on the Macintosh
-SWIGWIN                         Defined when running SWIG under Windows
-SWIG_VERSION                    Hexadecimal number containing SWIG version,
+SWIG_VERSION                    Hexadecimal (binary-coded decimal) number containing SWIG version,
                                 such as 0x010311 (corresponding to SWIG-1.3.11).
 
-SWIGCHICKEN                     Defined when using CHICKEN
 SWIGCSHARP                      Defined when using C#
 SWIGGUILE                       Defined when using Guile
 SWIGJAVA                        Defined when using Java
+SWIGJAVASCRIPT                  Defined when using Javascript
+SWIG_JAVASCRIPT_JSC             Defined when using Javascript for JavascriptCore
+SWIG_JAVASCRIPT_V8              Defined when using Javascript for v8 or node.js 
 SWIGLUA                         Defined when using Lua
-SWIGMODULA3                     Defined when using Modula-3
-SWIGMZSCHEME                    Defined when using Mzscheme        
-SWIGOCAML                       Defined when using Ocaml
+SWIGMZSCHEME                    Defined when using Mzscheme
+SWIGOCAML                       Defined when using OCaml
+SWIGOCTAVE                      Defined when using Octave
 SWIGPERL                        Defined when using Perl
-SWIGPERL5                       Defined when using Perl5
-SWIGPHP                         Defined when using PHP
-SWIGPHP4                        Defined when using PHP4
-SWIGPHP5                        Defined when using PHP5
-SWIGPIKE                        Defined when using Pike
+SWIGPHP                         Defined when using PHP (any version)
+SWIGPHP7                        Defined when using PHP7
 SWIGPYTHON                      Defined when using Python
+SWIGR                           Defined when using R
 SWIGRUBY                        Defined when using Ruby
-SWIGSEXP                        Defined when using S-expressions
+SWIGSCILAB                      Defined when using Scilab
 SWIGTCL                         Defined when using Tcl
-SWIGTCL8                        Defined when using Tcl8.0
 SWIGXML                         Defined when using XML
 </pre></div>
 
@@ -137,7 +138,7 @@ In addition, SWIG defines the following set of standard C/C++ macros:
 <pre>
 __LINE__                        Current line number
 __FILE__                        Current file name
-__STDC__                        Defined to indicate ANSI C
+__STDC__                        Defined to indicate ISO C
 __cplusplus                     Defined when -c++ option used
 </pre>
 </div>
@@ -150,7 +151,7 @@ SWIG (except for the symbol `<tt>SWIG</tt>' which is only defined
 within the SWIG compiler).
 </p>
 
-<H2><a name="Preprocessor_nn5"></a>7.4 Macro Expansion</H2>
+<H2><a name="Preprocessor_nn5">10.4 Macro Expansion</a></H2>
 
 
 <p>
@@ -179,9 +180,9 @@ More complex macros can be defined in the standard way. For example:
 <pre>
 #define EXTERN extern
 #ifdef __STDC__
-#define _ANSI(args)   (args)
+#define ISOC_(args)   (args)
 #else
-#define _ANSI(args) ()
+#define ISOC_(args) ()
 #endif
 </pre>
 </div>
@@ -205,7 +206,7 @@ like <tt>#x</tt>.  This is a non-standard SWIG extension.
 </li>
 </ul>
 
-<H2><a name="Preprocessor_nn6"></a>7.5 SWIG Macros</H2>
+<H2><a name="Preprocessor_nn6">10.5 SWIG Macros</a></H2>
 
 
 <p>
@@ -215,19 +216,19 @@ For example:
 
 <div class="code">
 <pre>
-%define ARRAYHELPER(type,name)
+%define ARRAYHELPER(type, name)
 %inline %{
 type *new_ ## name (int nitems) {
-   return (type *) malloc(sizeof(type)*nitems);
+  return (type *) malloc(sizeof(type)*nitems);
 }
 void delete_ ## name(type *t) {
-   free(t);
+  free(t);
 }
 type name ## _get(type *t, int index) {
-   return t[index];
+  return t[index];
 }
 void name ## _set(type *t, int index, type val) {
-   t[index] = val;
+  t[index] = val;
 }
 %}
 %enddef
@@ -251,7 +252,7 @@ many of SWIG's advanced features and libraries are built using this mechanism (s
 support).
 </p>
 
-<H2><a name="Preprocessor_nn7"></a>7.6 C99 and GNU Extensions</H2>
+<H2><a name="Preprocessor_nn7">10.6 C99 and GNU Extensions</a></H2>
 
 
 <p>
@@ -260,7 +261,7 @@ SWIG-1.3.12 and newer releases support variadic preprocessor macros.  For exampl
 
 <div class="code">
 <pre>
-#define DEBUGF(fmt,...)   fprintf(stderr,fmt,__VA_ARGS__)
+#define DEBUGF(fmt, ...)   fprintf(stderr, fmt, __VA_ARGS__)
 </pre>
 </div>
 
@@ -272,12 +273,12 @@ macros defined using <tt>%define</tt>.
 
 <p>
 SWIG allows a variable number of arguments to be empty.  However, this often results
-in an extra comma (,) and syntax error in the resulting expansion. For example:
+in an extra comma (, ) and syntax error in the resulting expansion. For example:
 </p>
 
 <div class="code">
 <pre>
-DEBUGF("hello");   --&gt; fprintf(stderr,"hello",);
+DEBUGF("hello");   --&gt; fprintf(stderr, "hello", );
 </pre>
 </div>
 
@@ -287,7 +288,7 @@ To get rid of the extra comma, use <tt>##</tt> like this:
 
 <div class="code">
 <pre>
-#define DEBUGF(fmt,...)   fprintf(stderr,fmt, ##__VA_ARGS__)
+#define DEBUGF(fmt, ...)   fprintf(stderr, fmt, ##__VA_ARGS__)
 </pre>
 </div>
 
@@ -297,7 +298,7 @@ SWIG also supports GNU-style variadic macros.    For example:
 
 <div class="code">
 <pre>
-#define DEBUGF(fmt, args...)  fprintf(stdout,fmt,args)
+#define DEBUGF(fmt, args...)  fprintf(stdout, fmt, args)
 </pre>
 </div>
 
@@ -307,7 +308,14 @@ interface building.   However, they are used internally to implement a number of
 SWIG directives and are provided to make SWIG more compatible with C99 code.
 </p>
 
-<H2><a name="Preprocessor_nn8"></a>7.7 Preprocessing and %{ ... %} &amp; " ... " delimiters</H2>
+<H2><a name="Preprocessor_delimiters">10.7 Preprocessing and delimiters</a></H2>
+
+
+<p>
+The preprocessor handles { }, " " and %{ %} delimiters differently.
+</p>
+
+<H3><a name="Preprocessor_nn8">10.7.1 Preprocessing and %{ ... %} &amp; " ... " delimiters</a></H3>
 
 
 <p>
@@ -320,7 +328,7 @@ if you write code like this,
 %{
 #ifdef NEED_BLAH
 int blah() {
-   ...
+  ...
 }
 #endif
 %}
@@ -332,7 +340,7 @@ the contents of the <tt>%{ ... %}</tt> block are copied without
 modification to the output (including all preprocessor directives).
 </p>
 
-<H2><a name="Preprocessor_nn9"></a>7.8 Preprocessing and { ... } delimiters</H2>
+<H3><a name="Preprocessor_nn9">10.7.2 Preprocessing and { ... } delimiters</a></H3>
 
 
 <p>
@@ -344,11 +352,11 @@ file.  For example:
 <div class="code">
 <pre>
 %extend Foo {
-   void bar() {
-      #ifdef DEBUG
-       printf("I'm in bar\n");
-      #endif
-   }
+  void bar() {
+    #ifdef DEBUG
+      printf("I'm in bar\n");
+    #endif
+  }
 }
 </pre>
 </div>
@@ -361,11 +369,11 @@ to actually go into the wrapper file, prefix the preprocessor directives with <t
 <div class="code">
 <pre>
 %extend Foo {
-   void bar() {
-      %#ifdef DEBUG
-       printf("I'm in bar\n");
-      %#endif
-   }
+  void bar() {
+    %#ifdef DEBUG
+      printf("I'm in bar\n");
+    %#endif
+  }
 }
 </pre>
 </div>
@@ -374,11 +382,11 @@ to actually go into the wrapper file, prefix the preprocessor directives with <t
 SWIG will strip the extra <tt>%</tt> and leave the preprocessor directive in the code.
 </p>
 
-<H2><a name="Preprocessor_typemap_delimiters"></a>7.9 Preprocessor and Typemaps</H2>
+<H2><a name="Preprocessor_typemap_delimiters">10.8 Preprocessor and Typemaps</a></H2>
 
 
 <p>
-<a href="Typemaps.html">Typemaps</a> support a special attribute called <tt>noblock</tt> where the { ... } delimiters can be used,
+<a href="Typemaps.html#Typemaps">Typemaps</a> support a special attribute called <tt>noblock</tt> where the { ... } delimiters can be used,
 but the delimiters are not actually generated into the code.
 The effect is then similar to using "" or %{ %} delimiters but the code <b>is</b> run through the preprocessor. For example:
 </p>
@@ -409,7 +417,7 @@ whereas
 <div class="code">
 <pre>
 #define SWIG_macro(CAST) (CAST)$input
-%typemap(in,noblock=1) Int {$1= SWIG_macro(int);}
+%typemap(in, noblock=1) Int {$1= SWIG_macro(int);}
 </pre>
 </div>
 
@@ -445,17 +453,17 @@ would generate
 </div>
 
 
-<H2><a name="Preprocessor_nn10"></a>7.10 Viewing preprocessor output</H2>
+<H2><a name="Preprocessor_nn10">10.9 Viewing preprocessor output</a></H2>
 
 
 <p>
 Like many compilers, SWIG supports a <tt>-E</tt> command line option to display the output from the preprocessor.
-When the <tt>-E</tt> switch is used, SWIG will not generate any wrappers.
+When the <tt>-E</tt> option is used, SWIG will not generate any wrappers.
 Instead the results after the preprocessor has run are displayed.
 This might be useful as an aid to debugging and viewing the results of macro expansions.
 </p>
 
-<H2><a name="Preprocessor_warning_error"></a>7.11 The #error and #warning directives</H2>
+<H2><a name="Preprocessor_warning_error">10.10 The #error and #warning directives</a></H2>
 
 
 <p>

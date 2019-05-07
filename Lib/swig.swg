@@ -9,7 +9,7 @@
  * User Directives 
  * ----------------------------------------------------------------------------- */
 
-/* Deprecated SWIG directives */
+/* Deprecated SWIG-1.1 directives */
 
 #define %disabledoc     %warn "104:%disabledoc is deprecated"
 #define %enabledoc      %warn "105:%enabledoc is deprecated"
@@ -25,10 +25,11 @@
 
 /* Code insertion directives such as %wrapper %{ ... %} */
 
-#define %init        %insert("init")
-#define %wrapper     %insert("wrapper")
-#define %header      %insert("header")
+#define %begin       %insert("begin")
 #define %runtime     %insert("runtime")
+#define %header      %insert("header")
+#define %wrapper     %insert("wrapper")
+#define %init        %insert("init")
 
 /* Class extension */
 
@@ -76,7 +77,7 @@
 #define %clearoldnodefault  %feature("oldnodefault","")
 
 /* the %exception directive */
-#ifdef SWIGCSHARP
+#if defined(SWIGCSHARP) || defined(SWIGD)
 #define %exception      %feature("except", canthrow=1)
 #else
 #define %exception      %feature("except")
@@ -94,7 +95,7 @@
    to set/get variable methods. You don't need to use the
    %allowexception directive when using %exceptionvar.
 */
-#ifdef SWIGCSHARP
+#if defined(SWIGCSHARP) || defined(SWIGD)
 #define %exceptionvar      %feature("exceptvar", canthrow=1)
 #else
 #define %exceptionvar      %feature("exceptvar")
@@ -135,6 +136,16 @@
 #define %nocallback     %feature("callback","0")
 #define %clearcallback  %feature("callback","")
 
+/* the %nestedworkaround directive (deprecated) */
+#define %nestedworkaround       %feature("nestedworkaround")
+#define %nonestedworkaround     %feature("nestedworkaround","0")
+#define %clearnestedworkaround  %feature("nestedworkaround","")
+
+/* the %flatnested directive */
+#define %flatnested       %feature("flatnested")
+#define %noflatnested     %feature("flatnested","0")
+#define %clearflatnested  %feature("flatnested","")
+
 /* the %fastdispatch directive */
 #define %fastdispatch        %feature("fastdispatch")
 #define %nofastdispatch      %feature("fastdispatch","0")
@@ -150,8 +161,13 @@
 #define %nonaturalvar    %feature("naturalvar","0")
 #define %clearnaturalvar %feature("naturalvar","")
 
+/* nspace directives */
+#define %nspace      %feature("nspace")
+#define %nonspace    %feature("nspace","0")
+#define %clearnspace %feature("nspace","")
+
 /* valuewrapper directives */
-#define %valuewrapper        %feature("valuewrapper",)
+#define %valuewrapper        %feature("valuewrapper")
 #define %clearvaluewrapper   %feature("valuewrapper","")
 #define %novaluewrapper      %feature("novaluewrapper")
 #define %clearnovaluewrapper %feature("novaluewrapper","")
@@ -247,7 +263,7 @@ static int NAME(TYPE x) {
 
      %rename("$ignore", %$isenumitem, %$classname="MyClass") "";
 
-   we use the prefix '%$' to avoid clashings with other swig
+   we use the prefix '%$' to avoid clashes with other swig
    macros/directives.
 
 */
@@ -257,7 +273,6 @@ static int NAME(TYPE x) {
 %define %$isenumitem     "match"="enumitem"  %enddef
 %define %$isaccess       "match"="access"   %enddef
 %define %$isclass        "match"="class","notmatch$template$templatetype"="class"   %enddef
-%define %$isextend       "match"="extend"  %enddef
 %define %$isextend       "match"="extend"  %enddef
 %define %$isconstructor  "match"="constructor"  %enddef
 %define %$isdestructor   "match"="destructor"  %enddef
@@ -281,7 +296,8 @@ static int NAME(TYPE x) {
 %define %$isextern       "match$storage"="extern"  %enddef
 
 %define %$ismember       "match$ismember"="1"  %enddef
-%define %$isglobal       %not %ismember  %enddef
+%define %$isglobal       %$not %$ismember  %enddef
+%define %$isextendmember "match$isextendmember"="1"  %enddef
 %define %$innamespace    "match$parentNode$nodeType"="namespace"  %enddef
 
 %define %$ispublic       "match$access"="public"  %enddef
@@ -291,202 +307,15 @@ static int NAME(TYPE x) {
 %define %$ismemberget    "match$memberget"="1"  %enddef
 %define %$ismemberset    "match$memberset"="1"  %enddef
 
-%define %$classname      %ismember,match$parentNode$name  %enddef
+%define %$classname      %$ismember,"match$parentNode$name"  %enddef
+%define %$isnested       "match$nested"="1"  %enddef
 
 /* -----------------------------------------------------------------------------
- * Include all the warnings labels and macros 
+ * Common includes for warning labels, macros, fragments etc
  * ----------------------------------------------------------------------------- */
 
 %include <swigwarnings.swg>
-
-/* -----------------------------------------------------------------------------
- * Default handling of certain overloaded operators 
- * ----------------------------------------------------------------------------- */
-
-#ifdef __cplusplus
-%ignoreoperator(NEW)     operator new;
-%ignoreoperator(DELETE)  operator delete;
-%ignoreoperator(NEWARR)  operator new[];
-%ignoreoperator(DELARR)  operator delete[];
-
-/* add C++ operator aliases */
-%rename("operator &&") operator and;    // `and'    `&&'
-%rename("operator ||") operator or;     // `or'     `||'
-%rename("operator !")  operator not;    // `not'     `!'
-%rename("operator &=") operator and_eq; // `and_eq'  `&='
-%rename("operator &")  operator bitand; // `bitand'  `&'
-%rename("operator |")  operator bitor;  // `bitor'   `|'
-%rename("operator ~")  operator compl;  // `compl'   `~'
-%rename("operator !=") operator not_eq; // `not_eq'  `!='
-%rename("operator |=") operator or_eq;  // `or_eq'   `|='
-%rename("operator ^")  operator xor;    // `xor'     `^'
-%rename("operator ^=") operator xor_eq; // `xor_eq'  `^='
-
-/* Smart pointer handling */
-
-%rename(__deref__) *::operator->;
-%rename(__ref__)   *::operator*();
-%rename(__ref__)   *::operator*() const;
-
-/* Define std namespace */
-namespace std {
-}
-#endif
-
-/* -----------------------------------------------------------------------------
- * Default char * and C array typemaps
- * ----------------------------------------------------------------------------- */
-
-/* Set up the typemap for handling new return strings */
-
-#ifdef __cplusplus
-%typemap(newfree) char * "delete [] $1;";
-#else
-%typemap(newfree) char * "free($1);";
-#endif
-
-/* Default typemap for handling char * members */
-
-#ifdef __cplusplus
-%typemap(memberin) char * {
-  if ($1) delete [] $1;
-  if ($input) {
-     $1 = ($1_type) (new char[strlen((const char *)$input)+1]);
-     strcpy((char *)$1, (const char *)$input);
-  } else {
-     $1 = 0;
-  }
-}
-%typemap(memberin,warning=SWIGWARN_TYPEMAP_CHARLEAK_MSG) const char * {
-  if ($input) {
-     $1 = ($1_type) (new char[strlen((const char *)$input)+1]);
-     strcpy((char *)$1, (const char *)$input);
-  } else {
-     $1 = 0;
-  }
-}
-%typemap(globalin) char * {
-  if ($1) delete [] $1;
-  if ($input) {
-     $1 = ($1_type) (new char[strlen((const char *)$input)+1]);
-     strcpy((char *)$1, (const char *)$input);
-  } else {
-     $1 = 0;
-  }
-}
-%typemap(globalin,warning=SWIGWARN_TYPEMAP_CHARLEAK_MSG) const char * {
-  if ($input) {
-     $1 = ($1_type) (new char[strlen((const char *)$input)+1]);
-     strcpy((char *)$1, (const char *)$input);
-  } else {
-     $1 = 0;
-  }
-}
-#else
-%typemap(memberin) char * {
-  if ($1) free((char *)$1);
-  if ($input) {
-     $1 = ($1_type) malloc(strlen((const char *)$input)+1);
-     strcpy((char *)$1, (const char *)$input);
-  } else {
-     $1 = 0;
-  }
-}
-%typemap(memberin,warning=SWIGWARN_TYPEMAP_CHARLEAK_MSG) const char * {
-  if ($input) {
-     $1 = ($1_type) malloc(strlen((const char *)$input)+1);
-     strcpy((char *)$1, (const char *)$input);
-  } else {
-     $1 = 0;
-  }
-}
-%typemap(globalin) char * {
-  if ($1) free((char *)$1);
-  if ($input) {
-     $1 = ($1_type) malloc(strlen((const char *)$input)+1);
-     strcpy((char *)$1, (const char *)$input);
-  } else {
-     $1 = 0;
-  }
-}
-%typemap(globalin,warning=SWIGWARN_TYPEMAP_CHARLEAK_MSG) const char * {
-  if ($input) {
-     $1 = ($1_type) malloc(strlen((const char *)$input)+1);
-     strcpy((char *)$1, (const char *)$input);
-  } else {
-     $1 = 0;
-  }
-}
-
-#endif
-
-/* Character array handling */
-
-%typemap(memberin) char [ANY] {
-  if ($input) strncpy((char *)$1, (const char *)$input, $1_dim0);
-  else $1[0] = 0;
-}
-
-%typemap(globalin) char [ANY] {
-  if ($input) strncpy((char *)$1, (const char *)$input, $1_dim0);
-  else $1[0] = 0;
-}
-
-%typemap(memberin) char [] {
-  if ($input) strcpy((char *)$1, (const char *)$input);
-  else $1[0] = 0;
-}
-
-%typemap(globalin) char [] {
-  if ($input) strcpy((char *)$1, (const char *)$input);
-  else $1[0] = 0;
-}
-
-/* memberin/globalin typemap for arrays. */
-
-%typemap(memberin) SWIGTYPE [ANY] {
-  size_t ii;
-  $1_basetype *b = ($1_basetype *) $1;
-  for (ii = 0; ii < (size_t)$1_size; ii++) b[ii] = *(($1_basetype *) $input + ii);
-}
-
-%typemap(globalin) SWIGTYPE [ANY] {
-  size_t ii;
-  $1_basetype *b = ($1_basetype *) $1;
-  for (ii = 0; ii < (size_t)$1_size; ii++) b[ii] = *(($1_basetype *) $input + ii);
-}
-
-/* memberin/globalin typemap for double arrays. */
-
-%typemap(memberin) SWIGTYPE [ANY][ANY] {
-  $basetype (*inp)[$dim1] = ($basetype (*)[$dim1])($input);
-  $basetype (*dest)[$dim1] = ($basetype (*)[$dim1])($1);
-  size_t ii = 0;
-  for (; ii < $dim0; ++ii) {
-    $basetype *ip = inp[ii];
-    $basetype *dp = dest[ii];
-    size_t jj = 0;
-    for (; jj < $dim1; ++jj) dp[jj] = ip[jj];
-  }
-}
-
-%typemap(globalin) SWIGTYPE [ANY][ANY] {
-  $basetype (*inp)[$dim1] = ($basetype (*)[$dim1])($input);
-  $basetype (*dest)[$dim1] = ($basetype (*)[$dim1])($1);
-  size_t ii = 0;
-  for (; ii < $dim0; ++ii) {
-    $basetype *ip = inp[ii];
-    $basetype *dp = dest[ii];
-    size_t jj = 0;
-    for (; jj < $dim1; ++jj) dp[jj] = ip[jj];
-  }
-}
-
-/* Typemap for variable length arguments sentinel value.  Used
-   by the %varargs directive. */
-
-%typemap(in,numinputs=0) SWIGTYPE *VARARGS_SENTINEL, SWIGTYPE VARARGS_SENTINEL "";
-
+%include <swigfragments.swg>
 
 /* -----------------------------------------------------------------------------
  * Overloading support
@@ -494,7 +323,7 @@ namespace std {
 
 /*
  * Function/method overloading support.   This is done through typemaps,
- * but also involve a precedence level. 
+ * but also involves a precedence level.
  */
 
 /* Macro for overload resolution */
@@ -532,6 +361,7 @@ namespace std {
 %define SWIG_TYPECHECK_STDSTRING    135    %enddef
 %define SWIG_TYPECHECK_STRING       140    %enddef
 %define SWIG_TYPECHECK_PAIR         150    %enddef
+%define SWIG_TYPECHECK_STDARRAY     155    %enddef
 %define SWIG_TYPECHECK_VECTOR       160    %enddef
 %define SWIG_TYPECHECK_DEQUE        170    %enddef
 %define SWIG_TYPECHECK_LIST         180    %enddef
@@ -567,9 +397,203 @@ namespace std {
 %define SWIG_TYPECHECK_DOUBLE_PTR        2090    %enddef
 %define SWIG_TYPECHECK_CHAR_PTR          2130    %enddef
 
-
 %define SWIG_TYPECHECK_SWIGOBJECT        5000    %enddef
 
+
+/* -----------------------------------------------------------------------------
+ * Default handling of certain overloaded operators 
+ * ----------------------------------------------------------------------------- */
+
+#ifdef __cplusplus
+%ignoreoperator(NEW)     operator new;
+%ignoreoperator(DELETE)  operator delete;
+%ignoreoperator(NEWARR)  operator new[];
+%ignoreoperator(DELARR)  operator delete[];
+
+/* add C++ operator aliases */
+%rename("operator &&") operator and;    // `and'    `&&'
+%rename("operator ||") operator or;     // `or'     `||'
+%rename("operator !")  operator not;    // `not'     `!'
+%rename("operator &=") operator and_eq; // `and_eq'  `&='
+%rename("operator &")  operator bitand; // `bitand'  `&'
+%rename("operator |")  operator bitor;  // `bitor'   `|'
+%rename("operator ~")  operator compl;  // `compl'   `~'
+%rename("operator !=") operator not_eq; // `not_eq'  `!='
+%rename("operator |=") operator or_eq;  // `or_eq'   `|='
+%rename("operator ^")  operator xor;    // `xor'     `^'
+%rename("operator ^=") operator xor_eq; // `xor_eq'  `^='
+
+/* Smart pointer handling */
+
+%rename(__deref__) *::operator->;
+%rename(__ref__)   *::operator*();
+%rename(__ref__)   *::operator*() const;
+
+/* Define std namespace */
+namespace std {
+  /* Warn about std::initializer_list usage. The constructor/method where used should probably be ignored. See docs. */
+  template<typename T> class initializer_list {};
+  %typemap(in, warning=SWIGWARN_TYPEMAP_INITIALIZER_LIST_MSG) initializer_list<T> ""
+  %typemap(typecheck, precedence=SWIG_TYPECHECK_POINTER) initializer_list<T> ""
+}
+#endif
+
+/* -----------------------------------------------------------------------------
+ * Default char * and C array typemaps
+ * ----------------------------------------------------------------------------- */
+
+/* Set up the typemap for handling new return strings */
+
+#ifdef __cplusplus
+%typemap(newfree) char * "delete [] $1;";
+#else
+%typemap(newfree) char * "free($1);";
+#endif
+
+/* Default typemap for handling char * members */
+
+#ifdef __cplusplus
+%typemap(memberin) char * {
+  delete [] $1;
+  if ($input) {
+     $1 = ($1_type) (new char[strlen((const char *)$input)+1]);
+     strcpy((char *)$1, (const char *)$input);
+  } else {
+     $1 = 0;
+  }
+}
+%typemap(memberin,warning=SWIGWARN_TYPEMAP_CHARLEAK_MSG) const char * {
+  if ($input) {
+     $1 = ($1_type) (new char[strlen((const char *)$input)+1]);
+     strcpy((char *)$1, (const char *)$input);
+  } else {
+     $1 = 0;
+  }
+}
+%typemap(globalin) char * {
+  delete [] $1;
+  if ($input) {
+     $1 = ($1_type) (new char[strlen((const char *)$input)+1]);
+     strcpy((char *)$1, (const char *)$input);
+  } else {
+     $1 = 0;
+  }
+}
+%typemap(globalin,warning=SWIGWARN_TYPEMAP_CHARLEAK_MSG) const char * {
+  if ($input) {
+     $1 = ($1_type) (new char[strlen((const char *)$input)+1]);
+     strcpy((char *)$1, (const char *)$input);
+  } else {
+     $1 = 0;
+  }
+}
+#else
+%typemap(memberin) char * {
+  free($1);
+  if ($input) {
+     $1 = ($1_type) malloc(strlen((const char *)$input)+1);
+     strcpy((char *)$1, (const char *)$input);
+  } else {
+     $1 = 0;
+  }
+}
+%typemap(memberin,warning=SWIGWARN_TYPEMAP_CHARLEAK_MSG) const char * {
+  if ($input) {
+     $1 = ($1_type) malloc(strlen((const char *)$input)+1);
+     strcpy((char *)$1, (const char *)$input);
+  } else {
+     $1 = 0;
+  }
+}
+%typemap(globalin) char * {
+  free($1);
+  if ($input) {
+     $1 = ($1_type) malloc(strlen((const char *)$input)+1);
+     strcpy((char *)$1, (const char *)$input);
+  } else {
+     $1 = 0;
+  }
+}
+%typemap(globalin,warning=SWIGWARN_TYPEMAP_CHARLEAK_MSG) const char * {
+  if ($input) {
+     $1 = ($1_type) malloc(strlen((const char *)$input)+1);
+     strcpy((char *)$1, (const char *)$input);
+  } else {
+     $1 = 0;
+  }
+}
+
+#endif
+
+/* Character array handling */
+
+%typemap(memberin) char [ANY] {
+  if($input) {
+    strncpy((char*)$1, (const char *)$input, $1_dim0-1);
+    $1[$1_dim0-1] = 0;
+  } else {
+    $1[0] = 0;
+  }
+}
+
+%typemap(globalin) char [ANY] {
+  if($input) {
+    strncpy((char*)$1, (const char *)$input, $1_dim0-1);
+    $1[$1_dim0-1] = 0;
+  } else {
+    $1[0] = 0;
+  }
+}
+
+%typemap(memberin) char [] {
+  if ($input) strcpy((char *)$1, (const char *)$input);
+  else $1[0] = 0;
+}
+
+%typemap(globalin) char [] {
+  if ($input) strcpy((char *)$1, (const char *)$input);
+  else $1[0] = 0;
+}
+
+/* memberin/globalin typemap for arrays. */
+
+%typemap(memberin) SWIGTYPE [ANY] {
+  size_t ii;
+  $1_basetype *b = ($1_basetype *) $1;
+  for (ii = 0; ii < (size_t)$1_size; ii++) b[ii] = *(($1_basetype *) $input + ii);
+}
+
+%typemap(globalin) SWIGTYPE [ANY] {
+  size_t ii;
+  $1_basetype *b = ($1_basetype *) $1;
+  for (ii = 0; ii < (size_t)$1_size; ii++) b[ii] = *(($1_basetype *) $input + ii);
+}
+
+/* memberin/globalin typemap for double arrays. */
+
+%typemap(memberin) SWIGTYPE [ANY][ANY] {
+  $basetype (*inp)[$1_dim1] = ($basetype (*)[$1_dim1])($input);
+  $basetype (*dest)[$1_dim1] = ($basetype (*)[$1_dim1])($1);
+  size_t ii = 0;
+  for (; ii < $1_dim0; ++ii) {
+    $basetype *ip = inp[ii];
+    $basetype *dp = dest[ii];
+    size_t jj = 0;
+    for (; jj < $1_dim1; ++jj) dp[jj] = ip[jj];
+  }
+}
+
+%typemap(globalin) SWIGTYPE [ANY][ANY] {
+  $basetype (*inp)[$1_dim1] = ($basetype (*)[$1_dim1])($input);
+  $basetype (*dest)[$1_dim1] = ($basetype (*)[$1_dim1])($1);
+  size_t ii = 0;
+  for (; ii < $1_dim0; ++ii) {
+    $basetype *ip = inp[ii];
+    $basetype *dp = dest[ii];
+    size_t jj = 0;
+    for (; jj < $1_dim1; ++jj) dp[jj] = ip[jj];
+  }
+}
 
 /* -----------------------------------------------------------------------------
  *  Runtime code
@@ -625,6 +649,10 @@ namespace std {
  *       arg1 = *inarg1;       // Assignment from a pointer
  *       arg1 = Vector(1,2,3); // Assignment from a value  
  *
+ * The class offers a strong guarantee of exception safety.
+ * With regards to the implementation, the private SwigMovePointer nested class is 
+ * a simple smart pointer with move semantics, much like std::auto_ptr.
+ *
  * This wrapping technique was suggested by William Fulton and is henceforth
  * known as the "Fulton Transform" :-).
  */
@@ -632,18 +660,21 @@ namespace std {
 #ifdef __cplusplus
 %insert("runtime") %{
 #ifdef __cplusplus
+/* SwigValueWrapper is described in swig.swg */
 template<typename T> class SwigValueWrapper {
-    T *tt;
+  struct SwigMovePointer {
+    T *ptr;
+    SwigMovePointer(T *p) : ptr(p) { }
+    ~SwigMovePointer() { delete ptr; }
+    SwigMovePointer& operator=(SwigMovePointer& rhs) { T* oldptr = ptr; ptr = 0; delete oldptr; ptr = rhs.ptr; rhs.ptr = 0; return *this; }
+  } pointer;
+  SwigValueWrapper& operator=(const SwigValueWrapper<T>& rhs);
+  SwigValueWrapper(const SwigValueWrapper<T>& rhs);
 public:
-    SwigValueWrapper() : tt(0) { }
-    SwigValueWrapper(const SwigValueWrapper<T>& rhs) : tt(new T(*rhs.tt)) { }
-    SwigValueWrapper(const T& t) : tt(new T(t)) { }
-    ~SwigValueWrapper() { delete tt; } 
-    SwigValueWrapper& operator=(const T& t) { delete tt; tt = new T(t); return *this; }
-    operator T&() const { return *tt; }
-    T *operator&() { return tt; }
-private:
-    SwigValueWrapper& operator=(const SwigValueWrapper<T>& rhs);
+  SwigValueWrapper() : pointer(0) { }
+  SwigValueWrapper& operator=(const T& t) { SwigMovePointer tmp(new T(t)); pointer = tmp; return *this; }
+  operator T&() const { return *pointer.ptr; }
+  T *operator&() { return pointer.ptr; }
 };%}
 
 /*

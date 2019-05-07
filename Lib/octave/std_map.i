@@ -2,7 +2,79 @@
 
 %include <octcontainer.swg>
 
-%fragment("StdMapTraits","header",fragment="StdSequenceTraits")
+%fragment("StdMapCommonTraits","header",fragment="StdSequenceTraits")
+{
+  namespace swig {
+    template <class ValueType>
+    struct from_key_oper 
+    {
+      typedef const ValueType& argument_type;
+      typedef octave_value result_type;
+      result_type operator()(argument_type v) const
+      {
+	return swig::from(v.first);
+      }
+    };
+
+    template <class ValueType>
+    struct from_value_oper 
+    {
+      typedef const ValueType& argument_type;
+      typedef octave_value result_type;
+      result_type operator()(argument_type v) const
+      {
+	return swig::from(v.second);
+      }
+    };
+
+    template<class OutIterator, class FromOper, class ValueType = typename OutIterator::value_type>
+    struct OctMapIterator_T : OctSwigIteratorClosed_T<OutIterator, ValueType, FromOper>
+    {
+      OctMapIterator_T(OutIterator curr, OutIterator first, OutIterator last, octave_value seq)
+	: OctSwigIteratorClosed_T<OutIterator,ValueType,FromOper>(curr, first, last, seq)
+      {
+      }
+    };
+
+
+    template<class OutIterator,
+	     class FromOper = from_key_oper<typename OutIterator::value_type> >
+    struct OctMapKeyIterator_T : OctMapIterator_T<OutIterator, FromOper>
+    {
+      OctMapKeyIterator_T(OutIterator curr, OutIterator first, OutIterator last, octave_value seq)
+	: OctMapIterator_T<OutIterator, FromOper>(curr, first, last, seq)
+      {
+      }
+    };
+
+    template<typename OutIter>
+    inline OctSwigIterator*
+    make_output_key_iterator(const OutIter& current, const OutIter& begin, const OutIter& end, octave_value seq = octave_value())
+    {
+      return new OctMapKeyIterator_T<OutIter>(current, begin, end, seq);
+    }
+
+    template<class OutIterator,
+	     class FromOper = from_value_oper<typename OutIterator::value_type> >
+    struct OctMapValueIterator_T : OctMapIterator_T<OutIterator, FromOper>
+    {
+      OctMapValueIterator_T(OutIterator curr, OutIterator first, OutIterator last, octave_value seq)
+	: OctMapIterator_T<OutIterator, FromOper>(curr, first, last, seq)
+      {
+      }
+    };
+    
+
+    template<typename OutIter>
+    inline OctSwigIterator*
+    make_output_value_iterator(const OutIter& current, const OutIter& begin, const OutIter& end, octave_value seq = 0)
+    {
+      return new OctMapValueIterator_T<OutIter>(current, begin, end, seq);
+    }
+  }
+}
+
+%fragment("StdMapTraits","header",fragment="StdMapCommonTraits")
 {
   namespace swig {
     template <class OctSeq, class K, class T >
@@ -22,11 +94,12 @@
 	/*
 	int res = SWIG_ERROR;
 	if (PyDict_Check(obj)) {
-	  PyObject_var items = PyObject_CallMethod(obj,(char *)"items",NULL);
+	  SwigVar_PyObject items = PyObject_CallMethod(obj,(char *)"items",NULL);
 	  res = traits_asptr_stdseq<std::map<K,T>, std::pair<K, T> >::asptr(items, val);
 	} else {
 	  map_type *p;
-	  res = SWIG_ConvertPtr(obj,(void**)&p,swig::type_info<map_type>(),0);
+	  swig_type_info *descriptor = swig::type_info<map_type>();
+	  res = descriptor ? SWIG_ConvertPtr(obj, (void **)&p, descriptor, 0) : SWIG_ERROR;
 	  if (SWIG_IsOK(res) && val)  *val = p;
 	}
 	return res;
@@ -58,8 +131,8 @@
 	  }
 	  PyObject *obj = PyDict_New();
 	  for (const_iterator i= map.begin(); i!= map.end(); ++i) {
-	    swig::PyObject_var key = swig::from(i->first);
-	    swig::PyObject_var val = swig::from(i->second);
+	    swig::SwigVar_PyObject key = swig::from(i->first);
+	    swig::SwigVar_PyObject val = swig::from(i->second);
 	    PyDict_SetItem(obj, key, val);
 	  }
 	  return obj;
@@ -68,73 +141,6 @@
 	return octave_value();
       }
     };
-
-    template <class ValueType>
-    struct from_key_oper 
-    {
-      typedef const ValueType& argument_type;
-      typedef octave_value result_type;
-      result_type operator()(argument_type v) const
-      {
-	return swig::from(v.first);
-      }
-    };
-
-    template <class ValueType>
-    struct from_value_oper 
-    {
-      typedef const ValueType& argument_type;
-      typedef octave_value result_type;
-      result_type operator()(argument_type v) const
-      {
-	return swig::from(v.second);
-      }
-    };
-
-    template<class OutIterator, class FromOper, class ValueType = typename OutIterator::value_type>
-    struct OctMapIterator_T : PySwigIteratorClosed_T<OutIterator, ValueType, FromOper>
-    {
-      OctMapIterator_T(OutIterator curr, OutIterator first, OutIterator last, octave_value seq)
-	: PySwigIteratorClosed_T<OutIterator,ValueType,FromOper>(curr, first, last, seq)
-      {
-      }
-    };
-
-
-    template<class OutIterator,
-	     class FromOper = from_key_oper<typename OutIterator::value_type> >
-    struct OctMapKeyIterator_T : OctMapIterator_T<OutIterator, FromOper>
-    {
-      OctMapKeyIterator_T(OutIterator curr, OutIterator first, OutIterator last, octave_value seq)
-	: OctMapIterator_T<OutIterator, FromOper>(curr, first, last, seq)
-      {
-      }
-    };
-
-    template<typename OutIter>
-    inline PySwigIterator*
-    make_output_key_iterator(const OutIter& current, const OutIter& begin, const OutIter& end, octave_value seq = octave_value())
-    {
-      return new OctMapKeyIterator_T<OutIter>(current, begin, end, seq);
-    }
-
-    template<class OutIterator,
-	     class FromOper = from_value_oper<typename OutIterator::value_type> >
-    struct OctMapValueIterator_T : OctMapIterator_T<OutIterator, FromOper>
-    {
-      OctMapValueIterator_T(OutIterator curr, OutIterator first, OutIterator last, octave_value seq)
-	: OctMapIterator_T<OutIterator, FromOper>(curr, first, last, seq)
-      {
-      }
-    };
-    
-
-    template<typename OutIter>
-    inline PySwigIterator*
-    make_output_value_iterator(const OutIter& current, const OutIter& begin, const OutIter& end, octave_value seq = 0)
-    {
-      return new OctMapValueIterator_T<OutIter>(current, begin, end, seq);
-    }
   }
 }
 

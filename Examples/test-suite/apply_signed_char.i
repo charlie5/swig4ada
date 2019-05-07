@@ -4,6 +4,10 @@
 
 %warnfilter(SWIGWARN_TYPEMAP_THREAD_UNSAFE,SWIGWARN_TYPEMAP_DIRECTOROUT_PTR) DirectorTest;
 
+#if defined(SWIGSCILAB)
+%rename(DirTest) DirectorTest;
+#endif
+
 %apply signed char {char, const char};
 %apply const signed char & {const char &};
 
@@ -31,5 +35,7 @@
     const char memberconstchar;
 
     virtual ~DirectorTest() {}
+  private:
+    DirectorTest& operator=(const DirectorTest &);
   };
 %}

@@ -1,5 +1,4 @@
 /*
-** $Id: lua.c 942 2009-03-02 15:54:38Z krischik $
 ** Lua stand-alone interpreter
 ** See Copyright Notice in lua.h
 */

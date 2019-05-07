@@ -1,7 +1,4 @@
 /* -----------------------------------------------------------------------------
- * See the LICENSE file for information on copyright, usage and redistribution
- * of SWIG, and the README file for authors - http://www.swig.org/release.html.
- *
  * guile_scm_run.swg
  * ----------------------------------------------------------------------------- */
 
@@ -15,7 +12,29 @@
 extern "C" {
 #endif
 
+
+/* In the code below, use guile 2.0 compatible functions where possible.
+   Functions that don't exist in older versions will be mapped to
+   a deprecated equivalent for those versions only */
+#if defined (SCM_MAJOR_VERSION) && (SCM_MAJOR_VERSION < 2)
+
+static SCM
+scm_module_variable (SCM module, SCM sym)
+{
+  return scm_sym2var (sym, scm_module_lookup_closure (module), SCM_BOOL_F);
+}
+
+#define scm_to_utf8_string scm_to_locale_string
+#define scm_from_utf8_string scm_from_locale_string
+#endif
+
+#if SCM_MAJOR_VERSION >= 2
+/* scm_c_define_gsubr takes a different parameter type depending on the guile version */
+
+typedef scm_t_subr swig_guile_proc;
+#else
 typedef SCM (*swig_guile_proc)();
+#endif
 typedef SCM (*guile_destructor)(SCM);
 
 typedef struct swig_guile_clientdata {
@@ -25,10 +44,12 @@ typedef struct swig_guile_clientdata {
 
 #define SWIG_scm2str(s) \
   SWIG_Guile_scm2newstr(s, NULL)
-#define SWIG_malloc(size) \
-  SCM_MUST_MALLOC(size)
-#define SWIG_free(mem) \
-  scm_must_free(mem)
+#define SWIG_str02scm(str) \
+  str ? scm_from_utf8_string(str) : SCM_BOOL_F 
+# define SWIG_malloc(size) \
+  scm_malloc(size)
+# define SWIG_free(mem) \
+  free(mem)
 #define SWIG_ConvertPtr(s, result, type, flags) \
   SWIG_Guile_ConvertPtr(s, result, type, flags)
 #define SWIG_MustGetPtr(s, type, argnum, flags) \
@@ -45,7 +66,7 @@ typedef struct swig_guile_clientdata {
   SWIG_Guile_IsPointer(object)
 #define SWIG_contract_assert(expr, msg)				\
   if (!(expr))							\
-    scm_error(scm_str2symbol("swig-contract-assertion-failed"),	\
+    scm_error(scm_from_locale_symbol("swig-contract-assertion-failed"),	\
 	      (char *) FUNC_NAME, (char *) msg,			\
 	      SCM_EOL, SCM_BOOL_F); else
 
@@ -56,25 +77,21 @@ typedef struct swig_guile_clientdata {
   SWIG_Guile_NewMemberObj(ptr, sz, type, FUNC_NAME)
   
 /* Runtime API */
-static swig_module_info *SWIG_Guile_GetModule(void);
-#define SWIG_GetModule(clientdata) SWIG_Guile_GetModule()
+static swig_module_info *SWIG_Guile_GetModule(void *SWIGUNUSEDPARM(clientdata));
+#define SWIG_GetModule(clientdata) SWIG_Guile_GetModule(clientdata)
 #define SWIG_SetModule(clientdata, pointer) SWIG_Guile_SetModule(pointer)
   
 SWIGINTERN char *
 SWIG_Guile_scm2newstr(SCM str, size_t *len) {
 #define FUNC_NAME "SWIG_Guile_scm2newstr"
   char *ret;
-  size_t l;
 
-  SCM_ASSERT (SCM_STRINGP(str), str, 1, FUNC_NAME);
-  
-  l = SCM_STRING_LENGTH(str);
-  ret = (char *) SWIG_malloc( (l + 1) * sizeof(char));
+  SCM_ASSERT (scm_is_string(str), str, 1, FUNC_NAME);
+
+  ret = scm_to_utf8_string(str);
   if (!ret) return NULL;
 
-  memcpy(ret, SCM_STRING_CHARS(str), l);
-  ret[l] = '\0';
-  if (len) *len = l;
+  if (len) *len = strlen(ret) - 1;
   return ret;
 #undef FUNC_NAME
 }
@@ -82,6 +99,7 @@ SWIG_Guile_scm2newstr(SCM str, size_t *len) {
 static int swig_initialized = 0;
 static scm_t_bits swig_tag = 0;
 static scm_t_bits swig_collectable_tag = 0;
+static scm_t_bits swig_finalized_tag = 0;
 static scm_t_bits swig_destroyed_tag = 0;
 static scm_t_bits swig_member_function_tag = 0;
 static SCM swig_make_func = SCM_EOL;
@@ -89,7 +107,7 @@ static SCM swig_keyword = SCM_EOL;
 static SCM swig_symbol = SCM_EOL;
 
 #define SWIG_Guile_GetSmob(x) \
-  ( SCM_NNULLP(x) && SCM_INSTANCEP(x) && SCM_NFALSEP(scm_slot_exists_p(x, swig_symbol)) \
+  ( !scm_is_null(x) && SCM_INSTANCEP(x) && scm_is_true(scm_slot_exists_p(x, swig_symbol)) \
       ? scm_slot_ref(x, swig_symbol) : (x) )
 
 SWIGINTERN SCM
@@ -146,7 +164,19 @@ SWIG_Guile_PointerType(SCM object)
   }
   else scm_wrong_type_arg("SWIG-Guile-PointerType", 1, object);
 }
-  
+
+SWIGINTERN int
+SWIG_Guile_IsValidSmob(SCM smob)
+{
+  /* We do not accept smobs representing destroyed pointers, but we have to
+     allow finalized smobs because Guile >= 2.0.12 sets all smob instances
+     to the 'finalized' type before calling their 'free' function. This change
+     was introduced to Guile in commit 8dff3af087c6eaa83ae0d72aa8b22aef5c65d65d */
+  return SCM_SMOB_PREDICATE(swig_tag, smob)
+    || SCM_SMOB_PREDICATE(swig_collectable_tag, smob)
+    || SCM_SMOB_PREDICATE(swig_finalized_tag, smob);
+}
+
 SWIGINTERN int
 SWIG_Guile_ConvertPtr(SCM s, void **result, swig_type_info *type, int flags)
 {
@@ -156,9 +186,13 @@ SWIG_Guile_ConvertPtr(SCM s, void **result, swig_type_info *type, int flags)
 
   if (SCM_NULLP(smob)) {
     *result = NULL;
+    return (flags & SWIG_POINTER_NO_NULL) ? SWIG_NullReferenceError : SWIG_OK;
+#if SCM_MAJOR_VERSION >= 2
+  } else if (SCM_POINTER_P(s)) {
+    *result = SCM_POINTER_VALUE(s);
     return SWIG_OK;
-  } else if (SCM_SMOB_PREDICATE(swig_tag, smob) || SCM_SMOB_PREDICATE(swig_collectable_tag, smob)) {
-    /* we do not accept smobs representing destroyed pointers */
+#endif /* if SCM_MAJOR_VERSION >= 2 */
+  } else if (SWIG_Guile_IsValidSmob(smob)) {
     from = (swig_type_info *) SCM_CELL_WORD_2(smob);
     if (!from) return SWIG_ERROR;
     if (type) {
@@ -207,7 +241,7 @@ SWIGINTERNINLINE int
 SWIG_Guile_IsPointer (SCM s)
 {
   /* module might not be initialized yet, so initialize it */
-  SWIG_Guile_GetModule();
+  SWIG_GetModule(0);
   return SWIG_Guile_IsPointerOfType (s, NULL);
 }
 
@@ -217,7 +251,7 @@ SWIG_Guile_MarkPointerNoncollectable(SCM s)
 {
   SCM smob = SWIG_Guile_GetSmob(s);
   if (!SCM_NULLP(smob)) {
-    if (SCM_SMOB_PREDICATE(swig_tag, smob) || SCM_SMOB_PREDICATE(swig_collectable_tag, smob)) {
+    if (SWIG_Guile_IsValidSmob(smob)) {
       SCM_SET_CELL_TYPE(smob, swig_tag);
     }
     else scm_wrong_type_arg(NULL, 0, s);
@@ -230,7 +264,7 @@ SWIG_Guile_MarkPointerDestroyed(SCM s)
 {
   SCM smob = SWIG_Guile_GetSmob(s);
   if (!SCM_NULLP(smob)) {
-    if (SCM_SMOB_PREDICATE(swig_tag, smob) || SCM_SMOB_PREDICATE(swig_collectable_tag, smob)) {
+    if (SWIG_Guile_IsValidSmob(smob)) {
       SCM_SET_CELL_TYPE(smob, swig_destroyed_tag);
     }
     else scm_wrong_type_arg(NULL, 0, s);
@@ -364,18 +398,16 @@ ensure_smob_tag(SCM swig_module,
 		const char *smob_name,
 		const char *scheme_variable_name)
 {
-  SCM variable = scm_sym2var(scm_str2symbol(scheme_variable_name),
-			     scm_module_lookup_closure(swig_module),
-			     SCM_BOOL_T);
-  if (SCM_UNBNDP(SCM_VARIABLE_REF(variable))) {
+  SCM variable = scm_module_variable(swig_module,
+                             scm_from_locale_symbol(scheme_variable_name));
+  if (scm_is_false(variable)) {
     *tag_variable = scm_make_smob_type((char*)scheme_variable_name, 0);
-    SCM_VARIABLE_SET(variable,
-		     scm_ulong2num(*tag_variable));
+    scm_c_module_define(swig_module, scheme_variable_name, 
+                        scm_from_ulong(*tag_variable));
     return 1;
   }
   else {
-    *tag_variable = scm_num2ulong(SCM_VARIABLE_REF(variable), 0,
-				  "SWIG_Guile_Init");
+    *tag_variable = scm_to_ulong(SCM_VARIABLE_REF(variable));
     return 0;
   }
 }
@@ -399,6 +431,8 @@ SWIG_Guile_Init ()
     scm_set_smob_print(swig_collectable_tag, print_collectable_swig);
     scm_set_smob_equalp(swig_collectable_tag, equalp_swig);
     scm_set_smob_free(swig_collectable_tag, free_swig);
+    /* For Guile >= 2.0.12. See libguile/smob.c:clear_smobnum */
+    swig_finalized_tag = swig_collectable_tag & ~0xff00;
   }
   if (ensure_smob_tag(swig_module, &swig_destroyed_tag,
 		      "destroyed-swig-pointer", "destroyed-swig-pointer-tag")) {
@@ -412,8 +446,8 @@ SWIG_Guile_Init ()
   }
   swig_make_func = scm_permanent_object(
   scm_variable_ref(scm_c_module_lookup(scm_c_resolve_module("oop goops"), "make")));
-  swig_keyword = scm_permanent_object(scm_c_make_keyword((char*) "init-smob"));
-  swig_symbol = scm_permanent_object(scm_str2symbol("swig-smob"));
+  swig_keyword = scm_permanent_object(scm_from_locale_keyword((char*) "init-smob"));
+  swig_symbol = scm_permanent_object(scm_from_locale_symbol("swig-smob"));
 #ifdef SWIG_INIT_RUNTIME_MODULE
   SWIG_INIT_RUNTIME_MODULE
 #endif
@@ -422,36 +456,24 @@ SWIG_Guile_Init ()
 }
 
 SWIGINTERN swig_module_info *
-SWIG_Guile_GetModule(void)
+SWIG_Guile_GetModule(void *SWIGUNUSEDPARM(clientdata))
 {
-  SCM module;
-  SCM variable;
-
-  module = SWIG_Guile_Init();
-
-  variable = scm_sym2var(scm_str2symbol("swig-type-list-address" SWIG_RUNTIME_VERSION SWIG_TYPE_TABLE_NAME),
-			       scm_module_lookup_closure(module),
-			       SCM_BOOL_T);
-  if (SCM_UNBNDP(SCM_VARIABLE_REF(variable))) {
+  SCM module = SWIG_Guile_Init();
+  SCM variable = scm_module_variable(module, scm_from_locale_symbol("swig-type-list-address" SWIG_RUNTIME_VERSION SWIG_TYPE_TABLE_NAME));
+  if (scm_is_false(variable)) {
     return NULL;
   } else {
-    return (swig_module_info *) scm_num2ulong(SCM_VARIABLE_REF(variable), 0, "SWIG_Guile_Init");
+    return (swig_module_info *) scm_to_ulong(SCM_VARIABLE_REF(variable));
   }
 }
 
 SWIGINTERN void
 SWIG_Guile_SetModule(swig_module_info *swig_module)
 {
-  SCM module;
-  SCM variable;
-
-  module = SWIG_Guile_Init();
-    
-  variable = scm_sym2var(scm_str2symbol("swig-type-list-address" SWIG_RUNTIME_VERSION SWIG_TYPE_TABLE_NAME),
-			       scm_module_lookup_closure(module),
-			       SCM_BOOL_T);
-
-  SCM_VARIABLE_SET(variable, scm_ulong2num((unsigned long) swig_module));
+  SCM module = SWIG_Guile_Init();
+  scm_module_define(module,
+                    scm_from_locale_symbol("swig-type-list-address" SWIG_RUNTIME_VERSION SWIG_TYPE_TABLE_NAME),
+                    scm_from_ulong((unsigned long) swig_module));
 }
 
 SWIGINTERN int
@@ -463,7 +485,7 @@ SWIG_Guile_GetArgs (SCM *dest, SCM rest,
   int num_args_passed = 0;
   for (i = 0; i<reqargs; i++) {
     if (!SCM_CONSP(rest))
-      scm_wrong_num_args(scm_makfrom0str((char *) procname));
+      scm_wrong_num_args(scm_from_utf8_string(procname ? (char *) procname : "unknown procedure"));
     *dest++ = SCM_CAR(rest);
     rest = SCM_CDR(rest);
     num_args_passed++;
@@ -476,7 +498,7 @@ SWIG_Guile_GetArgs (SCM *dest, SCM rest,
   for (; i<optargs; i++)
     *dest++ = SCM_UNDEFINED;
   if (!SCM_NULLP(rest))
-    scm_wrong_num_args(scm_makfrom0str((char *) procname));
+      scm_wrong_num_args(scm_from_utf8_string(procname ? (char *) procname : "unknown procedure"));
   return num_args_passed;
 }
 

@@ -153,10 +153,10 @@ namespace std {
 
   //50.  Copy constructor and assignment operator of ios_base
   private:
-    ios_base(const ios_base&);
+    ios_base(const ios_base& other);
 
     ios_base& 
-    operator=(const ios_base&);
+    operator=(const ios_base& other);
   };
 
   template<typename _CharT, typename _Traits = char_traits<_CharT> >
@@ -242,17 +242,19 @@ namespace std {
     // 27.4.5.1  basic_ios constructors
     basic_ios();
   private:
-    ios_base(const ios_base&);
+    basic_ios(const basic_ios& other);
 
-    ios_base& 
-    operator=(const ios_base&);
+    basic_ios&
+    operator=(const basic_ios& other);
   };
   
 }
 
 namespace std {
+  typedef basic_ios<char> ios;
   %template(ios) basic_ios<char>;
 #if defined(SWIG_WCHAR)
+ typedef basic_ios<wchar_t> wios;
   %template(wios) basic_ios<wchar_t>;
 #endif
 }

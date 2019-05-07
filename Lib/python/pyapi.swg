@@ -4,9 +4,6 @@
 
 #ifdef __cplusplus
 extern "C" {
-#if 0
-} /* cc-mode */
-#endif
 #endif
 
 /* -----------------------------------------------------------------------------
@@ -20,7 +17,7 @@ extern "C" {
 /* Constant information structure */
 typedef struct swig_const_info {
   int type;
-  char *name;
+  const char *name;
   long lvalue;
   double dvalue;
   void   *pvalue;
@@ -28,9 +25,6 @@ typedef struct swig_const_info {
 } swig_const_info;
 
 #ifdef __cplusplus
-#if 0
-{ /* cc-mode */
-#endif
 }
 #endif
 

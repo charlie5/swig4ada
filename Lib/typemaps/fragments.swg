@@ -1,238 +1,15 @@
 /*
-  Fragments:
-  ==========
+  Fragments
+  =========
+  See the "Typemap fragments" section in the documentation for understanding
+  fragments. Below is some info on how fragments and automatic type
+  specialization is used.
 
-  Second to typemaps, fragments are one the most powerful and
-  dangerous swig features. So, if you are starting to read about them,
-  make sure you read all of this document.
+  Macros that make the automatic generation of typemaps easier are provided.
 
-  Basics:
-  =======
+  Consider the following code:
 
-  Fragments provide a way to include or generate code into "on-demand"
-  as the typemaps could require.
-
-  For example, if you have a very long typemap
-
-  %typemap(in) MyClass * {
-    MyClass *value = 0;
-
-    <very long typemap>
-    ....
-    value = somewhere_converted_from_input_object_here($input);
-    ...
-    <very long typemap>
-  
-    $result = value;
-  }
-
-  very soon you will discover yourself copying the same long
-  conversion code in several typemaps, such as varin, directorout,
-  etc. Also, you will discover that swig copes verbatim the same very
-  long conversion code for every argument that requires it, making the
-  code very large too.
-
-  To eliminate this automatic or manual code copying, we define a
-  fragment that includes the common conversion code:
-
-  %fragment("AsMyClass","header") {
-     MyClass *AsMyClass(PyObject *obj) {
-        MyClass *value = 0;
-        <very long conversion>
-        ....
-        value = somewhere_converted_from_input_object_here(obj);
-        ...
-        <very long conversion>
-  
-        return value;
-     }
-  }
-
-  %typemap(in,fragment="AsMyClass") MyClass * {
-    $result = AsMyClass($input);
-  }
-
-  %typemap(varin,fragment="AsMyClass") MyClass * {
-    $result = AsMyClass($input);
-  }
-
-  When the 'in' or 'varin' typemaps for MyClass are invoked, the
-  fragment "AsMyClass" is added to the "header" section, and then the
-  typemap code is emitted. Hence, the method AsMyClass will be
-  included in the wrapping code and it will be available at the time
-  the typemap is applied.
-
-  To define a fragment then you need a name, a section where it goes,
-  and the code. Usually the section refers to the "header" part, and
-  both string and braces forms are accepted, ie:
-
-    %fragment("my_name","header") { ... }
-    %fragment("my_name","header") "...";
-
-  To ensure all the fragment/typemap engine works as expected, there
-  are some rules that fragments follow:
-
-  1.- A fragment is added to the wrapping code only once, ie, for the
-      method:
-      
-        int foo(MyClass *a, MyClass *b);
-
-     the wrapped code will look as much as:
-
-      MyClass *AsMyClass(PyObject *obj) {
-        .....
-      }
-      
-      int _wrap_foo(...) {
-        ....
-        arg1 = AsMyClass(obj1);
-        arg2 = AsMyClass(obj2);
-        ...
-	result = foo(arg1, arg2);
-      }
-
-
-     even when there will be duplicated typemap to process 'a' and
-     'b', the 'AsMyClass' method will be defined only once.
-
-     
-  2.- A fragment can only defined once, and the first definition
-      is the only one taking in account. All other definitions of the
-      same fragments are silently ignored. For example, you can have
-
-
-        %fragment("AsMyClass","header") { <definition 1> }
-	....
-        %fragment("AsMyClass","header") { <definition 2> }
-     
-      and then only the first definition is considered. In this way
-      you can change the 'system' fragments by including yours first.
-
-      Note that this behavior is opposite to the typemaps, where the
-      last typemap applied or defined prevails. Fragment follows the
-      first-in-first-out convention since they are intended to be
-      "global", while typemaps intend to be "locally" specialized.
-      
-  3.- Fragments names can not contain commas.
- 	
-
-  A fragment can include one or more additional fragments, for example:
-
-    %fragment("<limits.h>", "header")  {
-      #include <limits.h>
-    }
-
-
-    %fragment("AsMyClass", "header", fragment="<limits.h>") {
-      MyClass *AsMyClass(PyObject *obj) {
-        MyClass *value = 0;
-	int ival = somewhere_converted_from_input_object_here(obj)
-	...
-        if  (ival < CHAR_MIN) {
-	   value = something_from_ival(ival);
-        } else {
-	...
-	}
-	...
-        return value;
-      }
-    }
-
-  in this case, when the "AsMyClass" fragment is emitted, it also
-  trigger the inclusion of the "<limits.h>" fragment.
-
-  You can add as many fragments as you want, for example
-
-    %fragment("bigfragment","header", fragment="frag1", fragment="frag2", fragment="frag3") "";
-
-  here, when the "bigfragment" is included, the three fragments "frag1",
-  "frag2" and "frag3" are included. Note that as "bigframent" is defined
-  empty, "", it does not add any code by itself, buy only trigger the
-  inclusion of the other fragments.
-  
-  In a typemap you can also include more than one fragment, but since the
-  syntax is different, you need to specify them in a 'comma separated'
-  list, for example, considering the previous example:
- 
-     %typemap(in,fragment="frag1,frag2,frag3") {...}
-
-  is equivalent to
-
-     %typemap(in,fragment="bigfragment") {...}
-
-  
-  Finally, you can force the inclusion of a fragment at any moment as follow:
-
-     %fragment("bigfragment");
-
-  which is very useful inside a template class, for example. 
-
-
-  Fragment type specialization
-  ============================
-  
-  Fragments can be "type specialized". The syntax is as follows
- 									   
-    %fragment("name","header") { a type independent fragment }
-    %fragment("name" {Type}, "header") { a type dependent fragment  }
- 									   
-  and they can also, as typemaps, be used inside templates, for exampe:
- 									   
-     template <class T>					              
-     struct A {						              
-        %fragment("incode"{A<T>},"header") {			              
- 	  'incode' specialized fragment 
- 	}							   	    
- 									   
- 	%typemap(in,fragment="incode"{A<T>}) {		   	    
-           here we use the 'type specialized' 		   	    
-           fragment "incode"{A<T>}			              
- 	}
-     };							              
-  
-   which could seems a not much interesting feature, but is
-   fundamental for automatic typemap and template specialization.
-
-
-  Fragments and automatic typemap specialization:
-  ===============================================
-
-  Since fragments can be type specialized, they can be elegantly used
-  to specialized typemaps .
-
-  For example, if you have something like:
-
-    %fragment("incode"{float}, "header") {
-      float in_method_float(PyObject *obj) {
-        ...
-      }
-    }
-
-    %fragment("incode"{long}, "header") {
-      float in_method_long(PyObject *obj) {
-        ...
-      }
-    }
-    
-    %define %my_typemaps(Type) 
-    %typemaps(in,fragment="incode"{Type}) {
-      value = in_method_##Type(obj);
-    }
-    %enddef
-
-    %my_typemaps(float);
-    %my_typemaps(long);
-
-  then the proper "incode"{float,double} fragment will be included,
-  and the proper in_method_{float,double} will be called.
-
-  Since this is a recurrent fragment use, we provide a couple of
-  macros that make the automatic generation of typemaps easier:
-
-
-  Consider for example the following code:
-
-      %fragment(SWIG_From_frag(bool),"header") {     
+      %fragment(SWIG_From_frag(bool), "header") {     
       static PyObject*		      
       SWIG_From_dec(bool)(bool value)	       
       {					       
@@ -242,7 +19,7 @@
       }					       
       }					       
       					 
-      %typemap(out,fragment=SWIG_From_frag(bool)) bool {
+      %typemap(out, fragment=SWIG_From_frag(bool)) bool {
         $result = SWIG_From(bool)($1));
       }
 
@@ -319,56 +96,49 @@
  * common fragments 
  * ------------------------------------------------------------ */
 
-/* Default compiler options for gcc allow long_long but not LLONG_MAX. 
- * Define SWIG_NO_LLONG_MAX if this added limits support is not wanted. */
-%fragment("<limits.h>","header") %{
-#include <limits.h>
-#if !defined(SWIG_NO_LLONG_MAX)
-# if !defined(LLONG_MAX) && defined(__GNUC__) && defined (__LONG_LONG_MAX__)
-#   define LLONG_MAX __LONG_LONG_MAX__
-#   define LLONG_MIN (-LLONG_MAX - 1LL)
-#   define ULLONG_MAX (LLONG_MAX * 2ULL + 1ULL)
+%fragment("SWIG_isfinite","header",fragment="<math.h>,<float.h>") %{
+/* Getting isfinite working pre C99 across multiple platforms is non-trivial. Users can provide SWIG_isfinite on older platforms. */
+#ifndef SWIG_isfinite
+/* isfinite() is a macro for C99 */
+# if defined(isfinite)
+#  define SWIG_isfinite(X) (isfinite(X))
+# elif defined(__cplusplus) && __cplusplus >= 201103L
+/* Use a template so that this works whether isfinite() is std::isfinite() or
+ * in the global namespace.  The reality seems to vary between compiler
+ * versions.
+ *
+ * Make sure namespace std exists to avoid compiler warnings.
+ *
+ * extern "C++" is required as this fragment can end up inside an extern "C" { } block
+ */
+namespace std { }
+extern "C++" template<typename T>
+inline int SWIG_isfinite_func(T x) {
+  using namespace std;
+  return isfinite(x);
+}
+#  define SWIG_isfinite(X) (SWIG_isfinite_func(X))
+# elif defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 2))
+#  define SWIG_isfinite(X) (__builtin_isfinite(X))
+# elif defined(__clang__) && defined(__has_builtin)
+#  if __has_builtin(__builtin_isfinite)
+#   define SWIG_isfinite(X) (__builtin_isfinite(X))
+#  endif
+# elif defined(_MSC_VER)
+#  define SWIG_isfinite(X) (_finite(X))
+# elif defined(__sun) && defined(__SVR4)
+#  include <ieeefp.h>
+#  define SWIG_isfinite(X) (finite(X))
 # endif
 #endif
 %}
 
-%fragment("<math.h>","header") %{
-#include <math.h>
-%}
-
-%fragment("<wchar.h>","header") %{
-#include <wchar.h>
-#include <limits.h>
-#ifndef WCHAR_MIN
-#  define WCHAR_MIN 0
-#endif
-#ifndef WCHAR_MAX
-#  define WCHAR_MAX 65535
-#endif
-%}
-
-%fragment("<float.h>","header") %{
-#include <float.h>
-%}
-
-%fragment("<stdio.h>","header") %{
-#include <stdio.h>
-#if defined(_MSC_VER) || defined(__BORLANDC__) || defined(_WATCOM)
-# ifndef snprintf
-#  define snprintf _snprintf
-# endif
-#endif
-%}
-
-%fragment("<stdlib.h>","header") %{
-#include <stdlib.h>
-#ifdef _MSC_VER
-# ifndef strtoull
-#  define strtoull _strtoui64
-# endif
-# ifndef strtoll
-#  define strtoll _strtoi64
-# endif
+%fragment("SWIG_Float_Overflow_Check","header",fragment="<float.h>,SWIG_isfinite") %{
+/* Accept infinite as a valid float value unless we are unable to check if a value is finite */
+#ifdef SWIG_isfinite
+# define SWIG_Float_Overflow_Check(X) ((X < -FLT_MAX || X > FLT_MAX) && SWIG_isfinite(X))
+#else
+# define SWIG_Float_Overflow_Check(X) ((X < -FLT_MAX || X > FLT_MAX))
 #endif
 %}
 
@@ -432,11 +202,18 @@ SWIG_AsVal_dec(Type)(SWIG_Object obj, Type *val)
 %enddef
 
 
-/* Macro for 'double' derived types */
+/* Macro for floating point derived types (original macro) */
 
 %define %numeric_double(Type, Frag, Min, Max)
 %numeric_type_from(Type, double)
 %numeric_signed_type_asval(Type, double, Frag , Min, Max)
+%enddef
+
+/* Macro for floating point derived types */
+
+%define %numeric_float(Type, Frag, OverflowCond)
+%numeric_type_from(Type, double)
+%numeric_type_asval(Type, double, Frag, OverflowCond)
 %enddef
 
 
@@ -444,15 +221,15 @@ SWIG_AsVal_dec(Type)(SWIG_Object obj, Type *val)
 
 %define %ensure_fragment(Fragment)
 %fragment(`Fragment`,"header") {
-%#error "Swig language implementation must provide the Fragment fragment"
+%#error "SWIG language implementation must provide the Fragment fragment"
 }
 %enddef
 
 %define %ensure_type_fragments(Type)
 %fragment(SWIG_From_frag(Type),"header") {
-%#error "Swig language implementation must provide a SWIG_From_frag(Type) fragment"
+%#error "SWIG language implementation must provide a SWIG_From_frag(Type) fragment"
 }
 %fragment(SWIG_AsVal_frag(Type),"header") {
-%#error "Swig language implementation must provide a SWIG_AsVal_frag(Type) fragment"
+%#error "SWIG language implementation must provide a SWIG_AsVal_frag(Type) fragment"
 }
 %enddef

@@ -1,7 +1,4 @@
 /* -----------------------------------------------------------------------------
- * See the LICENSE file for information on copyright, usage and redistribution
- * of SWIG, and the README file for authors - http://www.swig.org/release.html.
- *
  * pikerun.swg
  *
  * This file contains the runtime support for Pike modules
@@ -12,11 +9,12 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-#include "object.h"
-#include "program.h"
+#include "pike/object.h"
+#include "pike/program.h"
 #ifdef __cplusplus
 }
 #endif
+#include <assert.h>
 
 /* Stores information about a wrapped object */
 typedef struct swig_object_wrapper {
@@ -31,11 +29,11 @@ typedef struct swig_object_wrapper {
 
 #define SWIG_ConvertPtr SWIG_Pike_ConvertPtr
 #define SWIG_NewPointerObj SWIG_Pike_NewPointerObj
-#define SWIG_GetModule(clientdata) SWIG_Pike_GetModule()
+#define SWIG_GetModule(clientdata) SWIG_Pike_GetModule(clientdata)
 #define SWIG_SetModule(clientdata, pointer) SWIG_Pike_SetModule(pointer)
 
 /* These need to be filled in before type sharing between modules will work */
-static swig_module_info *SWIG_Pike_GetModule() {
+static swig_module_info *SWIG_Pike_GetModule(void *SWIGUNUSEDPARM(clientdata)) {
   return 0;
 }
 

@@ -50,7 +50,7 @@ namespace test {
 			 PyComplex_ImagAsDouble($input));
     } else {
 	PyErr_SetString(PyExc_TypeError,"Expected test_complex.\n");
-	return NULL;
+	SWIG_fail;
     }
 }
 %typemap(freearg) test::test_complex * {
@@ -70,12 +70,21 @@ namespace test {
     delete $1;
 }
 #endif
+#ifdef SWIGGO
+%typemap(gotype) test::test_complex * "complex128"
+%typemap(in) test::test_complex * {
+    $1 = new test_complex(__real__ $input, __imag__ $input);
+}
+%typemap(freearg) test::test_complex * {
+    delete $1;
+}
+#endif
 
 namespace test {
     class string_class;
 #ifdef SWIGPYTHON
 	%typemap(in) string_class * {
-	    $1 = new string_class(PyString_AsString($input));
+	    $1 = new string_class(SWIG_Python_str_AsChar($input));
 	}
 	%typemap(freearg) string_class * {
 	    delete $1;
@@ -91,7 +100,20 @@ namespace test {
 #endif
 #ifdef SWIGRUBY
 	%typemap(in) string_class * {
-	    $1 = new string_class(STR2CSTR($input));
+	    $1 = new string_class(StringValuePtr($input));
+	}
+	%typemap(freearg) string_class * {
+	    delete $1;
+	}
+#endif
+#ifdef SWIGGO
+	%typemap(gotype) string_class * "string"
+	%typemap(in) string_class * {
+	    char* buf = new char[$input.n + 1];
+	    memcpy(buf, $input.p, $input.n);
+	    buf[$input.n] = '\0';
+	    $1 = new string_class(buf);
+	    delete[] buf;
 	}
 	%typemap(freearg) string_class * {
 	    delete $1;
@@ -220,7 +242,7 @@ namespace Split {
 	$1 = PyInt_AsLong($input);
 	if ($1 < 0) {
 	    PyErr_SetString(PyExc_ValueError,"domain error\n");
-	    return NULL;
+	    SWIG_fail;
 	}
     }	
 #endif
@@ -239,6 +261,14 @@ namespace Split {
 	    rb_raise(rb_eRangeError, "domain error");
 	}
     }	
+#endif
+#ifdef SWIGGO
+    %typemap(in) PosInteger {
+	$1 = $input;
+	if ($1 < 0) {
+	    _swig_gopanic("domain error");
+	}
+    }
 #endif
 }
     

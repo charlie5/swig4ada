@@ -2,7 +2,7 @@
 use overload_simple;
 use vars qw/$DOWARN/;
 use strict;
-use Test::More tests => 71;
+use Test::More tests => 97;
 
 pass("loaded");
 
@@ -189,3 +189,47 @@ is(overload_simple::fid("3", 3), "fid:intint", "fid:fid(int,int)");
 isnt(overload_simple::fbool(0), overload_simple::fbool(1), "fbool(bool)");
 
 is(2, overload_simple::fbool(2), "fbool(int)");
+
+# int and object overload
+
+is(overload_simple::int_object(1), 1, "int_object(1)");
+is(overload_simple::int_object(0), 0, "int_object(0)");
+is(overload_simple::int_object(undef), 999, "int_object(Spam*)");
+is(overload_simple::int_object($s), 999, "int_object(Spam*)");
+
+# some of this section is duplication of above tests, but I want to see
+# parity with the coverage in wrapmacro_runme.pl.
+
+sub check {
+  my($args, $want) = @_;
+  my($s, $rslt) = defined $want ?  ($want, "bar:$want") : ('*boom*', undef);
+  is(eval("overload_simple::Spam::bar($args)"), $rslt, "bar($args) => $s");
+}
+
+# normal use patterns
+check("11", 'int');
+check("11.0", 'double');
+check("'11'", 'char *');
+check("'11.0'", 'char *');
+check("-13", 'int');
+check("-13.0", 'double');
+check("'-13'", 'char *');
+check("'-13.0'", 'char *');
+
+check("' '", 'char *');
+check("' 11 '", 'char *');
+# TypeError explosions
+check("\\*STDIN", undef);
+check("[]", undef);
+check("{}", undef);
+check("sub {}", undef);
+
+# regression cases
+check("''", 'char *');
+check("' 11'", 'char *');
+check("' 11.0'", 'char *');
+check("' -11.0'", 'char *');
+check("\"11\x{0}\"", 'char *');
+check("\"\x{0}\"", 'char *');
+check("\"\x{9}11\x{0}this is not eleven.\"", 'char *');
+check("\"\x{9}11.0\x{0}this is also not eleven.\"", 'char *');

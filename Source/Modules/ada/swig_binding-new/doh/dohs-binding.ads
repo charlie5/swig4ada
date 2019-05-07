@@ -196,6 +196,10 @@ package DOHs.Binding is
    function DohIsFile
      (obj : in DOHs.Pointers.DOH_Pointer) return interfaces.c.int;
 
+   procedure DohSetMaxHashExpand (count : in interfaces.c.int);
+
+   function DohGetMaxHashExpand return interfaces.c.int;
+
    procedure DohSetmark (obj : in DOHs.Pointers.DOH_Pointer;
       x                      : in interfaces.c.int);
 
@@ -226,17 +230,15 @@ package DOHs.Binding is
    function DohStrchr (s1 : in DOHs.Pointers.DOH_Pointer;
       ch : in interfaces.c.int) return interfaces.c.strings.chars_ptr;
 
-   function DohNewFile (file : in DOHs.Pointers.DOH_Pointer;
-      mode : in interfaces.c.strings.chars_ptr) return DOHs.Pointers
+   function DohNewFile (filename : in DOHs.Pointers.DOH_Pointer;
+      mode                       : in interfaces.c.strings.chars_ptr;
+      outfiles : in DOHs.Pointers.DOH_Pointer) return DOHs.Pointers
      .DOH_Pointer;
 
    function DohNewFileFromFd
      (fd : in interfaces.c.int) return DOHs.Pointers.DOH_Pointer;
 
    procedure DohFileErrorDisplay (filename : in DOHs.Pointers.DOH_Pointer);
-
-   function DohClose
-     (file : in DOHs.Pointers.DOH_Pointer) return interfaces.c.int;
 
    function DohCopyto (input : in DOHs.Pointers.DOH_Pointer;
       output : in DOHs.Pointers.DOH_Pointer) return interfaces.c.int;
@@ -319,6 +321,8 @@ private
    pragma Import (C, DohIsSequence, "DohIsSequence");
    pragma Import (C, DohIsString, "DohIsString");
    pragma Import (C, DohIsFile, "DohIsFile");
+   pragma Import (C, DohSetMaxHashExpand, "DohSetMaxHashExpand");
+   pragma Import (C, DohGetMaxHashExpand, "DohGetMaxHashExpand");
    pragma Import (C, DohSetmark, "DohSetmark");
    pragma Import (C, DohGetmark, "DohGetmark");
    pragma Import (C, DohNewStringEmpty, "DohNewStringEmpty");
@@ -332,7 +336,6 @@ private
    pragma Import (C, DohNewFile, "DohNewFile");
    pragma Import (C, DohNewFileFromFd, "DohNewFileFromFd");
    pragma Import (C, DohFileErrorDisplay, "DohFileErrorDisplay");
-   pragma Import (C, DohClose, "DohClose");
    pragma Import (C, DohCopyto, "DohCopyto");
    pragma Import (C, DohNewList, "DohNewList");
    pragma Import (C, DohNewHash, "DohNewHash");

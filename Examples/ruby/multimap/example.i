@@ -20,7 +20,7 @@ extern int    gcd(int x, int y);
   if (TYPE($input) != T_ARRAY) {
     SWIG_exception(SWIG_ValueError, "Expected an array");
   }
-  $1 = RARRAY($input)->len;
+  $1 = RARRAY_LEN($input);
   if ($1 == 0) {
     SWIG_exception(SWIG_ValueError, "List must contain at least 1 element");
   }
@@ -31,7 +31,7 @@ extern int    gcd(int x, int y);
       free($2);
       SWIG_exception(SWIG_ValueError, "List items must be strings");
     }
-    $2[i] = STR2CSTR(s);
+    $2[i] = StringValuePtr(s);
   }
   $2[i] = 0;
 }
@@ -46,8 +46,8 @@ extern int gcdmain(int argc, char *argv[]);
   if (TYPE($input) != T_STRING) {
     SWIG_exception(SWIG_ValueError, "Expected a string");
   }
-  $1 = STR2CSTR($input);
-  $2 = RSTRING($input)->len;
+  $1 = StringValuePtr($input);
+  $2 = RSTRING_LEN($input);
 }
 
 extern int count(char *bytes, int len, char c);
@@ -60,8 +60,8 @@ extern int count(char *bytes, int len, char c);
   if (TYPE($input) != T_STRING) {
     SWIG_exception(SWIG_ValueError,"Expected a string");
   }
-  temp = STR2CSTR($input);
-  $2 = RSTRING($input)->len;
+  temp = StringValuePtr($input);
+  $2 = RSTRING_LEN($input);
   $1 = (char *) malloc($2+1);
   memmove($1,temp,$2);
 }

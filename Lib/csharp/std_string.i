@@ -1,7 +1,4 @@
 /* -----------------------------------------------------------------------------
- * See the LICENSE file for information on copyright, usage and redistribution
- * of SWIG, and the README file for authors - http://www.swig.org/release.html.
- *
  * std_string.i
  *
  * Typemaps for std::string and const std::string&
@@ -72,7 +69,7 @@ class string;
     SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return $null;
    }
-   std::string $1_str($input);
+   $*1_ltype $1_str($input);
    $1 = &$1_str; %}
 %typemap(out) const string & %{ $result = SWIG_csharp_string_callback($1->c_str()); %}
 
@@ -88,7 +85,7 @@ class string;
     return $null;
    }
    /* possible thread/reentrant code problem */
-   static std::string $1_str;
+   static $*1_ltype $1_str;
    $1_str = $input;
    $result = &$1_str; %}
 

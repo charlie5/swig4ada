@@ -1,7 +1,4 @@
 /* -----------------------------------------------------------------------------
- * See the LICENSE file for information on copyright, usage and redistribution
- * of SWIG, and the README file for authors - http://www.swig.org/release.html.
- *
  * typemaps.i
  *
  * Pointer handling
@@ -96,7 +93,6 @@ or you can use the %apply directive :
 
 */
 
-// These typemaps contributed by Robin Dunn
 //----------------------------------------------------------------------
 //
 // T_OUTPUT typemap (and helper function) to return multiple argouts as

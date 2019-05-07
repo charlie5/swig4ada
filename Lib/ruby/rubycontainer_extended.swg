@@ -1,17 +1,13 @@
-/**
- * @file   rubycontainer_extended.swg
- * @author gga
- * @date   Sat May  5 05:36:01 2007
- * 
- * @brief  This file contains additional functions that make containers
- *         behave closer to ruby primitive types.
- *         However, some of these functions place some restrictions on
- *         the underlying object inside of the container and the iterator
- *        (that it has to have an == comparison function, that it has to have 
- *         an = assignment operator, etc).
- * 
- */
-
+/* -----------------------------------------------------------------------------
+ * rubycontainer_extended.swg
+ *
+ * This file contains additional functions that make containers
+ * behave closer to ruby primitive types.
+ * However, some of these functions place some restrictions on
+ * the underlying object inside of the container and the iterator
+ * (that it has to have an == comparison function, that it has to have 
+ * an = assignment operator, etc).
+ * ----------------------------------------------------------------------------- */
 
 /** 
  * Macro used to add extend functions that require operator== in object.
@@ -73,10 +69,10 @@
 	  *i = swig::as< Type >( r );
 	}
     }
-    catch ( const std::invalid_argument& )
+    catch (const std::invalid_argument&)
       {
 	rb_raise(rb_eTypeError,
-		 "Yield block did not return a valid element for " #Container);
+		 "Yield block did not return a valid element for " "Container");
       }
     
     return $self;
@@ -127,7 +123,6 @@
 %swig_container_extend( %arg( Container ), double );
 %swig_container_extend( %arg( Container ), std::complex );
 %swig_container_extend( %arg( Container ), std::string );
-%swig_container_extend( %arg( Container ), swig::GC_VALUE );
 %swig_container_extend( %arg( Container ), swig::GC_VALUE );
 
 %enddef

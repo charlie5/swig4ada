@@ -1,22 +1,27 @@
 /* ----------------------------------------------------------------------------- 
+ * This file is part of SWIG, which is licensed as a whole under version 3 
+ * (or any later version) of the GNU General Public License. Some additional
+ * terms also apply to certain portions of SWIG. The full details of the SWIG
+ * license and copyrights can be found in the LICENSE and COPYRIGHT files
+ * included with the SWIG source code as distributed by the SWIG developers
+ * and at http://www.swig.org/legal.html.
+ *
  * memory.c
  *
  *     This file implements all of DOH's memory management including allocation
  *     of objects and checking of objects.
- * 
- * Author(s) : David Beazley (beazley@cs.uchicago.edu)
- *
- * Copyright (C) 1999-2000.  The University of Chicago
- * See the file LICENSE for information on usage and redistribution.	
  * ----------------------------------------------------------------------------- */
-
-char cvsroot_memory_c[] = "$Id: memory.c 961 2009-03-03 14:54:44Z krischik $";
 
 #include "dohint.h"
 
 #ifndef DOH_POOL_SIZE
 #define DOH_POOL_SIZE         16384
 #endif
+
+/* Checks stale DOH object use - will use a lot more memory as pool memory is not re-used. */
+/*
+#define DOH_DEBUG_MEMORY_POOLS
+*/
 
 static int PoolSize = DOH_POOL_SIZE;
 
@@ -76,11 +81,17 @@ static void InitPools() {
  * ---------------------------------------------------------------------- */
 
 int DohCheck(const DOH *ptr) {
-  register Pool *p = Pools;
-  register char *cptr = (char *) ptr;
+  Pool *p = Pools;
+  char *cptr = (char *) ptr;
   while (p) {
-    if ((cptr >= p->pbeg) && (cptr < p->pend))
+    if ((cptr >= p->pbeg) && (cptr < p->pend)) {
+#ifdef DOH_DEBUG_MEMORY_POOLS
+      DohBase *b = (DohBase *) ptr;
+      int DOH_object_already_deleted = b->type == 0;
+      assert(!DOH_object_already_deleted);
+#endif
       return 1;
+    }
     /*
        pptr = (char *) p->ptr;
        if ((cptr >= pptr) && (cptr < (pptr+(p->current*sizeof(DohBase))))) return 1; */
@@ -108,16 +119,20 @@ DOH *DohObjMalloc(DohObjInfo *type, void *data) {
   DohBase *obj;
   if (!pools_initialized)
     InitPools();
+#ifndef DOH_DEBUG_MEMORY_POOLS
   if (FreeList) {
     obj = FreeList;
     FreeList = (DohBase *) obj->data;
   } else {
+#endif
     while (Pools->current == Pools->len) {
       CreatePool();
     }
     obj = Pools->ptr + Pools->current;
     ++Pools->current;
+#ifndef DOH_DEBUG_MEMORY_POOLS
   }
+#endif
   obj->type = type;
   obj->data = data;
   obj->meta = 0;
@@ -142,6 +157,7 @@ void DohObjFree(DOH *ptr) {
   b->data = (void *) FreeList;
   b->meta = 0;
   b->type = 0;
+  b->refcount = 0;
   FreeList = b;
   if (meta) {
     Delete(meta);

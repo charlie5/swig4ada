@@ -1,7 +1,4 @@
 /* -----------------------------------------------------------------------------
- * See the LICENSE file for information on copyright, usage and redistribution
- * of SWIG, and the README file for authors - http://www.swig.org/release.html.
- *
  * std_string.i
  *
  * SWIG typemaps for std::string types
@@ -38,7 +35,7 @@ namespace std {
             SWIG_exception(SWIG_TypeError, "string expected");
     }
 
-    %typemap(in) const string & (std::string temp) {
+    %typemap(in) const string & ($*1_ltype temp) {
         if (SCHEME_STRINGP($input)) {
             temp.assign(SCHEME_STR_VAL($input));
             $1 = &temp;

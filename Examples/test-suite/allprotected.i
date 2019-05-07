@@ -8,6 +8,11 @@
 
 %include "std_string.i"
 
+#ifdef SWIGSCILAB
+%rename(ProcBase) ProtectedBase;
+%rename(PubBase) PublicBase;
+#endif
+
 %feature("director") PublicBase;
 %feature("director") ProtectedBase;
 
@@ -74,5 +79,9 @@ protected:
 };
 int ProtectedBase::staticMemberVariable = 10;
 
+class ProtectedDerived : public ProtectedBase {
+public:
+  ProtectedDerived(const char *s) : ProtectedBase(s) {}
+};
 %}
 

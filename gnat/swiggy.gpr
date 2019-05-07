@@ -9,14 +9,15 @@ project Swiggy is
                         "../Source/Include", 
                         "../Source/CParse", 
                         "../Source/Preprocessor",
+                        "../Source/Doxygen",
                         "../Source/Modules/ada",
                         "../Source/Modules/ada/ada_type",
---                        "../Source/Modules/ada/swig_binding-new-test/doh",
---                        "../Source/Modules/ada/swig_binding-new-test/swigg",
---                        "../Source/Modules/ada/swig_binding-new-test/swigmod");
                         "../Source/Modules/ada/swig_binding-new/doh",
                         "../Source/Modules/ada/swig_binding-new/swigg",
                         "../Source/Modules/ada/swig_binding-new/swigmod");
+--                        "../Source/Modules/ada/swig_binding-new-test/doh",
+--                        "../Source/Modules/ada/swig_binding-new-test/swigg",
+--                        "../Source/Modules/ada/swig_binding-new-test/swigmod");
    for Main use ("swigmain.cxx");
    for Object_Dir use "build";
    for Exec_Dir use ".";
@@ -57,7 +58,7 @@ project Swiggy is
       for Default_Switches ("c") use ("-g"); -- , "-I../Source/Include", "-I../Source/Swig");
 --      for Default_Switches ("c") use ("-g");
 --      for Default_Switches ("c++") use ("-g", "-D", "GNAT_ENABLED", "-I../Source/Swig", "-I../Source/Include");
-      for Default_Switches ("c++") use ("-g", "-D", "GNAT_ENABLED");
+      for Default_Switches ("c++") use ("-g", "-D", "GNAT_ENABLED", "-DHAVE_CONFIG_H");
    end Compiler;
 
    package Binder is
@@ -67,7 +68,7 @@ project Swiggy is
    package Linker is
       for Default_Switches ("ada") use ("-g");
       for Default_Switches ("c") use ("-g", "-lm");
-      for Default_Switches ("c++") use ("-g", "-lgmp", "-lm");
+      for Default_Switches ("c++") use ("-g", "-lgmp", "-lm", "-lpcre");
    end Linker;
 
 end Swiggy;

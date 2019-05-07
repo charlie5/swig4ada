@@ -1,14 +1,16 @@
 /* ----------------------------------------------------------------------------- 
- * See the LICENSE file for information on copyright, usage and redistribution
- * of SWIG, and the README file for authors - http://www.swig.org/release.html.
+ * This file is part of SWIG, which is licensed as a whole under version 3 
+ * (or any later version) of the GNU General Public License. Some additional
+ * terms also apply to certain portions of SWIG. The full details of the SWIG
+ * license and copyrights can be found in the LICENSE and COPYRIGHT files
+ * included with the SWIG source code as distributed by the SWIG developers
+ * and at http://www.swig.org/legal.html.
  *
  * browser.cxx
  *
  * A web-base parse tree browser using SWILL.   This is an optional
  * feature that's normally disabled.
  * ----------------------------------------------------------------------------- */
-
-char cvsroot_browser_cxx[] = "$Id: browser.cxx 10003 2007-10-17 21:42:11Z wsfulton $";
 
 #include "swigmod.h"
 
@@ -25,9 +27,9 @@ class Browser:public Dispatcher {
       v = 1;
     }
     if (v) {
-      Printf(out, "<a name=\"n%x\"></a>[<a href=\"hide.html?node=0x%x&hn=0x%x#n%x\">-</a>] ", n, t, n, n);
+      Printf(out, "<a name=\"n%p\"></a>[<a href=\"hide.html?node=%p&hn=%p#n%p\">-</a>] ", n, t, n, n);
     } else {
-      Printf(out, "<a name=\"n%x\"></a>[<a href=\"show.html?node=0x%x&hn=0x%x#n%x\">+</a>] ", n, t, n, n);
+      Printf(out, "<a name=\"n%p\"></a>[<a href=\"show.html?node=%p&hn=%p#n%p\">+</a>] ", n, t, n, n);
     }
   }
   void show_attributes(Node *obj) {
@@ -48,7 +50,7 @@ class Browser:public Dispatcher {
 	Replaceall(o, "&", "&amp;");
 	Replaceall(o, "<", "&lt;");
 	Replaceall(o, ">", "&gt;");
-	Printf(os, "<a href=\"data.html?n=0x%x\">?</a> %-12s - %s\n", Getattr(obj, k), k, o);
+	Printf(os, "<a href=\"data.html?n=%p\">?</a> %-12s - %s\n", Getattr(obj, k), k, o);
 	Delete(o);
       } else {
 	DOH *o;
@@ -60,10 +62,10 @@ class Browser:public Dispatcher {
 	  }
 	  Replaceall(o, "&", "&amp;");
 	  Replaceall(o, "<", "&lt;");
-	  Printf(os, "<a href=\"data.html?n=0x%x\">?</a> %-12s - \"%(escape)-0.70s%s\"\n", Getattr(obj, k), k, o, trunc);
+	  Printf(os, "<a href=\"data.html?n=%p\">?</a> %-12s - \"%(escape)-0.70s%s\"\n", Getattr(obj, k), k, o, trunc);
 	  Delete(o);
 	} else {
-	  Printf(os, "<a href=\"data.html?n=0x%x\">?</a> %-12s - 0x%x\n", Getattr(obj, k), k, Getattr(obj, k));
+	  Printf(os, "<a href=\"data.html?n=%p\">?</a> %-12s - %p\n", Getattr(obj, k), k, Getattr(obj, k));
 	}
       }
       ki = Next(ki);
@@ -80,7 +82,7 @@ public:
     char *name = GetChar(n, "name");
 
     show_checkbox(view_top, n);
-    Printf(out, "<b><a href=\"index.html?node=0x%x\">%s</a></b>", n, tag);
+    Printf(out, "<b><a href=\"index.html?node=%p\">%s</a></b>", n, tag);
     if (name) {
       Printf(out, " (%s)", name);
     }
@@ -134,6 +136,12 @@ public:
     return SWIG_OK;
   }
 
+  virtual int lambdaDeclaration(Node *n) {
+    show_attributes(n);
+    emit_children(n);
+    return SWIG_OK;
+  }
+
   virtual int enumDeclaration(Node *n) {
     show_attributes(n);
     emit_children(n);
@@ -180,9 +188,9 @@ static void display(FILE *f, Node *n) {
   Printf(f, "<HTML><HEAD><TITLE>SWIG-%s</TITLE></HEAD><BODY BGCOLOR=\"#ffffff\">\n", Swig_package_version());
   Printf(f, "<b>SWIG-%s</b><br>\n", Swig_package_version());
   Printf(f, "[ <a href=\"exit.html\">Exit</a> ]");
-  Printf(f, " [ <a href=\"index.html?node=0x%x\">Top</a> ]", tree_top);
+  Printf(f, " [ <a href=\"index.html?node=%p\">Top</a> ]", tree_top);
   if (n != tree_top) {
-    Printf(f, " [ <a href=\"index.html?node=0x%x\">Up</a> ]", parentNode(n));
+    Printf(f, " [ <a href=\"index.html?node=%p\">Up</a> ]", parentNode(n));
   }
   Printf(f, " [ <a href=\"symbol.html\">Symbols</a> ]");
   Printf(f, "<br><hr><p>\n");
@@ -251,10 +259,10 @@ void raw_data(FILE *out, Node *obj) {
 	  trunc = "...";
 	}
 	Replaceall(o, "<", "&lt;");
-	Printf(os, "    <a href=\"data.html?n=0x%x\">?</a> %-12s - \"%(escape)-0.70s%s\"\n", Getattr(obj, k), k, o, trunc);
+	Printf(os, "    <a href=\"data.html?n=%p\">?</a> %-12s - \"%(escape)-0.70s%s\"\n", Getattr(obj, k), k, o, trunc);
 	Delete(o);
       } else {
-	Printf(os, "    <a href=\"data.html?n=0x%x\">?</a> %-12s - 0x%x\n", Getattr(obj, k), k, Getattr(obj, k));
+	Printf(os, "    <a href=\"data.html?n=%p\">?</a> %-12s - %p\n", Getattr(obj, k), k, Getattr(obj, k));
       }
       ki = Next(ki);
     }
@@ -279,10 +287,10 @@ void raw_data(FILE *out, Node *obj) {
 	  trunc = "...";
 	}
 	Replaceall(o, "<", "&lt;");
-	Printf(os, "    <a href=\"data.html?n=0x%x\">?</a> [%d] - \"%(escape)-0.70s%s\"\n", o, i, s, trunc);
+	Printf(os, "    <a href=\"data.html?n=%p\">?</a> [%d] - \"%(escape)-0.70s%s\"\n", o, i, s, trunc);
 	Delete(s);
       } else {
-	Printf(os, "    <a href=\"data.html?n=0x%x\">?</a> [%d] - 0x%x\n", o, i, o);
+	Printf(os, "    <a href=\"data.html?n=%p\">?</a> [%d] - %p\n", o, i, o);
       }
     }
     Printf(os, "\n]\n");
@@ -299,7 +307,7 @@ void data_handler(FILE *f) {
   Printf(f, "<HTML><HEAD><TITLE>SWIG-%s</TITLE></HEAD><BODY BGCOLOR=\"#ffffff\">\n", Swig_package_version());
   Printf(f, "<b>SWIG-%s</b><br>\n", Swig_package_version());
   Printf(f, "[ <a href=\"exit.html\">Exit</a> ]");
-  Printf(f, " [ <a href=\"index.html?node=0x%x\">Top</a> ]", tree_top);
+  Printf(f, " [ <a href=\"index.html?node=%p\">Top</a> ]", tree_top);
   Printf(f, "<br><hr><p>\n");
   if (n) {
     raw_data(f, n);
@@ -315,7 +323,7 @@ void symbol_handler(FILE *f) {
   Printf(f, "<HTML><HEAD><TITLE>SWIG-%s</TITLE></HEAD><BODY BGCOLOR=\"#ffffff\">\n", Swig_package_version());
   Printf(f, "<b>SWIG-%s</b><br>\n", Swig_package_version());
   Printf(f, "[ <a href=\"exit.html\">Exit</a> ]");
-  Printf(f, " [ <a href=\"index.html?node=0x%x\">Top</a> ]", tree_top);
+  Printf(f, " [ <a href=\"index.html?node=%p\">Top</a> ]", tree_top);
   Printf(f, " [ <a href=\"symbol.html\">Symbols</a> ]");
   Printf(f, "<br><hr><p>\n");
 
@@ -339,7 +347,7 @@ void symbol_handler(FILE *f) {
 
   fprintf(f, "<p><form action=\"symbol.html\" method=GET>\n");
   fprintf(f, "Symbol lookup: <input type=text name=name size=40></input><br>\n");
-  fprintf(f, "<input type=hidden name=sym value=\"0x%x\">\n", sym);
+  fprintf(f, "<input type=hidden name=sym value=\"%p\">\n", sym);
   fprintf(f, "Submit : <input type=submit></input>\n");
   fprintf(f, "</form>");
 
@@ -361,7 +369,7 @@ void symbol_handler(FILE *f) {
     Hash *h;
     h = firstChild(sym);
     while (h) {
-      Printf(f, "<a href=\"symbol.html?sym=0x%x\">%s</a>\n", h, Getattr(h, "name"));
+      Printf(f, "<a href=\"symbol.html?sym=%p\">%s</a>\n", h, Getattr(h, "name"));
       h = nextSibling(h);
     }
   }

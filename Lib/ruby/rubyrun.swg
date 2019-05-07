@@ -1,7 +1,4 @@
 /* -----------------------------------------------------------------------------
- * See the LICENSE file for information on copyright, usage and redistribution
- * of SWIG, and the README file for authors - http://www.swig.org/release.html.
- *
  * rubyrun.swg
  *
  * This file contains the runtime support for Ruby modules
@@ -17,7 +14,7 @@
 #define SWIG_ConvertPtrAndOwn(obj,pptr,type,flags,own)  SWIG_Ruby_ConvertPtrAndOwn(obj, pptr, type, flags, own)
 #define SWIG_NewPointerObj(ptr, type, flags)            SWIG_Ruby_NewPointerObj(ptr, type, flags)
 #define SWIG_AcquirePtr(ptr, own)                       SWIG_Ruby_AcquirePtr(ptr, own)
-#define swig_owntype                                    ruby_owntype
+#define swig_owntype                                    swig_ruby_owntype
 
 /* for raw packed data */
 #define SWIG_ConvertPacked(obj, ptr, sz, ty)            SWIG_Ruby_ConvertPacked(obj, ptr, sz, ty, flags)
@@ -38,14 +35,14 @@
 
 /* Runtime API */
 
-#define SWIG_GetModule(clientdata)                      SWIG_Ruby_GetModule()	
+#define SWIG_GetModule(clientdata)                      SWIG_Ruby_GetModule(clientdata)
 #define SWIG_SetModule(clientdata, pointer) 		SWIG_Ruby_SetModule(pointer)
 
 
 /* Error manipulation */
 
 #define SWIG_ErrorType(code)                            SWIG_Ruby_ErrorType(code)               
-#define SWIG_Error(code, msg)            		rb_raise(SWIG_Ruby_ErrorType(code), msg)
+#define SWIG_Error(code, msg)            		rb_raise(SWIG_Ruby_ErrorType(code), "%s", msg)
 #define SWIG_fail                        		goto fail				 
 
 
@@ -100,7 +97,7 @@ static ID swig_call_id  = 0;
       ++swig_virtual_calls;
 #  define SWIG_RELEASE_STACK --swig_virtual_calls;
 #  define Ruby_DirectorTypeMismatchException(x) \
-          rb_raise( rb_eTypeError, x ); return c_result;
+          rb_raise( rb_eTypeError, "%s", x ); return c_result;
 
       static unsigned int swig_virtual_calls = 0;
 
@@ -154,14 +151,13 @@ SWIG_Ruby_InitRuntime(void)
 SWIGRUNTIME void
 SWIG_Ruby_define_class(swig_type_info *type)
 {
-  VALUE klass;
   char *klass_name = (char *) malloc(4 + strlen(type->name) + 1);
   sprintf(klass_name, "TYPE%s", type->name);
   if (NIL_P(_cSWIG_Pointer)) {
     _cSWIG_Pointer = rb_define_class_under(_mSWIG, "Pointer", rb_cObject);
     rb_undef_method(CLASS_OF(_cSWIG_Pointer), "new");
   }
-  klass = rb_define_class_under(_mSWIG, klass_name, _cSWIG_Pointer);
+  rb_define_class_under(_mSWIG, klass_name, _cSWIG_Pointer);
   free((void *) klass_name);
 }
 
@@ -175,10 +171,11 @@ SWIG_Ruby_NewPointerObj(void *ptr, swig_type_info *type, int flags)
   swig_class *sklass;
   VALUE klass;
   VALUE obj;
-  
+
   if (!ptr)
     return Qnil;
-  
+
+  assert(type);
   if (type->clientdata) {
     sklass = (swig_class *) type->clientdata;
 		
@@ -186,13 +183,13 @@ SWIG_Ruby_NewPointerObj(void *ptr, swig_type_info *type, int flags)
     track = sklass->trackObjects;
     if (track) {
       obj = SWIG_RubyInstanceFor(ptr);
-      
+
       /* Check the object's type and make sure it has the correct type.
         It might not in cases where methods do things like 
         downcast methods. */
       if (obj != Qnil) {
         VALUE value = rb_iv_get(obj, "@__swigtype__");
-        char* type_name = RSTRING_PTR(value);
+        const char* type_name = RSTRING_PTR(value);
 				
         if (strcmp(type->name, type_name) == 0) {
           return obj;
@@ -218,7 +215,7 @@ SWIG_Ruby_NewPointerObj(void *ptr, swig_type_info *type, int flags)
     obj = Data_Wrap_Struct(klass, 0, 0, ptr);
   }
   rb_iv_set(obj, "@__swigtype__", rb_str_new2(type->name));
-  
+
   return obj;
 }
 
@@ -242,22 +239,24 @@ SWIG_Ruby_MangleStr(VALUE obj)
 }
 
 /* Acquire a pointer value */
-typedef void (*ruby_owntype)(void*);
+typedef struct {
+  void (*datafree)(void *);
+  int own;
+} swig_ruby_owntype;
 
-SWIGRUNTIME ruby_owntype
-SWIG_Ruby_AcquirePtr(VALUE obj, ruby_owntype own) {
-  if (obj) {
-    ruby_owntype oldown = RDATA(obj)->dfree;
-    RDATA(obj)->dfree = own;
-    return oldown;
-  } else {
-    return 0;
+SWIGRUNTIME swig_ruby_owntype
+SWIG_Ruby_AcquirePtr(VALUE obj, swig_ruby_owntype own) {
+  swig_ruby_owntype oldown = {0, 0};
+  if (TYPE(obj) == T_DATA && !RTYPEDDATA_P(obj)) {
+    oldown.datafree = RDATA(obj)->dfree;
+    RDATA(obj)->dfree = own.datafree;
   }
+  return oldown;
 }
 
 /* Convert a pointer value */
 SWIGRUNTIME int
-SWIG_Ruby_ConvertPtrAndOwn(VALUE obj, void **ptr, swig_type_info *ty, int flags, ruby_owntype *own)
+SWIG_Ruby_ConvertPtrAndOwn(VALUE obj, void **ptr, swig_type_info *ty, int flags, swig_ruby_owntype *own)
 {
   char *c;
   swig_cast_info *tc;
@@ -265,16 +264,20 @@ SWIG_Ruby_ConvertPtrAndOwn(VALUE obj, void **ptr, swig_type_info *ty, int flags,
 
   /* Grab the pointer */
   if (NIL_P(obj)) {
-    *ptr = 0;
-    return SWIG_OK;
+    if (ptr)
+      *ptr = 0;
+    return (flags & SWIG_POINTER_NO_NULL) ? SWIG_NullReferenceError : SWIG_OK;
   } else {
-    if (TYPE(obj) != T_DATA) {
+    if (TYPE(obj) != T_DATA || (TYPE(obj) == T_DATA && RTYPEDDATA_P(obj))) {
       return SWIG_ERROR;
     }
     Data_Get_Struct(obj, void, vptr);
   }
   
-  if (own) *own = RDATA(obj)->dfree;
+  if (own) {
+    own->datafree = RDATA(obj)->dfree;
+    own->own = 0;
+  }
     
   /* Check to see if the input object is giving up ownership
      of the underlying C struct or C++ object.  If so then we
@@ -309,8 +312,6 @@ SWIG_Ruby_ConvertPtrAndOwn(VALUE obj, void **ptr, swig_type_info *ty, int flags,
           /* The object has already been deleted */
           return SWIG_ObjectPreviouslyDeletedError;
         }
-        *ptr = vptr;
-        return SWIG_OK;
       }
     }
     if ((c = SWIG_MangleStr(obj)) == NULL) {
@@ -320,12 +321,23 @@ SWIG_Ruby_ConvertPtrAndOwn(VALUE obj, void **ptr, swig_type_info *ty, int flags,
     if (!tc) {
       return SWIG_ERROR;
     } else {
-      int newmemory = 0;
-      *ptr = SWIG_TypeCast(tc, vptr, &newmemory);
-      assert(!newmemory); /* newmemory handling not yet implemented */
+      if (ptr) {
+        if (tc->type == ty) {
+          *ptr = vptr;
+        } else {
+          int newmemory = 0;
+          *ptr = SWIG_TypeCast(tc, vptr, &newmemory);
+          if (newmemory == SWIG_CAST_NEW_MEMORY) {
+            assert(own); /* badly formed typemap which will lead to a memory leak - it must set and use own to delete *ptr */
+            if (own)
+              own->own = own->own | SWIG_CAST_NEW_MEMORY;
+          }
+        }
+      }
     }
   } else {
-    *ptr = vptr;
+    if (ptr)
+      *ptr = vptr;
   }
   
   return SWIG_OK;
@@ -351,7 +363,7 @@ SWIG_Ruby_NewPackedObj(void *ptr, int sz, swig_type_info *type) {
   return rb_str_new2(result);
 }
 
-/* Convert a packed value value */
+/* Convert a packed pointer value */
 SWIGRUNTIME int
 SWIG_Ruby_ConvertPacked(VALUE obj, void *ptr, int sz, swig_type_info *ty) {
   swig_cast_info *tc;
@@ -374,7 +386,7 @@ SWIG_Ruby_ConvertPacked(VALUE obj, void *ptr, int sz, swig_type_info *ty) {
 }
 
 SWIGRUNTIME swig_module_info *
-SWIG_Ruby_GetModule(void)
+SWIG_Ruby_GetModule(void *SWIGUNUSEDPARM(clientdata))
 {
   VALUE pointer;
   swig_module_info *ret = 0;
@@ -414,7 +426,7 @@ SWIG_Ruby_SetModule(swig_module_info *pointer)
 SWIGINTERN
 int SWIG_Ruby_isCallable( VALUE proc )
 {
-  if ( rb_respond_to( proc, swig_call_id ) == Qtrue )
+  if ( rb_respond_to( proc, swig_call_id ) )
     return 1;
   return 0;
 }
@@ -427,7 +439,7 @@ int SWIG_Ruby_isCallable( VALUE proc )
 SWIGINTERN
 int SWIG_Ruby_arity( VALUE proc, int minimal )
 {
-  if ( rb_respond_to( proc, swig_arity_id ) == Qtrue )
+  if ( rb_respond_to( proc, swig_arity_id ) )
     {
       VALUE num = rb_funcall( proc, swig_arity_id, 0 );
       int arity = NUM2INT(num);

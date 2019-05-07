@@ -7,7 +7,7 @@
  * ------------------------------------------------------------ */
 
 /*
-  in Tcl we need to pass the interp value, so, we define the decl/call
+  In Tcl we need to pass the interp value, so we define the decl/call
   macros as needed.
 */
 
@@ -15,13 +15,13 @@
 #define SWIG_AS_CALL_ARGS SWIG_TCL_CALL_ARGS_2
 
 
-/* Include fundamental fragemt definitions */
+/* Include fundamental fragment definitions */
 %include <typemaps/fragments.swg>
 
 /* Look for user fragments file. */
 %include <tclfragments.swg>
 
-/* Tcl fragments for primitve types */
+/* Tcl fragments for primitive types */
 %include <tclprimtypes.swg>
 
 /* Tcl fragments for char* strings */
@@ -32,7 +32,7 @@
  *  Unified typemap section
  * ------------------------------------------------------------ */
 
-/* No director supported in Tcl */
+/* No director support in Tcl */
 #ifdef SWIG_DIRECTOR_TYPEMAPS
 #undef SWIG_DIRECTOR_TYPEMAPS
 #endif
@@ -61,12 +61,12 @@
 
 
 /* ------------------------------------------------------------
- *  Tcl extra typemaps
+ *  Tcl extra typemaps / typemap overrides
  * ------------------------------------------------------------ */
 
 #if 1
 // Old 1.3.25 typemaps needed to avoid premature object deletion
-%typemap(out,noblock=1) SWIGTYPE *INSTANCE, SWIGTYPE &INSTANCE, SWIGTYPE INSTANCE[] {
+%typemap(out,noblock=1) SWIGTYPE *INSTANCE, SWIGTYPE &INSTANCE, SWIGTYPE &&INSTANCE, SWIGTYPE INSTANCE[] {
   Tcl_SetObjResult(interp, SWIG_NewInstanceObj( %as_voidptr($1), $1_descriptor,0));
 }
 
@@ -84,6 +84,8 @@
 
 %typemap(out)    SWIGTYPE    =  SWIGTYPE INSTANCE;
 %typemap(out)    SWIGTYPE *  =  SWIGTYPE *INSTANCE;
+%typemap(out)    SWIGTYPE *const  =  SWIGTYPE *;
 %typemap(out)    SWIGTYPE &  =  SWIGTYPE &INSTANCE;
+%typemap(out)    SWIGTYPE && =  SWIGTYPE &&INSTANCE;
 %typemap(out)    SWIGTYPE [] =  SWIGTYPE INSTANCE[];
 %typemap(varout) SWIGTYPE    =  SWIGTYPE INSTANCE;

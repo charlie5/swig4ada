@@ -25,12 +25,11 @@ public:
   ComplexVal operator-() const {
     return ComplexVal(-rpart, -ipart);
   }
-  
+
   double re() const { return rpart; }
   double im() const { return ipart; }
 };
 
-
-
-
-  
+ComplexVal operator*(const double &s, const ComplexVal &c) {
+  return ComplexVal(s*c.re(), s*c.im());
+}

@@ -3,8 +3,12 @@
 %inline {
   struct A {};
   
-  bool func(A* a) {
+  bool funk(A* a) {
     return !a;
+  }
+
+  A* getnull() {
+    return 0;
   }
 }
 

@@ -1,7 +1,4 @@
 /* -----------------------------------------------------------------------------
- * See the LICENSE file for information on copyright, usage and redistribution
- * of SWIG, and the README file for authors - http://www.swig.org/release.html.
- *
  * _std_deque.i
  *
  * This file contains a generic definition of std::deque along with
@@ -27,21 +24,25 @@
          };
 */
 
-%define %std_deque_methods(T)
-       typedef T &reference;
-       typedef const T& const_reference;
+%define %std_deque_methods_noempty(T...)
+       typedef size_t size_type;
+       typedef ptrdiff_t difference_type;
+       typedef T value_type;
+       typedef value_type* pointer;
+       typedef const value_type* const_pointer;
+       typedef value_type& reference;
+       typedef const value_type& const_reference;
 
        deque();
        deque(unsigned int size, const T& value=T());
-       deque(const deque<T> &);
+       deque(const deque< T > &);
       ~deque();
 
        void assign(unsigned int n, const T& value);
-       void swap(deque<T> &x);
+       void swap(deque< T > &x);
        unsigned int size() const;
        unsigned int max_size() const;
        void resize(unsigned int n, T c = T());
-       bool empty() const;
        const_reference front();
        const_reference back();
        void push_front(const T& x);
@@ -69,7 +70,7 @@
                     throw std::out_of_range("deque index out of range");
            }
            void delitem(int i) throw (std::out_of_range) {
-            	int size = int(self->size());
+                int size = int(self->size());
                 if (i<0) i+= size;
                 if (i>=0 && i<size) {
                     self->erase(self->begin()+i);
@@ -77,17 +78,17 @@
                     throw std::out_of_range("deque index out of range");
                 }
            }
-	   std::deque<T> getslice(int i, int j) {
+           std::deque< T > getslice(int i, int j) {
                 int size = int(self->size());
                 if (i<0) i = size+i;
                 if (j<0) j = size+j;
                 if (i<0) i = 0;
                 if (j>size) j = size;
-                std::deque<T > tmp(j-i);
+                std::deque< T > tmp(j-i);
                 std::copy(self->begin()+i,self->begin()+j,tmp.begin());
                 return tmp;
             }
-            void setslice(int i, int j, const std::deque<T>& v) {
+            void setslice(int i, int j, const std::deque< T >& v) {
                 int size = int(self->size());
                 if (i<0) i = size+i;
                 if (j<0) j = size+j;
@@ -112,8 +113,23 @@
                 self->erase(self->begin()+i,self->begin()+j);
             }
        };
-
 %enddef
+
+#ifdef SWIGPHP
+%define %std_deque_methods(T...)
+    %extend {
+        bool is_empty() const {
+            return self->empty();
+        }
+    };
+    %std_deque_methods_noempty(T)
+%enddef
+#else
+%define %std_deque_methods(T...)
+    bool empty() const;
+    %std_deque_methods_noempty(T)
+%enddef
+#endif
 
 namespace std {
     template<class T> class deque {
@@ -121,6 +137,3 @@ namespace std {
        %std_deque_methods(T);
     };
 }
-
-
-

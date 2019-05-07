@@ -2,6 +2,12 @@
 
 %module java_throws
 
+// throw is invalid in C++17 and later, only SWIG to use it
+#define TESTCASE_THROW1(T1) throw(T1)
+%{
+#define TESTCASE_THROW1(T1)
+%}
+
 // Exceptions are chosen at random but are ones which have to have a try catch block to compile
 %typemap(in, throws="	 ClassNotFoundException") int num { 
     $1 = (int)$input;
@@ -39,15 +45,13 @@ short full_of_exceptions(int num) {
     return $null;
 }
 %inline %{
-#if defined(_MSC_VER)
-  #pragma warning(disable: 4290) // C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
-#endif
-void throw_spec_function(int value) throw (int) { throw (int)0; }
-#if defined(_MSC_VER)
-  #pragma warning(default: 4290) // C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
-#endif
+bool throw_spec_function(int value) TESTCASE_THROW1(int) { throw (int)0; }
 %}
 
+%catches(int) catches_function(int value);
+%inline %{
+bool catches_function(int value) { throw (int)0; }
+%}
 
 // Check newfree typemap throws attribute
 %newobject makeTestClass;
@@ -122,6 +126,24 @@ JAVAEXCEPTION(FeatureTest::staticMethod)
     };
 %}
 
+%include <swiginterface.i>
+%interface_impl(InterfaceTest);
+JAVAEXCEPTION(imethod)
+
+%inline %{
+    struct InterfaceTest {
+        virtual void imethod(bool raise) = 0;
+        virtual ~InterfaceTest() {}
+    };
+
+    struct InterfaceTestImpl : InterfaceTest {
+        void imethod(bool raise) {
+            if (raise)
+                throw MyException("raise message");
+        }
+    };
+%}
+
 // Mixing except feature and typemaps when both generate a class for the throws clause
 %typemap(in, throws="ClassNotFoundException") int both { 
     $1 = (int)$input;
@@ -142,4 +164,43 @@ try {
         throw MyException("no message");
     }
 %}
+
+// Test %nojavaexception
+%javaexception("MyException") %{
+/* global exception handler */
+try {
+    $action
+} catch (MyException) {
+    jclass excep = jenv->FindClass("java_throws/MyException");
+    if (excep)
+        jenv->ThrowNew(excep, "exception message");
+    return $null;
+}
+%}
+
+%nojavaexception *::noExceptionPlease();
+%nojavaexception NoExceptTest::NoExceptTest();
+
+// Need to handle the checked exception in NoExceptTest.delete()
+%typemap(javafinalize) SWIGTYPE %{
+  @SuppressWarnings("deprecation")
+  protected void finalize() {
+    try {
+      delete();
+    } catch (MyException e) {
+      throw new RuntimeException(e);
+    }
+  }
+%}
+
+%inline %{
+struct NoExceptTest {
+  unsigned int noExceptionPlease() { return 123; }
+  unsigned int exceptionPlease() { return 456; }
+  ~NoExceptTest() {}
+};
+%}
+
+// Turn global exceptions off (for the implicit destructors/constructors)
+%nojavaexception;
 

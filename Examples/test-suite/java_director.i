@@ -7,6 +7,7 @@
 %module(directors="1") java_director
 
 %typemap(javafinalize) SWIGTYPE %{
+  @SuppressWarnings("deprecation")
   protected void finalize() {
 //    System.out.println("Finalizing " + this);
     delete();
@@ -120,5 +121,13 @@ struct JObjectTest {
   virtual jobject foo(jobject x) { return x; }
 };
 
+%}
+
+%javaexception("Exception") etest "$action" 
+%inline %{
+struct JavaExceptionTest {
+  virtual ~JavaExceptionTest() {}
+  virtual void etest() {}
+};
 %}
 

@@ -21,19 +21,31 @@ UVW Bar::static_member_variable;
 %}
 
 
-// Now test the allowexcept feature by making the usual $action uncompileable and ensuring the %exception is picked up
+// Now test the allowexcept feature by making the usual $action uncompilable and ensuring the %exception is picked up
 
 struct XYZ {
 };
 
+// The operator& trick doesn't work for SWIG/PHP because the generated code
+// takes the address of the variable in the code in the "vinit" section.
+#ifdef SWIGPHP
 %{
 struct XYZ {
   void foo() {}
 private:
   XYZ& operator=(const XYZ& other); // prevent assignment used in normally generated set method
-  XYZ* operator&(); // prevent dereferencing used in normally generated  get method
 };
 %}
+#else
+%{
+struct XYZ {
+  void foo() {}
+private:
+  XYZ& operator=(const XYZ& other); // prevent assignment used in normally generated set method
+  XYZ* operator&(); // prevent dereferencing used in normally generated get method
+};
+%}
+#endif
 #if defined(SWIGUTL)
 %exception {
   /* 

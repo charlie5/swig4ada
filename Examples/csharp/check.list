@@ -1,9 +1,11 @@
 # see top-level Makefile.in
+arrays
 callback
 class
 enum
 extend
 funcptr
+nested
 reference
 simple
 template

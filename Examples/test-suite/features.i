@@ -2,6 +2,10 @@
 
 %warnfilter(SWIGWARN_LANG_IDENTIFIER,SWIGWARN_IGNORE_OPERATOR_PLUSEQ);
 
+#ifdef SWIGOCAML
+%warnfilter(SWIGWARN_PARSE_KEYWORD) method;
+#endif
+
 // This testcase checks that %feature is working for templates and non user supplied constructors/destructors and is just generally working
 
 // If the default %exception is used it will not compile. It shouldn't get used.
@@ -160,5 +164,22 @@ namespace Space {
     virtual const char** virtualmethod(int a) const { return 0; }
   };
 }
+%}
+
+// Test 8 conversion operators
+%rename(opbool) operator bool;
+%rename(opuint) operator unsigned int;
+
+%exception ConversionOperators::ConversionOperators() "$action /* ConversionOperators::ConversionOperators() */";
+%exception ConversionOperators::~ConversionOperators() "$action /* ConversionOperators::~ConversionOperators() */";
+%exception ConversionOperators::operator bool "$action /* ConversionOperators::operator bool */";
+%exception ConversionOperators::operator unsigned int "$action /* ConversionOperators::unsigned int*/";
+
+%inline %{
+  class ConversionOperators {
+  public:
+    operator bool() { return false; }
+    operator unsigned int() { return 0; }
+  };
 %}
 

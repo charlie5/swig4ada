@@ -1,5 +1,9 @@
 %module extend
 
+#ifdef SWIGOCAML
+%warnfilter(SWIGWARN_PARSE_KEYWORD) method;
+#endif
+
 %extend Base {
   ~Base() {
     delete $self; 
@@ -23,6 +27,9 @@ struct Base {
   virtual int method(int v) {
     return v;
   }
+#if !defined(SWIG)
+  virtual ~Base() {}
+#endif
 };
 struct Derived : Base {
   double actualval;

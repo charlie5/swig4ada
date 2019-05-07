@@ -1,7 +1,4 @@
 /* -----------------------------------------------------------------------------
- * See the LICENSE file for information on copyright, usage and redistribution
- * of SWIG, and the README file for authors - http://www.swig.org/release.html.
- *
  * guilemain.i
  *
  * The main functions for a user augmented guile
@@ -14,11 +11,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-/* Debugger interface (don't change the order of the following lines) */
-#define GDB_TYPE SCM
-#include <libguile/gdb_interface.h>
-GDB_INTERFACE;
 
 static void
 inner_main(void *closure, int argc, char **argv)

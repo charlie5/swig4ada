@@ -1,6 +1,6 @@
 ---- importing ----
 if string.sub(_VERSION,1,7)=='Lua 5.0' then
-	-- lua5.0 doesnt have a nice way to do this
+	-- lua5.0 doesn't have a nice way to do this
 	lib=loadlib('example.dll','luaopen_example') or loadlib('example.so','luaopen_example')
 	assert(lib)()
 else
@@ -25,7 +25,7 @@ math.randomseed(0)  -- init random
 
 
 --[[ version 1: passing a C array to the code
-lets test call sort_int()
+let's test call sort_int()
 this requires a C array, so is the hardest to use]]
 ARRAY_SIZE=10
 arr=example.new_int(ARRAY_SIZE)

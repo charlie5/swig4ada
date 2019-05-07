@@ -1,7 +1,4 @@
 /* -----------------------------------------------------------------------------
- * See the LICENSE file for information on copyright, usage and redistribution
- * of SWIG, and the README file for authors - http://www.swig.org/release.html.
- *
  * arrays_java.i
  *
  * These typemaps give more natural support for arrays. The typemaps are not efficient
@@ -31,9 +28,9 @@
 /* Array support functions declarations macro */
 %define JAVA_ARRAYS_DECL(CTYPE, JNITYPE, JAVATYPE, JFUNCNAME)
 %{
-int SWIG_JavaArrayIn##JFUNCNAME (JNIEnv *jenv, JNITYPE **jarr, CTYPE **carr, JNITYPE##Array input);
-void SWIG_JavaArrayArgout##JFUNCNAME (JNIEnv *jenv, JNITYPE *jarr, CTYPE *carr, JNITYPE##Array input);
-JNITYPE##Array SWIG_JavaArrayOut##JFUNCNAME (JNIEnv *jenv, CTYPE *result, jsize sz);
+static int SWIG_JavaArrayIn##JFUNCNAME (JNIEnv *jenv, JNITYPE **jarr, CTYPE **carr, JNITYPE##Array input);
+static void SWIG_JavaArrayArgout##JFUNCNAME (JNIEnv *jenv, JNITYPE *jarr, CTYPE *carr, JNITYPE##Array input);
+static JNITYPE##Array SWIG_JavaArrayOut##JFUNCNAME (JNIEnv *jenv, CTYPE *result, jsize sz);
 %}
 %enddef
 
@@ -41,7 +38,7 @@ JNITYPE##Array SWIG_JavaArrayOut##JFUNCNAME (JNIEnv *jenv, CTYPE *result, jsize 
 %define JAVA_ARRAYS_IMPL(CTYPE, JNITYPE, JAVATYPE, JFUNCNAME)
 %{
 /* CTYPE[] support */
-int SWIG_JavaArrayIn##JFUNCNAME (JNIEnv *jenv, JNITYPE **jarr, CTYPE **carr, JNITYPE##Array input) {
+static int SWIG_JavaArrayIn##JFUNCNAME (JNIEnv *jenv, JNITYPE **jarr, CTYPE **carr, JNITYPE##Array input) {
   int i;
   jsize sz;
   if (!input) {
@@ -55,7 +52,7 @@ int SWIG_JavaArrayIn##JFUNCNAME (JNIEnv *jenv, JNITYPE **jarr, CTYPE **carr, JNI
 #ifdef __cplusplus
 %{  *carr = new CTYPE[sz]; %}
 #else
-%{  *carr = (CTYPE*) calloc(sz, sizeof(CTYPE)); %}
+%{  *carr = (CTYPE*) malloc(sz * sizeof(CTYPE)); %}
 #endif
 %{  if (!*carr) {
     SWIG_JavaThrowException(jenv, SWIG_JavaOutOfMemoryError, "array memory allocation failed");
@@ -66,7 +63,7 @@ int SWIG_JavaArrayIn##JFUNCNAME (JNIEnv *jenv, JNITYPE **jarr, CTYPE **carr, JNI
   return 1;
 }
 
-void SWIG_JavaArrayArgout##JFUNCNAME (JNIEnv *jenv, JNITYPE *jarr, CTYPE *carr, JNITYPE##Array input) {
+static void SWIG_JavaArrayArgout##JFUNCNAME (JNIEnv *jenv, JNITYPE *jarr, CTYPE *carr, JNITYPE##Array input) {
   int i;
   jsize sz = JCALL1(GetArrayLength, jenv, input);
   for (i=0; i<sz; i++)
@@ -74,7 +71,7 @@ void SWIG_JavaArrayArgout##JFUNCNAME (JNIEnv *jenv, JNITYPE *jarr, CTYPE *carr, 
   JCALL3(Release##JAVATYPE##ArrayElements, jenv, input, jarr, 0);
 }
 
-JNITYPE##Array SWIG_JavaArrayOut##JFUNCNAME (JNIEnv *jenv, CTYPE *result, jsize sz) {
+static JNITYPE##Array SWIG_JavaArrayOut##JFUNCNAME (JNIEnv *jenv, CTYPE *result, jsize sz) {
   JNITYPE *arr;
   int i;
   JNITYPE##Array jresult = JCALL1(New##JAVATYPE##Array, jenv, sz);
@@ -150,19 +147,19 @@ JAVA_ARRAYS_IMPL(double, jdouble, Double, Double)     /* double[] */
 %typemap(jstype) CTYPE[ANY], CTYPE[]            %{JTYPE[]%}
 
 %typemap(in) CTYPE[] (JNITYPE *jarr)
-%{  if (!SWIG_JavaArrayIn##JFUNCNAME(jenv, &jarr, &$1, $input)) return $null; %}
+%{  if (!SWIG_JavaArrayIn##JFUNCNAME(jenv, &jarr, (CTYPE **)&$1, $input)) return $null; %}
 %typemap(in) CTYPE[ANY] (JNITYPE *jarr)
 %{  if ($input && JCALL1(GetArrayLength, jenv, $input) != $1_size) {
     SWIG_JavaThrowException(jenv, SWIG_JavaIndexOutOfBoundsException, "incorrect array size");
     return $null;
   }
-  if (!SWIG_JavaArrayIn##JFUNCNAME(jenv, &jarr, &$1, $input)) return $null; %}
+  if (!SWIG_JavaArrayIn##JFUNCNAME(jenv, &jarr, (CTYPE **)&$1, $input)) return $null; %}
 %typemap(argout) CTYPE[ANY], CTYPE[] 
-%{ SWIG_JavaArrayArgout##JFUNCNAME(jenv, jarr$argnum, $1, $input); %}
+%{ SWIG_JavaArrayArgout##JFUNCNAME(jenv, jarr$argnum, (CTYPE *)$1, $input); %}
 %typemap(out) CTYPE[ANY]
-%{$result = SWIG_JavaArrayOut##JFUNCNAME(jenv, $1, $1_dim0); %}
+%{$result = SWIG_JavaArrayOut##JFUNCNAME(jenv, (CTYPE *)$1, $1_dim0); %}
 %typemap(out) CTYPE[] 
-%{$result = SWIG_JavaArrayOut##JFUNCNAME(jenv, $1, FillMeInAsSizeCannotBeDeterminedAutomatically); %}
+%{$result = SWIG_JavaArrayOut##JFUNCNAME(jenv, (CTYPE *)$1, FillMeInAsSizeCannotBeDeterminedAutomatically); %}
 %typemap(freearg) CTYPE[ANY], CTYPE[] 
 #ifdef __cplusplus
 %{ delete [] $1; %}
@@ -175,6 +172,8 @@ JAVA_ARRAYS_IMPL(double, jdouble, Double, Double)     /* double[] */
     return $jnicall;
   }
 
+%typemap(memberin) CTYPE[ANY], CTYPE[];
+%typemap(globalin) CTYPE[ANY], CTYPE[];
 %enddef
 
 JAVA_ARRAYS_TYPEMAPS(bool, boolean, jboolean, Bool, "[Z")       /* bool[ANY] */
@@ -260,7 +259,7 @@ JAVA_ARRAYS_TYPEMAPS(double, double, jdouble, Double, "[D")     /* double[ANY] *
 #ifdef __cplusplus
   $1 = new $*1_ltype[sz];
 #else
-  $1 = ($1_ltype) calloc(sz, sizeof($*1_ltype));
+  $1 = ($1_ltype) malloc(sz * sizeof($*1_ltype));
 #endif
   if (!$1) {
     SWIG_JavaThrowException(jenv, SWIG_JavaOutOfMemoryError, "array memory allocation failed");
@@ -290,7 +289,7 @@ JAVA_ARRAYS_TYPEMAPS(double, double, jdouble, Double, "[D")     /* double[ANY] *
 #ifdef __cplusplus
   $1 = new $*1_ltype[sz];
 #else
-  $1 = ($1_ltype) calloc(sz, sizeof($*1_ltype));
+  $1 = ($1_ltype) malloc(sz * sizeof($*1_ltype));
 #endif
   if (!$1) {
     SWIG_JavaThrowException(jenv, SWIG_JavaOutOfMemoryError, "array memory allocation failed");
@@ -338,7 +337,8 @@ JAVA_ARRAYS_TYPEMAPS(double, double, jdouble, Double, "[D")     /* double[ANY] *
 
 /* Add some code to the proxy class of the array type for converting between type used in 
  * JNI class (long[]) and type used in proxy class ( ARRAYSOFCLASSES[] ) */
-%typemap(javacode) ARRAYSOFCLASSES %{
+%extend ARRAYSOFCLASSES {
+%proxycode %{
   protected static long[] cArrayUnwrap($javaclassname[] arrayWrapper) {
       long[] cArray = new long[arrayWrapper.length];
       for (int i=0; i<arrayWrapper.length; i++)
@@ -353,6 +353,7 @@ JAVA_ARRAYS_TYPEMAPS(double, double, jdouble, Double, "[D")     /* double[ANY] *
     return arrayWrapper;
   }
 %}
+}
 
 %enddef /* JAVA_ARRAYSOFCLASSES */
 

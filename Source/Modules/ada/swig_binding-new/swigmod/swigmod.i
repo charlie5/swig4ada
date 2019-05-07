@@ -25,6 +25,17 @@
 %ignore argv_template_string;
 %ignore argc_template_string;
 
+class DoxygenTranslator;
+
+%ignore ModuleFactory;
+//class Language;
+//typedef Language *(*ModuleFactory) (void);
+
+//class ModuleFactory;
+
+%ignore TargetLanguageModule;
+
+%ignore SWIG_main;
 
 %include "swigmod.h"
 

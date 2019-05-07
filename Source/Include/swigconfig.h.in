@@ -1,7 +1,7 @@
-/* Source/Include/swigconfig.h.in.  Generated from configure.in by autoheader.  */
+/* Source/Include/swigconfig.h.in.  Generated from configure.ac by autoheader.  */
 
-/* Define to 1 if the system has the type `bool'. */
-#undef HAVE_BOOL
+/* define if the Boost library is available */
+#undef HAVE_BOOST
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
@@ -15,11 +15,11 @@
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
 
+/* Define if you have PCRE library */
+#undef HAVE_PCRE
+
 /* Define if popen is available */
 #undef HAVE_POPEN
-
-/* Define if rxspencer is available */
-#undef HAVE_RXSPENCER
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
@@ -42,9 +42,6 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
-/* Define to 1 if your C compiler doesn't accept -c and -o together. */
-#undef NO_MINUS_C_MINUS_O
-
 /* Name of package */
 #undef PACKAGE
 
@@ -60,8 +57,14 @@
 /* Define to the one symbol short name of this package. */
 #undef PACKAGE_TARNAME
 
+/* Define to the home page for this package. */
+#undef PACKAGE_URL
+
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
+
+/* The size of `void *', as computed by sizeof. */
+#undef SIZEOF_VOID_P
 
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
@@ -83,10 +86,7 @@
 #undef VERSION
 
 
-/* Default language */
-#define SWIG_LANG               "-tcl"
-
-/* Deal with Microsoft's attempt at deprecating C standard runtime functions */
+/* Deal with attempt by Microsoft to deprecate C standard runtime functions */
 #if defined(_MSC_VER)
 # define _CRT_SECURE_NO_DEPRECATE
 #endif

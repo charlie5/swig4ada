@@ -14,7 +14,15 @@
 %warnfilter(SWIGWARN_LANG_OVERLOAD_SHADOW) fid;
 #endif
 
-#ifndef SWIG_NO_OVERLOAD
+#ifdef SWIGGO
+%warnfilter(SWIGWARN_PARSE_KEYWORD) type; // 'type' is a Go keyword, renamed as 'Xtype'
+%rename(Foos) Foo;
+#endif
+
+#ifdef SWIGOCAML
+%warnfilter(SWIGWARN_PARSE_KEYWORD) type;
+#endif
+
 %immutable Spam::type;
 
 %inline %{
@@ -172,8 +180,6 @@ long long ll(long long ull) { return ull; }
 %malloc(void);
 %free(void);
 
-#endif
-
 
 %inline {  
   class ClassA
@@ -203,3 +209,9 @@ long long ll(long long ull) { return ull; }
 } 
 
 #endif
+
+%inline %{
+  int int_object(Spam *s) { return 999; }
+  int int_object(int c) { return c; }
+%}
+

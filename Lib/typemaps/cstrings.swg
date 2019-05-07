@@ -1,7 +1,4 @@
 /* -----------------------------------------------------------------------------
- * See the LICENSE file for information on copyright, usage and redistribution
- * of SWIG, and the README file for authors - http://www.swig.org/release.html.
- *
  * cstrings.swg
  *
  * This file provides typemaps and macros for dealing with various forms
@@ -150,8 +147,7 @@
  */
 
 %define Name ## _mutable(TYPEMAP,EXP...)                  
-%typemap(in,noblock=1,fragment=#SWIG_AsCharPtrAndSize) TYPEMAP 
- (int res, Char* t = 0, size_t n = 0, int alloc = 0, size_t expansion = 0) {
+%typemap(in,noblock=1,fragment=#SWIG_AsCharPtrAndSize) TYPEMAP (int res, Char *t = 0, size_t n = 0, int alloc = 0, size_t expansion = 0) {
 #if #EXP != ""
   expansion += EXP;
 #endif
@@ -207,7 +203,7 @@
  * This macro is used to return Character data along with a size
  * parameter.
  *
- *     %cstring_output_maxsize(Char *outx, int *max) {
+ *     %cstring_output_withsize(Char *outx, int *max) {
  *     void foo(Char *outx, int *max) {
  *         sprintf(outx,"blah blah\n");
  *         *max = strlen(outx);  
@@ -240,7 +236,7 @@
  * This macro is used to return Character data that was
  * allocated with new or malloc.
  *
- *     %cstring_output_allocated(Char **outx, free($1));
+ *     %cstring_output_allocate(Char **outx, free($1));
  *     void foo(Char **outx) {
  *         *outx = (Char *) malloc(512);
  *         sprintf(outx,"blah blah\n");
@@ -267,7 +263,7 @@
  * This macro is used to return Character data that was
  * allocated with new or malloc.
  *
- *     %cstring_output_allocated(Char **outx, int *sz, free($1));
+ *     %cstring_output_allocate_size(Char **outx, int *sz, free($1));
  *     void foo(Char **outx, int *sz) {
  *         *outx = (Char *) malloc(512);
  *         sprintf(outx,"blah blah\n");

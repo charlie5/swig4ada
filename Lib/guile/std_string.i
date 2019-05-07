@@ -1,7 +1,4 @@
 /* -----------------------------------------------------------------------------
- * See the LICENSE file for information on copyright, usage and redistribution
- * of SWIG, and the README file for authors - http://www.swig.org/release.html.
- *
  * std_string.i
  *
  * SWIG typemaps for std::string
@@ -29,8 +26,8 @@ namespace std {
     %typemap(typecheck) string = char *;
     %typemap(typecheck) const string & = char *;
 
-    %typemap(in) string (char* tempptr) {
-        if (gh_string_p($input)) {
+    %typemap(in) string (char * tempptr) {
+        if (scm_is_string($input)) {
             tempptr = SWIG_scm2str($input);
             $1.assign(tempptr);
             if (tempptr) SWIG_free(tempptr);
@@ -39,9 +36,8 @@ namespace std {
         }
     }
 
-    %typemap(in) const string & (std::string temp,
-                                 char* tempptr) {
-        if (gh_string_p($input)) {
+    %typemap(in) const string & ($*1_ltype temp, char *tempptr) {
+        if (scm_is_string($input)) {
             tempptr = SWIG_scm2str($input);
             temp.assign(tempptr);
             if (tempptr) SWIG_free(tempptr);
@@ -51,10 +47,10 @@ namespace std {
         }
     }
 
-    %typemap(in) string * (char* tempptr) {
-        if (gh_string_p($input)) {
+    %typemap(in) string * (char *tempptr) {
+        if (scm_is_string($input)) {
             tempptr = SWIG_scm2str($input);
-            $1 = new std::string(tempptr);
+            $1 = new $*1_ltype(tempptr);
             if (tempptr) SWIG_free(tempptr);
         } else {
             SWIG_exception(SWIG_TypeError, "string expected");
@@ -62,19 +58,19 @@ namespace std {
     }
 
     %typemap(out) string {
-        $result = gh_str02scm($1.c_str());
+        $result = SWIG_str02scm($1.c_str());
     }
 
     %typemap(out) const string & {
-        $result = gh_str02scm($1->c_str());
+        $result = SWIG_str02scm($1->c_str());
     }
 
     %typemap(out) string * {
-        $result = gh_str02scm($1->c_str());
+        $result = SWIG_str02scm($1->c_str());
     }
 
     %typemap(varin) string {
-        if (gh_string_p($input)) {
+        if (scm_is_string($input)) {
 	    char *tempptr = SWIG_scm2str($input);
             $1.assign(tempptr);
             if (tempptr) SWIG_free(tempptr);
@@ -84,7 +80,7 @@ namespace std {
     }
 
     %typemap(varout) string {
-        $result = gh_str02scm($1.c_str());
+        $result = SWIG_str02scm($1.c_str());
     }
 
 }

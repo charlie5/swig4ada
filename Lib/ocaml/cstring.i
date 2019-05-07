@@ -1,7 +1,4 @@
 /* -----------------------------------------------------------------------------
- * See the LICENSE file for information on copyright, usage and redistribution
- * of SWIG, and the README file for authors - http://www.swig.org/release.html.
- *
  * cstring.i
  *
  * This file provides typemaps and macros for dealing with various forms
@@ -111,7 +108,7 @@
 %define %cstring_mutable(TYPEMAP,...)
 %typemap(in) TYPEMAP {
    char *t = String_val($input);
-   int   n = string_length($input);
+   int   n = caml_string_length($input);
    $1 = ($1_ltype) t;
 #if #__VA_ARGS__ == ""
 #ifdef __cplusplus

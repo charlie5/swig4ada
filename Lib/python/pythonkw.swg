@@ -3,16 +3,19 @@
 */
 
 #define PYTHONKW(x) %keywordwarn("'" `x` "' is a python keyword, renaming to '_" `x` "'", rename="_%s")  `x`
-#define PYTHONBN(x) %builtinwarn("'" `x` "' conflicts with a built-in name in python")  "::"`x`
+#define PYTHONBN(x) %builtinwarn("'" `x` "' conflicts with a built-in name in python")  `x`
 
 
 /*
   Warnings for Python keywords 
-  http://www.fnorb.org/docs/1.2/Fnorb-Guide/node62.html
+  https://docs.python.org/2/reference/lexical_analysis.html#keywords
 */
 
 PYTHONKW(and);
+PYTHONKW(as);
 PYTHONKW(assert);
+PYTHONKW(async);
+PYTHONKW(await);
 PYTHONKW(break);
 PYTHONKW(class);
 PYTHONKW(continue);
@@ -39,11 +42,12 @@ PYTHONKW(raise);
 PYTHONKW(return);
 PYTHONKW(try);
 PYTHONKW(while);
+PYTHONKW(with);
 PYTHONKW(yield);
 
 /*
   built-in functions
-  http://www.zvon.org/other/python/doc21/lib/built-in-funcs.html
+  https://docs.python.org/2/library/functions.html
  */ 
 
 PYTHONBN(abs);
@@ -105,7 +109,6 @@ PYTHONBN(setattr);
 PYTHONBN(slice);
 PYTHONBN(sorted);
 PYTHONBN(staticmethod);
-PYTHONBN(staticmethod);
 PYTHONBN(str);
 PYTHONBN(sum);
 PYTHONBN(super);
@@ -124,13 +127,14 @@ PYTHONBN(zip);
 */
 PYTHONBN(True);
 PYTHONBN(False);
-PYTHONBN(None);
+
+PYTHONKW(None);
 
 
 /* 
    'self' is also a bad Name
 */
-PYTHONBN(self);
+PYTHONKW(self);
 
 #undef PYTHONBN
 #undef PYTHONKW

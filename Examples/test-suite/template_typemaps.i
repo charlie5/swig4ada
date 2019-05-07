@@ -1,25 +1,33 @@
-%module template_typemap
+%module template_typemaps
 
 
 %typemap(in) Integer1 
 {
+  $1 = 0;
   /* do nothing */
 }
 
-%typemap(out) Integer1 
-{
-  /* do nothing */
-}
+#ifdef SWIGCSHARP
+%typemap(out) Integer1 { /* do nothing */ $result = 0; }
+#else
+%typemap(out) Integer1 { /* do nothing */ }
+#endif
 
 %typemap(in) Integer2 
 {
+  $1 = 0;
   /* do nothing */
 }
 
-%typemap(out) Integer2 
-{
-  /* do nothing */
-}
+#ifdef SWIGCSHARP
+%typemap(out) Integer2 { /* do nothing */ $result = 0; }
+#else
+%typemap(out) Integer2 { /* do nothing */ }
+#endif
+
+#ifdef SWIGOCAML
+%warnfilter(SWIGWARN_PARSE_KEYWORD) val;
+#endif
 
 %{
   typedef int Integer1;
@@ -34,12 +42,12 @@
     {
       T val;
       
-      T get_val() const 
+      T get_value() const 
       {
 	return val;
       }
 
-      void set_val(T v) 
+      void set_value(T v) 
       {
 	val = v;
       }

@@ -5,7 +5,7 @@
 
 ---- importing ----
 if string.sub(_VERSION,1,7)=='Lua 5.0' then
-	-- lua5.0 doesnt have a nice way to do this
+	-- lua5.0 doesn't have a nice way to do this
 	lib=loadlib('example.dll','luaopen_example') or loadlib('example.so','luaopen_example')
 	assert(lib)()
 else
@@ -53,7 +53,6 @@ print("\nGuess I'll clean up now")
 -- Note: this invokes the virtual destructor
 c=nil
 s=nil
-s = 3
 
 -- call gc to make sure they are collected
 collectgarbage()

@@ -1,7 +1,4 @@
 /* -----------------------------------------------------------------------------
- * See the LICENSE file for information on copyright, usage and redistribution
- * of SWIG, and the README file for authors - http://www.swig.org/release.html.
- *
  * cdata.i
  *
  * SWIG library file containing macros for manipulating raw C data as strings.
@@ -20,17 +17,45 @@ typedef struct SWIGCDATA {
 
 #if SWIGGUILE
 %typemap(out) SWIGCDATA {
-   $result = gh_str2scm($1.data,$1.len);
+   $result = scm_from_locale_stringn($1.data,$1.len);
 }
 %typemap(in) (const void *indata, int inlen) = (char *STRING, int LENGTH);
-#elif SWIGCHICKEN
+
+#elif SWIGPHP7
+
 %typemap(out) SWIGCDATA {
-  C_word *string_space = C_alloc(C_SIZEOF_STRING($1.len));
-  $result = C_string(&string_space, $1.len, $1.data);
+  ZVAL_STRINGL($result, $1.data, $1.len);
 }
 %typemap(in) (const void *indata, int inlen) = (char *STRING, int LENGTH);
-#else
-%echo "cdata.i module not supported."
+
+#elif SWIGJAVA
+
+%apply (char *STRING, int LENGTH) { (const void *indata, int inlen) }
+%typemap(jni) SWIGCDATA "jbyteArray"
+%typemap(jtype) SWIGCDATA "byte[]"
+%typemap(jstype) SWIGCDATA "byte[]"
+%fragment("SWIG_JavaArrayOutCDATA", "header") {
+static jbyteArray SWIG_JavaArrayOutCDATA(JNIEnv *jenv, char *result, jsize sz) {
+  jbyte *arr;
+  int i;
+  jbyteArray jresult = JCALL1(NewByteArray, jenv, sz);
+  if (!jresult)
+    return NULL;
+  arr = JCALL2(GetByteArrayElements, jenv, jresult, 0);
+  if (!arr)
+    return NULL;
+  for (i=0; i<sz; i++)
+    arr[i] = (jbyte)result[i];
+  JCALL3(ReleaseByteArrayElements, jenv, jresult, arr, 0);
+  return jresult;
+}
+}
+%typemap(out, fragment="SWIG_JavaArrayOutCDATA") SWIGCDATA
+%{$result = SWIG_JavaArrayOutCDATA(jenv, (char *)$1.data, $1.len); %}
+%typemap(javaout) SWIGCDATA {
+    return $jnicall;
+  }
+
 #endif
 
 
@@ -74,9 +99,6 @@ SWIGCDATA cdata_##NAME(TYPE *ptr, int nelements);
 
 %cdata(void);
 
-/* Memory move function */
+/* Memory move function. Due to multi-argument typemaps this appears to be wrapped as
+void memmove(void *data, const char *s); */
 void memmove(void *data, const void *indata, int inlen);
-
-
-
-

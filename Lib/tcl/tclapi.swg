@@ -16,7 +16,7 @@ extern "C" {
 /* Constant information structure */
 typedef struct swig_const_info {
     int type;
-    char *name;
+    const char *name;
     long lvalue;
     double dvalue;
     void   *pvalue;
@@ -49,6 +49,7 @@ typedef struct swig_class {
   struct swig_class **bases;
   const char              **base_names;
   swig_module_info   *module;
+  Tcl_HashTable       hashtable;
 } swig_class;
 
 typedef struct swig_instance {

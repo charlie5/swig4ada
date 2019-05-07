@@ -31,8 +31,8 @@ import java.lang.*; // for Exception
 
 // Create a new getCPtr() function which takes Java null and is public
 %typemap(javabody) NS::Greeting %{
-  private long swigCPtr;
-  protected boolean swigCMemOwn;
+  private transient long swigCPtr;
+  protected transient boolean swigCMemOwn;
 
   protected $javaclassname(long cPtr, boolean cMemoryOwn) {
     swigCMemOwn = cMemoryOwn;
@@ -46,8 +46,8 @@ import java.lang.*; // for Exception
 
 // Make the pointer constructor public
 %typemap(javabody) NS::Farewell %{
-  private long swigCPtr;
-  protected boolean swigCMemOwn;
+  private transient long swigCPtr;
+  protected transient boolean swigCMemOwn;
 
   public $javaclassname(long cPtr, boolean cMemoryOwn) {
     swigCMemOwn = cMemoryOwn;
@@ -119,6 +119,8 @@ public:
   void const_member_method(const ConstWithout *p) const {}
   const ConstWithout * const_var;
   const ConstWithout * const var_const;
+private:
+  ConstWithout& operator=(const ConstWithout &);
 };
 const ConstWithout * global_constwithout = 0;
 void global_method_constwithout(const ConstWithout *p) {}

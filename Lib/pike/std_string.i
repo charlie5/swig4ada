@@ -1,7 +1,4 @@
 /* -----------------------------------------------------------------------------
- * See the LICENSE file for information on copyright, usage and redistribution
- * of SWIG, and the README file for authors - http://www.swig.org/release.html.
- *
  * std_string.i
  *
  * SWIG typemaps for std::string
@@ -28,7 +25,7 @@ namespace std {
       $1.assign(STR0($input.u.string));
     }
 
-    %typemap(in, pikedesc="tStr") const string & (std::string temp) {
+    %typemap(in, pikedesc="tStr") const string & ($*1_ltype temp) {
       if ($input.type != T_STRING)
         Pike_error("Bad argument: Expected a string.\n");
       temp.assign(STR0($input.u.string));
@@ -39,9 +36,9 @@ namespace std {
 
     %typemap(out, pikedesc="tStr") const string & "push_text($1->c_str());";
     
-    %typemap(directorin) string, const string &, string & "$1_name.c_str()";
+    %typemap(directorin) string, const string &, string & "$1.c_str()";
 
-    %typemap(directorin) string *, const string * "$1_name->c_str()";
+    %typemap(directorin) string *, const string * "$1->c_str()";
     
     %typemap(directorout) string {
       if ($input.type == T_STRING)
@@ -50,7 +47,7 @@ namespace std {
         throw Swig::DirectorTypeMismatchException("string expected");
     }
     
-    %typemap(directorout) const string & (std::string temp) {
+    %typemap(directorout) const string & ($*1_ltype temp) {
       if ($input.type == T_STRING) {
         temp.assign(STR0($input.u.string));
         $result = &temp;
