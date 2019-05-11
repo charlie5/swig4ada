@@ -25,6 +25,7 @@ package swigmod.Language is
       doxygenTranslator             : access swigmod.DoxygenTranslator;
       symtabs                       : access swigg_module.Hash;
       overloading                   : aliased interfaces.c.int;
+      protected_and_private_Members_allowed : aliased swig.bool;
       multiinput                    : aliased interfaces.c.int;
       cplus_runtime                 : aliased interfaces.c.int;
       directors                     : aliased interfaces.c.int;
@@ -324,6 +325,9 @@ package swigmod.Language is
 
    function cplus_runtime_mode
      (Self : access swigmod.Language.Item'Class) return interfaces.c.int;
+
+   procedure allow_protected_and_private_Members
+     (Self : in out swigmod.Language.Item'Class);
 
    procedure allow_directors (Self : in out swigmod.Language.Item'Class;
       val                          : in     interfaces.c.int);
@@ -683,7 +687,8 @@ private
    pragma Import (CPP, enable_cplus_runtime_mode,
       "Ada_Language_enable_cplus_runtime_mode");
    pragma Import (CPP, cplus_runtime_mode, "Ada_Language_cplus_runtime_mode");
-
+   pragma Import (CPP, allow_protected_and_private_Members,
+      "Ada_Language_allow_protected_and_private_Members");
    procedure allow_directors_v1 (Self : in out swigmod.Language.Item'Class;
       val                             : in     interfaces.c.int);
 

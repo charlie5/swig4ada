@@ -314,6 +314,7 @@ director_ctor_code(NewString("")),
 director_prot_ctor_code(0),
 symtabs(NewHash()),
 overloading(0),
+protected_and_private_Members_allowed (false),         // For Ada.
 multiinput(0),
 cplus_runtime(0),
 directors(0) {
@@ -877,7 +878,13 @@ int Language::cDeclaration(Node *n) {
   }
 
   /* discards nodes following the access control rules */
-  if (cplus_mode != PUBLIC || !is_public(n)) {
+  if (protected_and_private_Members_allowed) {                   // For Ada.
+    if (!symname) {
+      Setattr (n, "sym:name", Getattr (n, "name"));
+      symname = Getattr(n, "sym:name");
+    }
+  }
+  else if (cplus_mode != PUBLIC || !is_public(n)) {
     /* except for friends, they are not affected by access control */
     int isfriend = Cmp(storage, "friend") == 0;
     if (!isfriend) {
@@ -3443,6 +3450,18 @@ Node *Language::enumLookup(SwigType *s) {
 
   return n;
 }
+
+
+// For Ada.
+//
+void
+Language::
+allow_protected_and_private_Members()
+{
+  protected_and_private_Members_allowed = true;
+}
+
+
 
 /* -----------------------------------------------------------------------------
  * Language::allow_overloading()

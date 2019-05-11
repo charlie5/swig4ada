@@ -3385,6 +3385,19 @@ DllExport int SWIGSTDCALL Ada_Language_cplus_runtime_mode (
 }
 
 
+DllExport void SWIGSTDCALL Ada_Language_allow_protected_and_private_Members (
+  void * jarg1
+  )
+{
+  Language *arg1 = (Language *) 0 ;
+  
+  arg1 = (Language *)jarg1; 
+  
+  (arg1)->Language::allow_protected_and_private_Members();
+  
+  
+}
+
 
 DllExport void SWIGSTDCALL Ada_Language_allow_directors__SWIG_0 (
   void * jarg1

@@ -165,7 +165,6 @@ is
          end;
       end loop;
 
-
       declare
          Unused : Hash_Pointer := Preprocessor_define (const_String_or_char_ptr.item (-"SWIGGNAT 1"),  0);   -- Add a symbol to the parser for conditional compilation.
          pragma Unreferenced (Unused);
@@ -174,9 +173,8 @@ is
          SWIG_config_file    (DOHs.const_String_or_char_ptr.item (-"gnat.swg"));
       end;
 
-
       Self.allow_Overloading;
---      Self.allow_protected_and_private_Members;
+      Self.allow_protected_and_private_Members;
 
       unindent_Log;
    end main;

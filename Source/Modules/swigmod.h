@@ -228,6 +228,9 @@ public:
   /* Returns the cplus_runtime mode */
   int cplus_runtime_mode();
 
+  /* Allow any protected or private members also (for Ada) */
+  void allow_protected_and_private_Members();
+
   /* Allow director related code generation */
   void allow_directors(int val = 1);
 
@@ -348,6 +351,7 @@ protected:
 private:
   Hash *symtabs; /* symbol tables */
   int overloading;
+  bool protected_and_private_Members_allowed;     // For Ada.
   int multiinput;
   int cplus_runtime;
   int directors;
