@@ -8,7 +8,6 @@ package body ada_Package
 is
 
    use ada_subprogram.Vectors,
-       ada_Package.Vectors,
        ada_variable.Vectors,
        ada_Type,
        ada_Type.composite.a_Record,

@@ -189,7 +189,6 @@ is
 --        options_Node : doh_Node'Class   := get_Attribute (get_Attribute (the_Node, -"module"),    -- get any options set in the module directive
 --                                                          -"options");
       module_Name  : constant unbounded_String := +doh_Item (get_Attribute (the_Node, -"name"));
-      the_Status   :          C.int;
 
    begin
       indent_Log;
@@ -509,7 +508,7 @@ is
    function includeDirective (Self : access Item;
                               n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int
    is
-      Status : C.int;
+      Status : C.int with Unreferenced;
    begin
       indent_Log;
 
@@ -528,7 +527,7 @@ is
    is
       the_Node :          Node_Pointer renames n;
       the_Name : constant unbounded_String  := +doh_Item (get_Attribute (the_Node, -"name"));
-      Status   :          C.int;
+      Status   :          C.int with Unreferenced;
    begin
       indent_Log;
       log (+"");
@@ -922,8 +921,8 @@ is
 
                declare
                   actioncode : constant String_Pointer := emit_action (n);
-                  tm         :          doh_String;
-                  Status     :          C.int;
+                  tm         :          doh_String with Unreferenced;
+                  Status     :          C.int      with Unreferenced;
                begin
                   tm := doh_String (Swig_typemap_lookup_out (const_String_or_char_ptr.item (-"out"),
                                                              n,
@@ -1146,7 +1145,7 @@ is
       --  new ...
       --
       new_c_Enum    : c_Type.view;
-      Status        : C.int;
+      Status        : C.int with Unreferenced;
 
    begin
       indent_Log;
@@ -1448,7 +1447,7 @@ is
       class_Name_Doh : constant SwigType_Pointer := SwigType_Pointer (get_Attribute (the_Node, -"sym:name"));
       class_Name     : constant String           := +DOH_Pointer (class_Name_Doh);
       new_c_Class    :          c_Type.view;
-      Status         :          C.int;
+      Status         :          C.int with Unreferenced;
       use type C.int;
    begin
       indent_Log;
@@ -1539,9 +1538,9 @@ is
    function memberfunctionHandler (Self : access Item;
                                    n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int
    is
-      the_Node : Node_Pointer renames n;
-      Status   : C.int;
-      function_Name : String := +DohGetattr (DOH_Pointer (the_Node), DOH_Pointer (-"name"));
+      the_Node      :          Node_Pointer renames n;
+      Status        :          C.int with Unreferenced;
+      function_Name : constant String := +DohGetattr (DOH_Pointer (the_Node), DOH_Pointer (-"name"));
    begin
       indent_Log;
       log (+"");
@@ -1581,7 +1580,7 @@ is
                                          n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int
    is
       the_Node : Node_Pointer renames n;
-      Status   : C.int;
+      Status   : C.int with Unreferenced;
    begin
       indent_Log;
       log (+"");
@@ -1609,7 +1608,7 @@ is
                                 n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int
    is
       the_Node : Node_Pointer renames n;
-      Status   : C.int;
+      Status   : C.int with Unreferenced;
       use type C.int;
    begin
       if not Self.in_cpp_Mode
@@ -1752,7 +1751,7 @@ is
                                n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int
    is
       the_Node : doh_Node renames n;
-      Status   : C.int;
+      Status   : C.int with Unreferenced;
       use type C.int;
    begin
       if not Self.in_cpp_Mode
@@ -1895,7 +1894,7 @@ is
                                    n    : in     swigg_module.Pointers.Node_Pointer) return interfaces.c.int
    is
       the_Node : doh_Node renames n;
-      Status   : C.int;
+      Status   : C.int    with Unreferenced;
    begin
       indent_Log;
 

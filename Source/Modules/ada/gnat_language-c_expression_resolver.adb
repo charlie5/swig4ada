@@ -1,11 +1,7 @@
 with
      GMP.discrete,
 
-     swigMod.Dispatcher,
-     swigg_module.Wrapper,
-
      ada_Utility,
-     Dohs.Pointers,         -- swig_p_Doh,
 
      ada.Strings.Maps,
      ada.Characters.handling,
@@ -14,20 +10,11 @@ with
 
 package body gnat_Language.c_expression_Resolver
 is
-   use ada.Strings,
-       swigMod.Dispatcher,
-       swigg_module.Wrapper,
-
-       Dohs.Pointers,
-
-       ada_Utility,
+   use ada_Utility,
+       ada.Strings,
        ada.Strings.Maps,
        ada.Characters.Handling,
        ada.Containers;
-
---     use type swig_p_Doh.item;
-   use type DOH_Pointer;
-
 
 
    function "+" (Self : in String) return unbounded_String

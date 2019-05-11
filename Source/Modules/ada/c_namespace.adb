@@ -6,7 +6,6 @@ with
 package body c_Namespace
 is
    use c_Function.Vectors,
-       c_nameSpace.Vectors,
        c_Variable,
        c_variable.Vectors,
        c_Type,

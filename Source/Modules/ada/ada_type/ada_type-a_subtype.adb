@@ -5,9 +5,6 @@ with Ada.Text_IO; use Ada.Text_IO;
 
 package body ada_Type.a_subType
 is
-   use ada_Package;
-
-
    --  Globals
    --
 

@@ -1941,7 +1941,6 @@ is
    procedure add_Component (Self          : access Item;
                             new_Component : access c_Variable.item'class)
    is
-      use c_Variable.Vectors;
    begin
       Self.my.component_Count                      := Self.my.component_Count + 1;
       Self.my.Components (Self.my.component_Count) := new_Component;
@@ -2017,8 +2016,7 @@ is
 
    function is_Limited (Self : access Item) return Boolean
    is
-      use c_Type.Vectors,
-          ada.Containers;
+      use c_Type.Vectors;
       Cursor : c_Type.Cursor := First (Self.my.base_Classes);
    begin
       while has_Element (Cursor)

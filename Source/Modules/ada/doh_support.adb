@@ -1,14 +1,11 @@
 with
-     swigg_Module.Binding,
-     swigg_Module.Pointers,
-     System;
+     swigg_Module.Binding;
 
 
 package body doh_Support
 is
    use swigg_Module,
        swigg_Module.Binding,
-       swigg_Module.Pointers,
        interfaces.C.strings;
 
 
@@ -57,8 +54,8 @@ is
    is
    begin
       doh_replace_All (in_Source,
-                       String_Pointer (-search_for),
-                       String_Pointer (-replace_with));
+                       -search_for,
+                       -replace_with);
    end replace_All;
 
 

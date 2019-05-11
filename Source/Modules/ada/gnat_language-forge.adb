@@ -9,7 +9,6 @@ with
      ada_Type.composite.a_record,
      ada_Utility,
 
-     swigg_module.Binding,
      ada.Strings.Maps;
 
 

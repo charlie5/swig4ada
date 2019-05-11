@@ -1,7 +1,4 @@
 with
---       swigg_c_import,
-     swigg_module.Binding,
-
      ada.Strings.fixed,
      ada.Characters.handling,
      ada.text_IO,

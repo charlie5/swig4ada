@@ -404,7 +404,7 @@ is
                         log ("adding enum '" & the_c_Type.Name & "'");
 
                         declare
-                           use c_type.enum_literal_Vectors, ada_Type.composite.a_record, GMP.discrete;
+                           use c_type.enum_literal_Vectors, GMP.discrete;
 
                            the_declaration_Package : constant access ada_Package.Item'Class
                              := c_namespace_Map_of_ada_Package.Element (the_c_Type.Namespace);
@@ -482,9 +482,7 @@ is
 
                         else
                            declare
-                              use c_type.enum_literal_Vectors,
-                                  ada_Type.composite.a_record,
-                                  ada_type.composite.an_array;
+                              use ada_type.composite.an_array;
 
                               the_ada_array_Bounds : constant ada_type.composite.an_array.array_dimension_upper_Bounds
                                 := ada_type.composite.an_array.array_dimension_upper_Bounds (the_c_Type.array_Dimensions_upper_Bound);
@@ -663,8 +661,7 @@ is
          while has_Element (Cursor)
          loop
             declare
-               use ada_Type,
-                   c_type;
+               use c_type;
 
                the_c_Variable   : constant c_Variable.view := Element (Cursor);
                the_ada_Variable :          ada_Variable.view;

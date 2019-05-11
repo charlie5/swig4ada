@@ -1,5 +1,4 @@
 with
-     swigg_module.Binding,
      swigMod.Binding,
 
      ada_type.a_Subtype,
@@ -19,9 +18,6 @@ with Ada.Characters.Handling;      use Ada.Characters.Handling;
 
 with ada_Context;            use ada_Context;
 
-with swigg_Module;            use swigg_Module;
---  with Dispatcher;              use Dispatcher;
---  with Wrapper;                 use Wrapper;
 
 with ada_Utility;            use ada_Utility;
 --  with swig_p_Doh;
@@ -1353,7 +1349,6 @@ is
             function Hashed (the_Pair : swap_Pair) return ada.Containers.Hash_Type
             is
                function to_Hash is new ada.Unchecked_Conversion (ada_Type.view, ada.Containers.Hash_Type);
-               use type ada.Containers.Hash_Type;
             begin
                return to_Hash (the_Pair.Type_1) + to_Hash (the_Pair.Type_2);
             end Hashed;
@@ -1465,11 +1460,8 @@ is
       for Each in 1 .. Natural (Length (all_Variables))
       loop
          declare
-            use ada_Variable.array_bounds_Vectors,
-                ada.Containers;
-
+            use ada_Variable.array_bounds_Vectors;
             the_Variable : constant ada_Variable.view      := Element (all_Variables,  Each);
-
          begin
             verify (the_Variable);
 

@@ -9,8 +9,7 @@ is
    is
    begin
       return new Item'(declaration_package => declaration_Package,
-                       name                => Name,
-                       others              => <>);
+                       name                => Name);
    end new_Item;
 
 

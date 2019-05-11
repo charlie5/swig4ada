@@ -82,8 +82,6 @@ is
 
    begin
       declare
-         use ada_type.Vectors;
-
          Cursor                   : ada_type_set_Cursor            := First (Self.a_required_Types);
          the_required_Type        : ada_Type.view;
          the_withing_Requirements : a_packages_withing_Requirements;
@@ -140,8 +138,7 @@ is
 
 
       declare
-         use ada_Type.Vectors,
-             ada_Package.Vectors,
+         use ada_Package.Vectors,
              ada.Containers;
 
          the_Package              : ada_Package.view;
