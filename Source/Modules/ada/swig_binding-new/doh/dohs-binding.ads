@@ -259,6 +259,15 @@ package DOHs.Binding is
    function doh_Copy
      (Self : in DOHs.Pointers.DOH_Pointer) return DOHs.Pointers.DOH_Pointer;
 
+   function doh_First
+     (obj : in DOHs.Pointers.DOH_Pointer) return DOHs.DohIterator.Item;
+
+   function doh_Next
+     (iter : in DOHs.DohIterator.Item) return DOHs.DohIterator.Item;
+
+   function get_Item
+     (Self : in DOHs.DohIterator.Item) return DOHs.Pointers.DOH_Pointer;
+
 private
 
    pragma Import (C, DohCheck, "DohCheck");
@@ -343,5 +352,8 @@ private
    pragma Import (C, DohSplitLines, "DohSplitLines");
    pragma Import (C, DohMemoryDebug, "DohMemoryDebug");
    pragma Import (C, doh_Copy, "doh_Copy");
+   pragma Import (C, doh_First, "doh_First");
+   pragma Import (C, doh_Next, "doh_Next");
+   pragma Import (C, get_Item, "get_Item");
 
 end DOHs.Binding;

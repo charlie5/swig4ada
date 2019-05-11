@@ -337,6 +337,7 @@ typedef Doh String_or_char;
 */
 
 
+/*
   // doh iterators
   //
 
@@ -361,5 +362,6 @@ typedef Doh String_or_char;
   {
     return Self.item;
   }
+*/
 
 %}

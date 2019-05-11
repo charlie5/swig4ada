@@ -58,8 +58,6 @@
     return Copy (Self);
   }
 
-/*
-
 
   // doh iterators
   //
@@ -84,5 +82,5 @@
   {
     return Self.item;
   }
-*/
+
 %}

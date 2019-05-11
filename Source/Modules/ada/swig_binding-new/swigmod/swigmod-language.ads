@@ -17,26 +17,21 @@ package swigmod.Language is
    --
 
    type Item is new Dispatcher.Item with record
-      none_comparison               : access swigg_module.String;
-      director_ctor_code            : access swigg_module.String;
-      director_prot_ctor_code       : access swigg_module.String;
-      director_multiple_inheritance : aliased interfaces.c.int;
-      director_language             : aliased interfaces.c.int;
-      doxygenTranslator             : access swigmod.DoxygenTranslator;
-      symtabs                       : access swigg_module.Hash;
-      overloading                   : aliased interfaces.c.int;
+      none_comparison                       : access swigg_module.String;
+      director_ctor_code                    : access swigg_module.String;
+      director_prot_ctor_code               : access swigg_module.String;
+      director_multiple_inheritance         : aliased interfaces.c.int;
+      director_language                     : aliased interfaces.c.int;
+      doxygenTranslator                     : access swigmod.DoxygenTranslator;
+      symtabs                               : access swigg_module.Hash;
+      overloading                           : aliased interfaces.c.int;
       protected_and_private_Members_allowed : aliased swig.bool;
-      multiinput                    : aliased interfaces.c.int;
-      cplus_runtime                 : aliased interfaces.c.int;
-      directors                     : aliased interfaces.c.int;
+      multiinput                            : aliased interfaces.c.int;
+      cplus_runtime                         : aliased interfaces.c.int;
+      directors                             : aliased interfaces.c.int;
    end record;
 
    pragma Import (CPP, Entity => Item);
-
-   function  construct  return Language.Item'Class;
-   pragma cpp_Constructor (construct, "_ZN8LanguageC1Ev");
-
-
 
    -- Items
    --
@@ -55,6 +50,10 @@ package swigmod.Language is
      array
        (interfaces.C.Size_t range <>) of aliased swigmod.Language
        .NestedClassSupport;
+
+   function construct return swigmod.Language.Item'Class;
+
+   pragma CPP_Constructor (construct, "_ZN8LanguageC1Ev");
 
    procedure destruct_0 (Self : in out swigmod.Language.Item);
 
@@ -689,6 +688,7 @@ private
    pragma Import (CPP, cplus_runtime_mode, "Ada_Language_cplus_runtime_mode");
    pragma Import (CPP, allow_protected_and_private_Members,
       "Ada_Language_allow_protected_and_private_Members");
+
    procedure allow_directors_v1 (Self : in out swigmod.Language.Item'Class;
       val                             : in     interfaces.c.int);
 
