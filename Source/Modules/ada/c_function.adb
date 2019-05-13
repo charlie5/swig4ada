@@ -14,7 +14,7 @@ is
    --  Globals
    --
 
-   NL : constant String := portable_new_line_Token;
+   NL : constant String := new_line_Token;
 
 
 

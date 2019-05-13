@@ -15,6 +15,6 @@ is
 
 private
 
-   NL : constant String := ada_Utility.portable_new_line_Token;
+   NL : constant String := ada_Utility.new_line_Token;
 
 end Swigg;

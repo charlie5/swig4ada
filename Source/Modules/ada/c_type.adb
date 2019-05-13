@@ -22,7 +22,7 @@ is
    --  Globals
    --
 
-   NL : constant String := portable_new_line_Token;
+   NL : constant String := new_line_Token;
 
    function "+" (Self : in String) return  ada.strings.Unbounded.Unbounded_String
      renames ada.strings.Unbounded.To_Unbounded_String;

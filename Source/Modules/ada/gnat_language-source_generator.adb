@@ -62,7 +62,7 @@ is
    subtype ic_Pointer_view      is ada_Type.elementary.an_access.to_type.interfaces_c_pointer.view;
    subtype ic_Pointer_class     is ada_Type.elementary.an_access.to_type.interfaces_c_pointer.Item'Class;
 
-   NL : constant String := portable_new_line_Token;
+   NL : constant String := new_line_Token;
 
 
    function depends_on (Self          : access ada_Type.Item'Class;

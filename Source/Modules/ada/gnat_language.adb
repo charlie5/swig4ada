@@ -63,7 +63,7 @@ is
          new String'("       -namespace <nm> - Generate wrappers into Ada namespace <nm>"),
          new String'("       -noproxy        - Generate the low-level functional interface instead of proxy classes"));
 
-   NL : constant String := portable_new_line_Token;
+   NL : constant String := new_line_Token;
 
 
    --  This provides the gnat_Language object to the (c-side) swig 'main' function.

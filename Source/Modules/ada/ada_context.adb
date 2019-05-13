@@ -13,7 +13,7 @@ is
    --  Globals
    --
 
-   NL : constant String := portable_new_line_Token;
+   NL : constant String := new_line_Token;
 
 
    subtype subType_view is ada_Type.a_subType.view;
