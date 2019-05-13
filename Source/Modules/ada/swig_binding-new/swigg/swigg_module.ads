@@ -3,17 +3,9 @@
 with DOHs;
 with interfaces.c;
 with interfaces.c.strings;
-with swig;
 with interfaces.C;
 
 package swigg_module is
-
-   -- DohObjInfo
-   --
-   subtype DohObjInfo is swig.opaque_structure;
-
-   type DohObjInfo_array is
-     array (interfaces.C.Size_t range <>) of aliased swigg_module.DohObjInfo;
 
    -- String
    --

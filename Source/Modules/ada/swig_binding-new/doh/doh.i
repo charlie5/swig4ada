@@ -3,11 +3,7 @@
 
 %{
 #include "doh.h"
-//#include "dohint.h"
 %}
-
-
-//typedef doh_String String;
 
 
 // The headers to be wrapped.
@@ -31,27 +27,6 @@
 %inline
 %{
 
-  #include <execinfo.h>
-
-/*
-  String*
-  c_to_doh_String (char*    c_String)
-  {
-    return NewStringf ("%s", c_String);
-  }
-
-
-
-  void
-  doh_replace_All (DOH*            Self,
-                   String*         Pattern,
-                   String*         Substitute)
-  {
-    DohReplace (Self,  Pattern, Substitute,  DOH_REPLACE_ANY);
-  }
-*/
-
-
   DOH*
   doh_Copy (DOH*    Self)
   {
@@ -61,7 +36,6 @@
 
   // doh iterators
   //
-
 
   DohIterator
   doh_First (DOH*    obj)

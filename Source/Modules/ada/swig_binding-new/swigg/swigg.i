@@ -2,9 +2,6 @@
 
 
 %{
-//#include "doh.h"
-//#include "dohint.h"
-
 #include "swigconfig.h"
 #include "swigwarn.h"
 
@@ -21,75 +18,28 @@
 
 %import "../doh/doh.i"
 
-%rename (a_current)    _current;
-%rename (a_index)      _index;
-
-
+%rename (a_current)       _current;
+%rename (a_index)         _index;
+%rename (Swig_error_file)   Swig_error;
 
 %ignore _current;
-
-
-//typedef doh_String String;
-
-
-
-//%ignore Language_getCPlusMode;
 %ignore Language::getCPlusMode;
-
 %ignore Swig_fragment_clear;
 %ignore Swig_naming_init;
 %ignore SwigType_template_deftype;
 %ignore SwigType_template_defargs;
-
-
-
-
 %ignore ModuleFactory;
-
-//#define Swig_error                Swig_error_file
+%ignore start_line;
 
 #define PRIVATE                   a_PRIVATE
 #define PROTECTED                 a_PROTECTED
-
-%rename(Swig_error_file)       Swig_error;
-//%rename(SwigScanner_struct)    struct SwigScanner;
-
-
-%ignore start_line;
-
-
 
 #define _current   a_current
 #define _index     a_index
 
 
-//%rename(swig_File)    File;
-
-
-
 // The headers to be wrapped.
 //
-
-%ignore DohEncoding;
-%ignore DohvPrintf;
-%ignore DohNewFileFromFile;
-%ignore DohSortList;
-%ignore DohNewVoid;
-%ignore DohNone;
-
-//%include "doh.h"
-
-
-%ignore DohHashMethods;
-%ignore DohListMethods;
-%ignore DohFileMethods;
-%ignore DohStringMethods;
-
-struct  DohObjInfo;
-%ignore DohObjInfo;
-
-//%include "dohint.h"
-
 
 %include "swigconfig.h"
 %include "swigwarn.h"
@@ -101,32 +51,15 @@ struct Wrapper;
 
 %include "swig.h"
 
-
-//struct File;
-//%rename(swig_File)    File;
 typedef Doh String_or_char;
 %ignore Wrapper_new_localv;
-
 %include "swigwrap.h"
-
 
 %include "preprocessor.h"
 %include "swigtree.h"
 
-
-/*
-%ignore Swig_register_module;
-%ignore Swig_find_module;
-%ignore argv_template_string;
-%ignore argc_template_string;
-
-%include "swigmod.h"
-*/
-
-
 #define FILE void
 %include "swigfile.h"
-
 
 %include "swigopt.h"
 
@@ -141,18 +74,6 @@ typedef Doh String_or_char;
   #include <execinfo.h>
 
 
-
-/*
-  Language*
-  do_construct()
-  {
-    Language*   Self = new Language();
-    return Self;
-  }
-*/
-
-
-
   int
   runtime_call_Depth ()
   {
@@ -161,7 +82,6 @@ typedef Doh String_or_char;
 
     return Count;  
   }
-
 
 
   char*
@@ -270,17 +190,6 @@ typedef Doh String_or_char;
   }
 
 
-/*
-  DOH*
-  doh_Copy (DOH*    Self)
-  {
-    return Copy (Self);
-  }
-*/
-
-
-  //extern int  Swig_save(const char *ns, Node *node,...);
-
   void
   Swig_save_1 (char*    name_Space, 
                Node*    the_Node, 
@@ -298,11 +207,6 @@ typedef Doh String_or_char;
   {
     Swig_require (name_Space, the_Node, Value_1, Value_2, NIL);
   }
-
-
-//extern void Swig_restore(Node *node);
-
-
 
 
   void 
@@ -327,41 +231,5 @@ typedef Doh String_or_char;
   {
     return nextSibling (Self);
   }
-
-/*
-  void
-  exit_with_Fail()
-  {
-    SWIG_exit (EXIT_FAILURE);
-  }
-*/
-
-
-/*
-  // doh iterators
-  //
-
-
-  DohIterator
-  doh_First (DOH*    obj)
-  {
-    return DohFirst (obj);
-  }
-
-
-  DohIterator
-  doh_Next (DohIterator    iter)
-  {
-    return DohNext (iter);
-  }
-
-
-
-  DOH*
-  get_Item (DohIterator    Self)
-  {
-    return Self.item;
-  }
-*/
 
 %}

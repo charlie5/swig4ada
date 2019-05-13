@@ -5,11 +5,6 @@ with interfaces.C;
 
 package swigg_module.pointer_Pointers is
 
-   -- DohObjInfo_Pointer_Pointer
-   --
-   type DohObjInfo_Pointer_Pointer is
-     access all swigg_module.Pointers.DohObjInfo_Pointer;
-
    -- String_Pointer_Pointer
    --
    type String_Pointer_Pointer is

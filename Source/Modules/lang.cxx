@@ -2528,7 +2528,8 @@ int Language::classDeclaration(Node *n) {
     classHandler(n);
   } else {
     Abstract = abstractClassTest(n);
-    Language::classHandler(n);
+//    Language::classHandler(n);
+    classHandler(n);    // For Ada.
   }
 
   Abstract = oldAbstract;

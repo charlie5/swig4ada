@@ -156,29 +156,7 @@
 #define private   public
 
 #include "doh.h"
-//#include "dohint.h"
 
-
-
-  #include <execinfo.h>
-
-/*
-  String*
-  c_to_doh_String (char*    c_String)
-  {
-    return NewStringf ("%s", c_String);
-  }
-
-
-
-  void
-  doh_replace_All (DOH*            Self,
-                   String*         Pattern,
-                   String*         Substitute)
-  {
-    DohReplace (Self,  Pattern, Substitute,  DOH_REPLACE_ANY);
-  }
-*/
 
 
   DOH*
@@ -190,7 +168,6 @@
 
   // doh iterators
   //
-
 
   DohIterator
   doh_First (DOH*    obj)

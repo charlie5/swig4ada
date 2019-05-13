@@ -155,9 +155,6 @@
 #define protected public
 #define private   public
 
-//#include "doh.h"
-//#include "dohint.h"
-
 #include "swigconfig.h"
 #include "swigwarn.h"
 
@@ -175,18 +172,6 @@
   #include <execinfo.h>
 
 
-
-/*
-  Language*
-  do_construct()
-  {
-    Language*   Self = new Language();
-    return Self;
-  }
-*/
-
-
-
   int
   runtime_call_Depth ()
   {
@@ -195,7 +180,6 @@
 
     return Count;  
   }
-
 
 
   char*
@@ -304,17 +288,6 @@
   }
 
 
-/*
-  DOH*
-  doh_Copy (DOH*    Self)
-  {
-    return Copy (Self);
-  }
-*/
-
-
-  //extern int  Swig_save(const char *ns, Node *node,...);
-
   void
   Swig_save_1 (char*    name_Space, 
                Node*    the_Node, 
@@ -332,11 +305,6 @@
   {
     Swig_require (name_Space, the_Node, Value_1, Value_2, NIL);
   }
-
-
-//extern void Swig_restore(Node *node);
-
-
 
 
   void 
@@ -361,42 +329,6 @@
   {
     return nextSibling (Self);
   }
-
-/*
-  void
-  exit_with_Fail()
-  {
-    SWIG_exit (EXIT_FAILURE);
-  }
-*/
-
-
-/*
-  // doh iterators
-  //
-
-
-  DohIterator
-  doh_First (DOH*    obj)
-  {
-    return DohFirst (obj);
-  }
-
-
-  DohIterator
-  doh_Next (DohIterator    iter)
-  {
-    return DohNext (iter);
-  }
-
-
-
-  DOH*
-  get_Item (DohIterator    Self)
-  {
-    return Self.item;
-  }
-*/
 
 
 #undef protected

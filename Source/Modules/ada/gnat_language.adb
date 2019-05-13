@@ -1538,9 +1538,27 @@ is
    function memberfunctionHandler (Self : access Item;
                                    n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int
    is
-      the_Node      :          Node_Pointer renames n;
-      Status        :          C.int with Unreferenced;
-      function_Name : constant String := +DohGetattr (DOH_Pointer (the_Node), DOH_Pointer (-"name"));
+      the_Node        :          Node_Pointer renames n;
+      Status          :          C.int with Unreferenced;
+      function_Name   : constant String  := +DohGetattr (DOH_Pointer (the_Node), DOH_Pointer (-"name"));
+      Storage         : constant String  := +DohGetattr (DOH_Pointer (the_Node), DOH_Pointer (-"storage"));
+      Value           : constant String  := +DohGetattr (DOH_Pointer (the_Node), DOH_Pointer (-"value"));
+      is_Virtual      : constant Boolean := Storage = "virtual";
+      is_Pure         : constant Boolean := Value   = "0";
+      is_pure_Virtual : constant Boolean := is_Pure and is_Virtual;
+
+      function get_Namespace return String
+      is
+      begin
+         if is_pure_Virtual
+         then
+            return "";
+         else
+            return to_String (Self.current_c_Class.Name) & "::";
+         end if;
+      end get_Namespace;
+
+      Namespace : constant String := get_Namespace;
    begin
       indent_Log;
       log (+"");
@@ -1550,7 +1568,8 @@ is
 
       Status := DohSetattr (obj   => DOH_Pointer (the_Node),
                             name  => DOH_Pointer (-"name"),
-                            value => DOH_Pointer (-(to_String (Self.current_c_Class.Name) & "::" & function_Name)));
+                            value => DOH_Pointer (-(Namespace & function_Name)));
+--                              value => DOH_Pointer (-(to_String (Self.current_c_Class.Name) & "::" & function_Name)));
 
 --        do_base_memberfunctionHandler (Self.all, the_Node);
       Status := swigMod.Language.item (Self.all).memberfunctionHandler (the_Node);

@@ -4,17 +4,6 @@ with interfaces.C;
 
 package swigg_module.Pointers is
 
-   -- DohObjInfo_Pointer
-   --
-   type DohObjInfo_Pointer is access all swigg_module.DohObjInfo;
-
-   -- DohObjInfo_Pointers
-   --
-   type DohObjInfo_Pointers is
-     array
-       (interfaces.C.Size_t range <>) of aliased swigg_module.Pointers
-       .DohObjInfo_Pointer;
-
    -- String_Pointer
    --
    type String_Pointer is access all swigg_module.String;

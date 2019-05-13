@@ -196,7 +196,7 @@ is
          if    Length (Self.Parameters)                          = 0     -- non-default constructors (ie those with parameters) are not yet implemented in gnat
            and declaration_Package.models_a_virtual_cpp_Class            --
          then
-            append (the_Source,  NL & "   pragma cpp_Constructor (Entity => " & unique_function_Name & ");");
+            append (the_Source,  NL & "   pragma cpp_Constructor (" & unique_function_Name & ");");
          end if;
 
          append (the_Source,   NL & NL & "   pragma Import (CPP, " & unique_function_Name & ", """ & link_Symbol & """);");
