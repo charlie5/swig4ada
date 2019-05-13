@@ -1012,6 +1012,10 @@ package swigg_module.Binding is
       decl : in DOHs.const_String_or_char_ptr.Item) return interfaces.c.strings
      .chars_ptr;
 
+   function Wrapper_new_localv (w : in swigg_module.Wrapper.Pointer;
+      name : in DOHs.const_String_or_char_ptr.Item) return interfaces.c.strings
+     .chars_ptr;
+
    function Preprocessor_expr (s : in swigg_module.Pointers.String_Pointer;
       error : in swig.pointers.int_Pointer) return interfaces.c.int;
 
@@ -1153,8 +1157,6 @@ package swigg_module.Binding is
    procedure Swig_check_options (check_input : in interfaces.c.int);
 
    procedure Swig_arg_error;
-
-   function runtime_call_Depth return interfaces.c.int;
 
    function String_in (the_string_Array : in swig.pointers.chars_ptr_Pointer;
       at_Index : in interfaces.c.int) return interfaces.c.strings.chars_ptr;
@@ -1525,6 +1527,7 @@ private
    pragma Import (C, Wrapper_add_localv, "Wrapper_add_localv");
    pragma Import (C, Wrapper_check_local, "Wrapper_check_local");
    pragma Import (C, Wrapper_new_local, "Wrapper_new_local");
+   pragma Import (C, Wrapper_new_localv, "Wrapper_new_localv");
    pragma Import (C, Preprocessor_expr, "Preprocessor_expr");
    pragma Import (C, Preprocessor_expr_error, "Preprocessor_expr_error");
    pragma Import (C, Preprocessor_define, "Preprocessor_define");
@@ -1578,7 +1581,6 @@ private
    pragma Import (C, Swig_check_marked, "Swig_check_marked");
    pragma Import (C, Swig_check_options, "Swig_check_options");
    pragma Import (C, Swig_arg_error, "Swig_arg_error");
-   pragma Import (C, runtime_call_Depth, "runtime_call_Depth");
    pragma Import (C, String_in, "String_in");
    pragma Import (C, c_to_doh_String, "c_to_doh_String");
    pragma Import (C, get_attribute, "get_attribute");

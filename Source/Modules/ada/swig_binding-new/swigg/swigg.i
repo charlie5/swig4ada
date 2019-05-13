@@ -10,32 +10,16 @@
 
 #include "swigtree.h"
 #include "swigopt.h"
-//#include "swigmod.h"
 #include "swigfile.h"
-//#include "swigwrap.h"
 %}
 
 
 %import "../doh/doh.i"
 
-%rename (a_current)       _current;
-%rename (a_index)         _index;
 %rename (Swig_error_file)   Swig_error;
 
-%ignore _current;
-%ignore Language::getCPlusMode;
 %ignore Swig_fragment_clear;
 %ignore Swig_naming_init;
-%ignore SwigType_template_deftype;
-%ignore SwigType_template_defargs;
-%ignore ModuleFactory;
-%ignore start_line;
-
-#define PRIVATE                   a_PRIVATE
-#define PROTECTED                 a_PROTECTED
-
-#define _current   a_current
-#define _index     a_index
 
 
 // The headers to be wrapped.
@@ -50,9 +34,6 @@
 struct Wrapper;
 
 %include "swig.h"
-
-typedef Doh String_or_char;
-%ignore Wrapper_new_localv;
 %include "swigwrap.h"
 
 %include "preprocessor.h"
@@ -70,19 +51,6 @@ typedef Doh String_or_char;
 
 %inline
 %{
-
-  #include <execinfo.h>
-
-
-  int
-  runtime_call_Depth ()
-  {
-    void*      the_Backtrace [5000];
-    int        Count               = backtrace (the_Backtrace, 5000);  // tbd: mem leak ?
-
-    return Count;  
-  }
-
 
   char*
   String_in (char*    the_string_Array[],

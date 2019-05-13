@@ -11,12 +11,14 @@
 
 %ignore DohEncoding;
 %ignore DohvPrintf;
+
+//typedef void FILE;
 %ignore DohNewFileFromFile;
+
 %ignore DohSortList;
 %ignore DohNewVoid;
 %ignore DohNone;
 %ignore DohFuncPtr;
-%ignore DohFuncPtr_t;
 
 %include "doh.h"
 

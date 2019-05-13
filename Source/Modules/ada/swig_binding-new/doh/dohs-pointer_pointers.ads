@@ -9,4 +9,9 @@ package DOHs.pointer_Pointers is
    --
    type DOH_Pointer_Pointer is access all DOHs.Pointers.DOH_Pointer;
 
+   -- DohFuncPtr_t_Pointer_Pointer
+   --
+   type DohFuncPtr_t_Pointer_Pointer is
+     access all DOHs.Pointers.DohFuncPtr_t_Pointer;
+
 end DOHs.pointer_Pointers;

@@ -12,6 +12,13 @@ package DOHs is
 
    type DOH_array is array (interfaces.C.Size_t range <>) of aliased DOHs.DOH;
 
+   -- DohFuncPtr_t
+   --
+   subtype DohFuncPtr_t is swig.opaque_structure;
+
+   type DohFuncPtr_t_array is
+     array (interfaces.C.Size_t range <>) of aliased DOHs.DohFuncPtr_t;
+
    DOH_MAJOR_VERSION      : constant := 0;
    DOH_MINOR_VERSION      : constant := 1;
    DOH_BEGIN              : constant := -1;

@@ -163,23 +163,8 @@
 
 #include "swigtree.h"
 #include "swigopt.h"
-//#include "swigmod.h"
 #include "swigfile.h"
-//#include "swigwrap.h"
 
-
-
-  #include <execinfo.h>
-
-
-  int
-  runtime_call_Depth ()
-  {
-    void*      the_Backtrace [5000];
-    int        Count               = backtrace (the_Backtrace, 5000);  // tbd: mem leak ?
-
-    return Count;  
-  }
 
 
   char*
@@ -6392,6 +6377,34 @@ DllExport char * SWIGSTDCALL Ada_Wrapper_new_local (
 
 
 
+DllExport char * SWIGSTDCALL Ada_Wrapper_new_localv (
+  void * jarg1
+  ,
+  
+  void* jarg2
+  )
+{
+  char * jresult ;
+  Wrapper *arg1 = (Wrapper *) 0 ;
+  const_String_or_char_ptr arg2 = (const_String_or_char_ptr) 0 ;
+  void *arg3 = 0 ;
+  char *result = 0 ;
+  
+  arg1 = (Wrapper *)jarg1; 
+  
+  arg2 = (const_String_or_char_ptr)jarg2; 
+  
+  result = (char *)Wrapper_new_localv(arg1,(void const *)arg2,arg3);
+  jresult = result; 
+  
+  
+  
+  return jresult;
+  
+}
+
+
+
 DllExport int SWIGSTDCALL Ada_Preprocessor_expr (
   void* jarg1
   ,
@@ -7337,23 +7350,6 @@ DllExport void SWIGSTDCALL Ada_Swig_arg_error (
 {
   Swig_arg_error();
   
-  
-}
-
-
-
-DllExport int SWIGSTDCALL Ada_runtime_call_Depth (
-  )
-{
-  int jresult ;
-  int result;
-  
-  result = (int)runtime_call_Depth();
-  jresult = result; 
-  
-  
-  
-  return jresult;
   
 }
 

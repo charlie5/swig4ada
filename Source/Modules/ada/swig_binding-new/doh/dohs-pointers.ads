@@ -13,4 +13,15 @@ package DOHs.Pointers is
    type DOH_Pointers is
      array (interfaces.C.Size_t range <>) of aliased DOHs.Pointers.DOH_Pointer;
 
+   -- DohFuncPtr_t_Pointer
+   --
+   type DohFuncPtr_t_Pointer is access all DOHs.DohFuncPtr_t;
+
+   -- DohFuncPtr_t_Pointers
+   --
+   type DohFuncPtr_t_Pointers is
+     array
+       (interfaces.C.Size_t range <>) of aliased DOHs.Pointers
+       .DohFuncPtr_t_Pointer;
+
 end DOHs.Pointers;
