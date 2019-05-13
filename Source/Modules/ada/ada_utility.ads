@@ -1,5 +1,6 @@
 with
      GMP.discrete,
+     ada.Characters.Latin_1,
      ada.Strings.unbounded;
 
 
@@ -35,7 +36,8 @@ is
 
    --  Other
    --
-   function portable_new_line_Token return String;
+--   function portable_new_line_Token return String;
+   portable_new_line_Token : constant String := (1 => ada.Characters.Latin_1.LF);
 
 
    procedure replace_All (Self       : in out ada.strings.unbounded.unbounded_String;

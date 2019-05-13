@@ -31,6 +31,7 @@ package swigmod is
    PURE_VIRTUAL  : constant                                        := 2;
    input_file    : aliased swigg_module.Pointers.String_Pointer;
    line_number   : aliased interfaces.c.int;
+   start_line    : aliased interfaces.c.int;
    CPlusPlus     : aliased interfaces.c.int;
    Extend        : aliased interfaces.c.int;
    Verbose       : aliased interfaces.c.int;
@@ -51,6 +52,7 @@ private
 
    pragma Import (CPP, input_file, "_ZN7swigmod10input_fileE");
    pragma Import (CPP, line_number, "_ZN7swigmod11line_numberE");
+   pragma Import (CPP, start_line, "_ZN7swigmod10start_lineE");
    pragma Import (CPP, CPlusPlus, "_ZN7swigmod9CPlusPlusE");
    pragma Import (CPP, Extend, "_ZN7swigmod6ExtendE");
    pragma Import (CPP, Verbose, "_ZN7swigmod7VerboseE");

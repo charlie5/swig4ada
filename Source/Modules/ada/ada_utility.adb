@@ -1,8 +1,8 @@
 with
      ada.Strings.fixed,
      ada.Characters.handling,
-     ada.text_IO,
-     ada.streams.stream_io;
+     ada.text_IO;
+--       ada.streams.stream_io;
 
 
 package body ada_Utility
@@ -67,37 +67,37 @@ is
    --  Other
    ---------
 
-   function portable_new_line_Token return String
-   is
-      the_Token     :          unbounded_String;
-      temp_fileName : constant String          := "portable_new_line_Token.tmp";   -- tbd: delete temporary file when done.
-   begin
-      declare
-         the_File : ada.text_IO.File_type;
-      begin
-         create   (the_File, out_File, temp_fileName);
-         new_Line (the_File);
-         close    (the_File);
-      end;
-
-      declare
-         use ada.streams.stream_io;
-         the_File    : ada.streams.stream_io.File_type;
-         the_Stream  : ada.streams.stream_io.Stream_access;
-      begin
-         open (the_File, in_File, temp_fileName);
-         the_Stream := Stream (the_File);
-
-         while not end_of_File (the_File)
-         loop
-            append (the_Token, Character'Input (the_Stream));
-         end loop;
-
-         close (the_File);
-      end;
-
-      return to_String (the_Token);
-   end portable_new_line_Token;
+--     function portable_new_line_Token return String
+--     is
+--        the_Token     :          unbounded_String;
+--        temp_fileName : constant String          := "portable_new_line_Token.tmp";   -- tbd: delete temporary file when done.
+--     begin
+--        declare
+--           the_File : ada.text_IO.File_type;
+--        begin
+--           create   (the_File, out_File, temp_fileName);
+--           new_Line (the_File);
+--           close    (the_File);
+--        end;
+--
+--        declare
+--           use ada.streams.stream_io;
+--           the_File    : ada.streams.stream_io.File_type;
+--           the_Stream  : ada.streams.stream_io.Stream_access;
+--        begin
+--           open (the_File, in_File, temp_fileName);
+--           the_Stream := Stream (the_File);
+--
+--           while not end_of_File (the_File)
+--           loop
+--              append (the_Token, Character'Input (the_Stream));
+--           end loop;
+--
+--           close (the_File);
+--        end;
+--
+--        return to_String (the_Token);
+--     end portable_new_line_Token;
 
 
 

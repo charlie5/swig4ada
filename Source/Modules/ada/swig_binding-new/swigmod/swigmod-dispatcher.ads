@@ -10,9 +10,9 @@ package swigmod.Dispatcher is
 
    -- AccessMode
    --
-   type AccessMode is (PUBLIC, a_PRIVATE, a_PROTECTED);
+   type AccessMode is (PUBLIC, the_PRIVATE, the_PROTECTED);
 
-   for AccessMode use (PUBLIC => 0, a_PRIVATE => 1, a_PROTECTED => 2);
+   for AccessMode use (PUBLIC => 0, the_PRIVATE => 1, the_PROTECTED => 2);
 
    pragma Convention (C, AccessMode);
 

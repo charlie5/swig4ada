@@ -20,6 +20,8 @@
 // The headers to be wrapped.
 //
 
+%ignore Language::getCPlusMode;
+
 %ignore Swig_register_module;
 %ignore Swig_find_module;
 %ignore argv_template_string;
