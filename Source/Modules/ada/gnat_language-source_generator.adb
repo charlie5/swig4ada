@@ -592,6 +592,11 @@ is
    begin
       append (the_Source,  NL & NL);
 
+      if Self.is_Overriding
+      then
+         append (the_Source,  "   overriding" & NL);
+      end if;
+
       if Self.is_Procedure
       then
          append (the_Source,  "   procedure ");

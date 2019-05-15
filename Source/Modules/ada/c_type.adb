@@ -2117,6 +2117,21 @@ is
 
 
 
+   function has_virtual_Destructor (Self : access Item) return Boolean
+   is
+   begin
+      return Self.my.has_virtual_Destructor;
+   end has_virtual_Destructor;
+
+
+   procedure has_virtual_Destructor (Self : access Item;   Now : in Boolean := True)
+   is
+   begin
+      Self.my.has_virtual_Destructor := Now;
+   end has_virtual_Destructor;
+
+
+
    --------------------------------
    --  function_Pointer Subprograms
    --

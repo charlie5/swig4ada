@@ -55,11 +55,11 @@ package swigmod.Language is
 
    pragma CPP_Constructor (construct, "_ZN8LanguageC1Ev");
 
-   procedure destruct_0 (Self : in out swigmod.Language.Item);
+   overriding procedure destruct_0 (Self : in out swigmod.Language.Item);
 
-   procedure destruct (Self : in out swigmod.Language.Item);
+   overriding procedure destruct (Self : in out swigmod.Language.Item);
 
-   function emit_one (Self :    access swigmod.Language.Item;
+   overriding function emit_one (Self :    access swigmod.Language.Item;
       n : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
 
    function directorClassName (Self :    access swigmod.Language.Item'Class;
@@ -69,85 +69,92 @@ package swigmod.Language is
    procedure main (Self : in out swigmod.Language.Item;
       argc : in interfaces.c.int; argv : in swig.pointers.chars_ptr_Pointer);
 
-   function top (Self :    access swigmod.Language.Item;
+   overriding function top (Self :    access swigmod.Language.Item;
       n : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function applyDirective (Self :    access swigmod.Language.Item;
+   overriding function applyDirective (Self :    access swigmod.Language.Item;
       n : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function clearDirective (Self :    access swigmod.Language.Item;
+   overriding function clearDirective (Self :    access swigmod.Language.Item;
       n : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function constantDirective (Self :    access swigmod.Language.Item;
+   overriding function constantDirective (Self : access swigmod.Language.Item;
       n : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function extendDirective (Self :    access swigmod.Language.Item;
+   overriding function extendDirective (Self :    access swigmod.Language.Item;
       n : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function fragmentDirective (Self :    access swigmod.Language.Item;
+   overriding function fragmentDirective (Self : access swigmod.Language.Item;
       n : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function importDirective (Self :    access swigmod.Language.Item;
+   overriding function importDirective (Self :    access swigmod.Language.Item;
       n : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function includeDirective (Self :    access swigmod.Language.Item;
+   overriding function includeDirective (Self : access swigmod.Language.Item;
       n : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function insertDirective (Self :    access swigmod.Language.Item;
+   overriding function insertDirective (Self :    access swigmod.Language.Item;
       n : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function moduleDirective (Self :    access swigmod.Language.Item;
+   overriding function moduleDirective (Self :    access swigmod.Language.Item;
       n : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function nativeDirective (Self :    access swigmod.Language.Item;
+   overriding function nativeDirective (Self :    access swigmod.Language.Item;
       n : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function pragmaDirective (Self :    access swigmod.Language.Item;
+   overriding function pragmaDirective (Self :    access swigmod.Language.Item;
       n : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function typemapDirective (Self :    access swigmod.Language.Item;
+   overriding function typemapDirective (Self : access swigmod.Language.Item;
       n : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function typemapcopyDirective (Self :    access swigmod.Language.Item;
+   overriding function typemapcopyDirective
+     (Self :    access swigmod.Language.Item;
+      n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
+
+   overriding function typesDirective (Self :    access swigmod.Language.Item;
       n : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function typesDirective (Self :    access swigmod.Language.Item;
+   overriding function cDeclaration (Self :    access swigmod.Language.Item;
       n : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function cDeclaration (Self :    access swigmod.Language.Item;
+   overriding function externDeclaration (Self : access swigmod.Language.Item;
       n : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function externDeclaration (Self :    access swigmod.Language.Item;
+   overriding function enumDeclaration (Self :    access swigmod.Language.Item;
       n : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function enumDeclaration (Self :    access swigmod.Language.Item;
+   overriding function enumvalueDeclaration
+     (Self :    access swigmod.Language.Item;
+      n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
+
+   overriding function enumforwardDeclaration
+     (Self :    access swigmod.Language.Item;
+      n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
+
+   overriding function classDeclaration (Self : access swigmod.Language.Item;
       n : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function enumvalueDeclaration (Self :    access swigmod.Language.Item;
+   overriding function classforwardDeclaration
+     (Self :    access swigmod.Language.Item;
+      n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
+
+   overriding function constructorDeclaration
+     (Self :    access swigmod.Language.Item;
+      n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
+
+   overriding function destructorDeclaration
+     (Self :    access swigmod.Language.Item;
+      n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
+
+   overriding function accessDeclaration (Self : access swigmod.Language.Item;
       n : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function enumforwardDeclaration (Self :    access swigmod.Language.Item;
-      n : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
+   overriding function namespaceDeclaration
+     (Self :    access swigmod.Language.Item;
+      n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
 
-   function classDeclaration (Self :    access swigmod.Language.Item;
-      n : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
-
-   function classforwardDeclaration (Self :    access swigmod.Language.Item;
-      n : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
-
-   function constructorDeclaration (Self :    access swigmod.Language.Item;
-      n : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
-
-   function destructorDeclaration (Self :    access swigmod.Language.Item;
-      n : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
-
-   function accessDeclaration (Self :    access swigmod.Language.Item;
-      n : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
-
-   function namespaceDeclaration (Self :    access swigmod.Language.Item;
-      n : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
-
-   function usingDeclaration (Self :    access swigmod.Language.Item;
+   overriding function usingDeclaration (Self : access swigmod.Language.Item;
       n : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
 
    function functionHandler (Self :    access swigmod.Language.Item;

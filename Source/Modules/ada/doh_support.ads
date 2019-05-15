@@ -55,5 +55,6 @@ is
    procedure replace_All (in_Source : in doh_Item;   search_for   : in String;
                                                      replace_with : in String);
 
+   procedure log (Self : in doh_Item);
 
 end doh_Support;

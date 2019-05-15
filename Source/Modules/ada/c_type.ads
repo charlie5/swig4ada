@@ -279,6 +279,8 @@ is
    function requires_Interfaces_C_Unsigned_Char_use   (Self : access Item) return Boolean;
    function requires_Interfaces_C_Extensions_bool_use (Self : access Item) return Boolean;
 
+   function  has_virtual_Destructor (Self : access Item)     return Boolean;
+   procedure has_virtual_Destructor (Self : access Item;   Now : in Boolean := True);
 
 
    --  'function_Pointer' Attributes
@@ -336,6 +338,7 @@ private
                requires_Interfaces_C_Unsigned_use        : Boolean        := False;
                requires_Interfaces_C_Unsigned_Char_use   : Boolean        := False;
                requires_Interfaces_C_Extensions_bool_use : Boolean        := False;
+               has_virtual_Destructor                    : Boolean        := False;
 
             when Enum =>
                Literals                     : enum_literal_vectors.Vector;

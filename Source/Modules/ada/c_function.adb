@@ -35,6 +35,7 @@ is
                                is_Static                => False,
                                is_Virtual               => False,
                                is_Abstract              => False,
+                               is_Overriding            => False,
                                is_to_view_Conversion    => False,
                                is_to_pointer_Conversion => False,
                                returns_an_Access        => False,

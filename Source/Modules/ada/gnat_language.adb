@@ -1495,10 +1495,6 @@ is
 
       Self.have_default_constructor_flag := False;
 
---        do_base_classHandler (Self.all, the_node);           -- Process all class members.
-      Status := swigMod.Language.item (Self.all).classHandler (the_node);           -- Process all class members.
-
-
       -- Handle base classes.
       --
       declare
@@ -1506,7 +1502,8 @@ is
          the_Item     :          DOH_Pointer;
          Length       : constant C.int      := DohLen (base_List);
       begin
---           put_Line ("BASE_LIST: '" & (+base_List) & "'      Len: " & C.int'Image (Length));
+--           put_Line ("BASE_LIST Len: " & C.int'Image (Length));
+--           log (Doh_Pointer (base_List));
 
          for i in 1 .. Length
          loop
@@ -1520,6 +1517,10 @@ is
             end;
          end loop;
       end;
+
+--        do_base_classHandler (Self.all, the_node);           -- Process all class members.
+      Status := swigMod.Language.item (Self.all).classHandler (the_node);           -- Process all class members.
+
 
       --  new ...
       --
@@ -1541,11 +1542,15 @@ is
       the_Node        :          Node_Pointer renames n;
       Status          :          C.int with Unreferenced;
       function_Name   : constant String  := +DohGetattr (DOH_Pointer (the_Node), DOH_Pointer (-"name"));
+
       Storage         : constant String  := +DohGetattr (DOH_Pointer (the_Node), DOH_Pointer (-"storage"));
       Value           : constant String  := +DohGetattr (DOH_Pointer (the_Node), DOH_Pointer (-"value"));
       is_Virtual      : constant Boolean := Storage = "virtual";
       is_Pure         : constant Boolean := Value   = "0";
       is_pure_Virtual : constant Boolean := is_Pure and is_Virtual;
+
+      overriding_Value : constant DOH_Pointer := DohGetattr (DOH_Pointer (the_Node), DOH_Pointer (-"override"));
+      is_Overriding    : constant Boolean     := overriding_Value /= null;
 
       function get_Namespace return String
       is
@@ -1580,7 +1585,8 @@ is
          the_new_Function := Self.new_c_Function (doh_Node (the_Node),
                                                   +(DOH_Pointer (get_Attribute (the_Node,  -"sym:name"))),
                                                   Self.current_c_Class.nameSpace.all'Access,
-                                                  is_Destructor => False);
+                                                  is_Destructor => False,
+                                                  is_Overriding => is_Overriding);
 
          Self.prior_c_Declaration := the_new_Function.all'Access;
       end;
@@ -1769,8 +1775,11 @@ is
    function destructorHandler (Self : access Item;
                                n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int
    is
-      the_Node : doh_Node renames n;
-      Status   : C.int with Unreferenced;
+      the_Node         :          doh_Node renames n;
+      Status           :          C.int    with    Unreferenced;
+      Storage          : constant DOH_Pointer   := DohGetattr (DOH_Pointer (the_Node), DOH_Pointer (-"storage"));
+      is_Overriding    :          Boolean       := False;
+
       use type C.int;
    begin
       if not Self.in_cpp_Mode
@@ -1780,6 +1789,25 @@ is
 
       indent_Log;
       log (+"'destructorHandler':");
+
+      if String'(+Storage) = "virtual"
+      then
+         Self.current_c_Class.has_virtual_Destructor;
+      end if;
+
+      declare
+         Bases    : constant c_Type.Vector := Self.current_c_Class.base_Classes;
+      begin
+         for the_Base of Bases
+         loop
+            if the_Base.has_virtual_Destructor
+            then
+               is_Overriding := True;
+               exit;
+            end if;
+         end loop;
+      end;
+
 
       Self.current_c_Node := doh_Node (the_Node);
 
@@ -1796,7 +1824,8 @@ is
          the_Destructor : constant c_Function.view := Self.new_c_Function (the_Node,
                                                                            to_unbounded_String ("destruct_0"),
                                                                            Self.current_c_Class.Namespace.all'Access,
-                                                                           is_destructor => True);
+                                                                           is_destructor => True,
+                                                                           is_Overriding => is_Overriding);
       begin
          the_Destructor.is_Constructor     := False;
          the_Destructor.is_Destructor      := True;
@@ -1808,7 +1837,8 @@ is
          the_Destructor : constant c_Function.view := Self.new_c_Function (the_Node,
                                                                            to_unbounded_String ("destruct"),
                                                                            Self.current_c_Class.Namespace.all'Access,
-                                                                           is_destructor => True);
+                                                                           is_destructor => True,
+                                                                           is_Overriding => is_Overriding);
       begin
          the_Destructor.is_Constructor     := False;
          the_Destructor.is_Destructor      := True;
@@ -2862,6 +2892,7 @@ is
       the_ada_subProgram.link_Symbol    := the_c_Function.link_Symbol;
       the_ada_subProgram.is_Virtual     := the_c_Function.is_Virtual;
       the_ada_subProgram.is_Abstract    := the_c_Function.is_Abstract;
+      the_ada_subProgram.is_Overriding  := the_c_Function.is_Overriding;
       the_ada_subProgram.is_Constructor := the_c_Function.is_Constructor;
       the_ada_subProgram.is_Destructor  := the_c_Function.is_Destructor;
 
@@ -3064,7 +3095,8 @@ is
                                                   function_name  : in     unbounded_String;
                                                   nameSpace      : in     c_nameSpace.view;
                                                   is_Destructor  : in     Boolean;
-                                                  is_Constructor : in     Boolean         := False) return c_function.view
+                                                  is_Constructor : in     Boolean := False;
+                                                  is_Overriding  : in     Boolean := False) return c_function.view
    is
       use c_parameter.Vectors;
 
@@ -3144,13 +3176,14 @@ is
 
 
       if not (Self.wrapping_member_flag  and  not Self.enum_constant_flag)
-      then     -- There is no need for setter/getter functions, since the actual object is available.
+      then     -- There is no need for setter/getter functions, since the actual memeber variables are available.
          declare
             use c_nameSpace, c_Function;
             new_Function : constant c_Function.view := new_c_Function (function_name,
                                                                        the_return_type);
          begin
-            new_Function.Parameters     := the_Parameters;
+            new_Function.Parameters    := the_Parameters;
+            new_Function.is_Overriding := is_Overriding;
 
             if is_Constructor
             then

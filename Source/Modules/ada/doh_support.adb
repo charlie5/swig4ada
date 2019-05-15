@@ -1,5 +1,7 @@
 with
-     swigg_Module.Binding;
+     DOHs.Binding,
+     swigg_Module.Binding,
+     ada.Text_IO;
 
 
 package body doh_Support
@@ -84,6 +86,16 @@ is
       print_to (String_Pointer (Self),
                 new_String (to_String (the_Text)));
    end print_to;
+
+
+
+   procedure log (Self : in doh_Item)
+   is
+      use ada.Text_IO,
+          DOHs.Binding;
+   begin
+      put_Line (+DohStr (DOH_Pointer (Self)));
+   end log;
 
 
 end doh_Support;

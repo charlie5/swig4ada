@@ -32,6 +32,7 @@ is
          is_Destructor      : Boolean              := False;
          is_Virtual         : Boolean              := False;
          is_Abstract        : Boolean              := False;
+         is_Overriding      : Boolean              := False;
          returns_an_Access  : Boolean              := False;
 
          is_to_view_Conversion    : Boolean        := False;

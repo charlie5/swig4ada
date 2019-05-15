@@ -31,6 +31,8 @@ is
          is_Static                : Boolean := False;
          is_Virtual               : Boolean := False;
          is_Abstract              : Boolean := False;
+         is_Overriding            : Boolean := False;
+
 
          --  old
 

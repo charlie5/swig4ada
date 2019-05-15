@@ -409,7 +409,8 @@ private
                                                   function_name  : in     unbounded_String;
                                                   nameSpace      : in     c_nameSpace.view;
                                                   is_Destructor  : in     Boolean;
-                            is_Constructor : in     Boolean         := False) return c_function.view;
+                                                  is_Constructor : in     Boolean := False;
+                                                  is_Overriding  : in     Boolean := False) return c_function.view;
 
    function to_c_Parameters      (Self : access Item;   swig_Parameters   : in     doh_ParmList) return c_parameter.Vector;
 
