@@ -681,7 +681,7 @@ is
             wrapper_Def          : constant doh_String      := the_function_Wrapper.Def;
             wrapper_Code         : constant doh_String      := the_function_Wrapper.Code;
 
-            overloaded_Name      : constant unbounded_String := to_unbounded_String (Self.get_overloaded_Name (the_Node));
+            overloaded_Name      : constant unbounded_String := to_unbounded_String (get_overloaded_Name (the_Node));
             wrapper_Name         : constant String           := +(doh_Item (Swig_name_wrapper (const_String_or_char_ptr.item (-overloaded_name))));
 
             the_Parameters       : constant ParmList_Pointer := ParmList_Pointer (get_Attribute (the_Node, -"parms"));
@@ -1668,7 +1668,7 @@ is
       end if;
 
       declare
-         overloaded_name     : constant String := Self.get_overloaded_Name (doh_Node (the_Node));
+         overloaded_name     : constant String := get_overloaded_Name (doh_Node (the_Node));
 
          constructor_Symbol  :          unbounded_String;    -- we need to build our own 'c' construction call   (tbd: move all this to functionWrapper)
          construct_Call      :          unbounded_String;    -- since the default swig constructor returns a pointer to class
@@ -1703,9 +1703,9 @@ is
                declare
                   pt         : constant SwigType_Pointer := SwigType_Pointer (get_Attribute (the_Parameter, -"type"));   -- tbd: rename
                   the_c_Type :          unbounded_String := +doh_Item        (get_Attribute (the_Parameter, -"tmap:ctype"));
-                  arg        : constant String           :=  Self.makeParameterName (doh_parmList (the_Node),
-                                                                                     doh_Parm (the_Parameter),
-                                                                                     Index);
+                  arg        : constant String           :=  makeParameterName (doh_parmList (the_Node),
+                                                                                doh_Parm (the_Parameter),
+                                                                                Index);
                begin
                   if gencomma
                   then
@@ -2864,11 +2864,9 @@ is
 
 
 
-   function get_overloaded_Name (Self : access Item;   for_Node : in doh_Node) return String
+   function get_overloaded_Name (for_Node : in doh_Node) return String
    is
-      pragma Unreferenced (Self);
       the_Name : constant String := +doh_Item (get_Attribute (for_Node,  -"sym:name"));
-
    begin
       if get_Attribute (for_Node,  -"sym:overloaded") /= null
       then
@@ -2919,11 +2917,11 @@ is
 
 
 
-   function makeParameterName (Self : access Item;   parameter_List : in doh_parmList;
-                                                     the_Parameter  : in doh_Parm    ;
-                                                     arg_num        : in Integer) return String
+   function makeParameterName (parameter_List : in doh_parmList;
+                               the_Parameter  : in doh_Parm    ;
+                               arg_num        : in Integer) return String
    is
-      pragma Unreferenced (Self, arg_num);
+      pragma Unreferenced (arg_num);
 
       the_Name : constant String       := +doh_Item (get_Attribute (Node_Pointer (the_Parameter),
                                                                     -"name"));
@@ -3017,9 +3015,9 @@ is
 
                         declare
                            arg : constant unbounded_String
-                             := to_unbounded_String (Self.makeParameterName (swig_Parameters,
-                                                                             doh_Parm (the_Parameter),
-                                                                             Index));
+                             := to_unbounded_String (makeParameterName (swig_Parameters,
+                                                     doh_Parm (the_Parameter),
+                                                     Index));
                            new_Parameter : c_Parameter.view;
                         begin
                            begin

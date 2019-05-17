@@ -434,7 +434,8 @@ private
 
    function current_Module       (Self : access Item)                                                  return swig_Module.swig_Module_view;
    function demand_Module        (Self : access Item;   Named             : in     unbounded_String)   return swig_Module.swig_Module_view;
-   function get_overloaded_Name  (Self : access Item;   for_Node          : in     doh_Node)     return String;
+
+   function get_overloaded_Name  (for_Node          : in     doh_Node)     return String;
 
 
    procedure add_new_c_Type      (Self : access Item'Class;
@@ -452,9 +453,9 @@ private
    --
    --  The same namespace may safely be added twice (is add is ignored after the 1st)
 
-   function makeParameterName    (Self : access Item;   parameter_List    : in     doh_parmList;
-                                                        the_Parameter     : in     doh_Parm;
-                                                        arg_num           : in     Integer)            return String;
+   function makeParameterName    (parameter_List    : in     doh_parmList;
+                                  the_Parameter     : in     doh_Parm;
+                                  arg_num           : in     Integer) return String;
 
    procedure associate           (Self : access Item;   the_ada_Type      : in     ada_Type.view;
                                                         with_c_Type       : in     c_Type  .view);
