@@ -550,8 +550,8 @@ is
    is
       the_Node       :          Node_Pointer renames n;
 
-      node_Type      : constant doh_swigType := doh_swigType (get_Attribute (the_Node, -"name"));   -- Swig 'forward declaration' nodes do not have a 'type' attribute,
-      the_class_Name : constant String       := Attribute    (the_Node, "name");                    -- so we are using 'name' instead.
+      node_Type      : constant doh_swigType := doh_swigType (get_Attribute (the_Node, "name"));   -- Swig 'forward declaration' nodes do not have a 'type' attribute,
+      the_class_Name : constant String       := Attribute    (the_Node, "name");                   -- so we are using 'name' instead.
       Kind           : constant String       := Attribute    (the_Node, "kind");
       is_a_Struct    : constant Boolean      := Kind = "struct";
 
@@ -657,12 +657,12 @@ is
       end if;
 
       declare
-         sym_Name   : constant doh_String   := doh_String   (get_Attribute (the_Node,  -"sym:name"));
-         swig_Type  : constant doh_swigType := doh_swigType (get_Attribute (the_Node,  -"type"));
+         sym_Name   : constant doh_String   := doh_String   (get_Attribute (the_Node,  "sym:name"));
+         swig_Type  : constant doh_swigType := doh_swigType (get_Attribute (the_Node,  "type"));
       begin
-         if get_Attribute (the_Node, -"sym:overloaded") = null
+         if get_Attribute (the_Node, "sym:overloaded") = null
          then
-            if Self.addSymbol (String_Pointer (get_Attribute (the_Node, -"sym:name")),
+            if Self.addSymbol (String_Pointer (get_Attribute (the_Node, "sym:name")),
                                the_Node) = 0
             then
                return SWIG_ERROR;
@@ -680,7 +680,7 @@ is
             overloaded_Name      : constant unbounded_String := to_unbounded_String (get_overloaded_Name (the_Node));
             wrapper_Name         : constant String           := +(doh_Item (Swig_name_wrapper (const_String_or_char_ptr.item (-overloaded_name))));
 
-            the_Parameters       : constant ParmList_Pointer := ParmList_Pointer (get_Attribute (the_Node, -"parms"));
+            the_Parameters       : constant ParmList_Pointer := ParmList_Pointer (get_Attribute (the_Node, "parms"));
 
             c_return_Type        :          unbounded_String := +doh_Item (Swig_typemap_lookup (const_String_or_char_ptr.item (-"ctype"),
                                                                                                 the_Node,
@@ -731,11 +731,11 @@ is
             set_Attribute (the_Node,  -"wrap:parms",  String_Pointer (the_Parameters));
             set_Attribute (the_Node,  -"wrap:name",  -wrapper_Name);
 
-            if get_Attribute (the_Node,  -"sym:overloaded") /= null
+            if get_Attribute (the_Node,  "sym:overloaded") /= null
             then     -- Wrappers not wanted for some methods where the parameters cannot be overloaded in Ada.
                Swig_overload_check (the_Node);     -- Emit warnings for the few cases that can't be overloaded in Ada and give up on generating wrapper.
 
-               if get_Attribute (the_Node, -"overload:ignore") /= null
+               if get_Attribute (the_Node, "overload:ignore") /= null
                then
                   unindent_Log;
                   return SWIG_OK;
@@ -763,14 +763,12 @@ is
                                          -"0") /= 0
                   loop   -- tbd: What is this for ?
                      the_Parameter := get_Attribute (the_Parameter,
-                                                     -"tmap:in:next");
+                                                     "tmap:in:next");
                   end loop;
 
                   declare
-                     param_swigType : constant doh_swigType     :=  doh_swigType (get_Attribute (the_Parameter,
-                                                                                                 -"type"));
-                     l_Name         : constant doh_String       :=  doh_String   (get_Attribute (the_Parameter,
-                                                                                                 -"lname"));
+                     param_swigType : constant doh_swigType     :=  doh_swigType (get_Attribute (the_Parameter, "type"));
+                     l_Name         : constant doh_String       :=  doh_String   (get_Attribute (the_Parameter, "lname"));
                      arg            : constant String           :=  "j" & (+l_Name);
                      param_c_Type   :          unbounded_String := +Attribute (the_Parameter, "tmap:ctype");
                   begin
@@ -974,7 +972,7 @@ is
             print_to (wrapper_Code,  argOut_Code);       -- Output argument output code.
             print_to (wrapper_Code,  cleanup_Code);      -- Output cleanup         code.
 
-            if get_Attribute (the_Node, -"feature:new") /= null
+            if get_Attribute (the_Node, "feature:new") /= null
             then   -- Look to see if there is any newfree cleanup code.
                declare
                   the_typeMap : constant unbounded_String := +doh_Item (Swig_typemap_lookup (const_String_or_char_ptr.item (-"newfree"),
@@ -1292,7 +1290,7 @@ is
       end if;
 
 
-      if get_Attribute (parent_Node (the_Node),  -"enumvalues") = null
+      if get_Attribute (parent_Node (the_Node),  "enumvalues") = null
       then
          set_Attribute (parent_Node (the_Node),  -"enumvalues",  -symname);
       end if;

@@ -66,14 +66,14 @@ struct Wrapper;
     return NewStringf ("%s", c_String);
   }
 
-
+/*
   Node*
   get_attribute (Node*      node,
                  String*    key)
   {
     return Getattr (node, key);
   }
-
+*/
 
   void
   set_attribute (Node*      node,

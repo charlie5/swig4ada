@@ -188,7 +188,7 @@ is
       loop
          if String'(+node_Type (the_Sibling)) = "module"
          then
-            return +doh_Item (get_Attribute (the_Sibling, -"name"));
+            return +doh_Item (get_Attribute (the_Sibling, "name"));
          end if;
 
          the_Sibling := next_Sibling (the_Sibling);
