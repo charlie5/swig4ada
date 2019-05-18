@@ -181,34 +181,6 @@
     return NewStringf ("%s", c_String);
   }
 
-/*
-  Node*
-  get_attribute (Node*      node,
-                 String*    key)
-  {
-    return Getattr (node, key);
-  }
-
-
-  void
-  set_attribute (Node*      node,
-                 String*    key,
-                 String*    value)
-  {
-    Setattr (node, key, value);
-  }
-*/
-
-
-  int
-  check_attribute (Node*      node,
-                   String*    key,
-                   String*    value)
-  {
-    return checkAttribute (node, key, value);
-  }
-
-                 
 
   char*
   Node_to_CStr (Node*    node)
@@ -7396,39 +7368,6 @@ DllExport void* SWIGSTDCALL Ada_c_to_doh_String (
   
   result = (String *)c_to_doh_String(arg1);
   jresult = (void *) result;      
-  
-  
-  
-  return jresult;
-  
-}
-
-
-
-DllExport int SWIGSTDCALL Ada_check_attribute (
-  void* jarg1
-  ,
-  
-  void* jarg2
-  ,
-  
-  void* jarg3
-  )
-{
-  int jresult ;
-  Node *arg1 = (Node *) 0 ;
-  String *arg2 = (String *) 0 ;
-  String *arg3 = (String *) 0 ;
-  int result;
-  
-  arg1 = (Node *)jarg1; 
-  
-  arg2 = (String *)jarg2; 
-  
-  arg3 = (String *)jarg3; 
-  
-  result = (int)check_attribute(arg1,arg2,arg3);
-  jresult = result; 
   
   
   

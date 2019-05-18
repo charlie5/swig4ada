@@ -150,4 +150,15 @@ is
    end Attribute;
 
 
+
+   function check_Attribute (Node : in doh_Node;  Named : in String;
+                                                  Value : in String) return Boolean
+   is
+      use type C.int;
+   begin
+      return checkAttribute (Node, DOH_Pointer (-Named),
+                                   DOH_Pointer (-Value)) /= 0;
+   end check_Attribute;
+
+
 end doh_Support;

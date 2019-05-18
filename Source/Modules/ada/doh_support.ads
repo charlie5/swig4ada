@@ -68,5 +68,8 @@ is
    function  get_Attribute (Node : in doh_Node;   Named : in String) return doh_Node;
    function  Attribute     (Node : in doh_Node;   Named : in String) return String;
 
+   function check_Attribute (Node : in doh_Node;  Named : in String;
+                                                  Value : in String) return Boolean;
+
 
 end doh_Support;

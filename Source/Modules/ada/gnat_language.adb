@@ -649,7 +649,7 @@ is
 
       freshen_current_module_Package (Self, the_Node);
 
-      if check_Attribute (the_Node,  -"access", -"private") /= 0
+      if check_Attribute (the_Node, "access", "private")
       then     -- Skip private functions (tbd: still needed ?).
          log (+"Skipping private function.");
          unindent_Log;
@@ -758,9 +758,7 @@ is
 
                for Each in 0 .. Num_arguments - 1
                loop
-                  while check_Attribute (the_Parameter,
-                                         -"tmap:in:numinputs",
-                                         -"0") /= 0
+                  while check_Attribute (the_Parameter, "tmap:in:numinputs", "0")
                   loop   -- tbd: What is this for ?
                      the_Parameter := get_Attribute (the_Parameter,
                                                      "tmap:in:next");
@@ -1634,7 +1632,7 @@ is
       log (+"'constructorHandler'");
 
 
-      if check_Attribute (the_Node,  -"access",  -"private") /= 0
+      if check_Attribute (the_Node, "access", "private")
       then
          unindent_Log;
          return SWIG_OK;
@@ -1642,8 +1640,8 @@ is
 
       Self.current_c_Node := doh_Node (the_Node);
 
-      if not (   check_Attribute (the_node,  -"access",  -"protected") /= 0
-              or check_Attribute (the_Node,  -"access",  -"private")   /= 0)
+      if not (   check_Attribute (the_node, "access", "protected")
+              or check_Attribute (the_Node, "access", "private"))
       then
 --           do_base_constructorHandler (Self.all, the_Node);
          Status := swigMod.Language.item (Self.all).constructorHandler (the_Node);
@@ -1679,11 +1677,11 @@ is
 
          while the_Parameter /= null
          loop
-            if check_Attribute (the_Parameter,  -"varargs:ignore",  -"1") /= 0
+            if check_Attribute (the_Parameter, "varargs:ignore", "1")
             then   -- Ignored varargs.
                the_Parameter := next_Sibling (the_Parameter);
 
-            elsif check_Attribute (the_Parameter,  -"tmap:in:numinputs",  -"0") /= 0
+            elsif check_Attribute (the_Parameter, "tmap:in:numinputs", "0")
             then   -- Ignored parameters.
                the_Parameter := get_Attribute (the_Parameter, "tmap:in:next");
 
@@ -1743,8 +1741,8 @@ is
             the_Constructor.constructor_Symbol := constructor_Symbol;
          end;
 
-         if not (    check_Attribute (the_Node,  -"access",  -"protected") /= 0
-                 or  check_Attribute (the_Node,  -"access",  -"private")   /= 0)
+         if not (    check_Attribute (the_Node, "access", "protected")
+                 or  check_Attribute (the_Node, "access", "private"))
          then
             print_to (DOH_Pointer (Self.f_gnat),  construct_Call & NL);
          end if;
@@ -1799,8 +1797,8 @@ is
 
       Self.current_c_Node := doh_Node (the_Node);
 
-      if not (   check_Attribute (the_Node,  -"access",  -"protected") /= 0
-              or check_Attribute (the_Node,  -"access",  -"private")   /= 0)
+      if not (   check_Attribute (the_Node, "access", "protected")
+              or check_Attribute (the_Node, "access", "private"))
       then
 --           do_base_destructorHandler (Self.all,  the_node);
          Status := swigMod.Language.item (Self.all).destructorHandler (the_node);
@@ -2968,11 +2966,11 @@ is
 
          while the_Parameter /= null
          loop
-            if check_Attribute (the_Parameter,  -"varargs:ignore",  -"1") /= 0
+            if check_Attribute (the_Parameter, "varargs:ignore", "1")
             then
                the_Parameter := next_Sibling (the_parameter);                            -- Ignored varargs.
 
-            elsif check_Attribute (the_Parameter,  -"tmap:in:numinputs",  -"0") /= 0
+            elsif check_Attribute (the_Parameter, "tmap:in:numinputs", "0")
             then
                the_Parameter := get_Attribute (the_Parameter, "tmap:in:next");         -- Ignored parameters.
 
@@ -3178,21 +3176,15 @@ is
 
             new_Function.returns_an_Access := return_by_Reference  or  return_by_Pointer;
 
-            if    checkAttribute (the_Node,
-                                  const_String_or_char_ptr.item (-"access"),
-                                  const_String_or_char_ptr.item (-"public"))    /= 0
+            if    check_Attribute (the_Node, "access", "public")
             then
                new_Function.access_Mode := public_access;
 
-            elsif checkAttribute (the_Node,
-                                  const_String_or_char_ptr.item (-"access"),
-                                  const_String_or_char_ptr.item (-"protected")) /= 0
+            elsif check_Attribute (the_Node, "access", "protected")
             then
                new_Function.access_Mode := protected_access;
 
-            elsif checkAttribute (the_Node,
-                                  const_String_or_char_ptr.item (-"access"),
-                                  const_String_or_char_ptr.item (-"private"))   /= 0
+            elsif check_Attribute (the_Node, "access", "private")
             then
                new_Function.access_Mode := private_access;
 
@@ -3205,12 +3197,8 @@ is
                new_Function.is_Static   := True;
             else
                new_Function.is_Static   := Self.static_flag;
-               new_Function.is_Virtual  := checkAttribute (the_Node,
-                                                           const_String_or_char_ptr.item (-"storage"),
-                                                           const_String_or_char_ptr.item (-"virtual")) /= 0;
-               new_Function.is_Abstract := checkAttribute (the_Node,
-                                                           const_String_or_char_ptr.item (-"abstract"),
-                                                           const_String_or_char_ptr.item (-"1"))       /= 0;
+               new_Function.is_Virtual  := check_Attribute (the_Node, "storage",  "virtual");
+               new_Function.is_Abstract := check_Attribute (the_Node, "abstract", "1");
             end if;
 
             if is_Destructor
