@@ -9,6 +9,7 @@ is
    use DOHs.Binding,
        swigg_Module,
        swigg_Module.Binding,
+       Interfaces,
        interfaces.C.strings;
 
 
@@ -101,6 +102,38 @@ is
 
    -- Nodes
    --
+
+   procedure set_Attribute (Node : in doh_Node;   Named : in String;
+                                                  Value : in String)
+   is
+      Status : constant C.int := DohSetattr (DOH_Pointer (Node),
+                                             DOH_Pointer (-Named),
+                                             DOH_Pointer (-Value));
+      use type C.int;
+   begin
+      if Status /= 0
+      then
+         raise Constraint_Error;
+      end if;
+   end set_Attribute;
+
+
+
+   procedure set_Attribute (Node : in doh_Node;   Named : in String;
+                                                  Value : in String_Pointer)
+   is
+      Status : constant C.int := DohSetattr (DOH_Pointer ( Node),
+                                             DOH_Pointer (-Named),
+                                             DOH_Pointer ( Value));
+      use type C.int;
+   begin
+      if Status /= 0
+      then
+         raise Constraint_Error;
+      end if;
+   end set_Attribute;
+
+
 
    function get_Attribute (Node : in doh_Node;   Named : in String) return doh_Node
    is

@@ -61,8 +61,12 @@ is
    -- Nodes
    --
 
-   function get_Attribute (Node : in doh_Node;   Named : in String) return doh_Node;
-   function Attribute     (Node : in doh_Node;   Named : in String) return String;
+   procedure set_Attribute (Node : in doh_Node;   Named : in String;
+                                                  Value : in String);
+   procedure set_Attribute (Node : in doh_Node;   Named : in String;
+                                                  Value : in String_Pointer);
+   function  get_Attribute (Node : in doh_Node;   Named : in String) return doh_Node;
+   function  Attribute     (Node : in doh_Node;   Named : in String) return String;
 
 
 end doh_Support;

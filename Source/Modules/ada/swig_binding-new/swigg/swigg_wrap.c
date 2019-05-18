@@ -188,7 +188,7 @@
   {
     return Getattr (node, key);
   }
-*/
+
 
   void
   set_attribute (Node*      node,
@@ -197,7 +197,7 @@
   {
     Setattr (node, key, value);
   }
-
+*/
 
 
   int
@@ -7400,33 +7400,6 @@ DllExport void* SWIGSTDCALL Ada_c_to_doh_String (
   
   
   return jresult;
-  
-}
-
-
-
-DllExport void SWIGSTDCALL Ada_set_attribute (
-  void* jarg1
-  ,
-  
-  void* jarg2
-  ,
-  
-  void* jarg3
-  )
-{
-  Node *arg1 = (Node *) 0 ;
-  String *arg2 = (String *) 0 ;
-  String *arg3 = (String *) 0 ;
-  
-  arg1 = (Node *)jarg1; 
-  
-  arg2 = (String *)jarg2; 
-  
-  arg3 = (String *)jarg3; 
-  
-  set_attribute(arg1,arg2,arg3);
-  
   
 }
 

@@ -73,7 +73,7 @@ struct Wrapper;
   {
     return Getattr (node, key);
   }
-*/
+
 
   void
   set_attribute (Node*      node,
@@ -82,7 +82,7 @@ struct Wrapper;
   {
     Setattr (node, key, value);
   }
-
+*/
 
 
   int

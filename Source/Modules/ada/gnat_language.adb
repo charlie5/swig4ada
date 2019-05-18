@@ -618,7 +618,7 @@ is
       if get_Attribute (the_Node, "type") /= null
       then
          Swig_save_1   (new_String ("nativeWrapper"),  the_Node,  new_String ("name"));
-         set_Attribute (the_Node,                     -"name",    wrap_Name);
+         set_Attribute (the_Node,                      "name",    wrap_Name);
 
          Self.native_function_Flag := True;
          Status                    := functionWrapper (Self, the_Node);     -- Delegate to functionWrapper.
@@ -728,8 +728,8 @@ is
 
             --  Parameter overloading.
             --
-            set_Attribute (the_Node,  -"wrap:parms",  String_Pointer (the_Parameters));
-            set_Attribute (the_Node,  -"wrap:name",  -wrapper_Name);
+            set_Attribute (the_Node,  "wrap:parms",  String_Pointer (the_Parameters));
+            set_Attribute (the_Node,  "wrap:name",   wrapper_Name);
 
             if get_Attribute (the_Node,  "sym:overloaded") /= null
             then     -- Wrappers not wanted for some methods where the parameters cannot be overloaded in Ada.
@@ -801,7 +801,7 @@ is
                            replace_All (the_typeMap,  "$arg",     Arg);          -- deprecated ?
                            replace_All (the_typeMap,  "$input",   Arg);          -- deprecated
 
-                           set_Attribute (the_Parameter,  -"emit:input", -Arg);
+                           set_Attribute (the_Parameter,  "emit:input", Arg);
 
                            print_to (wrapper_Code,  the_typeMap & NL);
 
@@ -877,8 +877,8 @@ is
                   the_Type : constant SwigType_Pointer := SwigType_Pointer (Swig_wrapped_var_type (SwigType_Pointer (get_Attribute (the_Node, "type")),
                                                                                                    Self.use_naturalvar_mode (the_Node)));
                begin
-                  set_Attribute (the_Node,   -"wrap:action",
-                                             -String' (  "result = ("
+                  set_Attribute (the_Node,  "wrap:action",
+                                            String' (  "result = ("
                                                        & (+doh_Item (SwigType_lstr (the_Type, null)))
                                                        & ") "
                                                        & Attribute (the_Node, "value")
@@ -1204,10 +1204,10 @@ is
          declare
             new_enum_Name : constant String := "anonymous_enum_" & Image (Self.anonymous_enum_Count);
          begin
-            set_Attribute (the_Node,  -"type",      -("enum " & new_enum_Name));
-            set_Attribute (the_Node,  -"sym:name",  -new_enum_Name);
-            set_Attribute (the_Node,  -"name",      -new_enum_Name);
-            set_Attribute (the_Node,  -"enumtype",  -new_enum_Name);
+            set_Attribute (the_Node,  "type",      "enum " & new_enum_Name);
+            set_Attribute (the_Node,  "sym:name",  new_enum_Name);
+            set_Attribute (the_Node,  "name",      new_enum_Name);
+            set_Attribute (the_Node,  "enumtype",  new_enum_Name);
 
             doh_swig_Type := SwigType_Pointer (get_Attribute (the_Node, "enumtype"));
          end;
@@ -1292,7 +1292,7 @@ is
 
       if get_Attribute (parent_Node (the_Node),  "enumvalues") = null
       then
-         set_Attribute (parent_Node (the_Node),  -"enumvalues",  -symname);
+         set_Attribute (parent_Node (the_Node),  "enumvalues",  +symname);
       end if;
 
 
@@ -1415,7 +1415,7 @@ is
          then -- Adjust the enum type for the Swig_typemap_lookup.
             the_swigType := SwigType_Pointer (get_Attribute (parent_Node (the_Node),
                                                              "enumtype"));           -- We want the same adatype typemap for all the enum items so we use the enum type (parent node).
-            set_Attribute (the_Node, -"type", String_Pointer (the_swigType));
+            set_Attribute (the_Node, "type", String_Pointer (the_swigType));
          end if;
       end;
 
@@ -1561,9 +1561,7 @@ is
 
       Self.current_c_Node := doh_Node (the_Node);
 
-      Status := DohSetattr (obj   => DOH_Pointer (the_Node),
-                            name  => DOH_Pointer (-"name"),
-                            value => DOH_Pointer (-(Namespace & function_Name)));
+      set_Attribute (the_Node, "name", Namespace & function_Name);
 --                              value => DOH_Pointer (-(to_String (Self.current_c_Class.Name) & "::" & function_Name)));
 
 --        do_base_memberfunctionHandler (Self.all, the_Node);

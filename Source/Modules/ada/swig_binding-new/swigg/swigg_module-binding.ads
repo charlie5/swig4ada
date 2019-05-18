@@ -1165,10 +1165,6 @@ package swigg_module.Binding is
      (c_String : in interfaces.c.strings.chars_ptr)
       return swigg_module.Pointers.String_Pointer;
 
-   procedure set_attribute (node : in swigg_module.Pointers.Node_Pointer;
-      key                        : in swigg_module.Pointers.String_Pointer;
-      value                      : in swigg_module.Pointers.String_Pointer);
-
    function check_attribute (node : in swigg_module.Pointers.Node_Pointer;
       key                         : in swigg_module.Pointers.String_Pointer;
       value : in swigg_module.Pointers.String_Pointer) return interfaces.c.int;
@@ -1579,7 +1575,6 @@ private
    pragma Import (C, Swig_arg_error, "Swig_arg_error");
    pragma Import (C, String_in, "String_in");
    pragma Import (C, c_to_doh_String, "c_to_doh_String");
-   pragma Import (C, set_attribute, "set_attribute");
    pragma Import (C, check_attribute, "check_attribute");
    pragma Import (C, Node_to_CStr, "Node_to_CStr");
    pragma Import (C, node_Type, "node_Type");
