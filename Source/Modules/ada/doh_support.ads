@@ -4,6 +4,7 @@ with
      swigg_module.Pointers,
      DOHs.Pointers,
      DOHs.DohIterator,
+     DOHs.const_String_or_char_ptr,
      ada.Strings.unbounded,
      interfaces.c.strings;
 
@@ -27,6 +28,8 @@ is
    subtype doh_List     is DOH_Pointer;
 
    subtype doh_Iterator is DOHs.DohIterator.Pointer;
+
+   subtype const_String is DOHs.const_String_or_char_ptr.item;
 
    null_DOH : doh_Item;
 
