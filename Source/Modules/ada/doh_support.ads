@@ -57,4 +57,12 @@ is
 
    procedure log (Self : in doh_Item);
 
+
+   -- Nodes
+   --
+
+   function get_Attribute (Node : in doh_Node;   Named : in String) return doh_Node;
+   function Attribute     (Node : in doh_Node;   Named : in String) return String;
+
+
 end doh_Support;

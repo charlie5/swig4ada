@@ -6,7 +6,8 @@ with
 
 package body doh_Support
 is
-   use swigg_Module,
+   use DOHs.Binding,
+       swigg_Module,
        swigg_Module.Binding,
        interfaces.C.strings;
 
@@ -91,11 +92,29 @@ is
 
    procedure log (Self : in doh_Item)
    is
-      use ada.Text_IO,
-          DOHs.Binding;
+      use ada.Text_IO;
    begin
       put_Line (+DohStr (DOH_Pointer (Self)));
    end log;
+
+
+
+   -- Nodes
+   --
+
+   function get_Attribute (Node : in doh_Node;   Named : in String) return doh_Node
+   is
+   begin
+      return doh_Node (DohGetattr (DOH_Pointer (Node),
+                                   DOH_Pointer (-Named)));
+   end get_Attribute;
+
+
+   function Attribute (Node : in doh_Node;   Named : in String) return String
+   is
+   begin
+      return +doh_String (get_Attribute (Node, Named));
+   end Attribute;
 
 
 end doh_Support;

@@ -188,7 +188,7 @@ is
       the_Node     :          Node_Pointer renames n;
 --        options_Node : doh_Node'Class   := get_Attribute (get_Attribute (the_Node, -"module"),    -- get any options set in the module directive
 --                                                          -"options");
-      module_Name  : constant unbounded_String := +doh_Item (get_Attribute (the_Node, -"name"));
+      module_Name  : constant unbounded_String := +Attribute (the_Node, "name");
 
    begin
       indent_Log;
@@ -209,13 +209,12 @@ is
 
       --  Initialize all of the output files.
       --
-      Self.f_runtime := new_File (name => String_Pointer (get_Attribute (the_Node,
-                                                                         -"outfile")),
-                                  mode => new_String ("w"));
+      Self.f_runtime := new_File (name => -Attribute (the_Node, "outfile"),
+                                  mode =>  new_String ("w"));
+
       if not exists (DOH_Pointer (Self.f_Runtime))
       then
-         log (+"unable to open " & to_String (DOH_Pointer (get_Attribute (the_Node,
-                                                                          -"outfile"))));
+         log (+"unable to open " & Attribute (the_Node, "outfile"));
          exit_with_Fail;
       end if;
 
@@ -441,10 +440,8 @@ is
       --        options_Node : doh_Node'Class   := get_Attribute (get_Attribute (the_Node, -"module"),    -- get any options set in the module directive
       --                                                          -"options");
 
-      the_Method : constant unbounded_String := +DOH_Pointer (get_Attribute (the_Node,
-                                                                             -"method"));
-      the_Code   : constant unbounded_String := +DOH_Pointer (get_Attribute (the_Node,
-                                                                             -"code"));
+      the_Method : constant unbounded_String := +Attribute (the_Node, "method");
+      the_Code   : constant unbounded_String := +Attribute (the_Node, "code");
 --        the_kwargs : constant unbounded_String := +get_Attribute (the_Node, -"kwargs");
 
    begin
@@ -457,12 +454,11 @@ is
             pattern_Type : unbounded_String;
             pattern_Name : unbounded_String;
             new_Key      : unbounded_String;
-
          begin
             while exists (doh_Item (Pattern))
             loop
-               pattern_Type := +doh_Item (get_Attribute (get_Attribute (Pattern, -"pattern"), -"type"));
-               pattern_Name := +doh_Item (get_Attribute (get_Attribute (Pattern, -"pattern"), -"name"));
+               pattern_Type := +Attribute (get_Attribute (Pattern, "pattern"), "type");
+               pattern_Name := +Attribute (get_Attribute (Pattern, "pattern"), "name");
 
                new_Key := pattern_Type;
 
@@ -491,7 +487,7 @@ is
    is
       pragma Unreferenced (Self);
       the_Node :          Node_Pointer renames n;
-      the_Name : constant unbounded_String  := +doh_Item (get_Attribute (the_Node, -"name"));
+      the_Name : constant unbounded_String  := +Attribute (the_Node, "name");
    begin
       indent_Log;
       log (+"");
@@ -526,7 +522,7 @@ is
                                   n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int
    is
       the_Node :          Node_Pointer renames n;
-      the_Name : constant unbounded_String  := +doh_Item (get_Attribute (the_Node, -"name"));
+      the_Name : constant unbounded_String  := +Attribute (the_Node, "name");
       Status   :          C.int with Unreferenced;
    begin
       indent_Log;
@@ -555,8 +551,8 @@ is
       the_Node       :          Node_Pointer renames n;
 
       node_Type      : constant doh_swigType := doh_swigType (get_Attribute (the_Node, -"name"));   -- Swig 'forward declaration' nodes do not have a 'type' attribute,
-      the_class_Name : constant String       := +doh_Item    (get_Attribute (the_Node, -"name"));   -- so we are using 'name' instead.
-      Kind           : constant String       := +doh_Item    (get_Attribute (the_Node,  -"kind"));
+      the_class_Name : constant String       := Attribute    (the_Node, "name");                    -- so we are using 'name' instead.
+      Kind           : constant String       := Attribute    (the_Node, "kind");
       is_a_Struct    : constant Boolean      := Kind = "struct";
 
       new_c_Class    :          c_Type.view;
@@ -603,7 +599,7 @@ is
                              n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int
    is
       the_Node       :          Node_Pointer renames n;
-      wrap_Name      : constant String_Pointer    := String_Pointer (get_Attribute (the_Node, -"wrap:name"));
+      wrap_Name      : constant String_Pointer    := String_Pointer (get_Attribute (the_Node, "wrap:name"));
       Status         :          C.int;
       pragma Unreferenced (Status);
 
@@ -619,7 +615,7 @@ is
       end if;
 
 
-      if get_Attribute (the_Node, -"type") /= null
+      if get_Attribute (the_Node, "type") /= null
       then
          Swig_save_1   (new_String ("nativeWrapper"),  the_Node,  new_String ("name"));
          set_Attribute (the_Node,                     -"name",    wrap_Name);
@@ -647,7 +643,7 @@ is
       use type C.int;
    begin
       indent_Log;
-      log (+"functionWrapper: '" & String' (+doh_Item (get_Attribute (the_Node,  -"sym:name"))) & "'");
+      log (+"functionWrapper: '" & Attribute (the_Node, "sym:name") & "'");
 
       Self.current_c_Node := doh_Node (the_Node);
 
@@ -757,7 +753,7 @@ is
             do_Parameters :
             declare
                the_Parameter : Node_Pointer := Node_Pointer (the_Parameters);
-               gen_Comma     : Boolean  := False;
+               gen_Comma     : Boolean      := False;
             begin
 
                for Each in 0 .. Num_arguments - 1
@@ -776,8 +772,7 @@ is
                      l_Name         : constant doh_String       :=  doh_String   (get_Attribute (the_Parameter,
                                                                                                  -"lname"));
                      arg            : constant String           :=  "j" & (+l_Name);
-                     param_c_Type   :          unbounded_String := +doh_Item     (get_Attribute (the_Parameter,
-                                                                                                 -"tmap:ctype"));
+                     param_c_Type   :          unbounded_String := +Attribute (the_Parameter, "tmap:ctype");
                   begin
                      if param_c_Type /= ""
                      then
@@ -799,8 +794,7 @@ is
                      --  Get typemap for this argument.
                      --
                      declare
-                        the_typeMap : unbounded_String := +doh_Item (get_Attribute (the_Parameter,
-                                                                                    -"tmap:in"));
+                        the_typeMap : unbounded_String := +Attribute (the_Parameter, "tmap:in");
                      begin
                         if the_typeMap /= ""
                         then
@@ -813,7 +807,7 @@ is
 
                            print_to (wrapper_Code,  the_typeMap & NL);
 
-                           the_Parameter := get_Attribute (the_Parameter,  -"tmap:in:next");
+                           the_Parameter := get_Attribute (the_Parameter,  "tmap:in:next");
                         else
                            log (+"Unable to use type " & String'(+param_swigType) & " as a function argument.");
                            the_Parameter := next_Sibling (the_Parameter);
@@ -833,15 +827,15 @@ is
                while the_Parameter /= null
                loop
                   declare
-                     the_typeMap : unbounded_String := +doh_Item (get_Attribute (the_Parameter,  -"tmap:freearg"));
+                     the_typeMap : unbounded_String := +Attribute (the_Parameter,  "tmap:freearg");
                   begin
                      if the_typeMap /= ""
                      then
                         replace_All (the_typeMap,
                                      "$input",
-                                     +doh_Item (get_Attribute (the_Parameter, -"emit:input")));
+                                     Attribute (the_Parameter, "emit:input"));
                         append (cleanup_Code,  the_typeMap & NL);
-                        the_Parameter := get_Attribute (the_Parameter,  -"tmap:freearg:next");
+                        the_Parameter := get_Attribute (the_Parameter,  "tmap:freearg:next");
                      else
                         the_Parameter := next_Sibling (the_Parameter);
                      end if;
@@ -857,17 +851,17 @@ is
                while the_Parameter /= null
                loop
                   declare
-                     the_typeMap : unbounded_String := +doh_Item (get_Attribute (the_Parameter,  -"tmap:argout"));
+                     the_typeMap : unbounded_String := +Attribute (the_Parameter, "tmap:argout");
                   begin
                      if the_typeMap /= ""
                      then
-                        replace_All (the_typeMap, "$arg",    +doh_Item (get_Attribute (the_Parameter, -"emit:input")));    -- deprecated ?
-                        replace_All (the_typeMap, "$input",  +doh_Item (get_Attribute (the_Parameter, -"emit:input")));
+                        replace_All (the_typeMap, "$arg",    Attribute (the_Parameter, "emit:input"));    -- deprecated ?
+                        replace_All (the_typeMap, "$input",  Attribute (the_Parameter, "emit:input"));
                         replace_All (the_typeMap, "$result", "jresult");
 
                         append (argout_Code,  the_typeMap & NL);
 
-                        the_Parameter := get_Attribute (the_Parameter,  -"tmap:argout:next");
+                        the_Parameter := get_Attribute (the_Parameter,  "tmap:argout:next");
                      else
                         the_Parameter := next_Sibling (the_Parameter);
                      end if;
@@ -882,14 +876,14 @@ is
 
                declare      -- below based on Swig_VargetToFunction()
                   use swigmod.Language;
-                  the_Type : constant SwigType_Pointer := SwigType_Pointer (Swig_wrapped_var_type (SwigType_Pointer (get_Attribute (the_Node, -"type")),
+                  the_Type : constant SwigType_Pointer := SwigType_Pointer (Swig_wrapped_var_type (SwigType_Pointer (get_Attribute (the_Node, "type")),
                                                                                                    Self.use_naturalvar_mode (the_Node)));
                begin
                   set_Attribute (the_Node,   -"wrap:action",
                                              -String' (  "result = ("
                                                        & (+doh_Item (SwigType_lstr (the_Type, null)))
                                                        & ") "
-                                                       & (+doh_Item (get_Attribute (the_Node, -"value")))
+                                                       & Attribute (the_Node, "value")
                                                        & ";"
                                                        & NL));
                end;
@@ -900,7 +894,7 @@ is
             --
             declare
                the_Type : constant SwigType_Pointer := SwigType_Pointer (doh_copy (DOH_Pointer (get_Attribute (the_Node,
-                                                                                                               -"type"))));
+                                                                                                               "type"))));
                void     :          doh_Item;
                pragma Unreferenced (void);
             begin
@@ -971,7 +965,7 @@ is
                      log (+ "Unable to use return type "
                           & String'(+swig_Type)
                           & " in function "
-                          & String'(+doh_Item (get_Attribute (the_Node, -"name")))
+                          & Attribute (the_Node, "name")
                           & NL);
                   end if;
                end;
@@ -1080,8 +1074,8 @@ is
 
       the_Node           :          Node_Pointer     renames n;
 
-      the_Name           :          unbounded_String := +doh_Item (get_Attribute (the_Node,  -"sym:name"));
-      the_swig_Type      :          SwigType_Pointer :=  SwigType_Pointer (doh_Copy (DOH_Pointer (get_Attribute (the_Node,  -"type"))));
+      the_Name           :          unbounded_String := +Attribute (the_Node,  "sym:name");
+      the_swig_Type      :          SwigType_Pointer :=  SwigType_Pointer (doh_Copy (DOH_Pointer (get_Attribute (the_Node,  "type"))));
       is_Pointer         : constant Boolean          :=  SwigType_ispointer (the_swig_Type) /= 0;
 
    begin
@@ -1140,7 +1134,7 @@ is
 --        use dispatcher.AccessMode;
 
       the_Node      : Node_Pointer renames  n;
-      doh_swig_Type : SwigType_Pointer :=   SwigType_Pointer (get_Attribute (the_Node,  -"enumtype"));
+      doh_swig_Type : SwigType_Pointer :=   SwigType_Pointer (get_Attribute (the_Node, "enumtype"));
 
       --  new ...
       --
@@ -1161,9 +1155,8 @@ is
       Self.current_c_Node := doh_Node (the_Node);
 
       declare
-         the_Name          : unbounded_String := +DOH_Pointer (get_Attribute (the_Node,  -"sym:name"));   -- nb: Will be null string for an anonymous enum.
+         the_Name          : unbounded_String := +Attribute (the_Node, "sym:name");        -- nb: Will be null string for an anonymous enum.
          the_doh_swig_Type : SwigType_Pointer := SwigType_Pointer (doh_Copy (DOH_Pointer (doh_swig_Type)));
-
       begin
          log ("the_Name: '" & the_Name & "'");
 
@@ -1218,7 +1211,7 @@ is
             set_Attribute (the_Node,  -"name",      -new_enum_Name);
             set_Attribute (the_Node,  -"enumtype",  -new_enum_Name);
 
-            doh_swig_Type := SwigType_Pointer (get_Attribute (the_Node,  -"enumtype"));
+            doh_swig_Type := SwigType_Pointer (get_Attribute (the_Node, "enumtype"));
          end;
 
       else
@@ -1249,23 +1242,23 @@ is
 --        use dispatcher.AccessMode;
 
       the_Node      :          Node_Pointer renames n;
-      symname       : constant unbounded_String  := +DOH_Pointer (get_Attribute (the_Node,  -"sym:name"));
+      symname       : constant unbounded_String  := +Attribute (the_Node, "sym:name");
 
       --  old ...
       --
-      value_Text    : aliased  unbounded_String  := +DOH_Pointer (get_Attribute (the_Node,  -"feature:ada:constvalue"));   -- Check for the %adaconstvalue feature.
+      value_Text    : aliased  unbounded_String  := +Attribute (the_Node, "feature:ada:constvalue");   -- Check for the %adaconstvalue feature.
 
    begin
       indent_Log;
       log (+"enumvalueDeclaration - '"
-           & String' (+DOH_Pointer (get_Attribute (the_Node, -"name")))
+           & Attribute (the_Node, "name")
            & "'");
 
 
       --  new ...
       --
       declare
-         enum_value_Text : constant unbounded_String := +(DOH_Pointer (get_Attribute (the_Node,  -"enumvalue")));
+         enum_value_Text : constant unbounded_String := +Attribute (the_Node, "enumvalue");
       begin
          if enum_value_Text = ""
          then
@@ -1295,7 +1288,7 @@ is
 
 
       if value_Text = "" then
-         value_Text := +DOH_Pointer (get_Attribute (the_Node,  -"enumvalue"));
+         value_Text := +Attribute (the_Node, "enumvalue");
       end if;
 
 
@@ -1320,8 +1313,8 @@ is
    is
       the_Node       :          Node_Pointer  renames n;
 
-      the_Name       : constant unbounded_String := +DOH_Pointer     (get_Attribute (the_Node,  -"sym:name"));
-      the_swigType   : constant SwigType_Pointer := SwigType_Pointer (get_Attribute (the_Node,  -"type"));
+      the_Name       : constant unbounded_String := +Attribute (the_Node, "sym:name");
+      the_swigType   : constant SwigType_Pointer := SwigType_Pointer (get_Attribute (the_Node, "type"));
 
       the_Type       :          c_Type.view;
       new_c_Constant :          c_Variable.view;
@@ -1342,7 +1335,7 @@ is
       new_c_Constant      := c_variable.new_c_Variable (name    => the_Name,
                                                         of_type => the_Type);
       declare
-         value_Text : unbounded_String := +DOH_Pointer (get_Attribute (the_Node,  -"value"));
+         value_Text : unbounded_String := +Attribute (the_Node,  "value");
       begin
          log ("VALUE_TEXT '" & value_Text & "'      '" & new_c_Constant.my_Type.qualified_Name & "'");
 
@@ -1416,14 +1409,14 @@ is
       end;
 
       declare
-         the_swigType :          SwigType_Pointer := SwigType_Pointer (get_Attribute (the_Node,  -"type"));
+         the_swigType :          SwigType_Pointer := SwigType_Pointer (get_Attribute (the_Node, "type"));
          is_enum_item : constant Boolean          := String' (+node_Type (the_Node)) = "enumitem";
 
       begin
          if is_enum_item
          then -- Adjust the enum type for the Swig_typemap_lookup.
             the_swigType := SwigType_Pointer (get_Attribute (parent_Node (the_Node),
-                                                             -"enumtype"));           -- We want the same adatype typemap for all the enum items so we use the enum type (parent node).
+                                                             "enumtype"));           -- We want the same adatype typemap for all the enum items so we use the enum type (parent node).
             set_Attribute (the_Node, -"type", String_Pointer (the_swigType));
          end if;
       end;
@@ -1443,8 +1436,8 @@ is
                           n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int
    is
       the_Node       :          Node_Pointer     renames  n;
-      node_Type      : constant SwigType_Pointer := SwigType_Pointer (get_Attribute (the_Node, -"name"));   -- use sym:name ???
-      class_Name_Doh : constant SwigType_Pointer := SwigType_Pointer (get_Attribute (the_Node, -"sym:name"));
+      node_Type      : constant SwigType_Pointer := SwigType_Pointer (get_Attribute (the_Node, "name"));   -- use sym:name ???
+      class_Name_Doh : constant SwigType_Pointer := SwigType_Pointer (get_Attribute (the_Node, "sym:name"));
       class_Name     : constant String           := +DOH_Pointer (class_Name_Doh);
       new_c_Class    :          c_Type.view;
       Status         :          C.int with Unreferenced;
@@ -1472,7 +1465,7 @@ is
                         doh_SwigType (node_Type));
       end if;
 
-      if String' (+DOH_Pointer (get_Attribute (the_Node, -"kind"))) = "union"
+      if String' (+DOH_Pointer (get_Attribute (the_Node, "kind"))) = "union"
       then
          new_c_Class.is_Union;
       end if;
@@ -1498,7 +1491,7 @@ is
       -- Handle base classes.
       --
       declare
-         base_List    : constant doh_List   := doh_List  (get_Attribute (the_Node, -"allbases")); -- -"bases");
+         base_List    : constant doh_List   := doh_List  (get_Attribute (the_Node, "allbases")); -- -"bases");
          the_Item     :          DOH_Pointer;
          Length       : constant C.int      := DohLen (base_List);
       begin
@@ -1509,8 +1502,7 @@ is
          loop
             the_Item := DohGetitem (base_List, i-1);
             declare
-               base_Name : constant String := +DOH_Pointer (get_Attribute (Node_Pointer (the_Item),
-                                                                          -"sym:name"));  -- formerly ... getProxyName (c_baseclassname));
+               base_Name : constant String := Attribute (Node_Pointer (the_Item), "sym:name");  -- formerly ... getProxyName (c_baseclassname));
             begin
 --                 put_Line ("Base name: '" & base_Name & "'");
                Self.current_c_Class.add_Base (Self.name_Map_of_c_type.Element (+base_Name));
@@ -1541,16 +1533,16 @@ is
    is
       the_Node        :          Node_Pointer renames n;
       Status          :          C.int with Unreferenced;
-      function_Name   : constant String  := +DohGetattr (DOH_Pointer (the_Node), DOH_Pointer (-"name"));
+      function_Name   : constant String  := Attribute (the_Node, "name");
 
-      Storage         : constant String  := +DohGetattr (DOH_Pointer (the_Node), DOH_Pointer (-"storage"));
-      Value           : constant String  := +DohGetattr (DOH_Pointer (the_Node), DOH_Pointer (-"value"));
+      Storage         : constant String  := Attribute (the_Node, "storage");
+      Value           : constant String  := Attribute (the_Node, "value");
       is_Virtual      : constant Boolean := Storage = "virtual";
       is_Pure         : constant Boolean := Value   = "0";
       is_pure_Virtual : constant Boolean := is_Pure and is_Virtual;
 
-      overriding_Value : constant DOH_Pointer := DohGetattr (DOH_Pointer (the_Node), DOH_Pointer (-"override"));
-      is_Overriding    : constant Boolean     := overriding_Value /= null;
+      overriding_Value : constant Node_Pointer := get_Attribute (the_Node, "override");
+      is_Overriding    : constant Boolean      := overriding_Value /= null;
 
       function get_Namespace return String
       is
@@ -1583,7 +1575,7 @@ is
          the_new_Function : c_Function.view;
       begin
          the_new_Function := Self.new_c_Function (doh_Node (the_Node),
-                                                  +(DOH_Pointer (get_Attribute (the_Node,  -"sym:name"))),
+                                                  +Attribute (the_Node, "sym:name"),
                                                   Self.current_c_Class.nameSpace.all'Access,
                                                   is_Destructor => False,
                                                   is_Overriding => is_Overriding);
@@ -1661,7 +1653,7 @@ is
          Status := swigMod.Language.item (Self.all).constructorHandler (the_Node);
       end if;
 
-      if get_Attribute (the_Node,  -"overload:ignore") /= null
+      if get_Attribute (the_Node, "overload:ignore") /= null
       then     -- Wrappers not wanted for some methods where the parameters cannot be overloaded in Ada.
          unindent_Log;
          return SWIG_OK;
@@ -1674,7 +1666,7 @@ is
          construct_Call      :          unbounded_String;    -- since the default swig constructor returns a pointer to class
          construct_call_Args :          unbounded_String;    -- instead of an actual solid class object.
 
-         parameter_List      : constant ParmList_Pointer := ParmList_Pointer (get_Attribute (the_Node, -"parms"));
+         parameter_List      : constant ParmList_Pointer := ParmList_Pointer (get_Attribute (the_Node, "parms"));
          the_Parameter       :          Node_Pointer     := Node_Pointer (parameter_list);
          Index               :          Natural          := 0;
          gencomma            :          Boolean          := False;
@@ -1697,12 +1689,12 @@ is
 
             elsif check_Attribute (the_Parameter,  -"tmap:in:numinputs",  -"0") /= 0
             then   -- Ignored parameters.
-               the_Parameter := get_Attribute (the_Parameter,  -"tmap:in:next");
+               the_Parameter := get_Attribute (the_Parameter, "tmap:in:next");
 
             else
                declare
-                  pt         : constant SwigType_Pointer := SwigType_Pointer (get_Attribute (the_Parameter, -"type"));   -- tbd: rename
-                  the_c_Type :          unbounded_String := +doh_Item        (get_Attribute (the_Parameter, -"tmap:ctype"));
+                  pt         : constant SwigType_Pointer :=  SwigType_Pointer  (get_Attribute (the_Parameter, "type"));   -- tbd: rename
+                  the_c_Type :          unbounded_String := +Attribute         (the_Parameter, "tmap:ctype");
                   arg        : constant String           :=  makeParameterName (doh_parmList (the_Node),
                                                                                 doh_Parm (the_Parameter),
                                                                                 Index);
@@ -1724,7 +1716,7 @@ is
                   end if;
 
                   gencomma      := True;
-                  the_Parameter := get_Attribute (the_Parameter,  -"tmap:in:next");
+                  the_Parameter := get_Attribute (the_Parameter, "tmap:in:next");
                   Index         := Index + 1;
                end;
             end if;
@@ -1777,7 +1769,7 @@ is
    is
       the_Node         :          doh_Node renames n;
       Status           :          C.int    with    Unreferenced;
-      Storage          : constant DOH_Pointer   := DohGetattr (DOH_Pointer (the_Node), DOH_Pointer (-"storage"));
+      Storage          : constant String        := Attribute (the_Node, "storage");
       is_Overriding    :          Boolean       := False;
 
       use type C.int;
@@ -1790,7 +1782,7 @@ is
       indent_Log;
       log (+"'destructorHandler':");
 
-      if String'(+Storage) = "virtual"
+      if Storage = "virtual"
       then
          Self.current_c_Class.has_virtual_Destructor;
       end if;
@@ -1860,10 +1852,10 @@ is
       use type C.int;
       the_Node           :          doh_Node     renames n;
 
-      swig_Type          :          SwigType_Pointer := SwigType_Pointer (doh_Copy (doh_Item (get_Attribute (the_Node,  -"type"))));
+      swig_Type          :          SwigType_Pointer := SwigType_Pointer (doh_Copy (doh_Item (get_Attribute (the_Node, "type"))));
       swig_Type_is_array : constant Boolean          := SwigType_isarray   (swig_Type) /= 0;
       is_Pointer         : constant Boolean          := SwigType_ispointer (swig_Type) /= 0;
-      variable_Name      : constant unbounded_String := +doh_Item (get_Attribute (the_Node,  -"sym:name"));
+      variable_Name      : constant unbounded_String := +Attribute (the_Node, "sym:name");
    begin
       indent_Log;
       log ("'memberVariableHandler':    Name => " & variable_Name & "     swig_Type: '" & String' (+doh_Item (swig_Type)));
@@ -1876,7 +1868,7 @@ is
          declare
             use c_Variable;
             new_Variable :          c_Variable.view;
-            bit_Field    : constant String         := +doh_Item (get_Attribute (the_Node,  -"bitfield"));
+            bit_Field    : constant String         := Attribute (the_Node, "bitfield");
          begin
             if swig_Type_is_array
             then
@@ -1923,8 +1915,8 @@ is
                                          n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int
    is
       the_Node      :          doh_Node    renames  n;
-      the_swigType  : constant doh_SwigType     :=  doh_SwigType (get_Attribute (the_Node, -"type"));
-      variable_Name : constant unbounded_String := +doh_Item     (get_Attribute (the_Node, -"sym:name"));
+      the_swigType  : constant doh_SwigType     :=  doh_SwigType (get_Attribute (the_Node, "type"));
+      variable_Name : constant unbounded_String := +Attribute (the_Node, "sym:name");
    begin
       indent_Log;
       log (+"");
@@ -1967,7 +1959,7 @@ is
                              n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int
    is
       the_Node :          doh_Node renames n;
-      the_Code : constant doh_swigType  := doh_swigType (get_Attribute (the_Node, -"code"));
+      the_Code : constant doh_swigType  := doh_swigType (get_Attribute (the_Node, "code"));
    begin
       indent_Log;
       doh_replace_all (the_Code,  -"$module",   -Self.Module_core.Name);
@@ -1996,7 +1988,7 @@ is
                             n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int
    is
       the_Node          :          doh_Node renames n;
-      the_doh_type_Name : constant doh_String    := doh_String (get_Attribute (the_Node, -"name"));
+      the_doh_type_Name : constant doh_String    := doh_String (get_Attribute (the_Node, "name"));
 
    begin
       indent_Log;
@@ -2013,10 +2005,10 @@ is
          log (+"Skipping typedef.");
       else
          declare
-            Name             : constant unbounded_String   := +doh_Item (get_Attribute (the_Node, -"name"));
+            Name             : constant unbounded_String   := +Attribute (the_Node, "name");
             the_type_Name    : constant unbounded_String   := Name;
 
-            the_doh_swigType : constant SwigType_Pointer   := SwigType_Pointer (get_Attribute (the_Node, -"type"));
+            the_doh_swigType : constant SwigType_Pointer   := SwigType_Pointer (get_Attribute (the_Node, "type"));
             the_swig_Type    : constant swig_Type          := +doh_Item (the_doh_swigType);
 
             Pad              :          SwigType_Pointer;
@@ -2643,7 +2635,7 @@ is
                if parent_node_Type = "import"
                then
                   declare
-                     parent_module_Name : constant String := +doh_Item (get_Attribute (the_Parent, -"module"));
+                     parent_module_Name : constant String := Attribute (the_Parent, "module");
                   begin
                      the_Module := Self.demand_Module (+parent_module_Name);
                      exit;
@@ -2866,13 +2858,13 @@ is
 
    function get_overloaded_Name (for_Node : in doh_Node) return String
    is
-      the_Name : constant String := +doh_Item (get_Attribute (for_Node,  -"sym:name"));
+      the_Name : constant String := Attribute (for_Node, "sym:name");
    begin
-      if get_Attribute (for_Node,  -"sym:overloaded") /= null
+      if get_Attribute (for_Node, "sym:overloaded") /= null
       then
-         return  the_Name & (+doh_Item (get_Attribute (for_Node,  -"sym:overname")));       -- Add overload suffix.
+         return the_Name & Attribute (for_Node, "sym:overname");       -- Add overload suffix.
       else
-         return  the_Name;
+         return the_Name;
       end if;
    end get_overloaded_Name;
 
@@ -2923,8 +2915,7 @@ is
    is
       pragma Unreferenced (arg_num);
 
-      the_Name : constant String       := +doh_Item (get_Attribute (Node_Pointer (the_Parameter),
-                                                                    -"name"));
+      the_Name : constant String       := Attribute (Node_Pointer (the_Parameter), "name");
       Count    :          Natural      := 0;
       plist    :          doh_parmList := parameter_List;            -- tbd: better name
 
@@ -2933,8 +2924,7 @@ is
       --
       while exists (plist)
       loop
-         if the_Name = String' (+doh_Item (get_Attribute (Node_Pointer (plist),
-                                                          -"name")))
+         if the_Name = Attribute (Node_Pointer (plist), "name")
          then
             Count := Count + 1;
          end if;
@@ -2988,7 +2978,7 @@ is
 
             elsif check_Attribute (the_Parameter,  -"tmap:in:numinputs",  -"0") /= 0
             then
-               the_Parameter := get_Attribute (the_Parameter,  -"tmap:in:next");         -- Ignored parameters.
+               the_Parameter := get_Attribute (the_Parameter, "tmap:in:next");         -- Ignored parameters.
 
             else
                if not (Self.variable_wrapper_flag  and  Index = 0)
@@ -2997,7 +2987,7 @@ is
                      use c_Parameter.Vectors,
                          swigg.Utility;
 
-                     param_swigType : SwigType_Pointer  :=SwigType_Pointer (doh_Copy (doh_Item (get_Attribute (the_parameter,  -"type"))));
+                     param_swigType : SwigType_Pointer :=SwigType_Pointer (doh_Copy (doh_Item (get_Attribute (the_parameter, "type"))));
                   begin
                      strip_all_qualifiers (doh_Item (param_swigType));
 
@@ -3033,7 +3023,7 @@ is
                                  raise Aborted;
                            end;
 
-                           new_Parameter.link_symbol_Code := +doh_Item (get_Attribute  (the_Parameter,  -"tmap:link_symbol_code"));
+                           new_Parameter.link_symbol_Code := +Attribute (the_Parameter, "tmap:link_symbol_code");
                            new_Parameter.is_Pointer       :=         SwigType_isreference (param_swigType) /= 0
                                                              or else SwigType_ispointer   (param_swigType) /= 0;
 
@@ -3047,7 +3037,7 @@ is
                   end;
                end if;
 
-               the_Parameter := get_Attribute (the_Parameter,  -"tmap:in:next");
+               the_Parameter := get_Attribute (the_Parameter, "tmap:in:next");
             end if;
 
             Index := Index + 1;
@@ -3098,8 +3088,8 @@ is
    is
       use c_parameter.Vectors;
 
-      the_swigType          :          SwigType_Pointer  := SwigType_Pointer (doh_Copy (doh_Item (get_Attribute (the_Node,  -"type"))));
-      parameter_list        :          doh_ParmList      := doh_parmList (get_Attribute (the_Node,  -"parms"));
+      the_swigType          :          SwigType_Pointer  := SwigType_Pointer (doh_Copy (doh_Item (get_Attribute (the_Node, "type"))));
+      parameter_list        :          doh_ParmList      := doh_parmList (get_Attribute (the_Node, "parms"));
       the_Parameters        :          c_parameter.Vector;
 
       the_return_type       :          c_Type.view;
@@ -3113,7 +3103,7 @@ is
 
       freshen_current_module_Package (Self, the_Node);
 
-      if String'(+doh_Item (get_Attribute (the_Node, -"overload:ignore"))) /= ""
+      if Attribute (the_Node, "overload:ignore") /= ""
       then
          return null;   -- Wrappers not wanted for some methods where the parameters cannot be overloaded in Ada.
       end if;
@@ -3123,7 +3113,7 @@ is
 
       if exists (parameter_list)
       then
-         if SwigType_type (SwigType_Pointer (get_Attribute (Node_Pointer (parameter_list), -"type"))) = T_VOID
+         if SwigType_type (SwigType_Pointer (get_Attribute (Node_Pointer (parameter_list), "type"))) = T_VOID
          then
             parameter_list := doh_parmList (next_Sibling (Node_Pointer (parameter_list)));
          end if;
@@ -3158,7 +3148,7 @@ is
       else
          declare
             use Swigg.Utility;
-            virtualtype : constant doh_swigType := doh_swigType (get_Attribute (the_Node,  -"virtual:type"));
+            virtualtype : constant doh_swigType := doh_swigType (get_Attribute (the_Node, "virtual:type"));
          begin
             if exists (virtualType)
             then                             -- note that in the case of polymorphic (covariant) return types, the method's

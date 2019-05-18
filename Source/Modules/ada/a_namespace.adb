@@ -48,5 +48,3 @@ is
 
 
 end a_Namespace;
-
-
