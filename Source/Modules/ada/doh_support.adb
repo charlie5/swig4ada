@@ -113,7 +113,7 @@ is
    begin
       if Status /= 0
       then
-         raise Constraint_Error;
+         raise Constraint_Error with "Status:" & C.int'Image (Status);
       end if;
    end set_Attribute;
 
@@ -129,7 +129,7 @@ is
    begin
       if Status /= 0
       then
-         raise Constraint_Error;
+         raise Constraint_Error with "Status:" & C.int'Image (Status);
       end if;
    end set_Attribute;
 

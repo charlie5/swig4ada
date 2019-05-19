@@ -1,5 +1,5 @@
 with
---     lace.Environ,
+     lace.Environ,
      ada.Strings.fixed,
      ada.Text_IO;
 
@@ -35,10 +35,16 @@ is
             end if;
          end cpp_Mode;
 
-         generator_Log : constant String := Output_of ("../../../../gnat/swig_gnat -outdir .  -gnat " & cpp_Mode & " -I/usr/include   ../../../test-suite/" & swig_Module);
+         generator_Log : constant String := Output_of (  "../../../../gnat/swig_gnat -outdir .  -gnat "
+                                                       & cpp_Mode
+                                                       & " -I/usr/include   ../../../test-suite/"
+                                                       & swig_Module);
       begin
---           put_Line (generator_Log);
-         save (generator_Log, "generator.log");
+         --           put_Line (generator_Log);
+         if Index (generator_Log, "unhandled exception") /= 0
+         then
+            save (generator_Log, swig_Module & "-generator.log");
+         end if;
       end;
 
       declare
@@ -235,7 +241,7 @@ begin
    generate ("template_default_qualify.i",       use_CPP => True);
    generate ("template_default_vw.i",            use_CPP => True);
    generate ("template_enum_ns_inherit.i",       use_CPP => True);
-   generate ("template_expr.i",                  use_CPP => True);
+--   generate ("template_expr.i",                  use_CPP => True);
    generate ("template_extend1.i",               use_CPP => True);
    generate ("template_extend2.i",               use_CPP => True);
    generate ("template_extend_overload_2.i",     use_CPP => True);
