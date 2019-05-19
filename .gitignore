@@ -22,6 +22,7 @@ class-fixed_by_hand
 class-simple
 class-simplest
 Examples/gnat/class
+Examples/gnat/testsuite/generated
 gnat/attic
 
 swig_binding-new-test
