@@ -38,7 +38,7 @@ is
 
 
    procedure transform (From                                       : in     c_Module     .item;
-                        Self                                       : in out gnat_Language.item;
+                        Self                                       : in out ada_Language.item;
 
                         name_Map_of_c_type                         : in out c_Type.               name_Maps_of_c_type  .Map;
                         name_Map_of_ada_type                       : in out ada_Type.             name_Maps_of_ada_type.Map;
@@ -537,7 +537,7 @@ is
                                  when Constraint_Error =>
                                     log (+"");
                                     log ("Unable to add '" & new_ada_Array.qualified_Name & "'into the Ada type map, as it already exists there.");
-                                    raise gnat_Language.Aborted;
+                                    raise ada_Language.Aborted;
                               end;
                               c_type_Map_of_ada_type.insert (the_c_Type, new_ada_Array.all'Access);
                            end;

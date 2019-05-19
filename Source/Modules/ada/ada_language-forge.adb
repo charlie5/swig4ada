@@ -12,10 +12,10 @@ with
      ada.Strings.Maps;
 
 
-package body gnat_Language.Forge
+package body ada_Language.Forge
 is
 
-   function construct return gnat_Language.view
+   function construct return ada_Language.view
    is
       use c_nameSpace,  ada_Package,  ada_Utility;
 
@@ -23,7 +23,7 @@ is
       Self : constant View
 --          := new gnat_Language.item'(swigg_module.Language.do_construct with -- base_Language with
 --          := new gnat_Language.item'(swigg_module.Language.do_construct with -- base_Language with
-        := new gnat_Language.item'(swigMod.Language.construct with -- base_Language with
+        := new ada_Language.item'(swigMod.Language.construct with -- base_Language with
 
                                    new_Modules           => <>,
                                    name_Map_of_module    => <>,
@@ -923,4 +923,4 @@ is
    end Construct;
 
 
-end gnat_Language.Forge;
+end ada_Language.Forge;

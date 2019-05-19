@@ -1,9 +1,9 @@
 with
      Transformer,
 
-     gnat_Language.c_expression_Resolver,
-     gnat_Language.source_Generator,
-     gnat_Language.Forge,
+     ada_Language.c_expression_Resolver,
+     ada_Language.source_Generator,
+     ada_Language.Forge,
 
      ada_Utility,
 
@@ -23,9 +23,9 @@ with
      interfaces.c.Strings;
 
 
-package body gnat_Language
+package body ada_Language
 is
-   use gnat_Language.c_expression_Resolver,
+   use ada_Language.c_expression_Resolver,
 
        c_Parameter,
 
@@ -68,7 +68,7 @@ is
    --
    function swig_gnat return system.Address
    is
-      the_gnat_Language : gnat_Language.view;
+      the_gnat_Language : ada_Language.view;
    begin
       the_gnat_Language := Forge.construct;
 
@@ -399,7 +399,7 @@ is
       --
       log (+"");
       log (+"Creating source for the main module.", Status);
-      gnat_Language.source_Generator.generate (Self);
+      ada_Language.source_Generator.generate (Self);
 
 
       --  Generate the C runtime.
@@ -3244,4 +3244,4 @@ is
    end add_array_Bounds_to;
 
 
-end gnat_Language;
+end ada_Language;

@@ -35,7 +35,7 @@ with
      System;
 
 
-package gnat_Language
+package ada_Language
 --
 -- Provides the derived Ada language class.
 --
@@ -464,4 +464,4 @@ private
    function "+"                  (Self     : in String)         return unbounded_String
                                   renames to_unbounded_String;
 
-end gnat_Language;
+end ada_Language;

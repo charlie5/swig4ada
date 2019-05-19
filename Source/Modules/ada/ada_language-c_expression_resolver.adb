@@ -8,7 +8,7 @@ with
      ada.Containers.Vectors;
 
 
-package body gnat_Language.c_expression_Resolver
+package body ada_Language.c_expression_Resolver
 is
    use ada_Utility,
        ada.Strings,
@@ -593,4 +593,4 @@ is
    end resolved_c_integer_Expression;
 
 
-end gnat_Language.c_expression_Resolver;
+end ada_Language.c_expression_Resolver;

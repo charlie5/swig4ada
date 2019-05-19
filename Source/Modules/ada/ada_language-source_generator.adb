@@ -28,7 +28,7 @@ with ada_Type;                use ada_Type;
 with Ada.Unchecked_Conversion;
 
 
-package body gnat_Language.source_Generator
+package body ada_Language.source_Generator
 is
    use ada_Type.composite.a_record,
        ada.Strings,
@@ -67,7 +67,7 @@ is
 
    function depends_on (Self          : access ada_Type.Item'Class;
                         a_Type        : in     ada_Type.view;
-                        the_Gnat_Lang : access gnat_Language.item)    return Boolean
+                        the_Gnat_Lang : access ada_Language.item)    return Boolean
    is
       pragma Unreferenced (the_Gnat_Lang);
       --        my_Depends : ada_Type.views := required_Types (Self, the_Gnat_Lang);
@@ -578,7 +578,7 @@ is
                                   declaration_Package : access ada_Package   .item'Class;
                                   using_Name          : in     unbounded_String;
                                   namespace_Prefix    : in     unbounded_String;
-                                  the_Gnat_Lang       : access gnat_Language.item) return unbounded_String
+                                  the_Gnat_Lang       : access ada_Language.item) return unbounded_String
    is
       pragma Unreferenced (the_Gnat_Lang);
       use ada_Parameter.Vectors;
@@ -866,7 +866,7 @@ is
 
 
 
-   function declaration_Text (Self : ada_Type.view;   the_Gnat_Lang : access gnat_Language.item) return String
+   function declaration_Text (Self : ada_Type.view;   the_Gnat_Lang : access ada_Language.item) return String
    is
       the_Source : unbounded_String;
 
@@ -981,7 +981,7 @@ is
                                         declaration_Package  : access ada_Package.item'Class;
                                         unique_function_Name : in     unbounded_String;
                                         namespace_Prefix     : in     unbounded_String;
-                                        the_gnat_lang        : access gnat_language.item) return unbounded_String
+                                        the_gnat_lang        : access ada_Language.item) return unbounded_String
    is
       the_Source : unbounded_String;
 
@@ -1021,7 +1021,7 @@ is
 
    procedure emit_Spec (the_Package   : access ada_Package.item'Class;
                         in_cpp_Mode   : in     Boolean;
-                        the_Gnat_Lang : access gnat_Language.item)
+                        the_Gnat_Lang : access ada_Language.item)
    is
       use ada_subprogram.Vectors,
           ada_Type      .Vectors,
@@ -1831,7 +1831,7 @@ is
 
 
 
-   procedure generate (Self : access gnat_Language.item)
+   procedure generate (Self : access ada_Language.item)
    is
    begin
       emit_Spec (Self.Module_top.Ada.Package_top,              Self.in_cpp_Mode,  Self);
@@ -1852,4 +1852,4 @@ is
    end generate;
 
 
-end gnat_Language.source_Generator;
+end ada_Language.source_Generator;
