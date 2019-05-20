@@ -45,7 +45,7 @@ extern "C" {
   Language *swig_tcl(void);
   Language *swig_xml(void);
 #ifdef GNAT_ENABLED
-  void      adainit  (void);
+  void      adainit (void);
   void      adafinal (void);
   Language *swig_gnat(void);
 #endif
@@ -56,7 +56,9 @@ extern "C" {
    list sorted alphabetically. */
 
 static TargetLanguageModule modules[] = {
+#ifdef GNAT_ENABLED
   {"-gnat", swig_gnat, "Ada12", Supported},
+#endif
   {"-allegrocl", NULL, "ALLEGROCL", Disabled},
   {"-chicken", NULL, "CHICKEN", Disabled},
   {"-clisp", NULL, "CLISP", Disabled},

@@ -183,9 +183,6 @@ static FILE *Swig_open_file(const_String_or_char_ptr name, int sysfile, int use_
     for (i = 0; i < ilen; i++) {
       Clear(filename);
       Printf(filename, "%s%s", Getitem(spath, i), cname);
-
-//      Printf(stdout, "  Open: '%s'\n", filename);
-      
       f = fopen(Char(filename), "r");
       if (f)
 	break;
