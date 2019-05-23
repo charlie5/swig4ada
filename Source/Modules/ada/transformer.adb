@@ -99,7 +99,7 @@ is
                   new_ada_Array        :          ada_Type.composite.an_array.view;
                begin
                   new_ada_Array := ada_Type.composite.an_array.new_Item (the_element_Type.declaration_Package,
-                                                                         the_base_ada_Type.Name & "s",  -- Pluralise.    "_array",    -- +"Items",
+                                                                         the_base_ada_Type.Name & "_Array",
                                                                          the_array_dimension_upper_Bounds => (1 => ada_Type.composite.an_array.unConstrained),
                                                                          element_type                     => the_element_Type);
 

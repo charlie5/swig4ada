@@ -12,12 +12,12 @@ project Swiggy is
                         "../Source/Doxygen",
                         "../Source/Modules/ada",
                         "../Source/Modules/ada/ada_type",
-                        "../Source/Modules/ada/swig_binding-new/doh",
-                        "../Source/Modules/ada/swig_binding-new/swigg",
-                        "../Source/Modules/ada/swig_binding-new/swigmod");
---                        "../Source/Modules/ada/swig_binding-new-test/doh",
---                        "../Source/Modules/ada/swig_binding-new-test/swigg",
---                        "../Source/Modules/ada/swig_binding-new-test/swigmod");
+                        "../Source/Modules/ada/swig_binding/doh",
+                        "../Source/Modules/ada/swig_binding/swigg",
+                        "../Source/Modules/ada/swig_binding/swigmod");
+--                        "../Source/Modules/ada/swig_binding-test/doh",
+--                        "../Source/Modules/ada/swig_binding-test/swigg",
+--                        "../Source/Modules/ada/swig_binding-test/swigmod");
    for Main use ("swigmain.cxx");
    for Object_Dir use "build";
    for Exec_Dir use ".";

@@ -6,7 +6,9 @@ with
      ada_Type.elementary.an_access.to_type.interfaces_c_pointer,
      ada_Type.elementary.an_access.to_subProgram,
      ada_Type.composite.an_array,
-     ada_Type.composite.a_record;
+     ada_Type.composite.a_record,
+
+     ada.Tags;
 
 
 --  old ...
@@ -43,7 +45,6 @@ is
 
    function "+" (Self : in unbounded_String) return String
                  renames to_String;
-   pragma Unreferenced ("+");
 
 
 
@@ -932,7 +933,7 @@ is
             if         Self.accessed_Type.all in  ada_Type.composite.a_record.item'Class
               and then ada_Type.composite.a_record.view (Self.accessed_Type).is_tagged_Type
             then
-               append (the_Source,  "'KKK_Class ");
+               append (the_Source,  "'Class ");
             end if;
 
             append (the_Source,  ";");
@@ -964,7 +965,32 @@ is
          begin
             if Self.base_Type.all in ic_Pointer_class
             then
-               return to_String ("   type "     &  Self.Name  &  " is access all " & ic_Pointer_view (Self.base_Type).accessed_Type.qualified_Name & ";");
+               declare
+                  instantiation_Name : constant String          :=  "C_" & (+Self.Name) & "s";
+                  accessed_Type      : constant ada_Type.view   :=  ic_Pointer_view (Self.base_Type).accessed_Type;
+                  accessed_type_Name : constant String          := +accessed_Type.qualified_Name;
+                  resolved_Type      : constant ada_Type.view   :=  accessed_Type.resolved_Type;
+                  default_Terminator :          unbounded_String;
+               begin
+                  if resolved_Type.all in ada_Type.elementary.an_access.item'Class  -- ada_Type.elementary.an_access.item'Class
+                  then
+                     default_Terminator := +"null";
+                  elsif resolved_Type.all in ada_Type.composite.a_record.item'Class
+                  then
+                     default_Terminator := +"<>";
+                  else
+                     default_Terminator := +"0";
+                  end if;
+
+                  return
+                      "   package " & instantiation_Name & " is new interfaces.c.Pointers (Index              => interfaces.c.size_t,"              & NL
+                    & "                                                                    Element            => " & accessed_type_Name & ","       & NL
+                    & "                                                                    element_Array      => " & accessed_type_Name & "_Array," & NL
+                    & "                                                                    default_Terminator => " & (+default_Terminator) & ");"   & NL
+                    & NL
+                    & "subtype " & (+Self.Name) & " is " & instantiation_Name & ".Pointer;";
+               end;
+--                 return to_String ("   type "     &  Self.Name  &  " is access all " & ic_Pointer_view (Self.base_Type).accessed_Type.qualified_Name & ";");
             else
                return to_String ("   subtype "  &  Self.Name  &  " is "            &  Self.base_Type.qualified_Name   &  ";");
             end if;
