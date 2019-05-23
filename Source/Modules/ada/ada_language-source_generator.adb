@@ -66,12 +66,12 @@ is
    NL : constant String := new_line_Token;
 
 
-   function depends_on (Self          : access ada_Type.Item'Class;
-                        a_Type        : in     ada_Type.view;
-                        the_Gnat_Lang : access ada_Language.item)    return Boolean
+   function depends_on (Self         : access ada_Type.Item'Class;
+                        a_Type       : in     ada_Type.view;
+                        the_ada_Lang : access ada_Language.item)    return Boolean
    is
-      pragma Unreferenced (the_Gnat_Lang);
-      --        my_Depends : ada_Type.views := required_Types (Self, the_Gnat_Lang);
+      pragma Unreferenced (the_ada_Lang);
+      --        my_Depends : ada_Type.views := required_Types (Self, the_ada_Lang);
       my_Depends : constant ada_Type.views := Self.required_Types;
 
    begin
@@ -579,9 +579,9 @@ is
                                   declaration_Package : access ada_Package   .item'Class;
                                   using_Name          : in     unbounded_String;
                                   namespace_Prefix    : in     unbounded_String;
-                                  the_Gnat_Lang       : access ada_Language.item) return unbounded_String
+                                  the_ada_Lang       : access ada_Language.item) return unbounded_String
    is
-      pragma Unreferenced (the_Gnat_Lang);
+      pragma Unreferenced (the_ada_Lang);
       use ada_Parameter.Vectors;
 
       the_Source     :          unbounded_String;
@@ -681,7 +681,7 @@ is
 
                   if         the_Parameter          = Element (First (all_Parameters))     -- is 1st parameter
                     and then the_Parameter.Name     = "Self"                               -- is a class 'Self' parameter
-                    and then parameter_type_Package = declaration_Package                  -- (tbd: simpler/clearer to add a flag to gnat_Parameter ?)
+                    and then parameter_type_Package = declaration_Package                  -- (tbd: simpler/clearer to add a flag to ada_Parameter ?)
                   then
                      if             the_Parameter.my_Type.all in ada_Type.composite.a_record.item'Class
                        and then not ada_Type.composite.a_record.view (the_Parameter.my_Type).is_Virtual
@@ -867,7 +867,7 @@ is
 
 
 
-   function declaration_Text (Self : ada_Type.view;   the_Gnat_Lang : access ada_Language.item) return String
+   function declaration_Text (Self : ada_Type.view;   the_ada_Lang : access ada_Language.item) return String
    is
       the_Source : unbounded_String;
 
@@ -886,7 +886,7 @@ is
                                                        declaration_package => my.declaration_Package,
                                                        using_Name          => null_unbounded_String,
                                                        namespace_Prefix    => null_unbounded_String,
-                                                       the_gnat_lang       => the_gnat_lang));
+                                                       the_ada_Lang       => the_ada_Lang));
             append (the_Source,  ";");
             append (the_Source,  to_String (NL & "pragma convention (C, " & Self.Name & ");"));
          end;
@@ -923,7 +923,7 @@ is
             Self : constant ada_Type.elementary.an_access.to_type.view := ada_Type.elementary.an_access.to_type.view (declaration_text.Self);
          begin
             if         Self.accessed_Type.all in ada_Type.composite.a_record.item'Class             -- add forward declaration of a class type,
-              and then depends_on (Self.accessed_Type,  ada_Type.view (Self),  the_Gnat_Lang)       -- if that is what we reference
+              and then depends_on (Self.accessed_Type,  ada_Type.view (Self),  the_ada_Lang)       -- if that is what we reference
             then
                append (the_Source, "   type " & Self.accessed_Type.Name & ";" & NL & NL);    --
             end if;
@@ -1022,7 +1022,7 @@ is
                                         declaration_Package  : access ada_Package.item'Class;
                                         unique_function_Name : in     unbounded_String;
                                         namespace_Prefix     : in     unbounded_String;
-                                        the_gnat_lang        : access ada_Language.item) return unbounded_String
+                                        the_ada_Lang        : access ada_Language.item) return unbounded_String
    is
       the_Source : unbounded_String;
 
@@ -1033,7 +1033,7 @@ is
                                                  declaration_package => declaration_Package,
                                                  using_name          => unique_function_Name,
                                                  namespace_Prefix    => namespace_Prefix,
-                                                 the_gnat_lang => the_gnat_lang));
+                                                 the_ada_Lang => the_ada_Lang));
       append (the_Source,  ";" & NL & NL);
 
       if Self.is_Constructor
@@ -1050,7 +1050,7 @@ is
                                                  declaration_package => declaration_Package,
                                                  using_name          => Self.Name,
                                                  namespace_Prefix    => namespace_Prefix,
-                                                 the_gnat_lang => the_gnat_lang));
+                                                 the_ada_Lang => the_ada_Lang));
 
       append (the_Source,  NL & "   renames " & unique_function_Name & ";" & NL & NL);
 
@@ -1063,7 +1063,7 @@ is
    procedure emit_Spec (the_Package      : access ada_Package.item'Class;
                         in_cpp_Mode      : in     Boolean;
                         with_IC_Pointers : in     Boolean;
-                        the_Gnat_Lang    : access ada_Language.item)
+                        the_ada_Lang    : access ada_Language.item)
    is
       use ada_subprogram.Vectors,
           ada_Type      .Vectors,
@@ -1475,7 +1475,7 @@ is
                   append (spec_Source, "   -- "                       & NL);
                end if;
 
-               append (spec_Source,  declaration_Text (the_Type, the_Gnat_Lang) & NL & NL);
+               append (spec_Source,  declaration_Text (the_Type, the_ada_Lang) & NL & NL);
 
                declare
                   the_representation_Text : constant String := representation_Text (the_Type);
@@ -1491,7 +1491,7 @@ is
       end emit_main_Types;
 
 
-      --  emit variables  -- tbd: shift the bulk of below code to a 'declaration_Text' & 'pragma_Import_Text' functions in gnat_Variable ?
+      --  emit variables  -- tbd: shift the bulk of below code to a 'declaration_Text' & 'pragma_Import_Text' functions in ada_Variable ?
       --
 
       append (spec_Source,  NL & NL & NL);
@@ -1521,7 +1521,7 @@ is
 
 
             if         the_Variable.is_Constant
-              and then the_Variable.my_Type = the_Gnat_Lang.name_Map_of_ada_Type.Element (+"interfaces.c.int")
+              and then the_Variable.my_Type = the_ada_Lang.name_Map_of_ada_Type.Element (+"interfaces.c.int")
               and then the_Variable.Value  /= ""
             then
                append (spec_Source,  "constant ");
@@ -1733,7 +1733,7 @@ is
                                                                        declaration_package => the_Package.all'Access,
                                                                        using_name          => the_Subprogram.Name,
                                                                        namespace_Prefix    => null_unbounded_String,
-                                                                       the_gnat_lang       => the_gnat_lang));
+                                                                       the_ada_Lang       => the_ada_Lang));
                            append (spec_Source,  ";");
                         -- end if;
 
@@ -1753,7 +1753,7 @@ is
                                                                                    declaration_package  => the_Package.all'Access,
                                                                                    unique_function_name => unique_function_Name,
                                                                                    namespace_Prefix     => null_unbounded_String,
-                                                                                   the_gnat_lang        => the_gnat_lang));
+                                                                                   the_ada_Lang        => the_ada_Lang));
                            end if;
 
                            if the_Subprogram.is_Constructor
@@ -1810,7 +1810,7 @@ is
                      append (spec_Source,          "   -- "                       & NL);
                   end if;
 
-                  append (spec_Source,  declaration_Text (the_Type, the_Gnat_Lang) & NL & NL);
+                  append (spec_Source,  declaration_Text (the_Type, the_ada_Lang) & NL & NL);
 
                   declare
                      the_representation_Text : constant String := representation_Text (the_Type);
@@ -1881,10 +1881,10 @@ is
    procedure generate (Self : access ada_Language.item)
    is
    begin
-      emit_Spec (Self.Module_top.Ada.Package_top,              Self.in_cpp_Mode,  with_IC_Pointers => False, the_gnat_Lang => Self);
-      emit_Spec (Self.Module_top.Ada.Package_binding,          Self.in_cpp_Mode,  with_IC_Pointers => False, the_gnat_Lang => Self);
-      emit_Spec (Self.Module_top.Ada.Package_pointers,         Self.in_cpp_Mode,  with_IC_Pointers => True, the_gnat_Lang => Self);
-      emit_Spec (Self.Module_top.Ada.Package_pointer_pointers, Self.in_cpp_Mode,  with_IC_Pointers => True, the_gnat_Lang => Self);
+      emit_Spec (Self.Module_top.Ada.Package_top,              Self.in_cpp_Mode,  with_IC_Pointers => False, the_ada_Lang => Self);
+      emit_Spec (Self.Module_top.Ada.Package_binding,          Self.in_cpp_Mode,  with_IC_Pointers => False, the_ada_Lang => Self);
+      emit_Spec (Self.Module_top.Ada.Package_pointers,         Self.in_cpp_Mode,  with_IC_Pointers => True, the_ada_Lang => Self);
+      emit_Spec (Self.Module_top.Ada.Package_pointer_pointers, Self.in_cpp_Mode,  with_IC_Pointers => True, the_ada_Lang => Self);
 
       declare
          use ada_package.Vectors;
@@ -1892,7 +1892,7 @@ is
       begin
          while has_Element (Cursor)
          loop
-            emit_Spec (Element (Cursor),  Self.in_cpp_Mode,  with_IC_Pointers => True, the_gnat_Lang => Self);
+            emit_Spec (Element (Cursor),  Self.in_cpp_Mode,  with_IC_Pointers => True, the_ada_Lang => Self);
             next (Cursor);
          end loop;
       end;

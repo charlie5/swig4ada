@@ -1516,8 +1516,6 @@ is
 --
 --  --     function  declaration_Text    (Self : access Item) return String
 --  --     is
---  --        use gnat_Utility;
---  --
 --  --        the_Source : unbounded_String;
 --  --     begin
 --  --  --      verify (Self);

@@ -103,7 +103,7 @@ is
    procedure models_cpp_class_Type      (Self : access Item;   new_Class       : in c_Type.view);
    function  cpp_class_Type             (Self : access Item)                                             return c_Type.view;
    --
-   --  The modeled cpp_class_Type for the c++ class which the 'Self' gnat_Package models.
+   --  The modeled cpp_class_Type for the c++ class which the 'Self' ada_Package models.
    --  Returns 'null' when 'Self' does not model a c++ class.
 
 
@@ -144,7 +144,7 @@ private
          a_Variables           : c_variable.Vector;
          a_Types               : c_type.Vector;
 
-         a_cpp_class_Type      : c_Type.view;             -- Convenience access to the 'c++ class' gnat_type which the package models.
+         a_cpp_class_Type      : c_Type.view;             -- Convenience access to the 'c++ class' ada_Type which the package models.
       end record;
 
 end c_Namespace;

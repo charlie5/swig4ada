@@ -19,11 +19,8 @@ is
    is
       use c_nameSpace,  ada_Package,  ada_Utility;
 
---        base_Language    : constant swigg_module.Language.item := swigg_module.Language.item (swigg_module.Language.construct);
       Self : constant View
---          := new gnat_Language.item'(swigg_module.Language.do_construct with -- base_Language with
---          := new gnat_Language.item'(swigg_module.Language.do_construct with -- base_Language with
-        := new ada_Language.item'(swigMod.Language.construct with -- base_Language with
+        := new ada_Language.item'(swigMod.Language.construct with
 
                                    new_Modules           => <>,
                                    name_Map_of_module    => <>,
@@ -86,7 +83,7 @@ is
                                    f_header                 => null,
                                    f_wrappers               => null,
                                    f_init                   => null,
-                                   f_gnat                   => null,
+                                   f_Ada                   => null,
 
                                    current_linkage_Symbol   => null_unbounded_String,
                                    current_lStr             => null_unbounded_String);

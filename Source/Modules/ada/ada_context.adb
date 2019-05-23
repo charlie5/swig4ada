@@ -284,20 +284,8 @@ is
             the_required_Type : ada_Type.view;
             is_access         : Boolean;
          begin
---              log ("gnat_context.add (required_Type: '" & required_Type.qualified_Name
---                   & "', c_type_kind: " & gnat_type.a_c_type_Kind 'Image (required_Type.c_type_Kind));
-
---  --              if required_Type.c_type_Kind = ada_type.type_Pointer then
---  --                 the_required_Type := required_Type.context_required_Type;
---  --                 is_access         := True;
---  --              else
---                 the_required_Type := required_Type;
---                 is_access         := False;
---  --              end if;
-
             if   required_Type.all in ada_type.elementary.an_access.to_type.item'Class
-
-              or (         required_Type.all in ada_type.a_subType.item'Class
+              or (         required_Type.all                          in ada_type.a_subType.item'Class
                   and then subType_view (required_Type).base_Type.all in ada_type.elementary.an_access.to_type.item'Class)
             then
                the_required_Type := required_Type;
@@ -348,13 +336,13 @@ is
       if required_Type.declaration_Package.qualified_Name /= "standard"
       then
          declare
---              the_required_Type : gnat_Type.view;
+--              the_required_Type : ada_Type.view;
 --              is_access         : Boolean;
          begin
---              log ("gnat_context.add (required_Type: '" & required_Type.qualified_Name
---                   & "', c_type_kind: " & gnat_type.a_c_type_Kind 'Image (required_Type.c_type_Kind));
+--              log ("ada_context.add (required_Type: '" & required_Type.qualified_Name
+--                   & "', c_type_kind: " & ada_Type.a_c_type_Kind 'Image (required_Type.c_type_Kind));
 
---              if required_Type.c_type_Kind = gnat_type.type_Pointer then
+--              if required_Type.c_type_Kind = ada_Type.type_Pointer then
 --                 the_required_Type := required_Type.context_required_Type;
 --                 is_access         := True;
 --              else

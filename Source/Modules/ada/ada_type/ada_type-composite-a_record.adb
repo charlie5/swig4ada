@@ -265,7 +265,7 @@ is
 
    function  use_type_Text (Self : access Item) return String
    is
-      use ada.Characters.Handling;  -- gnat_Utility;
+      use ada.Characters.Handling;
       the_Source : unbounded_String;
    begin
       --  components which are bitfields, and are signed, require a 'use type ...' so that the negation operator '-' is visible

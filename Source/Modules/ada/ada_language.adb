@@ -220,13 +220,13 @@ is
       Self.f_init     := File_Pointer (-(""));
       Self.f_header   := File_Pointer (-(""));
       Self.f_wrappers := File_Pointer (-(""));
-      Self.f_gnat     := File_Pointer (-(""));
+      Self.f_Ada     := File_Pointer (-(""));
 
       Swig_register_filebyname (const_String (-"header"),        Self.f_header);              -- Register file targets with the SWIG file handler.
       Swig_register_filebyname (const_String (-"wrapper"),       Self.f_wrappers);
       Swig_register_filebyname (const_String (-"runtime"),       Self.f_runtime);
       Swig_register_filebyname (const_String (-"init"),          Self.f_init);
-      Swig_register_filebyname (const_String (-"gnat_support"),  Self.f_gnat);
+      Swig_register_filebyname (const_String (-"gnat_support"),  Self.f_Ada);
 
       --  Setup the principal namespace and module package names.
       --
@@ -261,9 +261,9 @@ is
       print_to (Doh_Pointer (Self.f_wrappers), "extern ""C"" {");
       print_to (Doh_Pointer (Self.f_wrappers), "#endif");
 
-      print_to (Doh_Pointer (Self.f_gnat),     "#ifdef __cplusplus");
-      print_to (Doh_Pointer (Self.f_gnat),     "extern ""C"" {");
-      print_to (Doh_Pointer (Self.f_gnat),     "#endif");
+      print_to (Doh_Pointer (Self.f_Ada),     "#ifdef __cplusplus");
+      print_to (Doh_Pointer (Self.f_Ada),     "extern ""C"" {");
+      print_to (Doh_Pointer (Self.f_Ada),     "#endif");
 
 
       --   Do the base Language 'top' to recursively process all nodes.
@@ -280,9 +280,9 @@ is
       print_to (Doh_Pointer (Self.f_wrappers), "}");
       print_to (Doh_Pointer (Self.f_wrappers), "#endif");
 
-      print_to (Doh_Pointer (Self.f_gnat),     "#ifdef __cplusplus");
-      print_to (Doh_Pointer (Self.f_gnat),     "}");
-      print_to (Doh_Pointer (Self.f_gnat),     "#endif");
+      print_to (Doh_Pointer (Self.f_Ada),     "#ifdef __cplusplus");
+      print_to (Doh_Pointer (Self.f_Ada),     "}");
+      print_to (Doh_Pointer (Self.f_Ada),     "#endif");
 
       process_all_Modules :
       declare
@@ -407,7 +407,7 @@ is
       --
       dump                 (Self.f_header,    Self.f_runtime);
       dump                 (Self.f_wrappers,  Self.f_runtime);
-      dump                 (Self.f_gnat,      Self.f_runtime);
+      dump                 (Self.f_Ada,      Self.f_runtime);
       Wrapper_pretty_print (String_Pointer (Self.f_init), Self.f_runtime);
       close_File           (Self.f_runtime);
 
@@ -1742,7 +1742,7 @@ is
          if not (    check_Attribute (the_Node, "access", "protected")
                  or  check_Attribute (the_Node, "access", "private"))
          then
-            print_to (DOH_Pointer (Self.f_gnat),  construct_Call & NL);
+            print_to (DOH_Pointer (Self.f_Ada),  construct_Call & NL);
          end if;
       end;
 

@@ -311,9 +311,8 @@ private
 
 
 
-   --  'gnat_Language' Item
+   --  'ada_Language' Item
    --
---     type Item is new swigg_Module.Language.item with
    type Item is new swigMod.Language.item with
       record
          --  Maps
@@ -395,7 +394,7 @@ private
          f_header                :         swigg_module.Pointers.File_Pointer;
          f_wrappers              :         swigg_module.Pointers.File_Pointer;
          f_init                  :         swigg_module.Pointers.File_Pointer;
-         f_gnat                  :         swigg_module.Pointers.File_Pointer;     -- Contains gnat specific c++ declarations and code.
+         f_Ada                   :         swigg_module.Pointers.File_Pointer;     -- Contains Ada specific c++ declarations and code.
 
          current_linkage_Symbol  :         unbounded_String;
          current_lStr            :         unbounded_String;
