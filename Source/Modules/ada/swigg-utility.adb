@@ -210,7 +210,9 @@ is
       declare
          use swigg_Module,
              swigg_Module.Binding,
-             swigg_Module.Pointers;
+             swigg_Module.Pointers,
+             swigg_Module.Pointers.C_Node_Pointers;
+
          the_Parent : DOH_Node := DOH_Node (parent_Node (Node_Pointer (the_Node)));
       begin
          while the_Parent /= null

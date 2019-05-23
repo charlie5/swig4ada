@@ -8,6 +8,7 @@ with swigg_module;
 with swigg_module.Pointers;
 with swigmod.Dispatcher;
 with interfaces.C;
+with interfaces.C.Pointers;
 with System;
 private with system.Address_To_Access_Conversions;
 
@@ -33,9 +34,9 @@ package swigmod.Language is
 
    pragma Import (CPP, Entity => Item);
 
-   -- Items
+   -- Item_Array
    --
-   type Items is
+   type Item_Array is
      array (interfaces.C.Size_t range <>) of aliased swigmod.Language.Item;
 
    -- NestedClassSupport
@@ -447,31 +448,47 @@ package swigmod.Language is
    --
    type Pointer is access all swigmod.Language.Item;
 
-   -- Pointers
+   -- Pointer_Array
    --
-   type Pointers is
+   type Pointer_Array is
      array (interfaces.C.Size_t range <>) of aliased swigmod.Language.Pointer;
 
    -- Pointer_Pointer
    --
-   type Pointer_Pointer is access all swigmod.Language.Pointer;
+   package C_Pointer_Pointers is new interfaces.c.Pointers
+     (Index => interfaces.c.size_t, Element => swigmod.Language.Pointer,
+      element_Array      => swigmod.Language.Pointer_Array,
+      default_Terminator => null);
+
+   subtype Pointer_Pointer is C_Pointer_Pointers.Pointer;
 
    -- NestedClassSupport_Pointer
    --
-   type NestedClassSupport_Pointer is
-     access all swigmod.Language.NestedClassSupport;
+   package C_NestedClassSupport_Pointers is new interfaces.c.Pointers
+     (Index              => interfaces.c.size_t,
+      Element            => swigmod.Language.NestedClassSupport,
+      element_Array      => swigmod.Language.NestedClassSupport_Array,
+      default_Terminator => swigmod.Language.NestedClassSupport'Val (0));
 
-   -- NestedClassSupport_Pointers
+   subtype NestedClassSupport_Pointer is C_NestedClassSupport_Pointers.Pointer;
+
+   -- NestedClassSupport_Pointer_Array
    --
-   type NestedClassSupport_Pointers is
+   type NestedClassSupport_Pointer_Array is
      array
        (interfaces.C.Size_t range <>) of aliased swigmod.Language
        .NestedClassSupport_Pointer;
 
    -- NestedClassSupport_Pointer_Pointer
    --
-   type NestedClassSupport_Pointer_Pointer is
-     access all swigmod.Language.NestedClassSupport_Pointer;
+   package C_NestedClassSupport_Pointer_Pointers is new interfaces.c.Pointers
+     (Index              => interfaces.c.size_t,
+      Element            => swigmod.Language.NestedClassSupport_Pointer,
+      element_Array      => swigmod.Language.NestedClassSupport_Pointer_Array,
+      default_Terminator => null);
+
+   subtype NestedClassSupport_Pointer_Pointer is
+     C_NestedClassSupport_Pointer_Pointers.Pointer;
 
 private
 

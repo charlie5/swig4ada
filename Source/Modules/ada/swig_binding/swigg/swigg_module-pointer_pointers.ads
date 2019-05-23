@@ -2,62 +2,130 @@
 --
 with swigg_module.Pointers;
 with interfaces.C;
+with interfaces.C.Pointers;
 
 package swigg_module.pointer_Pointers is
 
    -- String_Pointer_Pointer
    --
-   type String_Pointer_Pointer is
-     access all swigg_module.Pointers.String_Pointer;
+   package C_String_Pointer_Pointers is new interfaces.c.Pointers
+     (Index              => interfaces.c.size_t,
+      Element            => swigg_module.Pointers.String_Pointer,
+      element_Array      => swigg_module.Pointers.String_Pointer_Array,
+      default_Terminator => null);
+
+   subtype String_Pointer_Pointer is C_String_Pointer_Pointers.Pointer;
 
    -- Hash_Pointer_Pointer
    --
-   type Hash_Pointer_Pointer is access all swigg_module.Pointers.Hash_Pointer;
+   package C_Hash_Pointer_Pointers is new interfaces.c.Pointers
+     (Index              => interfaces.c.size_t,
+      Element            => swigg_module.Pointers.Hash_Pointer,
+      element_Array      => swigg_module.Pointers.Hash_Pointer_Array,
+      default_Terminator => null);
+
+   subtype Hash_Pointer_Pointer is C_Hash_Pointer_Pointers.Pointer;
 
    -- List_Pointer_Pointer
    --
-   type List_Pointer_Pointer is access all swigg_module.Pointers.List_Pointer;
+   package C_List_Pointer_Pointers is new interfaces.c.Pointers
+     (Index              => interfaces.c.size_t,
+      Element            => swigg_module.Pointers.List_Pointer,
+      element_Array      => swigg_module.Pointers.List_Pointer_Array,
+      default_Terminator => null);
+
+   subtype List_Pointer_Pointer is C_List_Pointer_Pointers.Pointer;
 
    -- String_or_char_Pointer_Pointer
    --
-   type String_or_char_Pointer_Pointer is
-     access all swigg_module.Pointers.String_or_char_Pointer;
+   package C_String_or_char_Pointer_Pointers is new interfaces.c.Pointers
+     (Index              => interfaces.c.size_t,
+      Element            => swigg_module.Pointers.String_or_char_Pointer,
+      element_Array      => swigg_module.Pointers.String_or_char_Pointer_Array,
+      default_Terminator => null);
+
+   subtype String_or_char_Pointer_Pointer is
+     C_String_or_char_Pointer_Pointers.Pointer;
 
    -- File_Pointer_Pointer
    --
-   type File_Pointer_Pointer is access all swigg_module.Pointers.File_Pointer;
+   package C_File_Pointer_Pointers is new interfaces.c.Pointers
+     (Index              => interfaces.c.size_t,
+      Element            => swigg_module.Pointers.File_Pointer,
+      element_Array      => swigg_module.Pointers.File_Pointer_Array,
+      default_Terminator => null);
+
+   subtype File_Pointer_Pointer is C_File_Pointer_Pointers.Pointer;
 
    -- Parm_Pointer_Pointer
    --
-   type Parm_Pointer_Pointer is access all swigg_module.Pointers.Parm_Pointer;
+   package C_Parm_Pointer_Pointers is new interfaces.c.Pointers
+     (Index              => interfaces.c.size_t,
+      Element            => swigg_module.Pointers.Parm_Pointer,
+      element_Array      => swigg_module.Pointers.Parm_Pointer_Array,
+      default_Terminator => null);
+
+   subtype Parm_Pointer_Pointer is C_Parm_Pointer_Pointers.Pointer;
 
    -- ParmList_Pointer_Pointer
    --
-   type ParmList_Pointer_Pointer is
-     access all swigg_module.Pointers.ParmList_Pointer;
+   package C_ParmList_Pointer_Pointers is new interfaces.c.Pointers
+     (Index              => interfaces.c.size_t,
+      Element            => swigg_module.Pointers.ParmList_Pointer,
+      element_Array      => swigg_module.Pointers.ParmList_Pointer_Array,
+      default_Terminator => null);
+
+   subtype ParmList_Pointer_Pointer is C_ParmList_Pointer_Pointers.Pointer;
 
    -- Node_Pointer_Pointer
    --
-   type Node_Pointer_Pointer is access all swigg_module.Pointers.Node_Pointer;
+   package C_Node_Pointer_Pointers is new interfaces.c.Pointers
+     (Index              => interfaces.c.size_t,
+      Element            => swigg_module.Pointers.Node_Pointer,
+      element_Array      => swigg_module.Pointers.Node_Pointer_Array,
+      default_Terminator => null);
+
+   subtype Node_Pointer_Pointer is C_Node_Pointer_Pointers.Pointer;
 
    -- Symtab_Pointer_Pointer
    --
-   type Symtab_Pointer_Pointer is
-     access all swigg_module.Pointers.Symtab_Pointer;
+   package C_Symtab_Pointer_Pointers is new interfaces.c.Pointers
+     (Index              => interfaces.c.size_t,
+      Element            => swigg_module.Pointers.Symtab_Pointer,
+      element_Array      => swigg_module.Pointers.Symtab_Pointer_Array,
+      default_Terminator => null);
+
+   subtype Symtab_Pointer_Pointer is C_Symtab_Pointer_Pointers.Pointer;
 
    -- Typetab_Pointer_Pointer
    --
-   type Typetab_Pointer_Pointer is
-     access all swigg_module.Pointers.Typetab_Pointer;
+   package C_Typetab_Pointer_Pointers is new interfaces.c.Pointers
+     (Index              => interfaces.c.size_t,
+      Element            => swigg_module.Pointers.Typetab_Pointer,
+      element_Array      => swigg_module.Pointers.Typetab_Pointer_Array,
+      default_Terminator => null);
+
+   subtype Typetab_Pointer_Pointer is C_Typetab_Pointer_Pointers.Pointer;
 
    -- SwigType_Pointer_Pointer
    --
-   type SwigType_Pointer_Pointer is
-     access all swigg_module.Pointers.SwigType_Pointer;
+   package C_SwigType_Pointer_Pointers is new interfaces.c.Pointers
+     (Index              => interfaces.c.size_t,
+      Element            => swigg_module.Pointers.SwigType_Pointer,
+      element_Array      => swigg_module.Pointers.SwigType_Pointer_Array,
+      default_Terminator => null);
+
+   subtype SwigType_Pointer_Pointer is C_SwigType_Pointer_Pointers.Pointer;
 
    -- ErrorMessageFormat_Pointer_Pointer
    --
-   type ErrorMessageFormat_Pointer_Pointer is
-     access all swigg_module.Pointers.ErrorMessageFormat_Pointer;
+   package C_ErrorMessageFormat_Pointer_Pointers is new interfaces.c.Pointers
+     (Index              => interfaces.c.size_t,
+      Element            => swigg_module.Pointers.ErrorMessageFormat_Pointer,
+      element_Array => swigg_module.Pointers.ErrorMessageFormat_Pointer_Array,
+      default_Terminator => null);
+
+   subtype ErrorMessageFormat_Pointer_Pointer is
+     C_ErrorMessageFormat_Pointer_Pointers.Pointer;
 
 end swigg_module.pointer_Pointers;

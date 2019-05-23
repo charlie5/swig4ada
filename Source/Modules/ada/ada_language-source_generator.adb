@@ -971,28 +971,43 @@ is
                   accessed_type_Name : constant String          := +accessed_Type.qualified_Name;
                   resolved_Type      : constant ada_Type.view   :=  accessed_Type.resolved_Type;
                   default_Terminator :          unbounded_String;
+                  is_Abstract        :          Boolean := False;
+                  is_Limited         :          Boolean := False;
                begin
-                  if resolved_Type.all in ada_Type.elementary.an_access.item'Class  -- ada_Type.elementary.an_access.item'Class
+                  if    resolved_Type.all in ada_Type.elementary.an_access.item'Class  -- ada_Type.elementary.an_access.item'Class
                   then
                      default_Terminator := +"null";
                   elsif resolved_Type.all in ada_Type.composite.a_record.item'Class
                   then
-                     default_Terminator := +"<>";
+                     declare
+                        the_Record : constant ada_Type.composite.a_record.view := ada_Type.composite.a_record.view (resolved_Type);
+                     begin
+                        is_Abstract := the_Record.is_Abstract;
+                        is_Limited  := the_Record.is_tagged_Type;
+                        default_Terminator := +"(others => <>)";
+                     end;
+                  elsif resolved_Type.all in ada_Type.elementary.scalar.discrete.enumeration.item'Class
+                  then
+                     default_Terminator := +accessed_type_Name & "'Val (0)";
                   else
                      default_Terminator := +"0";
                   end if;
 
-                  return
-                      "   package " & instantiation_Name & " is new interfaces.c.Pointers (Index              => interfaces.c.size_t,"              & NL
-                    & "                                                                    Element            => " & accessed_type_Name & ","       & NL
-                    & "                                                                    element_Array      => " & accessed_type_Name & "_Array," & NL
-                    & "                                                                    default_Terminator => " & (+default_Terminator) & ");"   & NL
-                    & NL
-                    & "subtype " & (+Self.Name) & " is " & instantiation_Name & ".Pointer;";
+                  if is_Abstract or is_Limited
+                  then
+                     return to_String ("   type " & Self.Name & " is access all " & ic_Pointer_view (Self.base_Type).accessed_Type.qualified_Name & ";");
+                  else
+                     return
+                         "   package " & instantiation_Name & " is new interfaces.c.Pointers (Index              => interfaces.c.size_t,"              & NL
+                       & "                                                                    Element            => " & accessed_type_Name & ","       & NL
+                       & "                                                                    element_Array      => " & accessed_type_Name & "_Array," & NL
+                       & "                                                                    default_Terminator => " & (+default_Terminator) & ");"   & NL
+                       & NL
+                       & "subtype " & (+Self.Name) & " is " & instantiation_Name & ".Pointer;";
+                  end if;
                end;
---                 return to_String ("   type "     &  Self.Name  &  " is access all " & ic_Pointer_view (Self.base_Type).accessed_Type.qualified_Name & ";");
             else
-               return to_String ("   subtype "  &  Self.Name  &  " is "            &  Self.base_Type.qualified_Name   &  ";");
+               return to_String ("   subtype " & Self.Name & " is " & Self.base_Type.qualified_Name & ";");
             end if;
          end;
       end if;
@@ -1045,9 +1060,10 @@ is
 
 
 
-   procedure emit_Spec (the_Package   : access ada_Package.item'Class;
-                        in_cpp_Mode   : in     Boolean;
-                        the_Gnat_Lang : access ada_Language.item)
+   procedure emit_Spec (the_Package      : access ada_Package.item'Class;
+                        in_cpp_Mode      : in     Boolean;
+                        with_IC_Pointers : in     Boolean;
+                        the_Gnat_Lang    : access ada_Language.item)
    is
       use ada_subprogram.Vectors,
           ada_Type      .Vectors,
@@ -1330,6 +1346,11 @@ is
          if with_of_interfaces_c_Required
          then
             append (spec_Source,   "with interfaces.C;" &  NL);
+         end if;
+
+         if with_IC_Pointers
+         then
+            append (spec_Source,   "with interfaces.C.Pointers;" &  NL);
          end if;
 
          if             the_Package.models_a_virtual_cpp_Class
@@ -1860,10 +1881,10 @@ is
    procedure generate (Self : access ada_Language.item)
    is
    begin
-      emit_Spec (Self.Module_top.Ada.Package_top,              Self.in_cpp_Mode,  Self);
-      emit_Spec (Self.Module_top.Ada.Package_binding,          Self.in_cpp_Mode,  Self);
-      emit_Spec (Self.Module_top.Ada.Package_pointers,         Self.in_cpp_Mode,  Self);
-      emit_Spec (Self.Module_top.Ada.Package_pointer_pointers, Self.in_cpp_Mode,  Self);
+      emit_Spec (Self.Module_top.Ada.Package_top,              Self.in_cpp_Mode,  with_IC_Pointers => False, the_gnat_Lang => Self);
+      emit_Spec (Self.Module_top.Ada.Package_binding,          Self.in_cpp_Mode,  with_IC_Pointers => False, the_gnat_Lang => Self);
+      emit_Spec (Self.Module_top.Ada.Package_pointers,         Self.in_cpp_Mode,  with_IC_Pointers => True, the_gnat_Lang => Self);
+      emit_Spec (Self.Module_top.Ada.Package_pointer_pointers, Self.in_cpp_Mode,  with_IC_Pointers => True, the_gnat_Lang => Self);
 
       declare
          use ada_package.Vectors;
@@ -1871,7 +1892,7 @@ is
       begin
          while has_Element (Cursor)
          loop
-            emit_Spec (Element (Cursor),  Self.in_cpp_Mode,  Self);
+            emit_Spec (Element (Cursor),  Self.in_cpp_Mode,  with_IC_Pointers => True, the_gnat_Lang => Self);
             next (Cursor);
          end loop;
       end;

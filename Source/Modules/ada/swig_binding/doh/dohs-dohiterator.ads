@@ -3,6 +3,7 @@
 with interfaces.c;
 with swig;
 with interfaces.C;
+with interfaces.C.Pointers;
 
 package DOHs.DohIterator is
 
@@ -17,22 +18,32 @@ package DOHs.DohIterator is
       a_index   : aliased interfaces.c.int;
    end record;
 
-   -- Items
+   -- Item_Array
    --
-   type Items is
+   type Item_Array is
      array (interfaces.C.Size_t range <>) of aliased DOHs.DohIterator.Item;
 
    -- Pointer
    --
-   type Pointer is access all DOHs.DohIterator.Item;
+   package C_Pointers is new interfaces.c.Pointers
+     (Index => interfaces.c.size_t, Element => DOHs.DohIterator.Item,
+      element_Array      => DOHs.DohIterator.Item_Array,
+      default_Terminator => (others => <>));
 
-   -- Pointers
+   subtype Pointer is C_Pointers.Pointer;
+
+   -- Pointer_Array
    --
-   type Pointers is
+   type Pointer_Array is
      array (interfaces.C.Size_t range <>) of aliased DOHs.DohIterator.Pointer;
 
    -- Pointer_Pointer
    --
-   type Pointer_Pointer is access all DOHs.DohIterator.Pointer;
+   package C_Pointer_Pointers is new interfaces.c.Pointers
+     (Index => interfaces.c.size_t, Element => DOHs.DohIterator.Pointer,
+      element_Array      => DOHs.DohIterator.Pointer_Array,
+      default_Terminator => null);
+
+   subtype Pointer_Pointer is C_Pointer_Pointers.Pointer;
 
 end DOHs.DohIterator;

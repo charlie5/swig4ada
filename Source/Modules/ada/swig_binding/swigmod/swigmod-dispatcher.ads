@@ -3,6 +3,7 @@
 with interfaces.c;
 with swigg_module.Pointers;
 with interfaces.C;
+with interfaces.C.Pointers;
 with System;
 private with system.Address_To_Access_Conversions;
 
@@ -137,31 +138,46 @@ package swigmod.Dispatcher is
    --
    type Pointer is access all swigmod.Dispatcher.Item;
 
-   -- Pointers
+   -- Pointer_Array
    --
-   type Pointers is
+   type Pointer_Array is
      array
        (interfaces.C.Size_t range <>) of aliased swigmod.Dispatcher.Pointer;
 
    -- Pointer_Pointer
    --
-   type Pointer_Pointer is access all swigmod.Dispatcher.Pointer;
+   package C_Pointer_Pointers is new interfaces.c.Pointers
+     (Index => interfaces.c.size_t, Element => swigmod.Dispatcher.Pointer,
+      element_Array      => swigmod.Dispatcher.Pointer_Array,
+      default_Terminator => null);
+
+   subtype Pointer_Pointer is C_Pointer_Pointers.Pointer;
 
    -- AccessMode_Pointer
    --
-   type AccessMode_Pointer is access all swigmod.Dispatcher.AccessMode;
+   package C_AccessMode_Pointers is new interfaces.c.Pointers
+     (Index => interfaces.c.size_t, Element => swigmod.Dispatcher.AccessMode,
+      element_Array      => swigmod.Dispatcher.AccessMode_Array,
+      default_Terminator => swigmod.Dispatcher.AccessMode'Val (0));
 
-   -- AccessMode_Pointers
+   subtype AccessMode_Pointer is C_AccessMode_Pointers.Pointer;
+
+   -- AccessMode_Pointer_Array
    --
-   type AccessMode_Pointers is
+   type AccessMode_Pointer_Array is
      array
        (interfaces.C.Size_t range <>) of aliased swigmod.Dispatcher
        .AccessMode_Pointer;
 
    -- AccessMode_Pointer_Pointer
    --
-   type AccessMode_Pointer_Pointer is
-     access all swigmod.Dispatcher.AccessMode_Pointer;
+   package C_AccessMode_Pointer_Pointers is new interfaces.c.Pointers
+     (Index              => interfaces.c.size_t,
+      Element            => swigmod.Dispatcher.AccessMode_Pointer,
+      element_Array      => swigmod.Dispatcher.AccessMode_Pointer_Array,
+      default_Terminator => null);
+
+   subtype AccessMode_Pointer_Pointer is C_AccessMode_Pointer_Pointers.Pointer;
 
 private
 

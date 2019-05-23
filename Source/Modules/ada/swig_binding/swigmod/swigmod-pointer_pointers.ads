@@ -2,16 +2,28 @@
 --
 with swigmod.Pointers;
 with interfaces.C;
+with interfaces.C.Pointers;
 
 package swigmod.pointer_Pointers is
 
    -- DoxygenTranslator_Pointer_Pointer
    --
-   type DoxygenTranslator_Pointer_Pointer is
-     access all swigmod.Pointers.DoxygenTranslator_Pointer;
+   package C_DoxygenTranslator_Pointer_Pointers is new interfaces.c.Pointers
+     (Index              => interfaces.c.size_t,
+      Element            => swigmod.Pointers.DoxygenTranslator_Pointer,
+      element_Array      => swigmod.Pointers.DoxygenTranslator_Pointer_Array,
+      default_Terminator => null);
+
+   subtype DoxygenTranslator_Pointer_Pointer is
+     C_DoxygenTranslator_Pointer_Pointers.Pointer;
 
    -- Status_Pointer_Pointer
    --
-   type Status_Pointer_Pointer is access all swigmod.Pointers.Status_Pointer;
+   package C_Status_Pointer_Pointers is new interfaces.c.Pointers
+     (Index => interfaces.c.size_t, Element => swigmod.Pointers.Status_Pointer,
+      element_Array      => swigmod.Pointers.Status_Pointer_Array,
+      default_Terminator => null);
+
+   subtype Status_Pointer_Pointer is C_Status_Pointer_Pointers.Pointer;
 
 end swigmod.pointer_Pointers;

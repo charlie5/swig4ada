@@ -2,6 +2,7 @@
 --
 with DOHs.Pointers;
 with interfaces.C;
+with interfaces.C.Pointers;
 
 package DOHs.const_String_or_char_ptr is
 
@@ -9,26 +10,38 @@ package DOHs.const_String_or_char_ptr is
    --
    subtype Item is DOHs.Pointers.DOH_Pointer;
 
-   -- Items
+   -- Item_Array
    --
-   type Items is
+   type Item_Array is
      array
        (interfaces.C.Size_t range <>) of aliased DOHs.const_String_or_char_ptr
        .Item;
 
    -- Pointer
    --
-   type Pointer is access all DOHs.const_String_or_char_ptr.Item;
+   package C_Pointers is new interfaces.c.Pointers
+     (Index              => interfaces.c.size_t,
+      Element            => DOHs.const_String_or_char_ptr.Item,
+      element_Array      => DOHs.const_String_or_char_ptr.Item_Array,
+      default_Terminator => null);
 
-   -- Pointers
+   subtype Pointer is C_Pointers.Pointer;
+
+   -- Pointer_Array
    --
-   type Pointers is
+   type Pointer_Array is
      array
        (interfaces.C.Size_t range <>) of aliased DOHs.const_String_or_char_ptr
        .Pointer;
 
    -- Pointer_Pointer
    --
-   type Pointer_Pointer is access all DOHs.const_String_or_char_ptr.Pointer;
+   package C_Pointer_Pointers is new interfaces.c.Pointers
+     (Index              => interfaces.c.size_t,
+      Element            => DOHs.const_String_or_char_ptr.Pointer,
+      element_Array      => DOHs.const_String_or_char_ptr.Pointer_Array,
+      default_Terminator => null);
+
+   subtype Pointer_Pointer is C_Pointer_Pointers.Pointer;
 
 end DOHs.const_String_or_char_ptr;

@@ -35,6 +35,7 @@ is
        swigg_Module,
        swigg_Module.Binding,
        swigg_Module.Pointers,
+       swigg_Module.Pointers.C_Node_Pointers,
        swigMod.Binding,
        swigMod.Dispatcher,
 

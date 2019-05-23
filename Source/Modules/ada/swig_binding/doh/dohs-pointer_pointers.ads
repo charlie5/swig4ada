@@ -2,16 +2,28 @@
 --
 with DOHs.Pointers;
 with interfaces.C;
+with interfaces.C.Pointers;
 
 package DOHs.pointer_Pointers is
 
    -- DOH_Pointer_Pointer
    --
-   type DOH_Pointer_Pointer is access all DOHs.Pointers.DOH_Pointer;
+   package C_DOH_Pointer_Pointers is new interfaces.c.Pointers
+     (Index => interfaces.c.size_t, Element => DOHs.Pointers.DOH_Pointer,
+      element_Array      => DOHs.Pointers.DOH_Pointer_Array,
+      default_Terminator => null);
+
+   subtype DOH_Pointer_Pointer is C_DOH_Pointer_Pointers.Pointer;
 
    -- DohFuncPtr_t_Pointer_Pointer
    --
-   type DohFuncPtr_t_Pointer_Pointer is
-     access all DOHs.Pointers.DohFuncPtr_t_Pointer;
+   package C_DohFuncPtr_t_Pointer_Pointers is new interfaces.c.Pointers
+     (Index              => interfaces.c.size_t,
+      Element            => DOHs.Pointers.DohFuncPtr_t_Pointer,
+      element_Array      => DOHs.Pointers.DohFuncPtr_t_Pointer_Array,
+      default_Terminator => null);
+
+   subtype DohFuncPtr_t_Pointer_Pointer is
+     C_DohFuncPtr_t_Pointer_Pointers.Pointer;
 
 end DOHs.pointer_Pointers;

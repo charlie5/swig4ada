@@ -66,6 +66,7 @@ is
 
    function exists (Self : in doh_Item) return Boolean
    is
+      use DOHs.Pointers.C_DOH_Pointers;
    begin
       return Self /= null;
    end exists;
@@ -111,7 +112,8 @@ is
                                              DOH_Pointer (-Value));
       use type C.int;
    begin
-      if Status /= 0
+      if    Status /= 0   -- Success.
+        and Status /= 1   -- Successful replacement.
       then
          raise Constraint_Error with "Status:" & C.int'Image (Status);
       end if;
