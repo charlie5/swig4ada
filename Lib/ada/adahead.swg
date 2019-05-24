@@ -1,7 +1,7 @@
 /* -----------------------------------------------------------------------------
- * gnathead.swg
+ * adahead.swg
  *
- * Gnat/Ada support code - insertions into C wrapper code
+ * Ada support code - insertions into C wrapper code
  * ----------------------------------------------------------------------------- */
 
 

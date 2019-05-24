@@ -1,12 +1,12 @@
 
 /* -----------------------------------------------------------------------------
- * gnat.swg
+ * ada.swg
  *
- * Gnat/Ada typemaps
+ * Ada typemaps
  * ----------------------------------------------------------------------------- */
 
 
-%include "gnathead.swg"
+%include "adahead.swg"
 
 /*
 %typemap (ctype_new)        void                                                          "void"
@@ -1141,9 +1141,9 @@
 
 
 
-// gnat ada keywords
+// Ada keywords
 
-%include "gnatkw.swg"
+%include "adakw.swg"
 
 
 

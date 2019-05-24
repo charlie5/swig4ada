@@ -1,8 +1,8 @@
-#ifndef __gnat_adakw_swg__
-#define __gnat_adakw_swg__
+#ifndef __ada_adakw_swg__
+#define __ada_adakw_swg__
 
 
-// Warnings for Gnat/Ada keywords
+// Warnings for Ada keywords
 
 
 #define ADAKW(x) %namewarn("314:" #x " is a ada keyword") #x
@@ -84,4 +84,4 @@ ADAKW (xor);
 
 #undef ADAKW
 
-#endif //__gnat_adakw_swg__
+#endif //__ada_adakw_swg__
