@@ -277,8 +277,8 @@ private
 
    --  Hook to swig_main (on the c-side).
    --
-   function swig_gnat return system.Address;
-   pragma Export (C, swig_gnat);
+   function swig_ada return system.Address;
+   pragma Export (C, swig_ada);
 
    --  symbol_value_Maps
    --

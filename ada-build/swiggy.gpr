@@ -26,13 +26,13 @@ project Swiggy is
    end Ide;
 
    package Builder is
-      for Executable ("swigmain.cxx") use "swig_gnat";
-      for Default_Switches ("ada") use ("-g", "-gnatdQ", "-j13");
+      for Executable ("swigmain.cxx") use "swig_ada";
+      for Default_Switches ("ada")    use ("-g", "-gnatdQ", "-j13");
    end Builder;
 
    package Naming is
-      for Spec_Suffix ("c") use ".h";
-      for Body_Suffix ("c") use ".c";
+      for Spec_Suffix ("c")   use ".h";
+      for Body_Suffix ("c")   use ".c";
       for Spec_Suffix ("c++") use ".h";
       for Body_Suffix ("c++") use ".cxx";
    end Naming;
@@ -49,16 +49,10 @@ project Swiggy is
                           "-fno-strict-aliasing")
                         & Style_Options;
 
-
    package Compiler is
---      for Default_Switches ("ada") use ("-gnatVn", "-gnatf", "-gnatwa", "-gnaty3aAbCdefhklnOx", "-Wall", "-g", "-gnat12", "-gnato", "-fstack-check", "-gnata");
-
       for Default_Switches ("ada") use Compiler_Options & "-g";
---      for Default_Switches ("c") use ("-g", "-I../Source/Swig", "-I../Source/Include", "-I/eden/forge/applet/tool/swig4ada/Source/Include");
-      for Default_Switches ("c") use ("-g"); -- , "-I../Source/Include", "-I../Source/Swig");
---      for Default_Switches ("c") use ("-g");
---      for Default_Switches ("c++") use ("-g", "-D", "GNAT_ENABLED", "-I../Source/Swig", "-I../Source/Include");
-      for Default_Switches ("c++") use ("-g", "-D", "GNAT_ENABLED", "-DHAVE_CONFIG_H");
+      for Default_Switches ("c")   use ("-g"); -- , "-I../Source/Include", "-I../Source/Swig");
+      for Default_Switches ("c++") use ("-g", "-D", "ADA_ENABLED", "-DHAVE_CONFIG_H");
    end Compiler;
 
    package Binder is

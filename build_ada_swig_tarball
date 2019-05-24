@@ -1,0 +1,25 @@
+## Builds a tarball for binary install of Swig Ada version to /user/local.
+#
+
+
+#!/usr/bin/bash
+
+set -e
+
+mkdir -p ./usr/local/bin ./usr/local/include ./usr/local/share/swig/4.0.0/ada
+
+
+# Copy build to install location.
+#
+cp ./ada-build/swig_ada ./usr/local/bin
+
+
+cp ./swig.ads                    ./usr/local/include
+cp ./swig-pointers.ads           ./usr/local/include
+#cp ./interfaces_cpp_pointers.ads ./usr/local/include
+#cp ./interfaces_cpp_pointers.adb ./usr/local/include
+
+
+#mkdir -p /usr/local/share/swig/4.0.0/ada
+#cp     ./Lib/ada/* ./usr/local/share/swig/4.0.0/ada
+cp -fr ./Lib/*     ./usr/local/share/swig/4.0.0 

@@ -4,11 +4,11 @@
 
 # build the ada binding to the swig C headers
 #
-#cd Source/ada_binding
+#cd Source/Modules/ada/swig_binding
 #./builder
 
 
 # build the gnat swig executable
 #
-cd gnat
-gprbuild -P swiggy --config=/eden/forge/applet/tool/swig4ada/gnat/config.cgpr
+cd ada-build
+gprbuild -P swiggy --config=config.cgpr

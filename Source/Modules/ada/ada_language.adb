@@ -58,27 +58,22 @@ is
    --
 
    usage_help_Text : constant array (1 .. 3) of access String
-     := (new String'("Gnat/Ada Options (available with -gnat)"),
+     := (new String'("Ada Options (available with -ada)"),
          new String'("       -namespace <nm> - Generate wrappers into Ada namespace <nm>"),
          new String'("       -noproxy        - Generate the low-level functional interface instead of proxy classes"));
 
    NL : constant String := new_line_Token;
 
 
-   --  This provides the gnat_Language object to the (c-side) swig 'main' function.
+   --  This provides the ada_Language object to the (c-side) swig 'main' function.
    --
-   function swig_gnat return system.Address
+   function swig_ada return system.Address
    is
-      the_gnat_Language : ada_Language.view;
+      the_ada_Language : ada_Language.view;
    begin
-      the_gnat_Language := Forge.construct;
-
---        the_gnat_Language.initialize;
---        swig_director_connect (the_gnat_Language.all);
-
---        return getCPtr (the_gnat_Language.all);
-      return the_gnat_Language.all'Address;
-   end swig_gnat;
+      the_ada_Language := Forge.construct;
+      return the_ada_Language.all'Address;
+   end swig_ada;
 
 
    -----------
@@ -121,7 +116,7 @@ is
       log (+"main");
       --  delay 25.0;           -- For debug to allow gdb time to attach.
 
-      SWIG_library_directory (new_String ("gnat"));
+      SWIG_library_directory (new_String ("ada"));
 
 
       --  Parse the command line
@@ -165,11 +160,11 @@ is
       end loop;
 
       declare
-         Unused : Hash_Pointer := Preprocessor_define (const_String (-"SWIGGNAT 1"),  0);   -- Add a symbol to the parser for conditional compilation.
+         Unused : Hash_Pointer := Preprocessor_define (const_String (-"SWIGAda 1"),  0);   -- Add a symbol to the parser for conditional compilation.
          pragma Unreferenced (Unused);
       begin
-         SWIG_typemap_lang (new_String ("gnat"));                             -- Add typemap definitions.
-         SWIG_config_file    (const_String (-"gnat.swg"));
+         SWIG_typemap_lang (new_String ("ada"));                             -- Add typemap definitions.
+         SWIG_config_file    (const_String (-"ada.swg"));
       end;
 
       Self.allow_Overloading;
@@ -226,7 +221,7 @@ is
       Swig_register_filebyname (const_String (-"wrapper"),       Self.f_wrappers);
       Swig_register_filebyname (const_String (-"runtime"),       Self.f_runtime);
       Swig_register_filebyname (const_String (-"init"),          Self.f_init);
-      Swig_register_filebyname (const_String (-"gnat_support"),  Self.f_Ada);
+      Swig_register_filebyname (const_String (-"ada_support"),  Self.f_Ada);
 
       --  Setup the principal namespace and module package names.
       --
@@ -242,7 +237,7 @@ is
       print_to (Doh_Pointer (Self.f_header),    "#define protected public");
       print_to (Doh_Pointer (Self.f_header),    "#define private   public");
 
-      --  and destructor, needed by the replacement 'gnat_' constructor.
+      --  and destructor, needed by the replacement 'ada_' constructor.
       print_to (Doh_Pointer (Self.f_wrappers),  "#undef protected");
       print_to (Doh_Pointer (Self.f_wrappers),  "#undef private");
 
@@ -268,7 +263,7 @@ is
 
       --   Do the base Language 'top' to recursively process all nodes.
       --   As each node is processed, the base 'top' will call the relevant
-      --   specialised operation in our 'gnat_Language' package.
+      --   specialised operation in our 'ada_Language' package.
       --
       do_base_Top (swigMod.Language.Pointer (Self), the_Node);
 --          do_base_Top (Self.all'Access, the_Node);
@@ -1664,8 +1659,8 @@ is
          gencomma            :          Boolean          := False;
 
       begin
-         append (constructor_Symbol,  String'("gnat_" & (+doh_Item (Swig_name_construct (const_String (-Self.current_c_Namespace.qualified_Name),
-                                                                                         const_String (-overloaded_name))))));
+         append (constructor_Symbol,  String'("ada_" & (+doh_Item (Swig_name_construct (const_String (-Self.current_c_Namespace.qualified_Name),
+                                                                                        const_String (-overloaded_name))))));
          append (construct_Call,      "extern "  & Self.current_lStr & "    " & constructor_Symbol & "(");
 
          Swig_typemap_attach_parms (const_String (-"ctype"), parameter_List, null);    -- attach the non-standard typemaps to the parameter list

@@ -44,10 +44,10 @@ extern "C" {
   Language *swig_scilab(void);
   Language *swig_tcl(void);
   Language *swig_xml(void);
-#ifdef GNAT_ENABLED
+#ifdef ADA_ENABLED
   void      adainit (void);
   void      adafinal (void);
-  Language *swig_gnat(void);
+  Language *swig_ada(void);
 #endif
 }
 
@@ -56,8 +56,8 @@ extern "C" {
    list sorted alphabetically. */
 
 static TargetLanguageModule modules[] = {
-#ifdef GNAT_ENABLED
-  {"-gnat", swig_gnat, "Ada12", Supported},
+#ifdef ADA_ENABLED
+  {"-ada", swig_ada, "Ada12", Supported},
 #endif
   {"-allegrocl", NULL, "ALLEGROCL", Disabled},
   {"-chicken", NULL, "CHICKEN", Disabled},
@@ -220,7 +220,7 @@ static void merge_options_files(int *argc, char ***argv) {
 }
 
 int main(int margc, char **margv) {
-#ifdef GNAT_ENABLED
+#ifdef ADA_ENABLED
   adainit();
 #endif
 
@@ -282,7 +282,7 @@ int main(int margc, char **margv) {
 
   int res = SWIG_main(argc, argv, language_module);
 
-#ifdef GNAT_ENABLED
+#ifdef ADA_ENABLED
   adafinal();
 #endif
   

@@ -1,11 +1,11 @@
-## Installs the gnat version of Swig to /user/local.
+## Installs the Ada version of Swig to /user/local.
 #
 
 
 
 # Copy build to install location.
 #
-#cp ./gnat/swig_gnat /usr/local/bin
+#cp ./ada-build/swig_ada /usr/local/bin
 
 
 #cp ./swig.ads                    /usr/local/include
@@ -14,6 +14,6 @@
 #cp ./interfaces_cpp_pointers.adb /usr/local/include
 
 
-mkdir -p /usr/local/share/swig/4.0.0/gnat
-cp ./Lib/gnat/* /usr/local/share/swig/4.0.0/gnat/
-cp -fr ./Lib/*  /usr/local/share/swig/4.0.0 
+mkdir -p /usr/local/share/swig/4.0.0/ada
+#cp     ./Lib/ada/* /usr/local/share/swig/4.0.0/ada/
+cp -fr ./Lib/*     /usr/local/share/swig/4.0.0 
