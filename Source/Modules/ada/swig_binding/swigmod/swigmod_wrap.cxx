@@ -5309,7 +5309,7 @@ DllExport void SWIGSTDCALL Ada_do_base_top (
 #ifdef __cplusplus
 extern "C" {
 #endif
-extern Language    gnat_new_Language_Language()
+extern Language    ada_new_Language_Language()
 {
   return Language();
 }

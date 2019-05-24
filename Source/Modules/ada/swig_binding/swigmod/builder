@@ -1,5 +1,5 @@
-#rm *.ads
+rm *.ads
 
-../../../../../gnat/swig_gnat  -gnat  -c++  -I../../../../Include   -I../../../../Swig  -I../../../../Modules  -I../../../../Preprocessor   -I../../../../DOH    swigmod.i 
+../../../../../ada-build/swig_ada  -ada  -c++  -I../../../../Include   -I../../../../Swig  -I../../../../Modules  -I../../../../Preprocessor   -I../../../../DOH    swigmod.i 
 
 gnatpp  -rnb  -I../../../..   *.ads
