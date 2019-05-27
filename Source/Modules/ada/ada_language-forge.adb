@@ -76,6 +76,8 @@ is
                                    is_anonymous_Enum        => False,
 
                                    enum_rep_clause_required => False,
+                                   doing_constructorDeclaration => False,
+
                                    anonymous_enum_Count     => 0,
                                    integer_symbol_value_Map         => symbol_value_maps.empty_Map,
 

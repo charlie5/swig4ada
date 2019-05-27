@@ -179,62 +179,59 @@ is
 
 
 
-   function pragma_import_Source (Self                 : access Item;
-                                  declaration_Package  : access c_nameSpace.item'class;
-                                  unique_function_Name : in     unbounded_String;
-                                  in_cpp_Mode          : in     Boolean)         return unbounded_String
-   is
-      use ada.Containers;
-
-      the_Source  : unbounded_String;
-      link_Symbol : unbounded_String;
-
-   begin
-      if Self.is_Constructor
-      then
-         link_Symbol := Self.member_function_link_Symbol_for (in_cpp_Mode);
-
-         if    Length (Self.Parameters)                          = 0     -- non-default constructors (ie those with parameters) are not yet implemented in gnat
-           and declaration_Package.models_a_virtual_cpp_Class            --
-         then
-            append (the_Source,  NL & "   pragma cpp_Constructor (" & unique_function_Name & ");");
-         end if;
-
-         append (the_Source,   NL & NL & "   pragma Import (CPP, " & unique_function_Name & ", """ & link_Symbol & """);");
-
-      elsif Self.is_Destructor
-      then
-         link_Symbol := "_ZN" & Image (Length (declaration_Package.Name)) & declaration_Package.Name & "D1Ev";
-
---         append (the_Source,   NL & "   pragma cpp_Destructor (Entity => " & unique_function_Name & ");" & NL);
-         append (the_Source,   NL & "   pragma Import (CPP, " & unique_function_Name & ", """ & link_Symbol & """);");
-
-      else
-         if declaration_Package.models_an_interface_Type
-         then
-            append (the_Source,  NL & "   pragma Convention (CPP, ");
-
-         elsif declaration_Package.models_a_virtual_cpp_Class
-         then
-            append (the_Source,  NL & "   pragma Import (CPP, ");
-
-         else
-            append (the_Source,  NL & "   pragma Import (C, ");
-         end if;
-
-         append (the_Source,  unique_function_Name);
-
-         if not (   declaration_Package.models_an_interface_Type
-                 or Self.is_Abstract)
-         then
-            append (the_Source,  ", """ & Self.member_function_link_Symbol_for (in_cpp_Mode) &  """");
-         end if;
-
-         append (the_Source,  ");");
-      end if;
-
-      return the_Source;
-   end pragma_import_Source;
+--     function pragma_import_Source (Self                 : access Item;
+--                                    declaration_Package  : access c_nameSpace.item'class;
+--                                    unique_function_Name : in     unbounded_String;
+--                                    in_cpp_Mode          : in     Boolean)         return unbounded_String
+--     is
+--        the_Source  : unbounded_String;
+--        link_Symbol : unbounded_String;
+--     begin
+--        if Self.is_Constructor
+--        then
+--           link_Symbol := Self.member_function_link_Symbol_for (in_cpp_Mode);
+--
+--           if    -- Length (Self.Parameters) = 0 and     -- non-default constructors (ie those with parameters) are not yet implemented in gnat
+--             declaration_Package.models_a_virtual_cpp_Class            --
+--           then
+--              append (the_Source,  NL & "   pragma cpp_Constructor (" & unique_function_Name & ");");
+--           end if;
+--
+--           append (the_Source,   NL & NL & "   pragma Import (CPP, " & unique_function_Name & ", """ & link_Symbol & """);");
+--
+--        elsif Self.is_Destructor
+--        then
+--           link_Symbol := "_ZN" & Image (Length (declaration_Package.Name)) & declaration_Package.Name & "D1Ev";
+--
+--  --         append (the_Source,   NL & "   pragma cpp_Destructor (Entity => " & unique_function_Name & ");" & NL);
+--           append (the_Source,   NL & "   pragma Import (CPP, " & unique_function_Name & ", """ & link_Symbol & """);");
+--
+--        else
+--           if declaration_Package.models_an_interface_Type
+--           then
+--              append (the_Source,  NL & "   pragma Convention (CPP, ");
+--
+--           elsif declaration_Package.models_a_virtual_cpp_Class
+--           then
+--              append (the_Source,  NL & "   pragma Import (CPP, ");
+--
+--           else
+--              append (the_Source,  NL & "   pragma Import (C, ");
+--           end if;
+--
+--           append (the_Source,  unique_function_Name);
+--
+--           if not (   declaration_Package.models_an_interface_Type
+--                   or Self.is_Abstract)
+--           then
+--              append (the_Source,  ", """ & Self.member_function_link_Symbol_for (in_cpp_Mode) &  """");
+--           end if;
+--
+--           append (the_Source,  ");");
+--        end if;
+--
+--        return the_Source;
+--     end pragma_import_Source;
 
 
 

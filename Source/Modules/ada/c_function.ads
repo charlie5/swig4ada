@@ -85,9 +85,9 @@ is
    function is_Procedure              (Self : access Item) return Boolean;
    function is_Function               (Self : access Item) return Boolean;
 
-   function pragma_import_Source      (Self : access Item;   declaration_Package  : access c_nameSpace.item'class;
-                                                             unique_function_Name : in     unbounded_String;
-                                                             in_cpp_Mode          : in     Boolean) return unbounded_String;
+--     function pragma_import_Source      (Self : access Item;   declaration_Package  : access c_nameSpace.item'class;
+--                                                               unique_function_Name : in     unbounded_String;
+--                                                               in_cpp_Mode          : in     Boolean) return unbounded_String;
 
    function member_function_link_Symbol_for
                                       (Self : access Item;   in_cpp_Mode : in     Boolean) return unbounded_String;

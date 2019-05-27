@@ -57,9 +57,6 @@ is
    type View is access all Item'class;
 
 
---     function construct return Item;
---     pragma CPP_Constructor (construct);
-
    ---  Operations
    --
 
@@ -387,7 +384,7 @@ private
                                  :         Boolean           := False;       -- tbd: Possibly obsolete.
          enum_rep_clause_required
                                  :         Boolean           := False;       -- tbd: Possibly obsolete.
-
+         doing_constructorDeclaration :    Boolean           := False;
          --  C runtime
          --
          f_runtime               :         swigg_module.Pointers.File_Pointer;

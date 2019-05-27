@@ -1036,12 +1036,12 @@ is
                                                  the_ada_Lang => the_ada_Lang));
       append (the_Source,  ";" & NL & NL);
 
-      if Self.is_Constructor
-      then
+--        if Self.is_Constructor
+--        then
          append (the_Source, Self.pragma_import_Source (declaration_package  => declaration_Package,
                                                         unique_function_name => unique_function_Name,
                                                         in_cpp_Mode          => True));
-      end if;
+--        end if;
 
       --  provide body for public subprogram spec, by renaming the 'overloaded subprogram' with the unique name.
       --
@@ -1742,7 +1742,7 @@ is
                         begin
                            if the_Subprogram.is_Constructor
                            then
-                              the_Source := spec_Source'Unchecked_Access;
+                              the_Source := spec_Source_private'Unchecked_Access;
                            else
                               the_Source := spec_Source_private'Unchecked_Access;
                            end if;
@@ -1754,17 +1754,16 @@ is
                                                                                    unique_function_name => unique_function_Name,
                                                                                    namespace_Prefix     => null_unbounded_String,
                                                                                    the_ada_Lang        => the_ada_Lang));
-                           end if;
-
-                           if the_Subprogram.is_Constructor
+                           elsif the_Subprogram.is_Constructor
                            then
+                              null;
                               append (the_Source.all, the_Subprogram.pragma_CPP_Constructor_Source (declaration_package  => the_Package.all'Access,
                                                                                                     unique_function_name => unique_function_Name,
                                                                                                     in_cpp_Mode          => in_cpp_Mode));
                            else
                               append (the_Source.all, the_Subprogram.pragma_import_Source (declaration_package  => the_Package.all'Access,
-                                                                                        unique_function_name => unique_function_Name,
-                                                                                        in_cpp_Mode          => in_cpp_Mode));
+                                                                                           unique_function_name => unique_function_Name,
+                                                                                           in_cpp_Mode          => in_cpp_Mode));
                            end if;
 
 --                             put_Line (+the_Source.all);

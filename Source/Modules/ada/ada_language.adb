@@ -974,7 +974,7 @@ is
                begin
                   if the_typeMap /= ""
                   then
-                     print_to (wrapper_Code,  "CCC" & the_typeMap & NL);
+                     print_to (wrapper_Code,  the_typeMap & NL);
                   end if;
                end;
             end if;
@@ -991,7 +991,7 @@ is
                   if the_typeMap /= ""
                   then
                      --  replace_All (the_typeMap, "$source", "result");   -- deprecated
-                     put_Line ("CLEANUPO '" & (+the_typeMap) &  "'");
+                     put_Line ("CLEANUP '" & (+the_typeMap) &  "'");
                   end if;
                end;
             end if;
@@ -1017,7 +1017,8 @@ is
             end if;
 
 
-            if not Self.native_function_flag
+            if    not Self.native_function_flag
+              and not Self.doing_constructorDeclaration
             then
                Wrapper_print (the_function_Wrapper, Self.f_wrappers);      -- Dump the function out.
             end if;
@@ -1636,8 +1637,9 @@ is
       if not (   check_Attribute (the_node, "access", "protected")
               or check_Attribute (the_Node, "access", "private"))
       then
---           do_base_constructorHandler (Self.all, the_Node);
+         Self.doing_constructorDeclaration := True;
          Status := swigMod.Language.item (Self.all).constructorHandler (the_Node);
+         Self.doing_constructorDeclaration := False;
       end if;
 
       if get_Attribute (the_Node, "overload:ignore") /= null
@@ -1649,7 +1651,7 @@ is
       declare
          overloaded_name     : constant String := get_overloaded_Name (doh_Node (the_Node));
 
-         constructor_Symbol  :          unbounded_String;    -- we need to build our own 'c' construction call   (tbd: move all this to functionWrapper)
+         constructor_Symbol  :          unbounded_String;    -- We need to build our own 'c' construction call   (tbd: move all this to functionWrapper)
          construct_Call      :          unbounded_String;    -- since the default swig constructor returns a pointer to class
          construct_call_Args :          unbounded_String;    -- instead of an actual solid class object.
 
@@ -1661,7 +1663,7 @@ is
       begin
          append (constructor_Symbol,  String'("ada_" & (+doh_Item (Swig_name_construct (const_String (-Self.current_c_Namespace.qualified_Name),
                                                                                         const_String (-overloaded_name))))));
-         append (construct_Call,      "extern "  & Self.current_lStr & "    " & constructor_Symbol & "(");
+         append (construct_Call, "extern "  & Self.current_lStr & "    " & constructor_Symbol & "(");
 
          Swig_typemap_attach_parms (const_String (-"ctype"), parameter_List, null);    -- attach the non-standard typemaps to the parameter list
          Swig_typemap_attach_parms (const_String (-"in"),    parameter_List, null);    --
@@ -1742,8 +1744,6 @@ is
       end;
 
 
-      --  new ...
-      --
       unindent_Log;
       return SWIG_OK;
    end constructorHandler;
@@ -2864,12 +2864,13 @@ is
 
       the_ada_subProgram := new_ada_subProgram (ada_Utility.to_ada_Identifier (the_c_Function.Name),
                                                 Self.c_type_Map_of_ada_type.Element (the_c_Function.return_Type));
-      the_ada_subProgram.link_Symbol    := the_c_Function.link_Symbol;
-      the_ada_subProgram.is_Virtual     := the_c_Function.is_Virtual;
-      the_ada_subProgram.is_Abstract    := the_c_Function.is_Abstract;
-      the_ada_subProgram.is_Overriding  := the_c_Function.is_Overriding;
-      the_ada_subProgram.is_Constructor := the_c_Function.is_Constructor;
-      the_ada_subProgram.is_Destructor  := the_c_Function.is_Destructor;
+      the_ada_subProgram.link_Symbol        := the_c_Function.link_Symbol;
+      the_ada_subProgram.constructor_Symbol := the_c_Function.constructor_Symbol;
+      the_ada_subProgram.is_Virtual         := the_c_Function.is_Virtual;
+      the_ada_subProgram.is_Abstract        := the_c_Function.is_Abstract;
+      the_ada_subProgram.is_Overriding      := the_c_Function.is_Overriding;
+      the_ada_subProgram.is_Constructor     := the_c_Function.is_Constructor;
+      the_ada_subProgram.is_Destructor      := the_c_Function.is_Destructor;
 
       return the_ada_subProgram;
    end to_ada_subProgram;
