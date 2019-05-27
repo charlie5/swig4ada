@@ -1118,23 +1118,6 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_lambdaDeclaration (
 
 
 
-DllExport void * SWIGSTDCALL Ada_new_Language (
-  )
-{
-  void * jresult ;
-  Language *result = 0 ;
-  
-  result = (Language *)new Language();
-  jresult = (void *) result;      
-  
-  
-  
-  return jresult;
-  
-}
-
-
-
 DllExport void SWIGSTDCALL Ada_delete_Language (
   void * jarg1
   )

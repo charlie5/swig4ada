@@ -54,8 +54,6 @@ package swigmod.Language is
 
    function construct return swigmod.Language.Item'Class;
 
-   pragma CPP_Constructor (construct, "_ZN8LanguageC1Ev");
-
    overriding procedure destruct_0 (Self : in out swigmod.Language.Item);
 
    overriding procedure destruct (Self : in out swigmod.Language.Item);
@@ -492,6 +490,7 @@ package swigmod.Language is
 
 private
 
+   pragma CPP_Constructor (construct, "ada_new_Language_Language");
    pragma Import (CPP, destruct_0, "_ZN8LanguageD1Ev");
    pragma Import (CPP, destruct, "_ZN8LanguageD1Ev");
    pragma Import (CPP, emit_one, "Ada_Language_emit_one");
@@ -571,6 +570,9 @@ private
       virtual_destructor                  : in swig.pointers.int_Pointer;
       protectedbase : in interfaces.c.int) return interfaces.c.int;
 
+   pragma Import (CPP, unrollVirtualMethods_v1,
+      "Ada_Language_unrollVirtualMethods__SWIG_0");
+
    function unrollVirtualMethods (Self :    access swigmod.Language.Item;
       n                                : in swigg_module.Pointers.Node_Pointer;
       parent                           : in swigg_module.Pointers.Node_Pointer;
@@ -580,9 +582,6 @@ private
       protectedbase : in interfaces.c.int) return interfaces.c.int renames
      unrollVirtualMethods_v1;
 
-   pragma Import (CPP, unrollVirtualMethods_v1,
-      "Ada_Language_unrollVirtualMethods__SWIG_0");
-
    function unrollVirtualMethods_v2 (Self :    access swigmod.Language.Item;
       n : in swigg_module.Pointers.Node_Pointer;
       parent : in swigg_module.Pointers.Node_Pointer;
@@ -590,6 +589,9 @@ private
       default_director                    : in interfaces.c.int;
       virtual_destructor : in swig.pointers.int_Pointer) return interfaces.c
      .int;
+
+   pragma Import (CPP, unrollVirtualMethods_v2,
+      "Ada_Language_unrollVirtualMethods__SWIG_1");
 
    function unrollVirtualMethods (Self :    access swigmod.Language.Item;
       n                                : in swigg_module.Pointers.Node_Pointer;
@@ -600,8 +602,6 @@ private
      .int renames
      unrollVirtualMethods_v2;
 
-   pragma Import (CPP, unrollVirtualMethods_v2,
-      "Ada_Language_unrollVirtualMethods__SWIG_1");
    pragma Import (CPP, classDirectorConstructor,
       "Ada_Language_classDirectorConstructor");
    pragma Import (CPP, classDirectorDefaultConstructor,
@@ -623,6 +623,8 @@ private
       n                        : in swigg_module.Pointers.Node_Pointer;
       scope : in DOHs.const_String_or_char_ptr.Item) return interfaces.c.int;
 
+   pragma Import (CPP, addSymbol_v1, "Ada_Language_addSymbol__SWIG_0");
+
    function addSymbol (Self :    access swigmod.Language.Item;
       s                     : in swigg_module.Pointers.String_Pointer;
       n                     : in swigg_module.Pointers.Node_Pointer;
@@ -630,11 +632,11 @@ private
      .int renames
      addSymbol_v1;
 
-   pragma Import (CPP, addSymbol_v1, "Ada_Language_addSymbol__SWIG_0");
-
    function addSymbol_v2 (Self :    access swigmod.Language.Item;
       s                        : in swigg_module.Pointers.String_Pointer;
       n : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
+
+   pragma Import (CPP, addSymbol_v2, "Ada_Language_addSymbol__SWIG_1");
 
    function addSymbol (Self :    access swigmod.Language.Item;
       s                     : in swigg_module.Pointers.String_Pointer;
@@ -642,12 +644,13 @@ private
      .int renames
      addSymbol_v2;
 
-   pragma Import (CPP, addSymbol_v2, "Ada_Language_addSymbol__SWIG_1");
-
    function addInterfaceSymbol_v1 (Self :    access swigmod.Language.Item;
       interface_name : in swigg_module.Pointers.String_Pointer;
       n : in swigg_module.Pointers.Node_Pointer;
       scope : in DOHs.const_String_or_char_ptr.Item) return interfaces.c.int;
+
+   pragma Import (CPP, addInterfaceSymbol_v1,
+      "Ada_Language_addInterfaceSymbol__SWIG_0");
 
    function addInterfaceSymbol (Self :    access swigmod.Language.Item;
       interface_name                 : in swigg_module.Pointers.String_Pointer;
@@ -656,12 +659,12 @@ private
      .int renames
      addInterfaceSymbol_v1;
 
-   pragma Import (CPP, addInterfaceSymbol_v1,
-      "Ada_Language_addInterfaceSymbol__SWIG_0");
-
    function addInterfaceSymbol_v2 (Self :    access swigmod.Language.Item;
       interface_name : in swigg_module.Pointers.String_Pointer;
       n : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
+
+   pragma Import (CPP, addInterfaceSymbol_v2,
+      "Ada_Language_addInterfaceSymbol__SWIG_1");
 
    function addInterfaceSymbol (Self :    access swigmod.Language.Item;
       interface_name                 : in swigg_module.Pointers.String_Pointer;
@@ -669,8 +672,6 @@ private
      .int renames
      addInterfaceSymbol_v2;
 
-   pragma Import (CPP, addInterfaceSymbol_v2,
-      "Ada_Language_addInterfaceSymbol__SWIG_1");
    pragma Import (CPP, dumpSymbols, "Ada_Language_dumpSymbols");
 
    function symbolLookup_v1 (Self :    access swigmod.Language.Item;
@@ -678,24 +679,25 @@ private
       scope                       : in DOHs.const_String_or_char_ptr.Item)
       return swigg_module.Pointers.Node_Pointer;
 
+   pragma Import (CPP, symbolLookup_v1, "Ada_Language_symbolLookup__SWIG_0");
+
    function symbolLookup (Self :    access swigmod.Language.Item;
       s                        : in swigg_module.Pointers.String_Pointer;
       scope                    : in DOHs.const_String_or_char_ptr.Item)
       return swigg_module.Pointers.Node_Pointer renames
      symbolLookup_v1;
 
-   pragma Import (CPP, symbolLookup_v1, "Ada_Language_symbolLookup__SWIG_0");
-
    function symbolLookup_v2 (Self :    access swigmod.Language.Item;
       s : in swigg_module.Pointers.String_Pointer) return swigg_module.Pointers
      .Node_Pointer;
+
+   pragma Import (CPP, symbolLookup_v2, "Ada_Language_symbolLookup__SWIG_1");
 
    function symbolLookup (Self :    access swigmod.Language.Item;
       s : in swigg_module.Pointers.String_Pointer) return swigg_module.Pointers
      .Node_Pointer renames
      symbolLookup_v2;
 
-   pragma Import (CPP, symbolLookup_v2, "Ada_Language_symbolLookup__SWIG_1");
    pragma Import (CPP, symbolAddScope, "Ada_Language_symbolAddScope");
    pragma Import (CPP, symbolScopeLookup, "Ada_Language_symbolScopeLookup");
    pragma Import (CPP, symbolScopePseudoSymbolLookup,
@@ -716,57 +718,59 @@ private
    procedure allow_directors_v1 (Self : in out swigmod.Language.Item'Class;
       val                             : in     interfaces.c.int);
 
+   pragma Import (CPP, allow_directors_v1,
+      "Ada_Language_allow_directors__SWIG_0");
+
    procedure allow_directors (Self : in out swigmod.Language.Item'Class;
       val                          : in     interfaces.c.int) renames
      allow_directors_v1;
 
-   pragma Import (CPP, allow_directors_v1,
-      "Ada_Language_allow_directors__SWIG_0");
-
    procedure allow_directors_v2 (Self : in out swigmod.Language.Item'Class);
+
+   pragma Import (CPP, allow_directors_v2,
+      "Ada_Language_allow_directors__SWIG_1");
 
    procedure allow_directors
      (Self : in out swigmod.Language.Item'Class) renames
      allow_directors_v2;
 
-   pragma Import (CPP, allow_directors_v2,
-      "Ada_Language_allow_directors__SWIG_1");
    pragma Import (CPP, directorsEnabled, "Ada_Language_directorsEnabled");
 
    procedure allow_dirprot_v1 (Self : in out swigmod.Language.Item'Class;
       val                           : in     interfaces.c.int);
 
+   pragma Import (CPP, allow_dirprot_v1, "Ada_Language_allow_dirprot__SWIG_0");
+
    procedure allow_dirprot (Self : in out swigmod.Language.Item'Class;
       val                        : in     interfaces.c.int) renames
      allow_dirprot_v1;
 
-   pragma Import (CPP, allow_dirprot_v1, "Ada_Language_allow_dirprot__SWIG_0");
-
    procedure allow_dirprot_v2 (Self : in out swigmod.Language.Item'Class);
+
+   pragma Import (CPP, allow_dirprot_v2, "Ada_Language_allow_dirprot__SWIG_1");
 
    procedure allow_dirprot (Self : in out swigmod.Language.Item'Class) renames
      allow_dirprot_v2;
 
-   pragma Import (CPP, allow_dirprot_v2, "Ada_Language_allow_dirprot__SWIG_1");
-
    procedure allow_allprotected_v1 (Self : in out swigmod.Language.Item'Class;
       val                                : in     interfaces.c.int);
+
+   pragma Import (CPP, allow_allprotected_v1,
+      "Ada_Language_allow_allprotected__SWIG_0");
 
    procedure allow_allprotected (Self : in out swigmod.Language.Item'Class;
       val                             : in     interfaces.c.int) renames
      allow_allprotected_v1;
 
-   pragma Import (CPP, allow_allprotected_v1,
-      "Ada_Language_allow_allprotected__SWIG_0");
-
    procedure allow_allprotected_v2 (Self : in out swigmod.Language.Item'Class);
+
+   pragma Import (CPP, allow_allprotected_v2,
+      "Ada_Language_allow_allprotected__SWIG_1");
 
    procedure allow_allprotected
      (Self : in out swigmod.Language.Item'Class) renames
      allow_allprotected_v2;
 
-   pragma Import (CPP, allow_allprotected_v2,
-      "Ada_Language_allow_allprotected__SWIG_1");
    pragma Import (CPP, dirprot_mode, "Ada_Language_dirprot_mode");
    pragma Import (CPP, need_nonpublic_ctor,
       "Ada_Language_need_nonpublic_ctor");
@@ -780,39 +784,40 @@ private
    procedure allow_multiple_input_v1
      (Self : in out swigmod.Language.Item'Class; val : in interfaces.c.int);
 
+   pragma Import (CPP, allow_multiple_input_v1,
+      "Ada_Language_allow_multiple_input");
+
    procedure allow_multiple_input (Self : in out swigmod.Language.Item'Class;
       val                               : in     interfaces.c.int) renames
      allow_multiple_input_v1;
 
-   pragma Import (CPP, allow_multiple_input_v1,
-      "Ada_Language_allow_multiple_input");
-
    procedure allow_multiple_input_v2
      (Self : in out swigmod.Language.Item'Class);
+
+   pragma Import (CPP, allow_multiple_input_v2,
+      "Ada_Language_allow_multiple_input");
 
    procedure allow_multiple_input
      (Self : in out swigmod.Language.Item'Class) renames
      allow_multiple_input_v2;
 
-   pragma Import (CPP, allow_multiple_input_v2,
-      "Ada_Language_allow_multiple_input");
-
    procedure allow_overloading_v1 (Self : in out swigmod.Language.Item'Class;
       val                               : in     interfaces.c.int);
+
+   pragma Import (CPP, allow_overloading_v1, "Ada_Language_allow_overloading");
 
    procedure allow_overloading (Self : in out swigmod.Language.Item'Class;
       val                            : in     interfaces.c.int) renames
      allow_overloading_v1;
 
-   pragma Import (CPP, allow_overloading_v1, "Ada_Language_allow_overloading");
-
    procedure allow_overloading_v2 (Self : in out swigmod.Language.Item'Class);
+
+   pragma Import (CPP, allow_overloading_v2, "Ada_Language_allow_overloading");
 
    procedure allow_overloading
      (Self : in out swigmod.Language.Item'Class) renames
      allow_overloading_v2;
 
-   pragma Import (CPP, allow_overloading_v2, "Ada_Language_allow_overloading");
    pragma Import (CPP, is_wrapping_class, "Ada_Language_is_wrapping_class");
    pragma Import (CPP, getCurrentClass, "Ada_Language_getCurrentClass");
    pragma Import (CPP, getNSpace, "Ada_Language_getNSpace");
@@ -828,6 +833,8 @@ private
       p : in swigg_module.Pointers.Parm_Pointer; arg_num : in interfaces.c.int;
       setter : in swig.bool) return swigg_module.Pointers.String_Pointer;
 
+   pragma Import (CPP, makeParameterName_v1, "Ada_Language_makeParameterName");
+
    function makeParameterName (Self :    access swigmod.Language.Item;
       n                             : in swigg_module.Pointers.Node_Pointer;
       p : in swigg_module.Pointers.Parm_Pointer; arg_num : in interfaces.c.int;
@@ -835,13 +842,13 @@ private
      .String_Pointer renames
      makeParameterName_v1;
 
-   pragma Import (CPP, makeParameterName_v1, "Ada_Language_makeParameterName");
-
    function makeParameterName_v2 (Self :    access swigmod.Language.Item;
       n                                : in swigg_module.Pointers.Node_Pointer;
       p                                : in swigg_module.Pointers.Parm_Pointer;
       arg_num : in interfaces.c.int) return swigg_module.Pointers
      .String_Pointer;
+
+   pragma Import (CPP, makeParameterName_v2, "Ada_Language_makeParameterName");
 
    function makeParameterName (Self :    access swigmod.Language.Item;
       n                             : in swigg_module.Pointers.Node_Pointer;
@@ -850,7 +857,6 @@ private
      .String_Pointer renames
      makeParameterName_v2;
 
-   pragma Import (CPP, makeParameterName_v2, "Ada_Language_makeParameterName");
    pragma Import (CPP, extraDirectorProtectedCPPMethodsRequired,
       "Ada_Language_extraDirectorProtectedCPPMethodsRequired");
    pragma Import (CPP, nestedClassesSupport,

@@ -228,6 +228,9 @@ private
       fmt_fastdispatch : in DOHs.const_String_or_char_ptr.Item)
       return swigg_module.Pointers.String_Pointer;
 
+   pragma Import (C, Swig_overload_dispatch_v1,
+      "Ada_Swig_overload_dispatch__SWIG_0");
+
    function Swig_overload_dispatch (n : in swigg_module.Pointers.Node_Pointer;
       fmt                             : in DOHs.const_String_or_char_ptr.Item;
       arg_1                           : in swig.pointers.int_Pointer;
@@ -235,14 +238,14 @@ private
       return swigg_module.Pointers.String_Pointer renames
      Swig_overload_dispatch_v1;
 
-   pragma Import (C, Swig_overload_dispatch_v1,
-      "Ada_Swig_overload_dispatch__SWIG_0");
-
    function Swig_overload_dispatch_v2
      (n     : in swigg_module.Pointers.Node_Pointer;
       fmt   : in DOHs.const_String_or_char_ptr.Item;
       arg_1 : in swig.pointers.int_Pointer) return swigg_module.Pointers
      .String_Pointer;
+
+   pragma Import (C, Swig_overload_dispatch_v2,
+      "Ada_Swig_overload_dispatch__SWIG_1");
 
    function Swig_overload_dispatch (n : in swigg_module.Pointers.Node_Pointer;
       fmt                             : in DOHs.const_String_or_char_ptr.Item;
@@ -250,8 +253,6 @@ private
      .String_Pointer renames
      Swig_overload_dispatch_v2;
 
-   pragma Import (C, Swig_overload_dispatch_v2,
-      "Ada_Swig_overload_dispatch__SWIG_1");
    pragma Import (C, Swig_overload_dispatch_cast,
       "Ada_Swig_overload_dispatch_cast");
    pragma Import (C, Swig_overload_rank, "Ada_Swig_overload_rank");
@@ -275,23 +276,24 @@ private
      (parentnode : in swigg_module.Pointers.Node_Pointer;
       member : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
 
+   pragma Import (C, is_member_director_v1, "Ada_is_member_director__SWIG_0");
+
    function is_member_director
      (parentnode : in swigg_module.Pointers.Node_Pointer;
       member     : in swigg_module.Pointers.Node_Pointer) return interfaces.c
      .int renames
      is_member_director_v1;
 
-   pragma Import (C, is_member_director_v1, "Ada_is_member_director__SWIG_0");
-
    function is_member_director_v2
      (member : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
+
+   pragma Import (C, is_member_director_v2, "Ada_is_member_director__SWIG_1");
 
    function is_member_director
      (member : in swigg_module.Pointers.Node_Pointer) return interfaces.c
      .int renames
      is_member_director_v2;
 
-   pragma Import (C, is_member_director_v2, "Ada_is_member_director__SWIG_1");
    pragma Import (C, is_non_virtual_protected_access,
       "Ada_is_non_virtual_protected_access");
    pragma Import (C, Wrapper_virtual_elimination_mode_set,
