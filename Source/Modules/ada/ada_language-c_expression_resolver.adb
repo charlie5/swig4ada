@@ -22,7 +22,6 @@ is
 
 
 
-
    function resolved_sizeof_Expression (Self            : access Item;
                                         expression_Type : in     unbounded_String;
                                         known_Symbols   : in     symbol_value_maps.Map;
@@ -34,7 +33,7 @@ is
       required_sizeof_not_defined : exception;
 
    begin
-      replace_All (the_type_Text,  "&", "");    -- strip references, since they have no impact on size.
+      replace_All (the_type_Text,  "&", "");    -- Strip references, since they have no impact on size.
 
       --  Calculate array_Multiplier.
       --
@@ -96,6 +95,7 @@ is
       end record;
 
    package element_Vectors is new ada.containers.Vectors (Positive, an_Element);   use element_Vectors;
+
 
 
    function resolved_c_integer_Expression (Self           : access Item;
@@ -295,8 +295,8 @@ is
          is
             Pad : element_Vectors.Vector renames the_Vector.all;
          begin
-            reduce_unary (Pad, for_operation => "!");    -- nb: these must be done in C's order of precedence (tbd: check the order here is correct!)
-            reduce_unary (Pad, for_operation => "+");    -- nb: these must be done in C's order of precedence (tbd: check the order here is correct!)
+            reduce_unary (Pad, for_operation => "!");    -- nb: These must be done in C's order of precedence (todo: check the order here is correct!)
+            reduce_unary (Pad, for_operation => "+");    -- nb: These must be done in C's order of precedence (todo: check the order here is correct!)
             reduce_unary (Pad, for_operation => "-");
             reduce_unary (Pad, for_operation => "~");
 
@@ -323,21 +323,20 @@ is
             end if;
          end Result_of;
 
-
          the_Elements : aliased element_Vectors.Vector;
 
       begin
-         log ("'resolved_c_integer_Expression_recursive'   ~   Expression_pad: '" & Expression_pad.all & "'");
+--           log ("'resolved_c_integer_Expression_recursive'   ~   Expression_pad: '" & Expression_pad.all & "'");
 
          while Length (Expression_pad.all) > 0
          loop
-            log ("Self: '" & Expression_pad.all & "'");
+--              log ("Self: '" & Expression_pad.all & "'");
 
             if Element (Expression_pad.all, 1) = ' '
             then
                delete (Expression_pad.all,  1, 1);
 
-            elsif      Length (Expression_pad.all)       >= 3
+            elsif      Length (Expression_pad.all)                 >= 3
               and then to_Upper (Slice (Expression_pad.all, 1, 3))  = "ULL"
             then
                delete (Expression_pad.all,  1, 3);
@@ -348,7 +347,7 @@ is
                   replace_Element (the_Elements, Last (the_Elements), Prior);
                end;
 
-            elsif      Length (Expression_pad.all)       >= 2
+            elsif      Length (Expression_pad.all)                 >= 2
               and then to_Upper (Slice (Expression_pad.all, 1, 2))  = "UL"
             then
                delete (Expression_pad.all,  1, 2);
@@ -514,7 +513,7 @@ is
                end;
 
             elsif Slice (Expression_pad.all,  1, 1) (1) in '0' .. '9'
-            then   -- handle decimal and octal numbers
+            then   -- Handle decimal and octal numbers.
                declare
                   First : Natural;
                   Last  : Natural;
@@ -528,7 +527,7 @@ is
                end;
 
             elsif     Length  (Expression_pad.all)    = 1
-              or else Element (Expression_pad.all, 2) = ' '          -- nb: this disallows symbol identifiers of length 1
+              or else Element (Expression_pad.all, 2) = ' '          -- nb: This disallows symbol identifiers of length 1.
             then
                begin
                   if Element (Expression_pad.all, 1) in '0' .. '9'
@@ -550,7 +549,6 @@ is
                   First      : Natural;
                   Last       : Natural;
                   the_Symbol : unbounded_String;
-
                begin
                   find_Token (Expression_pad.all, to_Set ("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789"), Inside,  First, Last);
                   the_Symbol := unbounded_Slice (Expression_pad.all,  First, Last);
@@ -559,11 +557,10 @@ is
                                              value => Element (known_Symbols,  Namespace & the_Symbol),
                                              others => <>));
                   exception
-                     when Constraint_Error => -- key not found, try without namespace ...
+                     when Constraint_Error => -- Key not found, so try without namespace.
                         append (the_Elements,  (kind  => Value,
                                                 value => Element (known_Symbols,  the_Symbol),
                                                 others => <>));
-
                   end;
                   delete (Expression_pad.all,  First, Last);
                end;
