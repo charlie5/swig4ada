@@ -1,4 +1,4 @@
-%module swigg_module
+%module swig_Core
 
 
 %{

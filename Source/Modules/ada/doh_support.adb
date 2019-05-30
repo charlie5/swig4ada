@@ -1,14 +1,14 @@
 with
      DOHs.Binding,
-     swigg_Module.Binding,
+     swig_Core.Binding,
      ada.Text_IO;
 
 
 package body doh_Support
 is
    use DOHs.Binding,
-       swigg_Module,
-       swigg_Module.Binding,
+       swig_Core,
+       swig_Core.Binding,
        Interfaces,
        interfaces.C.strings;
 

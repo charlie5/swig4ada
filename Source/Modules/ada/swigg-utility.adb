@@ -1,8 +1,8 @@
 with
      ada_Utility,
      DOHs.Pointers,
-     swigg_Module.Binding,
-     swigg_Module.Pointers;
+     swig_Core.Binding,
+     swig_Core.Pointers;
 
 package body swigg.Utility
 is
@@ -178,8 +178,8 @@ is
 
    function sibling_module_Name_of (the_Node : in doh_Node) return String
    is
-      use swigg_Module.Binding,
-          swigg_Module.Pointers,
+      use swig_Core.Binding,
+          swig_Core.Pointers,
           DOHs.Pointers;
 
       the_Sibling : Node_Pointer := first_Child (parent_Node (Node_Pointer (the_Node)));
@@ -208,10 +208,10 @@ is
       end if;
 
       declare
-         use swigg_Module,
-             swigg_Module.Binding,
-             swigg_Module.Pointers,
-             swigg_Module.Pointers.C_Node_Pointers;
+         use swig_Core,
+             swig_Core.Binding,
+             swig_Core.Pointers,
+             swig_Core.Pointers.C_Node_Pointers;
 
          the_Parent : DOH_Node := DOH_Node (parent_Node (Node_Pointer (the_Node)));
       begin

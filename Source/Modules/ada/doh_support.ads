@@ -1,7 +1,7 @@
 with
 --     swig_p_Doh,
 --     swig_p_DohIterator,
-     swigg_module.Pointers,
+     swig_Core.Pointers,
      DOHs.Pointers,
      DOHs.DohIterator,
      DOHs.const_String_or_char_ptr,
@@ -15,7 +15,7 @@ package doh_Support
 --
 is
    use ada.Strings.unbounded,
-       swigg_module.Pointers,
+       swig_Core.Pointers,
        DOHs.Pointers;
 
    subtype doh_Item     is DOH_Pointer;

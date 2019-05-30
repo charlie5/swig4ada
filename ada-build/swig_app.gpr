@@ -13,7 +13,7 @@ project swig_App is
                         "../Source/Modules/ada",
                         "../Source/Modules/ada/ada_type",
                         "../Source/Modules/ada/swig_binding/doh",
-                        "../Source/Modules/ada/swig_binding/swigg",
+                        "../Source/Modules/ada/swig_binding/swig_core",
                         "../Source/Modules/ada/swig_binding/swigmod");
 --                        "../Source/Modules/ada/swig_binding-test/doh",
 --                        "../Source/Modules/ada/swig_binding-test/swigg",

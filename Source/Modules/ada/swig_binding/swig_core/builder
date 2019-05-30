@@ -1,0 +1,5 @@
+rm *.ads
+
+../../../../../ada-build/swig_ada  -ada  -I../../../../Include   -I../../../../Swig  -I../../../../Modules  -I../../../../Preprocessor   -I../../../../DOH    swig_core.i 
+
+gnatpp  -rnb  -I../../../..   *.ads

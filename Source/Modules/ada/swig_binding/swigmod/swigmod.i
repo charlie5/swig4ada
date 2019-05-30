@@ -14,7 +14,7 @@
 %}
 
 
-%import "../swigg/swigg.i"
+%import "../swig_core/swig_core.i"
 
 
 // The headers to be wrapped.

@@ -7,10 +7,10 @@ with
 
      ada_Utility,
 
-     swigg_Module.Binding,
+     swig_Core.Binding,
      swigMod.Binding,
      swigMod.Dispatcher,
-     swigg_module.Wrapper,
+     swig_Core.Wrapper,
 
      swigg.Utility,
 
@@ -32,10 +32,10 @@ is
        ada_Variable,
        ada_Utility,
 
-       swigg_Module,
-       swigg_Module.Binding,
-       swigg_Module.Pointers,
-       swigg_Module.Pointers.C_Node_Pointers,
+       swig_Core,
+       swig_Core.Binding,
+       swig_Core.Pointers,
+       swig_Core.Pointers.C_Node_Pointers,
        swigMod.Binding,
        swigMod.Dispatcher,
 
@@ -172,7 +172,7 @@ is
 
    overriding
    function top (Self : access Item;
-                 n    : in     swigg_module.Pointers.Node_Pointer) return interfaces.c.int
+                 n    : in     swig_Core.Pointers.Node_Pointer) return interfaces.c.int
    is
       the_Node     :          Node_Pointer renames n;
       module_Name  : constant unbounded_String := +Attribute (the_Node, "name");
@@ -399,7 +399,7 @@ is
 
    overriding
    function typemapDirective (Self : access Item;
-                              n    : in     swigg_module.Pointers.Node_Pointer) return interfaces.c.int
+                              n    : in     swig_Core.Pointers.Node_Pointer) return interfaces.c.int
    is
       the_Node   :          Node_Pointer renames n;
       the_Method : constant unbounded_String := +Attribute (the_Node, "method");
@@ -442,7 +442,7 @@ is
 
    overriding
    function moduleDirective (Self : access Item;
-                             n    : in     swigg_module.Pointers.Node_Pointer) return interfaces.c.int
+                             n    : in     swig_Core.Pointers.Node_Pointer) return interfaces.c.int
    is
       pragma Unreferenced (Self);
       the_Node :          Node_Pointer renames n;
@@ -460,7 +460,7 @@ is
 
    overriding
    function includeDirective (Self : access Item;
-                              n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int
+                              n    : in swig_Core.Pointers.Node_Pointer) return interfaces.c.int
    is
       Status : C.int with Unreferenced;
    begin
@@ -476,7 +476,7 @@ is
 
    overriding
    function namespaceDeclaration (Self : access Item;
-                                  n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int
+                                  n    : in swig_Core.Pointers.Node_Pointer) return interfaces.c.int
    is
       the_Node :          Node_Pointer renames n;
       the_Name : constant unbounded_String  := +Attribute (the_Node, "name");
@@ -501,7 +501,7 @@ is
 
    overriding
    function classforwardDeclaration (Self : access Item;
-                                     n    : in     swigg_module.Pointers.Node_Pointer) return interfaces.c.int
+                                     n    : in     swig_Core.Pointers.Node_Pointer) return interfaces.c.int
    is
       the_Node       :          Node_Pointer renames n;
 
@@ -544,7 +544,7 @@ is
 
    overriding
    function nativeDirective (Self : access Item;
-                             n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int
+                             n    : in swig_Core.Pointers.Node_Pointer) return interfaces.c.int
    is
       the_Node       :          Node_Pointer renames n;
       wrap_Name      : constant String_Pointer    := String_Pointer (get_Attribute (the_Node, "wrap:name"));
@@ -584,7 +584,7 @@ is
 
    overriding
    function functionWrapper (Self : access Item;
-                             n    : in     swigg_module.Pointers.Node_Pointer) return interfaces.c.int
+                             n    : in     swig_Core.Pointers.Node_Pointer) return interfaces.c.int
    is
       the_Node : Node_Pointer renames n;
       use type C.int;
@@ -982,7 +982,7 @@ is
 
    overriding
    function globalvariableHandler (Self : access Item;
-                                   n    : in     swigg_module.Pointers.Node_Pointer) return interfaces.c.int
+                                   n    : in     swig_Core.Pointers.Node_Pointer) return interfaces.c.int
    is
       use swigg.Utility;
       use type C.int;
@@ -1041,7 +1041,7 @@ is
 
    overriding
    function enumDeclaration (Self : access Item;
-                             n    : in     swigg_module.Pointers.Node_Pointer) return interfaces.c.int
+                             n    : in     swig_Core.Pointers.Node_Pointer) return interfaces.c.int
    is
       the_Node      : Node_Pointer renames n;
       doh_swig_Type : SwigType_Pointer :=  SwigType_Pointer (get_Attribute (the_Node, "enumtype"));
@@ -1140,7 +1140,7 @@ is
 
    overriding
    function enumvalueDeclaration (Self : access Item;
-                                  n    : in     swigg_module.Pointers.Node_Pointer) return interfaces.c.int
+                                  n    : in     swig_Core.Pointers.Node_Pointer) return interfaces.c.int
    is
       the_Node :          Node_Pointer renames n;
       symname  : constant unbounded_String  := +Attribute (the_Node, "sym:name");
@@ -1202,7 +1202,7 @@ is
 
    overriding
    function constantWrapper (Self : access Item;
-                             n    : in     swigg_module.Pointers.Node_Pointer) return interfaces.c.int
+                             n    : in     swig_Core.Pointers.Node_Pointer) return interfaces.c.int
    is
       the_Node       :          Node_Pointer  renames n;
 
@@ -1325,7 +1325,7 @@ is
 
    overriding
    function classHandler (Self : access Item;
-                          n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int
+                          n    : in swig_Core.Pointers.Node_Pointer) return interfaces.c.int
    is
       the_Node       :          Node_Pointer renames n;
       node_Type      : constant SwigType_Pointer :=  SwigType_Pointer (get_Attribute (the_Node, "name"));   -- todo: Use sym:name ?
@@ -1414,7 +1414,7 @@ is
 
    overriding
    function memberfunctionHandler (Self : access Item;
-                                   n    : in     swigg_module.Pointers.Node_Pointer) return interfaces.c.int
+                                   n    : in     swig_Core.Pointers.Node_Pointer) return interfaces.c.int
    is
       the_Node        :          Node_Pointer renames n;
       Status          :          C.int with Unreferenced;
@@ -1472,7 +1472,7 @@ is
 
    overriding
    function staticmemberfunctionHandler (Self : access Item;
-                                         n    : in     swigg_module.Pointers.Node_Pointer) return interfaces.c.int
+                                         n    : in     swig_Core.Pointers.Node_Pointer) return interfaces.c.int
    is
       the_Node : Node_Pointer renames n;
       Status   : C.int with Unreferenced;
@@ -1495,7 +1495,7 @@ is
 
    overriding
    function constructorHandler (Self : access Item;
-                                n    : in     swigg_module.Pointers.Node_Pointer) return interfaces.c.int
+                                n    : in     swig_Core.Pointers.Node_Pointer) return interfaces.c.int
    is
       the_Node : Node_Pointer renames n;
       Status   : C.int        with Unreferenced;
@@ -1632,7 +1632,7 @@ is
 
    overriding
    function destructorHandler (Self : access Item;
-                               n    : in     swigg_module.Pointers.Node_Pointer) return interfaces.c.int
+                               n    : in     swig_Core.Pointers.Node_Pointer) return interfaces.c.int
    is
       the_Node         :          doh_Node renames n;
       Status           :          C.int    with    Unreferenced;
@@ -1704,7 +1704,7 @@ is
 
    overriding
    function membervariableHandler (Self : access Item;
-                                   n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int
+                                   n    : in swig_Core.Pointers.Node_Pointer) return interfaces.c.int
    is
       use swigg.Utility;
       use type C.int;
@@ -1769,7 +1769,7 @@ is
 
    overriding
    function staticmembervariableHandler (Self : access Item;
-                                         n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int
+                                         n    : in swig_Core.Pointers.Node_Pointer) return interfaces.c.int
    is
       the_Node      :          doh_Node    renames  n;
       the_swigType  : constant doh_SwigType     :=  doh_SwigType (get_Attribute (the_Node, "type"));
@@ -1789,7 +1789,7 @@ is
 
    overriding
    function memberconstantHandler (Self : access Item;
-                                   n    : in     swigg_module.Pointers.Node_Pointer) return interfaces.c.int
+                                   n    : in     swig_Core.Pointers.Node_Pointer) return interfaces.c.int
    is
       the_Node : doh_Node renames n;
       Status   : C.int    with Unreferenced;
@@ -1812,7 +1812,7 @@ is
 
    overriding
    function insertDirective (Self : access Item;
-                             n    : in     swigg_module.Pointers.Node_Pointer) return interfaces.c.int
+                             n    : in     swig_Core.Pointers.Node_Pointer) return interfaces.c.int
    is
       the_Node :          doh_Node renames n;
       the_Code : constant doh_swigType  := doh_swigType (get_Attribute (the_Node, "code"));
@@ -1833,7 +1833,7 @@ is
 
    overriding
    function usingDeclaration (Self : access Item;
-                              n    : in     swigg_module.Pointers.Node_Pointer) return interfaces.c.int
+                              n    : in     swig_Core.Pointers.Node_Pointer) return interfaces.c.int
    is
       pragma Unreferenced (Self, n);
    begin
@@ -1845,7 +1845,7 @@ is
 
    overriding
    function typedefHandler (Self : access Item;
-                            n    : in     swigg_module.Pointers.Node_Pointer) return interfaces.c.int
+                            n    : in     swig_Core.Pointers.Node_Pointer) return interfaces.c.int
    is
       the_Node          :          doh_Node renames n;
       the_doh_type_Name : constant doh_String    := doh_String (get_Attribute (the_Node, "name"));

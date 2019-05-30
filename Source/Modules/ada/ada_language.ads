@@ -18,7 +18,7 @@ with
      gmp.Discrete,
 
      swig.Pointers,
-     swigg_module.Pointers,
+     swig_Core.Pointers,
 
      doh_Support,
 
@@ -61,73 +61,73 @@ is
                    argv : in     swig.pointers.chars_ptr_Pointer);
    overriding
    function top (Self : access Item;
-                 n    : in     swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
+                 n    : in     swig_Core.Pointers.Node_Pointer) return interfaces.c.int;
    overriding
    function classforwardDeclaration (Self : access Item;
-                                     n    : in     swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
+                                     n    : in     swig_Core.Pointers.Node_Pointer) return interfaces.c.int;
    overriding
    function nativeDirective (Self : access Item;
-                             n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
+                             n    : in swig_Core.Pointers.Node_Pointer) return interfaces.c.int;
    overriding
    function functionWrapper (Self : access Item;
-                             n    : in     swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
+                             n    : in     swig_Core.Pointers.Node_Pointer) return interfaces.c.int;
    overriding
    function globalvariableHandler (Self : access Item;
-                                   n    : in     swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
+                                   n    : in     swig_Core.Pointers.Node_Pointer) return interfaces.c.int;
    overriding
    function enumDeclaration (Self : access Item;
-                             n    : in     swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
+                             n    : in     swig_Core.Pointers.Node_Pointer) return interfaces.c.int;
    overriding
    function enumvalueDeclaration (Self : access Item;
-                                  n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
+                                  n    : in swig_Core.Pointers.Node_Pointer) return interfaces.c.int;
    overriding
    function constantWrapper (Self : access Item;
-                             n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
+                             n    : in swig_Core.Pointers.Node_Pointer) return interfaces.c.int;
    overriding
    function classHandler (Self : access Item;
-                          n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
+                          n    : in swig_Core.Pointers.Node_Pointer) return interfaces.c.int;
    overriding
    function usingDeclaration (Self : access Item;
-                              n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
+                              n    : in swig_Core.Pointers.Node_Pointer) return interfaces.c.int;
    overriding
    function memberfunctionHandler (Self : access Item;
-                                   n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
+                                   n    : in swig_Core.Pointers.Node_Pointer) return interfaces.c.int;
    overriding
    function staticmemberfunctionHandler (Self : access Item;
-                                         n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
+                                         n    : in swig_Core.Pointers.Node_Pointer) return interfaces.c.int;
    overriding
    function constructorHandler (Self : access Item;
-                                n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
+                                n    : in swig_Core.Pointers.Node_Pointer) return interfaces.c.int;
    overriding
    function destructorHandler (Self : access Item;
-                               n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
+                               n    : in swig_Core.Pointers.Node_Pointer) return interfaces.c.int;
    overriding
    function membervariableHandler (Self : access Item;
-                                   n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
+                                   n    : in swig_Core.Pointers.Node_Pointer) return interfaces.c.int;
    overriding
    function staticmembervariableHandler (Self : access Item;
-                                         n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
+                                         n    : in swig_Core.Pointers.Node_Pointer) return interfaces.c.int;
    overriding
    function memberconstantHandler (Self : access Item;
-                                   n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
+                                   n    : in swig_Core.Pointers.Node_Pointer) return interfaces.c.int;
    overriding
    function typedefHandler (Self : access Item;
-                            n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
+                            n    : in swig_Core.Pointers.Node_Pointer) return interfaces.c.int;
    overriding
    function insertDirective (Self : access Item;
-                             n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
+                             n    : in swig_Core.Pointers.Node_Pointer) return interfaces.c.int;
    overriding
    function namespaceDeclaration (Self : access Item;
-                                  n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
+                                  n    : in swig_Core.Pointers.Node_Pointer) return interfaces.c.int;
    overriding
    function moduleDirective (Self : access Item;
-                             n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
+                             n    : in swig_Core.Pointers.Node_Pointer) return interfaces.c.int;
    overriding
    function includeDirective (Self : access Item;
-                              n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
+                              n    : in swig_Core.Pointers.Node_Pointer) return interfaces.c.int;
    overriding
    function typemapDirective (Self : access Item;
-                              n    : in swigg_module.Pointers.Node_Pointer) return interfaces.c.int;
+                              n    : in swig_Core.Pointers.Node_Pointer) return interfaces.c.int;
 
    function to_ada_subProgram (Self : access Item;   the_c_Function   : in    c_Function.view)    return ada_subProgram.View;
    function to_Descriptor     (Self : access Item;   swig_Type        : in    doh_swigType)       return unbounded_String;
@@ -250,11 +250,11 @@ private
 
          --  C Runtime
          --
-         f_runtime               :         swigg_module.Pointers.File_Pointer;
-         f_header                :         swigg_module.Pointers.File_Pointer;
-         f_wrappers              :         swigg_module.Pointers.File_Pointer;
-         f_init                  :         swigg_module.Pointers.File_Pointer;
-         f_Ada                   :         swigg_module.Pointers.File_Pointer;     -- Contains Ada specific c++ declarations and code.
+         f_runtime               :         swig_Core.Pointers.File_Pointer;
+         f_header                :         swig_Core.Pointers.File_Pointer;
+         f_wrappers              :         swig_Core.Pointers.File_Pointer;
+         f_init                  :         swig_Core.Pointers.File_Pointer;
+         f_Ada                   :         swig_Core.Pointers.File_Pointer;     -- Contains Ada specific c++ declarations and code.
 
          current_linkage_Symbol  :         unbounded_String;
          current_lStr            :         unbounded_String;
