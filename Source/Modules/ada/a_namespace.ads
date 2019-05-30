@@ -1,6 +1,6 @@
 with
      ada.Strings.unbounded,
-     ada.containers.Vectors;
+     ada.Containers.Vectors;
 
 
 package a_Namespace
@@ -9,7 +9,6 @@ package a_Namespace
 --
 is
    use ada.Strings.unbounded;
-
 
    type Name is
       record
@@ -21,7 +20,6 @@ is
    type Name_view is access all Name;
 
 
-
    type Item is tagged private;
 
    procedure add_Name   (Self : in out Item;   name_Text : in unbounded_String);
@@ -29,10 +27,9 @@ is
 
 
 
-
 private
 
-   package name_Vectors is new ada.containers.Vectors (Positive, Name_view);      -- tbd: use an ada.containers set
+   package name_Vectors is new ada.Containers.Vectors (Positive, Name_view);      -- todo: Use an ada.containers set.
 
    subtype Names        is name_Vectors.Vector;
    subtype name_Cursor  is name_Vectors.Cursor;

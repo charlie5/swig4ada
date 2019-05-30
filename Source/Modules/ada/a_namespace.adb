@@ -1,12 +1,11 @@
 with
-     ada.Characters.Handling;
+     ada.Characters.handling;
 
 
 package body a_Namespace
 is
    use name_Vectors,
        ada.Characters.Handling;
-
 
 
    procedure add_Name (Self      : in out Item;
@@ -27,12 +26,11 @@ is
 
 
 
-   function fetch_Name (Self      : in     Item;
-                        name_Text : in     unbounded_String) return Name_view
+   function fetch_Name (Self      : in Item;
+                        name_Text : in unbounded_String) return Name_view
    is
       Cursor : name_Cursor := First (self.Names);
    begin
-
       while has_Element (Cursor)
       loop
          if to_Lower (to_String (name_Text)) = to_Lower (to_String (Element (Cursor).Text))
