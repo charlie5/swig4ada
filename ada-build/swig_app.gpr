@@ -1,6 +1,6 @@
 with "gmp";
 
-project Swiggy is
+project swig_App is
 
    for Languages use ("Ada", "C", "C++");
    for Source_Dirs use ("../Source/DOH", 
@@ -18,9 +18,10 @@ project Swiggy is
 --                        "../Source/Modules/ada/swig_binding-test/doh",
 --                        "../Source/Modules/ada/swig_binding-test/swigg",
 --                        "../Source/Modules/ada/swig_binding-test/swigmod");
-   for Main use ("swigmain.cxx");
+
+   for Main       use ("swigmain.cxx");
    for Object_Dir use "build";
-   for Exec_Dir use ".";
+   for Exec_Dir   use ".";
 
    package Ide is
    end Ide;
@@ -61,9 +62,9 @@ project Swiggy is
 
    package Linker is
       for Default_Switches ("ada") use ("-g");
-      for Default_Switches ("c") use ("-g", "-lm");
+      for Default_Switches ("c")   use ("-g", "-lm");
       for Default_Switches ("c++") use ("-g", "-lgmp", "-lm", "-lpcre");
    end Linker;
 
-end Swiggy;
+end swig_App;
 
