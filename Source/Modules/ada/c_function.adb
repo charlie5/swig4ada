@@ -1,6 +1,5 @@
 with
-     ada_Utility,
-     c_nameSpace;
+     ada_Utility;
 
 
 package body c_Function
@@ -10,18 +9,9 @@ is
        ada_Utility;
 
 
-   -----------
-   --  Globals
-   --
-
-   NL : constant String := new_line_Token;
-
-
-
    ---------
    --  Forge
    --
-
    function construct (the_Name    : in unbounded_String;
                        return_Type : in c_Type.view) return item'Class
    is
@@ -54,12 +44,9 @@ is
    end new_c_Function;
 
 
-
-
    --------------
    --  Attributes
    --
-
 
    function is_Procedure (Self : access Item) return Boolean
    is
@@ -76,9 +63,8 @@ is
    end is_Function;
 
 
-
    overriding
-   function required_Types (Self : access Item) return c_declarable.c_Type_views
+   function required_Types (Self : access Item) return c_Declarable.c_Type_views
    is
       use c_Declarable,
           c_Parameter;
@@ -93,7 +79,6 @@ is
    end required_Types;
 
 
-
    overriding
    function  depended_on_Declarations (Self : access Item) return c_Declarable.views
    is
@@ -102,7 +87,8 @@ is
    begin
       if Self.is_Function
       then
-         return   Self.return_Type.all'Access & Self.return_Type.depended_on_Declarations
+         return   Self.return_Type.all'Access
+                & Self.return_Type.depended_on_Declarations
                 & depended_on_Declarations (Self.Parameters);
       else
          return   depended_on_Declarations (Self.Parameters);
@@ -110,14 +96,11 @@ is
    end depended_on_Declarations;
 
 
-
    overriding
-   function depends_on (Self : access Item;   a_Declarable : in     c_Declarable.view) return Boolean
+   function depends_on (Self : access Item;   a_Declarable : in c_Declarable.view) return Boolean
    is
       use c_Parameter;
    begin
---        log ("c_function.depends_on ~ Self.Name: '" & Self.name & "'     a_Declarable.Name: '" & a_Declarable.Name & "'");
-
       if Self.is_Function
       then
          if        Self.return_Type.all'Access = a_Declarable
@@ -131,15 +114,11 @@ is
    end depends_on;
 
 
-
-
    overriding
-   function depends_directly_on (Self : access Item;   a_Declarable : in     c_Declarable.view) return Boolean
+   function depends_directly_on (Self : access Item;   a_Declarable : in c_Declarable.view) return Boolean
    is
       use c_Parameter;
    begin
---        log ("c_function.depends_on ~ Self.Name: '" & Self.name & "'     a_Declarable.Name: '" & a_Declarable.Name & "'");
-
       if Self.is_Function
       then
          if Self.return_Type.all'Access = a_Declarable then
@@ -151,15 +130,12 @@ is
    end depends_directly_on;
 
 
-
-
-   overriding function  directly_depended_on_Declarations (Self : access Item) return c_Declarable.views
+   overriding
+   function  directly_depended_on_Declarations (Self : access Item) return c_Declarable.views
    is
       use c_Declarable,
           c_Parameter;
    begin
-      log (+"c_function.directly_depended_on_Declarations");
-
       if Self.is_Function
       then
          return   Self.return_Type.all'Access
@@ -170,84 +146,26 @@ is
    end directly_depended_on_Declarations;
 
 
-
-   overriding function Name (Self : access Item) return ada.Strings.Unbounded.unbounded_String
+   overriding
+   function Name (Self : access Item) return ada.Strings.Unbounded.unbounded_String
    is
    begin
       return Self.Name;
    end Name;
 
 
-
---     function pragma_import_Source (Self                 : access Item;
---                                    declaration_Package  : access c_nameSpace.item'class;
---                                    unique_function_Name : in     unbounded_String;
---                                    in_cpp_Mode          : in     Boolean)         return unbounded_String
---     is
---        the_Source  : unbounded_String;
---        link_Symbol : unbounded_String;
---     begin
---        if Self.is_Constructor
---        then
---           link_Symbol := Self.member_function_link_Symbol_for (in_cpp_Mode);
---
---           if    -- Length (Self.Parameters) = 0 and     -- non-default constructors (ie those with parameters) are not yet implemented in gnat
---             declaration_Package.models_a_virtual_cpp_Class            --
---           then
---              append (the_Source,  NL & "   pragma cpp_Constructor (" & unique_function_Name & ");");
---           end if;
---
---           append (the_Source,   NL & NL & "   pragma Import (CPP, " & unique_function_Name & ", """ & link_Symbol & """);");
---
---        elsif Self.is_Destructor
---        then
---           link_Symbol := "_ZN" & Image (Length (declaration_Package.Name)) & declaration_Package.Name & "D1Ev";
---
---  --         append (the_Source,   NL & "   pragma cpp_Destructor (Entity => " & unique_function_Name & ");" & NL);
---           append (the_Source,   NL & "   pragma Import (CPP, " & unique_function_Name & ", """ & link_Symbol & """);");
---
---        else
---           if declaration_Package.models_an_interface_Type
---           then
---              append (the_Source,  NL & "   pragma Convention (CPP, ");
---
---           elsif declaration_Package.models_a_virtual_cpp_Class
---           then
---              append (the_Source,  NL & "   pragma Import (CPP, ");
---
---           else
---              append (the_Source,  NL & "   pragma Import (C, ");
---           end if;
---
---           append (the_Source,  unique_function_Name);
---
---           if not (   declaration_Package.models_an_interface_Type
---                   or Self.is_Abstract)
---           then
---              append (the_Source,  ", """ & Self.member_function_link_Symbol_for (in_cpp_Mode) &  """");
---           end if;
---
---           append (the_Source,  ");");
---        end if;
---
---        return the_Source;
---     end pragma_import_Source;
-
-
-
    function member_function_link_Symbol_for (Self        : access Item;
                                              in_cpp_Mode : in     Boolean) return unbounded_String
    is
    begin
-      --  'C' link name
+      --  'C' link name.
       --
       if not in_cpp_Mode
       then
          return Self.Name;
       end if;
 
-
-      --  'C++' link name
+      --  'C++' link name.
       --
       if Self.is_Constructor
       then
@@ -263,8 +181,6 @@ is
    end member_function_link_Symbol_for;
 
 
-
-
    --------------
    --  Operations
    --
@@ -274,6 +190,5 @@ is
    begin
       Self.Name := to_ada_Identifier (Self.Name);
    end verify;
-
 
 end c_Function;
