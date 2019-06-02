@@ -16,26 +16,24 @@ is
    ---------
    --  Forge
    --
-
    function new_c_nameSpace (Name   : in String;
-                              Parent : in View  := null) return View
+                             Parent : in View  := null) return View
    is
    begin
-      return new Item'(a_Kind                => Binding,
-                       a_Parent              => Parent,
-                       a_Name                => to_unbounded_String (Name),
+      return new Item'(a_Kind   => Binding,
+                       a_Parent => Parent,
+                       a_Name   => to_unbounded_String (Name),
 
-                       a_is_Module           => False,
-                       a_is_Import           => False,
-                       a_is_Core             => False,
-                       a_is_enum_Proxy       => False,
---                         a_is_global_Namespace => False,
-                       a_is_Unknown          => False,
+                       a_is_Module     => False,
+                       a_is_Import     => False,
+                       a_is_Core       => False,
+                       a_is_enum_Proxy => False,
+                       a_is_Unknown    => False,
 
-                       a_Subprograms         => <>,
-                       a_Variables           => <>,
-                       a_Types               => <>,
-                       a_cpp_class_Type      => null);
+                       a_Subprograms     => <>,
+                       a_Variables       => <>,
+                       a_Types           => <>,
+                       a_cpp_class_Type  => null);
    end new_c_nameSpace;
 
 
@@ -85,7 +83,7 @@ is
          if        is_reserved_Word                      (Self.Name)
            or else is_an_ada_Standard_Package_Identifier (Self.Name)
          then
-            return "c_" & Self.Name;     -- prevent clash
+            return "c_" & Self.Name;     -- Prevent clash.
          else
             return Self.Name;
          end if;
@@ -93,23 +91,6 @@ is
       else
          return Self.parent.qualified_Name & "." & Self.Name;
       end if;
-
---        if Self.Name = "standard" then
---           return Self.Name;
---
---        elsif Self.parent.Name = "standard" then
---
---           if        is_reserved_Word                      (Self.Name)
---             or else is_an_ada_Standard_Package_Identifier (Self.Name)
---           then
---              return "c_" & Self.Name;     -- prevent clash
---           else
---              return Self.Name;
---           end if;
---
---        else
---           return Self.parent.qualified_Name & "." & Self.Name;
---        end if;
    end qualified_Name;
 
 
@@ -127,8 +108,6 @@ is
       the_Parent : c_nameSpace.view := Self.Parent.all'Access;
    begin
       loop
---           log (the_Parent.qualified_Name & "   " & possible_Ancestor.Name);
-
          if the_Parent = possible_Ancestor then
             return True;
          end if;
@@ -184,16 +163,16 @@ is
                   new_Subprogram : in     c_Function.view)
    is
    begin
-      append (Self.a_Subprograms,  new_Subprogram);
+      append (Self.a_Subprograms, new_Subprogram);
    end add;
 
 
 
    procedure add (Self         : access Item;
-                  new_Variable : in c_Variable.view)
+                  new_Variable : in     c_Variable.view)
    is
    begin
-      append (Self.a_Variables,  new_Variable);
+      append (Self.a_Variables, new_Variable);
    end add;
 
 
@@ -251,14 +230,6 @@ is
 
 
 
---     function  is_global_Namespace        (Self : access Item) return Boolean
---     is
---     begin
---        return Self.a_is_global_Namespace;
---     end is_global_Namespace;
-
-
-
    procedure is_enum_Proxy (Self : access Item)
    is
    begin
@@ -302,16 +273,6 @@ is
    end cpp_class_Type;
 
 
-
---     procedure is_global_Namespace (Self : access Item)
---     is
---     begin
---        Self.a_is_global_Namespace := True;
---     end is_global_Namespace;
-
-
-
-
    --------------
    --  Operations
    --
@@ -323,7 +284,7 @@ is
       Self.a_Name := to_ada_Identifier (Self.a_Name);
 
       for Each in 1 .. Natural (Length (Self.a_Types))
-      loop   -- Verify contained types
+      loop -- Verify contained types.
          Element (Self.a_Types,  Each).verify;
       end loop;
 
@@ -341,16 +302,13 @@ is
 
 
    function type_name_needs_Standard_prefix (Self     : access Item'class;
-                                             Name     : in     String;                          -- tbd: find better name for this parameter
+                                             Name     : in     String;
                                              the_Type : in     c_Type.view) return Boolean
    is
-      lowcase_Name    : constant String            := to_Lower (Name);
-      lowcase_Type    : constant unbounded_String  := Text_before_first_Dot (to_unbounded_String (to_Lower (to_String (the_type.nameSpace.qualified_Name))));
-      name_type_Clash : constant Boolean           := lowcase_Name = lowcase_Type;
-
+      lowcase_Name    : constant String           := to_Lower (Name);
+      lowcase_Type    : constant unbounded_String := Text_before_first_Dot (+to_Lower (+the_type.nameSpace.qualified_Name));
+      name_type_Clash : constant Boolean          := lowcase_Name = lowcase_Type;
    begin
---        log ("'type_name_needs_Standard_prefix' - name: '" & lowcase_Name & "'     type: '" & lowcase_Type & "'");
-
       if name_type_Clash then
          return True;
       end if;
@@ -365,6 +323,5 @@ is
 
       return False;
    end type_name_needs_Standard_prefix;
-
 
 end c_Namespace;
