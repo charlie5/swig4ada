@@ -11,7 +11,6 @@ package ada_Variable
 is
    use ada.Strings.unbounded;
 
-
    package array_Bounds_Vectors is new ada.containers.Vectors (index_type   => Positive,
                                                                element_type => Integer);
 
@@ -21,17 +20,13 @@ is
          my_Type   : ada_Type.view;
          Value     : unbounded_String;
 
-         --  old
-         bit_Field        : Integer                    := -1;             -- '-1' indicates undefined.
+         bit_Field        : Integer                    := -1;   -- '-1' indicates undefined.
          array_Bounds     : array_bounds_vectors.Vector;
---           is_Constant      : Boolean                    := False;
          is_Pointer       : Boolean                    := False;
          is_class_Pointer : Boolean                    := False;
       end record;
 
-
    type View is access all item'Class;
-
 
 
    --  Containers
@@ -43,8 +38,6 @@ is
    subtype Cursor is Vectors.Cursor;
 
 
-
-
    --  Forge
    --
 
@@ -52,19 +45,15 @@ is
                               the_Type : in ada_Type.view;
                               Value    : in unbounded_String := null_unbounded_String) return View;
 
-
-
    --  Attributes
    --
 
    function is_Constant (Self : in Item'Class) return Boolean;
 
 
-
    --  Operations
    --
 
    procedure verify (Self : access Item);
-
 
 end ada_Variable;

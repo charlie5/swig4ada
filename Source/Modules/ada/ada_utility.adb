@@ -1,22 +1,18 @@
 with
      ada.Strings.fixed,
      ada.Characters.handling,
-     ada.text_IO;
---       ada.streams.stream_io;
+     ada.Text_IO;
 
 
 package body ada_Utility
 is
-
    use GMP,
        GMP.discrete,
 
        ada.Strings,
        ada.Strings.fixed,
        ada.Characters.Handling,
-       ada.text_IO;
-
-
+       ada.Text_IO;
 
    -----------
    --  Logging
@@ -24,21 +20,17 @@ is
 
    log_Depth : Natural := 0;
 
-
    procedure indent_Log
    is
    begin
       log_Depth := log_Depth + 1;
    end indent_Log;
 
-
-
    procedure unindent_Log
    is
    begin
       log_Depth := log_Depth - 1;
    end unindent_Log;
-
 
 
    procedure log (the_Message : in String;
@@ -53,7 +45,6 @@ is
    end log;
 
 
-
    procedure log (the_Message : in unbounded_String;   Level : in Verbosity := Debug)
    is
    begin
@@ -61,49 +52,13 @@ is
    end log;
 
 
-
-
    ---------
    --  Other
    ---------
 
---     function portable_new_line_Token return String
---     is
---        the_Token     :          unbounded_String;
---        temp_fileName : constant String          := "portable_new_line_Token.tmp";   -- tbd: delete temporary file when done.
---     begin
---        declare
---           the_File : ada.text_IO.File_type;
---        begin
---           create   (the_File, out_File, temp_fileName);
---           new_Line (the_File);
---           close    (the_File);
---        end;
---
---        declare
---           use ada.streams.stream_io;
---           the_File    : ada.streams.stream_io.File_type;
---           the_Stream  : ada.streams.stream_io.Stream_access;
---        begin
---           open (the_File, in_File, temp_fileName);
---           the_Stream := Stream (the_File);
---
---           while not end_of_File (the_File)
---           loop
---              append (the_Token, Character'Input (the_Stream));
---           end loop;
---
---           close (the_File);
---        end;
---
---        return to_String (the_Token);
---     end portable_new_line_Token;
-
-
-
-   procedure replace_All (Self       : in out ada.strings.unbounded.unbounded_String;
-                          Token      : in String;
-                          with_Token : in String)
+   procedure replace_All (Self       : in out unbounded_String;
+                          Token      : in     String;
+                          with_Token : in     String)
    is
       token_Index : Natural := Index (Self, Token);
    begin
@@ -113,14 +68,14 @@ is
 
       while token_Index /= 0
       loop
-         replace_Slice (Self,   token_Index,  token_Index + Token'Length - 1,  with_Token);
-         token_Index := Index (Self,  Token,  from => token_Index + with_Token'Length);
+         replace_Slice (Self,  token_Index,  token_Index + Token'Length - 1,  with_Token);
+         token_Index := Index (Self, Token, from => token_Index + with_Token'Length);
       end loop;
    end replace_All;
 
 
 
-   function class_Prefix_in (Self : in     unbounded_String) return unbounded_String
+   function class_Prefix_in (Self : in unbounded_String) return unbounded_String
    is
       the_Index : constant Natural := Index (Self, "::", backward);
    begin
@@ -134,7 +89,7 @@ is
 
 
 
-   function identifier_Suffix_in (Self : in     unbounded_String) return unbounded_String
+   function identifier_Suffix_in (Self : in unbounded_String) return unbounded_String
    is
       the_Index : constant Natural := Index (Self, "::", backward);
    begin
@@ -142,10 +97,9 @@ is
       then
          return Self;
       else
-         return unbounded_Slice (Self,   the_Index + 2,  Length (Self));
+         return unbounded_Slice (Self,  the_Index + 2,  Length (Self));
       end if;
    end identifier_Suffix_in;
-
 
 
 
@@ -153,8 +107,6 @@ is
    is
       first_dot_Index : constant Natural := Index (Self, ".");
    begin
-      --  log (Self &  "    start: " & integer'image (self'First) & "    Last: " & integer'image (Index (Self, ".", backward) - 1));
-
       if first_dot_Index = 0
       then
          return Self;
@@ -169,8 +121,6 @@ is
    is
       first_dot_Index : constant Natural := Index (Self, ".");
    begin
-      --  log (Self &  "    start: " & integer'image (self'First) & "    Last: " & integer'image (Index (Self, ".", backward) - 1));
-
       if first_dot_Index = 0
       then
          return Self;
@@ -185,15 +135,12 @@ is
    is
       last_dot_Index : constant Natural := Index (Self, ".", backward);
    begin
-      --  log (Self &  "    start: " & integer'image (self'First) & "    Last: " & integer'image (Index (Self, ".", backward) - 1));
-
       if last_dot_Index = 0
       then
          return "";
       else
          return Self (self'First .. last_dot_Index - 1);
       end if;
-
    end Text_before_last_dot;
 
 
@@ -221,7 +168,7 @@ is
          return;
       end if;
 
-      replace_Slice (Self,   1,  namespace_Index + 1,  "");
+      replace_Slice (Self, 1, namespace_Index + 1, "");
    end strip_Namespaces;
 
 
@@ -229,7 +176,7 @@ is
    procedure strip_const_Qualifiers (Self : in out unbounded_String)
    is
    begin
-      replace_All (Self, "q(const).", "");
+      replace_All (Self,  "q(const).",  "");
    end strip_const_Qualifiers;
 
 
@@ -240,8 +187,6 @@ is
       is_Negative :          Boolean := False;
       hex_Index   : constant Natural := Index (Self, "0x");
    begin
---        log ("to_Int - Self: '" & Self & "'");
-
       if hex_Index = 0
       then
          for Each in self'Range
@@ -258,29 +203,22 @@ is
             end case;
          end loop;
 
---           log ("result: " & Image (result));
-
       else -- is a hex number
-         --  for Each in self'First + 2 .. self'Last loop
          for Each in hex_Index + 2 .. self'Last
          loop
---              log ("hex ~ result: " & huge_Integer'image (to_huge_Integer (result)) & "    curr Char: '" & Self (Each) & "'");
-
             case Self (Each)
             is
                when '-'        => is_Negative := True;
-               when ' '        => null;                   -- ignore spaces
+               when ' '        => null;                   -- Ignore spaces.
                when '0' .. '9' => Result := Result * to_Integer (16) + to_Integer (Long_Long_Integer'Value (Self (Each .. Each)));
                when 'A' .. 'F' => Result := Result * to_Integer (16) + to_Integer (Character'Pos (Self (Each)) - Character'Pos ('A') + 10);
                when 'a' .. 'f' => Result := Result * to_Integer (16) + to_Integer (Character'Pos (Self (Each)) - Character'Pos ('a') + 10);
                when ')'        => exit;
                when others     => log ("bad hex character: '" & Self (Each) & "'   '" & Self & "'");
-                  raise Constraint_Error;
+                                  raise Constraint_Error;
             end case;
          end loop;
---           log ("hex ~ result: " & huge_Integer'image (to_huge_Integer (result)));
       end if;
-
 
       if is_Negative
       then   return -Result;
@@ -290,7 +228,7 @@ is
 
 
 
-   function to_Int (Self : in unbounded_String)      return GMP.discrete.Integer
+   function to_Int (Self : in unbounded_String) return GMP.discrete.Integer
    is
    begin
       return to_Int (to_String (Self));
@@ -343,7 +281,6 @@ is
    is
       lowcase_Word : constant String := to_Lower (to_String (Self));
    begin
-
       return    lowcase_Word = "abort"
         or else lowcase_Word = "abs"
         or else lowcase_Word = "abstract"
@@ -420,16 +357,11 @@ is
 
 
 
-
    function to_ada_Identifier (Self : in unbounded_String) return unbounded_String
    is
       the_Identifier : unbounded_String := Self;
    begin
---      log ("'to_ada_Identifier' ~   the_Identifier: '" & the_Identifier & "'");
-
       strip_Namespaces (the_Identifier);
-
---      log ("'to_ada_Identifier' ~   the_Identifier (rid namespace): '" & the_Identifier & "'");
 
       if is_reserved_Word (the_Identifier)
       then
@@ -441,8 +373,8 @@ is
       begin
          loop
             Start := Index (the_Identifier,  "__");
-            exit when Start = 0;                                                 -- loop repeatedly til there are no more '__' are left
-            replace_Slice (the_Identifier,  Start,  Start + 1,   "_a_");
+            exit when Start = 0;                                          -- Loop repeatedly til there are no more '__' are left.
+            replace_Slice (the_Identifier,  Start,  Start + 1,  "_a_");
          end loop;
       end;
 
@@ -476,6 +408,5 @@ is
 
       return the_Identifier;
    end to_ada_Identifier;
-
 
 end ada_Utility;

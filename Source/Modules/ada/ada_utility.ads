@@ -11,14 +11,11 @@ package ada_Utility
 is
    use ada.Strings.unbounded;
 
-
    function "+" (From : in unbounded_String) return String
      renames To_String;
 
    function "+" (From : in String) return unbounded_String
      renames To_Unbounded_String;
-
-
 
    --  Logging
    --
@@ -29,20 +26,17 @@ is
    procedure   indent_Log;
    procedure unindent_Log;
 
---     procedure log (the_Message : in String;             Level : in Verbosity := Debug);
    procedure log (the_Message : in unbounded_String;   Level : in Verbosity := Debug);
-
 
 
    --  Other
    --
---   function portable_new_line_Token return String;
    new_line_Token : constant String := (1 => ada.Characters.Latin_1.LF);
 
 
    procedure replace_All (Self       : in out ada.strings.unbounded.unbounded_String;
-                          Token      : in String;
-                          with_Token : in String);
+                          Token      : in     String;
+                          with_Token : in     String);
 
 
    function Text_before_last_dot    (Self : in String) return String;
@@ -56,9 +50,8 @@ is
    procedure strip_const_Qualifiers (Self : in out unbounded_String);
 
 
-   function class_Prefix_in         (Self : in     unbounded_String) return unbounded_String;
-   function identifier_Suffix_in    (Self : in     unbounded_String) return unbounded_String;
-
+   function class_Prefix_in         (Self : in unbounded_String) return unbounded_String;
+   function identifier_Suffix_in    (Self : in unbounded_String) return unbounded_String;
 
 
    function to_Int   (Self : in String)           return GMP.discrete.Integer;
@@ -71,11 +64,9 @@ is
    --  Integer'Image without leading spaces.
 
 
-
    function is_an_ada_Standard_Package_Identifier (Self : in unbounded_String) return Boolean;
    function is_reserved_Word                      (Self : in unbounded_String) return Boolean;
 
    function to_ada_Identifier                     (Self : in unbounded_String) return unbounded_String;
-
 
 end ada_Utility;
