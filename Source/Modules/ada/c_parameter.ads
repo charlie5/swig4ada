@@ -1,7 +1,8 @@
-with c_Type;
-with ada.Strings.unbounded;
-with ada.containers.Vectors;
-with c_Declarable;
+with
+     c_Declarable,
+     c_Type,
+     ada.Strings.unbounded,
+     ada.Containers.Vectors;
 
 
 package c_Parameter
@@ -12,19 +13,16 @@ is
 
    type Mode_kind is (in_mode, in_out_mode, access_mode, out_mode);
 
-
    type Item is tagged
       record
          Name             : unbounded_String;
          my_Type          : c_Type.view;
 
-         --  old
          is_Pointer       : Boolean         := False;
          link_symbol_Code : unbounded_String;
       end record;
 
    type View is access all Item'Class;
-
 
 
    -- Containers
@@ -36,17 +34,14 @@ is
    subtype Cursor is Vectors.Cursor;
 
 
-
    --  Forge
    --
 
    function construct       (the_Name : in unbounded_String;
-                             the_Type : in c_Type.view) return item'Class;
+                             the_Type : in c_Type.view) return Item'Class;
 
    function new_c_Parameter (the_Name : in unbounded_String;
                              the_Type : in c_Type.view) return View;
-
-
 
 
    --  Attributes
@@ -60,6 +55,4 @@ is
 
    function directly_depended_on_Declarations
                                      (Self : in c_Parameter.Vector) return c_Declarable.views;
-
-
 end c_Parameter;

@@ -1,16 +1,10 @@
-with
-     ada.Text_IO;
-
 package body c_Parameter
 is
-   use ada.Text_IO;
-
-
    --  Forge
    --
 
    function construct (the_Name : in unbounded_String;
-                       the_Type : in c_Type.view) return item'Class
+                       the_Type : in c_Type.view) return Item'Class
    is
    begin
       return Item' (name             => the_Name,
@@ -18,10 +12,6 @@ is
 
                     is_Pointer       => False,
                     link_symbol_Code => <>);
-
---        return Item'(a_name_type_Pair.item (a_name_type_Pair.construct (the_Name, the_Type)) with
---                     is_Pointer       => False,
---                     link_symbol_Code => null_unbounded_String);
    end construct;
 
 
@@ -34,8 +24,6 @@ is
    end new_c_Parameter;
 
 
-
-
    --  Attributes
    --
 
@@ -46,9 +34,7 @@ is
    begin
       for Each in 1 .. Natural (Length (Self))
       loop
---           the_Types (Each) := Element (Self,  Each).my_Type; -- .context_required_Type;
          the_Types (Each) := Element (Self,  Each).my_Type.resolved_Type;
-         --  the_Types (Each) := Element (Self,  Each).my_Type;
       end loop;
 
       return the_Types;
@@ -56,12 +42,11 @@ is
 
 
 
-
    function depended_on_Declarations (Self : in c_Parameter.Vector) return c_Declarable.views
    is
       use Vectors;
       the_Declarations : c_Declarable.views (1 .. 500);
-      Count            : Natural                      := 0;
+      Count            : Natural := 0;
    begin
       for Each in 1 .. Natural (Length (Self))
       loop
@@ -78,15 +63,14 @@ is
 
 
 
-
    function depends_on (Self : in c_Parameter.Vector;   the_Declarable : in c_Declarable.view) return Boolean
    is
       use Vectors;
    begin
       for Each in 1 .. Natural (Length (Self))
       loop
-         if        Element (Self,  Each).my_Type.all'Access = the_Declarable
-           or else Element (Self,  Each).my_Type.depends_on (the_Declarable)
+         if        Element (Self, Each).my_Type.all'Access = the_Declarable
+           or else Element (Self, Each).my_Type.depends_on (the_Declarable)
          then
             return True;
          end if;
@@ -119,16 +103,12 @@ is
       use Vectors;
       the_Declarations : c_Declarable.views (1 .. Natural (Length (Self)));
    begin
-      put_Line ("c_parameter.directly_depended_on_Declarations: KKKKKKKKK");
-
       for Each in the_Declarations'Range
       loop
          the_Declarations (Each) := Element (Self,  Each).my_Type.all'Access;
-         put_Line ("c_parameter.directly_depended_on_Declarations:  the_Declarations (Each): '" & to_String (the_Declarations (Each).Name) & "'");
       end loop;
 
       return the_Declarations;
    end directly_depended_on_Declarations;
-
 
 end c_Parameter;
