@@ -1,25 +1,19 @@
 with
      ada_Package,
-     ada_type.elementary.an_access,
+     ada_Type.elementary.an_Access,
      ada_Utility;
 
 
 package body ada_Subprogram
 is
    use ada_Type,
-       ada_parameter.Vectors,
+       ada_Parameter.Vectors,
        ada_Package,
        ada_Utility;
 
-
-
    --  Globals
    --
-
    NL : constant String := new_line_Token;
-
-
-
 
 
    --  Forge
@@ -39,23 +33,20 @@ is
                    is_Overriding      => False,
                    is_to_view_Conversion    => False,
                    is_to_pointer_Conversion => False,
-                   returns_an_Access        => False,
-                   constructor_Symbol       => null_unbounded_String,
-                   access_mode              => Unknown,
-                   link_symbol              => <>
-                  );
+                   returns_an_Access  => False,
+                   constructor_Symbol => null_unbounded_String,
+                   access_mode        => Unknown,
+                   link_symbol        => <>);
    end construct;
 
 
 
-   function new_ada_Subprogram (the_Name  : in unbounded_String;
-                                 return_Type  : in ada_Type.view) return View
+   function new_ada_Subprogram (the_Name    : in unbounded_String;
+                                return_Type : in ada_Type.view) return View
    is
    begin
       return new Item'(Item (construct (the_Name, return_Type)));
    end new_ada_Subprogram;
-
-
 
 
    --  Attributes
@@ -92,8 +83,6 @@ is
 
 
 
-
-
    function context_required_Types (Self : access Item) return ada_Type.views
    is
       use ada_Parameter;
@@ -109,14 +98,11 @@ is
 
 
 
-
-   function depends_on             (Self : access Item;   a_Type      : in     ada_Type.view;
-                                                          Depth       : in     Natural) return Boolean
+   function depends_on  (Self : access Item;   a_Type : in ada_Type.view;
+                                               Depth  : in Natural) return Boolean
    is
       use ada_Parameter;
    begin
---        log ("ada_subprogram.depends_on ~ Self.Name: '" & Self.name & "'     a_Type.Name: '" & a_Type.Name & "'");
-
       if Self.is_Function
       then
          if        Self.return_Type.all'Access = a_Type
@@ -131,14 +117,11 @@ is
 
 
 
-
-   function depends_directly_on (Self : access Item;   a_Type      : in     ada_Type.view;
-                                                       Depth       : in     Natural)       return Boolean
+   function depends_directly_on (Self : access Item;   a_Type : in ada_Type.view;
+                                                       Depth  : in Natural) return Boolean
    is
       use ada_Parameter;
    begin
---        log ("ada_subprogram.depends_directly_on ~ Self.Name: '" & Self.name & "'     a_Type.Name: '" & a_Type.Name & "'");
-
       if Self.is_Function
       then
          if Self.return_Type.all'Access = a_Type then
@@ -151,13 +134,11 @@ is
 
 
 
-   function depends_on (Self : access Item;   a_Package : access ada_Package.item'class;
+   function depends_on (Self : access Item;   a_Package : access ada_Package.item'Class;
                                               Depth     : in     Natural) return Boolean
    is
       use ada_Parameter;
    begin
---        log ("ada_subprogram.depends_on ~ Self.Name: '" & Self.name & "'     a_Type.Name: '" & a_Type.Name & "'");
-
       if Self.is_Function
       then
          if        Self.return_Type.declaration_Package = a_Package
@@ -190,14 +171,12 @@ is
 
 
    function pragma_import_Source (Self                 : access Item;
-                                  declaration_Package  : access ada_Package.item'class;
+                                  declaration_Package  : access ada_Package.item'Class;
                                   unique_function_Name : in     unbounded_String;
-                                  in_cpp_Mode          : in     Boolean)         return unbounded_String
+                                  in_cpp_Mode          : in     Boolean) return unbounded_String
    is
-      use ada.Containers;
       the_Source  : unbounded_String;
       link_Symbol : unbounded_String;
-
    begin
       if Self.is_Abstract
       then
@@ -208,8 +187,7 @@ is
       then
          link_Symbol := Self.member_function_link_Symbol_for (in_cpp_Mode);
 
-         if --   Length (Self.Parameters) = 0 and    -- Non-default constructors (ie those with parameters) are not yet implemented in gnat.
-            declaration_Package.models_a_virtual_cpp_Class
+         if declaration_Package.models_a_virtual_cpp_Class
          then
             append (the_Source,  NL & NL & "   pragma cpp_Constructor (" & unique_function_Name &  ", """ & link_Symbol &  """);");
          else
@@ -220,7 +198,6 @@ is
       then
          link_Symbol := "_ZN" & Image (Length (declaration_Package.Name)) & declaration_Package.Name & "D1Ev";
 
---         append (the_Source,   NL & "   pragma cpp_Destructor (Entity => " & unique_function_Name & ");" & NL);
          append (the_Source,   NL & "   pragma Import (CPP, " & unique_function_Name & ", """ & link_Symbol & """);");
 
       else
@@ -263,10 +240,8 @@ is
                                            unique_function_Name : in     unbounded_String;
                                            in_cpp_Mode          : in     Boolean)         return unbounded_String
    is
-      use ada.Containers;
       the_Source  : unbounded_String;
       link_Symbol : unbounded_String;
-
    begin
       --  'C' link name.
       --
@@ -283,10 +258,8 @@ is
       end if;
 
       link_Symbol := Self.member_function_link_Symbol_for (in_cpp_Mode);
---        link_Symbol := "_ZN" & Image (Length (declaration_Package.Name)) & declaration_Package.Name & "C1Ev";
 
-      if --   Length (Self.Parameters) = 0 and    -- ToDo this is no longer the case -> "Non-default constructors (ie those with parameters) are not yet implemented in gnat."
-         declaration_Package.models_a_virtual_cpp_Class
+      if declaration_Package.models_a_virtual_cpp_Class
       then
          append (the_Source,  NL & NL & "   pragma cpp_Constructor (" & unique_function_Name &  ", """ & link_Symbol &  """);");
       else
@@ -314,7 +287,6 @@ is
       if Self.is_Constructor
       then
          return Self.constructor_Symbol;
---           return Self.link_Symbol;
 
       elsif Self.link_Symbol /= ""
       then
@@ -324,8 +296,6 @@ is
          return to_unbounded_String ("_Z(to_be_determined)");
       end if;
    end member_function_link_Symbol_for;
-
-
 
 
    --  Operations

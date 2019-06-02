@@ -8,30 +8,20 @@ is
                        the_Type : in ada_Type.view) return item'Class
    is
    begin
-      return Item'(name      => the_Name,
-                   my_type   => the_Type,
-
+      return Item'(Name             => the_Name,
+                   my_Type          => the_Type,
                    is_Pointer       => False,
-                   link_symbol_Code => <>
-                  );
-
---        return Item'(a_name_type_Pair.item (a_name_type_Pair.construct (the_Name, the_Type)) with
---                     is_Pointer       => False,
---                     link_symbol_Code => null_unbounded_String);
+                   link_symbol_Code => <>);
    end construct;
 
 
 
    function new_ada_Parameter (the_Name : in unbounded_String;
-                                the_Type : in ada_Type.view) return View
+                               the_Type : in ada_Type.view) return View
    is
    begin
       return new Item'(Item (construct (the_Name, the_Type)));
    end new_ada_Parameter;
-
-
-
-
 
 
    --  Attributes
@@ -44,7 +34,7 @@ is
    begin
       for Each in 1 .. Natural (Length (Self))
       loop
-         the_Types (Each) := Element (Self,  Each).my_Type;   -- .resolved_Type;
+         the_Types (Each) := Element (Self, Each).my_Type;
       end loop;
 
       return the_Types;
@@ -59,7 +49,7 @@ is
    begin
       for Each in 1 .. Natural (Length (Self))
       loop
-         the_Types (Each) := Element (Self,  Each).my_Type;  -- .resolved_Type;
+         the_Types (Each) := Element (Self, Each).my_Type;
       end loop;
 
       return the_Types;
@@ -68,14 +58,14 @@ is
 
 
    function depends_on (Self : in ada_Parameter.Vector;   the_Type  : in     ada_Type.view;
-                                                          Depth     : in     Natural)          return Boolean
+                                                          Depth     : in     Natural) return Boolean
    is
       use Vectors;
    begin
       for Each in 1 .. Natural (Length (Self))
       loop
-         if        Element (Self,  Each).my_Type.all'Access = the_Type
-           or else Element (Self,  Each).my_Type.depends_on (the_Type, Depth + 1)
+         if        Element (Self, Each).my_Type.all'Access = the_Type
+           or else Element (Self, Each).my_Type.depends_on (the_Type, Depth + 1)
          then
             return True;
          end if;
@@ -93,8 +83,8 @@ is
    begin
       for Each in 1 .. Natural (Length (Self))
       loop
-         if        Element (Self,  Each).my_Type.all'Access = the_Type
-           or else Element (Self,  Each).my_Type.depends_directly_on (the_Type, Depth + 1)
+         if        Element (Self, Each).my_Type.all'Access = the_Type
+           or else Element (Self, Each).my_Type.depends_directly_on (the_Type, Depth + 1)
          then
             return True;
          end if;
@@ -106,14 +96,14 @@ is
 
 
    function depends_on (Self : in ada_Parameter.Vector;   a_Package : access ada_Package.item'Class;
-                                                          Depth     : in     Natural)                return Boolean
+                                                          Depth     : in     Natural) return Boolean
    is
       use Vectors;
    begin
       for Each in 1 .. Natural (Length (Self))
       loop
-         if        Element (Self,  Each).my_Type.resolved_Type.declaration_Package = a_Package
-           or else Element (Self,  Each).my_Type.resolved_Type.depends_on (a_Package, Depth + 1)
+         if        Element (Self, Each).my_Type.resolved_Type.declaration_Package = a_Package
+           or else Element (Self, Each).my_Type.resolved_Type.depends_on (a_Package, Depth + 1)
          then
             return True;
          end if;
@@ -121,6 +111,5 @@ is
 
       return False;
    end depends_on;
-
 
 end ada_Parameter;

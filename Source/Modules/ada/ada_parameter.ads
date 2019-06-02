@@ -21,18 +21,14 @@ is
 
    type Item is tagged
       record
-         Name    : unbounded_String;
-         my_Type : ada_Type.view;
-
-         --  old
+         Name             : unbounded_String;
+         my_Type          : ada_Type.view;
 
          is_Pointer       : Boolean         := False;
          link_symbol_Code : unbounded_String;
-
       end record;
 
    type View is access all Item'Class;
-
 
 
    --  Containers
@@ -41,8 +37,6 @@ is
 
    subtype Vector is Vectors.Vector;
    subtype Cursor is Vectors.Cursor;
-
-
 
 
    --  Forge
@@ -56,8 +50,6 @@ is
                                the_Type : in ada_Type.view) return View;
 
 
-
-
    --  Attributes
    --
 
@@ -65,11 +57,9 @@ is
    function context_required_Types (Self : in ada_Parameter.Vector) return ada_Type.views;
 
    function depends_on             (Self : in ada_Parameter.Vector;   the_Type  : in     ada_Type.view;
-                                                                      Depth     : in     Natural)          return Boolean;
+                                                                      Depth     : in     Natural)                return Boolean;
    function depends_directly_on    (Self : in ada_Parameter.Vector;   the_Type  : in     ada_Type.view;
                                                                       Depth     : in     Natural)                return Boolean;
    function depends_on             (Self : in ada_Parameter.Vector;   a_Package : access ada_Package.item'Class;
                                                                       Depth     : in     Natural)                return Boolean;
-
-
 end ada_Parameter;
