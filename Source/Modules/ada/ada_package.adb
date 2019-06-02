@@ -1,20 +1,18 @@
 with
      ada_Parameter,
      ada_Utility,
-     ada.Characters.Handling;
+     ada.Characters.handling;
 
 
 package body ada_Package
 is
 
-   use ada_subprogram.Vectors,
-       ada_variable.Vectors,
+   use ada_Subprogram.Vectors,
+       ada_Variable.Vectors,
        ada_Type,
        ada_Type.composite.a_Record,
        ada_Utility,
-       ada.Characters.Handling;
-
-
+       ada.Characters.handling;
 
    --  Forge
    --
@@ -24,9 +22,9 @@ is
                              is_Core : in Boolean := False) return View
    is
    begin
-      return new Item'(a_Kind                => Binding,
-                       a_Parent              => Parent,
-                       a_Name                => to_unbounded_String (Name),
+      return new Item'(a_Kind   => Binding,
+                       a_Parent => Parent,
+                       a_Name   => to_unbounded_String (Name),
 
                        a_is_Module           => False,
                        a_is_Import           => False,
@@ -41,7 +39,6 @@ is
                        a_Types          => ada_type.vectors.empty_Vector,
                        a_cpp_class_Type => null);
    end new_ada_Package;
-
 
 
    --  Attributes
@@ -72,29 +69,24 @@ is
    function qualified_Name (Self : access Item) return unbounded_String
    is
    begin
---        log ("KKKKKKKKKKKKKKK  qualified_Name: '" & Self.Name & "'     parent: '" & Self.parent.Name & "'");
-
       if Self.Name = "standard"
       then
          return Self.Name;
 
-      elsif Self.parent.Name = "standard"
+      elsif Self.Parent.Name = "standard"
       then
---           log ("KKKKKKKKKKKKKKK  qualified_Name: '" & Self.Name & "'     parent: '" & Self.parent.Name & "'");
-
          if        is_reserved_Word                      (Self.Name)
            or else is_an_ada_Standard_Package_Identifier (Self.Name)
          then
-            return "c_" & Self.Name;     -- prevent clash
+            return "c_" & Self.Name;     -- Prevent clash.
          else
             return Self.Name;
          end if;
 
       else
-         return Self.parent.qualified_Name & "." & Self.Name;
+         return Self.Parent.qualified_Name & "." & Self.Name;
       end if;
    end qualified_Name;
-
 
 
 
@@ -106,14 +98,11 @@ is
 
 
 
-
    function has_Ancestor (Self : access Item;   possible_Ancestor : access ada_Package.item'Class) return Boolean
    is
       the_Parent : ada_Package.view := Self.Parent.all'Access;
    begin
       loop
---           log (the_Parent.qualified_Name & "   " & possible_Ancestor.Name);
-
          if the_Parent = possible_Ancestor then
             return True;
          end if;
@@ -127,9 +116,7 @@ is
 
 
 
-
-
-   function  is_Module (Self : access Item) return Boolean
+   function is_Module (Self : access Item) return Boolean
    is
    begin
       return Self.a_is_Module;
@@ -145,9 +132,7 @@ is
 
 
 
-
-
-   function  is_Core (Self : access Item) return Boolean
+   function is_Core (Self : access Item) return Boolean
    is
    begin
       return Self.a_is_Core;
@@ -163,7 +148,6 @@ is
 
 
 
-
    procedure is_Unknown (Self : access Item)
    is
    begin
@@ -172,16 +156,11 @@ is
 
 
 
-
-
-
    procedure Name_is (Self : access Item;   Now : in String)
    is
    begin
       Self.a_Name := to_unbounded_String (Now);
    end Name_is;
-
-
 
 
 
@@ -194,9 +173,8 @@ is
          raise Program_Error with "attempt to add new subprogram  '" & (+new_Subprogram.Name) & "' to core package: " & (+Self.qualified_Name);
       end if;
 
-      append (Self.a_Subprograms,  new_Subprogram);
+      append (Self.a_Subprograms, new_Subprogram);
    end add;
-
 
 
 
@@ -209,7 +187,7 @@ is
          raise Program_Error with "attempt to add new variable  '" & (+new_Variable.Name) & "' to core package: " & (+Self.qualified_Name);
       end if;
 
-      append (Self.a_Variables,  new_Variable);
+      append (Self.a_Variables, new_Variable);
    end add;
 
 
@@ -229,7 +207,6 @@ is
 
 
 
-
    procedure rid (Self     : access Item;
                   the_Type : in     ada_Type.view)
    is
@@ -241,7 +218,7 @@ is
 
 
    procedure models_cpp_class_Type (Self      : access Item;
-                                    new_Class : in     ada_Type.composite.a_record.view)   -- ada_Type.view)
+                                    new_Class : in     ada_Type.composite.a_record.view)
    is
    begin
       Self.a_cpp_class_Type := new_Class;
@@ -254,8 +231,6 @@ is
    begin
       return Self.Context'Access;
    end Context;
-
-
 
 
 
@@ -275,7 +250,7 @@ is
 
 
 
-   function Types (Self : access Item)  return ada_type.Vector
+   function Types (Self : access Item) return ada_type.Vector
    is
    begin
       return Self.a_Types;
@@ -283,7 +258,7 @@ is
 
 
 
-   function  is_global_Namespace        (Self : access Item) return Boolean
+   function is_global_Namespace (Self : access Item) return Boolean
    is
    begin
       return Self.a_is_global_Namespace;
@@ -311,7 +286,7 @@ is
 
 
 
-   function models_an_interface_Type   (Self : access Item) return Boolean
+   function models_an_interface_Type  (Self : access Item) return Boolean
    is
    begin
       if Self.a_cpp_class_Type = null then
@@ -323,7 +298,7 @@ is
 
 
 
-   function  cpp_class_Type (Self : access Item) return ada_Type.composite.a_record.view --                                            return ada_Type.view
+   function cpp_class_Type (Self : access Item) return ada_Type.composite.a_record.view
    is
    begin
       if Self.a_cpp_class_Type = null
@@ -343,9 +318,6 @@ is
    end is_global_Namespace;
 
 
-
-
-
    --  Operations
    --
 
@@ -356,10 +328,9 @@ is
       Self.a_Name := to_ada_Identifier (Self.a_Name);
 
       for Each in 1 .. Natural (Length (Self.a_Types))
-      loop      -- Verify contained types.
-         Element (Self.a_Types,  Each).verify;
+      loop -- Verify contained types.
+         Element (Self.a_Types, Each).verify;
       end loop;
-
 
       declare
          Cursor : ada_subprogram.Cursor := First (Self.a_Subprograms);
@@ -370,14 +341,12 @@ is
             next    (Cursor);
          end loop;
       end;
-
    end verify;
 
 
 
-
    function type_name_needs_Standard_prefix (Self     : access Item'class;
-                                             Name     : in     String;                          -- tbd: find better name for this parameter
+                                             Name     : in     String;
                                              the_Type : in     ada_Type.view) return Boolean
    is
       lowcase_Name    : constant String           := to_Lower (Name);
@@ -390,7 +359,6 @@ is
          return True;
       end if;
 
-
       for Each in 1 .. Natural (Length (Self.a_Variables))
       loop
          if to_Lower (to_String (Element (Self.a_Variables, Each).Name))  =  lowcase_Type
@@ -399,22 +367,19 @@ is
          end if;
       end loop;
 
-
       return False;
    end type_name_needs_Standard_prefix;
 
 
 
-
-   function Depends_on (Self : access Item;         Other    : in ada_Package.view;
-                                                    Depth     : in     Natural)  return Boolean
+   function Depends_on (Self : access Item;   Other    : in ada_Package.view;
+                                              Depth    : in     Natural)  return Boolean
    is
    begin
       -- Check subprograms.
       --
       declare
          use ada_Parameter;
---           use ada_Subprogram.Vectors;
          Cursor         : ada_Subprogram.Vectors.Cursor := Self.a_Subprograms.First;
          the_Subprogram : ada_Subprogram.view;
       begin
@@ -443,7 +408,6 @@ is
       -- Check variables.
       --
       declare
---           use ada_Variable.Vectors;
          Cursor       : ada_Variable.Vectors.Cursor := Self.a_Variables.First;
          the_Variable : ada_Variable.view;
       begin
@@ -471,20 +435,14 @@ is
          loop
             the_Type := Element (Cursor);
 
---              log ("Checking if " & the_Type.qualified_Name & "  " & ada.Tags.External_Tag (the_Type.all'Tag) & " depends on " & Other.qualified_Name);
-
             if depends_on (the_Type, Other, Depth + 1)
             then
---                 log (+"TRUE!");
                return True;
             end if;
-
---              log (+"FALSE!");
 
             next (Cursor);
          end loop;
       end;
-
 
       return False;
    end Depends_on;

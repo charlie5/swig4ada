@@ -5,7 +5,7 @@ with
      ada_Subprogram,
      ada_Variable,
 
-     ada.strings.Unbounded,
+     ada.Strings.unbounded,
      ada.containers.Vectors,
      ada.containers.hashed_Sets,
      ada.unchecked_Conversion;
@@ -18,15 +18,12 @@ package ada_Package
 is
    use ada.strings.Unbounded;
 
-
    type Item is tagged private;
    type View is access all Item'class;
 
 
-
-   --  Containers
+   -- Containers
    --
-
 
    --  Vector
 
@@ -34,8 +31,6 @@ is
 
    subtype Vector        is Vectors.Vector;
    subtype vector_Cursor is Vectors.Cursor;
-
-
 
    --  Set
 
@@ -48,15 +43,12 @@ is
    subtype set_Cursor is sets.Cursor;
 
 
-
-
    --  Forge
    --
 
    function new_ada_Package (Name    : in String;
                              Parent  : in View    := null;
                              is_Core : in Boolean := False) return View;
-
 
 
    --  Attributes
@@ -117,16 +109,12 @@ is
                                                                          the_Type : in ada_Type.view) return Boolean;
 
    function Depends_on                      (Self : access Item;         Other    : in ada_Package.view;
-                                                                         Depth     : in     Natural)  return Boolean;
-
-
-
+                                                                         Depth    : in     Natural)  return Boolean;
 
    --  Operations
    --
 
    procedure verify (Self : access Item);
-
 
 
 
