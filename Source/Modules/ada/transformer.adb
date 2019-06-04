@@ -3,7 +3,7 @@ with
      ada_Package,
 
      ada_type.a_subtype,
-     ada_Type.elementary.an_access.to_type.interfaces_c_pointer,
+     ada_Type.elementary.an_Access.to_Type.interfaces_c_pointer,
      ada_Type.elementary.an_access.to_subProgram,
      ada_Type.elementary.scalar.discrete.enumeration,
      ada_Type.composite.a_record,
@@ -30,11 +30,8 @@ is
        doh_Support,
        ada.Strings.unbounded;
 
-
-
    function "+" (Self : in String) return unbounded_String
                  renames to_unbounded_String;
-
 
 
    procedure transform (From                                       : in     c_Module    .item;
@@ -72,7 +69,6 @@ is
 
             else
                return False;
-               return Left.Name < Right.Name;
             end if;
          end "<";
          pragma Unreferenced ("<");
@@ -94,7 +90,7 @@ is
                is
                   use ada_type.composite.an_array;
 
-                  the_element_Type     : constant ada_Type.view                   := the_base_ada_Type;
+                  the_element_Type     : constant ada_Type.view := the_base_ada_Type;
                   new_ada_Array        :          ada_Type.composite.an_array.view;
                begin
                   new_ada_Array := ada_Type.composite.an_array.new_Item (the_element_Type.declaration_Package,
@@ -104,11 +100,13 @@ is
 
                   new_ada_Array.declaration_Package.add (new_ada_Array.all'Access);
 
-                  name_Map_of_ada_type  .insert (new_ada_Array.qualified_Name,                              new_ada_Array.all'Access);
+                  name_Map_of_ada_type.insert (new_ada_Array.qualified_Name,
+                                               new_ada_Array.all'Access);
 
                   log ("the_base_c_Type.Name: " & the_base_c_Type.Name & "[]");
 
-                  c_type_Map_of_ada_type.insert (name_Map_of_c_type.Element (the_base_c_Type.Name & "[]"),  new_ada_Array.all'Access);     -- Register the new pointer.
+                  c_type_Map_of_ada_type.insert (name_Map_of_c_type.Element (the_base_c_Type.Name & "[]"),   -- Register the new pointer.
+                                                 new_ada_Array.all'Access);
                end add_array_Type_for;
 
 
@@ -136,10 +134,10 @@ is
                   end declaration_Package;
 
                   the_Declaration_Package       : constant ada_Package.view := declaration_Package;
-                  accessed_Type_is_main_type    : constant Boolean          :=     the_accessed_Type.Name = "Item";    -- is the main type of the package
+                  accessed_Type_is_main_type    : constant Boolean          :=     the_accessed_Type.Name = "Item";    -- Is the main type of the package.
                   the_type_Name                 :          unbounded_String;
                begin
-                  --  add type for instantiated pointer type from 'interfaces.c.pointers'
+                  --  Add type for instantiated pointer type from 'interfaces.C.pointers'.
                   --
                   if accessed_Type_is_main_type
                   then
@@ -152,12 +150,12 @@ is
                      end if;
                   end if;
 
-                  new_ada_Type := ada_Type.elementary.an_Access.to_Type.interfaces_c_Pointer.new_Item (the_Declaration_Package,   -- the_accessed_Type.declaration_Package,
+                  new_ada_Type := ada_Type.elementary.an_Access.to_Type.interfaces_c_Pointer.new_Item (the_Declaration_Package,
                                                                                                        the_type_Name,
                                                                                                        accessed_type => the_accessed_Type).all'Access;
                   new_ada_Type.declaration_Package.add (new_ada_Type);
 
-                  name_Map_of_ada_type                      .insert (new_ada_Type.qualified_Name,  new_ada_Type);
+                  name_Map_of_ada_type                      .insert (new_ada_Type.qualified_Name, new_ada_Type);
                   incomplete_access_to_Type_i_c_pointer_List.append (new_ada_Type);
 
                   --  Add 'subtype renaming' for the above instantiated pointer.
@@ -173,7 +171,7 @@ is
                      end if;
                   end if;
 
-                  new_ada_Type := ada_type.a_subType.new_subType (the_Declaration_Package,   -- The_accessed_Type.declaration_Package.
+                  new_ada_Type := ada_type.a_subType.new_subType (the_Declaration_Package,
                                                                   the_type_Name,
                                                                   base_type => new_ada_Type).all'Access;
                   new_ada_Type.declaration_Package.add (new_ada_Type);
@@ -301,10 +299,10 @@ is
                                                                                                     the_type_Name,
                                                                                                     accessed_subProgram => the_ada_subProgram).all'Access;
 
-                              new_ada_Type.declaration_Package.add (new_ada_Type);   -- tbd: generalise this (ie move it out)
+                              new_ada_Type.declaration_Package.add (new_ada_Type);   -- todo: Generalise this (ie move it out).
 
-                              name_Map_of_ada_type  .insert (the_type_Name,  new_ada_Type);
-                              c_type_Map_of_ada_type.insert (the_c_Type,     new_ada_Type);
+                              name_Map_of_ada_type  .insert (the_type_Name, new_ada_Type);
+                              c_type_Map_of_ada_type.insert (the_c_Type,    new_ada_Type);
                            end;
 
                         else
@@ -321,8 +319,8 @@ is
 
                         declare
                            use DOHs.Pointers;
-                           the_ada_subProgram : constant ada_subProgram.view := Self.       to_ada_subProgram (the_c_type.accessed_Function.all'Access);
-                           the_type_Name      : constant unbounded_String    := ada_Utility.to_ada_Identifier (Self.to_descriptor (DOH_Pointer (to_Doh (to_String (the_c_type.Name)))));
+                           the_ada_subProgram : constant ada_subProgram.view := Self.to_ada_subProgram (the_c_type.accessed_Function.all'Access);
+                           the_type_Name      : constant unbounded_String    := to_ada_Identifier (Self.to_descriptor (DOH_Pointer (to_Doh (+the_c_type.Name))));
                            new_ada_Type       :          ada_Type.view;
                         begin
                            the_ada_subProgram.Parameters := Self.to_ada_Parameters (the_c_type.accessed_Function.Parameters);
@@ -330,15 +328,14 @@ is
                            if the_ada_subProgram.depends_on_any_pointer
                            then
                               declare
-                                 new_ada_Package  : constant ada_package.view := ada_Package.new_ada_Package (name   => to_String (ada_Utility.to_ada_Identifier (the_c_Type.Name)),
+                                 new_ada_Package  : constant ada_package.view := ada_Package.new_ada_Package (name   => to_String (to_ada_Identifier (the_c_Type.Name)),
                                                                                                               parent => Result.Package_top);
                               begin
                                  new_ada_Type := ada_Type.elementary.an_access.to_subProgram.new_Item (new_ada_Package,
-                                                                                                       +"Item",  -- the_type_Name,
+                                                                                                       +"Item",
                                                                                                        accessed_subProgram => the_ada_subProgram).all'Access;
                                  Result.new_Packages.append (new_ada_Package);
                               end;
-
                            else
                               new_ada_Type := ada_Type.elementary.an_access.to_subProgram.new_Item (Result.Package_top,
                                                                                                     the_type_Name,
@@ -347,7 +344,7 @@ is
 
                            new_ada_Type.declaration_Package.add (new_ada_Type);
 
-                           name_Map_of_ada_type                .insert  (the_type_Name,  new_ada_Type);
+                           name_Map_of_ada_type                .insert  (the_type_Name, new_ada_Type);
                            new_ada_subPrograms                 .append  (the_ada_subProgram);
                            the_ada_subprogram_Map_of_c_function.include (the_ada_subProgram, the_c_type.accessed_Function.all'Access);
 
@@ -364,7 +361,7 @@ is
                         begin
                            the_ada_subProgram.Parameters := Self.to_ada_Parameters (the_c_type.typed_Function.Parameters);
 
-                           c_type_Map_of_ada_subprogram        .insert  (the_c_Type,  the_ada_subProgram);
+                           c_type_Map_of_ada_subprogram        .insert  (the_c_Type, the_ada_subProgram);
                            new_ada_subPrograms                 .append  (the_ada_subProgram);
                            the_ada_subprogram_Map_of_c_function.include (the_ada_subProgram, the_c_type.typed_Function.all'Access);
                         end;
@@ -376,10 +373,14 @@ is
 
                         declare
                            use ada_Type.composite.a_record;
-                           new_ada_Package  : constant ada_package.view                 := ada_Package.new_ada_Package (name   => to_String (ada_Utility.to_ada_Identifier (the_c_Type.Name)),
-                                                                                                                        parent => Result.Package_top);
-                           new_ada_Record   : constant ada_Type.composite.a_record.view := ada_Type.composite.a_record.new_Item (new_ada_Package,
-                                                                                                                                 +"Item");
+
+                           new_ada_Package  : constant ada_package.view
+                             := ada_Package.new_ada_Package (name   => to_String (to_ada_Identifier (the_c_Type.Name)),
+                                                             parent => Result.Package_top);
+
+                           new_ada_Record   : constant ada_Type.composite.a_record.view
+                             := ada_Type.composite.a_record.new_Item (new_ada_Package,
+                                                                      +"Item");
                         begin
                            if the_c_Type.is_Union then
                               new_ada_Record.is_Union;
@@ -409,8 +410,8 @@ is
                              := c_namespace_Map_of_ada_Package.Element (the_c_Type.Namespace);
 
                            new_ada_Enumeration     : constant ada_Type.elementary.scalar.discrete.enumeration.view
-                             := ada_Type.elementary.scalar.discrete.enumeration.new_Item (the_declaration_Package, -- From.Package_top,
-                                                                                          ada_Utility.to_ada_Identifier (the_c_Type.Name));
+                             := ada_Type.elementary.scalar.discrete.enumeration.new_Item (the_declaration_Package,
+                                                                                          to_ada_Identifier (the_c_Type.Name));
 
                            the_c_Literals          : constant c_type.enum_literal_vectors.Vector := the_c_Type.Literals;
                            Cursor                  :          c_type.enum_literal_Vectors.Cursor := the_c_Literals.First;
@@ -446,7 +447,7 @@ is
                                           the_declaration_Package.add (the_ada_Variable);
                                        end;
 
-                                    else   -- Add the literal to the enumeration.
+                                    else -- Add the literal to the enumeration.
                                        new_ada_Enumeration.add_Literal (name  => the_literal_Name,
                                                                         value => the_Literal.Value);
                                        the_literal_value_Map_of_literal_Name.insert (the_Literal.Value,
@@ -458,7 +459,7 @@ is
                               end loop;
                            end;
 
-                           new_ada_Enumeration.declaration_Package.add    (new_ada_Enumeration.all'Access);
+                           new_ada_Enumeration.declaration_Package.add    (new_ada_Enumeration            .all'Access);
                            c_type_Map_of_ada_type                 .insert (the_c_Type, new_ada_Enumeration.all'Access);
                         end;
 
@@ -481,12 +482,12 @@ is
 
                         else
                            declare
-                              use ada_type.composite.an_array;
+                              use ada_Type.composite.an_array;
 
-                              the_ada_array_Bounds : constant ada_type.composite.an_array.array_dimension_upper_Bounds
+                              the_ada_array_Bounds : constant ada_Type.composite.an_array.array_dimension_upper_Bounds
                                 := ada_type.composite.an_array.array_dimension_upper_Bounds (the_c_Type.array_Dimensions_upper_Bound);
 
-                              the_element_Type     : constant ada_Type.view                   := c_type_Map_of_ada_type.Element (the_c_Type.element_Type);
+                              the_element_Type     : constant ada_Type.view := c_type_Map_of_ada_type.Element (the_c_Type.element_Type);
                               new_ada_Array        :          ada_Type.composite.an_array.view;
 
                            begin
@@ -497,7 +498,7 @@ is
                                  if are_Constrained (the_ada_array_Bounds)
                                  then  -- Place in own package.
                                     declare
-                                       the_new_Package : constant ada_package.view := ada_Package.new_ada_Package (name   => to_String (the_c_Type.Name),
+                                       the_new_Package : constant ada_Package.view := ada_Package.new_ada_Package (name   => to_String (the_c_Type.Name),
                                                                                                                    parent => Result.Package_top);
                                     begin
                                        Result.new_Packages.append (the_new_Package);
@@ -518,12 +519,12 @@ is
                                    or not From.new_c_Declarations.Contains (c_Declarable.view (the_c_Type.element_Type))
                                  then
                                     new_ada_Array := ada_Type.composite.an_array.new_Item (Result.Package_top,
-                                                                                           ada_Utility.to_ada_Identifier (the_c_Type.Name),
+                                                                                           to_ada_Identifier (the_c_Type.Name),
                                                                                            the_array_dimension_upper_Bounds => the_ada_array_Bounds,
                                                                                            element_type                     => the_element_Type);
                                  else
                                     new_ada_Array := ada_Type.composite.an_array.new_Item (the_element_Type.declaration_Package,
-                                                                                           ada_Utility.to_ada_Identifier (the_c_Type.Name),
+                                                                                           to_ada_Identifier (the_c_Type.Name),
                                                                                            the_array_dimension_upper_Bounds => the_ada_array_Bounds,
                                                                                            element_type                     => the_element_Type);
                                  end if;
@@ -531,7 +532,8 @@ is
 
                               new_ada_Array.declaration_Package.add (new_ada_Array.all'Access);
                               begin
-                                 name_Map_of_ada_type  .insert (new_ada_Array.qualified_Name,  new_ada_Array.all'Access);
+                                 name_Map_of_ada_type.insert (new_ada_Array.qualified_Name,
+                                                              new_ada_Array.all'Access);
                               exception
                                  when Constraint_Error =>
                                     log (+"");
@@ -544,7 +546,7 @@ is
 
 
                      when others =>
-                        log ("unhandled c type Kind for : " & the_c_Type.Name & "   " & c_type.a_c_type_Kind'Image (the_c_Type.c_type_Kind));
+                        log ("unhandled c type Kind for : " & the_c_Type.Name & "   " & c_Type.a_c_type_Kind'Image (the_c_Type.c_type_Kind));
                         raise Program_Error;
                   end case;
 
@@ -560,8 +562,8 @@ is
       --
       add_ada_Type_for_each_c_Type_pass_2 :
       declare
-         use c_type.Vectors;
-         Cursor : c_type.Cursor;
+         use c_Type.Vectors;
+         Cursor : c_Type.Cursor;
       begin
          Cursor := From.new_c_Types.First;
 
@@ -570,16 +572,16 @@ is
             declare
                use c_Type, ada_Type, ada_Type.composite.a_record;
 
-               the_c_Type   : constant c_Type.view := Element (Cursor);
+               the_c_Type : constant c_Type.view := Element (Cursor);
             begin
                case the_c_Type.c_type_Kind
                is
-                  when c_type.c_Class =>
+                  when c_Type.c_Class =>
                      declare
                         the_ada_Record : constant ada_Type.composite.a_record.view := ada_Type.composite.a_record.view (c_type_Map_of_ada_type.Element (the_c_Type));
                      begin
                         if the_c_Type.nameSpace.models_a_virtual_cpp_Class
-                        then   -- Is a tagged record in Ada.
+                        then -- Is a tagged record in Ada.
                            add_base_Classes :
                            declare
                               the_c_Bases : constant c_Type.Vector := the_c_Type.base_Classes;
@@ -601,9 +603,8 @@ is
                            begin
                               while has_Element (Cursor)
                               loop
-                                 the_ada_Record.add_Component (ada_Variable.new_ada_Variable (ada_Utility.to_ada_Identifier (Element (Cursor).Name),
-                                                               c_type_Map_of_ada_type.Element (Element (Cursor))));
-
+                                 the_ada_Record.add_Component (ada_Variable.new_ada_Variable (to_ada_Identifier (Element (Cursor).Name),
+                                                                                              c_type_Map_of_ada_type.Element (Element (Cursor))));
                                  next (Cursor);
                               end loop;
                            end transform_base_Classes_to_record_Components;
@@ -654,8 +655,8 @@ is
 
       add_ada_Variable_for_each_c_Variable :
       declare
-         use c_variable.Vectors;
-         Cursor : c_variable.Cursor := From.new_c_Variables.First;
+         use c_Variable.Vectors;
+         Cursor : c_Variable.Cursor := From.new_c_Variables.First;
       begin
          while has_Element (Cursor)
          loop
@@ -665,7 +666,7 @@ is
                the_c_Variable   : constant c_Variable.view := Element (Cursor);
                the_ada_Variable :          ada_Variable.view;
             begin
-               the_ada_Variable := Self.to_ada_Variable (the_c_variable);
+               the_ada_Variable := Self.to_ada_Variable (the_c_Variable);
 
                if the_c_Variable.my_Type.c_type_Kind = C_Class
                then
@@ -682,8 +683,8 @@ is
 
       add_ada_subProgram_for_each_c_Function :
       declare
-         use c_function.Vectors;
-         Cursor : c_function.Cursor := From.new_c_Functions.First;
+         use c_Function.Vectors;
+         Cursor : c_Function.Cursor := From.new_c_Functions.First;
       begin
          while has_Element (Cursor)
          loop
