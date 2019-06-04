@@ -7,8 +7,8 @@ is
                        the_Type : in c_Type.view) return Item'Class
    is
    begin
-      return Item' (name             => the_Name,
-                    my_type          => the_Type,
+      return Item' (name    => the_Name,
+                    my_type => the_Type,
 
                     is_Pointer       => False,
                     link_symbol_Code => <>);
@@ -51,7 +51,7 @@ is
       for Each in 1 .. Natural (Length (Self))
       loop
          declare
-            my_type_Dependencies : constant c_Declarable.views := Element (Self,  Each).my_Type.depended_on_Declarations;
+            my_type_Dependencies : constant c_Declarable.views := Element (Self, Each).my_Type.depended_on_Declarations;
          begin
             the_Declarations (Count + 1 .. Count + my_type_Dependencies'Length) := my_type_Dependencies;
             Count := Count + my_type_Dependencies'Length;
@@ -87,7 +87,7 @@ is
    begin
       for Each in 1 .. Natural (Length (Self))
       loop
-         if Element (Self,  Each).my_Type.all'Access = the_Declarable
+         if Element (Self, Each).my_Type.all'Access = the_Declarable
          then
             return True;
          end if;
@@ -105,7 +105,7 @@ is
    begin
       for Each in the_Declarations'Range
       loop
-         the_Declarations (Each) := Element (Self,  Each).my_Type.all'Access;
+         the_Declarations (Each) := Element (Self, Each).my_Type.all'Access;
       end loop;
 
       return the_Declarations;

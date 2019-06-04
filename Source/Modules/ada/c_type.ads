@@ -27,11 +27,10 @@ is
    type Views is array (Positive range <>) of View;
 
 
-
    --  Containers
    --
 
-   package Vectors is new ada.containers.Vectors (Positive, View);
+   package Vectors is new ada.Containers.Vectors (Positive, View);
 
    subtype Vector is Vectors.Vector;
    subtype Cursor is Vectors.Cursor;
@@ -39,8 +38,7 @@ is
 
    package name_Maps_of_c_type is new ada.Containers.hashed_Maps (unbounded_String,
                                                                   c_Type.view,
-                                                                  ada.strings.Unbounded.Hash, "=");
-
+                                                                  ada.Strings.Unbounded.Hash, "=");
 
    --  Core Types
    --
@@ -60,134 +58,121 @@ is
    type an_import_Convention is (Unknown, import_as_C, import_as_CPP);
 
 
-
    --  Forge
    --
 
-   function new_virtual_class_Pointer       (nameSpace           : access c_nameSpace.item'Class := null;
-                                             Name                : in     unbounded_String       := null_unbounded_String;
-                                             base_Type           : in     c_Type.view) return c_Type.view;
+   function new_virtual_class_Pointer       (nameSpace : access c_nameSpace.item'Class := null;
+                                             Name      : in     unbounded_String       := null_unbounded_String;
+                                             base_Type : in     c_Type.view) return c_Type.view;
 
-   function virtual_class_Pointer_construct (nameSpace           : access c_nameSpace.item'Class := null;
-                                             Name                : in     unbounded_String       := null_unbounded_String;
-                                             base_Type           : in     c_Type.view) return c_Type.item;
+   function virtual_class_Pointer_construct (nameSpace : access c_nameSpace.item'Class := null;
+                                             Name      : in     unbounded_String       := null_unbounded_String;
+                                             base_Type : in     c_Type.view) return c_Type.item;
 
+   function new_Typedef          (nameSpace         : access c_nameSpace.item'Class := null;
+                                  Name              : in     unbounded_String       := null_unbounded_String;
+                                  base_Type         : in     c_Type.view) return c_Type.view;
 
+   function Typedef_construct    (nameSpace         : access c_nameSpace.item'Class := null;
+                                  Name              : in     unbounded_String       := null_unbounded_String;
+                                  base_Type         : in     c_Type.view) return c_Type.item;
 
-   function new_Typedef          (nameSpace           : access c_nameSpace.item'Class := null;
-                                  Name                : in     unbounded_String       := null_unbounded_String;
-                                  base_Type           : in     c_Type.view) return c_Type.view;
-
-   function Typedef_construct    (nameSpace           : access c_nameSpace.item'Class := null;
-                                  Name                : in     unbounded_String       := null_unbounded_String;
-                                  base_Type           : in     c_Type.view) return c_Type.item;
-
-   function new_type_Pointer     (nameSpace           : access c_nameSpace.item'class := null;
-                                  Name                : in     unbounded_String       := null_unbounded_String;
-                                  accessed_Type       : in     c_Type.view) return c_Type.view;
+   function new_type_Pointer     (nameSpace         : access c_nameSpace.item'Class := null;
+                                  Name              : in     unbounded_String       := null_unbounded_String;
+                                  accessed_Type     : in     c_Type.view) return c_Type.view;
 
 
+   function new_function_Pointer (nameSpace         : access c_nameSpace.item'Class := null;
+                                  Name              : in     unbounded_String       := null_unbounded_String;
+                                  accessed_Function : access c_Function.item'Class) return c_Type.view;
 
-   function new_function_Pointer (nameSpace           : access c_nameSpace.item'Class := null;
-                                  Name                : in     unbounded_String       := null_unbounded_String;
-                                  accessed_Function   : access c_Function.item'Class) return c_Type.view;
+   function new_typedef_Function (nameSpace      : access c_nameSpace.item'Class := null;
+                                  Name           : in     unbounded_String       := null_unbounded_String;
+                                  typed_Function : access c_Function.item'Class) return c_Type.view;
 
-   function new_typedef_Function (nameSpace           : access c_nameSpace.item'Class := null;
-                                  Name                : in     unbounded_String       := null_unbounded_String;
-                                  typed_Function      : access c_Function.item'Class) return c_Type.view;
+   function new_array_Type       (nameSpace      : access c_nameSpace.item'class := null;
+                                  Name           : in     unbounded_String       := null_unbounded_String;
+                                  element_Type   : in     c_Type.view) return c_Type.view;
 
-
-
-   function new_array_Type       (nameSpace           : access c_nameSpace.item'class := null;
-                                  Name                : in     unbounded_String       := null_unbounded_String;
-                                  element_Type        : in     c_Type.view) return c_Type.view;
-
-
-
-   function new_standard_c_Type  (nameSpace           : access c_nameSpace.item'Class;              -- tbd: rename to 'standard_c_type' to core_c_type
-                                  Name                : in     unbounded_String) return c_Type.view;
-
+   function new_standard_c_Type  (nameSpace      : access c_nameSpace.item'Class;              -- todo: Rename to 'standard_c_type' to core_c_type.
+                                  Name           : in     unbounded_String) return c_Type.view;
 
    function c_opaque_Struct_construct
-                                 (nameSpace           : access c_nameSpace.item'Class;
-                                  Name                : in     unbounded_String) return c_Type.item;
+                                 (nameSpace      : access c_nameSpace.item'Class;
+                                  Name           : in     unbounded_String) return c_Type.item;
 
-   function new_opaque_Struct    (nameSpace           : access c_nameSpace.item'Class;
-                                  Name                : in     unbounded_String) return c_Type.view;
-
+   function new_opaque_Struct    (nameSpace      : access c_nameSpace.item'Class;
+                                  Name           : in     unbounded_String) return c_Type.view;
 
    function c_incomplete_Class_construct
-                                 (nameSpace           : access c_nameSpace.item'Class;
-                                  Name                : in     unbounded_String) return c_Type.item;
+                                 (nameSpace      : access c_nameSpace.item'Class;
+                                  Name           : in     unbounded_String) return c_Type.item;
 
-   function new_incomplete_Class (nameSpace           : access c_nameSpace.item'Class;
-                                  Name                : in     unbounded_String) return c_Type.view;
+   function new_incomplete_Class (nameSpace      : access c_nameSpace.item'Class;
+                                  Name           : in     unbounded_String) return c_Type.view;
 
 
-   function Enum_construct       (nameSpace           : access c_nameSpace.item'Class;
-                                  Name                : in     unbounded_String) return c_Type.item;
+   function Enum_construct       (nameSpace      : access c_nameSpace.item'Class;
+                                  Name           : in     unbounded_String) return c_Type.item;
 
-   function new_Enum             (nameSpace           : access c_nameSpace.item'Class;
-                                  Name                : in     unbounded_String) return c_Type.view;
+   function new_Enum             (nameSpace      : access c_nameSpace.item'Class;
+                                  Name           : in     unbounded_String) return c_Type.view;
 
-   function c_Class_construct    (nameSpace           : access c_nameSpace.item'Class;
-                                  Name                : in     unbounded_String) return c_Type.item;
+   function c_Class_construct    (nameSpace      : access c_nameSpace.item'Class;
+                                  Name           : in     unbounded_String) return c_Type.item;
 
-   function new_c_Class          (nameSpace           : access c_nameSpace.item'class;
-                                  Name                : in     unbounded_String) return c_Type.view;
+   function new_c_Class          (nameSpace      : access c_nameSpace.item'Class;
+                                  Name           : in     unbounded_String) return c_Type.view;
 
-   function new_unknown_Type                                                     return c_Type.view;
+   function new_unknown_Type return c_Type.view;
    --
    --  Returned object is *mutable*.
-
-
 
 
    --  Attributes
    --
 
-   function c_type_Kind               (Self : access Item)     return a_c_type_Kind;
+   function c_type_Kind           (Self : access Item)     return a_c_type_Kind;
 
 
-   procedure Name_is                  (Self : access Item;   Now : in unbounded_String);
+   procedure Name_is              (Self : access Item;   Now : in unbounded_String);
    overriding
-   function  Name                     (Self : access Item)     return unbounded_String;
-   function  qualified_Name           (Self : access Item)     return unbounded_String;
+   function  Name                 (Self : access Item)     return unbounded_String;
+
+   function  qualified_Name       (Self : access Item)     return unbounded_String;
 
 
-   procedure nameSpace_is             (Self : access Item;   Now : access c_nameSpace.item'class);
-   function  nameSpace                (Self : access Item)  return access c_nameSpace.item'class;
+   procedure nameSpace_is         (Self : access Item;   Now : access c_nameSpace.item'Class);
+   function  nameSpace            (Self : access Item)  return access c_nameSpace.item'Class;
 
-   procedure import_Convention_is     (Self : access Item;   Now : in an_import_Convention);
-
-
-   overriding
-   function  required_Types           (Self : access Item)     return c_declarable.c_Type_views;   -- the types on which this type depends.
-   overriding
-   function  depends_on               (Self : access Item;   a_Declarable : in     c_Declarable.view) return Boolean;
+   procedure import_Convention_is (Self : access Item;   Now : in an_import_Convention);
 
    overriding
-   function  depends_directly_on      (Self : access Item;   a_Declarable : in     c_Declarable.view) return Boolean;
+   function  required_Types       (Self : access Item)  return c_declarable.c_Type_views;   -- The types on which this type depends.
+
+   overriding
+   function  depends_on           (Self : access Item;   a_Declarable : in c_Declarable.view) return Boolean;
+
+   overriding
+   function  depends_directly_on  (Self : access Item;   a_Declarable : in c_Declarable.view) return Boolean;
+
    overriding
    function  directly_depended_on_Declarations
-                                      (Self : access Item) return c_Declarable.views;
+                                  (Self : access Item) return c_Declarable.views;
 
-   function  is_Ignored               (Self : access Item) return Boolean;
-   procedure ignore                   (Self : access Item);
+   function  is_Ignored           (Self : access Item) return Boolean;
+   procedure ignore               (Self : access Item);
 
+   function  ultimate_base_Type     (Self : access Item) return c_Type.view;
+   function  is_ultimately_Unsigned (Self : access Item) return Boolean;
 
-   function  ultimate_base_Type       (Self : access Item) return c_Type.view;
-   function  is_ultimately_Unsigned   (Self : access Item) return Boolean;
+   procedure resolved_Type_is       (Self : access Item;   Now : in c_Type.view);
+   function  resolved_Type          (Self : access Item)     return c_Type.view;
 
-   procedure resolved_Type_is         (Self : access Item;   Now : in c_Type.view);
-   function  resolved_Type            (Self : access Item)     return c_Type.view;
+   function  context_required_Type  (Self : access Item) return c_Type.view;
 
-
-   function  context_required_Type    (Self : access Item) return c_Type.view;
    overriding
    function  depended_on_Declarations (Self : access Item) return c_Declarable.views;
-
-
 
 
    --  Operations
@@ -196,13 +181,10 @@ is
    procedure verify (Self : access Item);
 
 
-
-
    --  'type_Pointer' Attributes
    --
 
    function accessed_Type (Self : access Item) return c_Type.view;
-
 
 
    --  'Enum' Attributes
@@ -219,13 +201,12 @@ is
 
    procedure add_Literal                  (Self : access Item;   Name         : in unbounded_String;
                                                                  Value        : in gmp.discrete.Integer);
-   function  contains_Literal             (Self : access Item;   Named        : in     String)            return Boolean;
+   function  contains_Literal             (Self : access Item;   Named        : in String)            return Boolean;
 
-   procedure add_transformed_Literal      (Self : access Item;   literal_Name : in     unbounded_String);
-   function  contains_transformed_Literal (Self : access Item;   Named        : in     unbounded_String)  return Boolean;
+   procedure add_transformed_Literal      (Self : access Item;   literal_Name : in unbounded_String);
+   function  contains_transformed_Literal (Self : access Item;   Named        : in unbounded_String)  return Boolean;
 
    function  Literals                     (Self : access Item) return enum_literal_vectors.Vector;
-
 
 
    --  'array_Type' Attributes
@@ -236,13 +217,12 @@ is
 
 
    function  element_Type                 (Self : access Item) return c_Type.view;
-   procedure add_array_Dimension          (Self : access Item;   upper_Bound : in     Integer := unConstrained);
+   procedure add_array_Dimension          (Self : access Item;   upper_Bound : in Integer := unConstrained);
 
    function  is_Unconstrained             (Self : access Item) return Boolean;
 
    function  array_dimension_Count        (Self : access Item) return Natural;
    function  array_Dimensions_upper_Bound (Self : access Item) return array_dimension_upper_Bounds;
-
 
 
    --  'c_Class' Attributes
@@ -263,8 +243,8 @@ is
    function  total_virtual_member_function_Count (Self : access Item) return Natural;
    function  is_interface_Type                   (Self : access Item) return Boolean;
 
-   procedure add_Base                            (Self : access Item;   base_Class    : in     c_Type.view);
    function  base_Classes                        (Self : access Item) return c_Type.Vector;
+   procedure add_Base                            (Self : access Item;   base_Class    : in     c_Type.view);
 
    procedure add_Component                       (Self : access Item;   new_Component : access c_Variable.item'Class);
    function  component_Count                     (Self : access Item) return Natural;
@@ -289,19 +269,16 @@ is
    function accessed_Function  (Self : access Item) return access c_Function.item'Class;
 
 
-
    --  'typedef_Function' Attributes
    --
 
    function typed_Function  (Self : access Item) return access c_Function.item'Class;
 
 
-
    --  'Typedef' Attributes
    --
 
    function base_Type (Self : access Item) return c_Type.view;
-
 
 
 
@@ -317,47 +294,46 @@ private
          Name              :        unbounded_String;
          import_Convention :        an_import_Convention := Unknown;
 
-         resolved_Type     :        c_Type.view;                           -- tbd: move this to 'Unknown' variant.
-         Ignore            :        Boolean              := False;
+         resolved_Type     :        c_Type.view;                           -- todo: Move this to 'Unknown' variant.
+         Ignore            :        Boolean    := False;
 
          case c_type_Kind is
             when array_Type =>
                element_Type                 : c_Type.view;
-
-               array_dimension_Count        : Natural                               := 0;
+               array_dimension_Count        : Natural := 0;
                array_Dimensions_upper_Bound : array_dimension_upper_Bounds (1 .. 55);
 
             when c_Class =>
-               base_Classes                 : c_Type.Vector;
+               base_Classes    : c_Type.Vector;
 
-               Components                   : record_Components (1 .. 500);         -- C++ class member variables (tbd: rename ?).
-               component_Count              : Natural                     := 0;
+               Components      : record_Components (1 .. 500);         -- C++ class member variables (todo: rename ?).
+               component_Count : Natural := 0;
 
-               is_Union                                  : Boolean        := False;
-               requires_Interfaces_C_Int_use             : Boolean        := False;
-               requires_Interfaces_C_Unsigned_use        : Boolean        := False;
-               requires_Interfaces_C_Unsigned_Char_use   : Boolean        := False;
-               requires_Interfaces_C_Extensions_bool_use : Boolean        := False;
-               has_virtual_Destructor                    : Boolean        := False;
+               is_Union                                  : Boolean := False;
+               requires_Interfaces_C_Int_use             : Boolean := False;
+               requires_Interfaces_C_Unsigned_use        : Boolean := False;
+               requires_Interfaces_C_Unsigned_Char_use   : Boolean := False;
+               requires_Interfaces_C_Extensions_bool_use : Boolean := False;
+               has_virtual_Destructor                    : Boolean := False;
 
             when Enum =>
-               Literals                     : enum_literal_vectors.Vector;
-               transformed_literals_Names   : unbounded_string_vectors.Vector;
+               Literals                   : enum_literal_vectors.Vector;
+               transformed_literals_Names : unbounded_string_vectors.Vector;
 
             when function_Pointer =>
-               accessed_Function            : access c_Function.item'Class;     -- Subprogram definition of an 'access subprogram' type declaration.
+               accessed_Function          : access c_Function.item'Class;     -- Subprogram definition of an 'access subprogram' type declaration.
 
             when typedef_Function =>
-               typed_Function               : access c_Function.item'Class;     -- Subprogram definition of an 'access subprogram' type declaration.
+               typed_Function             : access c_Function.item'Class;     -- Subprogram definition of an 'access subprogram' type declaration.
 
             when type_Pointer =>
-               accessed_Type                : c_Type.view;                      -- The base type to which the access refers.
+               accessed_Type              : c_Type.view;                      -- The base type to which the access refers.
 
             when Typedef =>
-               base_Type                    : c_Type.view;                      -- The base type of the typedef (ie, the 'int' in   'typedef  int  Index_Type;').
+               base_Type                  : c_Type.view;                      -- The base type of the typedef (ie, the 'int' in   'typedef  int  Index_Type;').
 
             when virtual_class_Pointer =>
-               pointee_Type                 : c_Type.view;                      -- The pointed to virtual class type.
+               pointee_Type               : c_Type.view;                      -- The pointed to virtual class type.
 
             when Unknown
                | opaque_Struct
@@ -372,7 +348,6 @@ private
       record
          My : Item_mutable;
       end record;
-
 
 end c_Type;
 
