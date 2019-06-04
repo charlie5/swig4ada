@@ -7,6 +7,9 @@ with
 
 
 package ada_Type.a_subType
+--
+-- Models an Ada 'subtype'.
+--
 is
 
    type Item  is new ada_Type.item with private;
