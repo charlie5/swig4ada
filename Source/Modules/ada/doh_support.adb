@@ -13,8 +13,7 @@ is
        interfaces.C.strings;
 
 
-
-   function to_String (Self : doh_Item) return String
+   function to_String (Self : in doh_Item) return String
    is
       the_C_String : constant interfaces.c.strings.chars_ptr := Node_to_CStr (Node_Pointer (Self));
    begin
@@ -36,7 +35,6 @@ is
 
 
 
-
    function to_Doh (Self : in String) return String_Pointer
    is
    begin
@@ -54,7 +52,7 @@ is
 
 
    procedure replace_All (Self : in doh_Item;   search_for   : in String;
-                                                     replace_with : in String)
+                                                replace_with : in String)
    is
    begin
       doh_replace_All (Self,
@@ -77,7 +75,8 @@ is
                        the_Text : in String)
    is
    begin
-      print_to (String_Pointer (Self),  new_String (the_Text));
+      print_to (String_Pointer (Self),
+                new_String (the_Text));
    end print_to;
 
 
@@ -143,6 +142,7 @@ is
       return doh_Node (DohGetattr (DOH_Pointer (Node),
                                    DOH_Pointer (-Named)));
    end get_Attribute;
+
 
 
    function Attribute (Node : in doh_Node;   Named : in String) return String

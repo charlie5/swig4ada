@@ -68,5 +68,4 @@ is
    function check_Attribute (Node : in doh_Node;  Named : in String;
                                                   Value : in String) return Boolean;
 
-
 end doh_Support;
