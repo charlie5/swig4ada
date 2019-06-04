@@ -15,5 +15,4 @@ is
       Self.Ada.Package_top.is_global_Namespace;
    end define;
 
-
 end swig_Module;

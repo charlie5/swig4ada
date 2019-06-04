@@ -1,6 +1,5 @@
 with
      ada_Utility,
-     DOHs.Pointers,
      swig_Core.Binding,
      swig_Core.Pointers;
 
@@ -76,13 +75,12 @@ is
    procedure strip_leading_global_namespace_Prefix (Self : in out Text)
    is
    begin
-      if         Length (Self) >= 2
+      if         Length (Self)     >= 2
         and then Slice (Self, 1, 2) = "::"
       then
-         delete (Self,  1,  2);
+         delete (Self, 1, 2);
       end if;
    end strip_leading_global_namespace_Prefix;
-
 
 
 
@@ -91,18 +89,19 @@ is
       use ada.Strings;
 
       stripped_swig_Type : Text := +Self;
+
       bounds_Start : Natural;
       bounds_End   : Natural;
    begin
       loop
          bounds_Start := Index (stripped_swig_Type,  "a(");
-         exit when bounds_Start = 0;                              -- Loop til there are no more array bounds left.
+         exit when bounds_Start = 0;                              -- Loop until there are no more array bounds left.
          bounds_End   := Index (stripped_swig_Type,  ")",
                                 from  => Index (stripped_swig_Type, ".", from => bounds_Start),
                                 going => backward);
 
-         delete (stripped_swig_Type,  bounds_Start + 1,
-                                      bounds_End);
+         delete (stripped_swig_Type, bounds_Start + 1,
+                                     bounds_End);
       end loop;
 
       return stripped_swig_Type;
@@ -113,7 +112,7 @@ is
    function trim_Namespace (Self : in Text) return Text
    is
       use ada.Strings;
-      the_Index : constant Natural := Index (Self, "::", going => backward);
+      the_Index : constant Natural := Index (Self, "::", going => Backward);
    begin
       if the_Index = 0
       then
@@ -122,6 +121,7 @@ is
          return to_unbounded_String (Slice (Self,  the_Index + 2, Length (Self)));
       end if;
    end trim_Namespace;
+
    pragma Unreferenced (trim_Namespace);
 
 
@@ -134,7 +134,9 @@ is
    begin
       return Integer'Value (pre_Token)  *  2**Integer'Value (post_Token);
    end resolved_c_left_shift_Operator;
+
    pragma Unreferenced (resolved_c_left_shift_Operator);
+
 
 
    procedure strip_all_qualifiers (Self : in out Text)
@@ -149,9 +151,9 @@ is
             the_Index := Index (Pad, the_Token);
             exit when the_Index = 0;
 
-            replace_Slice (Pad,  the_Index,
-                                 the_Index + the_Token'Length - 1,
-                                 "");
+            replace_Slice (Pad, the_Index,
+                                the_Index + the_Token'Length - 1,
+                                "");
          end loop;
       end rid;
 
@@ -160,8 +162,6 @@ is
       rid ("q(volatile).");
       rid ("struct ");
       rid ("enum ");
-
---        log ("strip_all_qualifiers ~ result: '" & Pad & "'");
    end strip_all_qualifiers;
 
 
@@ -180,11 +180,11 @@ is
    is
       use swig_Core.Binding,
           swig_Core.Pointers,
-          DOHs.Pointers;
+          swig_Core.Pointers.C_Node_Pointers;
 
       the_Sibling : Node_Pointer := first_Child (parent_Node (Node_Pointer (the_Node)));
    begin
-      while exists (DOH_pointer (the_Sibling))
+      while the_Sibling /= null
       loop
          if String'(+node_Type (the_Sibling)) = "module"
          then

@@ -56,12 +56,10 @@ is
    package c_type_Maps_of_ada_type is new ada.containers.hashed_maps (c_Type  .view,
                                                                       ada_Type.view,
                                                                       Hashed, "=");
-
    use type ada_Subprogram.view;
-   package c_type_Maps_of_ada_subprogram is new ada.containers.hashed_maps (c_Type.view,
+   package c_type_Maps_of_ada_subprogram is new ada.containers.hashed_maps (c_Type        .view,
                                                                             ada_Subprogram.view,
                                                                             Hashed, "=");
-
 
    function Hashed is new ada.Unchecked_Conversion (ada_subProgram.view, ada.Containers.Hash_Type);
    use type c_Function.view;
@@ -69,7 +67,6 @@ is
    package ada_subprogram_Maps_of_c_function is new ada.containers.hashed_maps (ada_subProgram.view,
                                                                                 c_Function.view,
                                                                                 Hashed, "=");
-
 
    use type ada_Package.view,  c_Namespace.view;
    function Hashed is new ada.Unchecked_Conversion (c_Namespace.view,  ada.Containers.Hash_Type);
