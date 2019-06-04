@@ -1,6 +1,6 @@
 package ada_Type.composite.a_protected
 --
---
+-- Models an Ada 'protected' type.
 --
 is
 
@@ -8,7 +8,6 @@ is
 
    type View  is access all Item;
    type Views is array (Positive range <>) of View;
-
 
 
    --  Containers
@@ -20,28 +19,26 @@ is
    subtype Cursor is Vectors.Cursor;
 
 
-
    --  Attributes
    --
 
    overriding
-   function  required_Types         (Self : access Item)  return ada_Type.views;
-   overriding
-   function  context_required_Types (Self : access Item)  return ada_Type.views;
+   function required_Types         (Self : access Item)  return ada_Type.views;
 
    overriding
-   function  depends_on            (Self : access Item;   a_Type    : in     ada_Type.view;
+   function context_required_Types (Self : access Item)  return ada_Type.views;
+
+   overriding
+   function depends_on             (Self : access Item;   a_Type    : in     ada_Type.view;
                                                           Depth     : in     Natural) return Boolean;
    overriding
-   function  depends_directly_on   (Self : access Item;   a_Type    : in     ada_Type.view;
+   function depends_directly_on    (Self : access Item;   a_Type    : in     ada_Type.view;
                                                           Depth     : in     Natural) return Boolean;
-
    overriding
-   function  depends_on             (Self : access Item;   a_Package : access ada_Package.item'Class;
-                                                           Depth     : in     Natural) return Boolean;
-
+   function depends_on             (Self : access Item;   a_Package : access ada_Package.item'Class;
+                                                          Depth     : in     Natural) return Boolean;
    overriding
-   function resolved_Type           (Self : access Item) return ada_Type.view;
+   function resolved_Type          (Self : access Item) return ada_Type.view;
 
 
 
