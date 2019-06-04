@@ -53,11 +53,11 @@ is
 
 
 
-   procedure replace_All (in_Source : in doh_Item;   search_for   : in String;
+   procedure replace_All (Self : in doh_Item;   search_for   : in String;
                                                      replace_with : in String)
    is
    begin
-      doh_replace_All (in_Source,
+      doh_replace_All (Self,
                        -search_for,
                        -replace_with);
    end replace_All;

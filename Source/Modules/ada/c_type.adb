@@ -828,7 +828,7 @@ is
             --
             for Each in 1 .. Self.my.component_Count
             loop
-               if Self.my.Components (Each).bit_Field /= -1
+               if Self.my.Components (Each).bit_Field /= c_Variable.undefined_Bitfield
                then
                   if Self.my.Components (Each).my_Type.qualified_Name = "interfaces.c.Int"
                   then
@@ -894,10 +894,11 @@ is
 
    function contains_bit_Fields (Self : access Item) return Boolean
    is
+      use c_Variable;
    begin
       for Each in 1 .. Self.my.component_Count
       loop
-         if Self.my.Components (Each).bit_Field /= -1
+         if Self.my.Components (Each).bit_Field /= undefined_Bitfield
          then
             return True;
          end if;
@@ -1058,13 +1059,14 @@ is
             --  during the components '... range -2**n .. 2**n - 1;' definition.
             --
             declare
+               use c_Variable;
                the_Component : access c_Variable.item;
             begin
                for Each in 1 .. Self.my.component_Count
                loop
                   the_Component := Self.my.Components (Each);
 
-                  if the_Component.bit_Field /= -1
+                  if the_Component.bit_Field /= undefined_Bitfield
                   then
                      if Index (to_unbounded_String (to_Lower (to_String (the_Component.my_Type.Name))), "unsigned") = 0
                      then -- Must be signed.

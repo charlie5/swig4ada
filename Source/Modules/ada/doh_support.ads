@@ -1,17 +1,17 @@
 with
---     swig_p_Doh,
---     swig_p_DohIterator,
      swig_Core.Pointers,
+
      DOHs.Pointers,
      DOHs.DohIterator,
      DOHs.const_String_or_char_ptr,
+
      ada.Strings.unbounded,
-     interfaces.c.strings;
+     interfaces.C.strings;
 
 
 package doh_Support
 --
---
+-- Utilities to help dealing with DOH objects.
 --
 is
    use ada.Strings.unbounded,
@@ -35,29 +35,23 @@ is
 
 
    function to_String (Self : in doh_Item)   return String;
-   function "+"       (Self : in doh_Item)   return String    renames to_String;
+   function "+"       (Self : in doh_Item)   return String   renames to_String;
    function "+"       (Self : in doh_Item)   return unbounded_String;
 
    function to_Doh    (Self : in String)           return String_Pointer;
-   function "-"       (Self : in String)           return String_Pointer  renames to_Doh;
+   function "-"       (Self : in String)           return String_Pointer   renames to_Doh;
    function "-"       (Self : in unbounded_String) return String_Pointer;
 
-
-
-   function to_C      (Self : in String)     return interfaces.c.strings.chars_ptr
-     renames interfaces.c.strings.new_String;
-
+   function to_C      (Self : in String)     return interfaces.C.strings.chars_ptr
+     renames interfaces.C.strings.new_String;
 
    function exists    (Self : in doh_Item)   return Boolean;
 
+   procedure print_to (Self : in doh_Item;   the_Text : in String);
+   procedure print_to (Self : in doh_Item;   the_Text : in unbounded_String);
 
-   procedure print_to (Self     : in     doh_Item;   the_Text : in String);
-   procedure print_to (Self     : in     doh_Item;   the_Text : in unbounded_String);
-
-
-   procedure replace_All (in_Source : in doh_Item;   search_for   : in String;
-                                                     replace_with : in String);
-
+   procedure replace_all (Self : in doh_Item;   search_for   : in String;
+                                                replace_with : in String);
    procedure log (Self : in doh_Item);
 
 
