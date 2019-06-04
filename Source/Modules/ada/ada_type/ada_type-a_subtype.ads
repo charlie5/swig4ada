@@ -15,7 +15,6 @@ is
    type Views is array (Positive range <>) of View;
 
 
-
    --  Containers
    --
 
@@ -23,8 +22,6 @@ is
 
    subtype Vector is Vectors.Vector;
    subtype Cursor is Vectors.Cursor;
-
-
 
 
    --  Forge
@@ -36,8 +33,7 @@ is
 
    function Subtype_construct (declaration_Package : access ada_Package.item'Class := null;
                                Name                : in     unbounded_String       := null_unbounded_String;
-                               base_Type           : in     ada_Type.view) return a_subType.item'Class;
-
+                               base_Type           : in     ada_Type.view) return a_subType.item;
 
 
    --  Attributes
@@ -49,11 +45,11 @@ is
    function  context_required_Types (Self : access Item) return ada_Type.views;
 
    overriding
-   function  depends_on            (Self : access Item;   a_Type    : in     ada_Type.view;
-                                                          Depth     : in     Natural) return Boolean;
+   function  depends_on             (Self : access Item;   a_Type    : in     ada_Type.view;
+                                                           Depth     : in     Natural) return Boolean;
    overriding
-   function  depends_directly_on   (Self : access Item;   a_Type    : in     ada_Type.view;
-                                                          Depth     : in     Natural) return Boolean;
+   function  depends_directly_on    (Self : access Item;   a_Type    : in     ada_Type.view;
+                                                           Depth     : in     Natural) return Boolean;
 
    overriding
    function  depends_on             (Self : access Item;   a_Package : access ada_Package.item'Class;
@@ -64,7 +60,6 @@ is
    function  resolved_Type          (Self : access Item) return ada_Type.view;
 
 
-
    --  Operations
    --
 
@@ -73,12 +68,11 @@ is
 
 
 
-
 private
 
    type Item is new ada_Type.item with
       record
-         base_Type : ada_Type.view;           -- The base type of the typedef (ie, the 'int' in   'typedef  int  Index_Type;').
+         base_Type : ada_Type.view;     -- The base type of the typedef (ie, the 'int' in   'typedef  int  Index_Type;').
       end record;
 
 end ada_Type.a_subType;
