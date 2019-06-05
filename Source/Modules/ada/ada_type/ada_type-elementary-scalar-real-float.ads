@@ -1,6 +1,6 @@
 package ada_Type.elementary.scalar.real.float
 --
---
+-- Models a simple floating point real type.
 --
 is
 
@@ -10,15 +10,13 @@ is
    type Views is array (Positive range <>) of View;
 
 
-
    --  Containers
    --
 
-   package Vectors is new ada.containers.Vectors (Positive, View);
+   package Vectors is new ada.Containers.Vectors (Positive, View);
 
    subtype Vector is Vectors.Vector;
    subtype Cursor is Vectors.Cursor;
-
 
 
    --  Forge
@@ -26,7 +24,6 @@ is
 
    function new_Item (declaration_Package : access ada_Package.item'class := null;
                       Name                : in     unbounded_String       := null_unbounded_String) return View;
-
 
 
 private

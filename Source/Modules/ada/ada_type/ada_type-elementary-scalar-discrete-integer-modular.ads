@@ -1,6 +1,6 @@
 package ada_Type.elementary.scalar.discrete.integer.modular
 --
---
+-- Models a modular integer type.
 --
 is
 
@@ -8,7 +8,6 @@ is
 
    type View  is access all Item;
    type Views is array (Positive range <>) of View;
-
 
 
    --  Containers
@@ -20,14 +19,11 @@ is
    subtype Cursor  is Vectors.Cursor;
 
 
-
-
    --  Forge
    --
 
    function new_Item (declaration_Package : access ada_Package.item'Class := null;
                       Name                : in     unbounded_String       := null_unbounded_String) return View;
-
 
 
 

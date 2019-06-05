@@ -1,6 +1,6 @@
 package ada_Type.elementary.scalar.real
 --
---
+-- Models any real type.
 --
 is
 
@@ -10,15 +10,13 @@ is
    type Views is array (Positive range <>) of View;
 
 
-
    --  Containers
    --
 
-   package Vectors is new ada.containers.Vectors (Positive, View);
+   package Vectors is new ada.Containers.Vectors (Positive, View);
 
    subtype Vector is Vectors.Vector;
    subtype Cursor is Vectors.Cursor;
-
 
 
    --  Attributes
@@ -26,22 +24,19 @@ is
 
    overriding
    function  required_Types         (Self : access Item)  return ada_Type.views;
+
    overriding
    function  context_required_Types (Self : access Item)  return ada_Type.views;
 
-
    overriding
-   function  depends_on            (Self : access Item;   a_Type    : in     ada_Type.view;
-                                                          Depth     : in     Natural) return Boolean;
+   function  depends_on             (Self : access Item;   a_Type    : in     ada_Type.view;
+                                                           Depth     : in     Natural) return Boolean;
    overriding
    function  depends_directly_on    (Self : access Item;   a_Type    : in     ada_Type.view;
                                                            Depth     : in     Natural) return Boolean;
-
-
    overriding
    function  depends_on             (Self : access Item;   a_Package : access ada_Package.item'Class;
                                                            Depth     : in     Natural) return Boolean;
-
 
 
 private

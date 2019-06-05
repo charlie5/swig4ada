@@ -1,4 +1,3 @@
-with Ada.Text_IO; use Ada.Text_IO;
 package body ada_Type.elementary.an_access.to_type.interfaces_c_pointer
 is
 
@@ -15,7 +14,6 @@ is
                                                                                   accessed_Type         => accessed_Type,
                                                                                   associated_array_Type => <>);
    end new_Item;
-
 
 
 
@@ -37,21 +35,19 @@ is
    end required_Types;
 
 
-
-   overriding function context_required_Types (Self : access Item)  return ada_Type.views
+   overriding
+   function context_required_Types (Self : access Item) return ada_Type.views
    is
    begin
       return (1 => Self.accessed_Type);
    end context_required_Types;
 
 
-
    overriding
-   function  depends_on            (Self : access Item;   a_Type    : in     ada_Type.view;
-                                                          Depth     : in     Natural) return Boolean
+   function depends_on (Self : access Item;   a_Type : in ada_Type.view;
+                                              Depth  : in Natural) return Boolean
    is
    begin
-      put_line ("In depends_on for ada_Type.elementary.an_access.to_type.interfaces_c_pointer.");
       return    Self.accessed_Type.all'Access = a_Type
         or else Self.accessed_Type.depends_on (a_Type, Depth + 1)
         or else (         Self.associated_array_Type /= null
@@ -60,14 +56,13 @@ is
    end depends_on;
 
 
-
    overriding
-   function depends_directly_on (Self : access Item;   a_Type    : in     ada_Type.view;
-                                                       Depth     : in     Natural) return Boolean
+   function depends_directly_on (Self : access Item;   a_Type : in ada_Type.view;
+                                                       Depth  : in Natural) return Boolean
    is
       pragma Unreferenced (Depth);
    begin
-      return    Self.accessed_Type        .all'Access = a_Type
+      return    Self.accessed_Type.all'Access = a_Type
         or else (         Self.associated_array_Type           /= null
                  and then Self.associated_array_Type.all'Access = a_Type);
    end depends_directly_on;

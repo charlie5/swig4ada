@@ -1,6 +1,6 @@
 package ada_Type.elementary.an_access.to_type
 --
---
+-- Models an access type.
 --
 is
 
@@ -8,8 +8,6 @@ is
 
    type View  is access all Item'Class;
    type Views is array (Positive range <>) of View;
-
-
 
 
    --  Containers
@@ -21,15 +19,12 @@ is
    subtype Cursor  is Vectors.Cursor;
 
 
-
-
    --  Forge
    --
 
    function new_Item (declaration_Package : access ada_Package.item'Class := null;
                       Name                : in     unbounded_String       := null_unbounded_String;
                       accessed_Type       : in     ada_Type.view) return View;
-
 
 
    --  Attributes
@@ -43,14 +38,12 @@ is
    overriding
    function  depends_directly_on   (Self : access Item;   a_Type    : in     ada_Type.view;
                                                           Depth     : in     Natural) return Boolean;
-
    overriding
-   function  depends_on             (Self : access Item;   a_Package : access ada_Package.item'Class;
-                                                           Depth     : in     Natural) return Boolean;
-
-
+   function  depends_on            (Self : access Item;   a_Package : access ada_Package.item'Class;
+                                                          Depth     : in     Natural) return Boolean;
    overriding
    function required_Types         (Self : access Item) return ada_Type.views;
+
    overriding
    function context_required_Types (Self : access Item) return ada_Type.views;
 
@@ -63,7 +56,7 @@ private
 
    type Item is new ada_Type.elementary.an_access.item with
       record
-         accessed_Type : ada_Type.view;           -- The base type to which the access refers.
+         accessed_Type : ada_Type.view;           -- The type to which the access refers.
       end record;
 
 end ada_Type.elementary.an_access.to_type;

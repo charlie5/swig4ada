@@ -4,7 +4,7 @@ with
 
 package ada_Type.elementary.scalar.discrete.enumeration
 --
---
+--  Models an enumeration type.
 --
 is
 
@@ -14,7 +14,6 @@ is
    type Views is array (Positive range <>) of View;
 
 
-
    --  Containers
    --
 
@@ -22,7 +21,6 @@ is
 
    subtype Vector is Vectors.Vector;
    subtype Cursor is Vectors.Cursor;
-
 
 
    --  Forge
@@ -47,18 +45,15 @@ is
 
    procedure add_Literal                  (Self : access Item;   Name         : in unbounded_String;
                                                                  Value        : in gmp.discrete.Integer);
-   function  contains_Literal             (Self : access Item;   Named        : in     String)            return Boolean;
+   function  contains_Literal             (Self : access Item;   Named        : in String)           return Boolean;
 
-   procedure add_transformed_Literal      (Self : access Item;   literal_Name : in     unbounded_String);
-   function  contains_transformed_Literal (Self : access Item;   Named        : in     unbounded_String)  return Boolean;
+   procedure add_transformed_Literal      (Self : access Item;   literal_Name : in unbounded_String);
+   function  contains_transformed_Literal (Self : access Item;   Named        : in unbounded_String) return Boolean;
 
    function  Literals                     (Self : access Item) return enum_literal_vectors.Vector;
 
-
-
    overriding
-   function context_required_Types (Self : access Item)  return ada_Type.views;
-
+   function context_required_Types        (Self : access Item) return ada_Type.views;
 
 
    --  Operations
@@ -66,7 +61,6 @@ is
 
    overriding
    procedure verify (Self : access Item);
-
 
 
 

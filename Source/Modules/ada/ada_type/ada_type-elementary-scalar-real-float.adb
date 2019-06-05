@@ -8,8 +8,8 @@ is
                       Name                : in     unbounded_String       := null_unbounded_String) return View
    is
    begin
-      return new Item'(declaration_Package => declaration_Package,
-                       name                => Name);
+      return new Item' (declaration_Package => declaration_Package,
+                        Name                => Name);
    end new_Item;
 
 

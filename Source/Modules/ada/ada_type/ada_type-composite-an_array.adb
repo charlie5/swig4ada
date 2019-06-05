@@ -1,7 +1,7 @@
 package body ada_Type.composite.an_array
 is
 
-   --  General
+   --  Dimensions
    --
 
    function are_Constrained (Self : in array_dimension_upper_Bounds) return Boolean
@@ -18,8 +18,6 @@ is
    end are_Constrained;
 
 
-
-
    --  Forge
    --
 
@@ -29,13 +27,11 @@ is
                       element_Type                     : in     ada_Type.view) return View
    is
    begin
---        put_line ("NEW ada_Type.composite.an_array: " & To_String (Name));
-
-      return the_Item : constant View := new Item'(declaration_Package          => declaration_Package,
-                                                   name                         => Name,
-                                                   element_type                 => element_Type,
-                                                   array_dimension_Count        => the_array_dimension_upper_Bounds'Length,
-                                                   array_Dimensions_upper_Bound => <>)
+      return the_Item : constant View := new Item' (declaration_Package          => declaration_Package,
+                                                    Name                         => Name,
+                                                    element_Type                 => element_Type,
+                                                    array_dimension_Count        => the_array_dimension_upper_Bounds'Length,
+                                                    array_Dimensions_upper_Bound => <>)
       do
          for Each in the_array_dimension_upper_Bounds'Range
          loop
@@ -43,7 +39,6 @@ is
          end loop;
       end return;
    end new_Item;
-
 
 
 
@@ -74,14 +69,13 @@ is
 
       for Each in 1 .. Self.array_dimension_Count
       loop
-         if Self.array_Dimensions_upper_Bound (Each) = unConstrained then
+         if Self.array_Dimensions_upper_Bound (Each) = Unconstrained then
             return True;
          end if;
       end loop;
 
       return False;
    end is_Unconstrained;
-
 
 
 
@@ -100,14 +94,12 @@ is
    end array_Dimensions_upper_Bound;
 
 
-
    overriding
    function  required_Types (Self : access Item) return ada_Type.views
    is
    begin
       return (1 => Self.element_Type);
    end required_Types;
-
 
 
    overriding
@@ -118,36 +110,29 @@ is
    end context_required_Types;
 
 
-
    overriding
-   function  depends_on            (Self : access Item;   a_Type    : in     ada_Type.view;
-                                                          Depth     : in     Natural) return Boolean
+   function  depends_on (Self : access Item;   a_Type : in ada_Type.view;
+                                               Depth  : in Natural) return Boolean
    is
    begin
---        log ("c_type.depends_on ~ Self.Name: '" & Self.name & "'     a_Declarable.Name: '" & a_Declarable.Name & "'");
-
       return    Self.element_Type.all'Access = a_Type
         or else Self.element_Type.depends_on (a_Type, Depth + 1);
    end depends_on;
 
 
-
    overriding
-   function  depends_directly_on   (Self : access Item;   a_Type    : in     ada_Type.view;
-                                                          Depth     : in     Natural) return Boolean
+   function  depends_directly_on (Self : access Item;   a_Type : in ada_Type.view;
+                                                        Depth  : in Natural) return Boolean
    is
       pragma Unreferenced (Depth);
    begin
---        log ("c_type.depends_on ~ Self.Name: '" & Self.name & "'     a_Declarable.Name: '" & a_Declarable.Name & "'");
-
-      return    Self.element_Type.all'Access = a_Type;
+      return Self.element_Type.all'Access = a_Type;
    end depends_directly_on;
 
 
-
    overriding
-   function  depends_on             (Self : access Item;   a_Package : access ada_Package.item'Class;
-                                                           Depth     : in     Natural) return Boolean
+   function  depends_on (Self : access Item;   a_Package : access ada_Package.item'Class;
+                                               Depth     : in     Natural) return Boolean
    is
    begin
       return    Self.element_Type.declaration_Package = a_Package
@@ -155,9 +140,8 @@ is
    end depends_on;
 
 
-
    overriding
-   function resolved_Type (Self : access Item) return ada_Type.view   -- tbd: move this into 'Language' ... its app code !!
+   function resolved_Type (Self : access Item) return ada_Type.view
    is
    begin
       return Self.all'Access;

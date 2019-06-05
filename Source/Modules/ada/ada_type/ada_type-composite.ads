@@ -1,6 +1,6 @@
 package ada_Type.composite
 --
---
+-- Models an Ada composite type.
 --
 is
 
@@ -10,11 +10,10 @@ is
    type Views is array (Positive range <>) of View;
 
 
-
    --  Containers
    --
 
-   package Vectors is new ada.containers.Vectors (Positive, View);
+   package Vectors is new ada.Containers.Vectors (Positive, View);
 
    subtype Vector is Vectors.Vector;
    subtype Cursor is Vectors.Cursor;

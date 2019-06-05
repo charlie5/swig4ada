@@ -1,6 +1,6 @@
 package ada_Type.elementary.an_access
 --
---
+-- Models any access type.
 --
 is
 
@@ -8,7 +8,6 @@ is
 
    type View  is access all Item'Class;
    type Views is array (Positive range <>) of View;
-
 
 
    --  Containers
@@ -25,7 +24,7 @@ private
 
    type Item is abstract new ada_Type.elementary.item with
       record
-         null; -- accessed_Type : ada_Type.view;           -- The base type to which the access refers.
+         null;
       end record;
 
 end ada_Type.elementary.an_access;

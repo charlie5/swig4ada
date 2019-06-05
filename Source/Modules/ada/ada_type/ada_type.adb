@@ -1,10 +1,7 @@
 with
+     ada_Package,
+     ada_Utility,
      Swigg;
-
---  old ...
---
-with ada_Package;
-with ada_Utility;
 
 
 package body ada_Type
@@ -12,32 +9,14 @@ is
    use ada_Utility;
 
 
-
-   --  Globals
-   --
-
---     NL : String := portable_new_line_Token;
-
-
-
-
    --  Attributes
    --
-
---     function required_Types (Self : in Item) return ada_Type.views
---     is
---     begin
---        return (1..0 => <>);
---     end required_Types;
-
-
 
    procedure Name_is (Self : access Item;
                       Now  : in     unbounded_String)
    is
    begin
       Self.Name := Now;
-
    end Name_is;
 
 
@@ -65,7 +44,7 @@ is
 
 
    procedure declaration_Package_is (Self : access Item;
-                                     Now  : access ada_Package.item'class)
+                                     Now  : access ada_Package.item'Class)
    is
    begin
       Self.declaration_Package := Now;
@@ -73,7 +52,7 @@ is
 
 
 
-   function declaration_Package (Self : access Item) return access ada_Package.item'class
+   function declaration_Package (Self : access Item) return access ada_Package.item'Class
    is
    begin
       return Self.declaration_Package;
@@ -84,9 +63,9 @@ is
    function is_ultimately_Unsigned (Self : access Item'Class) return Boolean
    is
    begin
-      return Index (to_Lower (Self.resolved_type.Name), "unsigned") /= 0;
+      return Index (to_Lower (Self.resolved_type.Name),
+                    "unsigned") /= 0;
    end is_ultimately_Unsigned;
-
 
 
 

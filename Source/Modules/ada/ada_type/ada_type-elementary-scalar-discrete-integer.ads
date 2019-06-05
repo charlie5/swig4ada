@@ -1,7 +1,7 @@
 
 package ada_Type.elementary.scalar.discrete.integer
 --
---
+-- Models an integer type.
 --
 is
 
@@ -14,7 +14,7 @@ is
    --  Containers
    --
 
-   package Vectors is new ada.containers.Vectors (Positive, View);
+   package Vectors is new ada.Containers.Vectors (Positive, View);
 
    subtype Vector is Vectors.Vector;
    subtype Cursor is Vectors.Cursor;

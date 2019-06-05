@@ -1,6 +1,6 @@
 with
      ada_Utility,
-     ada.characters.Handling;
+     ada.Characters.handling;
 
 
 package body ada_Type.elementary.scalar.discrete.enumeration
@@ -13,11 +13,10 @@ is
                       Name                : in     unbounded_String       := null_unbounded_String) return View
    is
    begin
-      return new Item'(declaration_package => declaration_Package,
-                       name                => Name,
-                       others              => <>);
+      return new Item' (declaration_Package => declaration_Package,
+                        Name                => Name,
+                        others              => <>);
    end new_Item;
-
 
 
 
@@ -26,12 +25,11 @@ is
 
    procedure add_Literal (Self : access Item;   Name  : in unbounded_String;
                                                 Value : in gmp.discrete.Integer)
-
    is
       use enum_literal_Vectors;
    begin
-      append (Self.Literals,  (name => Name,
-                               value => Value));
+      append (Self.Literals, (Name  => Name,
+                              Value => Value));
    end add_Literal;
 
 
@@ -61,7 +59,7 @@ is
                                       literal_Name : in     unbounded_String)
    is
    begin
-      append (Self.transformed_literals_Names,  literal_Name);
+      append (Self.transformed_literals_Names, literal_Name);
    end add_transformed_Literal;
 
 
@@ -70,17 +68,16 @@ is
                                           Named : in     unbounded_String)  return Boolean
    is
    begin
-      return contains (Self.transformed_literals_Names,  Named);
+      return contains (Self.transformed_literals_Names, Named);
    end contains_transformed_Literal;
 
 
 
-   function  Literals (Self : access Item) return enum_literal_vectors.Vector
+   function Literals (Self : access Item) return enum_literal_vectors.Vector
    is
    begin
       return Self.Literals;
    end Literals;
-
 
 
    overriding
@@ -93,25 +90,23 @@ is
 
 
 
-
-
    --  Operations
    --
 
    overriding
    procedure verify (Self : access Item)
    is
-      use enum_literal_Vectors, ada.characters.Handling;
-
+      use enum_literal_Vectors,
+          ada_Utility,
+          ada.Characters.handling;
    begin
-      Self.Name := ada_Utility.to_ada_Identifier (Self.Name);
+      Self.Name := to_ada_Identifier (Self.Name);
 
       for Each in 1 .. Natural (Length (Self.Literals))
       loop
-         replace_Element (Self.Literals,  Each, (name  => ada_Utility.to_ada_Identifier (Element (Self.Literals,  Each).Name),
-                                                 value => Element (Self.Literals,  Each).Value));
+         replace_Element (Self.Literals, Each, (Name  => to_ada_Identifier (Element (Self.Literals, Each).Name),
+                                                Value => Element (Self.Literals, Each).Value));
       end loop;
-
 
       correct_any_name_Clash:
       declare
@@ -119,7 +114,7 @@ is
       begin
          for Each in 1 .. Natural (Length (Self.Literals))
          loop
-            if to_Lower (to_String (Element (Self.Literals,  Each).Name))  =   to_Lower (to_String (Self.Name))
+            if to_Lower (+Element (Self.Literals, Each).Name) = to_Lower (+Self.Name)
             then
                Clash_found := True;
             end if;
@@ -130,7 +125,6 @@ is
             append (Self.Name, "_enum");
          end if;
       end correct_any_name_Clash;
-
 
       sort_Literals:
       declare
@@ -145,7 +139,6 @@ is
       begin
          Sorter.sort (Self.Literals);
       end sort_Literals;
-
    end verify;
 
 

@@ -4,7 +4,7 @@ with
 
 package ada_Type.elementary.an_access.to_subProgram
 --
---
+-- Models a 'subprogram access' type.
 --
 is
 
@@ -12,7 +12,6 @@ is
 
    type View  is access all Item'Class;
    type Views is array (Positive range <>) of View;
-
 
 
    --  Containers
@@ -24,8 +23,6 @@ is
    subtype Cursor is Vectors.Cursor;
 
 
-
-
    --  Forge
    --
 
@@ -34,32 +31,28 @@ is
                       accessed_subProgram : in     ada_subProgram.view) return View;
 
 
-
-
-
    --  Attributes
    --
 
-   function accessed_subProgram                (Self : in     Item'Class) return ada_subProgram.view;
+   function accessed_subProgram     (Self : in     Item'Class) return ada_subProgram.view;
 
    overriding
-   function  depends_on              (Self : access Item;   a_Type    : in     ada_Type.view;
-                                                            Depth     : in     Natural) return Boolean;
+   function  depends_on             (Self : access Item;   a_Type    : in     ada_Type.view;
+                                                           Depth     : in     Natural) return Boolean;
    overriding
-   function  depends_directly_on     (Self : access Item;   a_Type    : in     ada_Type.view;
-                                                            Depth     : in     Natural) return Boolean;
-
+   function  depends_directly_on    (Self : access Item;   a_Type    : in     ada_Type.view;
+                                                           Depth     : in     Natural) return Boolean;
    overriding
    function  depends_on             (Self : access Item;   a_Package : access ada_Package.item'Class;
                                                            Depth     : in     Natural) return Boolean;
-
    overriding
    function  required_Types         (Self : access Item) return ada_Type.views;
+
    overriding
    function  context_required_Types (Self : access Item) return ada_Type.views;
 
    overriding
-   function  resolved_Type           (Self : access Item) return ada_Type.view;
+   function  resolved_Type          (Self : access Item) return ada_Type.view;
 
 
 
