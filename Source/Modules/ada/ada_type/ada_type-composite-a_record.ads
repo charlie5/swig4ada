@@ -1,8 +1,10 @@
-with ada_Variable;
+with
+     ada_Variable;
+
 
 package ada_Type.composite.a_record
 --
---
+-- Models an Ada 'record'.
 --
 is
 
@@ -12,15 +14,13 @@ is
    type Views is array (Positive range <>) of View;
 
 
-
    --  Containers
    --
 
-   package Vectors is new ada.containers.Vectors (Positive, View);
+   package Vectors is new ada.Containers.Vectors (Positive, View);
 
    subtype Vector is Vectors.Vector;
    subtype Cursor is Vectors.Cursor;
-
 
 
    --  Forge
@@ -30,66 +30,59 @@ is
                       Name                : in     unbounded_String       := null_unbounded_String) return View;
 
 
-
    --  Attributes
    --
 
    type record_Components is array (Positive range <>) of access ada_Variable.item'Class;
 
+   function  use_type_Text  (Self : access Item) return String;
 
-   function  use_type_Text                       (Self : access Item) return String;
+   function  is_Limited     (Self : access Item) return Boolean;
+   function  is_tagged_Type (Self : access Item) return Boolean;
+   function  is_Virtual     (Self : access Item) return Boolean;
+   function  is_Abstract    (Self : access Item) return Boolean;
 
-   function  is_Limited                          (Self : access Item) return Boolean;
-   function  is_tagged_Type                      (Self : access Item) return Boolean;
-   function  is_Virtual                          (Self : access Item) return Boolean;
-   function  is_Abstract                         (Self : access Item) return Boolean;
-
-   function  is_Union                            (Self : access Item) return Boolean;
-   procedure is_Union                            (Self : access Item);
-
-
+   function  is_Union       (Self : access Item) return Boolean;
+   procedure is_Union       (Self : access Item);
 
    function  virtual_member_function_Count       (Self : access Item) return Natural;
    function  pure_virtual_member_function_Count  (Self : access Item) return Natural;
    function  total_virtual_member_function_Count (Self : access Item) return Natural;
    function  is_interface_Type                   (Self : access Item) return Boolean;
 
-   procedure add_Base                            (Self : access Item;   base_Class    : in     ada_Type.view);
-   function  base_Classes                        (Self : access Item) return ada_Type.Vector;
+   procedure add_Base        (Self : access Item;   base_Class : in ada_Type.view);
+   function  base_Classes    (Self : access Item) return ada_Type.Vector;
 
-   procedure add_Component                       (Self : access Item;   new_Component : access ada_Variable.item'class);
-   function  component_Count                     (Self : access Item) return Natural;
-   function  Components                          (Self : access Item) return record_Components;
-
+   procedure add_Component   (Self : access Item;   new_Component : access ada_Variable.item'Class);
+   function  component_Count (Self : access Item) return Natural;
+   function  Components      (Self : access Item) return record_Components;
 
    function contains_bit_Fields (Self : access Item) return Boolean;
-
 
    function requires_Interfaces_C_Int_use             (Self : access Item) return Boolean;
    function requires_Interfaces_C_Unsigned_use        (Self : access Item) return Boolean;
    function requires_Interfaces_C_Unsigned_Char_use   (Self : access Item) return Boolean;
    function requires_Interfaces_C_Extensions_bool_use (Self : access Item) return Boolean;
 
+   overriding
+   procedure verify         (Self : access Item);
 
    overriding
-   procedure verify                 (Self : access Item);
+   function  required_Types (Self : access Item) return ada_Type.views;
 
    overriding
-   function  required_Types         (Self : access Item) return ada_Type.views;
+   function  context_required_Types
+                            (Self : access Item) return ada_Type.views;
    overriding
-   function  context_required_Types (Self : access Item) return ada_Type.views;
-
+   function  depends_on     (Self : access Item;   a_Type    : in     ada_Type.view;
+                                                   Depth     : in     Natural) return Boolean;
    overriding
-   function  depends_on            (Self : access Item;   a_Type    : in     ada_Type.view;
-                                                          Depth     : in     Natural) return Boolean;
+   function  depends_directly_on
+                            (Self : access Item;   a_Type    : in     ada_Type.view;
+                                                   Depth     : in     Natural) return Boolean;
    overriding
-   function  depends_directly_on   (Self : access Item;   a_Type    : in     ada_Type.view;
-                                                          Depth     : in     Natural) return Boolean;
-
-   overriding
-   function  depends_on             (Self : access Item;   a_Package : access ada_Package.item'Class;
-                                                           Depth     : in     Natural) return Boolean;
-
+   function  depends_on     (Self : access Item;   a_Package : access ada_Package.item'Class;
+                                                   Depth     : in     Natural) return Boolean;
    overriding
    function resolved_Type (Self : access Item) return ada_Type.view;
 
@@ -101,8 +94,8 @@ private
       record
          base_Classes    : ada_Type.Vector;
 
-         Components      : record_Components (1 .. 500);         -- C++ class member variables (tbd: rename ?).
-         component_Count : Natural                     := 0;
+         Components      : record_Components (1 .. 500);
+         component_Count : Natural := 0;
 
          is_Union                                  : Boolean := False;
          requires_Interfaces_C_Int_use             : Boolean := False;
