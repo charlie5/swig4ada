@@ -322,10 +322,11 @@ is
    is
       use ada_Subprogram.Vectors;
       the_Count : Natural := 0;
+
    begin
-      for Each in 1 .. Natural (Length (Self.declaration_Package.Subprograms))
+      for Subprogram of Self.declaration_Package.Subprograms
       loop
-         if Element (Self.declaration_Package.Subprograms, Each).is_Virtual
+         if Subprogram.is_Virtual
          then
             the_Count := the_Count + 1;
          end if;

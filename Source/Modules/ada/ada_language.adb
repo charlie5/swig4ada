@@ -1637,6 +1637,7 @@ is
       the_Node         :          doh_Node renames n;
       Status           :          C.int    with    Unreferenced;
       Storage          : constant String        := Attribute (the_Node, "storage");
+      is_Virtual       :          Boolean       := Storage = "virtual";
       is_Overriding    :          Boolean       := False;
    begin
       if not Self.in_cpp_Mode
@@ -1648,7 +1649,7 @@ is
       log (+"");
       log (+"'destructorHandler':");
 
-      if Storage = "virtual"
+      if is_Virtual
       then
          Self.current_c_Class.has_virtual_Destructor;
       end if;
@@ -3059,13 +3060,7 @@ is
                new_Function.is_Abstract := check_Attribute (the_Node, "abstract", "1");
             end if;
 
-            if is_Destructor
-            then
-               new_Function.is_Virtual := True;
-            end if;
-
             nameSpace.add (new_Function.all'Access);
-
             return new_Function;
          end;
       else
