@@ -980,7 +980,7 @@ is
                      default_Terminator := +"0";
                   end if;
 
-                  if is_Abstract or is_Limited
+                  if is_Abstract or is_Limited   -- Abstract and limited types cannot be used with interfaces.C.Pointers.
                   then
                      return to_String ("   type " & Self.Name & " is access all " & ic_Pointer_view (Self.base_Type).accessed_Type.qualified_Name & ";");
                   else

@@ -16,7 +16,7 @@ project swig_App is
                         "../Source/Modules/ada/swig_binding/swig_core",
                         "../Source/Modules/ada/swig_binding/swigmod");
 --                        "../Source/Modules/ada/swig_binding-test/doh",
---                        "../Source/Modules/ada/swig_binding-test/swigg",
+--                        "../Source/Modules/ada/swig_binding-test/swig_core",
 --                        "../Source/Modules/ada/swig_binding-test/swigmod");
 
    for Main       use ("swigmain.cxx");
