@@ -205,6 +205,14 @@ is
                                                               type_Qualifier => Element (Next (Cursor)).type_Qualifier));  -- tbd: determine and use correct C type promotion.
                         cull_value_Elements_and_restart_Cursor;
 
+                     elsif for_Operation = "-"
+                     then
+                        replace_Element (the_Vector, Cursor, (Kind           => Value,
+                                                              Value          => Element (Previous (Cursor)).Value - Element (Next (Cursor)).Value,
+                                                              type_Qualifier => Element (Next (Cursor)).type_Qualifier));
+
+                        cull_value_Elements_and_restart_Cursor;
+
                      elsif for_Operation = "*"
                      then
                         replace_Element (the_Vector, Cursor, (Kind           => Value,
@@ -318,7 +326,7 @@ is
             then
                return Element (First (Pad));
             else
-               log (+"expression evaluation failed ... fatal error ... raising exception");
+               log (+"C expression evaluation failed !");
                raise Constraint_Error;
             end if;
          end Result_of;

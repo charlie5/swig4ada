@@ -1255,11 +1255,11 @@ is
                   value_Text := +Image (the_Value);
                end if;
 
-               log ("inserting '" & the_Name & "' into the symbol_value_Map ... value: " & String'(Image (the_Value)));
+--                 log ("inserting '" & the_Name & "' into the symbol_value_Map ... value: " & String'(Image (the_Value)));
                insert (Self.integer_symbol_value_Map,  the_Name, the_Value);
 
             exception
-               when others =>
+               when Constraint_Error =>
                   declare
                      use swigg.Utility;
                   begin
