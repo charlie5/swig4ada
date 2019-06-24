@@ -1259,7 +1259,7 @@ is
                insert (Self.integer_symbol_value_Map,  the_Name, the_Value);
 
             exception
-               when Constraint_Error =>
+               when others => -- Constraint_Error =>
                   declare
                      use swigg.Utility;
                   begin
@@ -2024,10 +2024,10 @@ is
 
                         if "_" & the_type_Name = the_swig_Type
                         then
-                           register_Mirror (Self,
-                                            the_Type_Name,
-                                            new_c_Class,
-                                            doh_Item (-the_type_Name));
+--                             Self.register_Mirror (the_Type_Name,
+--                                                   new_c_Class,
+--                                                   doh_Item (-the_type_Name));
+--                                                   doh_Item (-("_" & the_type_Name)));
                            new_c_Class.Name_is (the_type_Name);
 
                            Self.name_Map_of_c_type.Element (new_c_Class.Name & "[]").Name_is (new_c_Class.Name & "_array");
@@ -2128,6 +2128,7 @@ is
          if Unbounded_String'(+the_swig_Type) /= the_c_Type.Name
          then
             Self.swig_type_Map_of_c_type.insert (the_c_Type.Name, the_c_Type);
+--              Self.swig_type_Map_of_c_type.insert (+the_swig_Type, the_c_Type);
          end if;
 
          Self.name_Map_of_c_type.insert (the_c_Type.Name, the_c_Type);

@@ -34,7 +34,7 @@ project swig_App is
    package Naming is
       for Spec_Suffix ("c")   use ".h";
       for Body_Suffix ("c")   use ".c";
-      for Spec_Suffix ("c++") use ".h";
+      for Spec_Suffix ("c++") use ".hpp";
       for Body_Suffix ("c++") use ".cxx";
    end Naming;
 
