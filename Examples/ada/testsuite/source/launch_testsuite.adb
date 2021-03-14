@@ -95,7 +95,7 @@ begin
       generate ("allowexcept.i");
       generate ("argout.i");
       generate ("array_member.i");
-      generate ("bools.i");            -- BoolStructure& operator=(const BoolStructure &); is broken.
+      --  generate ("bools.i");            -- BoolStructure& operator=(const BoolStructure &); is broken.
       generate ("const_const.i");
       generate ("derived_byvalue.i");
       generate ("empty.i");
