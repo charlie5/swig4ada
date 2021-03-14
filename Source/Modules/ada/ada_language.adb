@@ -621,8 +621,8 @@ is
          --
          declare
             the_function_Wrapper : constant Wrapper.Pointer  := newWrapper;
-            wrapper_Def          : constant doh_String       := the_function_Wrapper.Def;
-            wrapper_Code         : constant doh_String       := the_function_Wrapper.Code;
+            wrapper_Def          : constant doh_String       := doh_String (the_function_Wrapper.Def);
+            wrapper_Code         : constant doh_String       := doh_String (the_function_Wrapper.Code);
 
             overloaded_Name      : constant unbounded_String := to_unbounded_String (get_overloaded_Name (the_Node));
             wrapper_Name         : constant String           := +(doh_Item (Swig_name_wrapper (const_String (-overloaded_name))));
