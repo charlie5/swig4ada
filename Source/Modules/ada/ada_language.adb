@@ -214,11 +214,11 @@ is
       --   Convert 'protected' and 'private' member access to public access, within the generated C runtime.
       --   This is to allow access to protected or private copy constructor and is subject to review (todo).
       --
-      print_to (Doh_Pointer (Self.f_header),    "#define protected public");
-      print_to (Doh_Pointer (Self.f_header),    "#define private   public");
-
-      print_to (Doh_Pointer (Self.f_wrappers),  "#undef protected");
-      print_to (Doh_Pointer (Self.f_wrappers),  "#undef private");
+--        print_to (Doh_Pointer (Self.f_header),    "#define protected public");
+--        print_to (Doh_Pointer (Self.f_header),    "#define private   public");
+--
+--        print_to (Doh_Pointer (Self.f_wrappers),  "#undef protected");
+--        print_to (Doh_Pointer (Self.f_wrappers),  "#undef private");
 
       --  Register names with swig core.
       --
