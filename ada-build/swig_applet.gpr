@@ -1,8 +1,11 @@
-with "gmp";
+with
+     "gmp",
+     "swig_shared_library",
+     "swig_shared_applet";
 
-project swig_App is
-
-   for Languages use ("Ada", "C", "C++");
+project swig_Applet
+is
+   for Languages   use ("Ada", "C", "C++");
    for Source_Dirs use ("../Source/DOH", 
                         "../Source/Modules", 
                         "../Source/Swig", 
@@ -23,12 +26,12 @@ project swig_App is
    for Object_Dir use "build";
    for Exec_Dir   use ".";
 
-   package Ide is
-   end Ide;
 
    package Builder is
-      for Executable ("swigmain.cxx") use "swig_ada";
-      for Default_Switches ("ada")    use ("-g", "-gnatdQ", "-j13");
+      for Executable ("swigmain.cxx")  use "swig_ada";
+      for Default_Switches ("ada")     use ("-g", "-gnatdQ", "-C", "-j0") & swig_shared_Library.Builder'Default_Switches ("ada");
+      for Default_Switches ("c++")     use ("-C", "-j0");
+      for Global_Configuration_Pragmas use swig_shared_Applet.Builder'Global_Configuration_Pragmas;
    end Builder;
 
    package Naming is
@@ -45,20 +48,18 @@ project swig_App is
                       "-gnatye",      --  Check that labels on end statements (ending subprograms), and on exit statements (exiting named loops), are present.
                       "-gnatyx");     --  Check x:no extra parens.
 
-   Compiler_Options :=   ("-gnat12",
-                          "-gnatwa",
+   Compiler_Options :=   ("-gnatwa",
                           "-fno-strict-aliasing")
-                        & Style_Options;
+                        & Style_Options
+                        & swig_shared_Applet.Compiler_Options;
 
    package Compiler is
       for Default_Switches ("ada") use Compiler_Options & "-g";
-      for Default_Switches ("c")   use ("-g"); -- , "-I../Source/Include", "-I../Source/Swig");
+      for Default_Switches ("c")   use ("-g");     -- , "-I../Source/Include", "-I../Source/Swig");
       for Default_Switches ("c++") use ("-g", "-D", "ADA_ENABLED", "-DHAVE_CONFIG_H");
    end Compiler;
 
-   package Binder is
-      for Default_Switches ("ada") use ("-E");
-   end Binder;
+   package Binder renames swig_shared_Applet.Binder;
 
    package Linker is
       for Default_Switches ("ada") use ("-g");
@@ -66,5 +67,4 @@ project swig_App is
       for Default_Switches ("c++") use ("-g", "-lgmp", "-lm", "-lpcre");
    end Linker;
 
-end swig_App;
-
+end swig_Applet;

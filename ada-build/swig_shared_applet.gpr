@@ -1,0 +1,21 @@
+with
+     "swig_shared_library";
+
+abstract 
+project swig_shared_Applet
+is
+   Compiler_Options := swig_shared_Library.Compiler_Options;
+   
+   -- Define the packages.
+   --
+
+   package Ide      renames swig_shared_Library.Ide;
+   package Builder  renames swig_shared_Library.Builder;
+   package Compiler renames swig_shared_Library.Compiler;
+   package Binder   renames swig_shared_Library.Binder;
+
+   package Linker is
+      for Default_Switches ("ada") use ("-g");
+   end Linker;
+
+end swig_shared_Applet;
