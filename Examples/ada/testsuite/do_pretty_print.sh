@@ -2,5 +2,5 @@
 
 set -e
 
-gnatpp -rnb -I../../../..  *.ads    -cargs  -gnatX
+gnatpp -rnb -I../../../..  *.ads  -gnatX
 
