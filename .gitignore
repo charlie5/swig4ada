@@ -16,6 +16,11 @@ b__*.ad[sb]
 *.bexch
 *.db
 swig_gnat
+*.cgpr
+launch_testsuite
+portable_new_line_Token.tmp
+swig_ada
+attic
 
 abstract_class_vtable_bug
 class-fixed_by_hand
@@ -25,6 +30,7 @@ Examples/gnat/class
 Examples/gnat/testsuite/generated
 gnat/attic
 
+swig_binding-test
 swig_binding-new-test
 Makefile
 
