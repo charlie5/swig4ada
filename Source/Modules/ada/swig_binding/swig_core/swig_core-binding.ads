@@ -2,14 +2,11 @@
 --
 with DOHs.Pointers;
 with DOHs.const_String_or_char_ptr;
-with interfaces.c;
 with interfaces.c.strings;
-with swig;
 with swig.pointers;
 with swig_Core.Pointers;
 with swig_Core.Wrapper;
 with swig_Core.pointer_Pointers;
-with interfaces.C;
 
 package swig_Core.Binding is
 

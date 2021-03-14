@@ -5,7 +5,6 @@ with DOHs.Pointers;
 with interfaces.c;
 with interfaces.c.strings;
 with swig;
-with interfaces.C;
 
 package DOHs.Binding is
 

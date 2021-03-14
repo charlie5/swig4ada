@@ -2,7 +2,6 @@
 --
 with interfaces.c;
 with swig;
-with interfaces.C;
 
 package DOHs is
 

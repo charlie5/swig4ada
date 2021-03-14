@@ -4,7 +4,6 @@ with interfaces.c;
 with interfaces.c.strings;
 with swig;
 with swig_Core.Pointers;
-with interfaces.C;
 
 package swigmod is
 

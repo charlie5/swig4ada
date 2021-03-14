@@ -3,7 +3,6 @@
 with DOHs;
 with interfaces.c;
 with interfaces.c.strings;
-with interfaces.C;
 
 package swig_Core is
 

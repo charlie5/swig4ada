@@ -6,9 +6,9 @@ with
      ada.Strings.unbounded,
      ada.Containers.Vectors;
 
-limited
-with
-     c_nameSpace;
+--  limited
+--  with
+--       c_nameSpace;
 
 
 package c_Function

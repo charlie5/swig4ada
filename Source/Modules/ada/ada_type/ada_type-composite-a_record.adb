@@ -1,14 +1,12 @@
 with
      ada_Type.a_subType,
      ada_Type.elementary.an_access.to_type,
-     ada_Variable,
 
      ada_Utility,
      ada_Package,
      ada_Subprogram,
 
      ada.Characters.handling;
-
 
 package body ada_Type.composite.a_record
 is

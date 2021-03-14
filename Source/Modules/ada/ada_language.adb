@@ -1637,7 +1637,7 @@ is
       the_Node         :          doh_Node renames n;
       Status           :          C.int    with    Unreferenced;
       Storage          : constant String        := Attribute (the_Node, "storage");
-      is_Virtual       :          Boolean       := Storage = "virtual";
+      is_Virtual       : constant Boolean       := Storage = "virtual";
       is_Overriding    :          Boolean       := False;
    begin
       if not Self.in_cpp_Mode
