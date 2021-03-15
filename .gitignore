@@ -1,21 +1,24 @@
-# Object file
+### Build Artifacts
+
 *.o
-
-# Ada Library Information
 *.ali
-
 *.stderr
 *.stdout
 *.d
-
 gnatinspect.*
-
 *.a
 *.deps
 b__*.ad[sb]
+b~*.ad[sb]
 *.bexch
 *.db
 *.cgpr
+*.c~
+*-loc.xml
+
+
+### Binaries
+
 launch_testsuite
 portable_new_line_Token.tmp
 swig_ada
@@ -29,8 +32,10 @@ Examples/ada/class
 Examples/ada/testsuite/generated
 ada/attic
 
+
+### Miscellaneous
+
 swig_binding-test
 swig_binding-new-test
 Makefile
-
-*-loc.xml
+current_bug
