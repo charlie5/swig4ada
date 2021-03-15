@@ -38,4 +38,5 @@ ada/attic
 swig_binding-test
 swig_binding-new-test
 Makefile
-current_bug
+tester
+#current_bug
