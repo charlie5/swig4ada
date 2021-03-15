@@ -2,11 +2,16 @@
 
 set -e
 
-
-
 echo Cleaning.
-
 rm -f  *.ads
+rm -f  *.ali
 rm -f  *.cxx
+rm -f  *.c
+rm -f  *.o
 rm -f  *.pp
 rm -f  *.tmp
+rm -f  b~*.adb
+rm -f  *.stdout
+rm -f  *.stderr
+rm -f  b__*.adb
+rm -f  *.bexch

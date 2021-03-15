@@ -1,6 +1,11 @@
 
+static 
+inline
+void
+foo() {};
 
-#define DEG_TO_RAD	0.0174532925199	///< multiply to convert degrees to radians
+
+//#define DEG_TO_RAD    0.0174532925199    ///< multiply to convert degrees to radians
 
 
 /*

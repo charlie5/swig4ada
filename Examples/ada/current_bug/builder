@@ -2,21 +2,23 @@
 
 set -e
 
-
 ./cleaner
 
-
 echo Generating bindings.
-#../../../gnat/swig_gnat  -gnat -c++  -cpperraswarn  -I/usr/include   -I/usr/gnat/include/c++/4.3.4/bits   example.i 
-../../../gnat/swig_gnat  -gnat -c++ -I/usr/include   example.i 
+#../../../ada-build/swig_ada  -ada -c++  -cpperraswarn  -I/usr/include   -I/usr/gnat/include/c++/4.3.4/bits   example.i 
+#../../../ada-build/swig_ada  -ada -c++ -I/usr/include   example.i 
+../../../ada-build/swig_ada  -ada  -I/usr/include   example.i 
 
-
+echo
 echo Pretty printing.
-gnatpp  -rnb  -I../../..   *.ads   -cargs -gnatX -gnat12
-indent  -sob  -di16                  *.c
-indent  -sob  -di16                  *.cxx
+gnatpp  -rnb  -I../../..  *.ads
+indent  -sob  -di16       *.c
+#indent  -sob  -di16       *.cxx
 
-
-
+echo
+echo Compiling.
 gcc -c *.c
-rm *.o
+gnatmake tester -largs example_wrap.o
+
+echo
+./cleaner
