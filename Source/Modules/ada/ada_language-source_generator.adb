@@ -1723,21 +1723,23 @@ is
 
                            if is_overloaded
                            then
-                              append (the_Source.all, overload_resolution_Source (Self                 => the_Subprogram,
-                                                                                  declaration_package  => the_Package.all'Access,
-                                                                                  unique_function_name => unique_function_Name,
-                                                                                  namespace_Prefix     => null_unbounded_String,
-                                                                                  the_ada_Lang         => the_ada_Lang));
+                              append (the_Source.all,
+                                      overload_resolution_Source (Self                 => the_Subprogram,
+                                                                  declaration_package  => the_Package.all'Access,
+                                                                  unique_function_name => unique_function_Name,
+                                                                  namespace_Prefix     => null_unbounded_String,
+                                                                  the_ada_Lang         => the_ada_Lang));
                            elsif the_Subprogram.is_Constructor
                            then
-                              null;
-                              append (the_Source.all, the_Subprogram.pragma_CPP_Constructor_Source (declaration_package  => the_Package.all'Access,
-                                                                                                    unique_function_name => unique_function_Name,
-                                                                                                    in_cpp_Mode          => in_cpp_Mode));
+                              append (the_Source.all,
+                                      the_Subprogram.pragma_CPP_Constructor_Source (declaration_package  => the_Package.all'Access,
+                                                                                    unique_function_name => unique_function_Name,
+                                                                                    in_cpp_Mode          => in_cpp_Mode));
                            else
-                              append (the_Source.all, the_Subprogram.pragma_import_Source (declaration_package  => the_Package.all'Access,
-                                                                                           unique_function_name => unique_function_Name,
-                                                                                           in_cpp_Mode          => in_cpp_Mode));
+                              append (the_Source.all,
+                                      the_Subprogram.pragma_import_Source (declaration_package  => the_Package.all'Access,
+                                                                           unique_function_name => unique_function_Name,
+                                                                           in_cpp_Mode          => in_cpp_Mode));
                            end if;
                         end;
                      end if;
