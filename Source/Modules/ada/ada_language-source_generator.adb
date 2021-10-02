@@ -1080,7 +1080,9 @@ is
       use_of_iCe_unsigned_long_Long_type_Required : Boolean  := False;     -- ditto
 
    begin
-      dlog ("'emit_Spec' -    package name: '" & to_String (the_Package.qualified_Name) & "'");
+      dlog ("");
+      log  ("Creating package '"            & to_String (the_Package.qualified_Name) & "'");
+      dlog ("'emit_Spec' - package name: '" & to_String (the_Package.qualified_Name) & "'");
 
       if   the_Package.is_Core
         or (        declaration_Count = 0

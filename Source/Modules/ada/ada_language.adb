@@ -352,10 +352,9 @@ is
 
          --  Process the main module.
          --
-         dlog (+"");
-         dlog (+"");
-         dlog (+"");
-         dlog (+"Transforming the main module.");
+         log (+"");
+         log (+"");
+         log (+"Transforming the main module.");
 
          --   Set the 'std' C namespace mapping to our top level module top Ada package.
          --
@@ -367,8 +366,8 @@ is
 
       --  Generate the Ada source files.
       --
-      dlog (+"");
-      dlog (+"Creating source for the main module.");
+      log (+"");
+      log (+"Creating source for the main module.");
       ada_Language.source_Generator.generate (Self);
 
 
@@ -380,9 +379,8 @@ is
       Wrapper_pretty_print (String_Pointer (Self.f_init), Self.f_runtime);
       close_File           (Self.f_runtime);
 
-      dlog (+"");
-      dlog (+"");
-      dlog (+"Ada binding generated.");
+      log (+"");
+      log (+"Ada binding generated.");
       unindent_Log;
 
       return SWIG_OK;
@@ -976,7 +974,7 @@ is
          end;
       end;
 
-      dlog (+"end functionWrapper");
+      dlog (+"end functionWrapper.");
       unindent_Log;
       return SWIG_OK;
    end functionWrapper;
@@ -2122,6 +2120,7 @@ is
          raise Aborted;
       end if;
 
+      dlog ("");
       dlog (+"Registering new C type named '" & the_c_Type.Name & "' for swig type '" & to_String (the_swig_Type) & "'    is a new Type: " & Boolean'Image (is_a_new_Type));
 
       do_c_Type :
