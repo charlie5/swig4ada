@@ -10,6 +10,7 @@ with
      ada_Type.composite.an_array,
 
      ada_Utility,
+     Logger,
      doh_Support,
 
      GMP.discrete,
@@ -27,6 +28,7 @@ with
 package body Transformer
 is
    use ada_Utility,
+       Logger,
        doh_Support,
        ada.Strings.unbounded;
 

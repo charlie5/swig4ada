@@ -1,60 +1,19 @@
 with
+     Logger,
      ada.Strings.fixed,
-     ada.Characters.handling,
-     ada.Text_IO;
+     ada.Characters.handling;
 
 
 package body ada_Utility
 is
-   use GMP,
+   use Logger,
+       GMP,
        GMP.discrete,
 
        ada.Strings,
        ada.Strings.fixed,
-       ada.Characters.Handling,
-       ada.Text_IO;
+       ada.Characters.handling;
 
-   -----------
-   --  Logging
-   -----------
-
-   log_Depth : Natural := 0;
-
-   procedure indent_Log
-   is
-   begin
-      log_Depth := log_Depth + 1;
-   end indent_Log;
-
-   procedure unindent_Log
-   is
-   begin
-      log_Depth := log_Depth - 1;
-   end unindent_Log;
-
-
-   procedure log (the_Message : in String;
-                  Level       : in Verbosity := Debug)
-   is
-      Pad : constant String (1 .. 3 * log_Depth) := (others => ' ');
-   begin
-      if verbosity_Level >= Level
-      then
-         put_Line (Pad & the_Message);
-      end if;
-   end log;
-
-
-   procedure log (the_Message : in unbounded_String;   Level : in Verbosity := Debug)
-   is
-   begin
-      log (to_String (the_Message), Level);
-   end log;
-
-
-   ---------
-   --  Other
-   ---------
 
    procedure replace_All (Self       : in out unbounded_String;
                           Token      : in     String;

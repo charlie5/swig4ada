@@ -4,8 +4,8 @@ set -e
 
 ./cleaner
 
+echo
 echo Generating bindings.
-#../../../ada-build/swig_ada  -ada -c++  -cpperraswarn  -I/usr/include   -I/usr/gnat/include/c++/4.3.4/bits   example.i 
 #../../../ada-build/swig_ada  -ada -c++ -I/usr/include   example.i 
 ../../../ada-build/swig_ada  -ada  -I/usr/include   example.i 
 

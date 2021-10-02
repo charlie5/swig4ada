@@ -17,18 +17,6 @@ is
    function "+" (From : in String) return unbounded_String
      renames To_Unbounded_String;
 
-   --  Logging
-   --
-   type Verbosity is (Status, Debug);
-
-   verbosity_Level : Verbosity := Status;
-
-   procedure   indent_Log;
-   procedure unindent_Log;
-
-   procedure log (the_Message : in unbounded_String;   Level : in Verbosity := Debug);
-
-
    --  Other
    --
    new_line_Token : constant String := (1 => ada.Characters.Latin_1.LF);

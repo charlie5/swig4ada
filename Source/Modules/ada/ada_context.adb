@@ -2,12 +2,14 @@ with
      ada_Package,
      ada_type.a_subType,
      ada_type.elementary.an_access.to_type,
-     ada_Utility;
+     ada_Utility,
+     Logger;
 
 
 package body ada_Context
 is
-   use ada_Utility;
+   use ada_Utility,
+       Logger;
 
 
    --  Globals
@@ -273,7 +275,7 @@ is
 
       if required_Type.declaration_Package = null
       then
-         log (+"NULL");
+         log ("NULL");
       end if;
 
 --        log ("required_Type.declaration_Package.qualified_Name: " & required_Type.declaration_Package.qualified_Name);

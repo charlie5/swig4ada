@@ -6,7 +6,9 @@ with
      ada_Type.elementary.an_access.to_type.interfaces_c_pointer,
      ada_Type.elementary.an_access.to_subProgram,
      ada_Type.composite.an_array,
-     ada_Type.composite.a_record;
+     ada_Type.composite.a_record,
+     ada_Utility,
+     Logger;
 
 
 --  old ...
@@ -15,7 +17,6 @@ with a_Namespace,
      ada_Context,
      ada_Type,
      ada_Variable,
-     ada_Utility,
 
      ada.Strings.Maps.constants,
      ada.Characters.handling,
@@ -32,6 +33,7 @@ is
        ada_Type.composite.a_record,
        ada_Context,
        ada_Utility,
+       Logger,
 
        ada.Strings.Maps.constants,
        ada.Characters.handling,
@@ -1078,7 +1080,7 @@ is
       use_of_iCe_unsigned_long_Long_type_Required : Boolean  := False;     -- ditto
 
    begin
-      log ("'emit_Spec' -    package name: '" & the_Package.qualified_Name & "'");
+      log ("'emit_Spec' -    package name: '" & to_String (the_Package.qualified_Name) & "'");
 
       if   the_Package.is_Core
         or (        declaration_Count = 0

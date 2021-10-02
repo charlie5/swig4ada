@@ -2,6 +2,7 @@ with
      GMP.discrete,
 
      ada_Utility,
+     Logger,
 
      ada.Strings.Maps,
      ada.Characters.handling,
@@ -11,6 +12,7 @@ with
 package body ada_Language.c_expression_Resolver
 is
    use ada_Utility,
+       Logger,
        ada.Strings,
        ada.Strings.Maps,
        ada.Characters.Handling,
@@ -68,8 +70,8 @@ is
          then
             return Natural (Value (Element (known_Symbols,  "sizeof_" & new_expression_Type)));
          else
-            log ( "Cannot determine size of " & new_expression_Type);
-            log (+"Please add the following line to your swig interface file ('.i'), where <n> is the appropriate size");
+            log (+"Cannot determine size of " & new_expression_Type);
+            log ("Please add the following line to your swig interface file ('.i'), where <n> is the appropriate size");
             log ( "%constant   int   sizeof_" & new_expression_Type & " = <n>;");
 
             raise required_sizeof_not_defined;

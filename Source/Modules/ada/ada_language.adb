@@ -6,6 +6,7 @@ with
      ada_Language.Forge,
 
      ada_Utility,
+     Logger,
 
      swig_Core.Binding,
      swigMod.Binding,
@@ -31,6 +32,7 @@ is
 
        ada_Variable,
        ada_Utility,
+       Logger,
 
        swig_Core,
        swig_Core.Binding,
@@ -102,11 +104,9 @@ is
       use type C.int;
       Each : C.int := 0;
    begin
-      verbosity_Level := Debug;
-
       indent_Log;
-      log (+"",                   Status);
-      log (+"Parsing C headers.", Status);
+      log ("");
+      log ("Parsing C headers.");
 
       log (+"");
       log (+"main");
@@ -337,7 +337,7 @@ is
          begin
             while has_Element (Cursor)
             loop
-               log ("Transforming module: '" & Element (Cursor).Name & "'", Status);
+               log ("Transforming module: '" & Element (Cursor).Name & "'");
 
                --   Set the 'std' C namespace mapping to this modules top level Ada package.
                --
@@ -353,7 +353,7 @@ is
          log (+"");
          log (+"");
          log (+"");
-         log (+"Transforming the main module.", Status);
+         log (+"Transforming the main module.");
 
          --   Set the 'std' C namespace mapping to our top level module top Ada package.
          --
@@ -366,7 +366,7 @@ is
       --  Generate the Ada source files.
       --
       log (+"");
-      log (+"Creating source for the main module.", Status);
+      log (+"Creating source for the main module.");
       ada_Language.source_Generator.generate (Self);
 
 
@@ -379,8 +379,8 @@ is
       close_File           (Self.f_runtime);
 
       log (+"");
-      log (+"", Status);
-      log (+"Ada binding generated.", Status);
+      log (+"");
+      log (+"Ada binding generated.");
       unindent_Log;
 
       return SWIG_OK;
@@ -450,7 +450,7 @@ is
    begin
       indent_Log;
       log (+"");
-      log (+"moduleDirective: '" & to_String (the_Name) & "'",  Debug);
+      log (+"moduleDirective: '" & to_String (the_Name) & "'");
 
       unindent_Log;
       return SWIG_OK;
@@ -484,7 +484,7 @@ is
    begin
       indent_Log;
       log (+"");
-      log (+"namespaceDeclaration: '" & to_String (the_Name) & "'", Debug);
+      log (+"namespaceDeclaration: '" & to_String (the_Name) & "'");
 
       if the_Name /= ""
       then
@@ -2008,9 +2008,9 @@ is
                         new_c_Class : c_Type.view;
                         class_Name  : doh_swigType := doh_swigType (doh_Copy (doh_Item (-Name)));
                      begin
-                        log (+class_Name);
+                        log (class_Name);
                         strip_all_qualifiers (class_Name);
-                        log (+class_Name);
+                        log (class_Name);
 
                         if Self.swig_type_Map_of_c_type.Contains (+class_Name)
                         then
@@ -2178,7 +2178,7 @@ is
                                                            the_c_Type.Name & "*",
                                                            accessed_type => the_c_Type);
 
-            log ("Adding C pointer type for swig type '" &  (+pointer_swigType) & "'    C pointer name is '" & (+the_c_type_Pointer.qualified_Name) & "'");
+            log ("Adding C pointer type for swig type '" &  to_String (pointer_swigType) & "'    C pointer name is '" & (+the_c_type_Pointer.qualified_Name) & "'");
 
             Self.swig_type_Map_of_c_type.insert (+pointer_swigType, the_c_type_Pointer);
 
@@ -2847,7 +2847,7 @@ is
 
                      if not (String'(+doh_Item (param_swigType)) = "")     -- Guard against an empty parameter list.
                      then
-                        log ("to_c_Parameters ~ param_swigType: '" & (+doh_Item (param_swigType)) & "'");
+                        log ("to_c_Parameters ~ param_swigType: '" & to_String (doh_Item (param_swigType)) & "'");
 
                         strip_all_qualifiers (doh_swigType (param_swigType));
 

@@ -3,6 +3,7 @@ with
      c_nameSpace,
      c_Function,
      ada_Utility,
+     Logger,
 
      ada.Characters.handling;
 
@@ -13,6 +14,7 @@ is
        GMP.discrete,
        c_nameSpace,
        ada_Utility,
+       Logger,
 
        ada.Characters.handling;
 
@@ -294,7 +296,7 @@ is
    begin
       if Self.my.nameSpace = null
       then
-         log (+"Null nameSpace !");
+         log ("Null nameSpace !");
       end if;
 
       if Self.my.nameSpace.Name = "std"
