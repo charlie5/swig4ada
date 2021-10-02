@@ -24,6 +24,8 @@ is
    is
    begin
       put_Line (Message);
+      dlog     (Message);
+
       return True;
    end log;
 
