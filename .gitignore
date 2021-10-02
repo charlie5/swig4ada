@@ -1,5 +1,6 @@
+###################
 ### Build Artifacts
-
+#
 *.o
 *.ali
 *.stderr
@@ -15,10 +16,14 @@ b~*.ad[sb]
 *.cgpr
 *.c~
 *-loc.xml
+*.idx
+.clang-format
+.clangd
 
 
+############
 ### Binaries
-
+#
 launch_testsuite
 portable_new_line_Token.tmp
 swig_ada
@@ -33,10 +38,12 @@ Examples/ada/testsuite/generated
 ada/attic
 
 
+#################
 ### Miscellaneous
-
+#
 swig_binding-test
 swig_binding-new-test
 Makefile
 tester
+swig4ada-debug.log
 #current_bug
