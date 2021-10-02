@@ -79,7 +79,7 @@ is
    is
       Indent : constant String (1 .. 3 * log_Depth) := (others => ' ');
    begin
-      put_Line (Indent & Message);
+      put_Line (debug_Log, Indent & Message);
       return True;
    end dlog;
 
