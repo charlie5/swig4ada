@@ -1,0 +1,45 @@
+with
+     "gmp",
+     "swig_shared_library",
+     "swig_shared_applet";
+
+project swig_Applet_ada
+is
+   for Languages   use ("Ada");
+   for Source_Dirs use ("../Source/Modules/ada",
+                        "../Source/Modules/ada/ada_type",
+                        "../Source/Modules/ada/swig_binding/doh",
+                        "../Source/Modules/ada/swig_binding/swig_core",
+                        "../Source/Modules/ada/swig_binding/swigmod");
+
+   for Object_Dir use "build";
+
+
+   package Builder is
+      for Default_Switches ("ada")     use ("-g", "-gnatdQ", "-C", "-j0") & swig_shared_Library.Builder'Default_Switches ("ada");
+      for Global_Configuration_Pragmas use swig_shared_Applet.Builder'Global_Configuration_Pragmas;
+   end Builder;
+
+
+   Style_Options  := ("-gnatyknp",    --  Check casings: a:attribute, k:keywords, n:package Standard identifiers, p:pragma, r:identifier references.
+                      "-gnatybfhi",   --  Check b:no blanks at end of lines, f:no ff/vtabs, h: no htabs, i:if-then layout, u:no unnecessary blank lines.
+                      "-gnatyO",      --  Check that overriding subprograms are explicitly marked as such.
+                      "-gnatye",      --  Check that labels on end statements (ending subprograms), and on exit statements (exiting named loops), are present.
+                      "-gnatyx");     --  Check x:no extra parens.
+
+   Compiler_Options :=   ("-gnatwa",
+                          "-fno-strict-aliasing")
+                        & Style_Options
+                        & swig_shared_Applet.Compiler_Options;
+
+   package Compiler is
+      for Default_Switches ("ada") use Compiler_Options & "-g";
+   end Compiler;
+
+   package Binder renames swig_shared_Applet.Binder;
+
+   package Linker is
+      for Default_Switches ("ada") use ("-g");
+   end Linker;
+
+end swig_Applet_ada;

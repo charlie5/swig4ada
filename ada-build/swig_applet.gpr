@@ -1,26 +1,18 @@
 with
      "gmp",
-     "swig_shared_library",
-     "swig_shared_applet";
+     "swig_applet_c",
+     "swig_applet_ada";
 
 project swig_Applet
 is
-   for Languages   use ("Ada", "C", "C++");
-   for Source_Dirs use ("../Source/DOH", 
-                        "../Source/Modules", 
-                        "../Source/Swig", 
-                        "../Source/Include", 
-                        "../Source/CParse", 
-                        "../Source/Preprocessor",
+   for Languages   use ("C++");
+   for Source_Dirs use ("../Source/Modules", 
                         "../Source/Doxygen",
                         "../Source/Modules/ada",
                         "../Source/Modules/ada/ada_type",
                         "../Source/Modules/ada/swig_binding/doh",
                         "../Source/Modules/ada/swig_binding/swig_core",
                         "../Source/Modules/ada/swig_binding/swigmod");
---                        "../Source/Modules/ada/swig_binding-test/doh",
---                        "../Source/Modules/ada/swig_binding-test/swig_core",
---                        "../Source/Modules/ada/swig_binding-test/swigmod");
 
    for Main       use ("swigmain.cxx");
    for Object_Dir use "build";
@@ -29,41 +21,29 @@ is
 
    package Builder is
       for Executable ("swigmain.cxx")  use "swig_ada";
-      for Default_Switches ("ada")     use ("-g", "-gnatdQ", "-C", "-j0") & swig_shared_Library.Builder'Default_Switches ("ada");
       for Default_Switches ("c++")     use ("-C", "-j0");
-      for Global_Configuration_Pragmas use swig_shared_Applet.Builder'Global_Configuration_Pragmas;
    end Builder;
 
+
    package Naming is
-      for Spec_Suffix ("c")   use ".h";
-      for Body_Suffix ("c")   use ".c";
-      for Spec_Suffix ("c++") use ".hpp";
+      for Spec_Suffix ("c++") use ".h";
       for Body_Suffix ("c++") use ".cxx";
    end Naming;
 
 
-   Style_Options  := ("-gnatyknp",    --  Check casings: a:attribute, k:keywords, n:package Standard identifiers, p:pragma, r:identifier references.
-                      "-gnatybfhi",   --  Check b:no blanks at end of lines, f:no ff/vtabs, h: no htabs, i:if-then layout, u:no unnecessary blank lines.
-                      "-gnatyO",      --  Check that overriding subprograms are explicitly marked as such.
-                      "-gnatye",      --  Check that labels on end statements (ending subprograms), and on exit statements (exiting named loops), are present.
-                      "-gnatyx");     --  Check x:no extra parens.
-
-   Compiler_Options :=   ("-gnatwa",
-                          "-fno-strict-aliasing")
-                        & Style_Options
-                        & swig_shared_Applet.Compiler_Options;
-
    package Compiler is
-      for Default_Switches ("ada") use Compiler_Options & "-g";
-      for Default_Switches ("c")   use ("-g");     -- , "-I../Source/Include", "-I../Source/Swig");
-      for Default_Switches ("c++") use ("-g", "-D", "ADA_ENABLED", "-DHAVE_CONFIG_H");
+      for Default_Switches ("c++") use ("-g", "-D", "ADA_ENABLED", "-DHAVE_CONFIG_H",
+                                        "-I../../Source/Swig",
+                                        "-I../../Source/Include",
+                                        "-I../../Source/DOH",
+                                        "-I../../Source/Preprocessor",
+                                        "-I../../Source/Modules",
+                                        "-I../../Source/CParse",
+                                        "-I../../Source/Doxygen");
    end Compiler;
 
-   package Binder renames swig_shared_Applet.Binder;
 
    package Linker is
-      for Default_Switches ("ada") use ("-g");
-      for Default_Switches ("c")   use ("-g", "-lm");
       for Default_Switches ("c++") use ("-g", "-lgmp", "-lm", "-lpcre");
    end Linker;
 

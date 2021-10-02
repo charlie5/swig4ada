@@ -72,8 +72,6 @@ is
             when "Windows_NT"  =>
                Compiler_Options := Compiler_Options & "-fno-inline"
                                                     & "-gnatVcdeimoprst";
---                                                  & "-gnatVf"             -- (2016) turned off floating point validity check, seems to give  
-                                                                            -- false positives on a scalar product for collision detection
             when "MacOSX" =>
                null;
          end case;

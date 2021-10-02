@@ -1,0 +1,35 @@
+project swig_Applet_C
+is
+   for Languages   use ("C");
+   for Source_Dirs use ("../Source/DOH",
+                        "../Source/Swig",
+                        "../Source/CParse",
+                        "../Source/Preprocessor",
+                        "../Source/Modules/ada/swig_binding/doh",
+                        "../Source/Modules/ada/swig_binding/swig_core");
+
+   for Object_Dir use "build";
+
+
+   package Naming is
+      for Spec_Suffix ("c") use ".h";
+      for Body_Suffix ("c") use ".c";
+   end Naming;
+
+
+   package Compiler is
+      for Default_Switches ("c") use ("-g",
+                                      "-I../../Source/Swig",
+                                      "-I../../Source/Include",
+                                      "-I../../Source/DOH",
+                                      "-I../../Source/Preprocessor",
+                                      "-I../../Source/CParse",
+                                      "-I../../Source/Doxygen");
+   end Compiler;
+
+
+   package Linker is
+      for Default_Switches ("c") use ("-g", "-lm");
+   end Linker;
+
+end swig_Applet_C;
