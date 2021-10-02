@@ -21,4 +21,4 @@ gcc -c *.c
 gnatmake tester -largs example_wrap.o
 
 echo
-./cleaner
+#./cleaner
