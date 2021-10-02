@@ -1080,7 +1080,7 @@ is
       use_of_iCe_unsigned_long_Long_type_Required : Boolean  := False;     -- ditto
 
    begin
-      log ("'emit_Spec' -    package name: '" & to_String (the_Package.qualified_Name) & "'");
+      dlog ("'emit_Spec' -    package name: '" & to_String (the_Package.qualified_Name) & "'");
 
       if   the_Package.is_Core
         or (        declaration_Count = 0
@@ -1845,7 +1845,7 @@ is
             put    (the_File,  to_String (spec_Source));
             close  (the_File);
          exception
-            when others => log (+"unable to create package file: '" & file_Name & "'");
+            when others => dlog (+"unable to create package file: '" & file_Name & "'");
          end;
       end write_the_File;
    end emit_Spec;

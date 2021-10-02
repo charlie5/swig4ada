@@ -296,7 +296,7 @@ is
    begin
       if Self.my.nameSpace = null
       then
-         log ("Null nameSpace !");
+         dlog ("Null nameSpace !");
       end if;
 
       if Self.my.nameSpace.Name = "std"

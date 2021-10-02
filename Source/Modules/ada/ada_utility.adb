@@ -157,7 +157,7 @@ is
                when '('        => null;
                when ')'        => exit;
                when '0' .. '9' => Result := Result * to_Integer (10)  +  to_Integer (Long_Long_Integer'Value (Self (Each .. Each)));
-               when others     => log ("bad numeric character: '" & Self (Each) & "'   '" & Self & "'");
+               when others     => dlog ("bad numeric character: '" & Self (Each) & "'   '" & Self & "'");
                   raise Constraint_Error;
             end case;
          end loop;
@@ -173,7 +173,7 @@ is
                when 'A' .. 'F' => Result := Result * to_Integer (16) + to_Integer (Character'Pos (Self (Each)) - Character'Pos ('A') + 10);
                when 'a' .. 'f' => Result := Result * to_Integer (16) + to_Integer (Character'Pos (Self (Each)) - Character'Pos ('a') + 10);
                when ')'        => exit;
-               when others     => log ("bad hex character: '" & Self (Each) & "'   '" & Self & "'");
+               when others     => dlog ("bad hex character: '" & Self (Each) & "'   '" & Self & "'");
                                   raise Constraint_Error;
             end case;
          end loop;

@@ -70,9 +70,9 @@ is
          then
             return Natural (Value (Element (known_Symbols,  "sizeof_" & new_expression_Type)));
          else
-            log (+"Cannot determine size of " & new_expression_Type);
+            dlog (+"Cannot determine size of " & new_expression_Type);
             log ("Please add the following line to your swig interface file ('.i'), where <n> is the appropriate size");
-            log ( "%constant   int   sizeof_" & new_expression_Type & " = <n>;");
+            dlog ( "%constant   int   sizeof_" & new_expression_Type & " = <n>;");
 
             raise required_sizeof_not_defined;
          end if;
@@ -328,7 +328,7 @@ is
             then
                return Element (First (Pad));
             else
-               log (+"C expression evaluation failed !");
+               dlog (+"C expression evaluation failed !");
                raise Constraint_Error;
             end if;
          end Result_of;

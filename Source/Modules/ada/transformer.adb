@@ -105,7 +105,7 @@ is
                   name_Map_of_ada_type.insert (new_ada_Array.qualified_Name,
                                                new_ada_Array.all'Access);
 
-                  log ("the_base_c_Type.Name: " & the_base_c_Type.Name & "[]");
+                  dlog ("the_base_c_Type.Name: " & the_base_c_Type.Name & "[]");
 
                   c_type_Map_of_ada_type.insert (name_Map_of_c_type.Element (the_base_c_Type.Name & "[]"),   -- Register the new pointer.
                                                  new_ada_Array.all'Access);
@@ -213,8 +213,8 @@ is
                   case the_c_Type.c_type_Kind
                   is
                      when c_type.Typedef =>
-                        log (+"");
-                        log ("adding typedef: '" & the_c_Type.Name & "'      base_Type: '" & the_c_type.base_Type.Name & "'");
+                        dlog (+"");
+                        dlog ("adding typedef: '" & the_c_Type.Name & "'      base_Type: '" & the_c_type.base_Type.Name & "'");
 
                         declare
                            new_ada_Type : ada_Type.view;
@@ -258,7 +258,7 @@ is
                                                                            ada_Utility.to_ada_Identifier (the_c_Type.Name),
                                                                            name_Map_of_ada_type.Element (+"swig.opaque_structure")).all'Access;
 
-                           log ("adding opaque struct'" & the_c_Type.Name & "'");
+                           dlog ("adding opaque struct'" & the_c_Type.Name & "'");
 
                            Result.Package_top    .add    (new_ada_Type);
                            c_type_Map_of_ada_type.insert (the_c_Type, new_ada_Type);
@@ -272,7 +272,7 @@ is
                            new_ada_Type := ada_type.a_subtype.new_Subtype (Result.Package_top,
                                                                            ada_Utility.to_ada_Identifier (the_c_Type.Name),
                                                                            name_Map_of_ada_type.Element (+"swig.incomplete_class")).all'Access;
-                           log ("adding incomplete class '" & the_c_Type.Name & "'");
+                           dlog ("adding incomplete class '" & the_c_Type.Name & "'");
 
                            Result.Package_top    .add    (new_ada_Type);
                            c_type_Map_of_ada_type.insert (the_c_Type, new_ada_Type);
@@ -280,8 +280,8 @@ is
 
 
                      when c_type.type_Pointer =>
-                        log (+"");
-                        log ("adding type_Pointer '" & the_c_Type.Name & "'");
+                        dlog (+"");
+                        dlog ("adding type_Pointer '" & the_c_Type.Name & "'");
 
                         if        the_c_Type.accessed_Type.c_type_Kind = c_type.c_Class
                           or else (         the_c_Type.accessed_Type.          c_type_Kind = c_type.typeDef
@@ -308,16 +308,16 @@ is
                            end;
 
                         else
-                           log ("the_c_Type.accessed_Type:   " & the_c_Type.accessed_Type.Name);
-                           log ("the corresponding ada Type: " & c_type_Map_of_ada_type.Element (the_c_Type.accessed_Type).Name);
+                           dlog ("the_c_Type.accessed_Type:   " & the_c_Type.accessed_Type.Name);
+                           dlog ("the corresponding ada Type: " & c_type_Map_of_ada_type.Element (the_c_Type.accessed_Type).Name);
                            add_type_Pointer_for (c_type_Map_of_ada_type.Element (the_c_Type.accessed_Type),
                                                  the_c_Type.accessed_Type);
                         end if;
 
 
                      when c_type.function_Pointer =>
-                        log (+"");
-                        log ("adding function_Pointer '" & the_c_Type.Name & "'");
+                        dlog (+"");
+                        dlog ("adding function_Pointer '" & the_c_Type.Name & "'");
 
                         declare
                            use DOHs.Pointers;
@@ -370,8 +370,8 @@ is
 
 
                      when c_type.c_Class =>
-                        log (+"");
-                        log ("adding C struct/class '" & the_c_Type.Name & "'");
+                        dlog (+"");
+                        dlog ("adding C struct/class '" & the_c_Type.Name & "'");
 
                         declare
                            use ada_Type.composite.a_record;
@@ -402,8 +402,8 @@ is
 
 
                      when c_type.Enum =>
-                        log (+"");
-                        log ("adding enum '" & the_c_Type.Name & "'");
+                        dlog (+"");
+                        dlog ("adding enum '" & the_c_Type.Name & "'");
 
                         declare
                            use c_type.enum_literal_Vectors, GMP.discrete;
@@ -467,19 +467,19 @@ is
 
 
                      when c_type.array_Type =>
-                        log (+"");
-                        log ("adding array_Type '" & the_c_Type.Name & "' of element type: '" & the_c_Type.element_Type.qualified_Name & "'");
+                        dlog (+"");
+                        dlog ("adding array_Type '" & the_c_Type.Name & "' of element type: '" & the_c_Type.element_Type.qualified_Name & "'");
 
                         if         the_c_Type.element_Type.c_type_Kind = c_type.c_Class   -- Array of a class is already created when the class is
                           and then c_type_Map_of_ada_type.contains (the_c_Type)           -- created, to allow for Self-referential class members (see below).
                         then
-                           log (+"Skipping array of class.");
+                           dlog (+"Skipping array of class.");
                            null;
 
                         elsif      the_c_Type.element_Type.c_type_Kind = c_type.typeDef   -- Array of a class is already created when the class is
                           and then c_type_Map_of_ada_type.contains (the_c_Type)           -- created, to allow for Self-referential class members (see below).
                         then
-                           log (+"Skipping array of 'typedef'ed class.");
+                           dlog (+"Skipping array of 'typedef'ed class.");
                            null;
 
                         else
@@ -538,8 +538,8 @@ is
                                                               new_ada_Array.all'Access);
                               exception
                                  when Constraint_Error =>
-                                    log (+"");
-                                    log ("Unable to add '" & new_ada_Array.qualified_Name & "'into the Ada type map, as it already exists there.");
+                                    dlog (+"");
+                                    dlog ("Unable to add '" & new_ada_Array.qualified_Name & "'into the Ada type map, as it already exists there.");
                                     raise ada_Language.Aborted;
                               end;
                               c_type_Map_of_ada_type.insert (the_c_Type, new_ada_Array.all'Access);
@@ -548,7 +548,7 @@ is
 
 
                      when others =>
-                        log ("unhandled c type Kind for : " & the_c_Type.Name & "   " & c_Type.a_c_type_Kind'Image (the_c_Type.c_type_Kind));
+                        dlog ("unhandled c type Kind for : " & the_c_Type.Name & "   " & c_Type.a_c_type_Kind'Image (the_c_Type.c_type_Kind));
                         raise Program_Error;
                   end case;
 

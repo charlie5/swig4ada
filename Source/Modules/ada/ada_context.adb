@@ -275,7 +275,7 @@ is
 
       if required_Type.declaration_Package = null
       then
-         log ("NULL");
+         dlog ("NULL");
       end if;
 
 --        log ("required_Type.declaration_Package.qualified_Name: " & required_Type.declaration_Package.qualified_Name);
