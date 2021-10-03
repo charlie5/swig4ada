@@ -2155,6 +2155,9 @@ is
                the_c_type_Array := c_type.new_array_Type (the_c_Type.nameSpace,
                                                           the_c_Type.Name & "[]",
                                                           element_type => the_c_Type);
+
+               dlog ("Adding C array   type for swig type '" &  to_String (array_swigType) & "'    C array name is '" & (+the_c_type_Array.qualified_Name) & "'");
+
                the_c_type_Array.add_array_Dimension;
 
                Self.swig_type_Map_of_c_type.insert (+array_swigType, the_c_type_Array);

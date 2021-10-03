@@ -673,100 +673,151 @@ is
 
       associate_core_c_and_ada_Types :
       begin
-         ---  General
-         --
-
-         --  void
+         ----------
+         --  'void'
          --
          Self.associate (Self.fetch_ada_Type (+"swig.void"), Self.fetch_c_Type (+"void"));
 
 
-         --  void_ptr
+         ---------------
+         -- C 'void_ptr'
          --
          Self.associate (Self.fetch_ada_Type (+"swig.void_ptr"),                   Self.fetch_c_Type (+"void*"));
 
          Self.associate (Self.fetch_ada_Type (+"swig.void_ptr_Array"),             Self.fetch_c_Type (+"void*[]"));
-         Self.associate (Self.fetch_ada_Type (+"swig.pointers.void_ptr_Pointer"),  Self.fetch_c_Type (+"void**"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.void_ptr_Pointer"),  Self.fetch_c_Type (+"void**" ));
 
+
+         -------------------
          --  C 'std::string'
          --
-         Self.associate (Self.fetch_ada_Type (+"swig.pointers.std_string"),         Self.fetch_c_Type (+"std::string"));
-         Self.associate (Self.fetch_ada_Type (+"swig.pointers.std_string_Pointer"), Self.fetch_c_Type (+"std::string*"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.std_string"),                 Self.fetch_c_Type (+"std::string"));
 
+         Self.associate (Self.fetch_ada_Type (+"swig.std_string_Array"),                    Self.fetch_c_Type (+"std::string[]"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.std_string_Pointer"),         Self.fetch_c_Type (+"std::string*" ));
+
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.std_string_pointer_Array"),   Self.fetch_c_Type (+"std::string*[]"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.std_string_pointer_Pointer"), Self.fetch_c_Type (+"std::string**" ));
+
+
+         --------------
          --  C 'size_t'
          --
-         Self.associate (Self.fetch_ada_Type (+"interfaces.c.size_t"),          Self.fetch_c_Type (+"size_t"));
-         Self.associate (Self.fetch_ada_Type (+"swig.size_t_Array"),            Self.fetch_c_Type (+"size_t[]"));
-         Self.associate (Self.fetch_ada_Type (+"swig.pointers.size_t_Pointer"), Self.fetch_c_Type (+"size_t*"));
+         Self.associate (Self.fetch_ada_Type (+"interfaces.c.size_t"),                  Self.fetch_c_Type (+"size_t"));
 
+         Self.associate (Self.fetch_ada_Type (+"swig.size_t_Array"),                    Self.fetch_c_Type (+"size_t[]"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.size_t_Pointer"),         Self.fetch_c_Type (+"size_t*" ));
+
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.size_t_pointer_Array"),   Self.fetch_c_Type (+"size_t*[]"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.size_t_pointer_Pointer"), Self.fetch_c_Type (+"size_t**" ));
+
+
+         -----------------
          --  C 'ptrdiff_t'
          --
-         Self.associate (Self.fetch_ada_Type (+"interfaces.c.ptrdiff_t"),          Self.fetch_c_Type (+"ptrdiff_t"));
-         Self.associate (Self.fetch_ada_Type (+"swig.ptrdiff_t_Array"),            Self.fetch_c_Type (+"ptrdiff_t[]"));
-         Self.associate (Self.fetch_ada_Type (+"swig.pointers.ptrdiff_t_Pointer"), Self.fetch_c_Type (+"ptrdiff_t*"));
+         Self.associate (Self.fetch_ada_Type (+"interfaces.c.ptrdiff_t"),                  Self.fetch_c_Type (+"ptrdiff_t"));
 
+         Self.associate (Self.fetch_ada_Type (+"swig.ptrdiff_t_Array"),                    Self.fetch_c_Type (+"ptrdiff_t[]"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.ptrdiff_t_Pointer"),         Self.fetch_c_Type (+"ptrdiff_t*" ));
+
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.ptrdiff_t_pointer_Array"),   Self.fetch_c_Type (+"ptrdiff_t*[]"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.ptrdiff_t_pointer_Pointer"), Self.fetch_c_Type (+"ptrdiff_t**" ));
+
+
+         --------
          --  bool
          --
-         Self.associate (Self.fetch_ada_Type (+"swig.bool"),                  Self.fetch_c_Type (+"bool"));
-         Self.associate (Self.fetch_ada_Type (+"swig.bool_Array"),            Self.fetch_c_Type (+"bool[]"));
-         Self.associate (Self.fetch_ada_Type (+"swig.pointers.bool_Pointer"), Self.fetch_c_Type (+"bool*"));
+         Self.associate (Self.fetch_ada_Type (+"swig.bool"),                          Self.fetch_c_Type (+"bool"));
+
+         Self.associate (Self.fetch_ada_Type (+"swig.bool_Array"),                    Self.fetch_c_Type (+"bool[]"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.bool_Pointer"),         Self.fetch_c_Type (+"bool*" ));
+
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.bool_pointer_Array"),   Self.fetch_c_Type (+"bool*[]"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.bool_pointer_Pointer"), Self.fetch_c_Type (+"bool**" ));
 
 
+         -----------
          ---  Signed
          --
 
+         -------------
          --  C 'short'
          --
          Self.associate (Self.fetch_ada_Type (+"interfaces.c.short"),                  Self.fetch_c_Type (+"short"));
 
          Self.associate (Self.fetch_ada_Type (+"swig.short_Array"),                    Self.fetch_c_Type (+"short[]"));
-         Self.associate (Self.fetch_ada_Type (+"swig.pointers.short_Pointer"),         Self.fetch_c_Type (+"short*"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.short_Pointer"),         Self.fetch_c_Type (+"short*" ));
 
          Self.associate (Self.fetch_ada_Type (+"swig.pointers.short_pointer_Array"),   Self.fetch_c_Type (+"short*[]"));
-         Self.associate (Self.fetch_ada_Type (+"swig.pointers.short_pointer_Pointer"), Self.fetch_c_Type (+"short**"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.short_pointer_Pointer"), Self.fetch_c_Type (+"short**" ));
 
+         -----------
          --  C 'int'
          --
          Self.associate (Self.fetch_ada_Type (+"interfaces.c.int"),                  Self.fetch_c_Type (+"int"));
 
          Self.associate (Self.fetch_ada_Type (+"swig.int_Array"),                    Self.fetch_c_Type (+"int[]"));
-         Self.associate (Self.fetch_ada_Type (+"swig.pointers.int_Pointer"),         Self.fetch_c_Type (+"int*"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.int_Pointer"),         Self.fetch_c_Type (+"int*" ));
 
          Self.associate (Self.fetch_ada_Type (+"swig.pointers.int_pointer_Array"),   Self.fetch_c_Type (+"int*[]"));
-         Self.associate (Self.fetch_ada_Type (+"swig.pointers.int_pointer_Pointer"), Self.fetch_c_Type (+"int**"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.int_pointer_Pointer"), Self.fetch_c_Type (+"int**" ));
 
+         ------------
          --  C 'long'
          --
          Self.associate (Self.fetch_ada_Type (+"interfaces.c.long"),                  Self.fetch_c_Type (+"long"));
 
          Self.associate (Self.fetch_ada_Type (+"swig.long_Array"),                    Self.fetch_c_Type (+"long[]"));
-         Self.associate (Self.fetch_ada_Type (+"swig.pointers.long_Pointer"),         Self.fetch_c_Type (+"long*"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.long_Pointer"),         Self.fetch_c_Type (+"long*" ));
 
          Self.associate (Self.fetch_ada_Type (+"swig.pointers.long_pointer_Array"),   Self.fetch_c_Type (+"long*[]"));
-         Self.associate (Self.fetch_ada_Type (+"swig.pointers.long_pointer_Pointer"), Self.fetch_c_Type (+"long**"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.long_pointer_Pointer"), Self.fetch_c_Type (+"long**" ));
 
+         -----------------
          --  C 'long long'
          --
-         Self.associate (Self.fetch_ada_Type (+"swig.long_long"),       Self.fetch_c_Type (+"long long"));
-         Self.associate (Self.fetch_ada_Type (+"swig.long_long_Array"), Self.fetch_c_Type (+"long long[]"));
+         Self.associate (Self.fetch_ada_Type (+"swig.long_long"),                          Self.fetch_c_Type (+"long long"));
 
+         Self.associate (Self.fetch_ada_Type (+"swig.long_long_Array"),                    Self.fetch_c_Type (+"long long[]"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.long_long_Pointer"),         Self.fetch_c_Type (+"long long*" ));
+
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.long_long_pointer_Array"),   Self.fetch_c_Type (+"long long*[]"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.long_long_pointer_Pointer"), Self.fetch_c_Type (+"long long**" ));
+
+         --------------
          --  C 'int8_t'
          --
          Self.associate (Self.fetch_ada_Type (+"interfaces.Integer_8"),         Self.fetch_c_Type (+"int8_t"));
-         Self.associate (Self.fetch_ada_Type (+"swig.int8_t_Array"),            Self.fetch_c_Type (+"int8_t[]"));
-         Self.associate (Self.fetch_ada_Type (+"swig.pointers.int8_t_Pointer"), Self.fetch_c_Type (+"int8_t*"));
 
+         Self.associate (Self.fetch_ada_Type (+"swig.int8_t_Array"),            Self.fetch_c_Type (+"int8_t[]"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.int8_t_Pointer"), Self.fetch_c_Type (+"int8_t*" ));
+
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.int8_t_pointer_Array"),   Self.fetch_c_Type (+"int8_t*[]"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.int8_t_pointer_Pointer"), Self.fetch_c_Type (+"int8_t**" ));
+
+
+         ---------------
          --  C 'int16_t'
          --
          Self.associate (Self.fetch_ada_Type (+"interfaces.Integer_16"),         Self.fetch_c_Type (+"int16_t"));
-         Self.associate (Self.fetch_ada_Type (+"swig.int16_t_Array"),            Self.fetch_c_Type (+"int16_t[]"));
-         Self.associate (Self.fetch_ada_Type (+"swig.pointers.int16_t_Pointer"), Self.fetch_c_Type (+"int16_t*"));
 
+         Self.associate (Self.fetch_ada_Type (+"swig.int16_t_Array"),            Self.fetch_c_Type (+"int16_t[]"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.int16_t_Pointer"), Self.fetch_c_Type (+"int16_t*" ));
+
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.int16_t_pointer_Array"),   Self.fetch_c_Type (+"int16_t*[]"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.int16_t_pointer_Pointer"), Self.fetch_c_Type (+"int16_t**" ));
+
+
+         ---------------
          --  C 'int32_t'
          --
          Self.associate (Self.fetch_ada_Type (+"interfaces.Integer_32"),         Self.fetch_c_Type (+"int32_t"));
+
          Self.associate (Self.fetch_ada_Type (+"swig.int32_t_Array"),            Self.fetch_c_Type (+"int32_t[]"));
-         Self.associate (Self.fetch_ada_Type (+"swig.pointers.int32_t_Pointer"), Self.fetch_c_Type (+"int32_t*"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.int32_t_Pointer"), Self.fetch_c_Type (+"int32_t*" ));
+
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.int32_t_pointer_Array"),   Self.fetch_c_Type (+"int32_t*[]"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.int32_t_pointer_Pointer"), Self.fetch_c_Type (+"int32_t**" ));
 
 
          ---------------
@@ -775,138 +826,211 @@ is
          Self.associate (Self.fetch_ada_Type (+"interfaces.Integer_64"),         Self.fetch_c_Type (+"int64_t"));
 
          Self.associate (Self.fetch_ada_Type (+"swig.int64_t_Array"),            Self.fetch_c_Type (+"int64_t[]"));
-         Self.associate (Self.fetch_ada_Type (+"swig.pointers.int64_t_Pointer"), Self.fetch_c_Type (+"int64_t*"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.int64_t_Pointer"), Self.fetch_c_Type (+"int64_t*" ));
 
          Self.associate (Self.fetch_ada_Type (+"swig.pointers.int64_t_pointer_Array"),   Self.fetch_c_Type (+"int64_t*[]"));
-         Self.associate (Self.fetch_ada_Type (+"swig.pointers.int64_t_pointer_Pointer"), Self.fetch_c_Type (+"int64_t**"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.int64_t_pointer_Pointer"), Self.fetch_c_Type (+"int64_t**" ));
 
 
          -------------
          ---  Unsigned
          --
 
+         ----------------------
          --  C 'unsigned short'
          --
          Self.associate (Self.fetch_ada_Type (+"interfaces.c.unsigned_short"),          Self.fetch_c_Type (+"unsigned short"));
-         Self.associate (Self.fetch_ada_Type (+"swig.unsigned_short_Array"),            Self.fetch_c_Type (+"unsigned short[]"));
-         Self.associate (Self.fetch_ada_Type (+"swig.pointers.unsigned_short_Pointer"), Self.fetch_c_Type (+"unsigned short*"));
 
+         Self.associate (Self.fetch_ada_Type (+"swig.unsigned_short_Array"),            Self.fetch_c_Type (+"unsigned short[]"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.unsigned_short_Pointer"), Self.fetch_c_Type (+"unsigned short*" ));
+
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.unsigned_short_pointer_Array"),   Self.fetch_c_Type (+"unsigned short*[]"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.unsigned_short_pointer_Pointer"), Self.fetch_c_Type (+"unsigned short**" ));
+
+
+         --------------------
          --  C 'unsigned int'
          --
          Self.associate (Self.fetch_ada_Type (+"interfaces.c.unsigned"),                  Self.fetch_c_Type (+"unsigned int"));
 
          Self.associate (Self.fetch_ada_Type (+"swig.unsigned_Array"),                    Self.fetch_c_Type (+"unsigned int[]"));
-         Self.associate (Self.fetch_ada_Type (+"swig.pointers.unsigned_Pointer"),         Self.fetch_c_Type (+"unsigned int*"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.unsigned_Pointer"),         Self.fetch_c_Type (+"unsigned int*" ));
 
          Self.associate (Self.fetch_ada_Type (+"swig.pointers.unsigned_pointer_Array"),   Self.fetch_c_Type (+"unsigned int*[]"));
-         Self.associate (Self.fetch_ada_Type (+"swig.pointers.unsigned_pointer_Pointer"), Self.fetch_c_Type (+"unsigned int**"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.unsigned_pointer_Pointer"), Self.fetch_c_Type (+"unsigned int**" ));
 
+
+         ---------------------
          --  C 'unsigned long'
          --
-         Self.associate (Self.fetch_ada_Type (+"interfaces.c.unsigned_long"), Self.fetch_c_Type (+"unsigned long"));
-         Self.associate (Self.fetch_ada_Type (+"swig.unsigned_long_Array"),   Self.fetch_c_Type (+"unsigned long[]"));
+         Self.associate (Self.fetch_ada_Type (+"interfaces.c.unsigned_long"),                  Self.fetch_c_Type (+"unsigned long"));
 
+         Self.associate (Self.fetch_ada_Type (+"swig.unsigned_long_Array"),                    Self.fetch_c_Type (+"unsigned long[]"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.unsigned_long_Pointer"),         Self.fetch_c_Type (+"unsigned long*" ));
+
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.unsigned_long_pointer_Array"),   Self.fetch_c_Type (+"unsigned long*[]"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.unsigned_long_pointer_Pointer"), Self.fetch_c_Type (+"unsigned long**" ));
+
+
+         --------------------------
          --  C 'unsigned long long'
          --
-         Self.associate (Self.fetch_ada_Type (+"swig.unsigned_long_long"),       Self.fetch_c_Type (+"unsigned long long"));
-         Self.associate (Self.fetch_ada_Type (+"swig.unsigned_long_long_Array"), Self.fetch_c_Type (+"unsigned long long[]"));
+         Self.associate (Self.fetch_ada_Type (+"swig.unsigned_long_long"),                          Self.fetch_c_Type (+"unsigned long long"));
+
+         Self.associate (Self.fetch_ada_Type (+"swig.unsigned_long_long_Array"),                    Self.fetch_c_Type (+"unsigned long long[]"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.unsigned_long_long_Pointer"),         Self.fetch_c_Type (+"unsigned long long*" ));
+
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.unsigned_long_long_pointer_Array"),   Self.fetch_c_Type (+"unsigned long long*[]"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.unsigned_long_long_pointer_Pointer"), Self.fetch_c_Type (+"unsigned long long**" ));
 
 
+         ---------------
          --  C 'uint8_t'
          --
-         Self.associate (Self.fetch_ada_Type (+"interfaces.Unsigned_8"),        Self.fetch_c_Type (+"uint8_t"));
-         Self.associate (Self.fetch_ada_Type (+"swig.int8_t_Array"),            Self.fetch_c_Type (+"uint8_t[]"));
-         Self.associate (Self.fetch_ada_Type (+"swig.pointers.int8_t_Pointer"), Self.fetch_c_Type (+"uint8_t*"));
+         Self.associate (Self.fetch_ada_Type (+"interfaces.Unsigned_8"),                 Self.fetch_c_Type (+"uint8_t"));
 
+         Self.associate (Self.fetch_ada_Type (+"swig.uint8_t_Array"),                    Self.fetch_c_Type (+"uint8_t[]"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.uint8_t_Pointer"),         Self.fetch_c_Type (+"uint8_t*" ));
+
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.uint8_t_pointer_Array"),   Self.fetch_c_Type (+"uint8_t*[]"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.uint8_t_pointer_Pointer"), Self.fetch_c_Type (+"uint8_t**" ));
+
+
+         ----------------
          --  C 'uint16_t'
          --
-         Self.associate (Self.fetch_ada_Type (+"interfaces.Unsigned_16"),         Self.fetch_c_Type (+"uint16_t"));
-         Self.associate (Self.fetch_ada_Type (+"swig.uint16_t_Array"),            Self.fetch_c_Type (+"uint16_t[]"));
-         Self.associate (Self.fetch_ada_Type (+"swig.pointers.uint16_t_Pointer"), Self.fetch_c_Type (+"uint16_t*"));
+         Self.associate (Self.fetch_ada_Type (+"interfaces.Unsigned_16"),                 Self.fetch_c_Type (+"uint16_t"));
 
+         Self.associate (Self.fetch_ada_Type (+"swig.uint16_t_Array"),                    Self.fetch_c_Type (+"uint16_t[]"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.uint16_t_Pointer"),         Self.fetch_c_Type (+"uint16_t*" ));
+
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.uint16_t_pointer_Array"),   Self.fetch_c_Type (+"uint16_t*[]"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.uint16_t_pointer_Pointer"), Self.fetch_c_Type (+"uint16_t**" ));
+
+
+         ----------------
          --  C 'uint32_t'
          --
-         Self.associate (Self.fetch_ada_Type (+"interfaces.Unsigned_32"),         Self.fetch_c_Type (+"uint32_t"));
-         Self.associate (Self.fetch_ada_Type (+"swig.uint32_t_Array"),            Self.fetch_c_Type (+"uint32_t[]"));
-         Self.associate (Self.fetch_ada_Type (+"swig.pointers.uint32_t_Pointer"), Self.fetch_c_Type (+"uint32_t*"));
+         Self.associate (Self.fetch_ada_Type (+"interfaces.Unsigned_32"),                 Self.fetch_c_Type (+"uint32_t"));
 
+         Self.associate (Self.fetch_ada_Type (+"swig.uint32_t_Array"),                    Self.fetch_c_Type (+"uint32_t[]"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.uint32_t_Pointer"),         Self.fetch_c_Type (+"uint32_t*" ));
+
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.uint32_t_pointer_Array"),   Self.fetch_c_Type (+"uint32_t*[]"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.uint32_t_pointer_Pointer"), Self.fetch_c_Type (+"uint32_t**" ));
+
+
+         ----------------
          --  C 'uint64_t'
          --
          Self.associate (Self.fetch_ada_Type (+"interfaces.Unsigned_64"),         Self.fetch_c_Type (+"uint64_t"));
+
          Self.associate (Self.fetch_ada_Type (+"swig.uint64_t_Array"),            Self.fetch_c_Type (+"uint64_t[]"));
-         Self.associate (Self.fetch_ada_Type (+"swig.pointers.uint64_t_Pointer"), Self.fetch_c_Type (+"uint64_t*"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.uint64_t_Pointer"), Self.fetch_c_Type (+"uint64_t*" ));
+
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.uint64_t_pointer_Array"),   Self.fetch_c_Type (+"uint64_t*[]"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.uint64_t_pointer_Pointer"), Self.fetch_c_Type (+"uint64_t**" ));
 
 
+         ----------------
          --  C 'intptr_t'
          --
-         Self.associate (Self.fetch_ada_Type (+"swig.intptr_t"),                  Self.fetch_c_Type (+"intptr_t"));
-         Self.associate (Self.fetch_ada_Type (+"swig.intptr_t_Array"),            Self.fetch_c_Type (+"intptr_t[]"));
-         Self.associate (Self.fetch_ada_Type (+"swig.pointers.intptr_t_Pointer"), Self.fetch_c_Type (+"intptr_t*"));
+         Self.associate (Self.fetch_ada_Type (+"swig.intptr_t"),                          Self.fetch_c_Type (+"intptr_t"));
 
+         Self.associate (Self.fetch_ada_Type (+"swig.intptr_t_Array"),                    Self.fetch_c_Type (+"intptr_t[]"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.intptr_t_Pointer"),         Self.fetch_c_Type (+"intptr_t*" ));
+
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.intptr_t_pointer_Array"),   Self.fetch_c_Type (+"intptr_t*[]"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.intptr_t_pointer_Pointer"), Self.fetch_c_Type (+"intptr_t**" ));
+
+
+         -----------------
          --  C 'uintptr_t'
          --
-         Self.associate (Self.fetch_ada_Type (+"swig.uintptr_t"),                  Self.fetch_c_Type (+"uintptr_t"));
-         Self.associate (Self.fetch_ada_Type (+"swig.uintptr_t_Array"),            Self.fetch_c_Type (+"uintptr_t[]"));
-         Self.associate (Self.fetch_ada_Type (+"swig.pointers.uintptr_t_Pointer"), Self.fetch_c_Type (+"uintptr_t*"));
+         Self.associate (Self.fetch_ada_Type (+"swig.uintptr_t"),                          Self.fetch_c_Type (+"uintptr_t"));
+
+         Self.associate (Self.fetch_ada_Type (+"swig.uintptr_t_Array"),                    Self.fetch_c_Type (+"uintptr_t[]"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.uintptr_t_Pointer"),         Self.fetch_c_Type (+"uintptr_t*" ));
+
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.uintptr_t_pointer_Array"),   Self.fetch_c_Type (+"uintptr_t*[]"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.uintptr_t_pointer_Pointer"), Self.fetch_c_Type (+"uintptr_t**" ));
 
 
+         --------
          --  char
          --
          Self.associate (Self.fetch_ada_Type (+"interfaces.c.char"),                       Self.fetch_c_Type (+"char"));
 
          Self.associate (Self.fetch_ada_Type (+"interfaces.c.char_array"),                 Self.fetch_c_Type (+"char[]"));
-         Self.associate (Self.fetch_ada_Type (+"interfaces.c.strings.chars_ptr"),          Self.fetch_c_Type (+"char*"));
+         Self.associate (Self.fetch_ada_Type (+"interfaces.c.strings.chars_ptr"),          Self.fetch_c_Type (+"char*" ));
 
          Self.associate (Self.fetch_ada_Type (+"swig.pointers.chars_ptr_Array"),           Self.fetch_c_Type (+"char*[]"));
-         Self.associate (Self.fetch_ada_Type (+"swig.pointers.chars_ptr_Pointer"),         Self.fetch_c_Type (+"char**"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.chars_ptr_Pointer"),         Self.fetch_c_Type (+"char**" ));
 
          Self.associate (Self.fetch_ada_Type (+"swig.pointers.chars_ptr_pointer_Array"),   Self.fetch_c_Type (+"char**[]"));
-         Self.associate (Self.fetch_ada_Type (+"swig.pointers.chars_ptr_pointer_Pointer"), Self.fetch_c_Type (+"char***"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.chars_ptr_pointer_Pointer"), Self.fetch_c_Type (+"char***" ));
 
+         -----------------
          --  unsigned char
          --
          Self.associate (Self.fetch_ada_Type (+"interfaces.c.unsigned_char"),                  Self.fetch_c_Type (+"unsigned char"));
 
          Self.associate (Self.fetch_ada_Type (+"swig.unsigned_char_Array"),                    Self.fetch_c_Type (+"unsigned char[]"));
-         Self.associate (Self.fetch_ada_Type (+"swig.pointers.unsigned_char_Pointer"),         Self.fetch_c_Type (+"unsigned char*"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.unsigned_char_Pointer"),         Self.fetch_c_Type (+"unsigned char*" ));
 
          Self.associate (Self.fetch_ada_Type (+"swig.pointers.unsigned_char_pointer_Array"),   Self.fetch_c_Type (+"unsigned char*[]"));
-         Self.associate (Self.fetch_ada_Type (+"swig.pointers.unsigned_char_pointer_Pointer"), Self.fetch_c_Type (+"unsigned char**"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.unsigned_char_pointer_Pointer"), Self.fetch_c_Type (+"unsigned char**" ));
 
+         ---------------
          --  signed char
          --
-         Self.associate (Self.fetch_ada_Type (+"interfaces.c.signed_char"),          Self.fetch_c_Type (+"signed char"));
-         Self.associate (Self.fetch_ada_Type (+"swig.pointers.signed_char_Pointer"), Self.fetch_c_Type (+"signed char*"));
+         Self.associate (Self.fetch_ada_Type (+"interfaces.c.signed_char"),                  Self.fetch_c_Type (+"signed char"));
 
+         Self.associate (Self.fetch_ada_Type (+"swig.signed_char_Array"),                    Self.fetch_c_Type (+"signed char[]"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.signed_char_Pointer"),         Self.fetch_c_Type (+"signed char*" ));
+
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.signed_char_pointer_Array"),   Self.fetch_c_Type (+"signed char*[]"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.signed_char_pointer_Pointer"), Self.fetch_c_Type (+"signed char**" ));
+
+
+         -----------
          --  wchar_t
          --
-         Self.associate (Self.fetch_ada_Type (+"interfaces.c.wchar_t"),          Self.fetch_c_Type (+"wchar_t"));
-         Self.associate (Self.fetch_ada_Type (+"swig.wchar_t_Array"),            Self.fetch_c_Type (+"wchar_t[]"));
-         Self.associate (Self.fetch_ada_Type (+"swig.pointers.wchar_t_Pointer"), Self.fetch_c_Type (+"wchar_t*"));
+         Self.associate (Self.fetch_ada_Type (+"interfaces.c.wchar_t"),                  Self.fetch_c_Type (+"wchar_t"));
+
+         Self.associate (Self.fetch_ada_Type (+"swig.wchar_t_Array"),                    Self.fetch_c_Type (+"wchar_t[]"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.wchar_t_Pointer"),         Self.fetch_c_Type (+"wchar_t*" ));
+
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.wchar_t_pointer_Array"),   Self.fetch_c_Type (+"wchar_t*[]"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.wchar_t_pointer_Pointer"), Self.fetch_c_Type (+"wchar_t**" ));
 
 
+         ----------
          ---  Float
          --
 
+         -------------
          --  C 'float'
          --
          Self.associate (Self.fetch_ada_Type (+"interfaces.c.c_float"),                Self.fetch_c_Type (+"float"));
 
          Self.associate (Self.fetch_ada_Type (+"swig.float_Array"),                    Self.fetch_c_Type (+"float[]"));
-         Self.associate (Self.fetch_ada_Type (+"swig.pointers.float_Pointer"),         Self.fetch_c_Type (+"float*"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.float_Pointer"),         Self.fetch_c_Type (+"float*" ));
 
          Self.associate (Self.fetch_ada_Type (+"swig.pointers.float_pointer_Array"),   Self.fetch_c_Type (+"float*[]"));
-         Self.associate (Self.fetch_ada_Type (+"swig.pointers.float_pointer_Pointer"), Self.fetch_c_Type (+"float**"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.float_pointer_Pointer"), Self.fetch_c_Type (+"float**" ));
 
+
+         --------------
          --  C 'double'
          --
          Self.associate (Self.fetch_ada_Type (+"interfaces.c.double"),                  Self.fetch_c_Type (+"double"));
 
          Self.associate (Self.fetch_ada_Type (+"swig.double_Array"),                    Self.fetch_c_Type (+"double[]"));
-         Self.associate (Self.fetch_ada_Type (+"swig.pointers.double_Pointer"),         Self.fetch_c_Type (+"double*"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.double_Pointer"),         Self.fetch_c_Type (+"double*" ));
 
          Self.associate (Self.fetch_ada_Type (+"swig.pointers.double_pointer_Array"),   Self.fetch_c_Type (+"double*[]"));
-         Self.associate (Self.fetch_ada_Type (+"swig.pointers.double_pointer_Pointer"), Self.fetch_c_Type (+"double**"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.double_pointer_Pointer"), Self.fetch_c_Type (+"double**" ));
       end associate_core_c_and_ada_Types;
 
 

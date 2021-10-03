@@ -376,12 +376,30 @@ is
 
 
 
-   --------------
-   -- std::string
+   ---------------
+   -- std::string*
    --
-   type std_string         is private;
-   type std_string_Pointer is access all std_String;
-   type std_string_Array   is array (interfaces.c.size_t range <>) of aliased std_String;
+   package c_std_string_Pointers is new interfaces.c.Pointers (Index              => interfaces.c.size_t,
+                                                               Element            => std_string,
+                                                               element_Array      => std_string_Array,
+                                                               default_Terminator => null_std_string);
+   subtype std_string_Pointer is c_std_string_Pointers.Pointer;
+
+
+   --  std::string**
+   --
+   type std_string_pointer_Array is array (interfaces.C.size_t range <>) of aliased std_string_Pointer;
+
+   package c_std_string_pointer_Pointers is new interfaces.c.Pointers (Index              => interfaces.c.size_t,
+                                                                       Element            => std_string_Pointer,
+                                                                       element_Array      => std_string_pointer_Array,
+                                                                       default_Terminator => null);
+   subtype std_string_pointer_Pointer is c_std_string_pointer_Pointers.Pointer;
+
+
+--   type std_string         is private;
+--   type std_string_Pointer is access all std_String;
+--   type std_string_Array   is array (interfaces.c.size_t range <>) of aliased std_String;
 
 
 
@@ -391,12 +409,12 @@ is
 
 
 
-private
+--private
 
-   type std_String is
-      record
-         M_dataplus : swig.void_ptr;    -- Which is a subtype of 'system.Address'.
-      end record;
+--   type std_String is
+--      record
+--         M_dataplus : swig.void_ptr;    -- Which is a subtype of 'system.Address'.
+--      end record;
 
 end Swig.Pointers;
 

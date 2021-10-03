@@ -39,6 +39,9 @@ is
 
    subtype bool                  is interfaces.c.plain_char;
 
+   type std_string               is private;
+
+   null_std_string : constant null_std_string;
 
 
    --  Elementary Arrays
@@ -76,5 +79,19 @@ is
    type float_Array              is array (interfaces.c.size_t range <>) of aliased interfaces.c.c_Float;
    type double_Array             is array (interfaces.c.size_t range <>) of aliased interfaces.c.Double;
    type long_double_Array        is array (interfaces.c.size_t range <>) of aliased interfaces.c.long_Double;
+
+
+   type std_string_Array         is array (interfaces.c.size_t range <>) of aliased std_String;
+
+
+
+private
+
+   type std_String is
+      record
+         M_dataplus : swig.void_ptr;    -- Which is a subtype of 'system.Address'.
+      end record;
+
+   null_std_string : constant null_std_string := (M_dataplus => system.null_Address);
 
 end Swig;
