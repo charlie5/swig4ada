@@ -4,12 +4,14 @@ with
 
 package Swig
 --
--- Contains Swig related C type definitions not found in the 'interfaces.C' family.
+-- Contains Swig related C type definitions not found in the 'interfaces.C' package family.
 --
 is
    pragma Pure;
 
+   use Interfaces;
 
+   ---------------------
    --  Elementary types.
    --
 
@@ -37,51 +39,52 @@ is
    subtype uint32_t              is interfaces.unSigned_32;
    subtype uint64_t              is interfaces.unSigned_64;
 
-   subtype bool                  is interfaces.c.plain_char;
+   subtype bool                  is C.plain_char;
 
    type std_string               is private;
 
    null_std_string : constant null_std_string;
 
 
+   ---------------------
    --  Elementary Arrays
    --
 
-   type void_ptr_Array           is array (interfaces.c.size_t range <>) of aliased swig.void_ptr;
-   type size_t_Array             is array (interfaces.c.size_t range <>) of aliased interfaces.c.Size_t;
-   type bool_Array               is array (interfaces.c.size_t range <>) of aliased swig.bool;
+   type void_ptr_Array           is array (C.size_t range <>) of aliased swig.void_ptr;
+   type size_t_Array             is array (C.size_t range <>) of aliased C.Size_t;
+   type bool_Array               is array (C.size_t range <>) of aliased swig.bool;
 
-   type signed_char_Array        is array (interfaces.c.size_t range <>) of aliased interfaces.c.signed_Char;
-   type unsigned_char_Array      is array (interfaces.c.size_t range <>) of aliased interfaces.c.unsigned_Char;
+   type signed_char_Array        is array (C.size_t range <>) of aliased C.signed_Char;
+   type unsigned_char_Array      is array (C.size_t range <>) of aliased C.unsigned_Char;
 
-   type short_Array              is array (interfaces.c.size_t range <>) of aliased interfaces.c.Short;
-   type int_Array                is array (interfaces.c.size_t range <>) of aliased interfaces.c.Int;
-   type long_Array               is array (interfaces.c.size_t range <>) of aliased interfaces.c.Long;
-   type long_long_Array          is array (interfaces.c.size_t range <>) of aliased swig.long_Long;
+   type short_Array              is array (C.size_t range <>) of aliased C.Short;
+   type int_Array                is array (C.size_t range <>) of aliased C.Int;
+   type long_Array               is array (C.size_t range <>) of aliased C.Long;
+   type long_long_Array          is array (C.size_t range <>) of aliased swig.long_Long;
 
-   type unsigned_short_Array     is array (interfaces.c.size_t range <>) of aliased interfaces.c.unsigned_Short;
-   type unsigned_Array           is array (interfaces.c.size_t range <>) of aliased interfaces.c.Unsigned;
-   type unsigned_long_Array      is array (interfaces.c.size_t range <>) of aliased interfaces.c.unsigned_Long;
-   type unsigned_long_long_Array is array (interfaces.c.size_t range <>) of aliased swig.unsigned_long_Long;
-
-
-   type int8_t_Array             is array (interfaces.c.size_t range <>) of aliased swig.int8_t;
-   type int16_t_Array            is array (interfaces.c.size_t range <>) of aliased swig.int16_t;
-   type int32_t_Array            is array (interfaces.c.size_t range <>) of aliased swig.int32_t;
-   type int64_t_Array            is array (interfaces.c.size_t range <>) of aliased swig.int64_t;
-
-   type uint8_t_Array            is array (interfaces.c.size_t range <>) of aliased swig.uint8_t;
-   type uint16_t_Array           is array (interfaces.c.size_t range <>) of aliased swig.uint16_t;
-   type uint32_t_Array           is array (interfaces.c.size_t range <>) of aliased swig.uint32_t;
-   type uint64_t_Array           is array (interfaces.c.size_t range <>) of aliased swig.uint64_t;
+   type unsigned_short_Array     is array (C.size_t range <>) of aliased C.unsigned_Short;
+   type unsigned_Array           is array (C.size_t range <>) of aliased C.Unsigned;
+   type unsigned_long_Array      is array (C.size_t range <>) of aliased C.unsigned_Long;
+   type unsigned_long_long_Array is array (C.size_t range <>) of aliased swig.unsigned_long_Long;
 
 
-   type float_Array              is array (interfaces.c.size_t range <>) of aliased interfaces.c.c_Float;
-   type double_Array             is array (interfaces.c.size_t range <>) of aliased interfaces.c.Double;
-   type long_double_Array        is array (interfaces.c.size_t range <>) of aliased interfaces.c.long_Double;
+   type int8_t_Array             is array (C.size_t range <>) of aliased swig.int8_t;
+   type int16_t_Array            is array (C.size_t range <>) of aliased swig.int16_t;
+   type int32_t_Array            is array (C.size_t range <>) of aliased swig.int32_t;
+   type int64_t_Array            is array (C.size_t range <>) of aliased swig.int64_t;
+
+   type uint8_t_Array            is array (C.size_t range <>) of aliased swig.uint8_t;
+   type uint16_t_Array           is array (C.size_t range <>) of aliased swig.uint16_t;
+   type uint32_t_Array           is array (C.size_t range <>) of aliased swig.uint32_t;
+   type uint64_t_Array           is array (C.size_t range <>) of aliased swig.uint64_t;
 
 
-   type std_string_Array         is array (interfaces.c.size_t range <>) of aliased std_String;
+   type float_Array              is array (C.size_t range <>) of aliased C.c_Float;
+   type double_Array             is array (C.size_t range <>) of aliased C.Double;
+   type long_double_Array        is array (C.size_t range <>) of aliased C.long_Double;
+
+
+   type std_string_Array         is array (C.size_t range <>) of aliased std_String;
 
 
 
