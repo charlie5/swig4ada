@@ -769,9 +769,11 @@ is
          Self.associate (Self.fetch_ada_Type (+"swig.pointers.int32_t_Pointer"), Self.fetch_c_Type (+"int32_t*"));
 
 
+         ---------------
          --  C 'int64_t'
          --
          Self.associate (Self.fetch_ada_Type (+"interfaces.Integer_64"),         Self.fetch_c_Type (+"int64_t"));
+
          Self.associate (Self.fetch_ada_Type (+"swig.int64_t_Array"),            Self.fetch_c_Type (+"int64_t[]"));
          Self.associate (Self.fetch_ada_Type (+"swig.pointers.int64_t_Pointer"), Self.fetch_c_Type (+"int64_t*"));
 
