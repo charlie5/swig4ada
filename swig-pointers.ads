@@ -260,8 +260,19 @@ is
    subtype int64_t_Pointer is c_int64_t_Pointers.Pointer;
 
 
+   --  int64_t**
+   --
+   type int64_t_pointer_Array is array (interfaces.c.size_t range <>) of aliased int64_t_Pointer;
 
-   --  uint8_t*'
+   package c_int64_t_pointer_Pointers is new interfaces.c.Pointers (Index              => interfaces.c.size_t,
+                                                                    Element            => int64_t_Pointer,
+                                                                    element_Array      => int64_t_pointer_Array,
+                                                                    default_Terminator => null);
+   subtype int64_t_pointer_Pointer is c_int64_t_pointer_Pointers.Pointer;
+
+
+   ------------
+   --  uint8_t*
    --
    package c_uint8_t_Pointers is new interfaces.c.Pointers (Index              => interfaces.c.size_t,
                                                             Element            => swig.uint8_t,
