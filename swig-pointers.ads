@@ -1,14 +1,14 @@
 with
      interfaces.C.Pointers,
      interfaces.C.Strings,
-
-     system.Address_To_Access_Conversions;
+     system.Address_to_Access_conversions;
 
 package swig.Pointers
 --
 -- Contains pointers to Swig related C type definitions not found in the 'interfaces.C' family.
 --
 is
+   ------------
    --  void_ptr
    --
    package C_void_ptr_Pointers is new interfaces.c.Pointers (Index              => interfaces.c.size_t,
@@ -18,6 +18,7 @@ is
    subtype void_ptr_Pointer is C_void_ptr_Pointers.Pointer;
 
 
+   ---------------------
    --  opaque struct_ptr
    --
    type opaque_structure_ptr       is access swig.opaque_structure;
@@ -30,6 +31,7 @@ is
    subtype opaque_structure_ptr_Pointer is C_opaque_structure_ptr_Pointers.Pointer;
 
 
+   --------------------
    --  incomplete class
    --
    type incomplete_class_ptr is access swig.incomplete_class;
@@ -42,6 +44,7 @@ is
    subtype incomplete_class_ptr_Pointer is C_incomplete_class_ptr_Pointers.Pointer;
 
 
+   ---------
    --  bool*
    --
    package c_bool_Pointers is new interfaces.c.Pointers (Index              => interfaces.c.size_t,
@@ -61,7 +64,7 @@ is
    subtype bool_pointer_Pointer is C_bool_pointer_Pointers.Pointer;
 
 
-
+   ------------
    --  char* []
    --
    type chars_ptr_array is array (interfaces.c.Size_t range <>) of aliased interfaces.c.strings.chars_Ptr;   -- standard Ada does not have 'aliased'
@@ -84,6 +87,7 @@ is
    subtype chars_ptr_pointer_Pointer is C_chars_ptr_pointer_Pointers.Pointer;
 
 
+   -----------
    -- wchar_t*
    --
    package c_wchar_t_Pointers is new interfaces.c.Pointers (Index              => interfaces.c.size_t,
@@ -93,6 +97,7 @@ is
    subtype wchar_t_Pointer is c_wchar_t_Pointers.Pointer;
 
 
+   ----------------
    --  signed char*
    --
    package c_signed_char_Pointers is new interfaces.c.Pointers (Index              => interfaces.c.size_t,
@@ -102,6 +107,7 @@ is
    subtype signed_char_Pointer is c_signed_char_Pointers.Pointer;
 
 
+   ------------------
    --  unsigned char*
    --
    package c_unsigned_char_Pointers is new interfaces.c.Pointers (Index              => interfaces.c.size_t,
@@ -111,6 +117,7 @@ is
    subtype unsigned_char_Pointer is c_unsigned_char_Pointers.Pointer;
 
 
+   ----------
    --  short*
    --
    package c_short_Pointers is new interfaces.c.Pointers (Index              => interfaces.c.size_t,
@@ -120,7 +127,7 @@ is
    subtype short_Pointer is c_short_Pointers.Pointer;
 
 
-
+   -------------------
    --  unsigned short*
    --
    package c_unsigned_short_Pointers is new interfaces.c.Pointers (Index              => interfaces.c.size_t,
@@ -130,6 +137,7 @@ is
    subtype unsigned_short_Pointer is c_unsigned_short_Pointers.Pointer;
 
 
+   --------
    --  int*
    --
    package c_int_Pointers is new interfaces.c.Pointers (Index              => interfaces.c.size_t,
@@ -150,6 +158,7 @@ is
    subtype int_pointer_Pointer is c_int_pointer_Pointers.Pointer;
 
 
+   -----------
    --  size_t*
    --
    package c_size_t_Pointers is new interfaces.c.Pointers (Index              => interfaces.c.size_t,
@@ -160,6 +169,7 @@ is
 
 
 
+   -------------
    --  unsigned*
    --
    package c_unsigned_Pointers is new interfaces.c.Pointers (Index              => interfaces.c.size_t,
@@ -169,6 +179,7 @@ is
    subtype unsigned_Pointer is c_unsigned_Pointers.Pointer;
 
 
+   ---------
    --  long*
    --
    package c_long_Pointers is new interfaces.c.Pointers (Index              => interfaces.c.size_t,
@@ -178,6 +189,7 @@ is
    subtype long_Pointer is c_long_Pointers.Pointer;
 
 
+   ------------------
    --  unsigned long*
    --
    package c_unsigned_long_Pointers is new interfaces.c.Pointers (Index              => interfaces.c.size_t,
@@ -187,6 +199,7 @@ is
    subtype unsigned_long_Pointer is c_unsigned_long_Pointers.Pointer;
 
 
+   --------------
    --  long long*
    --
    package c_long_long_Pointers is new interfaces.c.Pointers (Index              => interfaces.c.size_t,
@@ -196,6 +209,7 @@ is
    subtype long_long_Pointer is c_long_long_Pointers.Pointer;
 
 
+   -----------------------
    --  unsigned long long*
    --
    package c_unsigned_long_long_Pointers is new interfaces.c.Pointers (Index              => interfaces.c.size_t,
@@ -206,6 +220,7 @@ is
 
 
 
+   -----------
    --  int8_t*
    --
    package c_int8_t_Pointers is new interfaces.c.Pointers (Index              => interfaces.c.size_t,
@@ -215,6 +230,7 @@ is
    subtype int8_t_Pointer is c_int8_t_Pointers.Pointer;
 
 
+   ------------
    --  int16_t*
    --
    package c_int16_t_Pointers is new interfaces.c.Pointers (Index              => interfaces.c.size_t,
@@ -224,6 +240,7 @@ is
    subtype int16_t_Pointer is c_int16_t_Pointers.Pointer;
 
 
+   ------------
    --  int32_t*
    --
    package c_int32_t_Pointers is new interfaces.c.Pointers (Index              => interfaces.c.size_t,
@@ -233,6 +250,7 @@ is
    subtype int32_t_Pointer is c_int32_t_Pointers.Pointer;
 
 
+   ------------
    --  int64_t*
    --
    package c_int64_t_Pointers is new interfaces.c.Pointers (Index              => interfaces.c.size_t,
@@ -252,7 +270,8 @@ is
    subtype uint8_t_Pointer is c_uint8_t_Pointers.Pointer;
 
 
-   --  uint16_t*'
+   -------------
+   --  uint16_t*
    --
    package c_uint16_t_Pointers is new interfaces.c.Pointers (Index              => interfaces.c.size_t,
                                                              Element            => swig.uint16_t,
@@ -261,7 +280,8 @@ is
    subtype uint16_t_Pointer is c_uint16_t_Pointers.Pointer;
 
 
-   --  uint32_t*'
+   -------------
+   --  uint32_t*
    --
    package c_uint32_t_Pointers is new interfaces.c.Pointers (Index              => interfaces.c.size_t,
                                                              Element            => swig.uint32_t,
@@ -270,7 +290,8 @@ is
    subtype uint32_t_Pointer is c_uint32_t_Pointers.Pointer;
 
 
-   --  uint64_t*'
+   -------------
+   --  uint64_t*
    --
    package c_uint64_t_Pointers is new interfaces.c.Pointers (Index              => interfaces.c.size_t,
                                                              Element            => swig.uint64_t,
@@ -280,7 +301,8 @@ is
 
 
 
-   --  float*'
+   ----------
+   --  float*
    package c_float_Pointers is new interfaces.c.Pointers (Index              => interfaces.c.size_t,
                                                           Element            => interfaces.c.c_Float,
                                                           element_Array      => float_Array,
@@ -299,7 +321,8 @@ is
    subtype float_pointer_Pointer is c_float_pointer_Pointers.Pointer;
 
 
-   --  double*'
+   -----------
+   --  double*
    --
    package c_double_Pointers is new interfaces.c.Pointers (Index              => interfaces.c.size_t,
                                                            Element            => interfaces.c.Double,
@@ -320,7 +343,8 @@ is
 
 
 
-   --  long double*'
+   ----------------
+   --  long double*
    --
    package c_long_double_Pointers is new interfaces.c.Pointers (Index              => interfaces.c.size_t,
                                                                 Element            => interfaces.c.long_Double,
@@ -341,6 +365,7 @@ is
 
 
 
+   --------------
    -- std::string
    --
    type std_string         is private;
@@ -351,7 +376,7 @@ is
 
    --  Utility
    --
-   package void_Conversions is new system.Address_To_Access_Conversions (swig.Void);
+   package void_Conversions is new system.Address_to_Access_conversions (swig.Void);
 
 
 
@@ -359,7 +384,7 @@ private
 
    type std_String is
       record
-         M_dataplus : swig.void_ptr;    -- which is a subtype of system.Address
+         M_dataplus : swig.void_ptr;    -- Which is a subtype of 'system.Address'.
       end record;
 
 end Swig.Pointers;
