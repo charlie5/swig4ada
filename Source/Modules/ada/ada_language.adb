@@ -19,7 +19,8 @@ with
      DOHs.Pointers,
 
      ada.Strings.fixed,
-     ada.text_IO,
+     ada.Text_IO,
+     ada.Exceptions,
 
      interfaces.c.Strings;
 
@@ -2918,11 +2919,21 @@ is
          the_c_Parameter := Element (Cursor);
 
          declare
-            the_ada_Parameter : constant ada_Parameter.view
-              := new_ada_Parameter (the_c_Parameter.Name,
-                                    Self.c_type_Map_of_ada_type.Element (the_c_Parameter.my_Type));
+            use ada.Exceptions;
+            the_ada_Parameter : ada_Parameter.view;
          begin
+            the_ada_Parameter := new_ada_Parameter (the_c_Parameter.Name,
+                                                    Self.c_type_Map_of_ada_type.Element (the_c_Parameter.my_Type));
             the_ada_Parameters.append (the_ada_Parameter);
+         exception
+            when E : constraint_Error =>
+               dlog ("");
+               dlog ("********************************************************");
+               dlog (exception_Information (E));
+               dlog ("c_Parameter name: '" & the_c_Parameter.Name         & "'");
+               dlog ("c_Parameter type: '" & the_c_Parameter.my_Type.Name & "'");
+               dlog ("*********************************************************");
+               dlog ("");
          end;
 
          next (Cursor);
