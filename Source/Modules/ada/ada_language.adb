@@ -384,6 +384,14 @@ is
       log (+"Ada binding generated.");
       unindent_Log;
 
+      log (+"");
+      log (+"Unable to bind functions:");
+
+      for Each of Self.bind_Failures
+      loop
+         log ("   " & Each);
+      end loop;
+
       return SWIG_OK;
 
    exception
@@ -614,9 +622,27 @@ is
             if Self.addSymbol (String_Pointer (get_Attribute (the_Node, "sym:name")),
                                the_Node) = 0
             then
+               unindent_Log;
                return SWIG_ERROR;
             end if;
          end if;
+
+         declare
+            use Swigg.Utility;
+            the_swigType     : doh_Item        := doh_Copy (swig_Type);
+            return_type_Name : unbounded_String;
+         begin
+            strip_all_Qualifiers (the_swigType);
+            return_type_Name :=  +the_swigType;
+
+            if not Self.swig_type_Map_of_c_type.contains (return_type_Name)
+            then
+               dlog ("Unknown return type: '" & return_type_Name & "'");
+               Self.bind_Failures.append (sym_Name & " ~ unknown return type (" & (+return_type_Name) & ")");
+               unindent_Log;
+               return SWIG_ERROR;
+            end if;
+         end;
 
          --  The rest of this function deals with generating the intermediary package wrapper function (which wraps
          --  a c/c++ function) and generating the c code. Each Ada wrapper function has a matching c function call.
@@ -959,11 +985,13 @@ is
               and not Self.enum_constant_flag
             then
                declare
-                  the_new_Function : constant c_Function.view := Self.new_c_Function (the_Node,
-                                                                                      +sym_Name,
-                                                                                      Self.nameSpace_std,
-                                                                                      is_Destructor => False);
+                  the_new_Function : c_Function.view;
                begin
+                  the_new_Function := Self.new_c_Function (the_Node,
+                                                           +sym_Name,
+                                                           Self.nameSpace_std,
+                                                           is_Destructor => False);
+
                   Self.current_Module.C.new_c_Functions   .append (the_new_Function);
                   Self.current_Module.C.new_c_Declarations.append (the_new_Function.all'Access);
 

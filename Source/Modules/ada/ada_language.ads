@@ -24,8 +24,9 @@ with
 
      ada.Containers.hashed_Maps,
      ada.Containers.hashed_Sets,
+     ada.Containers.indefinite_Vectors,
 
-     ada.Strings.Unbounded.Hash,
+     ada.Strings.unbounded.Hash,
 
      interfaces.C,
 
@@ -170,6 +171,11 @@ private
    use swig_type_Maps_of_c_type;
 
 
+   --  String Vectors
+   --
+   package String_Vectors is new ada.Containers.indefinite_Vectors (Positive, String);
+   subtype String_Vector  is String_Vectors.Vector;
+
 
    --  'ada_Language' Item
    --
@@ -258,6 +264,10 @@ private
 
          current_linkage_Symbol  :         unbounded_String;
          current_lStr            :         unbounded_String;
+
+         --  Binding Failures
+         --
+         bind_Failures           :         String_Vector;
       end record;
 
 

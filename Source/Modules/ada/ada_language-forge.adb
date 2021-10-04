@@ -19,7 +19,7 @@ is
       use c_nameSpace, ada_Package;
 
       Self : constant View
-        := new ada_Language.item'(swigMod.Language.construct with
+        := new ada_Language.item' (swigMod.Language.construct with
 
                                    new_Modules           => <>,
                                    name_Map_of_module    => <>,
@@ -87,7 +87,11 @@ is
                                    f_Ada                    => null,
 
                                    current_linkage_Symbol   => null_unbounded_String,
-                                   current_lStr             => null_unbounded_String);
+                                   current_lStr             => null_unbounded_String,
+
+                                   -- new ...
+                                   --
+                                   bind_Failures => <>);
    begin
       --  Modules
       --
