@@ -384,13 +384,16 @@ is
       log (+"Ada binding generated.");
       unindent_Log;
 
-      log (+"");
-      log (+"Unable to bind functions:");
+      if not Self.bind_Failures.is_Empty
+      then
+         log (+"");
+         log (+"Unable to bind functions:");
 
-      for Each of Self.bind_Failures
-      loop
-         log ("   " & Each);
-      end loop;
+         for Each of Self.bind_Failures
+         loop
+            log ("   " & Each);
+         end loop;
+      end if;
 
       return SWIG_OK;
 
@@ -627,6 +630,7 @@ is
             end if;
          end if;
 
+         check_return_type_is_known:
          declare
             use Swigg.Utility;
             the_swigType     : doh_Item        := doh_Copy (swig_Type);
@@ -642,7 +646,24 @@ is
                unindent_Log;
                return SWIG_ERROR;
             end if;
-         end;
+         end check_return_type_is_known;
+
+         check_parameter_types_are_known:
+         declare
+            use ada.Exceptions;
+
+            parameter_list : doh_ParmList      := doh_parmList (get_Attribute (the_Node, "parms"));
+            the_Parameters : c_parameter.Vector;
+         begin
+            the_Parameters := Self.to_c_Parameters (parameter_List);
+         exception
+            when E : Aborted =>
+               Self.bind_Failures.append (sym_Name & " ~ " & exception_Message (E));
+               unindent_Log;
+               return SWIG_ERROR;
+
+         end check_parameter_types_are_known;
+
 
          --  The rest of this function deals with generating the intermediary package wrapper function (which wraps
          --  a c/c++ function) and generating the c code. Each Ada wrapper function has a matching c function call.
@@ -2892,23 +2913,24 @@ is
                         end if;
 
                         declare
-                           arg : constant unbounded_String
+                           parameter_Name : constant unbounded_String
                              := to_unbounded_String (makeParameterName (swig_Parameters,
-                                                     doh_Parm (the_Parameter),
-                                                     Index));
+                                                                        doh_Parm (the_Parameter),
+                                                                        Index));
                            new_Parameter : c_Parameter.view;
+                           type_Name     : unbounded_String := +doh_Item (param_swigType);
                         begin
                            begin
-                              new_Parameter := new_c_Parameter (arg,
-                                                                Self.swig_type_Map_of_c_type.Element (+doh_Item (param_swigType)));
+                              new_Parameter := new_c_Parameter (parameter_Name,
+                                                                Self.swig_type_Map_of_c_type.Element (type_Name));
                            exception
-                              when Constraint_Error =>
+                              when constraint_Error =>
                                  dlog (+"Type '"
-                                      & String'(+doh_Item (param_swigType))
+                                      & type_Name
                                       & " is unknown for C parameter '"
-                                      & to_String (arg)
+                                      & to_String (parameter_Name)
                                       & "'.");
-                                 raise Aborted;
+                                 raise Aborted with "parameter '" & (+parameter_Name) & "' has unknown type (" & (+type_Name) & ")";
                            end;
 
                            new_Parameter.link_symbol_Code := +Attribute (the_Parameter, "tmap:link_symbol_code");
