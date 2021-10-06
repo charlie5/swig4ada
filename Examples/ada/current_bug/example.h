@@ -1,8 +1,32 @@
 
-static 
-inline
-void
-foo() {};
+struct Object
+{
+   TF_Bool   Option;
+};
+
+
+//#define TF_Bool unsigned char
+
+//void
+//foo (TF_Bool p) {};
+
+
+//typedef struct TF_Status            TF_Status;
+//typedef struct TF_SessionOptions    TF_SessionOptions;
+//typedef struct TF_DeprecatedSession TF_DeprecatedSession;
+
+//TF_CAPI_EXPORT
+//extern
+//TF_DeprecatedSession* 
+//TF_NewDeprecatedSession (const TF_SessionOptions*, 
+//                               TF_Status* status);
+
+
+
+//static 
+//inline
+//void
+//foo() {};
 
 
 //#define DEG_TO_RAD    0.0174532925199    ///< multiply to convert degrees to radians
