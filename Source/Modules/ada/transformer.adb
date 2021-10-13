@@ -489,7 +489,8 @@ is
                               the_ada_array_Bounds : constant ada_Type.composite.an_array.array_dimension_upper_Bounds
                                 := ada_type.composite.an_array.array_dimension_upper_Bounds (the_c_Type.array_Dimensions_upper_Bound);
 
-                              the_element_Type     : constant ada_Type.view := c_type_Map_of_ada_type.Element (the_c_Type.element_Type);
+                              the_c_element_Type   : constant c_Type.view := the_c_Type.element_Type;
+                              the_element_Type     : constant ada_Type.view := c_type_Map_of_ada_type.Element (the_c_element_Type);
                               new_ada_Array        :          ada_Type.composite.an_array.view;
 
                            begin
@@ -548,8 +549,8 @@ is
 
 
                      when others =>
-                        dlog ("unhandled c type Kind for : " & the_c_Type.Name & "   " & c_Type.a_c_type_Kind'Image (the_c_Type.c_type_Kind));
-                        raise Program_Error;
+                        dlog ("Transformer.transform: unhandled c type Kind for : " & the_c_Type.Name & "   " & c_Type.a_c_type_Kind'Image (the_c_Type.c_type_Kind));
+                        --  raise Program_Error;
                   end case;
 
                end if;
