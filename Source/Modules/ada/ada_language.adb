@@ -37,7 +37,6 @@ is
 
        swig_Core,
        swig_Core.Binding,
-       swig_Core.Pointers,
        swig_Core.Pointers.C_Node_Pointers,
        swigMod.Binding,
        swigMod.Dispatcher,
@@ -46,7 +45,6 @@ is
        DOHs.Pointers,
        DOHs.Binding,
 
-       Interfaces,
        interfaces.c.Strings,
 
        ada.Strings,
@@ -2221,9 +2219,9 @@ is
    end typedefHandler;
 
 
-   -----------
-   --  Utility
-   -----------
+   ------------
+   ---  Utility
+   --
 
    function is_a_function_Pointer (Self : in doh_swigType) return Boolean
    is
@@ -2250,12 +2248,12 @@ is
 
 
 
-   procedure add_new_c_Type (Self : access Item'Class;   the_new_Type : c_Type.view)
+   procedure add_new_c_Type (Self : access Item;   new_Type : c_Type.view)
    is
       the_current_Module : constant swig_Module.swig_Module_view := Self.current_Module;
    begin
-      the_current_Module.C.new_c_Types       .append (the_new_Type);
-      the_current_Module.C.new_c_Declarations.append (the_new_Type.all'Access);
+      the_current_Module.C.new_c_Types       .append (new_Type);
+      the_current_Module.C.new_c_Declarations.append (new_Type.all'Access);
    end add_new_c_Type;
 
 
@@ -2632,11 +2630,11 @@ is
 
 
 
-   procedure associate (Self : access Item;   the_ada_Type : in ada_Type.view;
-                                              with_c_Type  : in c_Type  .view)
+   procedure associate (Self : access Item;   the_Ada : in ada_Type.view;
+                                              with_C  : in c_Type  .view)
    is
    begin
-      Self.c_type_Map_of_ada_type.insert (with_c_Type, the_ada_Type);
+      Self.c_type_Map_of_ada_type.insert (with_C, the_Ada);
    end associate;
 
 
@@ -2700,12 +2698,12 @@ is
 
 
 
-   function demand_c_Type_for (Self : access Item;   the_doh_swig_Type : in doh_swigType) return c_Type.view
+   function demand_c_Type_for (Self : access Item;   swig_Type : in doh_swigType) return c_Type.view
    is
       the_Type : c_Type.view;
 
    begin
-      the_Type := Self.swig_type_Map_of_c_type.Element (+the_doh_swig_Type);
+      the_Type := Self.swig_type_Map_of_c_type.Element (+swig_Type);
       return the_Type;
 
    exception
@@ -2715,9 +2713,9 @@ is
             the_Type := c_type.new_unknown_Type;        -- 'Unknown' type is a mutable variant record, so it can be morphed.
 
             the_Type.nameSpace_is (Self.current_c_Namespace);
-            the_Type.Name_is      (+the_doh_swig_Type);
+            the_Type.Name_is      (+swig_Type);
 
-            Self.register (the_Type, the_doh_swig_Type);
+            Self.register (the_Type, swig_Type);
          end if;
 
          return the_Type;
