@@ -306,7 +306,7 @@ is
                            end;
                         else
                            dlog ("Unable to transform unknown C type: " & the_c_Type.Name);
-                           raise Program_Error;
+                           --  raise Program_Error;
                         end if;
                      end if;
                   end;
@@ -351,6 +351,12 @@ is
             end loop;
          end;
 
+
+         -- Prune for unknown C types and declarations which depend on such.
+         --
+         Self.prune_unknown_C_Types;
+
+
          --  Process the main module.
          --
          log (+"");
@@ -384,16 +390,16 @@ is
       log (+"Ada binding generated.");
       unindent_Log;
 
-      if not Self.bind_Failures.is_Empty
-      then
-         log (+"");
-         log (+"Unable to bind functions:");
-
-         for Each of Self.bind_Failures
-         loop
-            log ("   " & Each);
-         end loop;
-      end if;
+      --  if not Self.bind_Failures.is_Empty
+      --  then
+      --     log (+"");
+      --     log (+"Unable to bind functions:");
+      --
+      --     for Each of Self.bind_Failures
+      --     loop
+      --        log ("   " & Each);
+      --     end loop;
+      --  end if;
 
       return SWIG_OK;
 
@@ -402,6 +408,112 @@ is
          dlog (+"Aborting !");
          raise;
    end top;
+
+
+
+   procedure prune_unknown_C_Types (Self : in out Item)
+   is
+      use c_Type;
+      not_fully_known_Types : c_Type.Vector;
+      Count                 : Natural := 0;
+   begin
+      -- Build a list of all types which are unknown or which depend on types that are not fully known.
+      --
+      for Each of Self.name_Map_of_c_type
+      loop
+         if Each.c_type_Kind = Unknown
+         then
+            Count := Count + 1;
+            not_fully_known_Types.append (Each);
+         end if;
+      end loop;
+
+      while Count /= 0
+      loop
+         Count := 0;
+
+         for Each of Self.name_Map_of_c_type
+         loop
+            if not not_fully_known_Types.contains (Each)
+            then
+               for i in 1 .. Integer (not_fully_known_Types.Length)
+               loop
+                  if Each.depends_directly_on (not_fully_known_Types.Element (i).all'Access)
+                  then
+                     Count := Count + 1;
+                     not_fully_known_Types.append (Each);
+                  end if;
+               end loop;
+            end if;
+         end loop;
+      end loop;
+
+      -- Rid not fully known C types from top module.
+      --
+      log (+"");
+      log (+"Pruning out unknown C types.");
+
+      for Each of not_fully_known_Types
+      loop
+         declare
+            use c_Type.Vectors;
+            i : constant Natural := Self.Module_top.C.new_c_Types.find_Index (Each);
+         begin
+            if i /= no_Index
+            then
+               log ("Unable to bind unknown C type: " & Each.Name);
+               Self.Module_top.C.new_c_Types.delete (i);
+            end if;
+         end;
+      end loop;
+
+      -- Rid variables from top module with not fully known C types.
+      --
+      log (+"");
+      log (+"Pruning out C variables.");
+
+      for i in reverse 1 .. Self.Module_top.C.new_c_Variables.last_Index
+      loop
+         declare
+            Variable      : constant c_Variable.view := Self.Module_top.C.new_c_Variables.Element (i);
+            variable_Type : constant c_Type    .view := Variable.my_Type;
+         begin
+            if not_fully_known_Types.contains (variable_Type)
+            then
+               log ("Unable to bind variable '" & Variable.Name & "' due to unknown C type: " & variable_Type.Name);
+               Self.Module_top.C.new_c_Variables.delete (i);
+            end if;
+         end;
+      end loop;
+
+      -- Rid functions from top module whose parameters or return type are not fully known C types.
+      --
+      log (+"");
+      log (+"Pruning out C functions.");
+
+      for i in reverse 1 .. Self.Module_top.C.new_c_Functions.last_Index
+      loop
+         declare
+            the_Function  : constant c_Function.view := Self.Module_top.C.new_c_Functions.Element (i);
+            return_Type   : constant c_Type    .view := the_Function.return_Type;
+         begin
+            if not_fully_known_Types.contains (return_Type)
+            then
+               log ("Unable to bind function '" & the_Function.Name & "' due to unknown C return type: " & return_Type.Name);
+               Self.Module_top.C.new_c_Functions.delete (i);
+            end if;
+
+            for Each of the_Function.Parameters
+            loop
+               if not_fully_known_Types.contains (Each.my_Type)
+               then
+                  log ("Unable to bind function '" & the_Function.Name & "' due to parameter '" & Each.Name & "' of unknown C type: " & Each.my_Type.Name);
+                  Self.Module_top.C.new_c_Functions.delete (i);
+               end if;
+            end loop;
+         end;
+      end loop;
+   end prune_unknown_C_Types;
 
 
 
@@ -630,39 +742,39 @@ is
             end if;
          end if;
 
-         check_return_type_is_known:
-         declare
-            use Swigg.Utility;
-            the_swigType     : doh_Item        := doh_Copy (swig_Type);
-            return_type_Name : unbounded_String;
-         begin
-            strip_all_Qualifiers (the_swigType);
-            return_type_Name :=  +the_swigType;
+         --  check_return_type_is_known:
+         --  declare
+         --     use Swigg.Utility;
+         --     the_swigType     : doh_Item        := doh_Copy (swig_Type);
+         --     return_type_Name : unbounded_String;
+         --  begin
+         --     strip_all_Qualifiers (the_swigType);
+         --     return_type_Name :=  +the_swigType;
+         --
+         --     if not Self.swig_type_Map_of_c_type.contains (return_type_Name)
+         --     then
+         --        dlog ("Unknown return type: '" & return_type_Name & "'");
+         --        Self.bind_Failures.append (sym_Name & " ~ unknown return type (" & (+return_type_Name) & ")");
+         --        unindent_Log;
+         --        return SWIG_ERROR;
+         --     end if;
+         --  end check_return_type_is_known;
 
-            if not Self.swig_type_Map_of_c_type.contains (return_type_Name)
-            then
-               dlog ("Unknown return type: '" & return_type_Name & "'");
-               Self.bind_Failures.append (sym_Name & " ~ unknown return type (" & (+return_type_Name) & ")");
-               unindent_Log;
-               return SWIG_ERROR;
-            end if;
-         end check_return_type_is_known;
-
-         check_parameter_types_are_known:
-         declare
-            use ada.Exceptions;
-
-            parameter_list : doh_ParmList      := doh_parmList (get_Attribute (the_Node, "parms"));
-            the_Parameters : c_parameter.Vector;
-         begin
-            the_Parameters := Self.to_c_Parameters (parameter_List);
-         exception
-            when E : Aborted =>
-               Self.bind_Failures.append (sym_Name & " ~ " & exception_Message (E));
-               unindent_Log;
-               return SWIG_ERROR;
-
-         end check_parameter_types_are_known;
+         --  check_parameter_types_are_known:
+         --  declare
+         --     use ada.Exceptions;
+         --
+         --     parameter_list : doh_ParmList      := doh_parmList (get_Attribute (the_Node, "parms"));
+         --     the_Parameters : c_parameter.Vector;
+         --  begin
+         --     the_Parameters := Self.to_c_Parameters (parameter_List);
+         --  exception
+         --     when E : Aborted =>
+         --        Self.bind_Failures.append (sym_Name & " ~ " & exception_Message (E));
+         --        unindent_Log;
+         --        return SWIG_ERROR;
+         --
+         --  end check_parameter_types_are_known;
 
 
          --  The rest of this function deals with generating the intermediary package wrapper function (which wraps
@@ -2920,18 +3032,19 @@ is
                            new_Parameter : c_Parameter.view;
                            type_Name     : unbounded_String := +doh_Item (param_swigType);
                         begin
-                           begin
+                           --  begin
                               new_Parameter := new_c_Parameter (parameter_Name,
-                                                                Self.swig_type_Map_of_c_type.Element (type_Name));
-                           exception
-                              when constraint_Error =>
-                                 dlog (+"Type '"
-                                      & type_Name
-                                      & " is unknown for C parameter '"
-                                      & to_String (parameter_Name)
-                                      & "'.");
-                                 raise Aborted with "parameter '" & (+parameter_Name) & "' has unknown type (" & (+type_Name) & ")";
-                           end;
+                                                                Self.demand_c_Type_for (doh_Item (param_swigType)));
+                                                                --  Self.swig_type_Map_of_c_type.Element (type_Name));
+                           --  exception
+                           --     when constraint_Error =>
+                           --        dlog (+"Type '"
+                           --             & type_Name
+                           --             & " is unknown for C parameter '"
+                           --             & to_String (parameter_Name)
+                           --             & "'.");
+                           --        raise Aborted with "parameter '" & (+parameter_Name) & "' has unknown type (" & (+type_Name) & ")";
+                           --  end;
 
                            new_Parameter.link_symbol_Code := +Attribute (the_Parameter, "tmap:link_symbol_code");
                            new_Parameter.is_Pointer       :=         SwigType_isreference (param_swigType) /= 0
@@ -3075,7 +3188,8 @@ is
                     & String'(+doh_Item (SwigType_str (SwigType_Pointer (virtualtype), null))));  -- todo: ?
             else
                strip_all_Qualifiers (doh_Item (the_swigType));
-               the_return_Type := Self.swig_type_Map_of_c_type.Element (+doh_Item (the_swigType));
+               the_return_Type := Self.demand_c_Type_for (doh_Item (the_swigType));
+               --  the_return_Type := Self.swig_type_Map_of_c_type.Element (+doh_Item (the_swigType));
             end if;
          end;
       end if;

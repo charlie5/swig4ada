@@ -134,7 +134,6 @@ is
 
    function c_type_Kind           (Self : access Item)     return a_c_type_Kind;
 
-
    procedure Name_is              (Self : access Item;   Now : in unbounded_String);
    overriding
    function  Name                 (Self : access Item)     return unbounded_String;
@@ -178,7 +177,7 @@ is
    --  Operations
    --
 
-   procedure verify (Self : access Item);
+   procedure verify         (Self : access Item);
 
 
    --  'type_Pointer' Attributes

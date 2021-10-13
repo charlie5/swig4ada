@@ -267,7 +267,7 @@ private
 
          --  Binding Failures
          --
-         bind_Failures           :         String_Vector;
+         --  bind_Failures           :         String_Vector;
       end record;
 
 
@@ -291,6 +291,8 @@ private
 
    procedure add_array_Bounds_to (Self : access Item;   the_Variable   : in     c_Variable.view;
                                                         from_swig_Type : in     doh_swigType);
+
+   procedure prune_unknown_C_Types (Self : in out Item);
 
 
    ---  Utility

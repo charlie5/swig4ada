@@ -14,7 +14,7 @@ is
 
    type Item is tagged
       record
-         new_c_Declarations : c_Declarable.Vector;   -- Contains all new types, variables and functions.
+         new_c_Declarations : c_Declarable.Vector;   -- Contains all new types, variables and functions. TODO: Probably get rid of this.
          new_c_Types        : c_Type      .Vector;
          new_c_Variables    : c_Variable  .Vector;
          new_c_Functions    : c_Function  .Vector;

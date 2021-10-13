@@ -87,11 +87,11 @@ is
                                    f_Ada                    => null,
 
                                    current_linkage_Symbol   => null_unbounded_String,
-                                   current_lStr             => null_unbounded_String,
+                                   current_lStr             => null_unbounded_String);
 
-                                   -- new ...
-                                   --
-                                   bind_Failures => <>);
+                                   --  -- new ...
+                                   --  --
+                                   --  bind_Failures => <>);
    begin
       --  Modules
       --
