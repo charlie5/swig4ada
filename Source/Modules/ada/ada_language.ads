@@ -62,11 +62,11 @@ is
 
    overriding
    procedure main (Self : in out Item;
-                   argc : in     C.int;
-                   argv : in     swig.pointers.chars_ptr_Pointer);
+                   argC : in     C.int;
+                   argV : in     swig.pointers.chars_ptr_Pointer);
    overriding
    function  top  (Self : access Item;
-                   n    : in     Node_Pointer) return C.int;
+                   N    : in     Node_Pointer) return C.int;
 
 
    ----------------------------------------
@@ -74,7 +74,7 @@ is
    --
 
    overriding
-   function classforwardDeclaration     (Self : access Item;
+   function classForwardDeclaration     (Self : access Item;
                                          n    : in     Node_Pointer) return C.int;
    overriding
    function nativeDirective             (Self : access Item;
@@ -83,13 +83,13 @@ is
    function functionWrapper             (Self : access Item;
                                          n    : in     Node_Pointer) return C.int;
    overriding
-   function globalvariableHandler       (Self : access Item;
+   function globalVariableHandler       (Self : access Item;
                                          n    : in     Node_Pointer) return C.int;
    overriding
    function enumDeclaration             (Self : access Item;
                                          n    : in     Node_Pointer) return C.int;
    overriding
-   function enumvalueDeclaration        (Self : access Item;
+   function enumValueDeclaration        (Self : access Item;
                                          n    : in     Node_Pointer) return C.int;
    overriding
    function constantWrapper             (Self : access Item;
@@ -101,10 +101,10 @@ is
    function usingDeclaration            (Self : access Item;
                                          n    : in     Node_Pointer) return C.int;
    overriding
-   function memberfunctionHandler       (Self : access Item;
+   function memberFunctionHandler       (Self : access Item;
                                          n    : in     Node_Pointer) return C.int;
    overriding
-   function staticmemberfunctionHandler (Self : access Item;
+   function staticMemberFunctionHandler (Self : access Item;
                                          n    : in     Node_Pointer) return C.int;
    overriding
    function constructorHandler          (Self : access Item;
@@ -113,13 +113,13 @@ is
    function destructorHandler           (Self : access Item;
                                          n    : in     Node_Pointer) return C.int;
    overriding
-   function membervariableHandler       (Self : access Item;
+   function memberVariableHandler       (Self : access Item;
                                          n    : in     Node_Pointer) return C.int;
    overriding
-   function staticmembervariableHandler (Self : access Item;
+   function staticMembervariableHandler (Self : access Item;
                                          n    : in     Node_Pointer) return C.int;
    overriding
-   function memberconstantHandler       (Self : access Item;
+   function memberConstantHandler       (Self : access Item;
                                          n    : in     Node_Pointer) return C.int;
    overriding
    function typedefHandler              (Self : access Item;
@@ -275,10 +275,10 @@ private
 
          --  C Runtime
          --
-         f_runtime  : swig_Core.Pointers.File_Pointer;
-         f_header   : swig_Core.Pointers.File_Pointer;
-         f_wrappers : swig_Core.Pointers.File_Pointer;
-         f_init     : swig_Core.Pointers.File_Pointer;
+         f_Runtime  : swig_Core.Pointers.File_Pointer;
+         f_Header   : swig_Core.Pointers.File_Pointer;
+         f_Wrappers : swig_Core.Pointers.File_Pointer;
+         f_Init     : swig_Core.Pointers.File_Pointer;
          f_Ada      : swig_Core.Pointers.File_Pointer;           -- Contains Ada specific C++ declarations and code.
 
          current_linkage_Symbol : unbounded_String;
