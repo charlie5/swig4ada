@@ -4,7 +4,7 @@ with
 
 package Swig
 --
--- Contains Swig related C type definitions not found in the 'interfaces.C' package family.
+-- Contains Swig related C type definitions not available in the 'interfaces.C' package family.
 --
 is
    pragma Pure;
@@ -15,35 +15,36 @@ is
    --  Elementary types.
    --
 
-   subtype void                  is System.Address;
-   subtype void_ptr              is System.Address;
+   subtype void                is System.Address;
+   subtype void_ptr            is System.Address;
 
-   subtype opaque_structure      is System.Address;
-   subtype incomplete_class      is System.Address;
-
-
-   subtype long_Long             is long_long_Integer;
-   type    unsigned_long_Long    is mod 2 ** 64;
-
-   type    intptr_t              is range -(2 ** (Standard'Address_Size - Integer'(1))) .. +(2 ** (Standard'Address_Size - Integer'(1)) - 1);
-   type   uintptr_t              is mod 2 ** Standard'Address_Size;
+   subtype opaque_structure    is System.Address;
+   subtype incomplete_class    is System.Address;
 
 
-   subtype int8_t                is interfaces.Integer_8;
-   subtype int16_t               is interfaces.Integer_16;
-   subtype int32_t               is interfaces.Integer_32;
-   subtype int64_t               is interfaces.Integer_64;
+   subtype long_Long           is long_long_Integer;
+   type    unsigned_long_Long  is mod 2 ** 64;
 
-   subtype uint8_t               is interfaces.unSigned_8;
-   subtype uint16_t              is interfaces.unSigned_16;
-   subtype uint32_t              is interfaces.unSigned_32;
-   subtype uint64_t              is interfaces.unSigned_64;
+   type    intptr_t            is range -(2 ** (Standard'Address_Size - Integer'(1))) .. +(2 ** (Standard'Address_Size - Integer'(1)) - 1);
+   type   uintptr_t            is mod 2 ** Standard'Address_Size;
 
-   subtype bool                  is C.plain_char;
 
-   type std_string               is private;
+   subtype int8_t              is interfaces.Integer_8;
+   subtype int16_t             is interfaces.Integer_16;
+   subtype int32_t             is interfaces.Integer_32;
+   subtype int64_t             is interfaces.Integer_64;
 
-   null_std_string : constant null_std_string;
+   subtype uint8_t             is interfaces.unSigned_8;
+   subtype uint16_t            is interfaces.unSigned_16;
+   subtype uint32_t            is interfaces.unSigned_32;
+   subtype uint64_t            is interfaces.unSigned_64;
+
+   subtype bool                is C.plain_char;
+
+   type std_String is
+      record
+         M_dataplus : swig.void_ptr;    -- Which is a subtype of 'system.Address'.
+      end record;
 
 
    ---------------------
@@ -86,15 +87,5 @@ is
 
    type std_string_Array         is array (C.size_t range <>) of aliased std_String;
 
-
-
-private
-
-   type std_String is
-      record
-         M_dataplus : swig.void_ptr;    -- Which is a subtype of 'system.Address'.
-      end record;
-
-   null_std_string : constant null_std_string := (M_dataplus => system.null_Address);
 
 end Swig;
