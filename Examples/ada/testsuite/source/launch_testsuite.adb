@@ -1,5 +1,6 @@
 with
-     lace.Environ,
+     lace.Environ.Paths,
+     lace.Environ.OS_Commands,
      ada.Strings.fixed,
      ada.Text_IO;
 
@@ -25,14 +26,18 @@ is
    procedure generate (swig_Module : in String;
                        use_CPP     : in Boolean := False)
    is
+      use lace.Environ.Paths,
+          lace.Environ.OS_Commands;
+
    begin
       put_Line ("Generating swig module '" & swig_Module & "'.");
 
 --        remove_Folder ("./generated");
-      verify_Folder ("./generated");
-      goto_Folder   ("./generated", lock => False);
+      ensure_Folder (+"./generated");
+      go_to_Folder  (+"./generated", lock => False);
 
       declare
+
          function cpp_Mode return String
          is
          begin
@@ -41,25 +46,31 @@ is
             end if;
          end cpp_Mode;
 
-         generator_Log : constant String := Output_of (  "../../../../ada-build/swig_ada -outdir .  -ada "
-                                                       & cpp_Mode
-                                                       & " -I/usr/include   ../../../test-suite/"
-                                                       & swig_Module);
+
+         --  generator_Log : constant String := Output_of (  "../../../../ada-build/swig_ada -outdir .  -ada "
+         --                                                  & cpp_Mode
+         --                                                  & " -I/usr/include   ../../../test-suite/"
+         --                                                  & swig_Module);
+         generator_Log : constant String := run_OS (command_Line =>   "../../../../ada-build/swig_ada -outdir .  -ada "
+                                                                    & cpp_Mode
+                                                                    & " -I/usr/include   ../../../test-suite/"
+                                                                    & swig_Module);
       begin
          --           put_Line (generator_Log);
          if Index (generator_Log, "unhandled exception") /= 0
          then
-            save (generator_Log, swig_Module & "-generator.log");
+            save (+generator_Log, swig_Module & "-generator.log");
          end if;
       end;
 
       declare
-         pretty_Log : constant String := Output_of ("../do_pretty_print.sh");
+         --  pretty_Log : constant String := Output_of ("../do_pretty_print.sh");
+         pretty_Log : constant String := run_OS (command_Line => "../do_pretty_print.sh");
       begin
          if Index (pretty_Log, "gnatpp: cannot compile") /= 0
          then
 --              put_Line (pretty_Log);
-            save (pretty_Log, "pretty_print.log");
+            save (+pretty_Log, "pretty_print.log");
 
             if abort_on_Error
             then
@@ -71,13 +82,14 @@ is
       end;
 
       declare
-         tidy_Log : String := Output_of ("../do_tidy.sh");
+         --  tidy_Log : String := Output_of ("../do_tidy.sh");
+         tidy_Log : String := run_OS (command_Line => "../do_tidy.sh");
       begin
---           put_Line (tidy_Log);
+         put_Line (tidy_Log);
          null;
       end;
 
-      goto_Folder   ("..", lock => False);
+      go_to_Folder   (+"..", lock => False);
    end generate;
 
 
