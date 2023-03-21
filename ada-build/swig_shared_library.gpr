@@ -6,7 +6,7 @@ is
 
    type Os_Type is
       ("Windows_NT", "Linux", "MacOSX");
-   Os : Os_Type := external ("OS");
+   Os : Os_Type := external ("OS", "Linux");
 
    type Restrictions is
       ("xgc", "ravenscar");
