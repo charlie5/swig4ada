@@ -11,4 +11,4 @@
 # build the gnat swig executable
 #
 cd ada-build
-gprbuild -P swiggy --config=config.cgpr
+gprbuild -P swig_applet
