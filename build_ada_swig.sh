@@ -11,4 +11,4 @@
 # build the gnat swig executable
 #
 cd ada-build
-gprbuild -P swig_applet
+gprbuild -P swig_applet -Xrestrictions=xgc
