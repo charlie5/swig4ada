@@ -1,11 +1,11 @@
 with
-     C.Pointers,
-     C.Strings,
+     interfaces.C.Pointers,
+     interfaces.C.Strings,
      system.Address_to_Access_conversions;
 
 package swig.Pointers
 --
--- Contains pointers to Swig related C type definitions not found in the 'interfaces.C' family.
+-- Contains pointers to Swig related C type definitions not available in the 'interfaces.C' family.
 --
 is
    use Interfaces;
@@ -379,6 +379,8 @@ is
    ---------------
    -- std::string*
    --
+   null_std_string : constant std_string := (M_dataplus => system.null_Address);
+
    package c_std_string_Pointers is new C.Pointers (Index              => C.size_t,
                                                     Element            => std_string,
                                                     element_Array      => std_string_Array,
