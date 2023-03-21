@@ -20,7 +20,7 @@ Install
 - Install the GMP library for your OS.
 - Install cBound to provide the GMP library Ada binding.
 
-- $ ./build_gnat_swig
-- $ sudo ./install_gnat_swig
+- $ ./build_ada_swig.sh
+- $ sudo ./install_ada_swig.sh
 
 Installs to /usr/local.
