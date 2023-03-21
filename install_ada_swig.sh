@@ -1,7 +1,7 @@
 ## Installs the Ada version of Swig to /user/local.
 #
 
-
+set -e
 
 # Copy binary to install location.
 #
