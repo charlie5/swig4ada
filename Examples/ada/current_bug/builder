@@ -2,7 +2,7 @@
 
 set -e
 
-./cleaner
+#./cleaner
 
 echo
 echo Generating bindings.
@@ -18,7 +18,7 @@ indent  -sob  -di16       *.c
 echo
 echo Compiling.
 gcc -c *.c
-gnatmake tester -I../../.. -largs example_wrap.o
+gnatmake tester -I../../.. -largs example_wrap.o c_example.o
 
 echo
 #./cleaner

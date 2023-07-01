@@ -1,8 +1,11 @@
 
-struct Object
-{
-   TF_Bool   Option;
-};
+void foo (void);
+
+
+//struct Object
+//{
+//   TF_Bool   Option;
+//};
 
 
 //#define TF_Bool unsigned char
