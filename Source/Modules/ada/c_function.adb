@@ -101,6 +101,7 @@ is
    function depends_on (Self : access Item;   a_Declarable : in c_Declarable.view) return Boolean
    is
       use c_Parameter;
+      use type c_Declarable.view;
    begin
       if Self.is_Function
       then
@@ -119,6 +120,7 @@ is
    function depends_directly_on (Self : access Item;   a_Declarable : in c_Declarable.view) return Boolean
    is
       use c_Parameter;
+      use type c_Declarable.view;
    begin
       if Self.is_Function
       then

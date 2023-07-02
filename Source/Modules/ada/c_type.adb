@@ -594,6 +594,7 @@ is
    overriding
    function depends_on (Self : access Item;   a_Declarable : in c_Declarable.view) return Boolean
    is
+      use type c_Declarable.view;
    begin
       raise Program_Error;   -- todo: Resolve this.
 
@@ -665,6 +666,7 @@ is
    overriding
    function depends_directly_on (Self : access Item;   a_Declarable : in c_Declarable.view) return Boolean
    is
+      use type c_Declarable.view;
    begin
       case Self.my.c_type_Kind
       is

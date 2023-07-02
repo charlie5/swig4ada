@@ -61,6 +61,7 @@ is
                                                           Depth     : in     Natural) return Boolean
    is
       use Vectors;
+      use type ada_Type.view;
    begin
       for Each in 1 .. Natural (Length (Self))
       loop
@@ -80,6 +81,7 @@ is
                                                                    Depth     : in     Natural) return Boolean
    is
       use Vectors;
+      use type ada_Type.view;
    begin
       for Each in 1 .. Natural (Length (Self))
       loop

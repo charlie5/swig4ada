@@ -55,6 +55,7 @@ is
    overriding
    function depends_on (Self : access Item;   a_Declarable : in c_Declarable.view) return Boolean
    is
+      use type c_Declarable.view;
    begin
       return    Self.my_Type.all'Access = a_Declarable
         or else Self.my_Type.depends_on (a_Declarable);
@@ -64,6 +65,7 @@ is
    overriding
    function  depends_directly_on (Self : access Item;   a_Declarable : in c_Declarable.view) return Boolean
    is
+      use type c_Declarable.view;
    begin
       return Self.my_Type.all'Access = a_Declarable;
    end depends_directly_on;
