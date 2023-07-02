@@ -32,7 +32,8 @@ is
 
 
    package Compiler is
-      for Default_Switches ("c++") use ("-g", "-D", "ADA_ENABLED", "-DHAVE_CONFIG_H",
+      for Default_Switches ("c++") use ("-g", "-fPIC",
+                                        "-D", "ADA_ENABLED", "-DHAVE_CONFIG_H",
                                         "-I../../Source/Swig",
                                         "-I../../Source/Include",
                                         "-I../../Source/DOH",
