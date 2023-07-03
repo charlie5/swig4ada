@@ -76,7 +76,8 @@ is
             then
                raise Error;
             else
-               put_line ("Compile error detected !");
+               put_line ("Compilation error detected !");
+               new_Line;
             end if;
          end if;
       end;
@@ -312,7 +313,7 @@ begin
       put_Line ("Generating uncompilable C tests.");
       new_Line;
 
-      generate ("char_constant.i");   -- Fails due to #define SPECIALCHAR 'á'
+      generate ("char_constant.i");   -- Fails due to #define SPECIALCHAR 'ï¿½'
       generate ("li_carrays.i");
       generate ("li_cmalloc.i");
       generate ("preproc.i");         -- Fails due to #define MASK(shift, size) (((1 << (size)) - 1) <<(shift))
