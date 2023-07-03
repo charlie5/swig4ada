@@ -313,7 +313,7 @@ begin
       put_Line ("Generating uncompilable C tests.");
       new_Line;
 
-      generate ("char_constant.i");   -- Fails due to #define SPECIALCHAR 'ï¿½'
+      generate ("char_constant.i");   -- Fails due to #define SPECIALCHAR 'á'
       generate ("li_carrays.i");
       generate ("li_cmalloc.i");
       generate ("preproc.i");         -- Fails due to #define MASK(shift, size) (((1 << (size)) - 1) <<(shift))
@@ -336,7 +336,7 @@ begin
       generate ("dynamic_cast.i",                   use_CPP => True);
       generate ("features.i",                       use_CPP => True);
       generate ("fvirtual.i",                       use_CPP => True);
-      generate ("import_nomodule.i",                use_CPP => True);
+      --  generate ("import_nomodule.i",                use_CPP => True);     -- This test does not apply to langauges with static type checking.
       generate ("imports_b.i",                      use_CPP => True);
       generate ("inherit_same_name.i",              use_CPP => True);
       --  generate ("li_attribute.i",                   use_CPP => True);     -- Error: Unable to find 'std_string.i'
