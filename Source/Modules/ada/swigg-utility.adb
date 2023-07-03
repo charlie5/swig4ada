@@ -10,16 +10,27 @@ is
 
    procedure replace_integer_with_float (Self : in out Text)
    is
+      use ada.Strings;
+      e_Index   : constant Natural := Index (Self, "e");
+      dot_Index :          Natural;
    begin
-      replace_All (Self, "0e", "0.0e");
-      replace_All (Self, "1e", "1.0e");   replace_All (Self, "2e", "2.0e");   replace_All (Self, "3e", "3.0e");
-      replace_All (Self, "4e", "4.0e");   replace_All (Self, "5e", "5.0e");   replace_All (Self, "6e", "6.0e");
-      replace_All (Self, "7e", "7.0e");   replace_All (Self, "8e", "8.0e");   replace_All (Self, "9e", "9.0e");
+      if e_Index /= 0
+      then
+         dot_Index := Index (Self, ".", from => e_Index, going => Backward);
 
-      replace_All (Self, "0E", "0.0E");
-      replace_All (Self, "1E", "1.0E");   replace_All (Self, "2E", "2.0E");   replace_All (Self, "3E", "3.0E");
-      replace_All (Self, "4E", "4.0E");   replace_All (Self, "5E", "5.0E");   replace_All (Self, "6E", "6.0E");
-      replace_All (Self, "7E", "7.0E");   replace_All (Self, "8E", "8.0E");   replace_All (Self, "9E", "9.0E");
+         if dot_Index = 0
+         then
+            replace_All (Self, "0e", "0.0e");
+            replace_All (Self, "1e", "1.0e");   replace_All (Self, "2e", "2.0e");   replace_All (Self, "3e", "3.0e");
+            replace_All (Self, "4e", "4.0e");   replace_All (Self, "5e", "5.0e");   replace_All (Self, "6e", "6.0e");
+            replace_All (Self, "7e", "7.0e");   replace_All (Self, "8e", "8.0e");   replace_All (Self, "9e", "9.0e");
+
+            replace_All (Self, "0E", "0.0E");
+            replace_All (Self, "1E", "1.0E");   replace_All (Self, "2E", "2.0E");   replace_All (Self, "3E", "3.0E");
+            replace_All (Self, "4E", "4.0E");   replace_All (Self, "5E", "5.0E");   replace_All (Self, "6E", "6.0E");
+            replace_All (Self, "7E", "7.0E");   replace_All (Self, "8E", "8.0E");   replace_All (Self, "9E", "9.0E");
+         end if;
+      end if;
    end replace_integer_with_float;
 
 
