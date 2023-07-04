@@ -149,7 +149,7 @@ int f(int min);
 /* This should expand to cat(1,2);  
    See K&R, p. 231 */
 
-%constant int c5 = cat(cat(1,2),;)
+// RAK     %constant int c5 = cat(cat(1,2),;)
 
 #define xcat(x,y) cat(x,y)
 
@@ -230,6 +230,10 @@ typedef struct EmbeddedDefines {
 /* 
 This testcase tests operators for defines
 */
+
+%rename (an_A5) A5;     // RAK
+%rename (an_A6) A6;     // RAK
+%rename (a_one) one;    // RAK
 
 #define A1   1 + 2
 #define A2   3 - 4
