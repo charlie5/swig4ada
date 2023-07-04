@@ -696,6 +696,7 @@ is
       use type C.int;
    begin
       indent_Log;
+      log  ("");
       log  (+"Binding function: '" & Attribute (the_Node, "sym:name") & "'");
       dlog (+"functionWrapper:  '" & Attribute (the_Node, "sym:name") & "'");
 
@@ -2241,8 +2242,8 @@ is
          raise Aborted;
       end if;
 
-      dlog ("");
-      dlog (+"Registering new C type named '" & the_c_Type.Name & "' for swig type '" & to_String (the_swig_Type) & "'    is a new Type: " & Boolean'Image (is_a_new_Type));
+      --  dlog ("");
+      --  dlog (+"Registering new C type named '" & the_c_Type.Name & "' for swig type '" & to_String (the_swig_Type) & "'    is a new Type: " & Boolean'Image (is_a_new_Type));
 
       do_c_Type:
       begin
@@ -2274,7 +2275,7 @@ is
                                                           the_c_Type.Name & "[]",
                                                           element_Type => the_c_Type);
 
-               dlog ("Adding C array   type for swig type '" &  to_String (array_swigType) & "'    C array name is '" & (+the_c_type_Array.qualified_Name) & "'");
+               --  dlog ("Adding C array   type for swig type '" &  to_String (array_swigType) & "'    C array name is '" & (+the_c_type_Array.qualified_Name) & "'");
 
                the_c_type_Array.add_array_Dimension;
 
@@ -2301,7 +2302,7 @@ is
                                                            the_c_Type.Name & "*",
                                                            accessed_Type => the_c_Type);
 
-            dlog ("Adding C pointer type for swig type '" &  to_String (pointer_swigType) & "'    C pointer name is '" & (+the_c_type_Pointer.qualified_Name) & "'");
+            --  dlog ("Adding C pointer type for swig type '" &  to_String (pointer_swigType) & "'    C pointer name is '" & (+the_c_type_Pointer.qualified_Name) & "'");
 
             Self.swig_type_Map_of_c_type.insert (+pointer_swigType, the_c_type_Pointer);
 
@@ -2447,7 +2448,7 @@ is
                  := doh_SwigType (to_DOH ("a." & (+doh_Item (swigtype_add_Pointer (swigtype_add_Pointer (SwigType_Pointer (doh_copy (the_swig_Type))))))));
                the_c_type_pointer_pointer_Array   : c_Type.view;
             begin
-               dlog (+"array_of_pointer_pointers_swigType: '" & String'(+array_of_pointer_pointers_swigType) & "'");
+               --  dlog (+"array_of_pointer_pointers_swigType: '" & String'(+array_of_pointer_pointers_swigType) & "'");
 
                the_c_type_pointer_pointer_Array := c_type.new_array_Type (the_c_Type.nameSpace,
                                                                           the_c_Type.Name & "**[]",
