@@ -108,6 +108,7 @@ begin
       generate ("argout.i");
       generate ("array_member.i");
       generate ("bools.i");
+      generate ("char_constant.i");
       generate ("const_const.i");
       generate ("derived_byvalue.i");
       generate ("empty.i");
@@ -320,11 +321,11 @@ begin
       put_Line ("Generating uncompilable C tests.");
       new_Line;
 
-      generate ("char_constant.i");   -- Fails due to #define SPECIALCHAR '�'
-      generate ("li_carrays.i");
-      generate ("li_cmalloc.i");
-      generate ("preproc.i");         -- Fails due to #define MASK(shift, size) (((1 << (size)) - 1) <<(shift))
-                                      --              #define SOME_MASK_DEF (80*MASK(8, 10))
+      --  generate ("li_carrays.i");     -- May not be relevant for Ada.
+      --  generate ("li_cmalloc.i");     -- May not be relevant for Ada.
+
+      generate ("preproc.i");            -- Fails due to #define MASK(shift, size) (((1 << (size)) - 1) <<(shift))
+                                         --              #define SOME_MASK_DEF (80*MASK(8, 10))
    end if;
 
 
