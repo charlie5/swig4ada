@@ -1329,7 +1329,8 @@ is
 
          if with_of_interfaces_c_Required
          then
-            append (spec_Source,   "with interfaces.C;" &  NL);
+            append (spec_Source,   "with Interfaces.C;" &  NL & NL);
+            append (spec_Source,   "use  Interfaces.C;" &  NL);
          end if;
 
          if with_IC_Pointers
