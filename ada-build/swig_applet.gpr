@@ -3,6 +3,7 @@ with
      "swig_applet_c",
      "swig_applet_ada";
 
+
 project swig_Applet
 is
    for Languages   use ("C++");
@@ -19,20 +20,23 @@ is
    for Exec_Dir   use ".";
 
 
-   package Builder is
-      for Executable ("swigmain.cxx")  use "swig_ada";
-      for Default_Switches ("c++")     use ("-C", "-j0");
+   package Builder
+   is
+      for Executable       ("swigmain.cxx")  use "swig4ada";
+      for Default_Switches ("C++")           use ("-C", "-j0");
    end Builder;
 
 
-   package Naming is
-      for Spec_Suffix ("c++") use ".h";
-      for Body_Suffix ("c++") use ".cxx";
+   package Naming
+   is
+      for Spec_Suffix ("C++") use ".h";
+      for Body_Suffix ("C++") use ".cxx";
    end Naming;
 
 
-   package Compiler is
-      for Default_Switches ("c++") use ("-g", "-fPIC",
+   package Compiler
+   is
+      for Default_Switches ("C++") use ("-g", "-fPIC",
                                         "-D", "ADA_ENABLED", "-DHAVE_CONFIG_H",
                                         "-I../../Source/Swig",
                                         "-I../../Source/Include",
@@ -44,8 +48,9 @@ is
    end Compiler;
 
 
-   package Linker is
-      for Default_Switches ("c++") use ("-g", "-lgmp", "-lm", "-lpcre");
+   package Linker
+   is
+      for Default_Switches ("C++") use ("-g", "-lgmp", "-lm", "-lpcre");
    end Linker;
 
 end swig_Applet;

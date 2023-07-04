@@ -46,7 +46,7 @@ is
             end if;
          end cpp_Mode;
 
-         generator_Log : constant String := run_OS (command_Line =>   "../../../../ada-build/swig_ada "
+         generator_Log : constant String := run_OS (command_Line =>   "../../../../ada-build/swig4ada "
                                                                     & "-outdir . "
                                                                     & "-ada "
                                                                     & cpp_Mode
