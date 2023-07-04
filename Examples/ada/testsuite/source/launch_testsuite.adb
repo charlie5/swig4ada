@@ -62,9 +62,16 @@ is
       end;
 
       declare
-         pretty_Log : constant String := run_OS (command_Line =>  "gnatpp -rnb -I../../../.. "
-                                                                 & swig_Module (swig_Module'First .. swig_Module'Last - 2)
-                                                                 & "*.ads ");
+         pretty_Log : constant String
+           := run_OS (command_Line => "gnatpp --replace"
+                      & "                     --layout=default"
+                      & "                     --max-line-length=120"
+                      & "                     --based-grouping=3"
+                      & "                     --decimal-grouping=3"
+                      & "                     --par-threshold=2"
+                      & "                     --call-threshold=2"
+                      & "                     -I../../../.. "
+                      &                       swig_Module (swig_Module'First .. swig_Module'Last - 2) & "*.ads");
       begin
          if Index (pretty_Log, "Syntax errors in") /= 0
          then
@@ -313,7 +320,7 @@ begin
       put_Line ("Generating uncompilable C tests.");
       new_Line;
 
-      generate ("char_constant.i");   -- Fails due to #define SPECIALCHAR 'á'
+      generate ("char_constant.i");   -- Fails due to #define SPECIALCHAR 'ï¿½'
       generate ("li_carrays.i");
       generate ("li_cmalloc.i");
       generate ("preproc.i");         -- Fails due to #define MASK(shift, size) (((1 << (size)) - 1) <<(shift))
