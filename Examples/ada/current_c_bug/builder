@@ -12,12 +12,23 @@ echo Generating bindings.
 
 echo
 echo Pretty printing.
-gnatpp  -rnb  -I../../..  *.ads
-indent  -sob  -di16       *.c
-#indent  -sob  -di16       *.cxx
+
+gnatpp --replace               \
+       --layout=default        \
+       --max-line-length=120   \
+       --based-grouping=3      \
+       --decimal-grouping=3    \
+       --par-threshold=2       \
+       --call-threshold=2      \
+       -I../../../..           \
+       *.ads
+       
+indent  -sob  -di16  *.c
+
 
 echo
 echo Compiling.
+
 gcc -c *.c
 #gnatmake tester -I../../.. -largs example_wrap.o c_example.o
 
