@@ -107,7 +107,7 @@ begin
       generate ("allowexcept.i");
       generate ("argout.i");
       generate ("array_member.i");
-      --  generate ("bools.i");            -- BoolStructure& operator=(const BoolStructure &); is broken.
+      generate ("bools.i");
       generate ("const_const.i");
       generate ("derived_byvalue.i");
       generate ("empty.i");
@@ -117,7 +117,7 @@ begin
       generate ("extern_declaration.i");
       generate ("fragments.i");
       generate ("ignore_parameter.i");
-      --  generate ("immutable.i");     -- '.i' file is missing.
+      generate ("immutable_values.i");
       generate ("integers.i");
       generate ("keyword_rename.i");
       generate ("langobj.i");
@@ -132,14 +132,13 @@ begin
       generate ("multivalue.i");
       generate ("name.i");
       generate ("naturalvar.i");
-      --  generate ("nested.i");     -- Crashes swig_ada.
+      --  generate ("nested.i");     -- Much pruning.
       generate ("null_pointer.i");
       generate ("ordering.i");
       generate ("ret_by_value.i");
       generate ("struct_rename.i");
       generate ("struct_value.i");
       generate ("tag_no_clash_with_variable.i");
-      --  generate ("traits.i");     -- '.i' file is missing.
       generate ("typedef_mptr.i");
       generate ("typedef_reference.i");
       generate ("typedef_sizet.i");
@@ -165,6 +164,7 @@ begin
       generate ("abstract_signature.i",             use_CPP => True);
       generate ("abstract_typedef.i",               use_CPP => True);
       generate ("access_change.i",                  use_CPP => True);
+      generate ("bools.i",                          use_CPP => True);
       generate ("cast_operator.i",                  use_CPP => True);
       generate ("casts.i",                          use_CPP => True);
       generate ("clientdata_prop_a.i",              use_CPP => True);
