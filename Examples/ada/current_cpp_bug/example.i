@@ -4,5 +4,5 @@
 #include "example.h"
 %}
 
-
+%ignore foo;
 %include "example.h";

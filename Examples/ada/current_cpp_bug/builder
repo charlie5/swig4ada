@@ -6,8 +6,7 @@ set -e
 
 echo
 echo Generating bindings.
-#../../../ada-build/swig_ada  -ada -c++ -I/usr/include   example.i 
-../../../ada-build/swig_ada  -ada  -I/usr/include  -I/usr/local/include  example.i 
+../../../ada-build/swig_ada -c++ -ada -I/usr/include  -I/usr/local/include  example.i 
 
 echo
 echo Pretty printing.
@@ -18,7 +17,7 @@ indent  -sob  -di16       *.c
 echo
 echo Compiling.
 gcc -c *.c
-gnatmake tester -I../../.. -largs example_wrap.o c_example.o
+#gnatmake tester -I../../.. -largs example_wrap.o c_example.o
 
 echo
 #./cleaner
