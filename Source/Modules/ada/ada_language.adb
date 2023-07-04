@@ -1325,6 +1325,8 @@ is
       declare
          value_Text : unbounded_String := +Attribute (the_Node, "value");
       begin
+         dlog ("value_Text => '" & value_Text & "'");
+
          if not (        new_c_Constant.my_Type.qualified_Name = "Character"
                  or else new_c_Constant.my_Type.qualified_Name = "char*")
          then   -- Is numeric.
@@ -1362,9 +1364,26 @@ is
                         replace_Integer_with_Float (value_Text);
 
                      elsif the_Type.Name = "char"
-                       and Slice (value_Text, 1, 1) = "\"
                      then
-                        value_Text := +"interfaces.c.char'Val (" & Slice (value_Text, 2, Length (value_Text)) & ")";
+                        if value_Text = "\n"
+                        then
+                           value_Text := +"interfaces.c.char'Val (10)";
+
+                        elsif Slice (value_Text, 1, 1) = "\"
+                        then
+                           if         Length (value_Text) >= 5
+                             and then Slice  (value_Text, 5, 5) = "\"
+                           then
+                              the_Type       := Self.swig_type_Map_of_c_type.Element (+"wchar_t");
+                              new_c_Constant := c_variable.new_c_Variable (Name    => the_Name,
+                                                                           of_Type => the_Type);
+
+                              value_Text := +"interfaces.c.wchar_t'Val (8#" & Slice (value_Text, 2, Length (value_Text) - 4) & "# * 256 + "
+                                                                     & "8#" & Slice (value_Text, 6, Length (value_Text)    ) & "#)";
+                           else
+                              value_Text := +"interfaces.c.char'Val (8#" & Slice (value_Text, 2, Length (value_Text)) & "#)";
+                           end if;
+                        end if;
                      end if;
 
                      new_c_Constant.Value := value_Text;
