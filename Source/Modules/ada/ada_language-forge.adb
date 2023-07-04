@@ -78,7 +78,7 @@ is
                                    doing_constructorDeclaration => False,
 
                                    anonymous_enum_Count     => 0,
-                                   integer_symbol_value_Map         => symbol_value_maps.empty_Map,
+                                   integer_symbol_value_Map => symbol_value_maps.empty_Map,
 
                                    f_runtime                => null,
                                    f_header                 => null,
