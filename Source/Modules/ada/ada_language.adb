@@ -1365,9 +1365,18 @@ is
 
                      elsif the_Type.Name = "char"
                      then
-                        if value_Text = "\n"
-                        then
-                           value_Text := +"interfaces.c.char'Val (10)";
+                        if    value_Text = "\a"  then value_Text := +"interfaces.c.char'Val (07)";
+                        elsif value_Text = "\b"  then value_Text := +"interfaces.c.char'Val (08)";
+                        elsif value_Text = "\e"  then value_Text := +"interfaces.c.char'Val (27)";
+                        elsif value_Text = "\f"  then value_Text := +"interfaces.c.char'Val (12)";
+                        elsif value_Text = "\n"  then value_Text := +"interfaces.c.char'Val (10)";
+                        elsif value_Text = "\r"  then value_Text := +"interfaces.c.char'Val (13)";
+                        elsif value_Text = "\t"  then value_Text := +"interfaces.c.char'Val (09)";
+                        elsif value_Text = "\v"  then value_Text := +"interfaces.c.char'Val (11)";
+                        elsif value_Text = "\\"  then value_Text := +"interfaces.c.char'Val (92)";
+                        elsif value_Text = "\'"  then value_Text := +"interfaces.c.char'Val (39)";
+                        elsif value_Text = "\""" then value_Text := +"interfaces.c.char'Val (34)";
+                        elsif value_Text = "\?"  then value_Text := +"interfaces.c.char'Val (63)";
 
                         elsif Slice (value_Text, 1, 1) = "\"
                         then
