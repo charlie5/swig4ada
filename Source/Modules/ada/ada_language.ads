@@ -311,6 +311,7 @@ private
                                                           add_level_3_Indirection : in     Boolean := False);
 
    procedure prune_unknown_C_Types (Self : in out Item);
+   procedure process_all_Modules   (Self : in out Item);
 
 
    ------------
