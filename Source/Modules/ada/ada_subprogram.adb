@@ -224,7 +224,12 @@ is
          if not (   declaration_Package.models_an_interface_Type
                  or Self.is_Abstract)
          then
-            append (the_Source,  ", ""Ada_" & Self.member_function_link_Symbol_for (in_cpp_Mode) &  """");
+            if in_cpp_Mode
+            then   -- The link symbol is the wrapper name, which already carries the 'Ada_' prefix.
+               append (the_Source,  ", """     & Self.member_function_link_Symbol_for (in_cpp_Mode) &  """");
+            else
+               append (the_Source,  ", ""Ada_" & Self.member_function_link_Symbol_for (in_cpp_Mode) &  """");
+            end if;
          end if;
 
          append (the_Source,  ");");
