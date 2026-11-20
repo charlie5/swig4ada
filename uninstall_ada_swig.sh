@@ -3,5 +3,5 @@
 
 set -e
 
-rm     /usr/local/bin/swig_ada
+rm     /usr/local/bin/swig4ada
 rm -fr /usr/local/share/swig

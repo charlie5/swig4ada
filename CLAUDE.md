@@ -17,7 +17,7 @@ Requires GNAT + gprbuild, the GMP and PCRE libraries, and the `gmp` Ada binding 
 sudo ./install_ada_swig.sh     # copies ada-build/swig4ada to /usr/local/bin and Lib/* to /usr/local/share/swig/4.0.0
 ```
 
-- The executable is `ada-build/swig4ada` (objects in `ada-build/build/`). It was renamed from `swig_ada`; several older scripts (`Examples/ada/testsuite/builder`, `swig_binding/*/builder`, `ada-build/generate-example-i-binding.sh`, `uninstall_ada_swig.sh`) still refer to the old name.
+- The executable is `ada-build/swig4ada` (objects in `ada-build/build/`). Many older example `builder` scripts (e.g. `Examples/ada/simple`, `enum`, `template`, `std_vector`, and `swig_binding/doxygen/builder`) predate this and still call `../../../gnat/swig_gnat -gnat ...`; they need the path and the `-ada` flag updating before they will run.
 - `SWIG_LIB` is compiled in as `/usr/local/share/swig/4.0.0` (`Source/Include/swigconfig.h`). Changes to `Lib/ada/*.swg|*.i` (typemaps etc.) therefore have no effect until re-installed, unless the `SWIG_LIB` environment variable points at `./Lib`.
 - `swig_applet.gpr` (C++, main is `Source/Modules/swigmain.cxx`, built with `-DADA_ENABLED`) aggregates `swig_applet_c.gpr` (SWIG core: DOH, Swig, CParse, Preprocessor) and `swig_applet_ada.gpr` (the Ada module).
 - The Ada sources are compiled with `-gnatwa` plus style checks (`-gnatykp -gnatybfhi -gnatyO -gnatye -gnatyx`): no trailing blanks, no tabs, explicit `overriding`, labelled `end`s, no redundant parentheses.

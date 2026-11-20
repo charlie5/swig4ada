@@ -11,7 +11,7 @@ mkdir -p ./usr/local/bin ./usr/local/include ./usr/local/share/swig/4.0.0/ada
 
 # Copy build to install location.
 #
-cp ./ada-build/swig_ada ./usr/local/bin
+cp ./ada-build/swig4ada ./usr/local/bin
 
 
 cp ./swig.ads                    ./usr/local/include

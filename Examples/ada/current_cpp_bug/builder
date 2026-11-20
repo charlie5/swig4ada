@@ -6,7 +6,7 @@ set -e
 
 echo
 echo Generating bindings.
-../../../ada-build/swig_ada -c++ -ada -I/usr/include  -I/usr/local/include  example.i 
+../../../ada-build/swig4ada -c++ -ada -I/usr/include  -I/usr/local/include  example.i 
 
 echo
 echo Pretty printing.
