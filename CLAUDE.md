@@ -17,7 +17,7 @@ Requires GNAT + gprbuild, the GMP and PCRE libraries, and the `gmp` Ada binding 
 sudo ./install_ada_swig.sh     # copies ada-build/swig4ada to /usr/local/bin and Lib/* to /usr/local/share/swig/4.0.0
 ```
 
-- The executable is `ada-build/swig4ada` (objects in `ada-build/build/`). Many older example `builder` scripts (e.g. `Examples/ada/simple`, `enum`, `template`, `std_vector`, and `swig_binding/doxygen/builder`) predate this and still call `../../../gnat/swig_gnat -gnat ...`; they need the path and the `-ada` flag updating before they will run.
+- The executable is `ada-build/swig4ada` (objects in `ada-build/build/`).
 - **GNAT 16 accessibility checks:** a function which returns an anonymous access type (`return access T`) gives a result whose accessibility level is that of the caller, so storing that result in a record component raises `PROGRAM_ERROR : ... accessibility check failed` at run time under GNAT 16.2 (GCC 14.2 let it through). For this reason no function in the Ada module returns an anonymous access type any more: they return named ones (`c_Type.nameSpace_view`, `c_Type.Function_view`, `ada_Type.Package_view`, `ada_Context.view`, or the package's own `View`), and call sites convert explicitly where the types differ, e.g. `ada_Package.view (the_Type.declaration_Package)`. Keep to this in new code.
 - To build without replacing `ada-build/swig4ada`, add `--relocate-build-tree=<dir> --root-dir=/eden/forge` and pass the `Source/*` include directories as absolute `-I` paths through `-cargs:c` and `-cargs:c++` (the project's own include paths are relative to the object directory).
 - `SWIG_LIB` is compiled in as `/usr/local/share/swig/4.0.0` (`Source/Include/swigconfig.h`). Changes to `Lib/ada/*.swg|*.i` (typemaps etc.) therefore have no effect until re-installed, unless the `SWIG_LIB` environment variable points at `./Lib`.
@@ -30,7 +30,7 @@ Invocation: `swig4ada -ada [-c++] [-I<dir>] [-outdir <dir>] [-namespace <ns>] fo
 
 Generated specs depend on the support packages `swig.ads` and `swig-pointers.ads` at the repository root, which is why scripts pass `-I../../..` to `gnatpp`/`gnatmake`.
 
-**Single example** — each `Examples/ada/<name>/` has a `builder` script, to be run from within that directory (it uses relative paths to `ada-build/swig4ada`): it cleans, generates, pretty prints with `gnatpp`, and (in most examples) builds `test_example.gpr` and runs `./tester`.
+**Single example** — each `Examples/ada/<name>/` has a `builder` script, to be run from within that directory (it uses relative paths to `ada-build/swig4ada`): it cleans, generates, pretty prints with `gnatpp`, and (in most examples) builds `test_example.gpr` and runs `./tester`. A builder deletes and regenerates the specs in its directory, several of which are tracked, so expect a diff after running one. Known not to generate (2026-11-20): `addlink`, `anonymous_bitfield`, `llvm` and `std_vector`.
 
 ```sh
 cd Examples/ada/class && ./builder
