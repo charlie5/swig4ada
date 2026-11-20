@@ -5,7 +5,7 @@ set -e
 
 # Copy binary to install location.
 #
-cp ./ada-build/swig_ada /usr/local/bin
+cp ./ada-build/swig4ada /usr/local/bin
 
 
 #cp ./swig.ads                    /usr/local/include
