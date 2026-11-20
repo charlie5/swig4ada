@@ -7,12 +7,12 @@ set -e
 
 
 echo Generating bindings.
-#../../../gnat/swig_gnat  -gnat -c++  -cpperraswarn  -I/usr/include   -I/usr/gnat/include/c++/4.3.4/bits   example.i 
-../../../gnat/swig_gnat  -gnat -c++  -cpperraswarn  -I/usr/include   llvm.i 
+#../../../ada-build/swig4ada  -ada -c++  -cpperraswarn  -I/usr/include   -I/usr/gnat/include/c++/4.3.4/bits   example.i 
+../../../ada-build/swig4ada  -ada -c++  -cpperraswarn  -I/usr/include   llvm.i 
 
 
 echo Pretty printing.
-gnatpp  -rnb  -I../../..   *.ads   -cargs -gnatX -gnat12
+gnatpp  -rnb  -I../../..   *.ads
 indent  -sob  -di16                  *.c
 
 

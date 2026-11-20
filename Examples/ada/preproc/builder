@@ -7,11 +7,11 @@ set -e
 
 
 echo Generating bindings.
-../../../gnat/swig_gnat  -gnat  -I/usr/include   preproc.i 
+../../../ada-build/swig4ada  -ada  -I/usr/include   preproc.i 
 
 
 echo Pretty printing.
-gnatpp  -rnb  -I../../..   *.ads   -cargs -gnatX -gnat12
+gnatpp  -rnb  -I../../..   *.ads
 indent  -sob  -di16                  *.c
 
 

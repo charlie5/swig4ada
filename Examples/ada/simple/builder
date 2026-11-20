@@ -11,7 +11,7 @@ rm ./tester
 echo
 echo generating bindings
 
-swig_gnat  -gnat  example.i
+../../../ada-build/swig4ada  -ada  example.i
 
 
 

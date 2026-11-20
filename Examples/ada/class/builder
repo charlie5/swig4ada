@@ -11,14 +11,14 @@ rm *.ads
 echo
 echo generating bindings
 
-../../../gnat/swig_gnat  -c++  -gnat   example.i
+../../../ada-build/swig4ada  -c++  -ada   example.i
 
 
 
 #echo
 #echo pretty printing ...  crashes gnatpp
 #
-#gnatpp  -rnb  -I../../..      *.ads    -cargs -gnatX
+#gnatpp  -rnb  -I../../..      *.ads
 
 
 

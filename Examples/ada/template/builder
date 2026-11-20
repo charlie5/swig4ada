@@ -12,7 +12,7 @@ rm *.a
 echo
 echo generating bindings
 
-../../../gnat/swig_gnat  -gnat -c++  example.i
+../../../ada-build/swig4ada  -ada -c++  example.i
 
 
 
@@ -20,7 +20,7 @@ echo generating bindings
 echo
 echo pretty printing ...
 
-gnatpp  -rnb  -I../../..      *.ads    -cargs -gnatX
+gnatpp  -rnb  -I../../..      *.ads
 
 
 
@@ -28,7 +28,7 @@ gnatpp  -rnb  -I../../..      *.ads    -cargs -gnatX
 echo
 echo compiling
 
-gprmake  -P   test_example.gpr 
+gprbuild  -P   test_example.gpr 
 
 
 

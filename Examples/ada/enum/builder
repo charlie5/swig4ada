@@ -10,7 +10,7 @@ rm *.ali
 
 
 echo Generating Bindings
-../../../gnat/swig_gnat  -c++  -gnat   example.i
+../../../ada-build/swig4ada  -c++  -ada   example.i
 
 
 echo

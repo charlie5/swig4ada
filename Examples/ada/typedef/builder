@@ -15,13 +15,13 @@ rm *.a
 echo
 echo generating bindings
 
-../../../gnat/swig_gnat  -gnat -c++  -cpperraswarn  -I/usr/include   -I/usr/gnat/include/c++/4.3.4/bits   example.i 
+../../../ada-build/swig4ada  -ada -c++  -cpperraswarn  -I/usr/include   -I/usr/gnat/include/c++/4.3.4/bits   example.i 
 
 
 #echo
 #echo pretty printing ...
 
-gnatpp  -rnb  -I../../..      *.ads    -cargs -gnatX
+gnatpp  -rnb  -I../../..      *.ads
 
 
 
@@ -29,7 +29,7 @@ gnatpp  -rnb  -I../../..      *.ads    -cargs -gnatX
 #echo
 #echo compiling
 
-#gprmake  -P   test_example.gpr 
+#gprbuild  -P   test_example.gpr 
 
 
 

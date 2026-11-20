@@ -12,8 +12,8 @@ rm *.ads
 echo
 echo generating bindings
 
-swig_gnat  -gnat   example.i
-//swig_gnat  -java   example.i
+../../../ada-build/swig4ada  -ada   example.i
+#../../../ada-build/swig4ada  -java   example.i
 
 
 
@@ -21,7 +21,7 @@ swig_gnat  -gnat   example.i
 echo
 echo pretty printing ...
 
-gnatpp  -rnb  -I../../..      *.ads    -cargs -gnatX
+gnatpp  -rnb  -I../../..      *.ads
 
 
 
@@ -29,7 +29,7 @@ gnatpp  -rnb  -I../../..      *.ads    -cargs -gnatX
 echo
 echo compiling
 
-gprmake  -P   test_example.gpr 
+gprbuild  -P   test_example.gpr 
 
 
 
