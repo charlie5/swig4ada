@@ -1683,6 +1683,24 @@ is
          end loop;
       end;
 
+      --  Likewise whether its destructor is virtual, which a class derived from it in another module needs to know.
+      --
+      declare
+         the_Child : Node_Pointer := first_Child (the_Node);
+      begin
+         while the_Child /= null
+         loop
+            if         Attribute (the_Child, "nodeType") = "destructor"
+              and then check_Attribute (the_Child, "storage", "virtual")
+            then
+               new_c_Class.has_virtual_Destructor;
+               exit;
+            end if;
+
+            the_Child := next_Sibling (the_Child);
+         end loop;
+      end;
+
       --  Note the form which the name of a template instance takes when the default arguments of its template are given.
       --
       declare

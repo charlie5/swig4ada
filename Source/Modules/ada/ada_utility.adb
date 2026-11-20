@@ -326,6 +326,11 @@ is
    begin
       strip_Namespaces (the_Identifier);
 
+      if the_Identifier = "__deref__"     -- The name which the core gives to 'operator->'.
+      then
+         return +"dereference";
+      end if;
+
       if Index (the_Identifier, "<") /= 0
       then   -- The name of a class template instance which was given no name of its own, such as 'A<(int)>' or
              -- 'B<(double,ns::C)>', for which the names of the template and its arguments are joined: 'A_int'.
