@@ -15,6 +15,7 @@ is
                    Name             => Name,
                    my_Type          => of_Type,
                    Value            => <>,
+                   link_Symbol => <>,
                    is_Static        => <>,
                    is_class_Pointer => <>,
                    is_Pointer       => <>,

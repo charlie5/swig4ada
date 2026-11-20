@@ -202,11 +202,14 @@ is
          --
          --  The destructor of a class which is not virtual is a function of the wrapper file.
          --
-         if         Self.link_Symbol /= ""
-           and then not Self.is_Virtual
-           and then not declaration_Package.models_a_virtual_cpp_Class
+         if Self.link_Symbol /= ""
          then
-            append (the_Source,   NL & "   pragma Import (C, " & unique_function_Name & ", """ & Self.link_Symbol & """);");
+            if Index (Self.link_Symbol, "ada_destruct_") = 1
+            then   -- A function of the wrapper file.
+               append (the_Source,   NL & "   pragma Import (C, "   & unique_function_Name & ", """ & Self.link_Symbol & """);");
+            else   -- The C++ symbol of a virtual destructor, made from the full name of its class.
+               append (the_Source,   NL & "   pragma Import (CPP, " & unique_function_Name & ", """ & Self.link_Symbol & """);");
+            end if;
 
             return the_Source;
          end if;

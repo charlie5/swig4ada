@@ -1727,6 +1727,51 @@ is
          end sort_types_by_dependence;
 
 
+         --  A pointer type is an instance of 'interfaces.C.Pointers', which takes the array type of what it points
+         --  to. The sort above does not know of that, and in a class which refers to itself (a list node, say) can
+         --  leave the pointer ahead of the array.
+         --
+         place_each_array_before_its_Pointer :
+         declare
+            Index : Positive := 1;
+         begin
+            while Index <= Natural (Length (main_Types))
+            loop
+               declare
+                  the_Pointer : constant ada_Type.view := Element (main_Types, Index);
+                  Moved       :          Boolean       := False;
+               begin
+                  if         the_Pointer.all in subType_class
+                    and then subType_view (the_Pointer).base_Type.all in ic_Pointer_class
+                  then
+                     for Later in Index + 1 .. Natural (Length (main_Types))
+                     loop
+                        declare
+                           the_Array : constant ada_Type.view := Element (main_Types, Later);
+                        begin
+                           if         the_Array.all in an_Array_class
+                             and then an_Array_view (the_Array).element_Type = ic_Pointer_view (subType_view (the_Pointer).base_Type).accessed_Type
+                           then
+                              delete (main_Types, Later);
+                              insert (main_Types, Before => Index, new_Item => the_Array);
+                              Moved := True;
+                              exit;
+                           end if;
+                        end;
+                     end loop;
+                  end if;
+
+                  if not Moved
+                  then
+                     Index := Index + 1;
+                  else
+                     Index := Index + 2;     -- Past the array and the pointer.
+                  end if;
+               end;
+            end loop;
+         end place_each_array_before_its_Pointer;
+
+
          for Each in 1 .. Natural (Length (main_Types))
          loop
             the_Type := Element (main_Types,  Each);
@@ -1956,7 +2001,11 @@ is
                   function link_Symbol return unbounded_String
                   is
                   begin
-                     if in_cpp_Mode
+                     if the_Variable.link_Symbol /= ""
+                     then
+                        return the_Variable.link_Symbol;
+
+                     elsif in_cpp_Mode
                      then                               -- todo: Need to use proper storage class ?
                         if the_Package.is_Module
                         then

@@ -23,6 +23,7 @@ is
          Name             : unbounded_String;
          my_Type          : c_Type.view;
          Value            : unbounded_String;
+         link_Symbol      : unbounded_String;     -- The C++ symbol of a variable which is declared in a namespace.
 
          bit_Field        : Integer := undefined_Bitfield;
 

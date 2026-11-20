@@ -17,6 +17,7 @@ is
       return Item' (Name      => the_Name,
                     my_Type   => the_Type,
                     Value     => Value,
+                    link_Symbol => <>,
 
                     bit_Field        => -1,
                     array_Bounds     => <>,

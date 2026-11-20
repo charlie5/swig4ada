@@ -80,6 +80,7 @@ is
 
    function  is_a_function_Pointer (swig_Type : in doh_swigType) return Boolean;
    function  returns_a_cpp_constructed_Type (Self : access Item;   the_Node : in doh_Node) return Boolean;
+   function  cpp_Symbol (qualified_Name : in String;   Suffix : in String) return String;
 
    procedure register_Mirror (Self : access Item;   proxy_Name              : in unbounded_String;
                                                     the_c_Type              : in c_Type.view;
@@ -1192,6 +1193,10 @@ is
       the_Name      : unbounded_String := +Attribute (the_Node, "sym:name");
       the_swig_Type : SwigType_Pointer :=  SwigType_Pointer (doh_Copy (DOH_Pointer (get_Attribute (the_Node, "type"))));
       is_Pointer    : constant Boolean :=  SwigType_isPointer (the_swig_Type) /= 0;
+
+      full_Name     : constant String  :=  Attribute (the_Node, "name");                           -- With its namespaces.
+      is_Constant   : constant Boolean :=  SwigType_isConst (the_swig_Type) /= 0;
+      value_Text    : constant String  :=  Attribute (the_Node, "value");
    begin
       indent_Log;
       dlog (+"");
@@ -1229,6 +1234,35 @@ is
                  & "'");
             new_Variable.my_Type := Self.demand_c_Type_for (doh_swigType (to_Doh (to_String (the_swig_type_Name))));     -- An unknown type is pruned later.
          end;
+
+         if Self.in_cpp_Mode
+         then
+            --  A constant with a value ('const int Size = 2;') has no symbol in C++, so it is given its value.
+            --
+            if         is_Constant
+              and then value_Text /= ""
+              and then new_Variable.array_Bounds.is_Empty
+              and then ada.Strings.fixed.Index (full_Name, "::") /= 0     -- Outside a namespace a constant is imported, as it has been.
+              and then to_String (new_Variable.my_Type.Name) in "int" | "unsigned int" | "long" | "unsigned long" | "short" | "unsigned short" | "long long" | "unsigned long long"
+            then
+               begin
+                  new_Variable.Value := +Image (resolved_c_integer_Expression (Self, +value_Text,
+                                                                                     Self.integer_symbol_value_Map,
+                                                                                     Self.current_class_namespace_Prefix));
+               exception
+                  when others =>
+                     null;     -- The value is not an integer expression, so the constant is imported.
+               end;
+            end if;
+
+            --  A variable in a namespace is imported by its C++ symbol.
+            --
+            if         new_Variable.Value = ""
+              and then ada.Strings.fixed.Index (full_Name, "::") /= 0
+            then
+               new_Variable.link_Symbol := +cpp_Symbol (full_Name, Suffix => "E");
+            end if;
+         end if;
 
          Self.Module_top.C.new_c_Variables.append (new_Variable);
 
@@ -1837,8 +1871,9 @@ is
    function staticMemberFunctionHandler (Self : access Item;
                                          N    : in     Node_Pointer) return C.int
    is
-      the_Node : Node_Pointer renames N;
-      Status   : C.int with Unreferenced;
+      the_Node    : Node_Pointer renames N;
+      Status      : C.int with Unreferenced;
+      member_Name : constant String := Attribute (the_Node, "sym:name");     -- The base handler gives the node the name of its wrapper.
    begin
       indent_Log;
       dlog (+"");
@@ -1848,6 +1883,27 @@ is
 
       Self.static_Flag := True;
       Status := swigMod.Language.item (Self.all).staticMemberFunctionHandler (the_Node);
+
+      --  A static member function is a function of the package of its class, with no 'Self' parameter.
+      --
+      if         not Self.c_class_Stack.is_Empty
+        and then get_Attribute (the_Node, "overload:ignore") = null
+      then
+         declare
+            the_new_Function : c_Function.view;
+         begin
+            the_new_Function := Self.new_c_Function (doh_Node (the_Node),
+                                                     +member_Name,
+                                                     Self.current_c_Class.nameSpace.all'Access,
+                                                     is_Destructor => False);
+
+            if c_Function."/=" (the_new_Function, null)
+            then
+               Self.prior_c_Declaration := the_new_Function.all'Access;
+            end if;
+         end;
+      end if;
+
       Self.static_Flag := False;
 
       unindent_Log;
@@ -2046,6 +2102,7 @@ is
       is_Overriding :          Boolean := False;
 
       destruct_Symbol : unbounded_String;     -- The function of the wrapper which destructs an object, where there is one.
+      class_cpp_Name  : constant String := (if Self.in_cpp_Mode then +DOH_Pointer (get_Attribute (Self.getCurrentClass, "name")) else "");
    begin
       if not Self.in_cpp_Mode
       then
@@ -2124,7 +2181,8 @@ is
       begin
          the_Destructor.is_Static   := False;
          the_Destructor.is_Virtual  := the_Destructor.is_Virtual or is_Overriding;     -- An implicit destructor is virtual when a base class destructor is.
-         the_Destructor.link_Symbol := destruct_Symbol;
+         the_Destructor.link_Symbol := (if destruct_Symbol /= "" then destruct_Symbol
+                                                                 else +cpp_Symbol (class_cpp_Name, Suffix => "D1Ev"));     -- The complete object destructor.
       end;
 
       declare
@@ -2136,7 +2194,9 @@ is
       begin
          the_Destructor.is_Static   := False;
          the_Destructor.is_Virtual  := the_Destructor.is_Virtual or is_Overriding;     -- An implicit destructor is virtual when a base class destructor is.
-         the_Destructor.link_Symbol := destruct_Symbol;
+         the_Destructor.link_Symbol := (if destruct_Symbol /= "" then destruct_Symbol
+                                        else +cpp_Symbol (class_cpp_Name, Suffix => (if the_Destructor.is_Virtual then "D0Ev"      -- The deleting destructor.
+                                                                                                                  else "D1Ev")));
       end;
 
       unindent_Log;
@@ -2514,6 +2574,49 @@ is
    -----------
    --- Utility
    --
+
+   function cpp_Symbol (qualified_Name : in String;   Suffix : in String) return String
+   --
+   --  The C++ symbol of an entity with the given name ('geometry::solid::Box') and the suffix of its kind ('E' for
+   --  a variable, 'D1Ev' for a destructor). Returns "" where the name is not a plain one, such as that of a
+   --  template instance, whose symbol cannot be made from its name alone.
+   --
+   is
+      use ada.Strings.fixed;
+
+      the_Symbol : unbounded_String := +"_ZN";
+      First      : Positive         := qualified_Name'First;
+      Last       : Natural;
+   begin
+      if        qualified_Name = ""
+        or else (for some Each of qualified_Name => Each not in 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' | ':')
+        or else Index (qualified_Name, "std::") = qualified_Name'First
+      then
+         return "";
+      end if;
+
+      loop
+         Last := Index (qualified_Name, "::", from => First);
+
+         declare
+            Component : constant String := qualified_Name (First .. (if Last = 0 then qualified_Name'Last else Last - 1));
+         begin
+            if Component = ""
+            then
+               return "";
+            end if;
+
+            append (the_Symbol, Trim (Component'Length'Image, ada.Strings.Left) & Component);
+         end;
+
+         exit when Last = 0;
+         First := Last + 2;
+      end loop;
+
+      return to_String (the_Symbol) & Suffix;
+   end cpp_Symbol;
+
+
 
    function returns_a_cpp_constructed_Type (Self : access Item;   the_Node : in doh_Node) return Boolean
    --
@@ -3319,6 +3422,8 @@ is
       loop
          the_ada_Variable.array_Bounds.append (the_c_Variable.array_Bounds.Element (i));
       end loop;
+
+      the_ada_Variable.link_Symbol := the_c_Variable.link_Symbol;
 
       return the_ada_Variable;
 
