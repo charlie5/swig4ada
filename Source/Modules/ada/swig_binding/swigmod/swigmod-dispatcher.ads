@@ -31,6 +31,51 @@ package swigmod.Dispatcher is
      array
        (Interfaces.C.size_t range <>) of aliased swigmod.Dispatcher.AccessMode;
 
+   -- Pointer
+   --
+   type Pointer is access all swigmod.Dispatcher.Item;
+
+   -- Pointer_Array
+   --
+   type Pointer_Array is
+     array
+       (Interfaces.C.size_t range <>) of aliased swigmod.Dispatcher.Pointer;
+
+   -- Pointer_Pointer
+   --
+   package C_Pointer_Pointers is new Interfaces.C.Pointers
+     (Index => Interfaces.C.size_t, Element => swigmod.Dispatcher.Pointer,
+      Element_Array      => swigmod.Dispatcher.Pointer_Array,
+      Default_Terminator => null);
+
+   subtype Pointer_Pointer is C_Pointer_Pointers.Pointer;
+
+   -- AccessMode_Pointer
+   --
+   package C_AccessMode_Pointers is new Interfaces.C.Pointers
+     (Index => Interfaces.C.size_t, Element => swigmod.Dispatcher.AccessMode,
+      Element_Array      => swigmod.Dispatcher.AccessMode_array,
+      Default_Terminator => swigmod.Dispatcher.AccessMode'Val (0));
+
+   subtype AccessMode_Pointer is C_AccessMode_Pointers.Pointer;
+
+   -- AccessMode_Pointer_Array
+   --
+   type AccessMode_Pointer_Array is
+     array
+       (Interfaces.C.size_t range <>) of aliased swigmod.Dispatcher
+       .AccessMode_Pointer;
+
+   -- AccessMode_Pointer_Pointer
+   --
+   package C_AccessMode_Pointer_Pointers is new Interfaces.C.Pointers
+     (Index              => Interfaces.C.size_t,
+      Element            => swigmod.Dispatcher.AccessMode_Pointer,
+      Element_Array      => swigmod.Dispatcher.AccessMode_Pointer_Array,
+      Default_Terminator => null);
+
+   subtype AccessMode_Pointer_Pointer is C_AccessMode_Pointer_Pointers.Pointer;
+
    procedure destruct_0 (Self : in out swigmod.Dispatcher.Item);
 
    procedure destruct (Self : in out swigmod.Dispatcher.Item);
@@ -167,51 +212,6 @@ package swigmod.Dispatcher is
    function lambdaDeclaration
      (Self :    access swigmod.Dispatcher.Item;
       n    : in swig_Core.Pointers.Node_Pointer) return Interfaces.C.int;
-
-   -- Pointer
-   --
-   type Pointer is access all swigmod.Dispatcher.Item;
-
-   -- Pointer_Array
-   --
-   type Pointer_Array is
-     array
-       (Interfaces.C.size_t range <>) of aliased swigmod.Dispatcher.Pointer;
-
-   -- Pointer_Pointer
-   --
-   package C_Pointer_Pointers is new Interfaces.C.Pointers
-     (Index => Interfaces.C.size_t, Element => swigmod.Dispatcher.Pointer,
-      Element_Array      => swigmod.Dispatcher.Pointer_Array,
-      Default_Terminator => null);
-
-   subtype Pointer_Pointer is C_Pointer_Pointers.Pointer;
-
-   -- AccessMode_Pointer
-   --
-   package C_AccessMode_Pointers is new Interfaces.C.Pointers
-     (Index => Interfaces.C.size_t, Element => swigmod.Dispatcher.AccessMode,
-      Element_Array      => swigmod.Dispatcher.AccessMode_array,
-      Default_Terminator => swigmod.Dispatcher.AccessMode'Val (0));
-
-   subtype AccessMode_Pointer is C_AccessMode_Pointers.Pointer;
-
-   -- AccessMode_Pointer_Array
-   --
-   type AccessMode_Pointer_Array is
-     array
-       (Interfaces.C.size_t range <>) of aliased swigmod.Dispatcher
-       .AccessMode_Pointer;
-
-   -- AccessMode_Pointer_Pointer
-   --
-   package C_AccessMode_Pointer_Pointers is new Interfaces.C.Pointers
-     (Index              => Interfaces.C.size_t,
-      Element            => swigmod.Dispatcher.AccessMode_Pointer,
-      Element_Array      => swigmod.Dispatcher.AccessMode_Pointer_Array,
-      Default_Terminator => null);
-
-   subtype AccessMode_Pointer_Pointer is C_AccessMode_Pointer_Pointers.Pointer;
 
 private
 
