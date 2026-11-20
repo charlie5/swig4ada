@@ -200,7 +200,7 @@ is
                   delete (the_Vector, to_Index (Next     (Cursor)));     -- nb: 'Cursor' is not ambiguous after this delete (see RM A.18.2 219/2)
                   delete (the_Vector, to_Index (Previous (Cursor)));     --     'Cursor' is ambiguous after this delete
 
-                  Cursor := First (the_Vector);                          --      so we restart it.
+                  Cursor := First (the_Vector);                          --      So we restart it.
                end cull_value_Elements_and_restart_Cursor;
 
             begin
@@ -263,25 +263,24 @@ is
 
                elsif for_Operation = "^"
                then
-                  replace_Element (the_Vector, Cursor, (Kind  => Value,
-                                                        Value => Element (Previous (Cursor)).Value  xor  Element (Next (Cursor)).Value,
+                  replace_Element (the_Vector, Cursor, (Kind           => Value,
+                                                        Value          => Element (Previous (Cursor)).Value  xor  Element (Next (Cursor)).Value,
                                                         type_Qualifier => Element (Previous (Cursor)).type_Qualifier));
                   cull_value_Elements_and_restart_Cursor;
 
                elsif for_Operation = "/"
                then
-                  replace_Element (the_Vector, Cursor, (Kind  => Value,
-                                                        Value => Element (Previous (Cursor)).Value / Element (Next (Cursor)).Value,
+                  replace_Element (the_Vector, Cursor, (Kind           => Value,
+                                                        Value          => Element (Previous (Cursor)).Value / Element (Next (Cursor)).Value,
                                                         type_Qualifier => Element (Next (Cursor)).type_Qualifier));
 
                   cull_value_Elements_and_restart_Cursor;
 
                elsif for_Operation = "<<"
                then
-                  replace_Element (the_Vector, Cursor, (Kind  => Value,
-                                                        Value => Element (Previous (Cursor)).Value  *  to_Integer (2) ** Value (Element (Next (Cursor)).Value),
+                  replace_Element (the_Vector, Cursor, (Kind           => Value,
+                                                        Value          => Element (Previous (Cursor)).Value  *  to_Integer (2) ** Value (Element (Next (Cursor)).Value),
                                                         type_Qualifier => Element (Previous (Cursor)).type_Qualifier));
-
                   cull_value_Elements_and_restart_Cursor;
 
                elsif for_Operation = ">>"
@@ -534,9 +533,9 @@ is
             elsif Element (Expression_pad.all, 1) = ')'
             then
                delete (Expression_pad.all,  1, 1);
-               exit;                                                  -- nb: exit loop to allow recursion to end.
+               exit;                                                  -- nb: Exit loop to allow recursion to end.
 
-            elsif      Length (Expression_pad.all)       >= 2         -- handle hex numbers
+            elsif      Length (Expression_pad.all)       >= 2         -- Handle hex numbers.
               and then Slice  (Expression_pad.all, 1, 2)  = "0x"      --
             then
                declare
@@ -545,8 +544,8 @@ is
                begin
                   find_Token (Expression_pad.all, to_Set ("0123456789xABCDEFabcdef"), Inside,  First, Last);
 
-                  append (the_Elements,  (kind  => Value,
-                                          value => to_Int (Slice (Expression_pad.all,  First, Last)),
+                  append (the_Elements,  (Kind  => Value,
+                                          Value => to_Int (Slice (Expression_pad.all,  First, Last)),
                                           others => <>));
                   delete (Expression_pad.all,  First, Last);
                end;
@@ -559,8 +558,8 @@ is
                begin
                   find_Token (Expression_pad.all, to_Set ("0123456789"), Inside,  First, Last);
 
-                  append (the_Elements,  (kind  => Value,
-                                          value => to_Int (Slice (Expression_pad.all,  First, Last)),
+                  append (the_Elements,  (Kind  => Value,
+                                          Value => to_Int (Slice (Expression_pad.all,  First, Last)),
                                           others => <>));
                   delete (Expression_pad.all,  First, Last);
                end;
@@ -571,12 +570,12 @@ is
                begin
                   if Element (Expression_pad.all, 1) in '0' .. '9'
                   then
-                     append (the_Elements,  (kind  => Value,
-                                             value => to_Int (Expression_pad.all),
+                     append (the_Elements,  (Kind  => Value,
+                                             Value => to_Int (Expression_pad.all),
                                              others => <>));
                   else
-                     append (the_Elements,  (kind  => Value,
-                                             value => to_Integer (Character'Pos (Element (Expression_pad.all, 1))),
+                     append (the_Elements,  (Kind  => Value,
+                                             Value => to_Integer (Character'Pos (Element (Expression_pad.all, 1))),
                                              others => <>));
                   end if;
 
