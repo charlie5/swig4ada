@@ -373,6 +373,13 @@ extern aaa    ada_new_aaa_aaa()
 }
 
 
+extern "C" void ada_destruct_aaa (aaa * self)
+{
+  typedef aaa swig_ada_class;
+  self->~swig_ada_class ();
+}
+
+
 #ifdef __cplusplus
 }
 #endif

@@ -361,14 +361,14 @@ extern          "C"
 
   }
 
-  DllExport int SWIGSTDCALL Ada_method (struct TypeNameTraits a_arg1)
+  DllExport int SWIGSTDCALL Ada_method (struct TypeNameTraits *a_arg1)
   {
     int             jresult;
     struct TypeNameTraits arg1;
     int             result;
     struct TypeNameTraits *argp1;
 
-    argp1 = (struct TypeNameTraits *) &a_arg1;
+    argp1 = (struct TypeNameTraits *) a_arg1;
 
     arg1 = *argp1;
 

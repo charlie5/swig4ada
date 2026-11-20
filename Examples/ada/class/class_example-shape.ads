@@ -40,7 +40,7 @@ type Item is  tagged limited
 
    -- Pointer
    -- 
-   type Pointer is access all class_example.Shape.Item;
+   type Pointer is access all class_example.Shape.Item'Class;
 
    -- Pointer_Array
    -- 

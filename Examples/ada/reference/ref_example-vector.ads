@@ -79,7 +79,7 @@ private
      construct_v2;
 
    pragma Import (C, print, "Ada_Vector_print");
-   pragma Import (CPP, destruct_0, "_ZN6VectorD1Ev");
-   pragma Import (CPP, destruct, "_ZN6VectorD1Ev");
+   pragma Import (C, destruct_0, "ada_destruct_Vector");
+   pragma Import (C, destruct, "ada_destruct_Vector");
 
 end ref_example.Vector;

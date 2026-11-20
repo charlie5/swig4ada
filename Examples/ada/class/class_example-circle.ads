@@ -40,7 +40,7 @@ type Item is new class_example.Shape.item with
 
    -- Pointer
    -- 
-   type Pointer is access all class_example.Circle.Item;
+   type Pointer is access all class_example.Circle.Item'Class;
 
    -- Pointer_Array
    -- 

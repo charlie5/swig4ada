@@ -83,7 +83,7 @@ package example.foo is
 private
 
    pragma Import (CPP, construct, "ada_new_foo_foo");
-   pragma Import (CPP, destruct_0, "_ZN3fooD1Ev");
-   pragma Import (CPP, destruct, "_ZN3fooD1Ev");
+   pragma Import (C, destruct_0, "ada_destruct_foo");
+   pragma Import (C, destruct, "ada_destruct_foo");
 
 end example.foo;

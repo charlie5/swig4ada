@@ -72,8 +72,8 @@ package ref_example.VectorArray is
 
 private
 
-   pragma Import (CPP, destruct_0, "_ZN11VectorArrayD1Ev");
-   pragma Import (CPP, destruct, "_ZN11VectorArrayD1Ev");
+   pragma Import (C, destruct_0, "ada_destruct_VectorArray");
+   pragma Import (C, destruct, "ada_destruct_VectorArray");
    pragma Import (C, size, "Ada_VectorArray_size");
    pragma Import (C, get, "Ada_VectorArray_get");
    pragma Import (C, set, "Ada_VectorArray_set");

@@ -604,9 +604,23 @@ extern vector< int >    ada_new_vecint_vecint(int   sz)
 }
 
 
+extern "C" void ada_destruct_vector__int__ (vector< int > * self)
+{
+  typedef vector< int > swig_ada_class;
+  self->~swig_ada_class ();
+}
+
+
 extern vector< double >    ada_new_vecdouble_vecdouble(int   sz)
 {
   return vector< double >(sz);
+}
+
+
+extern "C" void ada_destruct_vector__double__ (vector< double > * self)
+{
+  typedef vector< double > swig_ada_class;
+  self->~swig_ada_class ();
 }
 
 

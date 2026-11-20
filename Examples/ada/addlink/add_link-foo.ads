@@ -52,7 +52,7 @@ private
 
    pragma Import (CPP, construct, "ada_new_Foo_Foo");
    pragma Import (C, blah, "Ada_Foo_blah");
-   pragma Import (CPP, destruct_0, "_ZN3FooD1Ev");
-   pragma Import (CPP, destruct, "_ZN3FooD1Ev");
+   pragma Import (C, destruct_0, "ada_destruct_Foo");
+   pragma Import (C, destruct, "ada_destruct_Foo");
 
 end add_link.Foo;

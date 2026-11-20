@@ -77,7 +77,7 @@ private
    pragma Import (C, set, "Ada_vecint_set");
    pragma Import (C, getitem, "Ada_vecint_getitem");
    pragma Import (C, setitem, "Ada_vecint_setitem");
-   pragma Import (CPP, destruct_0, "_ZN6vecintD1Ev");
-   pragma Import (CPP, destruct, "_ZN6vecintD1Ev");
+   pragma Import (C, destruct_0, "ada_destruct_vector__int__");
+   pragma Import (C, destruct, "ada_destruct_vector__int__");
 
 end template_example.vecint;

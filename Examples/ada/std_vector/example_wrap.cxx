@@ -245,14 +245,14 @@ static void (*swig_ada_throw_exception_reference) (SWIG_AdaExceptionCodes, const
 #include <vector>
 #include <stdexcept>
 
-SWIGINTERN std::vector< int >::const_reference std_vector_Sl_int_Sg__std_vector_Sl_int_Sg__get(std::vector< int > *self,int i){
+SWIGINTERN int const &std_vector_Sl_int_Sg__std_vector_Sl_int_Sg__get(std::vector< int > *self,int i){
                 int size = int(self->size());
                 if (i>=0 && i<size)
                     return (*self)[i];
                 else
                     throw std::out_of_range("vector index out of range");
             }
-SWIGINTERN void std_vector_Sl_int_Sg__std_vector_Sl_int_Sg__set(std::vector< int > *self,int i,std::vector< int >::value_type const &x){
+SWIGINTERN void std_vector_Sl_int_Sg__std_vector_Sl_int_Sg__set(std::vector< int > *self,int i,int const &x){
                 int size = int(self->size());
                 if (i>=0 && i<size)
                     (*self)[i] = x;
@@ -262,13 +262,28 @@ SWIGINTERN void std_vector_Sl_int_Sg__std_vector_Sl_int_Sg__set(std::vector< int
 #ifdef __cplusplus 
 extern "C" {
 #endif
+DllExport void SWIGSTDCALL Ada_delete_int_vector (
+  void * a_arg1
+  )
+{
+  std::vector< int > *arg1 = (std::vector< int > *) 0 ;
+  
+  arg1 = (std::vector< int > *)a_arg1; 
+  
+  delete arg1;
+  
+  
+}
+
+
+
 DllExport size_t SWIGSTDCALL Ada_int_vector_size (
   void * a_arg1
   )
 {
   size_t jresult ;
   std::vector< int > *arg1 = (std::vector< int > *) 0 ;
-  std::vector< int >::size_type result;
+  size_t result;
   
   arg1 = (std::vector< int > *)a_arg1; 
   
@@ -289,7 +304,7 @@ DllExport size_t SWIGSTDCALL Ada_int_vector_capacity (
 {
   size_t jresult ;
   std::vector< int > *arg1 = (std::vector< int > *) 0 ;
-  std::vector< int >::size_type result;
+  size_t result;
   
   arg1 = (std::vector< int > *)a_arg1; 
   
@@ -312,12 +327,12 @@ DllExport void SWIGSTDCALL Ada_int_vector_reserve (
   )
 {
   std::vector< int > *arg1 = (std::vector< int > *) 0 ;
-  std::vector< int >::size_type arg2 ;
+  size_t arg2 ;
   
   arg1 = (std::vector< int > *)a_arg1; 
   
   
-  arg2 = (std::vector< int >::size_type) a_arg2; 
+  arg2 = (size_t) a_arg2; 
   
   
   (arg1)->std::vector< int >::reserve(arg2);
@@ -371,16 +386,16 @@ DllExport void SWIGSTDCALL Ada_int_vector_add (
   )
 {
   std::vector< int > *arg1 = (std::vector< int > *) 0 ;
-  std::vector< int >::value_type *arg2 = 0 ;
+  int *arg2 = 0 ;
   int temp2 ;
   
   arg1 = (std::vector< int > *)a_arg1; 
   
   
-  arg2 = (std::vector< int >::value_type *) a_arg2;      // The reference is to the object of the caller, which Ada passes by pointer.
+  arg2 = (int *) a_arg2;      // The reference is to the object of the caller, which Ada passes by pointer.
   
   
-  (arg1)->std::vector< int >::push_back((std::vector< int >::value_type const &)*arg2);
+  (arg1)->std::vector< int >::push_back((int const &)*arg2);
   
   
 }
@@ -397,7 +412,7 @@ DllExport int* SWIGSTDCALL Ada_int_vector_get (
   int* jresult ;
   std::vector< int > *arg1 = (std::vector< int > *) 0 ;
   int arg2 ;
-  std::vector< int >::value_type *result = 0 ;
+  int *result = 0 ;
   
   arg1 = (std::vector< int > *)a_arg1; 
   
@@ -406,14 +421,14 @@ DllExport int* SWIGSTDCALL Ada_int_vector_get (
   
   
   try {
-    result = (std::vector< int >::value_type *) &std_vector_Sl_int_Sg__std_vector_Sl_int_Sg__get(arg1,arg2);
+    result = (int *) &std_vector_Sl_int_Sg__std_vector_Sl_int_Sg__get(arg1,arg2);
   } catch(std::out_of_range &_e) {
     (void) _e;
     SWIG_AdaThrowException (SWIG_AdaException, "C++ std::out_of_range exception thrown");
     
   }
   
-  jresult = (std::vector< int >::value_type *) result; 
+  jresult = (int *) result; 
   
   
   
@@ -436,7 +451,7 @@ DllExport void SWIGSTDCALL Ada_int_vector_set (
 {
   std::vector< int > *arg1 = (std::vector< int > *) 0 ;
   int arg2 ;
-  std::vector< int >::value_type *arg3 = 0 ;
+  int *arg3 = 0 ;
   int temp3 ;
   
   arg1 = (std::vector< int > *)a_arg1; 
@@ -446,7 +461,7 @@ DllExport void SWIGSTDCALL Ada_int_vector_set (
   
   
   
-  arg3 = (std::vector< int >::value_type *) a_arg3;      // The reference is to the object of the caller, which Ada passes by pointer.
+  arg3 = (int *) a_arg3;      // The reference is to the object of the caller, which Ada passes by pointer.
   
   
   try {
@@ -456,21 +471,6 @@ DllExport void SWIGSTDCALL Ada_int_vector_set (
     SWIG_AdaThrowException (SWIG_AdaException, "C++ std::out_of_range exception thrown");
     
   }
-  
-  
-}
-
-
-
-DllExport void SWIGSTDCALL Ada_delete_int_vector (
-  void * a_arg1
-  )
-{
-  std::vector< int > *arg1 = (std::vector< int > *) 0 ;
-  
-  arg1 = (std::vector< int > *)a_arg1; 
-  
-  delete arg1;
   
   
 }
@@ -489,7 +489,20 @@ extern std::vector< int >    ada_new_int_vector_int_vector__SWIG_0()
 }
 
 
-extern std::vector< int >    ada_new_int_vector_int_vector__SWIG_1(std::vector< int >::size_type   n)
+extern std::vector< int >    ada_new_int_vector_int_vector__SWIG_1(std::vector< int > *   other)
+{
+  return std::vector< int >((std::vector< int > const &)*other);
+}
+
+
+extern "C" void ada_destruct_std__vector__int__ (std::vector< int > * self)
+{
+  typedef std::vector< int > swig_ada_class;
+  self->~swig_ada_class ();
+}
+
+
+extern std::vector< int >    ada_new_int_vector_int_vector__SWIG_2(size_t   n)
 {
   return std::vector< int >(n);
 }

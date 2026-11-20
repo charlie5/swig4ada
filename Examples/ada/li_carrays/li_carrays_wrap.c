@@ -493,7 +493,7 @@ extern          "C"
   }
 
   DllExport void SWIGSTDCALL Ada_XYArray_setitem (void *a_arg1,
-						  int a_arg2, XY a_arg3)
+						  int a_arg2, XY * a_arg3)
   {
     XYArray        *arg1 = (XYArray *) 0;
     int             arg2;
@@ -504,7 +504,7 @@ extern          "C"
 
     arg2 = (int) a_arg2;
 
-    argp3 = (XY *) & a_arg3;
+    argp3 = (XY *) a_arg3;
 
     arg3 = *argp3;
 
@@ -588,7 +588,7 @@ extern          "C"
   }
 
   DllExport void SWIGSTDCALL Ada_ABArray_setitem (void *a_arg1,
-						  int a_arg2, AB a_arg3)
+						  int a_arg2, AB * a_arg3)
   {
     AB             *arg1 = (AB *) 0;
     int             arg2;
@@ -599,7 +599,7 @@ extern          "C"
 
     arg2 = (int) a_arg2;
 
-    argp3 = (AB *) & a_arg3;
+    argp3 = (AB *) a_arg3;
 
     arg3 = *argp3;
 

@@ -52,7 +52,7 @@ package string_example.aaa is
 private
 
    pragma CPP_Constructor (construct, "ada_new_aaa_aaa");
-   pragma Import (CPP, destruct_0, "_ZN3aaaD1Ev");
-   pragma Import (CPP, destruct, "_ZN3aaaD1Ev");
+   pragma Import (C, destruct_0, "ada_destruct_aaa");
+   pragma Import (C, destruct, "ada_destruct_aaa");
 
 end string_example.aaa;

@@ -79,7 +79,7 @@ private
    pragma Import (C, set, "Ada_vecdouble_set");
    pragma Import (C, getitem, "Ada_vecdouble_getitem");
    pragma Import (C, setitem, "Ada_vecdouble_setitem");
-   pragma Import (CPP, destruct_0, "_ZN9vecdoubleD1Ev");
-   pragma Import (CPP, destruct, "_ZN9vecdoubleD1Ev");
+   pragma Import (C, destruct_0, "ada_destruct_vector__double__");
+   pragma Import (C, destruct, "ada_destruct_vector__double__");
 
 end template_example.vecdouble;

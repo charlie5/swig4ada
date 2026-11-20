@@ -299,6 +299,13 @@ extern Foo    ada_new_Foo_Foo()
 }
 
 
+extern "C" void ada_destruct_Foo (Foo * self)
+{
+  typedef Foo swig_ada_class;
+  self->~swig_ada_class ();
+}
+
+
 #ifdef __cplusplus
 }
 #endif
