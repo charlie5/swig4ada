@@ -1749,7 +1749,15 @@ is
                               the_Source := spec_Source_private'Unchecked_Access;
                            end if;
 
-                           if is_overloaded
+                           if         is_overloaded
+                             and then the_Subprogram.is_Constructor
+                             and then the_Package.models_a_virtual_cpp_Class
+                           then   -- A C++ constructor cannot be renamed, so its pragma directly follows its own declaration.
+                              append (spec_Source,
+                                      the_Subprogram.pragma_CPP_Constructor_Source (declaration_package  => the_Package.all'Access,
+                                                                                    unique_function_name => the_Subprogram.Name,
+                                                                                    in_cpp_Mode          => in_cpp_Mode));
+                           elsif is_overloaded
                            then
                               append (the_Source.all,
                                       overload_resolution_Source (Self                 => the_Subprogram,
