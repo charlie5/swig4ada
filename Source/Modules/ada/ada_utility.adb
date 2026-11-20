@@ -120,7 +120,11 @@ is
 
    procedure strip_Namespaces (Self : in out unbounded_String)
    is
-      namespace_Index : constant Natural := Index (Self, "::", backward);
+      --  Only the namespaces of the name itself are stripped, not those within the arguments of a template.
+      --
+      template_Index  : constant Natural := Index (Self, "<");
+      Last            : constant Natural := (if template_Index = 0 then Length (Self) else template_Index - 1);
+      namespace_Index : constant Natural := (if Last = 0 then 0 else Index (Self, "::", Last, backward));
    begin
       if namespace_Index = 0
       then
@@ -321,6 +325,33 @@ is
       the_Identifier : unbounded_String := Self;
    begin
       strip_Namespaces (the_Identifier);
+
+      if Index (the_Identifier, "<") /= 0
+      then   -- The name of a class template instance which was given no name of its own, such as 'A<(int)>' or
+             -- 'B<(double,ns::C)>', for which the names of the template and its arguments are joined: 'A_int'.
+         replace_All (the_Identifier,  ")>",  "");
+         replace_All (the_Identifier,  "<(",  "_");
+         replace_All (the_Identifier,  "::",  "_");
+
+         for Each in 1 .. Length (the_Identifier)
+         loop
+            if Element (the_Identifier, Each) in '<' | '>' | '(' | ')' | ',' | ' ' | '.' | '&' | ':'
+            then
+               replace_Element (the_Identifier, Each, '_');
+            end if;
+         end loop;
+
+         loop
+            exit when Index (the_Identifier, "__") = 0;
+            replace_All (the_Identifier,  "__",  "_");
+         end loop;
+
+         while    Length (the_Identifier) > 1
+           and then Tail (the_Identifier, 1) = "_"
+         loop
+            Head (the_Identifier, Length (the_Identifier) - 1);
+         end loop;
+      end if;
 
       if is_reserved_Word (the_Identifier)
       then

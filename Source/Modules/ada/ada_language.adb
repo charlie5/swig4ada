@@ -1616,7 +1616,8 @@ is
          end owner_is_among_Bases;
 
       begin
-         if overriding_Value = null
+         if        overriding_Value = null
+           or else Self.current_c_Class.base_Classes.is_Empty     -- Such as a smart pointer, which is given the functions of the class it points to.
          then
             return False;
          end if;

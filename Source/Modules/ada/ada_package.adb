@@ -25,6 +25,7 @@ is
       return new Item'(a_Kind   => Binding,
                        a_Parent => Parent,
                        a_Name   => to_unbounded_String (Name),
+                       a_name_Suffix => null_unbounded_String,
 
                        a_is_Module           => False,
                        a_is_Import           => False,
@@ -66,9 +67,19 @@ is
    end Name;
 
 
-   function ada_Name (Self : access Item) return unbounded_String
+   procedure name_Suffix_is (Self : access Item;   Now : in String)
    is
    begin
+      Self.a_name_Suffix := to_unbounded_String (Now);
+   end name_Suffix_is;
+
+
+
+   function ada_Name (Self : access Item) return unbounded_String
+   is
+      function unsuffixed_Name return unbounded_String
+      is
+      begin
       if Self.Name = "standard"
       then
          return Self.Name;
@@ -103,6 +114,10 @@ is
             end if;
          end;
       end if;
+      end unsuffixed_Name;
+
+   begin
+      return unsuffixed_Name & Self.a_name_Suffix;
    end ada_Name;
 
 

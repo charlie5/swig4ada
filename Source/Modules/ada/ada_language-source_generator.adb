@@ -151,7 +151,7 @@ is
          then
             append (the_Source,  " limited interface");
 
-         elsif Self.virtual_member_function_Count > 0
+         elsif Self.is_Virtual     -- Also true for a class whose only virtual member is one which is not bound.
          then
             if Self.is_Abstract
             then
@@ -182,6 +182,11 @@ is
       the_Source              :          unbounded_String;
       union_variant_type_Name : constant unbounded_String := Self.Name & "_variant";
       base_Classes            : constant ada_type.Vector  := Self.base_Classes;
+
+      --  A union with no members has no variants to enumerate, and is declared as a plain record.
+      --
+      is_a_Union              : constant Boolean          :=          Self.is_Union
+                                                             and then Self.component_Count > 0;
    begin
       if Self.is_interface_Type
       then
@@ -211,7 +216,7 @@ is
       end if;
 
 
-      if Self.is_Union
+      if is_a_Union
       then
          append (the_Source,  NL & NL & "type " & union_variant_type_Name & " is (");
 
@@ -237,7 +242,7 @@ is
 
       append (the_Source,  NL  &  "type "  &  Self.Name);
 
-      if Self.is_Union
+      if is_a_Union
       then
          append (the_Source,  " (union_Variant : " &  union_variant_type_Name & " := " & union_variant_type_Name & "'First)");
       end if;
@@ -282,7 +287,7 @@ is
          then
             append (the_Source,  " limited interface");
 
-         elsif Self.virtual_member_function_Count > 0
+         elsif Self.is_Virtual     -- Also true for a class whose only virtual member is one which is not bound.
          then
             if Self.is_Abstract
             then
@@ -311,7 +316,7 @@ is
                end if;
 
             else
-               if Self.is_Union
+               if is_a_Union
                then
                   append (the_Source, NL & "      case union_Variant is");
                end if;
@@ -327,7 +332,7 @@ is
                   loop
                      the_Component := Self.Components (Each);
 
-                     if Self.is_Union
+                     if is_a_Union
                      then
                         append (the_Source,  NL & "         when " & the_component.Name & "_variant =>");
                      end if;
@@ -403,7 +408,7 @@ is
                end;
 
 
-               if Self.is_Union
+               if is_a_Union
                then
                   append (the_Source,  NL & "      end case;");
                end if;
@@ -416,7 +421,7 @@ is
       append (the_Source,  ";" & NL & NL);
 
 
-      if Self.is_Union
+      if is_a_Union
       then
          append (the_Source,  "   pragma unchecked_Union (" & Self.Name & ");" & NL & NL);
       end if;

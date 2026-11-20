@@ -63,6 +63,7 @@ is
    function  Parent                     (Self : access Item)     return View;
 
    function  ada_Name                   (Self : access Item)     return unbounded_String;
+   procedure name_Suffix_is             (Self : access Item;   Now : in String);     -- Appended to the Ada name, to make it unique.
    --
    --  The simple name of the package in the generated Ada source, which is prefixed where the C name would clash.
 
@@ -130,6 +131,7 @@ private
          a_Kind                : ada_Package.a_Kind;
          a_Parent              : ada_Package.view;
          a_Name                : unbounded_String;
+         a_name_Suffix         : unbounded_String;
 
          a_is_Module           : Boolean := False;
          a_is_Import           : Boolean := False;

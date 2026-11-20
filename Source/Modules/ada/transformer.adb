@@ -61,6 +61,42 @@ is
 
 
 
+      procedure make_Unique (the_Package : in ada_Package.view)
+      --
+      --  C is case sensitive, so two classes or typedefs may have names which differ only in case (such as 'hi0'
+      --  and 'Hi0'). Their packages would have the same Ada name, and the same file, so the later one is suffixed.
+      --
+      is
+         use ada.Characters.handling;
+         use type ada_Package.view;
+
+         function is_Taken return Boolean
+         is
+         begin
+            for Each of Result.new_Packages
+            loop
+               if         Each        /= the_Package
+                 and then Each.Parent  = the_Package.Parent
+                 and then to_Lower (to_String (Each.ada_Name)) = to_Lower (to_String (the_Package.ada_Name))
+               then
+                  return True;
+               end if;
+            end loop;
+
+            return False;
+         end is_Taken;
+
+         Count : Positive := 1;
+      begin
+         while is_Taken
+         loop
+            Count := Count + 1;
+            the_Package.name_Suffix_is ("_" & ada.Strings.fixed.Trim (Count'Image, ada.Strings.Left));
+         end loop;
+      end make_Unique;
+
+
+
       function is_Bindable (the_c_Function : in c_Function.view) return Boolean
       --
       --  A function can only be bound when its return type and the type of each of its parameters has an Ada type.
@@ -257,6 +293,7 @@ is
                                    := ada_Package.new_ada_Package (name   => to_String (ada_Utility.to_ada_Identifier (the_c_Type.Name)),
                                                                    parent => Result.Package_top);
                               begin
+                                 make_Unique (new_ada_Package);
                                  Result.new_Packages.append (new_ada_Package);
                                  new_ada_Type := ada_type.a_subtype.new_Subtype (new_ada_Package,
                                                                                  +"Item",
@@ -404,6 +441,7 @@ is
                                  new_ada_Type := ada_Type.elementary.an_access.to_subProgram.new_Item (new_ada_Package,
                                                                                                        +"Item",
                                                                                                        accessed_subProgram => the_ada_subProgram).all'Access;
+                                 make_Unique (new_ada_Package);
                                  Result.new_Packages.append (new_ada_Package);
                               end;
                            else
@@ -473,6 +511,7 @@ is
                            add_array_Type_for   (new_ada_Record.all'Access, the_c_Type);
                            add_type_Pointer_for (new_ada_Record.all'Access, the_c_Type);
 
+                           make_Unique (new_ada_Package);
                            Result.new_Packages   .append (new_ada_Package);
                            c_type_Map_of_ada_type.insert (the_c_Type, new_ada_Record.all'Access);
                         end;
@@ -601,6 +640,7 @@ is
                                        the_new_Package : constant ada_Package.view := ada_Package.new_ada_Package (name   => to_String (the_c_Type.Name),
                                                                                                                    parent => Result.Package_top);
                                     begin
+                                       make_Unique (the_new_Package);
                                        Result.new_Packages.append (the_new_Package);
                                        new_ada_Array := ada_Type.composite.an_array.new_Item (the_new_Package,
                                                                                               +"Item",
@@ -751,9 +791,60 @@ is
                                  declare
                                     the_c_Function     : constant c_Function.view     := Element (Cursor);
                                     the_ada_subProgram : constant ada_subProgram.view := Self.to_ada_subProgram (the_c_Function);
+                                    is_Overridable     :          Boolean             := True;
                                  begin
                                     the_ada_subProgram.Parameters := Self.to_ada_Parameters (the_c_function.Parameters);
-                                    the_ada_Record.declaration_Package.add (the_ada_subProgram);
+
+                                    if the_c_Function.is_Overriding
+                                    then
+                                       --  C++ allows a function which overrides to return a pointer or reference to a class derived
+                                       --  from that returned by the function it overrides. In Ada the two results must be of the
+                                       --  same type, so the result type of the overridden function is used.
+                                       --
+                                       declare
+                                          use ada_Type.Vectors;
+                                          use type ada.Containers.Count_type;
+
+                                          the_Class  : ada_Type.composite.a_record.view := the_ada_Record;
+                                          is_Found   : Boolean                          := False;
+                                          is_Unknown : Boolean                          := False;     -- The functions of a class in an imported
+                                       begin                                                          -- module are not collected.
+                                          while    not is_Found
+                                            and then not the_Class.base_Classes.is_Empty
+                                          loop
+                                             the_Class := ada_Type.composite.a_record.view (the_Class.base_Classes.first_Element);
+
+                                             if the_Class.declaration_Package.Subprograms.is_Empty
+                                             then
+                                                is_Unknown := True;
+                                             end if;
+
+                                             for Each of the_Class.declaration_Package.Subprograms
+                                             loop
+                                                if         Each.Name              = the_ada_subProgram.Name
+                                                  and then Each.Parameters.Length = the_ada_subProgram.Parameters.Length
+                                                then
+                                                   the_ada_subProgram.return_Type := Each.return_Type;
+                                                   is_Found                       := True;
+                                                   exit;
+                                                end if;
+                                             end loop;
+                                          end loop;
+
+                                          is_Overridable := is_Found or is_Unknown;
+                                       end;
+                                    end if;
+
+                                    if is_Overridable
+                                    then
+                                       the_ada_Record.declaration_Package.add (the_ada_subProgram);
+                                    else
+                                       --  The function which is overridden could not be bound, so there is nothing to override.
+                                       --  Declared as a new function, it would take a further slot in the vtable.
+                                       --
+                                       log (  "Warning: unable to bind the function '" & the_c_Function.Name & "' of class '" & the_c_Type.Name
+                                            & "', as the function which it overrides is not bound.");
+                                    end if;
                                  end;
 
                               elsif      Element (Cursor).is_Virtual
