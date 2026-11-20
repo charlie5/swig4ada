@@ -2,7 +2,12 @@
 
 set -e
 
-#./cleaner
+clear
+
+
+./cleaner
+
+
 
 echo
 echo Generating bindings.
