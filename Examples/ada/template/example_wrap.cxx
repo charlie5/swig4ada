@@ -170,6 +170,18 @@ template <typename T> T SwigValueInit() {
 
 #ifdef __cplusplus
 #  include <new>
+
+/* Replaces an object of the caller by a result which C++ has just made: the object is destructed, and the
+   result is moved (or, before C++11, copied) into its place. The assignment of the class is not used. */
+template <typename T> static void swig_ada_replace (T* target, T& value)
+{
+  target->~T ();
+#  if __cplusplus >= 201103L
+  new (target) T (static_cast<T &&> (value));
+#  else
+  new (target) T (value);
+#  endif
+}
 #endif
 
 
@@ -241,16 +253,16 @@ static void (*swig_ada_throw_exception_reference) (SWIG_AdaExceptionCodes, const
 
 #include "example.h"
 
-SWIGINTERN int vector_Sl_int_Sg__vector_Sl_int_Sg__getitem(vector< int > *self,int index){
+SWIGINTERN int vector_Sl_int_Sg__getitem(vector< int > *self,int index){
       return self->get(index);
     }
-SWIGINTERN void vector_Sl_int_Sg__vector_Sl_int_Sg__setitem(vector< int > *self,int index,int val){
+SWIGINTERN void vector_Sl_int_Sg__setitem(vector< int > *self,int index,int val){
       self->set(index,val);
     }
-SWIGINTERN double vector_Sl_double_Sg__vector_Sl_double_Sg__getitem(vector< double > *self,int index){
+SWIGINTERN double vector_Sl_double_Sg__getitem(vector< double > *self,int index){
       return self->get(index);
     }
-SWIGINTERN void vector_Sl_double_Sg__vector_Sl_double_Sg__setitem(vector< double > *self,int index,double val){
+SWIGINTERN void vector_Sl_double_Sg__setitem(vector< double > *self,int index,double val){
       self->set(index,val);
     }
 #ifdef __cplusplus 
@@ -337,9 +349,7 @@ DllExport int* SWIGSTDCALL Ada_vecint_get (
   
   
   result = (int *) &(arg1)->vector< int >::get(arg2);
-  
-  jresult = (int *) result; 
-  
+  jresult = (int*) result;
   
   
   
@@ -398,7 +408,7 @@ DllExport int SWIGSTDCALL Ada_vecint_getitem (
   arg2 = (int) a_arg2; 
   
   
-  result = (int)vector_Sl_int_Sg__vector_Sl_int_Sg__getitem(arg1,arg2);
+  result = (int)vector_Sl_int_Sg__getitem(arg1,arg2);
   jresult = result; 
   
   
@@ -433,7 +443,7 @@ DllExport void SWIGSTDCALL Ada_vecint_setitem (
   arg3 = (int) a_arg3; 
   
   
-  vector_Sl_int_Sg__vector_Sl_int_Sg__setitem(arg1,arg2,arg3);
+  vector_Sl_int_Sg__setitem(arg1,arg2,arg3);
   
   
 }
@@ -474,9 +484,7 @@ DllExport double* SWIGSTDCALL Ada_vecdouble_get (
   
   
   result = (double *) &(arg1)->vector< double >::get(arg2);
-  
-  jresult = (double *) result; 
-  
+  jresult = (double*) result;
   
   
   
@@ -535,7 +543,7 @@ DllExport double SWIGSTDCALL Ada_vecdouble_getitem (
   arg2 = (int) a_arg2; 
   
   
-  result = (double)vector_Sl_double_Sg__vector_Sl_double_Sg__getitem(arg1,arg2);
+  result = (double)vector_Sl_double_Sg__getitem(arg1,arg2);
   jresult = result; 
   
   
@@ -570,7 +578,7 @@ DllExport void SWIGSTDCALL Ada_vecdouble_setitem (
   arg3 = (double) a_arg3; 
   
   
-  vector_Sl_double_Sg__vector_Sl_double_Sg__setitem(arg1,arg2,arg3);
+  vector_Sl_double_Sg__setitem(arg1,arg2,arg3);
   
   
 }

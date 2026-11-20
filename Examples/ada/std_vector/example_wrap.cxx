@@ -170,6 +170,18 @@ template <typename T> T SwigValueInit() {
 
 #ifdef __cplusplus
 #  include <new>
+
+/* Replaces an object of the caller by a result which C++ has just made: the object is destructed, and the
+   result is moved (or, before C++11, copied) into its place. The assignment of the class is not used. */
+template <typename T> static void swig_ada_replace (T* target, T& value)
+{
+  target->~T ();
+#  if __cplusplus >= 201103L
+  new (target) T (static_cast<T &&> (value));
+#  else
+  new (target) T (value);
+#  endif
+}
 #endif
 
 
@@ -245,14 +257,14 @@ static void (*swig_ada_throw_exception_reference) (SWIG_AdaExceptionCodes, const
 #include <vector>
 #include <stdexcept>
 
-SWIGINTERN int const &std_vector_Sl_int_Sg__std_vector_Sl_int_Sg__get(std::vector< int > *self,int i){
+SWIGINTERN int const &std_vector_Sl_int_Sg__get(std::vector< int > *self,int i){
                 int size = int(self->size());
                 if (i>=0 && i<size)
                     return (*self)[i];
                 else
                     throw std::out_of_range("vector index out of range");
             }
-SWIGINTERN void std_vector_Sl_int_Sg__std_vector_Sl_int_Sg__set(std::vector< int > *self,int i,int const &x){
+SWIGINTERN void std_vector_Sl_int_Sg__set(std::vector< int > *self,int i,int const &x){
                 int size = int(self->size());
                 if (i>=0 && i<size)
                     (*self)[i] = x;
@@ -421,15 +433,13 @@ DllExport int* SWIGSTDCALL Ada_int_vector_get (
   
   
   try {
-    result = (int *) &std_vector_Sl_int_Sg__std_vector_Sl_int_Sg__get(arg1,arg2);
+    result = (int *) &std_vector_Sl_int_Sg__get(arg1,arg2);
   } catch(std::out_of_range &_e) {
     (void) _e;
     SWIG_AdaThrowException (SWIG_AdaException, "C++ std::out_of_range exception thrown");
     
   }
-  
-  jresult = (int *) result; 
-  
+  jresult = (int*) result;
   
   
   
@@ -465,7 +475,7 @@ DllExport void SWIGSTDCALL Ada_int_vector_set (
   
   
   try {
-    std_vector_Sl_int_Sg__std_vector_Sl_int_Sg__set(arg1,arg2,(int const &)*arg3);
+    std_vector_Sl_int_Sg__set(arg1,arg2,(int const &)*arg3);
   } catch(std::out_of_range &_e) {
     (void) _e;
     SWIG_AdaThrowException (SWIG_AdaException, "C++ std::out_of_range exception thrown");

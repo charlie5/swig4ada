@@ -170,6 +170,18 @@ template <typename T> T SwigValueInit() {
 
 #ifdef __cplusplus
 #  include <new>
+
+/* Replaces an object of the caller by a result which C++ has just made: the object is destructed, and the
+   result is moved (or, before C++11, copied) into its place. The assignment of the class is not used. */
+template <typename T> static void swig_ada_replace (T* target, T& value)
+{
+  target->~T ();
+#  if __cplusplus >= 201103L
+  new (target) T (static_cast<T &&> (value));
+#  else
+  new (target) T (value);
+#  endif
+}
 #endif
 
 
@@ -245,7 +257,7 @@ public:
 };
 
 
-SWIGINTERN Foo *Foo_Foo_blah(Foo *self){
+SWIGINTERN Foo *Foo_blah(Foo *self){
    return new Foo();
 }
 #ifdef __cplusplus 
@@ -261,8 +273,8 @@ DllExport void * SWIGSTDCALL Ada_Foo_blah (
   
   arg1 = (Foo *)a_arg1; 
   
-  result = (Foo *)Foo_Foo_blah(arg1);
-  jresult = (void *) result;      
+  result = (Foo *)Foo_blah(arg1);
+  jresult = (void *) result;
   
   
   

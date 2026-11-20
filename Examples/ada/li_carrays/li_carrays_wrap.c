@@ -145,6 +145,19 @@
 
 #ifdef __cplusplus
 #include <new>
+
+/* Replaces an object of the caller by a result which C++ has just made: the object is destructed, and the
+   result is moved (or, before C++11, copied) into its place. The assignment of the class is not used. */
+template < typename T > static void
+swig_ada_replace (T *target, T & value)
+{
+  target->~T ();
+#if __cplusplus >= 201103L
+  new (target) T (static_cast < T && >(value));
+#else
+  new (target) T (value);
+#endif
+}
 #endif
 
 /* Exceptions.
@@ -251,19 +264,19 @@ intArray_setitem (int *ary, int index, int value)
 typedef double  doubleArray;
 
 SWIGINTERN double
-doubleArray_doubleArray_getitem (doubleArray *self, int index)
+doubleArray_getitem (doubleArray *self, int index)
 {
   return self[index];
 }
 
 SWIGINTERN void
-doubleArray_doubleArray_setitem (doubleArray *self, int index, double value)
+doubleArray_setitem (doubleArray *self, int index, double value)
 {
   self[index] = value;
 }
 
 SWIGINTERN double *
-doubleArray_doubleArray_cast (doubleArray *self)
+doubleArray_cast (doubleArray *self)
 {
   return self;
 }
@@ -292,19 +305,19 @@ AB              globalABArray[3];
 typedef XY      XYArray;
 
 SWIGINTERN XY
-XYArray_XYArray_getitem (XYArray *self, int index)
+XYArray_getitem (XYArray *self, int index)
 {
   return self[index];
 }
 
 SWIGINTERN void
-XYArray_XYArray_setitem (XYArray *self, int index, XY value)
+XYArray_setitem (XYArray *self, int index, XY value)
 {
   self[index] = value;
 }
 
 SWIGINTERN XY  *
-XYArray_XYArray_cast (XYArray *self)
+XYArray_cast (XYArray *self)
 {
   return self;
 }
@@ -352,7 +365,6 @@ extern          "C"
                     arg1 = (int) a_arg1;
 
                     result = (int *) new_intArray (arg1);
-
                     jresult = (int *) result;
 
                     return jresult;
@@ -416,7 +428,7 @@ extern          "C"
 
     arg2 = (int) a_arg2;
 
-    result = (double) doubleArray_doubleArray_getitem (arg1, arg2);
+    result = (double) doubleArray_getitem (arg1, arg2);
     jresult = result;
 
     return jresult;
@@ -437,7 +449,7 @@ extern          "C"
 
     arg3 = (double) a_arg3;
 
-    doubleArray_doubleArray_setitem (arg1, arg2, arg3);
+    doubleArray_setitem (arg1, arg2, arg3);
 
   }
 
@@ -449,8 +461,7 @@ extern          "C"
 
     arg1 = (doubleArray *) a_arg1;
 
-    result = (double *) doubleArray_doubleArray_cast (arg1);
-
+    result = (double *) doubleArray_cast (arg1);
     jresult = (double *) result;
 
     return jresult;
@@ -483,7 +494,7 @@ extern          "C"
 
     arg2 = (int) a_arg2;
 
-    result = XYArray_XYArray_getitem (arg1, arg2);
+    result = XYArray_getitem (arg1, arg2);
     {
       jresult = result;
     }
@@ -508,7 +519,7 @@ extern          "C"
 
     arg3 = *argp3;
 
-    XYArray_XYArray_setitem (arg1, arg2, arg3);
+    XYArray_setitem (arg1, arg2, arg3);
 
   }
 
@@ -520,7 +531,7 @@ extern          "C"
 
     arg1 = (XYArray *) a_arg1;
 
-    result = (XY *) XYArray_XYArray_cast (arg1);
+    result = (XY *) XYArray_cast (arg1);
     jresult = (void *) result;
 
     return jresult;
