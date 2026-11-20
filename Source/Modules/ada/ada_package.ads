@@ -91,6 +91,9 @@ is
 
 
    function  models_a_virtual_cpp_Class (Self : access Item)     return Boolean;
+   function  models_a_constructed_cpp_Class (Self : access Item) return Boolean;
+   --
+   --  True for a class which is virtual or is not trivial (see 'ada_Type.composite.a_record.is_constructed_by_Cpp').
    function  models_an_interface_Type   (Self : access Item)     return Boolean;
 
 

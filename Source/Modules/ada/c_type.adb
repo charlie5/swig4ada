@@ -1169,6 +1169,23 @@ is
 
 
 
+   procedure has_nontrivial_Members (Self : access Item)
+   is
+   begin
+      Self.my.has_nontrivial_Members := True;
+   end has_nontrivial_Members;
+
+
+
+   function has_nontrivial_Members (Self : access Item) return Boolean
+   is
+   begin
+      return         Self.my.c_type_Kind = c_Class
+            and then Self.my.has_nontrivial_Members;
+   end has_nontrivial_Members;
+
+
+
    function virtual_member_function_Count (Self : access Item) return Natural
    is
       use c_Function.Vectors;

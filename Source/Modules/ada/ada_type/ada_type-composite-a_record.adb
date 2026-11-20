@@ -324,6 +324,68 @@ is
 
 
 
+   procedure has_nontrivial_Members (Self : access Item)
+   is
+   begin
+      Self.has_nontrivial_Members := True;
+   end has_nontrivial_Members;
+
+
+
+   function is_Nontrivial (Self : access Item) return Boolean
+   is
+   begin
+      if Self.is_Union     -- A union is bound as an unchecked union, whose discriminant a type of convention CPP may not have.
+      then
+         return False;
+      end if;
+
+      if Self.has_nontrivial_Members
+      then
+         return True;
+      end if;
+
+      for Each of Self.base_Classes
+      loop
+         if View (Each).is_constructed_by_Cpp
+         then
+            return True;
+         end if;
+      end loop;
+
+      for Each in 1 .. Self.component_Count
+      loop
+         declare
+            the_Type : constant ada_Type.view := (if Self.Components (Each).my_Type = null then null
+                                                                                         else Self.Components (Each).my_Type.resolved_Type);
+         begin
+            if the_Type = null
+            then
+               null;
+
+            elsif     (         the_Type.all in Item'Class
+                       and then View (the_Type).is_constructed_by_Cpp)
+              or else ada.Characters.handling.to_Lower (to_String (the_Type.qualified_Name)) = "swig.std_string"     -- A C++ 'std::string'.
+            then
+               return True;
+            end if;
+         end;
+      end loop;
+
+      return False;
+   end is_Nontrivial;
+
+
+
+   function is_constructed_by_Cpp (Self : access Item) return Boolean
+   is
+   begin
+      return        Self.is_Virtual
+            or else Self.is_Nontrivial;
+   end is_constructed_by_Cpp;
+
+
+
    function virtual_member_function_Count (Self : access Item) return Natural
    is
       use ada_Subprogram.Vectors;

@@ -187,7 +187,7 @@ is
       then
          link_Symbol := Self.member_function_link_Symbol_for (in_cpp_Mode);
 
-         if declaration_Package.models_a_virtual_cpp_Class
+         if declaration_Package.models_a_constructed_cpp_Class
          then
             append (the_Source,  NL & NL & "   pragma cpp_Constructor (" & unique_function_Name &  ", """ & link_Symbol &  """);");
          else
@@ -279,7 +279,7 @@ is
 
       link_Symbol := Self.member_function_link_Symbol_for (in_cpp_Mode);
 
-      if declaration_Package.models_a_virtual_cpp_Class
+      if declaration_Package.models_a_constructed_cpp_Class
       then
          append (the_Source,  NL & NL & "   pragma cpp_Constructor (" & unique_function_Name &  ", """ & link_Symbol &  """);");
       else

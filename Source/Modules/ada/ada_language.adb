@@ -1578,6 +1578,16 @@ is
          end loop;
       end;
 
+      --  Note whether the class declares a destructor or a copy constructor. C++ passes and returns such a
+      --  class by reference, so it cannot be bound as a plain record. (The core notes both on the class, and
+      --  later adds a destructor node to every class, declared or not.)
+      --
+      if        get_Attribute (the_Node, "allocate:has_destructor")       /= null
+        or else get_Attribute (the_Node, "allocate:has_copy_constructor") /= null
+      then
+         new_c_Class.has_nontrivial_Members;
+      end if;
+
       Self.c_class_Stack    .append (new_C_Class);
       Self.c_namespace_Stack.append (new_C_Class.nameSpace.all'Access);
 

@@ -46,6 +46,20 @@ is
    procedure is_Union       (Self : access Item);
    procedure has_virtual_Members (Self : access Item);
 
+   procedure has_nontrivial_Members (Self : access Item);
+   --
+   --  The C++ class declares a destructor or a copy constructor.
+
+   function  is_Nontrivial  (Self : access Item) return Boolean;
+   --
+   --  The C++ class is not trivially copyable: it declares a destructor or a copy constructor, or has a base class
+   --  or a member which does. C++ passes and returns such a class by reference, and only C++ can construct it.
+
+   function  is_constructed_by_Cpp (Self : access Item) return Boolean;
+   --
+   --  True for a virtual class and for one which is not trivial. Either is a limited
+   --  type of convention CPP, whose objects are made by an imported C++ constructor.
+
    function  virtual_member_function_Count       (Self : access Item) return Natural;
    function  pure_virtual_member_function_Count  (Self : access Item) return Natural;
    function  total_virtual_member_function_Count (Self : access Item) return Natural;
@@ -100,6 +114,7 @@ private
 
          is_Union                                  : Boolean := False;
          has_virtual_Members                       : Boolean := False;
+         has_nontrivial_Members                    : Boolean := False;
          requires_Interfaces_C_Int_use             : Boolean := False;
          requires_Interfaces_C_Unsigned_use        : Boolean := False;
          requires_Interfaces_C_Unsigned_Char_use   : Boolean := False;

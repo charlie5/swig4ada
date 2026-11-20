@@ -160,6 +160,10 @@ is
 
             append (the_Source,  " tagged limited private");
 
+         elsif Self.is_Nontrivial
+         then
+            append (the_Source,  " limited private");
+
          else
             append (the_Source,  " private");
          end if;
@@ -295,6 +299,10 @@ is
             end if;
 
             append (the_Source,  " tagged limited");
+
+         elsif Self.is_Nontrivial     -- A C++ class which is passed and returned by reference, and which only C++ can construct.
+         then
+            append (the_Source,  " limited");
          end if;
       end if;
 
@@ -576,7 +584,7 @@ is
             end if;
 
 
-            if             the_Record.is_Virtual
+            if             the_Record.is_constructed_by_Cpp
               and then not the_Record.is_interface_Type
             then
                append (the_Source,  to_String (NL & "   pragma Import (CPP, Entity => " & the_Record.Name & ");" & NL & NL));
@@ -1003,7 +1011,7 @@ is
                         the_Record : constant ada_Type.composite.a_record.view := ada_Type.composite.a_record.view (resolved_Type);
                      begin
                         is_Abstract        := the_Record.is_Abstract;
-                        is_Limited         := the_Record.is_tagged_Type;
+                        is_Limited         := the_Record.is_tagged_Type or else the_Record.is_Nontrivial;
                         default_Terminator := +"(others => <>)";
                      end;
                   elsif resolved_Type.all in ada_Type.elementary.scalar.discrete.enumeration.item'Class
@@ -1344,7 +1352,7 @@ is
          loop
             the_Type := Element (Cursor);
 
-            if         the_Package.models_a_virtual_cpp_Class
+            if         the_Package.models_a_constructed_cpp_Class
               and then (
                         the_Type.all in ic_Pointer_Class
 
@@ -2105,7 +2113,7 @@ is
 
                            if         is_overloaded
                              and then the_Subprogram.is_Constructor
-                             and then the_Package.models_a_virtual_cpp_Class
+                             and then the_Package.models_a_constructed_cpp_Class
                            then   -- A C++ constructor cannot be renamed, so its pragma directly follows its own declaration.
                               append (spec_Source,
                                       the_Subprogram.pragma_CPP_Constructor_Source (declaration_package  => the_Package.all'Access,

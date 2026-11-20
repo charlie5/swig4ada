@@ -599,6 +599,11 @@ is
                               new_ada_Record.has_virtual_Members;
                            end if;
 
+                           if the_c_Type.has_nontrivial_Members
+                           then
+                              new_ada_Record.has_nontrivial_Members;
+                           end if;
+
                            new_ada_Package.add                   (new_ada_Record.all'Access);
                            new_ada_Package.models_cpp_class_Type (new_ada_Record.all'Access);
 

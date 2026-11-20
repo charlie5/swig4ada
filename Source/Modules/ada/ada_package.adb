@@ -332,6 +332,15 @@ is
 
 
 
+   function models_a_constructed_cpp_Class (Self : access Item) return Boolean
+   is
+   begin
+      return         Self.a_cpp_class_Type /= null
+            and then Self.a_cpp_class_Type.is_constructed_by_Cpp;
+   end models_a_constructed_cpp_Class;
+
+
+
    function models_an_interface_Type  (Self : access Item) return Boolean
    is
    begin

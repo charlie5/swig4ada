@@ -257,6 +257,11 @@ is
 
    procedure is_Union                            (Self : access Item);
 
+   procedure has_nontrivial_Members              (Self : access Item);
+   function  has_nontrivial_Members              (Self : access Item) return Boolean;
+   --
+   --  The class declares a destructor or a copy constructor, so C++ passes and returns it by reference.
+
    procedure has_virtual_Members                 (Self : access Item);
    --
    --  The member functions of a class in an imported module are not collected, so that the class is virtual is noted when the class is declared.
@@ -321,6 +326,7 @@ private
 
                is_Union                                  : Boolean := False;
                has_virtual_Members                       : Boolean := False;
+               has_nontrivial_Members                    : Boolean := False;
                requires_Interfaces_C_Int_use             : Boolean := False;
                requires_Interfaces_C_Unsigned_use        : Boolean := False;
                requires_Interfaces_C_Unsigned_Char_use   : Boolean := False;
