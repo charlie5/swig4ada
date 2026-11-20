@@ -60,9 +60,17 @@ begin
    begin
       check (the_Horse.legs = 4,                          "the constructor of the imported base class has run");
 
-      --  The members which the derived class adds ('coat' and 'tag') are not read here. C++ places the first of them
-      --  in the unused tail of the base class, where GNAT begins a type extension after the whole of its parent, so
-      --  Ada has them at the wrong offset. They are read through C++ instead.
+      --  The members which the derived class adds are read and written through functions. C++ places the first of
+      --  them in the unused tail of the base class, where GNAT begins a type extension after the whole of its parent,
+      --  so the components of the Ada record are not where the members are.
+      --
+      check (Horse.coat (the_Horse'Access) = Green,       "a member which the derived class adds is read");
+      check (Horse.tag  (the_Horse'Access).id = 17,       "a member of a class type is reached");
+
+      Horse.set_coat (the_Horse, Blue);
+      check (Horse.coat     (the_Horse'Access) = Blue,    "the member is written");
+      check (Horse.get_coat (the_Horse'Access) = Blue,    "and C++ sees the value which Ada wrote");
+      Horse.set_coat (the_Horse, Green);
 
       check (Animal.get_legs (the_Horse'Access) = 4,      "a function of the imported base class is called on the derived object");
       check (Horse.get_coat  (the_Horse'Access) = Green,  "a function of the derived class");

@@ -40,7 +40,7 @@ begin
                                                                           the_Square'unchecked_Access];
    begin
       check (shape_count = 2,                  "C++ has constructed two shapes");
-      check (the_Circle.radius = 2.0,          "the constructor of a derived class sets its member");
+      check (Circle.radius (the_Circle'Access) = 2.0,   "the constructor of a derived class sets its member");
       check (the_Circle.x = 0.0,               "the constructor of the base class sets its member");
 
       Shape.move (the_Square, 3.0, 4.0);
