@@ -238,15 +238,15 @@
 
 
 
-%typemap (ctype)      char,                      const char &                       "char"
-
-
-
-%typemap (ctype)      int8_t,               const int8_t &                "int8_t"
+%typemap (ctype)      char                       "char"
+%typemap (ctype)      const char &                       "char*"
+%typemap (ctype)      int8_t                "int8_t"
+%typemap (ctype)      const int8_t &                "int8_t*"
 %typemap (ctype)      int8_t        *,      int8_t              *         "int8_t*"
 %typemap (ctype)      int8_t         [],    int8_t        [ANY]           "int8_t*"
 
-%typemap (ctype)      int16_t,               const int16_t &                "int16_t"
+%typemap (ctype)      int16_t                "int16_t"
+%typemap (ctype)      const int16_t &                "int16_t*"
 %typemap (ctype)      int16_t        *,      int16_t              *         "int16_t*"
 %typemap (ctype)      int16_t         [],    int16_t        [ANY]           "int16_t*"
 
@@ -262,30 +262,36 @@
 
 
 
-%typemap (ctype)      uint8_t,               const uint8_t &                "uint8_t"
+%typemap (ctype)      uint8_t                "uint8_t"
+%typemap (ctype)      const uint8_t &                "uint8_t*"
 %typemap (ctype)      uint8_t        *,      uint8_t              *         "uint8_t*"
 %typemap (ctype)      uint8_t         [],    uint8_t        [ANY]           "uint8_t*"
 
-%typemap (ctype)      uint16_t,               const uint16_t &                "uint16_t"
+%typemap (ctype)      uint16_t                "uint16_t"
+%typemap (ctype)      const uint16_t &                "uint16_t*"
 %typemap (ctype)      uint16_t        *,      uint16_t              *         "uint16_t*"
 %typemap (ctype)      uint16_t         [],    uint16_t        [ANY]           "uint16_t*"
 
-%typemap (ctype)      uint32_t,               const uint32_t &                "uint32_t"
+%typemap (ctype)      uint32_t                "uint32_t"
+%typemap (ctype)      const uint32_t &                "uint32_t*"
 %typemap (ctype)      uint32_t        *,      uint32_t              *         "uint32_t*"
 %typemap (ctype)      uint32_t         [],    uint32_t        [ANY]           "uint32_t*"
 
-%typemap (ctype)      uint64_t,               const uint64_t &                "uint64_t"
+%typemap (ctype)      uint64_t                "uint64_t"
+%typemap (ctype)      const uint64_t &                "uint64_t*"
 %typemap (ctype)      uint64_t        *,      uint64_t              *         "uint64_t*"
 %typemap (ctype)      uint64_t         [],    uint64_t        [ANY]           "uint64_t*"
 
 
 
-%typemap (ctype)      signed char,               const signed char &                "signed char"
+%typemap (ctype)      signed char                "signed char"
+%typemap (ctype)      const signed char &                "signed char*"
 %typemap (ctype)      signed char        *,      signed char              *         "signed char*"
 %typemap (ctype)      signed char         [],      signed char        [ANY]         "signed char*"
 
 
-%typemap (ctype)      unsigned char,             const unsigned char &              "unsigned char"
+%typemap (ctype)      unsigned char              "unsigned char"
+%typemap (ctype)      const unsigned char &              "unsigned char*"
 %typemap (ctype)      unsigned char      *,      unsigned char            *         "unsigned char*"
 %typemap (ctype)      unsigned char       [],      unsigned char      [ANY]         "unsigned char*"
 
@@ -791,8 +797,7 @@
                                                      const double &              (double            temp),
                                                      const long double &         (long double       temp)
 %{
-  temp = ($*1_ltype) *$input; 
-  $1   = &temp; 
+  $1 = ($1_ltype) $input;      // The reference is to the object of the caller, which Ada passes by pointer.
 %}
 
 
@@ -800,33 +805,33 @@
 //%typemap (out)                                        const bool &                                       %{ $result = *$1; %}
 %typemap (out)                                        const bool &                                       %{ $result = $1; %}
 
-%typemap (out)                                        const char &                                       %{ $result = *$1; %}
+%typemap (out)                                        const char &                                       %{ $result = $1; %}
 
-%typemap (out)                                        const int8_t &                                     %{ $result = *$1; %}
-%typemap (out)                                        const int16_t &                                    %{ $result = *$1; %}
-%typemap (out)                                        const int32_t &                                    %{ $result = *$1; %}
-%typemap (out)                                        const int64_t &                                    %{ $result = *$1; %}
+%typemap (out)                                        const int8_t &                                     %{ $result = $1; %}
+%typemap (out)                                        const int16_t &                                    %{ $result = $1; %}
+%typemap (out)                                        const int32_t &                                    %{ $result = $1; %}
+%typemap (out)                                        const int64_t &                                    %{ $result = $1; %}
 
-%typemap (out)                                        const uint8_t &                                    %{ $result = *$1; %}
-%typemap (out)                                        const uint16_t &                                   %{ $result = *$1; %}
-%typemap (out)                                        const uint32_t &                                   %{ $result = *$1; %}
-%typemap (out)                                        const uint64_t &                                   %{ $result = *$1; %}
+%typemap (out)                                        const uint8_t &                                    %{ $result = $1; %}
+%typemap (out)                                        const uint16_t &                                   %{ $result = $1; %}
+%typemap (out)                                        const uint32_t &                                   %{ $result = $1; %}
+%typemap (out)                                        const uint64_t &                                   %{ $result = $1; %}
 
-%typemap (out)                                        const signed char &                                %{ $result = *$1; %}
-%typemap (out)                                        const unsigned char &                              %{ $result = *$1; %}
-%typemap (out)                                        const short &                                      %{ $result = *$1; %}
-%typemap (out)                                        const unsigned short &                             %{ $result = *$1; %}
-%typemap (out)                                        const int &                                        %{ $result = *$1; %}
-%typemap (out)                                        const size_t &                                     %{ $result = *$1; %}
-%typemap (out)                                        const ptrdiff_t &                                  %{ $result = *$1; %}
-%typemap (out)                                        const unsigned int &                               %{ $result = *$1; %}
-%typemap (out)                                        const long &                                       %{ $result = *$1; %}
-%typemap (out)                                        const unsigned long &                              %{ $result = *$1; %}
-%typemap (out)                                        const long long &                                  %{ $result = *$1; %}
-%typemap (out)                                        const unsigned long long &                         %{ $result = *$1; %}
+%typemap (out)                                        const signed char &                                %{ $result = $1; %}
+%typemap (out)                                        const unsigned char &                              %{ $result = $1; %}
+%typemap (out)                                        const short &                                      %{ $result = $1; %}
+%typemap (out)                                        const unsigned short &                             %{ $result = $1; %}
+%typemap (out)                                        const int &                                        %{ $result = $1; %}
+%typemap (out)                                        const size_t &                                     %{ $result = $1; %}
+%typemap (out)                                        const ptrdiff_t &                                  %{ $result = $1; %}
+%typemap (out)                                        const unsigned int &                               %{ $result = $1; %}
+%typemap (out)                                        const long &                                       %{ $result = $1; %}
+%typemap (out)                                        const unsigned long &                              %{ $result = $1; %}
+%typemap (out)                                        const long long &                                  %{ $result = $1; %}
+%typemap (out)                                        const unsigned long long &                         %{ $result = $1; %}
 %typemap (out)                                        const float &                                      %{ $result = $1; %}
-%typemap (out)                                        const double &                                     %{ $result = *$1; %}
-%typemap (out)                                        const long double &                                %{ $result = *$1; %}
+%typemap (out)                                        const double &                                     %{ $result = $1; %}
+%typemap (out)                                        const long double &                                %{ $result = $1; %}
 
 
 
@@ -868,8 +873,7 @@
 %typemap (out)                                  SWIGTYPE 
 #ifdef __cplusplus
 %{
-  $result = $1; 
-  //$result = new $1_ltype (($1_ltype &) $1); 
+  $result = ($1_ltype &) $1;      // Both may be held in a 'SwigValueWrapper', which cannot be assigned to another.
 %}
 #else
 {

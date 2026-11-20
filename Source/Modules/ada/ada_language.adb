@@ -152,6 +152,7 @@ is
 
       declare
          Unused : Hash_Pointer := Preprocessor_define (const_String (-"SWIGAda 1"),  0) with Unreferenced;     -- Add a symbol to the parser for conditional compilation.
+         Unused_2 : Hash_Pointer := Preprocessor_define (const_String (-"SWIGADA 1"),  0) with Unreferenced;   -- The usual upper case form, as the library files test for.
       begin
          swig_typemap_Lang (new_String   ( "ada"));         -- Add typemap definitions.
          swig_config_File  (const_String (-"ada.swg"));
@@ -743,6 +744,7 @@ is
                                                                                                 const_String (-""),
                                                                                                 null));
             is_void_return  : constant Boolean := (c_return_Type = "void");
+            returns_a_Class : constant Boolean := (c_return_Type = "$c_classname");     -- A class, returned by value.
 
             Num_arguments   : Natural          := 0;
             Num_required    : Natural with Unreferenced;
@@ -756,12 +758,18 @@ is
 
             if c_return_Type /= ""
             then
-               replace_All (c_return_Type, "$c_classname", +swig_type);
+               replace_All (c_return_Type, "$c_classname", +doh_Item (SwigType_str (SwigType_Pointer (swig_Type), null)));     -- As C++ source, not as swig holds it.
             else
                dlog (+"No ctype typemap defined for " & String'(+swig_Type));
             end if;
 
-            if not is_void_return
+            if         returns_a_Class
+              and then Self.in_cpp_Mode
+            then   -- The class may have no default constructor or no assignment, so the result is held as the swig runtime holds such a value.
+               Wrapper_add_local_2 (the_function_Wrapper,  String_or_char_Pointer (-"jresult"),
+                                                           new_String ("SwigValueWrapper< " & to_String (c_return_Type) & " >"),
+                                                           new_String ("jresult"));
+            elsif not is_void_return
             then
                Wrapper_add_local_2 (the_function_Wrapper,  String_or_char_Pointer (-"jresult"),
                                                            new_String (to_String (c_return_Type)),
@@ -823,7 +831,7 @@ is
                   begin
                      if param_c_Type /= ""
                      then
-                        replace_All (param_c_Type,  "$c_classname", +param_swigType);
+                        replace_All (param_c_Type,  "$c_classname", +doh_Item (SwigType_str (SwigType_Pointer (param_swigType), null)));
                         replace_All (param_c_Type,  "(", " ");        -- TODO: Hack to remove parentheses from template arguments.
                         replace_All (param_c_Type,  ")", " ");
                      else
@@ -1049,6 +1057,10 @@ is
             else   doh_replace_All (wrapper_Code, -"$null", -"");
             end if;
 
+            --  A protected member is given a wrapper too (the bindings to swig itself call some). Such a wrapper compiles
+            --  only where access is opened to it: by '#define protected public' ahead of the class, as 'swigmod.i' does,
+            --  or by the '-fno-access-control' switch of g++.
+            --
             if    not Self.native_function_Flag
               and not Self.doing_constructorDeclaration
             then
@@ -1671,11 +1683,12 @@ is
       function get_Namespace return String
       is
       begin
-         if is_pure_Virtual
+         if        is_pure_Virtual
+           or else C."/=" (Self.is_smart_Pointer, 0)     -- The function of the pointee has its class name already.
          then
             return "";
-         else
-            return to_String (Self.current_c_Class.Name) & "::";
+         else   -- The class is named as C++ knows it ('Base< int >'), which for a template instance is not the name it is bound by.
+            return String'(+doh_Item (SwigType_namestr (SwigType_Pointer (get_Attribute (Self.getCurrentClass, "name"))))) & "::";
          end if;
       end get_Namespace;
 
@@ -1786,9 +1799,43 @@ is
          Index          : Natural      := 0;
          genComma       : Boolean      := False;
 
+
+         function has_hidden_Destructor return Boolean
+         --
+         --  The construction function returns its object by value, which C++
+         --  allows only for a class whose destructor is public.
+         --
+         is
+            the_Child : Node_Pointer := first_Child (Self.getCurrentClass);
+         begin
+            while the_Child /= null
+            loop
+               if         Attribute (the_Child, "nodeType") = "destructor"
+                 and then (        check_Attribute (the_Child, "access", "protected")
+                           or else check_Attribute (the_Child, "access", "private"))
+               then
+                  return True;
+               end if;
+
+               the_Child := next_Sibling (the_Child);
+            end loop;
+
+            return False;
+         end has_hidden_Destructor;
+
       begin
          append (constructor_Symbol, String'("ada_" & (+doh_Item (Swig_name_construct (const_String (-Self.current_c_Namespace.qualified_Name),
                                                                                        const_String (-overloaded_name))))));
+         --  The name of a class in a namespace, or of a template instance, holds characters which a C identifier may not.
+         --
+         for Each in 1 .. Length (constructor_Symbol)
+         loop
+            if Element (constructor_Symbol, Each) not in 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_'
+            then
+               replace_Element (constructor_Symbol, Each, '_');
+            end if;
+         end loop;
+
          append (construct_Call, "extern "  & Self.current_lStr & "    " & constructor_Symbol & "(");
 
          Swig_typemap_attach_parms (const_String (-"ctype"), parameter_List, null);    -- Attach the non-standard typemaps to the parameter list.
@@ -1822,7 +1869,7 @@ is
 
                   if the_c_Type /= ""
                   then
-                     replace_All (the_c_Type, "$c_classname", +doh_Item (swig_Type));
+                     replace_All (the_c_Type, "$c_classname", +doh_Item (SwigType_str (swig_Type, null)));
 
                      append (construct_Call,      String' (+doh_Item (SwigType_lstr     (swig_Type, null))  &   "   "  &  Arg));
                      append (construct_call_Args, String' (+doh_Item (SwigType_rcaststr (swig_Type, const_String (-Arg)))));
@@ -1860,7 +1907,9 @@ is
          end;
 
          if not (    check_Attribute (the_Node, "access", "protected")
-                 or  check_Attribute (the_Node, "access", "private"))
+                 or  check_Attribute (the_Node, "access", "private")
+                 or  has_hidden_Destructor
+                 or  Attribute (the_Node, "feature:extend") /= "")     -- A constructor added by '%extend' is not one which C++ can call.
          then
             print_to (DOH_Pointer (Self.f_Ada), construct_Call & NL);
          end if;

@@ -211,6 +211,41 @@ SWIGINTERN void SWIG_CSharpException(int code, const char *msg) {
 { SWIG_CSharpException(code, msg); return $null; }
 #endif // SWIGCSHARP
 
+#ifdef SWIGADA
+%{
+SWIGINTERN void SWIG_AdaExceptionOfCode(int code, const char *msg) {
+  SWIG_AdaExceptionCodes exception_code = SWIG_AdaException;
+  switch(code) {
+  case SWIG_MemoryError:
+    exception_code = SWIG_AdaOutOfMemoryException;
+    break;
+  case SWIG_IndexError:
+    exception_code = SWIG_AdaIndexOutOfRangeException;
+    break;
+  case SWIG_DivisionByZero:
+    exception_code = SWIG_AdaDivideByZeroException;
+    break;
+  case SWIG_ValueError:
+    exception_code = SWIG_AdaArgumentOutOfRangeException;
+    break;
+  case SWIG_IOError:
+    exception_code = SWIG_AdaIOException;
+    break;
+  case SWIG_OverflowError:
+    exception_code = SWIG_AdaOverflowException;
+    break;
+  default:
+    exception_code = SWIG_AdaException;
+    break;
+  }
+  SWIG_AdaThrowException(exception_code, msg);
+}
+%}
+
+#define SWIG_exception(code, msg)\
+{ SWIG_AdaExceptionOfCode(code, msg); return $null; }
+#endif // SWIGADA
+
 #ifdef SWIGLUA
 
 %{
