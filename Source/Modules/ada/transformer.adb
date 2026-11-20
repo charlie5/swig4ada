@@ -511,47 +511,52 @@ is
                         dlog (+"");
                         dlog ("adding function_Pointer '" & the_c_Type.Name & "'");
 
-                        declare
-                           use DOHs.Pointers;
-                           use type ada_Package.view;
-                           the_ada_subProgram : constant ada_subProgram.view := Self.to_ada_subProgram (the_c_type.accessed_Function.all'Access);
-                           the_type_Name      : constant unbounded_String    := to_ada_Identifier (Self.to_descriptor (DOH_Pointer (to_Doh (+the_c_type.Name))));
-                           new_ada_Type       :          ada_Type.view;
-                        begin
-                           the_ada_subProgram.Parameters := Self.to_ada_Parameters (the_c_type.accessed_Function.Parameters);
+                        if not is_Bindable (the_c_Type.accessed_Function.all'Access)
+                        then   -- Such as a type which is declared after the first use of the function pointer.
+                           log ("Warning: unable to bind the function pointer type '" & the_c_Type.Name & "', as one of its types has no Ada type.");
+                        else
+                           declare
+                              use DOHs.Pointers;
+                              use type ada_Package.view;
+                              the_ada_subProgram : constant ada_subProgram.view := Self.to_ada_subProgram (the_c_type.accessed_Function.all'Access);
+                              the_type_Name      : constant unbounded_String    := to_ada_Identifier (Self.to_descriptor (DOH_Pointer (to_Doh (+the_c_type.Name))));
+                              new_ada_Type       :          ada_Type.view;
+                           begin
+                              the_ada_subProgram.Parameters := Self.to_ada_Parameters (the_c_type.accessed_Function.Parameters);
 
-                           if        the_ada_subProgram.depends_on_any_pointer
-                             or else (for some Each of the_ada_subProgram.required_Types                                            -- A type declared in a child package (a class)
-                                      =>       ada_Package.view (Each.declaration_Package)        /= Result.Package_top             -- cannot be seen by the top package.
-                                      and then ada_Package.view (Each.declaration_Package).Parent  = Result.Package_top)
-                           then
-                              declare
-                                 new_ada_Package  : constant ada_package.view := ada_Package.new_ada_Package (name   => to_String (to_ada_Identifier (the_c_Type.Name)),
-                                                                                                              parent => Result.Package_top);
-                              begin
-                                 new_ada_Type := ada_Type.elementary.an_access.to_subProgram.new_Item (new_ada_Package,
-                                                                                                       +"Item",
+                              if        the_ada_subProgram.depends_on_any_pointer
+                                or else (for some Each of the_ada_subProgram.required_Types                                            -- A type declared in a child package (a class)
+                                         =>       ada_Package.view (Each.declaration_Package)        /= Result.Package_top             -- cannot be seen by the top package.
+                                         and then ada_Package.view (Each.declaration_Package).Parent  = Result.Package_top)
+                              then
+                                 declare
+                                    new_ada_Package  : constant ada_package.view := ada_Package.new_ada_Package (name   => to_String (the_type_Name),     -- The swig type made an identifier ('p_f_int_int_ret_int').
+                                                                                                                 parent => Result.Package_top);
+                                 begin
+                                    new_ada_Type := ada_Type.elementary.an_access.to_subProgram.new_Item (new_ada_Package,
+                                                                                                          +"Item",
+                                                                                                          accessed_subProgram => the_ada_subProgram).all'Access;
+                                    make_Unique (new_ada_Package);
+                                    Result.new_Packages.append (new_ada_Package);
+                                 end;
+                              else
+                                 new_ada_Type := ada_Type.elementary.an_access.to_subProgram.new_Item (Result.Package_top,
+                                                                                                       the_type_Name,
                                                                                                        accessed_subProgram => the_ada_subProgram).all'Access;
-                                 make_Unique (new_ada_Package);
-                                 Result.new_Packages.append (new_ada_Package);
-                              end;
-                           else
-                              new_ada_Type := ada_Type.elementary.an_access.to_subProgram.new_Item (Result.Package_top,
-                                                                                                    the_type_Name,
-                                                                                                    accessed_subProgram => the_ada_subProgram).all'Access;
-                           end if;
+                              end if;
 
-                           new_ada_Type.declaration_Package.add (new_ada_Type);
+                              new_ada_Type.declaration_Package.add (new_ada_Type);
 
-                           name_Map_of_ada_type                .insert  (the_type_Name, new_ada_Type);
-                           new_ada_subPrograms                 .append  (the_ada_subProgram);
-                           the_ada_subprogram_Map_of_c_function.include (the_ada_subProgram, the_c_type.accessed_Function.all'Access);
+                              name_Map_of_ada_type                .insert  (the_type_Name, new_ada_Type);
+                              new_ada_subPrograms                 .append  (the_ada_subProgram);
+                              the_ada_subprogram_Map_of_c_function.include (the_ada_subProgram, the_c_type.accessed_Function.all'Access);
 
-                           c_type_Map_of_ada_type.insert (the_c_Type, new_ada_Type);
+                              c_type_Map_of_ada_type.insert (the_c_Type, new_ada_Type);
 
-                           add_array_Type_for   (new_ada_Type.all'Access, the_c_Type);
-                           add_type_Pointer_for (new_ada_Type.all'Access, the_c_Type);
-                        end;
+                              add_array_Type_for   (new_ada_Type.all'Access, the_c_Type);
+                              add_type_Pointer_for (new_ada_Type.all'Access, the_c_Type);
+                           end;
+                        end if;
 
 
                      when c_type.typedef_Function =>

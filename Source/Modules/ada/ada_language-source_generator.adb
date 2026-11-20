@@ -1260,6 +1260,22 @@ is
 
 
 
+      function is_a_Subprogram_of_the_Package (Name : in String) return Boolean
+      is
+      begin
+         for each_Subprogram of all_Subprograms
+         loop
+            if to_Lower (to_String (each_Subprogram.Name)) = to_Lower (Name)
+            then
+               return True;
+            end if;
+         end loop;
+
+         return False;
+      end is_a_Subprogram_of_the_Package;
+
+
+
       function ada_Name_of (the_Variable : in ada_Variable.view) return String
       --
       --  C is case sensitive, so a variable may differ only in case from an enumeration literal or a function
@@ -1750,6 +1766,16 @@ is
             use ada_Variable.array_bounds_Vectors;
             the_Variable : constant ada_Variable.view := Element (all_Variables,  Each);
          begin
+            if         the_Variable.is_Constant
+              and then the_Variable.Value /= ""
+              and then the_Variable.my_Type.resolved_Type.all in ada_Type.elementary.an_access.to_subProgram.item'Class
+              and then not is_a_Subprogram_of_the_Package (to_String (the_Variable.Value))
+            then   -- The constant is completed by the access of a function of this package, so there must be one.
+               log (  "Warning: unable to bind the constant '" & the_Variable.Name & "', whose value '" & the_Variable.Value
+                    & "' does not name a function of its package.");
+               goto next_Variable;
+            end if;
+
             variable_Names.include (the_Variable.Name, ada_Name_of (the_Variable));
 
             verify (the_Variable);
@@ -1938,6 +1964,8 @@ is
                end emit_import_Pragma;
             end if;
          end;
+
+         <<next_Variable>>
       end loop;
 
 
