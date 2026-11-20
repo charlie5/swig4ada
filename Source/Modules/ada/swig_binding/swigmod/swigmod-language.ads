@@ -19,18 +19,18 @@ package swigmod.Language is
    --
 
    type Item is new swigmod.Dispatcher.Item with record
-      none_comparison                       : access swig_Core.String;
-      director_ctor_code                    : access swig_Core.String;
-      director_prot_ctor_code               : access swig_Core.String;
-      director_multiple_inheritance         : aliased Interfaces.C.int;
-      director_language                     : aliased Interfaces.C.int;
-      doxygenTranslator                     : access swigmod.DoxygenTranslator;
-      symtabs                               : access swig_Core.Hash;
-      overloading                           : aliased Interfaces.C.int;
-      protected_and_private_Members_allowed : aliased swig.bool;
-      multiinput                            : aliased Interfaces.C.int;
-      cplus_runtime                         : aliased Interfaces.C.int;
-      directors                             : aliased Interfaces.C.int;
+      none_comparison_storage                       : access swig_Core.String;
+      director_ctor_code_storage                    : access swig_Core.String;
+      director_prot_ctor_code_storage               : access swig_Core.String;
+      director_multiple_inheritance_storage         : aliased Interfaces.C.int;
+      director_language_storage                     : aliased Interfaces.C.int;
+      doxygenTranslator_storage : access swigmod.DoxygenTranslator;
+      symtabs_storage                               : access swig_Core.Hash;
+      overloading_storage                           : aliased Interfaces.C.int;
+      protected_and_private_Members_allowed_storage : aliased swig.bool;
+      multiinput_storage                            : aliased Interfaces.C.int;
+      cplus_runtime_storage                         : aliased Interfaces.C.int;
+      directors_storage                             : aliased Interfaces.C.int;
    end record;
 
    pragma Import (CPP, Entity => Item);
