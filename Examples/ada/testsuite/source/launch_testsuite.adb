@@ -321,8 +321,8 @@ begin
       put_Line ("Generating uncompilable C tests.");
       new_Line;
 
-      --  generate ("li_carrays.i");     -- May not be relevant for Ada. Generates, but 7 of 7 specs do not compile.
-      --  generate ("li_cmalloc.i");     -- May not be relevant for Ada. Generates, but 2 of 2 specs do not compile.
+      generate ("li_carrays.i");
+      generate ("li_cmalloc.i");
 
       generate ("preproc.i");            -- Fails due to #define MASK(shift, size) (((1 << (size)) - 1) <<(shift))
                                          --              #define SOME_MASK_DEF (80*MASK(8, 10))
@@ -344,7 +344,7 @@ begin
       generate ("dynamic_cast.i",                   use_CPP => True);
       generate ("features.i",                       use_CPP => True);
       generate ("fvirtual.i",                       use_CPP => True);
-      --  generate ("import_nomodule.i",                use_CPP => True);     -- This test does not apply to languages with static type checking. Generates, but 2 of 3 specs do not compile.
+      generate ("import_nomodule.i",                use_CPP => True);
       generate ("imports_b.i",                      use_CPP => True);
       generate ("inherit_same_name.i",              use_CPP => True);
       --  generate ("li_attribute.i",                   use_CPP => True);     -- Error: Unable to find 'std_string.i'.
@@ -385,7 +385,7 @@ begin
       --  generate ("apply_signed_char.i");     -- Error: Directors are not supported for C code and require the -c++ option.
       --  generate ("apply_strings.i");     -- Error: Directors are not supported for C code and require the -c++ option.
       generate ("arrayref.i");
-      --  generate ("arrays_dimensionless.i");     -- Generates, but 3 of 3 specs do not compile.
+      generate ("arrays_dimensionless.i");
       --  generate ("arrays_global.i");     -- Fails: a C expression cannot be evaluated.
       --  generate ("arrays_global_twodim.i");     -- Fails: a type name is not known.
       generate ("arrays.i");
@@ -409,7 +409,7 @@ begin
       --  generate ("li_std_wstring.i");     -- Error: Unable to find 'std_basic_string.i'.
       --  generate ("list_vector.i");     -- Error: Unable to find 'list-vector.i'.
       generate ("li_typemaps.i");
-      --  generate ("li_windows.i");     -- Generates, but 62 of 62 specs do not compile.
+      generate ("li_windows.i");
       generate ("long_long_apply.i");
       generate ("nested_comment.i");
       --  generate ("pointer_in_out.i");     -- Error: Unable to find 'pointer-in-out.i'.
@@ -445,7 +445,7 @@ begin
       --  generate ("cpp_basic.i",                       use_CPP => True);     -- Fails: a C type has no Ada type.
       --  generate ("cpp_broken.i",                      use_CPP => True);     -- There is no such test file.
       --  generate ("cpp_enum.i",                        use_CPP => True);     -- Fails: a constant is defined twice.
-      --  generate ("cpp_namespace.i",                   use_CPP => True);     -- Generates, but 1 of 17 specs do not compile.
+      generate ("cpp_namespace.i",                  use_CPP => True);
       generate ("cpp_typedef.i",                    use_CPP => True);
       --  generate ("enum_scope_template.i",             use_CPP => True);     -- Fails: a type is registered twice.
       --  generate ("enum_thorough.i",                   use_CPP => True);     -- Fails: a type is registered twice.
@@ -455,7 +455,7 @@ begin
       generate ("global_ns_arg.i",                  use_CPP => True);
       generate ("ignore_template_constructor.i",    use_CPP => True);
       --  generate ("inherit_target_language.i",         use_CPP => True);     -- Fails: a type name is not known.
-      --  generate ("intermediary_classname.i",          use_CPP => True);     -- Generates, but 5 of 8 specs do not compile.
+      generate ("intermediary_classname.i",         use_CPP => True);
       generate ("kind.i",                           use_CPP => True);
       generate ("li_boost_shared_ptr_bits.i",       use_CPP => True);
       --  generate ("li_boost_shared_ptr.i",             use_CPP => True);     -- Error: Unable to find 'std_string.i'.
@@ -481,14 +481,14 @@ begin
       generate ("primitive_ref.i",                  use_CPP => True);
       --  generate ("primitive_types.i",                 use_CPP => True);     -- Fails: a type name is not known.
       generate ("refcount.i",                       use_CPP => True);
-      --  generate ("reference_global_vars.i",           use_CPP => True);     -- Generates, but 3 of 3 specs do not compile.
+      generate ("reference_global_vars.i",          use_CPP => True);
       --  generate ("rename1.i",                         use_CPP => True);     -- Fails: a type is registered twice.
       --  generate ("rename2.i",                         use_CPP => True);     -- Fails: a type is registered twice.
       --  generate ("rename3.i",                         use_CPP => True);     -- Fails: a type is registered twice.
       --  generate ("rename4.i",                         use_CPP => True);     -- Fails: a type is registered twice.
       generate ("return_value_scope.i",             use_CPP => True);
       generate ("smart_pointer_inherit.i",          use_CPP => True);
-      --  generate ("smart_pointer_templatemethods.i",   use_CPP => True);     -- Generates, but 3 of 11 specs do not compile.
+      generate ("smart_pointer_templatemethods.i",  use_CPP => True);
       --  generate ("smart_pointer_templatevariables.i", use_CPP => True);     -- Fails: a type is registered twice.
       --  generate ("std_containers.i",                  use_CPP => True);     -- Error: Unable to find 'std_string.i'.
       generate ("template_arg_scope.i",             use_CPP => True);
