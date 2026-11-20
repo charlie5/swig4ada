@@ -5,8 +5,12 @@ with
      virtual_classes.Circle.Guards,
      virtual_classes.Square,
      virtual_classes.Square.Guards,
+     virtual_classes.Grid,
+
+     swig.Pointers,
 
      Triangles,
+     Hexagons,
 
      interfaces.C,
 
@@ -82,6 +86,57 @@ begin
       Square.destruct_0 (Square.Item (the_Triangle));
       check (shape_count = 0,                                   "the shape is destructed");
    end a_class_derived_in_Ada;
+
+   members_of_a_derived_class :
+   declare
+      use swig.Pointers,
+          swig.Pointers.c_int_Pointers;     -- For its pointer arithmetic.
+
+      the_Grid : aliased Grid.Item := Grid.construct;
+      Values   : aliased swig.int_Array := [1, 2, 3];
+   begin
+      --  The members which a derived class adds are read and written through functions, as C++ lays the
+      --  first of them in the unused tail of the base class, where Ada cannot place a component.
+      --
+      check (Grid.kind  (the_Grid'Access) = 'g',             "a member which fits in the tail of the base class");
+      check (Grid.scale (the_Grid'Access) = 1.5,             "a member which follows it");
+      check (Grid.visible (the_Grid'Access) = 1,             "a bit field of one bit");
+      check (Grid.depth   (the_Grid'Access) = 9,             "a bit field of four bits");
+      check (Grid.hidden  (the_Grid'Access) = 77,            "a protected member");
+
+      Grid.set_kind  (the_Grid, 'k');
+      Grid.set_depth (the_Grid, 5);
+      check (Grid.get_kind  (the_Grid'Access) = 'k',         "C++ sees a member which Ada wrote");
+      check (Grid.get_depth (the_Grid'Access) = 5,           "C++ sees a bit field which Ada wrote");
+      check (Grid.visible   (the_Grid'Access) = 1,           "the bit field beside it is unchanged");
+
+      check (Grid.cells (the_Grid'Access).all = 10,          "the first element of an array member");
+      check (int_Pointer'(Grid.cells (the_Grid'Access) + 2).all = 30,   "its last element");
+
+      Grid.set_cells (the_Grid, Values (Values'First)'unchecked_Access);
+      check (Grid.cell_sum (the_Grid'Access) = 6,            "C++ sees an array member which Ada wrote");
+
+      Shape.destruct_0 (Shape.Item (the_Grid));
+   end members_of_a_derived_class;
+
+   a_class_derived_from_an_abstract_class :
+   declare
+      the_Hexagon : aliased Hexagons.Item;     -- Its abstract parent is constructed by C++.
+   begin
+      the_Hexagon.Side := 2.0;
+
+      check (shape_count = 1,                                 "the constructor of the abstract parent has run");
+      check (the_Hexagon.x = 0.0 and the_Hexagon.y = 0.0,     "and has set the members of the parent");
+
+      Shape.move (the_Hexagon, 1.0, 2.0);
+      check (the_Hexagon.x = 1.0 and the_Hexagon.y = 2.0,     "a function of the abstract parent is called");
+
+      check (area_of  (the_Hexagon'unchecked_Access) = 10.0,  "C++ dispatches to the function which was pure virtual");
+      check (sides_of (the_Hexagon'unchecked_Access) = 6,     "C++ dispatches to a second function overridden in Ada");
+
+      Shape.destruct_0 (Shape.Item (the_Hexagon));
+      check (shape_count = 0,                                 "the shape is destructed");
+   end a_class_derived_from_an_abstract_class;
 
    finish;
 end Tester;
