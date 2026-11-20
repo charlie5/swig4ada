@@ -386,7 +386,7 @@ begin
       --  generate ("apply_strings.i");     -- Error: Directors are not supported for C code and require the -c++ option.
       generate ("arrayref.i");
       generate ("arrays_dimensionless.i");
-      --  generate ("arrays_global.i");     -- Generates, but 3 of 5 specs do not compile.
+      generate ("arrays_global.i");
       generate ("arrays_global_twodim.i");
       generate ("arrays.i");
       generate ("arrays_scope.i");
@@ -448,10 +448,10 @@ begin
       generate ("cpp_namespace.i",                  use_CPP => True);
       generate ("cpp_typedef.i",                    use_CPP => True);
       generate ("enum_scope_template.i",            use_CPP => True);
-      --  generate ("enum_thorough.i",                  use_CPP => True);     -- Generates, but 17 of 17 specs do not compile.
-      --  generate ("enum_thorough_proper.i",           use_CPP => True);     -- Generates, but 17 of 17 specs do not compile.
-      --  generate ("enum_thorough_simple.i",           use_CPP => True);     -- Generates, but 17 of 17 specs do not compile.
-      --  generate ("enum_thorough_typesafe.i",         use_CPP => True);     -- Generates, but 17 of 17 specs do not compile.
+      generate ("enum_thorough.i",                  use_CPP => True);
+      generate ("enum_thorough_proper.i",           use_CPP => True);
+      generate ("enum_thorough_simple.i",           use_CPP => True);
+      generate ("enum_thorough_typesafe.i",         use_CPP => True);
       generate ("global_ns_arg.i",                  use_CPP => True);
       generate ("ignore_template_constructor.i",    use_CPP => True);
       generate ("inherit_target_language.i",        use_CPP => True);
@@ -468,8 +468,8 @@ begin
       --  generate ("li_std_stream.i",                   use_CPP => True);     -- Error: Unable to find 'std_iostream.i'.
       --  generate ("li_std_string.i",                   use_CPP => True);     -- Error: Unable to find 'std_string.i'.
       generate ("memberin1.i",                      use_CPP => True);
-      --  generate ("member_pointer.i",                 use_CPP => True);     -- Generates, but 11 of 11 specs do not compile.
-      --  generate ("mixed_types.i",                    use_CPP => True);     -- Generates, but 3 of 8 specs do not compile.
+      generate ("member_pointer.i",                 use_CPP => True);
+      generate ("mixed_types.i",                    use_CPP => True);
       --  generate ("multi_import_c.i",                  use_CPP => True);     -- No module name specified using %module or -module.
       generate ("multiple_inheritance.i",           use_CPP => True);
       generate ("namespace_class.i",                use_CPP => True);
@@ -479,7 +479,7 @@ begin
       generate ("namespace_union.i",                use_CPP => True);
       generate ("overload_complicated.i",           use_CPP => True);
       generate ("primitive_ref.i",                  use_CPP => True);
-      --  generate ("primitive_types.i",                use_CPP => True);     -- Generates, but 9 of 9 specs do not compile.
+      generate ("primitive_types.i",                use_CPP => True);
       generate ("refcount.i",                       use_CPP => True);
       generate ("reference_global_vars.i",          use_CPP => True);
       generate ("rename1.i",                        use_CPP => True);
@@ -496,7 +496,7 @@ begin
       generate ("template_classes.i",               use_CPP => True);
       generate ("template_const_ref.i",             use_CPP => True);
       generate ("template_default_arg.i",           use_CPP => True);
-      --  generate ("template_default.i",               use_CPP => True);     -- Generates, but 18 of 18 specs do not compile.
+      generate ("template_default.i",               use_CPP => True);
       generate ("template_default_inherit.i",       use_CPP => True);
       --  generate ("template_default_pointer.i",        use_CPP => True);     -- Error: Syntax error in input(1).
       generate ("template_enum.i",                  use_CPP => True);
