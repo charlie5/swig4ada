@@ -86,8 +86,8 @@ is
       end if;
 
       declare
-         new_expression_Type : Unbounded_String := expression_Type;
-         space_Index         : Integer          := Index (new_expression_Type, " ");
+         new_expression_Type :          Unbounded_String := expression_Type;
+         space_Index         : constant Integer          := Index (new_expression_Type, " ");
       begin
          if space_Index > 0
          then
@@ -312,8 +312,12 @@ is
 
                elsif for_Operation = ">>"
                then
-                  replace_Element (the_Vector, Cursor, (Kind  => Value,
-                                                        Value => Element (Previous (Cursor)).Value  /  to_Integer (2) ** Value (Element (Next (Cursor)).Value),
+                  --  A right shift rounds down, where '/' rounds towards zero ('-9 >> 1' is -5).
+                  --
+                  replace_Element (the_Vector, Cursor, (Kind           => Value,
+                                                        Value          => div (Element (Previous (Cursor)).Value,
+                                                                               to_Integer (2) ** Value (Element (Next (Cursor)).Value),
+                                                                               Round => Down),
                                                         type_Qualifier => Element (Previous (Cursor)).type_Qualifier));
 
                   cull_value_Elements_and_restart_Cursor;
@@ -397,11 +401,11 @@ is
          end follows_a_Value;
 
       begin
-         log ("'resolved_c_integer_Expression_recursive'   ~   Expression_pad: '" & Expression_pad.all & "'");
+         --  log ("'resolved_c_integer_Expression_recursive'   ~   Expression_pad: '" & Expression_pad.all & "'");
 
          while Length (Expression_pad.all) > 0
          loop
-            log ("Self: '" & Expression_pad.all & "'");
+            --  log ("Self: '" & Expression_pad.all & "'");
 
             if Element (Expression_pad.all, 1) = ' '
             then
