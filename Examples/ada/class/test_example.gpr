@@ -23,7 +23,7 @@ project Test_Example is
 
    package Compiler is
       for Default_Switches ("ada") use ("-g", "-gnat12", "-gnatdQ", "-gnatdZ");
-      for Default_Switches ("c++") use ("-g", "-fdump-class-hierarchy");
+      for Default_Switches ("c++") use ("-g");
    end Compiler;
 
    package Ide is
