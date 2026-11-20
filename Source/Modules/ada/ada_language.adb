@@ -19,6 +19,7 @@ with
      DOHs.Pointers,
 
      ada.Strings.fixed,
+     ada.Strings.Maps,
      ada.Text_IO,
      ada.Exceptions,
 
@@ -815,7 +816,8 @@ is
             --  of the caller. Its assignment is not used: one which the compiler generates is wrong for a class which
             --  manages a resource through its copy constructor and destructor alone.
             --
-            if result_by_Parameter
+            if         result_by_Parameter
+              and then get_Attribute (the_Node, "feature:except") = null     -- The code of an '%exception' may use the 'result' variable.
             then
                declare
                   the_Action : constant String  := Attribute (the_Node, "wrap:action");
@@ -828,17 +830,12 @@ is
                     and then ada.Strings.fixed.Trim (the_Action (the_Action'First .. First - 1), ada.Strings.Both) = ""
                     and then ada.Strings.fixed.Trim (the_Action (Last + 1 .. the_Action'Last),   ada.Strings.Both) = ""
                   then
+                     --  The action is kept to one line, as an '%exception' may place it within other text.
+                     --
                      set_Attribute (the_Node, "wrap:action",
-                                    String'(  "{"                                                                                                  & NL
-                                            & "    typedef " & to_String (c_return_Type) & " swig_ada_result_type;"                                & NL
-                                            & "    swig_ada_result_type swig_ada_result = " & the_Action (First + Prefix'Length .. Last - 1) & ";" & NL
-                                            & "    a_result->~swig_ada_result_type ();"                                                            & NL
-                                            & "#if __cplusplus >= 201103L"                                                                         & NL
-                                            & "    new (a_result) swig_ada_result_type (static_cast<swig_ada_result_type &&> (swig_ada_result));"  & NL
-                                            & "#else"                                                                                              & NL
-                                            & "    new (a_result) swig_ada_result_type (swig_ada_result);"                                         & NL
-                                            & "#endif"                                                                                             & NL
-                                            & "  }"                                                                                                & NL));
+                                    String'(  "{ typedef " & to_String (c_return_Type) & " swig_ada_result_type;"
+                                            & "  swig_ada_result_type swig_ada_result = " & the_Action (First + Prefix'Length .. Last - 1) & ";"
+                                            & "  swig_ada_replace (a_result, swig_ada_result); }"));
                      built_in_Place := True;
                   end if;
                end;
@@ -893,10 +890,19 @@ is
                      l_Name         : constant doh_String       :=  doh_String   (get_Attribute (the_Parameter, "lname"));
                      arg            : constant String           :=  "a_" & (+l_Name);
                      param_c_Type   :          unbounded_String := +Attribute (the_Parameter, "tmap:ctype");
+                     declares_Name  :          Boolean          := False;     -- 'param_c_Type' holds the name of the parameter too.
                   begin
                      if param_c_Type = "$c_classname"
                      then   -- A class or structure passed by value. Ada passes a record to an imported subprogram by reference.
-                        param_c_Type := +doh_Item (SwigType_str (SwigType_Pointer (param_swigType), null)) & " *";
+                        declare
+                           pointer_Type : constant SwigType_Pointer := SwigType_Pointer (doh_Copy (doh_Item (param_swigType)));
+                        begin
+                           --  The type is written with the name of the parameter, which
+                           --  does not simply follow it (as in 'int (*const *a_arg1)[10]').
+                           --
+                           param_c_Type  := +doh_Item (SwigType_str (SwigType_add_Pointer (pointer_Type), const_String (-arg)));
+                           declares_Name := True;
+                        end;
 
                      elsif param_c_Type /= ""
                      then
@@ -912,7 +918,7 @@ is
                         print_to (wrapper_Def, "," & NL);
                      end if;
 
-                     print_to (wrapper_Def, to_String (param_c_Type & " " & arg));     -- Add parameter to C function.
+                     print_to (wrapper_Def, to_String (if declares_Name then param_c_Type else param_c_Type & " " & arg));     -- Add parameter to C function.
                      gen_Comma      := True;
                      has_Parameters := True;
 
@@ -1073,6 +1079,39 @@ is
                   elsif the_typeMap /= ""
                   then
                      replace_All (the_typeMap, "$result", "jresult");
+
+                     --  A pointer result is cast to the type which the wrapper returns, as the two differ where a typemap
+                     --  has been applied to another type ('%apply char * { unsigned char * }'), or in their qualifiers.
+                     --
+                     if         Length (c_return_Type) > 0
+                       and then Element (Trim (c_return_Type, ada.Strings.Both), Length (Trim (c_return_Type, ada.Strings.Both))) = '*'
+                     then
+                        declare
+                           White    : constant ada.Strings.Maps.Character_Set := ada.Strings.Maps.to_Set (' ' & ASCII.LF & ASCII.CR & ASCII.HT);
+                           the_Code : constant String := ada.Strings.fixed.Trim (to_String (the_typeMap), Left => White, Right => White);
+                           Head     : constant String := "jresult = ";
+                           Tail     : constant String := "result;";
+                        begin
+                           if         the_Code'Length >= Head'Length + Tail'Length
+                             and then the_Code (the_Code'First .. the_Code'First + Head'Length - 1) = Head
+                             and then the_Code (the_Code'Last - Tail'Length + 1 .. the_Code'Last)   = Tail
+                           then
+                              declare
+                                 its_Cast : constant String := ada.Strings.fixed.Trim (the_Code (the_Code'First + Head'Length .. the_Code'Last - Tail'Length),
+                                                                                       ada.Strings.Both);
+                              begin
+                                 if        its_Cast = ""
+                                   or else (         its_Cast (its_Cast'First) = '('
+                                            and then its_Cast (its_Cast'Last)  = ')'
+                                            and then ada.Strings.fixed.Index (its_Cast, ";") = 0)
+                                 then
+                                    the_typeMap := +("  jresult = (" & to_String (c_return_Type) & ") result;");
+                                 end if;
+                              end;
+                           end if;
+                        end;
+                     end if;
+
                      print_to (wrapper_Code, the_typeMap & NL);
 
                   elsif not is_Void_return
@@ -1136,6 +1175,7 @@ is
 
             print_to        (wrapper_Code, "}" & NL);
             doh_replace_All (wrapper_Code, -"$cleanup",               -cleanup_Code);                      -- Substitute the cleanup code.
+            doh_replace_All (wrapper_Code, -"$symname",               -sym_Name);                          -- And the name which the function is bound by.
             doh_replace_All (wrapper_Code, -"SWIG_contract_assert(",  -"SWIG_contract_assert($null, ");    -- Contract macro modification.
 
             if not is_Void_return
@@ -1865,7 +1905,8 @@ is
       is
       begin
          if        is_pure_Virtual
-           or else C."/=" (Self.is_smart_Pointer, 0)     -- The function of the pointee has its class name already.
+           or else C."/=" (Self.is_smart_Pointer, 0)               -- The function of the pointee has its class name already.
+           or else Attribute (the_Node, "feature:extend") /= ""    -- A function added by '%extend' is not a member, and is called by a name which the core makes.
          then
             return "";
          else   -- The class is named as C++ knows it ('Base< int >'), which for a template instance is not the name it is bound by.
@@ -2007,6 +2048,9 @@ is
 
          parameters_First : Positive;     -- Where the parameters begin in 'construct_Call'.
 
+         ignored_Code     : unbounded_String;   -- The code which gives a value to each parameter which the caller does not give.
+         any_Argument     : Boolean := False;   -- The call of the constructor has an argument so far.
+
          function has_hidden_Destructor return Boolean
          --
          --  The construction function returns its object by value, which C++
@@ -2046,6 +2090,21 @@ is
          append (construct_Call, "extern "  & Self.current_lStr & "    " & constructor_Symbol & "(");
          parameters_First := Length (construct_Call) + 1;
 
+         --  Each parameter is given the name of a local variable, which its 'in' typemap then assigns
+         --  to. It is only used for a parameter which the caller does not give (see below).
+         --
+         declare
+            Each  : Node_Pointer := Node_Pointer (parameter_List);
+            Count : Natural      := 0;
+         begin
+            while Each /= null
+            loop
+               Count := Count + 1;
+               set_Attribute (Each, "lname", "swig_ada_ignored_" & ada.Strings.fixed.Trim (Count'Image, ada.Strings.Left));
+               Each  := next_Sibling (Each);
+            end loop;
+         end;
+
          Swig_typemap_attach_parms (const_String (-"ctype"), parameter_List, null);    -- Attach the non-standard typemaps to the parameter list.
          Swig_typemap_attach_parms (const_String (-"in"),    parameter_List, null);
 
@@ -2058,8 +2117,25 @@ is
                the_Parameter := next_Sibling (the_Parameter);
 
             elsif check_Attribute (the_Parameter, "tmap:in:numinputs", "0")
-            then   -- Ignored parameters.
-               the_Parameter := get_Attribute (the_Parameter, "tmap:in:next");
+            then   -- A parameter which the caller does not give: its 'in' typemap gives it a value, held in a local variable.
+               declare
+                  swig_Type : constant SwigType_Pointer := SwigType_Pointer (get_Attribute (the_Parameter, "type"));
+                  the_Local : constant String           := Attribute (the_Parameter, "lname");
+                  the_Code  : constant unbounded_String := +Attribute (the_Parameter, "tmap:in");
+               begin
+
+                  append (ignored_Code,   "  " & String'(+doh_Item (SwigType_lstr (swig_Type, const_String (-the_Local)))) & ";" & NL
+                                        & "  " & to_String (the_Code) & NL);
+
+                  if any_Argument
+                  then
+                     append (construct_call_Args,  ",   ");
+                  end if;
+
+                  append (construct_call_Args, the_Local);
+                  any_Argument  := True;
+                  the_Parameter := get_Attribute (the_Parameter, "tmap:in:next");
+               end;
 
             else
                declare
@@ -2072,12 +2148,19 @@ is
                   if genComma
                   then
                      append (construct_Call,       ",   ");
+                  end if;
+
+                  if any_Argument
+                  then
                      append (construct_call_Args,  ",   ");
                   end if;
 
+                  any_Argument := True;
+
                   if the_c_Type = "$c_classname"
                   then   -- A class or structure passed by value, which Ada passes by reference.
-                     append (construct_Call,      String' (+doh_Item (SwigType_lstr     (swig_Type, null))  &   " *   "  &  Arg));
+                     append (construct_Call,      String' (+doh_Item (SwigType_lstr (SwigType_add_Pointer (SwigType_Pointer (doh_Copy (doh_Item (swig_Type)))),
+                                                                                    const_String (-Arg)))));
                      append (construct_call_Args, "*" & Arg);
 
                   elsif the_c_Type /= ""
@@ -2112,12 +2195,14 @@ is
                construct_Call := +(  "extern void " & to_String (constructor_Symbol) & " (" & the_Class & " * self"
                                    & (if the_Parameters = "" then "" else ",   " & the_Parameters) & ")"                   & NL
                                    & "{"                                                                                   & NL
+                                   & to_String (ignored_Code)
                                    & "  new (self) " & to_String (Self.abstract_shim_Name) & " (" & to_String (construct_call_Args) & ");" & NL
                                    & "}"                                                                                   & NL);
             end;
          else
-            append (construct_Call,  ")" & NL & "{");
-            append (construct_Call,  NL  &  "  return "  &  Self.current_lStr  &  "("  &  construct_call_Args  &  ");"  & NL);
+            append (construct_Call,  ")" & NL & "{" & NL);
+            append (construct_Call,  ignored_Code);
+            append (construct_Call,  "  return "  &  Self.current_lStr  &  "("  &  construct_call_Args  &  ");"  & NL);
             append (construct_Call,  "}" & NL);
          end if;
 
@@ -2285,7 +2370,6 @@ is
       swig_Type_is_array : constant Boolean          := SwigType_isArray   (swig_Type) /= 0;
       is_Pointer         : constant Boolean          := SwigType_isPointer (swig_Type) /= 0;
       variable_Name      : constant unbounded_String := +Attribute (the_Node, "sym:name");
-      bit_Field_text     : constant String           :=  Attribute (the_Node, "bitfield");
 
       function has_virtual_Base return Boolean
       is
@@ -2685,7 +2769,6 @@ is
    --  which constructs an object of the concrete class in the storage it is given.
    --
    is
-      use DOHs.Binding;
       use type C.int;
       use type DOH_Pointer;
       use type swig_Module.swig_Module_view;
@@ -2748,7 +2831,7 @@ is
                   end;
                end if;
 
-               SwigType_push (the_Type, String_Pointer (to_Doh (to_String (the_Decl))));
+               SwigType_push (the_Type, to_Doh (to_String (the_Decl)));
 
                append (the_Functions,   "  virtual " & String'(+doh_Item (SwigType_str (the_Type, const_String (-to_String (Name)))))
                                       & Qualifier & " { abort (); }" & NL);

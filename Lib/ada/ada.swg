@@ -637,7 +637,7 @@
 //%typemap (adatype)    char[ANY], char[]                                  "interfaces.c.char_Array"
 
 
-%typemap (in)         char *                                             %{ $1 = $input; %}
+%typemap (in)         char *                                             %{ $1 = ($1_ltype) $input; %}     // Cast, as the typemap may be applied to another type ('%apply').
 %typemap (out)        char *                                             %{ $result = $1; %}
 
 
@@ -1015,7 +1015,7 @@
 
 // char arrays - treat as String
 
-%typemap (in)                char[ANY], char[]            %{ $1 = $input; %}
+%typemap (in)                char[ANY], char[]            %{ $1 = ($1_ltype) $input; %}
 %typemap (out)               char[ANY], char[]            %{ $result = $1; %}
 
 
