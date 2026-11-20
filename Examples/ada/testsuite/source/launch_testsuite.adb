@@ -238,7 +238,7 @@ begin
       generate ("return_const_value.i",             use_CPP => True);
       generate ("smart_pointer_const2.i",           use_CPP => True);
       generate ("smart_pointer_const.i",            use_CPP => True);
-      --  generate ("smart_pointer_extend.i",           use_CPP => True);     -- Fails: a type is registered twice.
+      generate ("smart_pointer_extend.i",           use_CPP => True);
       generate ("smart_pointer_member.i",           use_CPP => True);
       generate ("smart_pointer_multi.i",            use_CPP => True);
       generate ("smart_pointer_namespace2.i",       use_CPP => True);
@@ -287,7 +287,7 @@ begin
       generate ("template_using.i",                 use_CPP => True);
       generate ("template_virtual.i",               use_CPP => True);
       generate ("throw_exception.i",                use_CPP => True);
-      --  generate ("typedef_class.i",                  use_CPP => True);     -- Fails: an Ada type name is used twice.
+      generate ("typedef_class.i",                  use_CPP => True);
       generate ("typedef_inherit.i",                use_CPP => True);
       generate ("typemap_self.i",                   use_CPP => True);
       generate ("typemap_variables.i",              use_CPP => True);
@@ -351,7 +351,7 @@ begin
       generate ("minherit2.i",                      use_CPP => True);
       generate ("mod_b.i",                          use_CPP => True);
       generate ("multi_import_a.i",                 use_CPP => True);
-      --  generate ("namespace_virtual_method.i",       use_CPP => True);     -- Fails: a type is registered twice.
+      generate ("namespace_virtual_method.i",       use_CPP => True);
       generate ("name_warnings.i",                  use_CPP => True);
       generate ("newobject1.i",                     use_CPP => True);
       generate ("operator_overload.i",              use_CPP => True);
@@ -381,23 +381,23 @@ begin
       put_Line ("Generating broken C tests.");
       new_Line;
 
-      --  generate ("anonymous_bitfield.i");     -- Fails: needs a 'sizeof_unsigned_int' constant.
+      generate ("anonymous_bitfield.i");
       --  generate ("apply_signed_char.i");     -- Error: Directors are not supported for C code and require the -c++ option.
       --  generate ("apply_strings.i");     -- Error: Directors are not supported for C code and require the -c++ option.
       generate ("arrayref.i");
       generate ("arrays_dimensionless.i");
-      --  generate ("arrays_global.i");     -- Fails: a C expression cannot be evaluated.
-      --  generate ("arrays_global_twodim.i");     -- Fails: a type name is not known.
+      --  generate ("arrays_global.i");     -- Generates, but 3 of 5 specs do not compile.
+      generate ("arrays_global_twodim.i");
       generate ("arrays.i");
-      --  generate ("arrays_scope.i");     -- Fails: a type name is not known.
-      --  generate ("array_typedef_memberin.i");     -- Fails: a type name is not known.
-      --  generate ("bloody_hell.i");     -- Fails: needs a 'sizeof_int' constant.
-      --  generate ("char_strings.i");     -- Fails: needs a 'sizeof_CPLUSPLUS_MSG' constant.
-      --  generate ("class_scope_weird.i");     -- Fails: a type name is not known.
+      generate ("arrays_scope.i");
+      generate ("array_typedef_memberin.i");
+      generate ("bloody_hell.i");
+      generate ("char_strings.i");
+      generate ("class_scope_weird.i");
       --  generate ("default_args.i");     -- Error: Unable to find 'std_string.i'.
       --  generate ("enum_thorough_typeunsafe.i");     -- Error: Unable to find 'enumtypeunsafe.swg'.
       --  generate ("file_test.i");     -- Error: Unable to find 'file.i'.
-      --  generate ("funcptr.i");     -- Fails: a type is registered twice.
+      generate ("funcptr.i");
       generate ("function_typedef.i");
       --  generate ("global_vars.i");     -- Error: Unable to find 'std_string.i'.
       generate ("grouping.i");
@@ -415,14 +415,14 @@ begin
       --  generate ("pointer_in_out.i");     -- Error: Unable to find 'pointer-in-out.i'.
       generate ("pointer_reference.i");
       generate ("register_par.i");
-      --  generate ("sizeof_pointer.i");     -- Fails: needs a 'sizeof_char' constant.
+      generate ("sizeof_pointer.i");
       generate ("sizet.i");
       generate ("sneaky1.i");
       --  generate ("special_variables.i");     -- Error: Unable to find 'std_string.i'.
       --  generate ("threads.i");     -- Error: Unable to find 'std_string.i'.
-      --  generate ("typedef_array_member.i");     -- Fails: a type name is not known.
-      --  generate ("typedef_funcptr.i");     -- Fails: a type name is not known.
-      --  generate ("typedef_struct.i");     -- Fails: a type is registered twice.
+      generate ("typedef_array_member.i");
+      generate ("typedef_funcptr.i");
+      generate ("typedef_struct.i");
    end if;
 
 
@@ -435,26 +435,26 @@ begin
       put_Line ("Generating broken C++ tests.");
       new_Line;
 
-      generate ("add_link.i",                        use_CPP => True);
+      generate ("add_link.i",                       use_CPP => True);
       --  generate ("allprotected.i",                    use_CPP => True);     -- Error: Unable to find 'std_string.i'.
 
       generate ("abstract_typedef2.i",              use_CPP => True);
-      --  generate ("class_ignore.i",                    use_CPP => True);     -- Fails: a type name is not known.
-      --  generate ("constant_pointers.i",               use_CPP => True);     -- Fails: a type is registered twice.
+      generate ("class_ignore.i",                   use_CPP => True);
+      generate ("constant_pointers.i",              use_CPP => True);
       --  generate ("constants.i",                       use_CPP => True);     -- Error: Syntax error in input(1).
-      --  generate ("cpp_basic.i",                       use_CPP => True);     -- Fails: a C type has no Ada type.
+      generate ("cpp_basic.i",                      use_CPP => True);
       --  generate ("cpp_broken.i",                      use_CPP => True);     -- There is no such test file.
-      --  generate ("cpp_enum.i",                        use_CPP => True);     -- Fails: a constant is defined twice.
+      generate ("cpp_enum.i",                       use_CPP => True);
       generate ("cpp_namespace.i",                  use_CPP => True);
       generate ("cpp_typedef.i",                    use_CPP => True);
-      --  generate ("enum_scope_template.i",             use_CPP => True);     -- Fails: a type is registered twice.
-      --  generate ("enum_thorough.i",                   use_CPP => True);     -- Fails: a type is registered twice.
-      --  generate ("enum_thorough_proper.i",            use_CPP => True);     -- Fails: a type is registered twice.
-      --  generate ("enum_thorough_simple.i",            use_CPP => True);     -- Fails: a type is registered twice.
-      --  generate ("enum_thorough_typesafe.i",          use_CPP => True);     -- Fails: a type is registered twice.
+      generate ("enum_scope_template.i",            use_CPP => True);
+      --  generate ("enum_thorough.i",                  use_CPP => True);     -- Generates, but 17 of 17 specs do not compile.
+      --  generate ("enum_thorough_proper.i",           use_CPP => True);     -- Generates, but 17 of 17 specs do not compile.
+      --  generate ("enum_thorough_simple.i",           use_CPP => True);     -- Generates, but 17 of 17 specs do not compile.
+      --  generate ("enum_thorough_typesafe.i",         use_CPP => True);     -- Generates, but 17 of 17 specs do not compile.
       generate ("global_ns_arg.i",                  use_CPP => True);
       generate ("ignore_template_constructor.i",    use_CPP => True);
-      --  generate ("inherit_target_language.i",         use_CPP => True);     -- Fails: a type name is not known.
+      generate ("inherit_target_language.i",        use_CPP => True);
       generate ("intermediary_classname.i",         use_CPP => True);
       generate ("kind.i",                           use_CPP => True);
       generate ("li_boost_shared_ptr_bits.i",       use_CPP => True);
@@ -464,55 +464,55 @@ begin
       --  generate ("li_factory.i",                      use_CPP => True);     -- Error: Unable to find 'factory.i'.
       --  generate ("li_implicit.i",                     use_CPP => True);     -- Error: Unable to find 'implicit.i'.
       --  generate ("li_std_deque.i",                    use_CPP => True);     -- Error: Unable to find 'std_deque.i'.
-      --  generate ("li_std_except.i",                   use_CPP => True);     -- Fails: a type name is not known.
+      generate ("li_std_except.i",                  use_CPP => True);
       --  generate ("li_std_stream.i",                   use_CPP => True);     -- Error: Unable to find 'std_iostream.i'.
       --  generate ("li_std_string.i",                   use_CPP => True);     -- Error: Unable to find 'std_string.i'.
       generate ("memberin1.i",                      use_CPP => True);
-      --  generate ("member_pointer.i",                  use_CPP => True);     -- Fails: a type name is not known.
-      --  generate ("mixed_types.i",                     use_CPP => True);     -- Fails: a C expression cannot be evaluated.
+      --  generate ("member_pointer.i",                 use_CPP => True);     -- Generates, but 11 of 11 specs do not compile.
+      --  generate ("mixed_types.i",                    use_CPP => True);     -- Generates, but 3 of 8 specs do not compile.
       --  generate ("multi_import_c.i",                  use_CPP => True);     -- No module name specified using %module or -module.
-      --  generate ("multiple_inheritance.i",            use_CPP => True);     -- Fails: a type name is not known.
-      --  generate ("namespace_class.i",                 use_CPP => True);     -- Fails: a type is registered twice.
+      generate ("multiple_inheritance.i",           use_CPP => True);
+      generate ("namespace_class.i",                use_CPP => True);
       generate ("namespace_nested.i",               use_CPP => True);
       generate ("namespace_spaces.i",               use_CPP => True);
       generate ("namespace_typemap.i",              use_CPP => True);
-      generate ("namespace_union.i",                 use_CPP => True);
-      --  generate ("overload_complicated.i",            use_CPP => True);     -- Fails: a null access is dereferenced (ada_language.adb:1664).
+      generate ("namespace_union.i",                use_CPP => True);
+      generate ("overload_complicated.i",           use_CPP => True);
       generate ("primitive_ref.i",                  use_CPP => True);
-      --  generate ("primitive_types.i",                 use_CPP => True);     -- Fails: a type name is not known.
+      --  generate ("primitive_types.i",                use_CPP => True);     -- Generates, but 9 of 9 specs do not compile.
       generate ("refcount.i",                       use_CPP => True);
       generate ("reference_global_vars.i",          use_CPP => True);
-      --  generate ("rename1.i",                         use_CPP => True);     -- Fails: a type is registered twice.
-      --  generate ("rename2.i",                         use_CPP => True);     -- Fails: a type is registered twice.
-      --  generate ("rename3.i",                         use_CPP => True);     -- Fails: a type is registered twice.
-      --  generate ("rename4.i",                         use_CPP => True);     -- Fails: a type is registered twice.
+      generate ("rename1.i",                        use_CPP => True);
+      generate ("rename2.i",                        use_CPP => True);
+      generate ("rename3.i",                        use_CPP => True);
+      generate ("rename4.i",                        use_CPP => True);
       generate ("return_value_scope.i",             use_CPP => True);
       generate ("smart_pointer_inherit.i",          use_CPP => True);
       generate ("smart_pointer_templatemethods.i",  use_CPP => True);
-      --  generate ("smart_pointer_templatevariables.i", use_CPP => True);     -- Fails: a type is registered twice.
+      generate ("smart_pointer_templatevariables.i", use_CPP => True);
       --  generate ("std_containers.i",                  use_CPP => True);     -- Error: Unable to find 'std_string.i'.
       generate ("template_arg_scope.i",             use_CPP => True);
       generate ("template_arg_typename.i",          use_CPP => True);
       generate ("template_classes.i",               use_CPP => True);
       generate ("template_const_ref.i",             use_CPP => True);
-      --  generate ("template_default_arg.i",            use_CPP => True);     -- Fails: a type is registered twice.
-      --  generate ("template_default.i",                use_CPP => True);     -- Fails: a type name is not known.
+      generate ("template_default_arg.i",           use_CPP => True);
+      --  generate ("template_default.i",               use_CPP => True);     -- Generates, but 18 of 18 specs do not compile.
       generate ("template_default_inherit.i",       use_CPP => True);
       --  generate ("template_default_pointer.i",        use_CPP => True);     -- Error: Syntax error in input(1).
-      --  generate ("template_enum.i",                   use_CPP => True);     -- Fails: a constant is defined twice.
+      generate ("template_enum.i",                  use_CPP => True);
       generate ("template_enum_typedef.i",          use_CPP => True);
       generate ("template_explicit.i",              use_CPP => True);
       generate ("template_extend_overload.i",       use_CPP => True);
-      --  generate ("template_forward.i",                use_CPP => True);     -- Fails: a type is registered twice.
+      generate ("template_forward.i",               use_CPP => True);
       --  generate ("template.i",                        use_CPP => True);     -- There is no such test file.
       generate ("template_ns2.i",                   use_CPP => True);
-      --  generate ("template_ns4.i",                    use_CPP => True);     -- Fails: a type name is not known.
+      generate ("template_ns4.i",                   use_CPP => True);
       generate ("template_ns_enum2.i",              use_CPP => True);
       generate ("template_ns_enum.i",               use_CPP => True);
       generate ("template_opaque.i",                use_CPP => True);
       generate ("template_retvalue.i",              use_CPP => True);
       generate ("template_tbase_template.i",        use_CPP => True);
-      generate ("template_typedef_cplx2.i",          use_CPP => True);
+      generate ("template_typedef_cplx2.i",         use_CPP => True);
       generate ("template_typedef_cplx3.i",         use_CPP => True);
       generate ("template_typedef_cplx4.i",         use_CPP => True);
       generate ("template_typedef_cplx5.i",         use_CPP => True);
@@ -530,7 +530,7 @@ begin
       generate ("typename.i",                       use_CPP => True);
       generate ("using1.i",                         use_CPP => True);
       generate ("using2.i",                         use_CPP => True);
-      --  generate ("using_namespace.i",                 use_CPP => True);     -- Fails: an Ada type name is used twice.
+      generate ("using_namespace.i",                use_CPP => True);
       generate ("valuewrapper_opaque.i",            use_CPP => True);
       generate ("virtual_poly.i",                   use_CPP => True);
    end if;
