@@ -240,11 +240,17 @@ is
 
 
 
-   procedure run (the_Case : in String;   use_CPP : in Boolean := True)
+   procedure run (the_Case : in String;   use_CPP  : in Boolean := True;
+                                          Imported : in String  := "")
    --
-   --  Generates the binding of a run-time case, builds its tester and runs it.
+   --  Generates the binding of a run-time case, builds its tester and runs it. 'Imported' names an
+   --  interface file of the case ('base' for 'base.i') whose module the case imports, and which is
+   --  generated first.
    --
    is
+      Generator : constant String := "../../../../../ada-build/swig4ada -ada" & (if use_CPP then " -c++" else "") & " -outdir .";
+      Extension : constant String := (if use_CPP then "cxx" else "c");
+
       Build : constant String := "runtime-build/" & the_Case;
       Log   : constant String := "runtime-build/" & the_Case & ".log";
    begin
@@ -257,9 +263,11 @@ is
                   & " && cd " & Build
                   & " && rm -rf obj tester *.ads *_wrap.cxx *_wrap.c"
                   & " && echo 'Generating.'"
-                  & " && ../../../../../ada-build/swig4ada -ada" & (if use_CPP then " -c++" else "")
-                  &                                       " -outdir . -o ./example_wrap." & (if use_CPP then "cxx" else "c")
-                  &                                       " -I../../runtime/" & the_Case & " ../../runtime/" & the_Case & "/example.i"
+                  & (if Imported = "" then ""
+                     else   " && " & Generator & " -o ./" & Imported & "_wrap." & Extension
+                          & " -I../../runtime/" & the_Case & " ../../runtime/" & the_Case & "/" & Imported & ".i")
+                  & " && " & Generator & " -o ./example_wrap." & Extension
+                  &          " -I../../runtime/" & the_Case & " ../../runtime/" & the_Case & "/example.i"
                   & " && echo 'Building.'"
                   & " && gprbuild -q -p -P ../../runtime/runtime_test.gpr -XCASE=" & the_Case & (if use_CPP then "" else " -XBOUND_LANGUAGE=C")
                   & " && echo 'Running.'"
@@ -771,6 +779,8 @@ begin
       run ("namespaces");          -- Declarations in namespaces, one of them nested.
       run ("overloads");           -- Overloading, default arguments, operators and a static member function.
       run ("c_library",   use_CPP => False);     -- A binding to C: structures, a union, arrays, strings, callbacks and variables.
+      run ("smart_pointers");      -- A class which is used through a smart pointer.
+      run ("imports",     Imported => "base");   -- A module which imports another, and derives from one of its classes.
    end if;
 
 
