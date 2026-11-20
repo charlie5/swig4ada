@@ -49,7 +49,7 @@ gprbuild -P testsuite.gpr
 
 - The test list is hard coded in `source/launch_testsuite.adb` as `generate ("x.i")` / `generate ("x.i", use_CPP => True)` calls, grouped by the `do_C`, `do_Cxx`, `do_uncompilable_*`, `do_broken_*` flags. Commented out cases carry a note saying why.
 - To run a single test case, put a `generate (...)` call followed by `return;` at the top of the main body (check the file is not already in this state before assuming a full run) and rebuild.
-- A test only checks that generation does not raise an unhandled exception and that `gnatpp` finds no syntax errors; failures are saved as `generated/<module>-generator.log` and `generated/<module>-pretty_print.log`. Nothing is compiled or executed. Baseline (2026-11-20): all 197 enabled cases generate without either failure. A separate measure, not made by the launcher: of the 937 specs generated, 810 pass a compile check (`gcc -c -gnatc -gnat2022 -I<repository root>` run in the output directory) and 127 do not.
+- A test only checks that generation does not raise an unhandled exception and that `gnatpp` finds no syntax errors; failures are saved as `generated/<module>-generator.log` and `generated/<module>-pretty_print.log`. Nothing is compiled or executed. Baseline (2026-11-20): all 197 enabled cases generate without either failure. A separate measure, not made by the launcher: of the 937 specs generated, 875 pass a compile check (`gcc -c -gnatc -gnat2022 -I<repository root>` run in the output directory) and 62 do not. The 62 are in 15 cases: `%import` of a module outside the test list or a circular dependency (`clientdata_prop_b`, `template_typedef_import`, `imports_b`, `mod_b`, `multi_import_a`), multiple inheritance (`contract`, `minherit2`, `abstract_virtual`), and individual problems in `pure_virtual`, `enums`, `template_specialization_enum`, `operator_overload`, `template_inherit_abstract`, `grouping`, `abstract_typedef` and `samename`.
 
 ## Architecture
 
@@ -77,6 +77,7 @@ For a module `foo` (see `ada_module.ads`):
 - `foo-binding.ads` — the imported (non-class) C functions.
 - `foo-pointers.ads`, `foo-pointer_pointers.ads` — pointer and pointer-to-pointer types.
 - `foo-<type>.ads` — one child package per struct/class (and per function pointer type).
+- In a virtual class package, each overloaded member function is imported by an aspect on its own declaration (`with Import, Convention => CPP, External_Name => "..."`), and each overloaded constructor has its `pragma cpp_Constructor` directly after its declaration. Elsewhere an overload is imported under a unique `_vN` name in the private part and the public name renames it; that cannot be used in a virtual class, where the `_vN` twin would be a further primitive with a vtable slot of its own.
 - `foo-<class>-guards.ads` — for a C++ class with a virtual destructor, an instantiation of `swig.Guards`. GNAT never calls a C++ destructor by itself, so a `Guards.Guard (the_Object'Access)` declared after the object calls it (via the non-deleting `destruct_0`) when the guard leaves scope. Note that a *dispatching* call of `destruct` reaches the deleting destructor, which frees the object, and so must not be used on a stack object.
 
 ## Conventions
