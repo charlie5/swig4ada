@@ -512,7 +512,7 @@ begin
       --  generate ("template_opaque.i",                 use_CPP => True);     -- Crashes swig_ada.
       --  generate ("template_retvalue.i",               use_CPP => True);     -- Crashes swig_ada.
       --  generate ("template_tbase_template.i",         use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("template_typedef_cplx2.i",          use_CPP => True);     -- Crashes swig_ada.
+      generate ("template_typedef_cplx2.i",          use_CPP => True);
       --  generate ("template_typedef_cplx3.i",          use_CPP => True);     -- Crashes swig_ada.
       --  generate ("template_typedef_cplx4.i",          use_CPP => True);     -- Crashes swig_ada.
       --  generate ("template_typedef_cplx5.i",          use_CPP => True);     -- Crashes swig_ada.
