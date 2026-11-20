@@ -146,6 +146,18 @@
 
 #ifdef __cplusplus
 #  include <new>
+
+/* Replaces an object of the caller by a result which C++ has just made: the object is destructed, and the
+   result is moved (or, before C++11, copied) into its place. The assignment of the class is not used. */
+template <typename T> static void swig_ada_replace (T* target, T& value)
+{
+  target->~T ();
+#  if __cplusplus >= 201103L
+  new (target) T (static_cast<T &&> (value));
+#  else
+  new (target) T (value);
+#  endif
+}
 #endif
 
 
@@ -315,7 +327,7 @@ DllExport void* SWIGSTDCALL Ada_DohCopy (
   arg1 = (DOH *)a_arg1; 
   
   result = (DOH *)DohCopy((void const *)arg1);
-  jresult = (void *) result;      
+  jresult = (void*) result;
   
   
   
@@ -351,7 +363,7 @@ DllExport void* SWIGSTDCALL Ada_DohStr (
   arg1 = (DOH *)a_arg1; 
   
   result = (DOH *)DohStr((void const *)arg1);
-  jresult = (void *) result;      
+  jresult = (void*) result;
   
   
   
@@ -372,7 +384,7 @@ DllExport void* SWIGSTDCALL Ada_DohData (
   arg1 = (DOH *)a_arg1; 
   
   result = (void *)DohData((void const *)arg1);
-  jresult = (void *) result;      
+  jresult = (void*) result;
   
   
   
@@ -537,7 +549,7 @@ DllExport void* SWIGSTDCALL Ada_DohGetattr (
   arg2 = (DOH *)a_arg2; 
   
   result = (DOH *)DohGetattr(arg1,(void const *)arg2);
-  jresult = (void *) result;      
+  jresult = (void*) result;
   
   
   
@@ -651,7 +663,7 @@ DllExport void* SWIGSTDCALL Ada_DohKeys (
   arg1 = (DOH *)a_arg1; 
   
   result = (DOH *)DohKeys(arg1);
-  jresult = (void *) result;      
+  jresult = (void*) result;
   
   
   
@@ -790,7 +802,7 @@ DllExport char * SWIGSTDCALL Ada_DohGetChar (
   arg2 = (DOH *)a_arg2; 
   
   result = (char *)DohGetChar(arg1,(void const *)arg2);
-  jresult = result; 
+  jresult = (char *) result;
   
   
   
@@ -818,7 +830,7 @@ DllExport void SWIGSTDCALL Ada_DohSetChar (
   
   arg2 = (DOH *)a_arg2; 
   
-  arg3 = a_arg3; 
+  arg3 = (char *) a_arg3; 
   
   DohSetChar(arg1,(void const *)arg2,arg3);
   
@@ -844,7 +856,7 @@ DllExport void* SWIGSTDCALL Ada_DohGetFlagAttr (
   arg2 = (DOH *)a_arg2; 
   
   result = (void *)DohGetFlagAttr(arg1,(void const *)arg2);
-  jresult = (void *) result;      
+  jresult = (void*) result;
   
   
   
@@ -946,7 +958,7 @@ DllExport void* SWIGSTDCALL Ada_DohGetVoid (
   arg2 = (DOH *)a_arg2; 
   
   result = (void *)DohGetVoid(arg1,(void const *)arg2);
-  jresult = (void *) result;      
+  jresult = (void*) result;
   
   
   
@@ -1002,7 +1014,7 @@ DllExport void* SWIGSTDCALL Ada_DohGetitem (
   
   
   result = (DOH *)DohGetitem(arg1,arg2);
-  jresult = (void *) result;      
+  jresult = (void*) result;
   
   
   
@@ -1379,7 +1391,7 @@ DllExport DohIterator SWIGSTDCALL Ada_DohFirst (
 
 
 DllExport DohIterator SWIGSTDCALL Ada_DohNext (
-  DohIterator * a_arg1
+  DohIterator *a_arg1
   )
 {
   DohIterator jresult ;
@@ -1461,7 +1473,7 @@ DllExport void* SWIGSTDCALL Ada_DohGetfile (
   arg1 = (DOH *)a_arg1; 
   
   result = (DOH *)DohGetfile((void const *)arg1);
-  jresult = (void *) result;      
+  jresult = (void*) result;
   
   
   
@@ -1565,7 +1577,7 @@ DllExport void* SWIGSTDCALL Ada_DohGetmeta (
   arg2 = (DOH *)a_arg2; 
   
   result = (DOH *)DohGetmeta(arg1,(void const *)arg2);
-  jresult = (void *) result;      
+  jresult = (void*) result;
   
   
   
@@ -1650,7 +1662,7 @@ DllExport int SWIGSTDCALL Ada_DohPrintf (
   
   arg1 = (DOH *)a_arg1; 
   
-  arg2 = a_arg2; 
+  arg2 = (char *) a_arg2; 
   
   result = (int)DohPrintf(arg1,(char const *)arg2,arg3);
   jresult = result; 
@@ -1696,7 +1708,7 @@ DllExport void* SWIGSTDCALL Ada_DohReadline (
   arg1 = (DOH *)a_arg1; 
   
   result = (DOH *)DohReadline(arg1);
-  jresult = (void *) result;      
+  jresult = (void*) result;
   
   
   
@@ -1875,7 +1887,7 @@ DllExport void* SWIGSTDCALL Ada_DohNewStringEmpty (
   DOH *result = 0 ;
   
   result = (DOH *)DohNewStringEmpty();
-  jresult = (void *) result;      
+  jresult = (void*) result;
   
   
   
@@ -1896,7 +1908,7 @@ DllExport void* SWIGSTDCALL Ada_DohNewString (
   arg1 = (DOH *)a_arg1; 
   
   result = (DOH *)DohNewString((void const *)arg1);
-  jresult = (void *) result;      
+  jresult = (void*) result;
   
   
   
@@ -1925,7 +1937,7 @@ DllExport void* SWIGSTDCALL Ada_DohNewStringWithSize (
   
   
   result = (DOH *)DohNewStringWithSize((void const *)arg1,arg2);
-  jresult = (void *) result;      
+  jresult = (void*) result;
   
   
   
@@ -1947,7 +1959,7 @@ DllExport void* SWIGSTDCALL Ada_DohNewStringf (
   arg1 = (DOH *)a_arg1; 
   
   result = (DOH *)DohNewStringf((void const *)arg1,arg2);
-  jresult = (void *) result;      
+  jresult = (void*) result;
   
   
   
@@ -2036,7 +2048,7 @@ DllExport char * SWIGSTDCALL Ada_DohStrstr (
   arg2 = (DOH *)a_arg2; 
   
   result = (char *)DohStrstr((void const *)arg1,(void const *)arg2);
-  jresult = result; 
+  jresult = (char *) result;
   
   
   
@@ -2065,7 +2077,7 @@ DllExport char * SWIGSTDCALL Ada_DohStrchr (
   
   
   result = (char *)DohStrchr((void const *)arg1,arg2);
-  jresult = result; 
+  jresult = (char *) result;
   
   
   
@@ -2093,12 +2105,12 @@ DllExport void* SWIGSTDCALL Ada_DohNewFile (
   
   arg1 = (DOH *)a_arg1; 
   
-  arg2 = a_arg2; 
+  arg2 = (char *) a_arg2; 
   
   arg3 = (DOH *)a_arg3; 
   
   result = (DOH *)DohNewFile(arg1,(char const *)arg2,arg3);
-  jresult = (void *) result;      
+  jresult = (void*) result;
   
   
   
@@ -2121,7 +2133,7 @@ DllExport void* SWIGSTDCALL Ada_DohNewFileFromFd (
   
   
   result = (DOH *)DohNewFileFromFd(arg1);
-  jresult = (void *) result;      
+  jresult = (void*) result;
   
   
   
@@ -2180,7 +2192,7 @@ DllExport void* SWIGSTDCALL Ada_DohNewList (
   DOH *result = 0 ;
   
   result = (DOH *)DohNewList();
-  jresult = (void *) result;      
+  jresult = (void*) result;
   
   
   
@@ -2197,7 +2209,7 @@ DllExport void* SWIGSTDCALL Ada_DohNewHash (
   DOH *result = 0 ;
   
   result = (DOH *)DohNewHash();
-  jresult = (void *) result;      
+  jresult = (void*) result;
   
   
   
@@ -2234,7 +2246,7 @@ DllExport void* SWIGSTDCALL Ada_DohSplit (
   
   
   result = (DOH *)DohSplit(arg1,arg2,arg3);
-  jresult = (void *) result;      
+  jresult = (void*) result;
   
   
   
@@ -2255,7 +2267,7 @@ DllExport void* SWIGSTDCALL Ada_DohSplitLines (
   arg1 = (DOH *)a_arg1; 
   
   result = (DOH *)DohSplitLines(arg1);
-  jresult = (void *) result;      
+  jresult = (void*) result;
   
   
   
@@ -2286,7 +2298,7 @@ DllExport void* SWIGSTDCALL Ada_doh_Copy (
   arg1 = (DOH *)a_arg1; 
   
   result = (DOH *)doh_Copy(arg1);
-  jresult = (void *) result;      
+  jresult = (void*) result;
   
   
   
@@ -2320,7 +2332,7 @@ DllExport DohIterator SWIGSTDCALL Ada_doh_First (
 
 
 DllExport DohIterator SWIGSTDCALL Ada_doh_Next (
-  DohIterator * a_arg1
+  DohIterator *a_arg1
   )
 {
   DohIterator jresult ;
@@ -2348,7 +2360,7 @@ DllExport DohIterator SWIGSTDCALL Ada_doh_Next (
 
 
 DllExport void* SWIGSTDCALL Ada_get_Item (
-  DohIterator * a_arg1
+  DohIterator *a_arg1
   )
 {
   void* jresult ;
@@ -2363,7 +2375,7 @@ DllExport void* SWIGSTDCALL Ada_get_Item (
   
   
   result = (DOH *)get_Item(arg1);
-  jresult = (void *) result;      
+  jresult = (void*) result;
   
   
   
