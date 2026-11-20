@@ -1,14 +1,15 @@
 --  Builds the tester of one run-time test case, with the address sanitizer.
 --
 --  The launcher generates the binding of the case into 'runtime-build/<case>' and then
---  builds this project with '-XCASE=<case>'.
+--  builds this project with '-XCASE=<case>', and with '-XBOUND_LANGUAGE=C' for a case which binds C.
 --
 project Runtime_Test is
 
    the_Case := external ("CASE");
+   Lang     := external ("BOUND_LANGUAGE", "C++");
    Build    := "../runtime-build/" & the_Case;
 
-   for Languages   use ("Ada", "C++");
+   for Languages   use ("Ada", Lang);
    for Main        use ("tester.adb");
 
    for Source_Dirs use ("support",              -- The 'Checks' package.
@@ -30,6 +31,8 @@ project Runtime_Test is
    package Compiler is
       for Default_Switches ("ada") use ("-g", "-gnat2022", "-gnata", "-fsanitize=address");
       for Default_Switches ("c++") use ("-g", "-fno-access-control", "-fsanitize=address", "-fno-omit-frame-pointer",
+                                        "-I" & Runtime_Test'Project_Dir & the_Case);
+      for Default_Switches ("c")   use ("-g", "-std=gnu17", "-fsanitize=address", "-fno-omit-frame-pointer",
                                         "-I" & Runtime_Test'Project_Dir & the_Case);
    end Compiler;
 

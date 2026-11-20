@@ -240,7 +240,7 @@ is
 
 
 
-   procedure run (the_Case : in String)
+   procedure run (the_Case : in String;   use_CPP : in Boolean := True)
    --
    --  Generates the binding of a run-time case, builds its tester and runs it.
    --
@@ -255,12 +255,13 @@ is
 
       if not run (  "mkdir -p " & Build
                   & " && cd " & Build
-                  & " && rm -rf obj tester *.ads *_wrap.cxx"
+                  & " && rm -rf obj tester *.ads *_wrap.cxx *_wrap.c"
                   & " && echo 'Generating.'"
-                  & " && ../../../../../ada-build/swig4ada -ada -c++ -outdir . -o ./example_wrap.cxx"
+                  & " && ../../../../../ada-build/swig4ada -ada" & (if use_CPP then " -c++" else "")
+                  &                                       " -outdir . -o ./example_wrap." & (if use_CPP then "cxx" else "c")
                   &                                       " -I../../runtime/" & the_Case & " ../../runtime/" & the_Case & "/example.i"
                   & " && echo 'Building.'"
-                  & " && gprbuild -q -p -P ../../runtime/runtime_test.gpr -XCASE=" & the_Case
+                  & " && gprbuild -q -p -P ../../runtime/runtime_test.gpr -XCASE=" & the_Case & (if use_CPP then "" else " -XBOUND_LANGUAGE=C")
                   & " && echo 'Running.'"
                   & " && ./tester",
                   Log)
@@ -767,6 +768,9 @@ begin
       run ("mutual_classes");      -- Two classes, each of which uses the other.
       run ("containers");          -- The containers of the C++ standard library.
       run ("exceptions");          -- The record of a C++ exception which a wrapper has caught.
+      run ("namespaces");          -- Declarations in namespaces, one of them nested.
+      run ("overloads");           -- Overloading, default arguments, operators and a static member function.
+      run ("c_library",   use_CPP => False);     -- A binding to C: structures, a union, arrays, strings, callbacks and variables.
    end if;
 
 
