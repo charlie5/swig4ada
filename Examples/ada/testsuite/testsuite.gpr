@@ -1,4 +1,4 @@
-with "lace";
+with "lace_environ";
 
 project Testsuite is
 
