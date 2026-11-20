@@ -327,17 +327,20 @@ DllExport void SWIGSTDCALL Ada_greeting (
   )
 {
   std::string arg1 ;
-  std::string result;
   
   
   arg1 = (std::string) a_arg1; 
   
   
-  result = greeting(arg1);
   {
     typedef std::string swig_ada_result_type;
+    swig_ada_result_type swig_ada_result = greeting(arg1);
     a_result->~swig_ada_result_type ();
-    new (a_result) swig_ada_result_type ((swig_ada_result_type &) result);
+#if __cplusplus >= 201103L
+    new (a_result) swig_ada_result_type (static_cast<swig_ada_result_type &&> (swig_ada_result));
+#else
+    new (a_result) swig_ada_result_type (swig_ada_result);
+#endif
   }
   
   
