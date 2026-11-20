@@ -200,6 +200,17 @@ is
          --  and 'destruct' the deleting destructor (D0), which also frees the object. A destructor which is not virtual
          --  has no deleting variant.
          --
+         --  The destructor of a class which is not virtual is a function of the wrapper file.
+         --
+         if         Self.link_Symbol /= ""
+           and then not Self.is_Virtual
+           and then not declaration_Package.models_a_virtual_cpp_Class
+         then
+            append (the_Source,   NL & "   pragma Import (C, " & unique_function_Name & ", """ & Self.link_Symbol & """);");
+
+            return the_Source;
+         end if;
+
          if         Self.is_Virtual
            and then Self.Name = "destruct"
          then

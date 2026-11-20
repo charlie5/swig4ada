@@ -1001,6 +1001,7 @@ is
                   default_Terminator :          unbounded_String;
                   is_Abstract        :          Boolean := False;
                   is_Limited         :          Boolean := False;
+                  is_Tagged          :          Boolean := False;
                begin
                   if    resolved_Type.all in ada_Type.elementary.an_access.item'Class  -- ada_Type.elementary.an_access.item'Class
                   then
@@ -1012,6 +1013,7 @@ is
                      begin
                         is_Abstract        := the_Record.is_Abstract;
                         is_Limited         := the_Record.is_tagged_Type or else the_Record.is_Nontrivial;
+                        is_Tagged          := the_Record.is_tagged_Type;
                         default_Terminator := +"(others => <>)";
                      end;
                   elsif resolved_Type.all in ada_Type.elementary.scalar.discrete.enumeration.item'Class
@@ -1032,7 +1034,11 @@ is
 
                   if is_Abstract or is_Limited   -- Abstract and limited types cannot be used with interfaces.C.Pointers.
                   then
-                     return to_String ("   type " & Self.Name & " is access all " & ic_Pointer_view (Self.base_Type).accessed_Type.qualified_Name & ";");
+                     --  A pointer to a virtual class may point to an object of any class derived from
+                     --  it, as it may in C++, and a call through it dispatches.
+                     --
+                     return to_String (  "   type " & Self.Name & " is access all " & ic_Pointer_view (Self.base_Type).accessed_Type.qualified_Name
+                                       & (if is_Tagged then "'Class" else "") & ";");
                   else
                      return
                          "   package " & instantiation_Name & " is new interfaces.c.Pointers (Index              => interfaces.c.size_t,"              & NL

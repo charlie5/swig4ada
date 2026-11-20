@@ -41,6 +41,8 @@ is
                                    Package_swig          => <>,
                                    Package_swig_pointers => <>,
                                    Package_swig_std_strings => <>,
+                                   template_full_Forms      => <>,
+                                   template_plain_Forms     => <>,
 
                                    incomplete_access_to_Type_i_c_pointer_List
                                                          => <>,

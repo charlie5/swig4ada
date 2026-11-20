@@ -853,7 +853,11 @@ is
                      arg            : constant String           :=  "a_" & (+l_Name);
                      param_c_Type   :          unbounded_String := +Attribute (the_Parameter, "tmap:ctype");
                   begin
-                     if param_c_Type /= ""
+                     if param_c_Type = "$c_classname"
+                     then   -- A class or structure passed by value. Ada passes a record to an imported subprogram by reference.
+                        param_c_Type := +doh_Item (SwigType_str (SwigType_Pointer (param_swigType), null)) & " *";
+
+                     elsif param_c_Type /= ""
                      then
                         replace_All (param_c_Type,  "$c_classname", +doh_Item (SwigType_str (SwigType_Pointer (param_swigType), null)));
                         replace_All (param_c_Type,  "(", " ");        -- TODO: Hack to remove parentheses from template arguments.
@@ -1602,6 +1606,20 @@ is
          end loop;
       end;
 
+      --  Note the form which the name of a template instance takes when the default arguments of its template are given.
+      --
+      declare
+         full_Form : constant String := +doh_Item (Swig_symbol_template_deftype (node_Type, null));
+         its_Form  : constant String := +DOH_Pointer (node_Type);
+      begin
+         if         full_Form /= its_Form
+           and then not Self.template_full_Forms.contains (full_Form)
+         then
+            Self.template_full_Forms .append (full_Form);
+            Self.template_plain_Forms.append (its_Form);
+         end if;
+      end;
+
       --  Note whether the class declares a destructor or a copy constructor. C++ passes and returns such a
       --  class by reference, so it cannot be bound as a plain record. (The core notes both on the class, and
       --  later adds a destructor node to every class, declared or not.)
@@ -1914,7 +1932,12 @@ is
                      append (construct_call_Args,  ",   ");
                   end if;
 
-                  if the_c_Type /= ""
+                  if the_c_Type = "$c_classname"
+                  then   -- A class or structure passed by value, which Ada passes by reference.
+                     append (construct_Call,      String' (+doh_Item (SwigType_lstr     (swig_Type, null))  &   " *   "  &  Arg));
+                     append (construct_call_Args, "*" & Arg);
+
+                  elsif the_c_Type /= ""
                   then
                      replace_All (the_c_Type, "$c_classname", +doh_Item (SwigType_str (swig_Type, null)));
 
@@ -1978,6 +2001,8 @@ is
       Storage       : constant String  := Attribute (the_Node, "storage");
       is_Virtual    : constant Boolean := Storage = "virtual";
       is_Overriding :          Boolean := False;
+
+      destruct_Symbol : unbounded_String;     -- The function of the wrapper which destructs an object, where there is one.
    begin
       if not Self.in_cpp_Mode
       then
@@ -2014,6 +2039,37 @@ is
          Status := swigMod.Language.item (Self.all).destructorHandler (the_node);
       end if;
 
+      --  The destructor of a class which is not virtual is called through a function of the wrapper, as its C++
+      --  symbol cannot be told from the name of the class alone (that of a template instance or of a class in a
+      --  namespace, say). A virtual destructor is imported by its symbol, as it is a primitive of the tagged type.
+      --
+      if         not Self.current_c_Class.is_Virtual
+        and then not is_Virtual
+        and then not is_Overriding
+        and then not (   check_Attribute (the_Node, "access", "protected")
+                      or check_Attribute (the_Node, "access", "private"))
+      then
+         declare
+            the_Class : constant String := +doh_Item (SwigType_namestr (SwigType_Pointer (get_Attribute (Self.getCurrentClass, "name"))));
+         begin
+            destruct_Symbol := +("ada_destruct_" & String'(+DOH_Pointer (get_Attribute (Self.getCurrentClass, "name"))));
+
+            for Each in 1 .. Length (destruct_Symbol)
+            loop
+               if Element (destruct_Symbol, Each) not in 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_'
+               then
+                  replace_Element (destruct_Symbol, Each, '_');
+               end if;
+            end loop;
+
+            print_to (DOH_Pointer (Self.f_Ada),   "extern ""C"" void " & to_String (destruct_Symbol) & " (" & the_Class & " * self)" & NL
+                                                & "{"                                                                              & NL
+                                                & "  typedef " & the_Class & " swig_ada_class;"                                    & NL
+                                                & "  self->~swig_ada_class ();"                                                    & NL
+                                                & "}"                                                                              & NL & NL);
+         end;
+      end if;
+
       -- Dummy hack destructor.
       --
       declare
@@ -2023,8 +2079,9 @@ is
                                                                            is_Destructor => True,
                                                                            is_Overriding => is_Overriding);
       begin
-         the_Destructor.is_Static  := False;
-         the_Destructor.is_Virtual := the_Destructor.is_Virtual or is_Overriding;     -- An implicit destructor is virtual when a base class destructor is.
+         the_Destructor.is_Static   := False;
+         the_Destructor.is_Virtual  := the_Destructor.is_Virtual or is_Overriding;     -- An implicit destructor is virtual when a base class destructor is.
+         the_Destructor.link_Symbol := destruct_Symbol;
       end;
 
       declare
@@ -2034,8 +2091,9 @@ is
                                                                            is_Destructor => True,
                                                                            is_Overriding => is_Overriding);
       begin
-         the_Destructor.is_Static  := False;
-         the_Destructor.is_Virtual := the_Destructor.is_Virtual or is_Overriding;     -- An implicit destructor is virtual when a base class destructor is.
+         the_Destructor.is_Static   := False;
+         the_Destructor.is_Virtual  := the_Destructor.is_Virtual or is_Overriding;     -- An implicit destructor is virtual when a base class destructor is.
+         the_Destructor.link_Symbol := destruct_Symbol;
       end;
 
       unindent_Log;
@@ -2958,6 +3016,34 @@ is
 
    exception
       when constraint_Error =>   -- No element in map.
+         --  The type may name a template instance with the default arguments of its template given.
+         --
+         declare
+            the_Name : constant String := +swig_Type;
+         begin
+            for Each in 1 .. Natural (Self.template_full_Forms.Length)
+            loop
+               declare
+                  full_Form : constant String  := Self.template_full_Forms.Element (Each);
+                  First     : constant Natural := ada.Strings.fixed.Index (the_Name, full_Form);
+               begin
+                  if First /= 0
+                  then
+                     declare
+                        plain_Name : constant unbounded_String := +(  the_Name (the_Name'First .. First - 1)
+                                                                    & Self.template_plain_Forms.Element (Each)
+                                                                    & the_Name (First + full_Form'Length .. the_Name'Last));
+                     begin
+                        if Self.swig_type_Map_of_c_type.contains (plain_Name)
+                        then
+                           return Self.swig_type_Map_of_c_type.Element (plain_Name);
+                        end if;
+                     end;
+                  end if;
+               end;
+            end loop;
+         end;
+
          if the_Type = null
          then   -- C type has not yet been declared, so create it as an 'unknown' C type.
             the_Type := c_type.new_unknown_Type;        -- 'Unknown' type is a mutable variant record, so it can be morphed.

@@ -238,6 +238,13 @@ private
          --
          nameSpace_std     : c_nameSpace.view;
          c_namespace_Stack : c_nameSpace.Vector;
+         --  A template instance whose template has default arguments is known by two swig types: that of its '%template'
+         --  ('std::set<(int)>') and that with the defaults given ('std::set<(int,std::less<(int)>)>'), which is how the core
+         --  writes it as the type of a parameter. Each pair is held here, the form with the defaults first.
+         --
+         template_full_Forms  : String_Vectors.Vector;
+         template_plain_Forms : String_Vectors.Vector;
+
          a_Namespaces      : namespace_sets.Set;                 -- TODO: Make a hashed set, as length ordering is no longer important.
 
          --  'Standard' Ada Packages

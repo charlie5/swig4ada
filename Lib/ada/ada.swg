@@ -840,11 +840,11 @@
 
 // - default handling
 // - object passed by value
-// - convert to a pointer
+// - Ada passes a record to an imported subprogram by reference, so the wrapper takes a pointer to it
 
 %typemap (in)                       SWIGTYPE ($&1_type    argp)
 %{ 
-   argp = ($&1_ltype) &$input; 
+   argp = ($&1_ltype) $input; 
    
    $1 = *argp; 
 %}
