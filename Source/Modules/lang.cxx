@@ -20,6 +20,7 @@ static int director_mode = 0;
 static int director_protected_mode = 1;
 static int all_protected_mode = 0;
 static int naturalvar_mode = 0;
+static int protected_and_private_members_mode = 0;      // For Ada.
 Language *Language::this_ = 0;
 
 /* Set director_protected_mode */
@@ -37,6 +38,11 @@ void Wrapper_all_protected_mode_set(int flag) {
 
 void Wrapper_naturalvar_mode_set(int flag) {
   naturalvar_mode = flag;
+}
+
+/* For Ada: True when the language module wraps protected and private class members. */
+int protected_and_private_members_mode_is_set() {
+  return protected_and_private_members_mode;
 }
 
 extern "C" {
@@ -3460,6 +3466,7 @@ Language::
 allow_protected_and_private_Members()
 {
   protected_and_private_Members_allowed = true;
+  protected_and_private_members_mode    = 1;
 }
 
 

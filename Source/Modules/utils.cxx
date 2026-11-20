@@ -76,7 +76,7 @@ void clean_overloaded(Node *n) {
     if ((GetFlag(nn, "feature:ignore")) ||
 	(Getattr(nn, "error")) ||
 	(Strcmp(ntype, "template") == 0) ||
-	((Strcmp(ntype, "cdecl") == 0) && is_protected(nn) && !is_member_director(nn) && !is_non_virtual_protected_access(n))) {
+	((Strcmp(ntype, "cdecl") == 0) && is_protected(nn) && !protected_and_private_members_mode_is_set() && !is_member_director(nn) && !is_non_virtual_protected_access(n))) {
       /* Remove from overloaded list */
       Node *ps = Getattr(nn, "sym:previousSibling");
       Node *ns = Getattr(nn, "sym:nextSibling");

@@ -418,6 +418,7 @@ int is_protected(Node *n);
 int is_member_director(Node *parentnode, Node *member);
 int is_member_director(Node *member);
 int is_non_virtual_protected_access(Node *n); /* Check if the non-virtual protected members are required (for directors) */
+int protected_and_private_members_mode_is_set(); /* For Ada: Check if protected and private class members are wrapped */
 
 void Wrapper_virtual_elimination_mode_set(int);
 void Wrapper_fast_dispatch_mode_set(int);
