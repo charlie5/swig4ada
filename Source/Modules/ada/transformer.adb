@@ -612,16 +612,25 @@ is
                               the_c_Bases : constant c_Type.Vector := the_c_Type.base_Classes;
                               Cursor      :          c_Type.Cursor := the_c_Bases.First;
                            begin
-                              if has_Element (Cursor)
-                              then
-                                 the_ada_Record.add_Base (c_type_Map_of_ada_type.Element (Element (Cursor)));
-                                 next (Cursor);
-                              end if;
-
-                              while has_Element (Cursor)     -- Only the first base class is kept, as a tagged type has a single parent.
+                              --  A tagged type has a single parent, which must itself be tagged. The first base class which
+                              --  is virtual becomes the parent, as C++ places it first in the object. A base class which is not
+                              --  virtual becomes a component, as it does for a class which is not virtual. Any further virtual
+                              --  base class is ignored.
+                              --
+                              while has_Element (Cursor)
                               loop
-                                 log (  "Warning: the base class '" & Element (Cursor).Name & "' of class '" & the_c_Type.Name
-                                      & "' is ignored, as multiple inheritance is not supported.");
+                                 if not Element (Cursor).is_Virtual
+                                 then
+                                    the_ada_Record.add_Component (ada_Variable.new_ada_Variable (to_ada_Identifier (Element (Cursor).Name),
+                                                                                                 c_type_Map_of_ada_type.Element (Element (Cursor))));
+                                 elsif the_ada_Record.base_Classes.is_Empty
+                                 then
+                                    the_ada_Record.add_Base (c_type_Map_of_ada_type.Element (Element (Cursor)));
+                                 else
+                                    log (  "Warning: the base class '" & Element (Cursor).Name & "' of class '" & the_c_Type.Name
+                                         & "' is ignored, as multiple inheritance is not supported.");
+                                 end if;
+
                                  next (Cursor);
                               end loop;
                            end add_base_Classes;

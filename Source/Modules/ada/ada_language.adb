@@ -1555,24 +1555,28 @@ is
 
       function is_Overriding return Boolean
       --
-      --  Only the first base class of a class is kept, so a function which overrides one
-      --  from a second or later base class has nothing to override in the Ada binding.
+      --  Only the first virtual base class of a class is kept as its parent, so a function which overrides
+      --  one from another base class has nothing to override in the Ada binding.
       --
       is
-         function owner_is_among_Bases (the_Class : in c_Type.view;   Owner            : in String;
-                                                                      first_Bases_only : in Boolean) return Boolean
+         function owner_is_among_Bases (the_Class : in c_Type.view;   Owner        : in String;
+                                                                      parents_only : in Boolean) return Boolean
          is
             Bases : constant c_Type.Vector := the_Class.base_Classes;
          begin
             for Each of Bases
             loop
-               if        Each.Name = Owner
-                 or else owner_is_among_Bases (Each, Owner, first_Bases_only)
+               if        not parents_only
+                 or else Each.is_Virtual
                then
-                  return True;
-               end if;
+                  if        Each.Name = Owner
+                    or else owner_is_among_Bases (Each, Owner, parents_only)
+                  then
+                     return True;
+                  end if;
 
-               exit when first_Bases_only;
+                  exit when parents_only;     -- Only the first virtual base class is the parent.
+               end if;
             end loop;
 
             return False;
@@ -1587,8 +1591,8 @@ is
          declare
             Owner : constant String := Attribute (parent_Node (overriding_Value), "sym:name");
          begin
-            return        owner_is_among_Bases (Self.current_c_Class, Owner, first_Bases_only => True)
-                  or else not owner_is_among_Bases (Self.current_c_Class, Owner, first_Bases_only => False);     -- The owner is not known by this name.
+            return        owner_is_among_Bases (Self.current_c_Class, Owner, parents_only => True)
+                  or else not owner_is_among_Bases (Self.current_c_Class, Owner, parents_only => False);     -- The owner is not known by this name.
          end;
       end is_Overriding;
 
@@ -1821,11 +1825,14 @@ is
       declare
          Bases : constant c_Type.Vector := Self.current_c_Class.base_Classes;
       begin
-         if         not Bases.is_Empty
-           and then Bases.first_Element.has_virtual_Destructor     -- Only the first base class is kept.
-         then
-            is_Overriding := True;
-         end if;
+         for Each of Bases
+         loop
+            if Each.is_Virtual     -- Only the first virtual base class is the parent.
+            then
+               is_Overriding := Each.has_virtual_Destructor;
+               exit;
+            end if;
+         end loop;
       end;
 
       Self.current_c_Node := doh_Node (the_Node);
