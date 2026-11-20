@@ -20,6 +20,7 @@ with a_Namespace,
 
      ada.Strings.Maps.constants,
      ada.Characters.handling,
+     ada.Exceptions,
      ada.Text_IO,
      ada.unchecked_Conversion;
 
@@ -1847,8 +1848,16 @@ is
             create (the_File,  out_File,  file_Name);
             put    (the_File,  to_String (spec_Source));
             close  (the_File);
+
          exception
-            when others => dlog (+"unable to create package file: '" & file_Name & "'");
+            when E : name_Error | use_Error | device_Error =>
+               if is_Open (the_File)
+               then
+                  close (the_File);
+               end if;
+
+               log ("Unable to write package file: '" & file_Name & "'");
+               raise Aborted with "Unable to write package file '" & file_Name & "': " & ada.Exceptions.exception_Message (E);
          end;
       end write_the_File;
    end emit_Spec;
