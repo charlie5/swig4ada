@@ -434,6 +434,14 @@ package swigmod.Language is
       scope : in DOHs.const_String_or_char_ptr.Item)
       return swig_Core.Pointers.Hash_Pointer;
 
+   function classLookup
+     (s : in swig_Core.Pointers.SwigType_Pointer)
+      return swig_Core.Pointers.Node_Pointer;
+
+   function enumLookup
+     (s : in swig_Core.Pointers.SwigType_Pointer)
+      return swig_Core.Pointers.Node_Pointer;
+
    function abstractClassTest
      (Self :    access swigmod.Language.Item;
       n    : in swig_Core.Pointers.Node_Pointer) return Interfaces.C.int;
@@ -518,6 +526,8 @@ package swigmod.Language is
      (Self : in out swigmod.Language.Item'Class;
       argc : in     swig_Core.Pointers.String_Pointer;
       argv : in     swig_Core.Pointers.String_Pointer);
+
+   function instance return swigmod.Language.Pointer;
 
    procedure allow_multiple_input
      (Self : in out swigmod.Language.Item'Class;
@@ -706,6 +716,8 @@ private
    pragma Import
      (CPP, symbolScopePseudoSymbolLookup,
       "Ada_Language_symbolScopePseudoSymbolLookup");
+   pragma Import (CPP, classLookup, "Ada_Language_classLookup");
+   pragma Import (CPP, enumLookup, "Ada_Language_enumLookup");
    pragma Import (CPP, abstractClassTest, "Ada_Language_abstractClassTest");
    pragma Import (CPP, is_assignable, "Ada_Language_is_assignable");
    pragma Import (CPP, runtimeCode, "Ada_Language_runtimeCode");
@@ -732,6 +744,7 @@ private
    pragma Import
      (CPP, setOverloadResolutionTemplates,
       "Ada_Language_setOverloadResolutionTemplates");
+   pragma Import (CPP, instance, "Ada_Language_instance");
    pragma Import (CPP, is_wrapping_class, "Ada_Language_is_wrapping_class");
    pragma Import (CPP, getCurrentClass, "Ada_Language_getCurrentClass");
    pragma Import (CPP, getNSpace, "Ada_Language_getNSpace");
