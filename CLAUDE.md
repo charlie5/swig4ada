@@ -75,7 +75,7 @@ GCC has its own C/C++ to Ada spec generator: `g++ -c -fdump-ada-spec -fsyntax-on
 
 - A class with only pure virtual functions is an `abstract tagged limited record`, not an interface — as here.
 - Every member function is imported by an aspect on its declaration (`with Import => True, Convention => CPP, External_Name => "..."`), and each constructor has its `pragma CPP_Constructor` directly after its declaration — as here for overloads in a virtual class. Its constructors return the type itself, where the Ada module returns `Item'Class` for a virtual class.
-- A virtual destructor is two primitives: `Delete_X`, importing the complete object destructor (`D1`), and `Delete_And_Free_X`, importing the deleting destructor (`D0`). The Ada module's `destruct_0` and `destruct` hold the same two vtable slots, but both import `D1`.
+- A virtual destructor is two primitives: `Delete_X`, importing the complete object destructor (`D1`), and `Delete_And_Free_X`, importing the deleting destructor (`D0`). The Ada module's `destruct_0` and `destruct` are the same pair, under different names.
 - It is not an oracle: its output for a class hierarchy with a pure virtual destructor does not compile (the per-class `Delete_X` names do not override one another), and for multiple inheritance it emits `new C and AA`, which GNAT rejects unless `AA` is an interface.
 
 ### Shape of the generated output
@@ -88,7 +88,7 @@ For a module `foo` (see `ada_module.ads`):
 - `foo-<type>.ads` — one child package per struct/class (and per function pointer type).
 - In a virtual class package, each overloaded member function is imported by an aspect on its own declaration (`with Import, Convention => CPP, External_Name => "..."`), and each overloaded constructor has its `pragma cpp_Constructor` directly after its declaration. Elsewhere an overload is imported under a unique `_vN` name in the private part and the public name renames it; that cannot be used in a virtual class, where the `_vN` twin would be a further primitive with a vtable slot of its own.
 - A C++ class with only pure virtual functions and no data is modelled as an abstract tagged type, not as an Ada interface (`is_interface_Type` always returns False). An interface is laid out as a secondary base, which matches C++ only for a second or later base class, and multiple inheritance is not supported.
-- `foo-<class>-guards.ads` — for a C++ class with a virtual destructor, an instantiation of `swig.Guards`. GNAT never calls a C++ destructor by itself, so a `Guards.Guard (the_Object'Access)` declared after the object calls it (via the non-deleting `destruct_0`) when the guard leaves scope. Note that a *dispatching* call of `destruct` reaches the deleting destructor, which frees the object, and so must not be used on a stack object.
+- `foo-<class>-guards.ads` — for a C++ class with a virtual destructor, an instantiation of `swig.Guards`. GNAT never calls a C++ destructor by itself, so a `Guards.Guard (the_Object'Access)` declared after the object calls it (via the non-deleting `destruct_0`) when the guard leaves scope. For a virtual class, `destruct_0` is the complete object destructor (`D1`) and `destruct` the deleting destructor (`D0`), which also frees the object; `destruct` is therefore only for an object allocated by C++ `new`, never for an Ada stack object or one allocated by an Ada allocator. A class whose destructor is not virtual has no deleting variant, and there both import `D1`.
 
 ## Conventions
 
