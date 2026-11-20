@@ -98,7 +98,7 @@ private
    pragma Import (CPP, area, "Ada_Circle_area");
    pragma Import (CPP, perimeter, "Ada_Circle_perimeter");
    pragma Import (CPP, destruct_0, "_ZN6CircleD1Ev");
-   pragma Import (CPP, destruct, "_ZN6CircleD1Ev");
+   pragma Import (CPP, destruct, "_ZN6CircleD0Ev");
 
 
    package conversions is new System.Address_To_Access_Conversions (Item);

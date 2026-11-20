@@ -94,7 +94,7 @@ private
    pragma Import (CPP, area, "Ada_Square_area");
    pragma Import (CPP, perimeter, "Ada_Square_perimeter");
    pragma Import (CPP, destruct_0, "_ZN6SquareD1Ev");
-   pragma Import (CPP, destruct, "_ZN6SquareD1Ev");
+   pragma Import (CPP, destruct, "_ZN6SquareD0Ev");
 
 
    package conversions is new System.Address_To_Access_Conversions (Item);

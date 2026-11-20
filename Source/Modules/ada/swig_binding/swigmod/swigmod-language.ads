@@ -612,7 +612,7 @@ private
 
    pragma CPP_Constructor (construct, "ada_new_Language_Language");
    pragma Import (CPP, destruct_0, "_ZN8LanguageD1Ev");
-   pragma Import (CPP, destruct, "_ZN8LanguageD1Ev");
+   pragma Import (CPP, destruct, "_ZN8LanguageD0Ev");
    pragma Import (CPP, emit_one, "Ada_Language_emit_one");
    pragma Import (CPP, directorClassName, "Ada_Language_directorClassName");
    pragma Import (CPP, main, "Ada_Language_main");

@@ -90,7 +90,7 @@ private
 
    pragma cpp_Constructor (construct, "ada_new_Shape_Shape");
    pragma Import (CPP, destruct_0, "_ZN5ShapeD1Ev");
-   pragma Import (CPP, destruct, "_ZN5ShapeD1Ev");
+   pragma Import (CPP, destruct, "_ZN5ShapeD0Ev");
    pragma Import (CPP, move, "Ada_Shape_move");
    pragma Import (CPP, area0, "Ada_Shape_area0");
    pragma Import (CPP, area, "Ada_Shape_area");
