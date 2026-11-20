@@ -521,9 +521,9 @@
 %typemap (adatype)    long double []                                                  "swig.long_double_Array"
 
 
-%typemap (adatype)    std::string                                                     "swig.std_String"
-%typemap (adatype)    std::string*                                                    "swig.std_String_view"
-%typemap (adatype)    std::string&                                                    "swig.std_String_view"
+%typemap (adatype)    std::string                                                     "swig.std_Strings.std_String"
+%typemap (adatype)    std::string*                                                    "swig.std_Strings.std_string_Pointer"
+%typemap (adatype)    std::string&                                                    "swig.std_Strings.std_string_Pointer"
 
 
 %typemap (adatype)              dummy                                                 "system.Address"
@@ -620,7 +620,7 @@
 %typemap (record_component_array_adatype)    SWIGTYPE*                                      "$adaclassname.views"
 %typemap (record_component_array_adatype)    SWIGTYPE[]                                     "$adaclassname.items"
 
-%typemap (record_component_array_adatype)    std::string                                    "swig.std_String"
+%typemap (record_component_array_adatype)    std::string                                    "swig.std_Strings.std_String"
 // tbd: check this above
 
 
