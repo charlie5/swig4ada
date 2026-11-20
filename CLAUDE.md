@@ -30,7 +30,7 @@ Invocation: `swig4ada -ada [-c++] [-I<dir>] [-outdir <dir>] [-namespace <ns>] fo
 
 Generated specs depend on the support packages `swig.ads`, `swig-pointers.ads` and `swig-guards.ads/.adb` at the repository root, which is why scripts pass `-I../../..` to `gnatpp`/`gnatmake`. The tool itself, and cBound based projects, take `swig.ads` and `swig-pointers.ads` from cBound's `tier-0/swig` library instead, which is a separate copy: a change to a support package must be made in both places (`swig.Guards` was copied there on 2026-11-20). The `swigmod` builder deletes the guard specs it generates, as the tool has no use for them.
 
-**Single example** — each `Examples/ada/<name>/` has a `builder` script, to be run from within that directory (it uses relative paths to `ada-build/swig4ada`): it cleans, generates, pretty prints with `gnatpp`, and (in most examples) builds `test_example.gpr` and runs `./tester`. A builder deletes and regenerates the specs in its directory, several of which are tracked, so expect a diff after running one. Known not to generate (2026-11-20): `addlink`, `anonymous_bitfield`, `llvm` and `std_vector`.
+**Single example** — each `Examples/ada/<name>/` has a `builder` script, to be run from within that directory (it uses relative paths to `ada-build/swig4ada`): it cleans, generates, pretty prints with `gnatpp`, and (in most examples) builds `test_example.gpr` and runs `./tester`. A builder deletes and regenerates the specs in its directory, several of which are tracked, so expect a diff after running one. Known not to generate (2026-11-20): `anonymous_bitfield`, `llvm` and `std_vector`.
 
 ```sh
 cd Examples/ada/class && ./builder
@@ -49,7 +49,7 @@ gprbuild -P testsuite.gpr
 
 - The test list is hard coded in `source/launch_testsuite.adb` as `generate ("x.i")` / `generate ("x.i", use_CPP => True)` calls, grouped by the `do_C`, `do_Cxx`, `do_uncompilable_*`, `do_broken_*` flags. Commented out cases carry a note saying why.
 - To run a single test case, put a `generate (...)` call followed by `return;` at the top of the main body (check the file is not already in this state before assuming a full run) and rebuild.
-- A test only checks that generation does not raise an unhandled exception and that `gnatpp` finds no syntax errors; failures are saved as `generated/<module>-generator.log` and `generated/<module>-pretty_print.log`. Nothing is compiled or executed. Baseline (2026-11-20, binary built October 2024): all 197 enabled cases generate without either failure.
+- A test only checks that generation does not raise an unhandled exception and that `gnatpp` finds no syntax errors; failures are saved as `generated/<module>-generator.log` and `generated/<module>-pretty_print.log`. Nothing is compiled or executed. Baseline (2026-11-20): all 197 enabled cases generate without either failure. A separate measure, not made by the launcher: of the 937 specs generated, 810 pass a compile check (`gcc -c -gnatc -gnat2022 -I<repository root>` run in the output directory) and 127 do not.
 
 ## Architecture
 
