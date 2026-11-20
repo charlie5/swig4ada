@@ -52,10 +52,10 @@ is
 
 
 
-   function declaration_Package (Self : access Item) return access ada_Package.item'Class
+   function declaration_Package (Self : access Item) return Package_view
    is
    begin
-      return Self.declaration_Package;
+      return Package_view (Self.declaration_Package);
    end declaration_Package;
 
 

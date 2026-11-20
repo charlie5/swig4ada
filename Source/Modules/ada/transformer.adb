@@ -17,6 +17,7 @@ with
      ada_Variable,
      c_Declarable,
      c_Function,
+     c_nameSpace,
      c_Variable,
 
      DOHs.Pointers,
@@ -122,11 +123,11 @@ is
                   function declaration_Package return ada_package.view
                   is
                   begin
-                     if    the_accessed_Type.declaration_Package = Result.Package_top
+                     if    ada_Package.view (the_accessed_Type.declaration_Package) = Result.Package_top
                      then
                         return Result.Package_pointers;
 
-                     elsif the_accessed_Type.declaration_Package = Result.Package_pointers
+                     elsif ada_Package.view (the_accessed_Type.declaration_Package) = Result.Package_pointers
                      then
                         return Result.Package_pointer_pointers;
 
@@ -391,7 +392,7 @@ is
                            new_ada_Package.add                   (new_ada_Record.all'Access);
                            new_ada_Package.models_cpp_class_Type (new_ada_Record.all'Access);
 
-                           c_namespace_Map_of_ada_Package.insert (the_c_Type.Namespace, new_ada_Package);
+                           c_namespace_Map_of_ada_Package.insert (c_nameSpace.view (the_c_Type.Namespace), new_ada_Package);
 
                            add_array_Type_for   (new_ada_Record.all'Access, the_c_Type);
                            add_type_Pointer_for (new_ada_Record.all'Access, the_c_Type);
@@ -409,7 +410,7 @@ is
                            use c_type.enum_literal_Vectors, GMP.discrete;
 
                            the_declaration_Package : constant access ada_Package.Item'Class
-                             := c_namespace_Map_of_ada_Package.Element (the_c_Type.Namespace);
+                             := c_namespace_Map_of_ada_Package.Element (c_nameSpace.view (the_c_Type.Namespace));
 
                            new_ada_Enumeration     : constant ada_Type.elementary.scalar.discrete.enumeration.view
                              := ada_Type.elementary.scalar.discrete.enumeration.new_Item (the_declaration_Package,
@@ -485,6 +486,7 @@ is
                         else
                            declare
                               use ada_Type.composite.an_array;
+                              use type ada_Package.view;
 
                               the_ada_array_Bounds : constant ada_Type.composite.an_array.array_dimension_upper_Bounds
                                 := ada_type.composite.an_array.array_dimension_upper_Bounds (the_c_Type.array_Dimensions_upper_Bound);
@@ -494,7 +496,7 @@ is
                               new_ada_Array        :          ada_Type.composite.an_array.view;
 
                            begin
-                              if         the_element_Type.declaration_Package /= Result.Package_top
+                              if         ada_Package.view (the_element_Type.declaration_Package) /= Result.Package_top
                                 and then (        the_element_Type.all in ada_Type.composite.a_record.item'Class    -- Is a c class/struct which has its own package.
                                           or else the_element_Type.all in ada_Type.composite.an_array.item'Class)
                               then

@@ -101,7 +101,7 @@ is
 --              log ("required typed decl pkg: " & the_type_Info.my_Type.declaration_Package.qualified_Name);
 --              log ("own_Package:             " & own_Package.qualified_Name);
 
-            if the_type_Info.my_Type.declaration_Package /= own_Package
+            if ada_Package.view (the_type_Info.my_Type.declaration_Package) /= own_Package
             then
                the_required_Type := the_type_Info.my_Type;
 

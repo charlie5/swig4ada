@@ -26,6 +26,8 @@ is
    type View  is access all Item;
    type Views is array (Positive range <>) of View;
 
+   type nameSpace_view is access all c_nameSpace.item'Class;
+
 
    --  Containers
    --
@@ -142,7 +144,7 @@ is
 
 
    procedure nameSpace_is         (Self : access Item;   Now : access c_nameSpace.item'Class);
-   function  nameSpace            (Self : access Item)  return access c_nameSpace.item'Class;
+   function  nameSpace            (Self : access Item)  return nameSpace_view;
 
    procedure import_Convention_is (Self : access Item;   Now : in an_import_Convention);
 

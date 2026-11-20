@@ -317,10 +317,10 @@ is
 
 
 
-   function nameSpace (Self : access Item) return access c_nameSpace.item'Class
+   function nameSpace (Self : access Item) return nameSpace_view
    is
    begin
-      return Self.my.nameSpace;
+      return nameSpace_view (Self.my.nameSpace);
    end nameSpace;
 
 

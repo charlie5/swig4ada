@@ -21,6 +21,8 @@ is
    type View  is access all Item'Class;
    type Views is array (Positive range <>) of View;
 
+   type Package_view is access all ada_Package.item'Class;
+
 
    --  Containers
    --
@@ -60,7 +62,7 @@ is
    function  qualified_Name         (Self : access Item)     return unbounded_String;
 
    procedure declaration_Package_is (Self : access Item;   Now : access ada_Package.item'Class);
-   function  declaration_Package    (Self : access Item)  return access ada_Package.item'Class;
+   function  declaration_Package    (Self : access Item)  return Package_view;
 
    function  is_ultimately_Unsigned (Self : access Item'Class) return Boolean;
    function  resolved_Type          (Self : access Item)       return ada_Type.view   is abstract;
