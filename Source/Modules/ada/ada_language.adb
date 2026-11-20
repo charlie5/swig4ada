@@ -769,6 +769,7 @@ is
             is_void_return  : constant Boolean := (c_return_Type = "void") or result_by_Parameter;
             returns_a_Class : constant Boolean := (c_return_Type = "$c_classname") and not result_by_Parameter;     -- A class, returned by value.
             has_Parameters  :          Boolean := False;
+            built_in_Place  :          Boolean := False;     -- The result is constructed from the call itself, with no result variable.
 
             Num_arguments   : Natural          := 0;
             Num_required    : Natural with Unreferenced;
@@ -806,9 +807,47 @@ is
 
             emit_parameter_variables (the_Parameters,
                                       the_function_Wrapper);        -- Emit all local variables for holding arguments.
-            emit_return_variable     (the_Node,
+
+            --  The core's action for a function is 'result = <call>;', which assigns to a variable of the result type. A
+            --  class which C++ constructs is instead constructed from the call, and then moved (or copied) into the object
+            --  of the caller. Its assignment is not used: one which the compiler generates is wrong for a class which
+            --  manages a resource through its copy constructor and destructor alone.
+            --
+            if result_by_Parameter
+            then
+               declare
+                  the_Action : constant String  := Attribute (the_Node, "wrap:action");
+                  Prefix     : constant String  := "result = ";
+                  First      : constant Natural := ada.Strings.fixed.Index (the_Action, Prefix);
+                  Last       : constant Natural := ada.Strings.fixed.Index (the_Action, ";", going => ada.Strings.Backward);
+               begin
+                  if         First /= 0
+                    and then Last   > First
+                    and then ada.Strings.fixed.Trim (the_Action (the_Action'First .. First - 1), ada.Strings.Both) = ""
+                    and then ada.Strings.fixed.Trim (the_Action (Last + 1 .. the_Action'Last),   ada.Strings.Both) = ""
+                  then
+                     set_Attribute (the_Node, "wrap:action",
+                                    String'(  "{"                                                                                                  & NL
+                                            & "    typedef " & to_String (c_return_Type) & " swig_ada_result_type;"                                & NL
+                                            & "    swig_ada_result_type swig_ada_result = " & the_Action (First + Prefix'Length .. Last - 1) & ";" & NL
+                                            & "    a_result->~swig_ada_result_type ();"                                                            & NL
+                                            & "#if __cplusplus >= 201103L"                                                                         & NL
+                                            & "    new (a_result) swig_ada_result_type (static_cast<swig_ada_result_type &&> (swig_ada_result));"  & NL
+                                            & "#else"                                                                                              & NL
+                                            & "    new (a_result) swig_ada_result_type (swig_ada_result);"                                         & NL
+                                            & "#endif"                                                                                             & NL
+                                            & "  }"                                                                                                & NL));
+                     built_in_Place := True;
+                  end if;
+               end;
+            end if;
+
+            if not built_in_Place
+            then
+               emit_return_variable  (the_Node,
                                       SwigType_Pointer (swig_Type),
                                       the_function_Wrapper);
+            end if;
             emit_attach_parmMaps     (the_Parameters,
                                       the_function_Wrapper);        -- Attach the standard typemaps.
 
@@ -1018,7 +1057,11 @@ is
                                                                                     const_String (-"result"),
                                                                                     null));
                begin
-                  if result_by_Parameter
+                  if built_in_Place
+                  then
+                     null;     -- The action has done so.
+
+                  elsif result_by_Parameter
                   then   -- Replace the object of the caller by the result.
                      print_to (wrapper_Code,   "  {"                                                                                     & NL
                                              & "    typedef " & to_String (c_return_Type) & " swig_ada_result_type;"                    & NL
