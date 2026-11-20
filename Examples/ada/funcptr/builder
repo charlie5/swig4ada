@@ -1,60 +1,36 @@
 #!/bin/bash
+#
+#  Regenerates the binding, builds the tester and runs it.
+#  To be run from within this directory.
 
-clear
-
-echo
-echo removing prior build
-
-rm -f ./tester
-rm *.o
-rm *.ali
-rm *.a
-rm *.ads
-
-
+set -e
 
 echo
-echo generating bindings
+echo "Removing the prior build."
 
-../../../ada-build/swig4ada  -ada   example.i
+rm -rf build
+rm -f  ./tester *.ads *_wrap.c *_wrap.cxx *.o *.ali
 
 
 echo
-echo pretty printing ...
+echo "Generating the binding."
+
+../../../ada-build/swig4ada  -ada  example.i
+
+
+echo
+echo "Pretty printing."
 
 gnatpp  -rnb  -I../../..  *.ads
 
 
 echo
-echo compiling
+echo "Compiling."
 
-gprbuild  -P   test_example.gpr 
-
+gprbuild  -q  -p  -P test_example.gpr
 
 
 echo
-echo running tester ...
+echo "Running the tester."
 
 ./tester
-
-
-echo
-echo cleaning up
-
-rm *.a
-rm *.o
-rm *.d
-rm *.ali
-rm *.stderr
-rm *.stdout
-rm *.bexch
-rm *.deps
-rm b__*
-
-
-
-gnatpp  -rnb  -I../../..  *.ads
-
-
-echo
-echo Done.

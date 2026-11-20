@@ -38,8 +38,8 @@ begin
 
    --set (VA'access,  0, A'unchecked_access);
    --set (VA'access,  1, B'unchecked_access);
-   set (VA,  0, A'access);
-   set (VA,  1, B'access);
+   set (VA,  0, A'unchecked_Access);     -- 'A' and 'B' are local, and outlive every use made of them here.
+   set (VA,  1, B'unchecked_Access);
 
    for each in 0 .. 5 loop
       declare

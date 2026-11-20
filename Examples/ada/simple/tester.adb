@@ -1,4 +1,5 @@
 
+with simple_example;         use simple_example;
 with simple_example.Binding; use simple_example.Binding;
 
 with ada.text_IO;    use ada.text_IO;

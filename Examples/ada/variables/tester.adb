@@ -19,7 +19,7 @@ begin
    put_Line ("ivar => " & int'Image (ivar));
    
    svar := -31_000;
-   put_Line ("svar => " & short_Integer'Image (svar));
+   put_Line ("svar => " & short'Image (svar));
    
    lvar := 65_537;
    put_Line ("lvar => " & long'Image (lvar));
@@ -40,7 +40,7 @@ begin
    put_Line ("ucvar => " & interfaces.c.unsigned_Char'Image (ucvar));
    
    cvar := 'S';
-   put_Line ("cvar => " & cvar);
+   put_Line ("cvar => " & to_Ada (cvar));
    
    fvar := 3.14159;
    put_Line ("fvar => " & c_float'Image (fvar));
@@ -60,7 +60,7 @@ begin
    iptrvar := new_Int (37);
    put_Line ("iptrvar.all => " & int'Image (iptrvar.all));
    
-   put_Line ("name => " & to_Ada (vars_example.Binding.name));
+   put_Line ("name => " & to_Ada (vars_example.name));
    
    ptptr := new Point.item'(37, 42);
    put_Line ("ptptr => " & Value (Point_print (ptptr)));
