@@ -1,6 +1,7 @@
 with
      class_values.Binding,
      class_values.Buffer,
+     class_values.Token,
 
      swig.std_Strings,
      interfaces.C,
@@ -45,6 +46,24 @@ begin
    Buffer.destruct (A);
    Buffer.destruct (B);
    Buffer.destruct (C);
+
+   a_class_with_no_assignment :
+   declare
+      T : aliased Token.Item;
+      U : aliased Token.Item;
+   begin
+      check (Token.get (T) = 0,           "a token is default constructed");
+
+      make_token (41, T'unchecked_Access);
+      check (Token.get (T) = 41,          "a function result replaces a token, with no use of assignment");
+
+      Token.next (T, U'unchecked_Access);
+      check (Token.get (U) = 42,          "a member function result replaces a token");
+      check (Token.get (T) = 41,          "the first token is unchanged");
+
+      Token.destruct (T);
+      Token.destruct (U);
+   end a_class_with_no_assignment;
 
    finish;
 end Tester;

@@ -14,3 +14,18 @@ public:
 };
 inline Buffer make_buffer (int n)        { Buffer b (n); b.label = "made"; return b; }   // a function which returns the class by value
 inline int    total       (Buffer b)     { return b.sum (); }                             // a function which takes the class by value
+
+
+/* A class which manages a resource through its copy constructor and destructor alone. It declares no
+   assignment, so that which the compiler generates would share the resource between two objects. */
+class Token {
+public:
+  int* value;
+  Token ()               : value (new int (0))          {}
+  Token (int v)          : value (new int (v))          {}
+  Token (const Token& o) : value (new int (*o.value))   {}
+  ~Token ()              { delete value; }
+  int   get ()           { return *value; }
+  Token next ()          { return Token (*value + 1); }     // a member which returns its class by value
+};
+inline Token make_token (int v)   { return Token (v); }     // a function which returns the class by value
