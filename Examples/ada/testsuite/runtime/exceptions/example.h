@@ -13,3 +13,11 @@ inline int require_positive (int value)
   if (value < 0)  throw value;
   return value;
 }
+
+inline int element (int index)
+{
+  static const int values [3] = { 10, 20, 30 };
+
+  if (index < 0 || index > 2)  throw std::out_of_range ("index is out of range");
+  return values [index];
+}
