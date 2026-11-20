@@ -1,96 +1,262 @@
 with
      lace.Environ.Paths,
-     lace.Environ.OS_Commands,
+     ada.Command_Line,
+     ada.Containers.indefinite_Vectors,
+     ada.Directories,
      ada.Strings.fixed,
-     ada.Text_IO;
+     ada.Text_IO,
+     gnat.OS_Lib;
 
 
 procedure launch_testsuite
+--
+--  Runs the generator over the SWIG test suite and checks, for each case, that
+--
+--    - the generator ends without an error,
+--    - the generated specs have no syntax errors (found by 'gnatpp', which also tidies them),
+--    - the generated C or C++ wrapper compiles,
+--    - the generated specs compile.
+--
+--  The specs are compiled once every case has been generated, as a case which imports another
+--  module needs the specs of that module. A failure leaves a log in the 'generated' folder,
+--  named '<case>-generator.log', '-pretty_print.log', '-wrapper.log' or '-compile.log'.
+--
 is
    use lace.Environ,
        ada.Strings.fixed,
        ada.Text_IO;
 
-   Error : exception;
+   do_C                : constant Boolean := True;
+   do_Cxx              : constant Boolean := True;
+   do_uncompilable_C   : constant Boolean := True;
+   do_uncompilable_Cxx : constant Boolean := True;
+   do_broken_C         : constant Boolean := True;
+   do_broken_Cxx       : constant Boolean := True;
 
-   do_C                : Boolean := True;
-   do_Cxx              : Boolean := True;
-   do_uncompilable_C   : Boolean := True;
-   do_uncompilable_Cxx : Boolean := True;
-   do_broken_C         : Boolean := True;
-   do_broken_Cxx       : Boolean := True;
+   check_Wrappers      : constant Boolean := True;     -- Compile each generated wrapper.
+   check_Specs         : constant Boolean := True;     -- Compile each generated spec.
 
-   abort_on_Error      : Boolean := False;
-   --  abort_on_Error      : Boolean := True;
+   Root                : constant String  := "../../../..";     -- The repository root, as seen from the 'generated' folder.
 
 
-   procedure generate (swig_Module : in String;
-                       use_CPP     : in Boolean := False)
+   --  The specs which each case generates, kept for the compile check.
+   --
+   type a_Case (name_Length, specs_Length : Natural) is
+      record
+         Name  : String (1 .. name_Length);
+         Specs : String (1 .. specs_Length);     -- The file names, separated by spaces.
+      end record;
+
+   package case_Vectors is new ada.Containers.indefinite_Vectors (Positive, a_Case);
+
+   the_Cases          : case_Vectors.Vector;
+
+   generator_Failures : Natural := 0;
+   syntax_Failures    : Natural := 0;
+   wrapper_Failures   : Natural := 0;
+   compile_Failures   : Natural := 0;
+   unexpected_Passes  : Natural := 0;
+
+
+
+   function run (Command : in String;   Log : in String) return Boolean
+   --
+   --  Runs the command in a shell, with its output sent to the 'Log' file. Returns True if the command succeeds.
+   --
    is
-      use lace.Environ.Paths,
-          lace.Environ.OS_Commands;
+      use gnat.OS_Lib;
+
+      Arguments : Argument_List := [new String'("-c"),
+                                    new String'(Command)];
+      Success   : Boolean;
+      Status    : Integer;
+   begin
+      Spawn (program_Name => "/bin/sh",
+             Args         => Arguments,
+             output_File  => Log,
+             Success      => Success,
+             return_Code  => Status,
+             err_to_Out   => True);
+
+      for Each of Arguments
+      loop
+         Free (Each);
+      end loop;
+
+      return Success and then Status = 0;
+   end run;
+
+
+
+   function Contents (of_File : in String) return String
+   is
+      use ada.Directories;
+      the_File : File_Type;
+      Result   : String (1 .. Natural (Size (of_File)));
+      Last     : Natural := 0;
+   begin
+      open (the_File, in_File, of_File);
+
+      while not end_of_File (the_File)
+      loop
+         declare
+            the_Line : constant String := get_Line (the_File);
+         begin
+            Result (Last + 1 .. Last + the_Line'Length) := the_Line;
+            Last                                        := Last + the_Line'Length + 1;
+            Result (Last)                               := ' ';
+         end;
+      end loop;
+
+      close (the_File);
+      return Result (1 .. Natural'Min (Last, Result'Last));
+   end Contents;
+
+
+
+   procedure keep (Log : in String;   as_Log : in String)
+   --
+   --  Keeps the log of a failed step.
+   --
+   is
+   begin
+      ada.Directories.copy_File (Log, as_Log);
+   end keep;
+
+
+
+   procedure generate (swig_Module      : in String;
+                       use_CPP          : in Boolean := False;
+                       wrapper_Compiles : in Boolean := True)
+   --
+   --  'wrapper_Compiles' is False for a case whose wrapper is known not to compile. Its wrapper
+   --  is still compiled, so that the launcher can say when it has begun to.
+   --
+   is
+      use lace.Environ.Paths;
+
+      Stem      : constant String := swig_Module (swig_Module'First .. swig_Module'Last - 2);     -- Less the '.i'.
+      Wrapper   : constant String := Stem & "_wrap." & (if use_CPP then "cxx" else "c");
+      Step_Log  : constant String := "step.log";
+      Specs_Log : constant String := "specs.log";
    begin
       put_Line ("Generating swig module '" & swig_Module & "'.");
 
---        remove_Folder ("./generated");
       ensure_Folder (+"./generated");
       go_to_Folder  (+"./generated");
 
+      --  Generate.
+      --
+      if not run ("touch marker", Step_Log)
+      then
+         raise Program_Error with "Unable to write into the 'generated' folder.";
+      end if;
+
+      if not run (  Root & "/ada-build/swig4ada -ada"
+                  & (if use_CPP then " -c++" else "")
+                  & " -outdir . -o ./" & Wrapper
+                  & " -I/usr/include "
+                  & "../../../test-suite/" & swig_Module,
+                  Step_Log)
+      then
+         keep (Step_Log, as_Log => swig_Module & "-generator.log");
+         generator_Failures := generator_Failures + 1;
+         put_Line ("   The generator failed !");
+      end if;
+
+      --  Find the specs which were generated, tidy them and check their syntax.
+      --
+      if not run ("find . -maxdepth 1 -name '*.ads' -newer marker | sort", Specs_Log)
+      then
+         raise Program_Error with "Unable to list the generated specs.";
+      end if;
+
       declare
-
-         function cpp_Mode return String
-         is
-         begin
-            if use_CPP then return " -c++ ";
-                       else return "";
-            end if;
-         end cpp_Mode;
-
-         generator_Log : constant String := run_OS (command_Line =>   "../../../../ada-build/swig4ada "
-                                                                    & "-outdir . "
-                                                                    & "-ada "
-                                                                    & cpp_Mode
-                                                                    & " -I/usr/include "
-                                                                    & "../../../test-suite/" & swig_Module);
+         Specs : constant String := Contents (of_File => Specs_Log);
       begin
---           put_Line (generator_Log);
-         if Index (generator_Log, "unhandled exception") /= 0
+         if Specs /= ""
          then
-            save (to_File (swig_Module & "-generator.log"),
-                  generator_Log);
-         end if;
-      end;
-
-      declare
-         pretty_Log : constant String
-           := run_OS (command_Line => "gnatpp --replace"
-                      & "                     --layout=default"
-                      & "                     --max-line-length=120"
-                      & "                     --based-grouping=3"
-                      & "                     --decimal-grouping=3"
-                      & "                     --par-threshold=2"
-                      & "                     --call-threshold=2"
-                      & "                     -I../../../.. "
-                      &                       swig_Module (swig_Module'First .. swig_Module'Last - 2) & "*.ads");
-      begin
-         if Index (pretty_Log, "Syntax errors in") /= 0
-         then
---              put_Line (pretty_Log);
-            save (to_File (swig_Module & "-pretty_print.log"),
-                  pretty_Log);
-
-            if abort_on_Error
+            if        not run (  "gnatpp --replace"
+                               & " --layout=default"
+                               & " --max-line-length=120"
+                               & " --based-grouping=3"
+                               & " --decimal-grouping=3"
+                               & " --par-threshold=2"
+                               & " --call-threshold=2"
+                               & " -I" & Root & " "
+                               & Specs,
+                               Step_Log)
+              or else Index (Contents (of_File => Step_Log), "Syntax errors in") /= 0
             then
-               raise Error;
-            else
-               put_line ("Compilation error detected !");
-               new_Line;
+               keep (Step_Log, as_Log => swig_Module & "-pretty_print.log");
+               syntax_Failures := syntax_Failures + 1;
+               put_Line ("   A spec has a syntax error !");
             end if;
          end if;
+
+         the_Cases.append (a_Case'(name_Length  => swig_Module'Length,
+                                   specs_Length => Specs'Length,
+                                   Name         => swig_Module,
+                                   Specs        => Specs));
       end;
+
+      --  Compile the wrapper.
+      --
+      if         check_Wrappers
+        and then ada.Directories.exists (Wrapper)
+      then
+         declare
+            --  The Ada module wraps the protected members of a class, and such a wrapper needs access to them.
+            --
+            Compiles : constant Boolean := run (  (if use_CPP then "g++ -fno-access-control" else "gcc -std=gnu17")
+                                                & " -fsyntax-only -w -I../../../test-suite -I. " & Wrapper,
+                                                Step_Log);
+         begin
+            if         wrapper_Compiles
+              and then not Compiles
+            then
+               keep (Step_Log, as_Log => swig_Module & "-wrapper.log");
+               wrapper_Failures := wrapper_Failures + 1;
+               put_Line ("   The wrapper does not compile !");
+
+            elsif      Compiles
+              and then not wrapper_Compiles
+            then
+               unexpected_Passes := unexpected_Passes + 1;
+               put_Line ("   The wrapper now compiles, and need no longer be marked as failing to.");
+            end if;
+         end;
+      end if;
 
       go_to_Folder (to_Folder (".."));
    end generate;
+
+
+
+   procedure compile_all_Specs
+   is
+      use lace.Environ.Paths;
+      Step_Log : constant String := "step.log";
+   begin
+      new_Line;
+      put_Line ("Compiling the generated specs.");
+      new_Line;
+
+      go_to_Folder (+"./generated");
+
+      for Each of the_Cases
+      loop
+         if         Each.Specs /= ""
+           and then not run ("gcc -c -gnatc -gnat2022 -I" & Root & " " & Each.Specs, Step_Log)
+         then
+            keep (Step_Log, as_Log => Each.Name & "-compile.log");
+            compile_Failures := compile_Failures + 1;
+            put_Line ("A spec of '" & Each.Name & "' does not compile !");
+         end if;
+      end loop;
+
+      go_to_Folder (to_Folder (".."));
+   end compile_all_Specs;
 
 
 begin
@@ -104,20 +270,20 @@ begin
       put_Line ("Generating C tests.");
       new_Line;
       generate ("aggregate.i");
-      generate ("allowexcept.i");
-      generate ("argout.i");
+      generate ("allowexcept.i",                    use_CPP => True);
+      generate ("argout.i",                         use_CPP => True);
       generate ("array_member.i");
       --  generate ("bools.i");     -- A C++ input, which is run with the C++ tests. As C, SWIG reports a syntax error.
       generate ("char_constant.i");
       generate ("const_const.i");
-      generate ("derived_byvalue.i");
+      generate ("derived_byvalue.i",                use_CPP => True);
       generate ("empty.i");
       generate ("enum_plus.i");
       generate ("enums.i");
-      generate ("enum_var.i");
+      generate ("enum_var.i",                       use_CPP => True);
       generate ("extern_declaration.i");
       generate ("fragments.i");
-      generate ("ignore_parameter.i");
+      generate ("ignore_parameter.i",   wrapper_Compiles => False);     -- Wrapper: a C++ input; as C++, a constructor with ignored parameters is called with them.
       generate ("immutable_values.i");
       generate ("integers.i");
       generate ("keyword_rename.i");
@@ -134,19 +300,19 @@ begin
       generate ("name.i");
       generate ("naturalvar.i");
       generate ("nested.i");
-      generate ("null_pointer.i");
-      generate ("ordering.i");
+      generate ("null_pointer.i",                   use_CPP => True);
+      generate ("ordering.i",                       use_CPP => True);
       generate ("ret_by_value.i");
       generate ("struct_rename.i");
-      generate ("struct_value.i");
+      generate ("struct_value.i",                   use_CPP => True);
       generate ("tag_no_clash_with_variable.i");
       generate ("typedef_mptr.i");
-      generate ("typedef_reference.i");
+      generate ("typedef_reference.i",              use_CPP => True);
       generate ("typedef_sizet.i");
       generate ("typemap_numinputs.i");
-      generate ("typemap_subst.i");
+      generate ("typemap_subst.i",                  use_CPP => True);
       generate ("unions.i");
-      generate ("wrapmacro.i");
+      generate ("wrapmacro.i",                      use_CPP => True);
    end if;
 
 
@@ -214,7 +380,7 @@ begin
       generate ("multi_import_b.i",                 use_CPP => True);
       generate ("name_cxx.i",                       use_CPP => True);
       generate ("namespace_enum.i",                 use_CPP => True);
-      generate ("namespace_extend.i",               use_CPP => True);
+      generate ("namespace_extend.i",               use_CPP => True,   wrapper_Compiles => False);     -- Wrapper: an '%extend' function of a class in a namespace is called by the wrong name.
       generate ("namespace_template.i",             use_CPP => True);
       generate ("namespace_typedef_class.i",        use_CPP => True);
       generate ("newobject2.i",                     use_CPP => True);
@@ -238,7 +404,7 @@ begin
       generate ("return_const_value.i",             use_CPP => True);
       generate ("smart_pointer_const2.i",           use_CPP => True);
       generate ("smart_pointer_const.i",            use_CPP => True);
-      generate ("smart_pointer_extend.i",           use_CPP => True);
+      generate ("smart_pointer_extend.i",           use_CPP => True,   wrapper_Compiles => False);     -- Wrapper: an '%extend' function reached through a smart pointer is called by the wrong name.
       generate ("smart_pointer_member.i",           use_CPP => True);
       generate ("smart_pointer_multi.i",            use_CPP => True);
       generate ("smart_pointer_namespace2.i",       use_CPP => True);
@@ -262,7 +428,7 @@ begin
       generate ("template_default_qualify.i",       use_CPP => True);
       generate ("template_default_vw.i",            use_CPP => True);
       generate ("template_enum_ns_inherit.i",       use_CPP => True);
-      generate ("template_expr.i",                  use_CPP => True);
+      generate ("template_expr.i",                  use_CPP => True,   wrapper_Compiles => False);     -- Wrapper: the input holds C++ which does not compile.
       generate ("template_extend1.i",               use_CPP => True);
       generate ("template_extend2.i",               use_CPP => True);
       generate ("template_extend_overload_2.i",     use_CPP => True);
@@ -289,7 +455,7 @@ begin
       generate ("throw_exception.i",                use_CPP => True);
       generate ("typedef_class.i",                  use_CPP => True);
       generate ("typedef_inherit.i",                use_CPP => True);
-      generate ("typemap_self.i",                   use_CPP => True);
+      generate ("typemap_self.i",                   use_CPP => True,   wrapper_Compiles => False);     -- Wrapper: uses the swig runtime type system, which the Ada runtime does not have.
       generate ("typemap_variables.i",              use_CPP => True);
       generate ("types_directive.i",                use_CPP => True);
       generate ("union_scope.i",                    use_CPP => True);
@@ -341,7 +507,7 @@ begin
       generate ("abstract_virtual.i",               use_CPP => True);
       generate ("clientdata_prop_b.i",              use_CPP => True);
       generate ("contract.i",                       use_CPP => True);
-      generate ("dynamic_cast.i",                   use_CPP => True);
+      generate ("dynamic_cast.i",                   use_CPP => True,   wrapper_Compiles => False);     -- Wrapper: uses the swig runtime type system, which the Ada runtime does not have.
       generate ("features.i",                       use_CPP => True);
       generate ("fvirtual.i",                       use_CPP => True);
       generate ("import_nomodule.i",                use_CPP => True);
@@ -382,18 +548,18 @@ begin
       new_Line;
 
       generate ("anonymous_bitfield.i");
-      generate ("apply_signed_char.i",              use_CPP => True);
-      generate ("apply_strings.i",                  use_CPP => True);
-      generate ("arrayref.i");
-      generate ("arrays_dimensionless.i");
-      generate ("arrays_global.i");
+      generate ("apply_signed_char.i",              use_CPP => True,   wrapper_Compiles => False);     -- Wrapper: a 'signed char*' argument is passed as 'char*'.
+      generate ("apply_strings.i",                  use_CPP => True,   wrapper_Compiles => False);     -- Wrapper: an 'unsigned char*' argument is passed as 'char*'.
+      generate ("arrayref.i",                       use_CPP => True);
+      generate ("arrays_dimensionless.i",           use_CPP => True);
+      generate ("arrays_global.i",                  use_CPP => True);
       generate ("arrays_global_twodim.i");
       generate ("arrays.i");
-      generate ("arrays_scope.i");
-      generate ("array_typedef_memberin.i");
+      generate ("arrays_scope.i",                   use_CPP => True);
+      generate ("array_typedef_memberin.i",         use_CPP => True);
       generate ("bloody_hell.i");
-      generate ("char_strings.i");
-      generate ("class_scope_weird.i");
+      generate ("char_strings.i",                   use_CPP => True);
+      generate ("class_scope_weird.i",              use_CPP => True);
       generate ("default_args.i",                   use_CPP => True);
       generate ("enum_thorough_typeunsafe.i",       use_CPP => True);
       generate ("file_test.i");
@@ -408,20 +574,20 @@ begin
       generate ("li_std_vector.i",                  use_CPP => True);
       generate ("li_std_wstring.i",                 use_CPP => True);
       --  generate ("list_vector.i");     -- Not applicable: uses a library of Guile typemaps.
-      generate ("li_typemaps.i");
-      generate ("li_windows.i");
-      generate ("long_long_apply.i");
+      generate ("li_typemaps.i",                    use_CPP => True);
+      generate ("li_windows.i",   wrapper_Compiles => False);     -- Wrapper: a C++ input; as C++, a reference to '__int8' is dereferenced as a value.
+      generate ("long_long_apply.i",                use_CPP => True);
       generate ("nested_comment.i");
       --  generate ("pointer_in_out.i");     -- Not applicable: uses a library of Guile typemaps.
-      generate ("pointer_reference.i");
+      generate ("pointer_reference.i",              use_CPP => True);
       generate ("register_par.i");
       generate ("sizeof_pointer.i");
-      generate ("sizet.i");
+      generate ("sizet.i",                          use_CPP => True);
       generate ("sneaky1.i");
-      generate ("special_variables.i",              use_CPP => True);
+      generate ("special_variables.i",              use_CPP => True,   wrapper_Compiles => False);     -- Wrapper: the '$symname' special variable is not expanded.
       generate ("threads.i",                        use_CPP => True);
       generate ("typedef_array_member.i");
-      generate ("typedef_funcptr.i");
+      generate ("typedef_funcptr.i",                use_CPP => True);
       generate ("typedef_struct.i");
    end if;
 
@@ -455,7 +621,7 @@ begin
       generate ("global_ns_arg.i",                  use_CPP => True);
       generate ("ignore_template_constructor.i",    use_CPP => True);
       generate ("inherit_target_language.i",        use_CPP => True);
-      generate ("intermediary_classname.i",         use_CPP => True);
+      generate ("intermediary_classname.i",         use_CPP => True,   wrapper_Compiles => False);     -- Wrapper: an array of constant pointers is written as an invalid parameter.
       generate ("kind.i",                           use_CPP => True);
       generate ("li_boost_shared_ptr_bits.i",       use_CPP => True);
       generate ("li_boost_shared_ptr.i",            use_CPP => True);
@@ -479,7 +645,7 @@ begin
       generate ("namespace_union.i",                use_CPP => True);
       generate ("overload_complicated.i",           use_CPP => True);
       generate ("primitive_ref.i",                  use_CPP => True);
-      generate ("primitive_types.i",                use_CPP => True);
+      generate ("primitive_types.i",                use_CPP => True,   wrapper_Compiles => False);     -- Wrapper: a 'const char*' result is assigned to a 'char*'.
       generate ("refcount.i",                       use_CPP => True);
       generate ("reference_global_vars.i",          use_CPP => True);
       generate ("rename1.i",                        use_CPP => True);
@@ -490,7 +656,7 @@ begin
       generate ("smart_pointer_inherit.i",          use_CPP => True);
       generate ("smart_pointer_templatemethods.i",  use_CPP => True);
       generate ("smart_pointer_templatevariables.i", use_CPP => True);
-      generate ("std_containers.i",                 use_CPP => True);
+      generate ("std_containers.i",                 use_CPP => True,   wrapper_Compiles => False);     -- Wrapper: a container of a class with no default constructor is constructed with a size.
       generate ("template_arg_scope.i",             use_CPP => True);
       generate ("template_arg_typename.i",          use_CPP => True);
       generate ("template_classes.i",               use_CPP => True);
@@ -501,7 +667,7 @@ begin
       --  generate ("template_default_pointer.i",        use_CPP => True);     -- Error: Syntax error in input(1).
       generate ("template_enum.i",                  use_CPP => True);
       generate ("template_enum_typedef.i",          use_CPP => True);
-      generate ("template_explicit.i",              use_CPP => True);
+      generate ("template_explicit.i",              use_CPP => True,   wrapper_Compiles => False);     -- Wrapper: an array of constant pointers is written as an invalid parameter.
       generate ("template_extend_overload.i",       use_CPP => True);
       generate ("template_forward.i",               use_CPP => True);
       --  generate ("template.i",                        use_CPP => True);     -- There is no such test file.
@@ -536,14 +702,37 @@ begin
    end if;
 
 
+   -----------------
+   --- Compile check
+   --
+   if check_Specs
+   then
+      compile_all_Specs;
+   end if;
+
+
    --------
    --- Done
    --
    new_Line;
-   put_Line ("Complete.");
+   put_Line ("Cases:                        " & the_Cases.Length'Image);
+   put_Line ("Generator failures:           " & generator_Failures'Image);
+   put_Line ("Specs with a syntax error:    " & syntax_Failures   'Image);
+   put_Line ("Wrappers which do not compile:" & wrapper_Failures  'Image);
+   put_Line ("Specs which do not compile:   " & compile_Failures  'Image);
 
-exception
-   when Error =>
-      new_Line;
+   if unexpected_Passes > 0
+   then
+      put_Line ("Wrappers which now compile:   " & unexpected_Passes'Image);
+   end if;
+
+   new_Line;
+
+   if generator_Failures + syntax_Failures + wrapper_Failures + compile_Failures = 0
+   then
+      put_Line ("Complete.");
+   else
       put_Line ("Testsuite failed !");
+      ada.Command_Line.set_exit_Status (ada.Command_Line.Failure);
+   end if;
 end launch_testsuite;
