@@ -2693,7 +2693,14 @@ is
                   declare
                      parent_module_Name : constant String := Attribute (the_Parent, "module");
                   begin
-                     the_Module := Self.demand_Module (+parent_module_Name);
+                     if parent_module_Name = ""
+                     then   -- A file imported without a module name has no binding of its own in which its
+                            -- declarations could be found, so they are bound along with those of the main module.
+                        the_Module := Self.Module_top'Access;
+                     else
+                        the_Module := Self.demand_Module (+parent_module_Name);
+                     end if;
+
                      exit;
                   end;
 

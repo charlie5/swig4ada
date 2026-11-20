@@ -83,6 +83,14 @@ is
                end if;
             end loop;
 
+            for Each of the_Package.Parent.Types     -- A package cannot have the name of a type of its parent, either.
+            loop
+               if to_Lower (to_String (Each.Name)) = to_Lower (to_String (the_Package.ada_Name))
+               then
+                  return True;
+               end if;
+            end loop;
+
             return False;
          end is_Taken;
 
@@ -94,6 +102,52 @@ is
             the_Package.name_Suffix_is ("_" & ada.Strings.fixed.Trim (Count'Image, ada.Strings.Left));
          end loop;
       end make_Unique;
+
+
+
+      function unique_type_Name (the_Package : in ada_Package.view;   Name : in unbounded_String) return unbounded_String
+      --
+      --  C is case sensitive, so two types of a package may have names which differ only in case (such as 'uint64'
+      --  and 'UINT64'). The later one is suffixed.
+      --
+      is
+         use ada.Characters.handling;
+         use type ada_Package.view;
+
+         function is_Taken (the_Name : in unbounded_String) return Boolean
+         is
+         begin
+            for Each of the_Package.Types
+            loop
+               if to_Lower (to_String (Each.Name)) = to_Lower (to_String (the_Name))
+               then
+                  return True;
+               end if;
+            end loop;
+
+            for Each of Result.new_Packages     -- A type cannot have the name of a child package, either.
+            loop
+               if         Each.Parent = the_Package
+                 and then to_Lower (to_String (Each.ada_Name)) = to_Lower (to_String (the_Name))
+               then
+                  return True;
+               end if;
+            end loop;
+
+            return False;
+         end is_Taken;
+
+         the_Name : unbounded_String := Name;
+         Count    : Positive         := 1;
+      begin
+         while is_Taken (the_Name)
+         loop
+            Count    := Count + 1;
+            the_Name := Name & "_" & ada.Strings.fixed.Trim (Count'Image, ada.Strings.Left);
+         end loop;
+
+         return the_Name;
+      end unique_type_Name;
 
 
 
@@ -285,8 +339,8 @@ is
                            new_ada_Type : ada_Type.view;
                         begin
                            if        the_c_Type.ultimate_base_Type.c_type_Kind = c_type.c_Class     -- Also a typedef of a typedef of a class.
-                             or else (         the_c_Type.base_Type.c_type_Kind = c_type.type_Pointer
-                                      and then the_c_Type.base_Type            /= fetch_c_Type (+"void*"))
+                             or else (         the_c_Type.ultimate_base_Type.c_type_Kind = c_type.type_Pointer     -- Or of a pointer.
+                                      and then the_c_Type.ultimate_base_Type            /= fetch_c_Type (+"void*"))
                            then
                               declare
                                  new_ada_Package  : constant ada_package.view
@@ -346,7 +400,8 @@ is
 
                            else
                               new_ada_Type := ada_type.a_subtype.new_Subtype (Result.Package_top,
-                                                                              ada_Utility.to_ada_Identifier  (the_c_Type.Name),
+                                                                              unique_type_Name (Result.Package_top,
+                                                                                                ada_Utility.to_ada_Identifier (the_c_Type.Name)),
                                                                               c_type_Map_of_ada_type.Element (the_c_type.base_Type)).all'Access;
                               new_ada_Type.declaration_Package.add (new_ada_Type);
                            end if;
@@ -655,19 +710,27 @@ is
                                  end if;
 
                               else
+                                 declare
+                                    --  The array of a type is named after the Ada name of that type, which may differ from its C name.
+                                    --
+                                    array_Name : constant unbounded_String
+                                      := (if the_c_Type.Name = the_c_Type.element_Type.Name & "[]" then the_element_Type.Name & "_array"
+                                                                                                   else to_ada_Identifier (the_c_Type.Name));
+                                 begin
                                  if       the_element_Type.declaration_Package.is_Core
                                    or not From.new_c_Declarations.Contains (c_Declarable.view (the_c_Type.element_Type))
                                  then
                                     new_ada_Array := ada_Type.composite.an_array.new_Item (Result.Package_top,
-                                                                                           to_ada_Identifier (the_c_Type.Name),
+                                                                                           array_Name,
                                                                                            the_array_dimension_upper_Bounds => the_ada_array_Bounds,
                                                                                            element_type                     => the_element_Type);
                                  else
                                     new_ada_Array := ada_Type.composite.an_array.new_Item (the_element_Type.declaration_Package,
-                                                                                           to_ada_Identifier (the_c_Type.Name),
+                                                                                           array_Name,
                                                                                            the_array_dimension_upper_Bounds => the_ada_array_Bounds,
                                                                                            element_type                     => the_element_Type);
                                  end if;
+                                 end;
                               end if;
 
                               new_ada_Array.declaration_Package.add (new_ada_Array.all'Access);
@@ -917,8 +980,8 @@ is
                the_ada_Variable := Self.to_ada_Variable (the_c_Variable);
 
                if        the_c_Variable.my_Type.c_type_Kind = C_Class
-                 or else ada_Package.view (the_ada_Variable.my_Type.declaration_Package) = Result.Package_pointers           -- The top package cannot see
-                 or else ada_Package.view (the_ada_Variable.my_Type.declaration_Package) = Result.Package_pointer_pointers   -- its own child packages.
+                 or else (         ada_Package.view (the_ada_Variable.my_Type.declaration_Package)        /= Result.Package_top     -- The top package cannot see
+                          and then ada_Package.view (the_ada_Variable.my_Type.declaration_Package).Parent  = Result.Package_top)    -- its own child packages.
                  or else (         the_ada_Variable.is_Constant                                                              -- A constant pointer to a function
                           and then the_ada_Variable.my_Type.resolved_Type.all                                                -- has a function of the binding
                                    in ada_Type.elementary.an_access.to_subProgram.item'Class)                               -- package as its value.

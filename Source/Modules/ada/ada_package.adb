@@ -442,7 +442,8 @@ is
 
             -- Check return type.
             --
-            if the_Subprogram.return_Type.depends_on (Other, Depth + 1)
+            if        ada_Package.view (the_Subprogram.return_Type.resolved_Type.declaration_Package) = Other     -- A result of a type of the other
+              or else the_Subprogram.return_Type.depends_on (Other, Depth + 1)                                    -- package, as for a parameter.
             then
                return True;
             end if;

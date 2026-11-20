@@ -854,6 +854,12 @@ is
                   append (the_Source,
                           qualified_Name (ada_Type.elementary.an_access.to_type.view (Self.return_Type.resolved_Type).accessed_Type));
                end if;
+            elsif      Self.return_Type.resolved_Type.all in ada_Type.elementary.an_access.to_Type.item'Class
+              and then declaration_Package.Context.limited_Withs
+                         (ada_Type.elementary.an_access.to_Type.view (Self.return_Type.resolved_Type).accessed_Type.declaration_Package.all'Access)
+            then   -- Only a limited view of the package of the accessed type is had, in which its pointer type cannot be seen.
+               append (the_Source,
+                       "access " & qualified_Name (ada_Type.elementary.an_access.to_Type.view (Self.return_Type.resolved_Type).accessed_Type));
             else
                append (the_Source,
                        qualified_Name (Self.return_Type)); -- .resolved_Type));
@@ -1148,6 +1154,72 @@ is
       variable_Names : name_Maps.Map;     -- The Ada name of each variable in the package, keyed by its C name.
 
 
+      function accessed_Package (the_Type : in ada_Type.view) return ada_Package.view
+      --
+      --  The package of the type which a pointer type accesses, or null when 'the_Type' is not a pointer to a type.
+      --
+      is
+         the_resolved_Type : constant ada_Type.view := the_Type.resolved_Type;
+      begin
+         if         the_resolved_Type /= null
+           and then the_resolved_Type.all in ada_Type.elementary.an_access.to_Type.item'Class
+         then
+            return ada_Package.view (ada_Type.elementary.an_access.to_Type.view (the_resolved_Type).accessed_Type.declaration_Package);
+         else
+            return null;
+         end if;
+      end accessed_Package;
+
+
+
+      function is_mutually_dependent (the_Type : in ada_Type.view) return Boolean
+      --
+      --  True when 'the_Type' is a pointer to a type of another package, a subprogram of which has a parameter or result
+      --  of a type of this package. The two package specifications cannot both 'with' each other, so this package
+      --  uses a limited view of the other, which suffices for a pointer.
+      --
+      is
+         the_other_Package : constant ada_Package.view := accessed_Package (the_Type);
+
+         function is_of_this_Package (the_other_Type : in ada_Type.view) return Boolean
+         is
+         begin
+            return        accessed_Package (the_other_Type) = ada_Package.view (the_Package)
+                  or else (         the_other_Type.resolved_Type /= null
+                           and then ada_Package.view (the_other_Type.resolved_Type.declaration_Package) = ada_Package.view (the_Package));
+         end is_of_this_Package;
+
+      begin
+         if        the_other_Package  = null
+           or else the_other_Package  = ada_Package.view (the_Package)
+           or else the_other_Package.cpp_class_Type = null
+         then
+            return False;
+         end if;
+
+         for each_Subprogram of the_other_Package.Subprograms
+         loop
+            if         each_Subprogram.return_Type /= null
+              and then is_of_this_Package (each_Subprogram.return_Type)
+            then
+               return True;
+            end if;
+
+            for each_Parameter of each_Subprogram.Parameters
+            loop
+               if         each_Parameter.Name /= "Self"
+                 and then is_of_this_Package (each_Parameter.my_Type)
+               then
+                  return True;
+               end if;
+            end loop;
+         end loop;
+
+         return False;
+      end is_mutually_dependent;
+
+
+
       function is_unusable_Array (the_Type : in ada_Type.view) return Boolean
       --
       --  An array type cannot be declared when its element type is an abstract C++ class or is an
@@ -1306,6 +1378,11 @@ is
                   then
                      the_Context.add (ada_Type.elementary.an_Access.to_Type.view (the_Parameter.my_Type).accessed_Type,
                                       is_access => True);
+
+                  elsif is_mutually_dependent (the_Parameter.my_Type)
+                  then
+                     the_Context.add (ada_Type.elementary.an_Access.to_Type.view (the_Parameter.my_Type.resolved_Type).accessed_Type,
+                                      is_access => True);
                   else
                      the_Context.add (the_Parameter.my_Type,
                                       is_access => False);
@@ -1325,6 +1402,11 @@ is
                     and the_return_Type.qualified_Name /= "interfaces.c.strings.chars_ptr"
                   then
                      the_Context.add (ada_Type.elementary.an_access.to_type.view (the_Subprogram.return_Type).accessed_Type,
+                                      is_access => True);
+
+                  elsif is_mutually_dependent (the_return_Type)
+                  then
+                     the_Context.add (ada_Type.elementary.an_access.to_type.view (the_return_Type.resolved_Type).accessed_Type,
                                       is_access => True);
                   else
                      the_Context.add (the_Subprogram.return_Type,
@@ -1723,7 +1805,7 @@ is
 
                      if Element (the_variable.array_Bounds, Each) = -1
                      then
-                        append (spec_Source, "0 .. swig.indefinite_array_Last");
+                        append (spec_Source, "0 .. interfaces.C.size_t'Last");     -- The length of the C array is not known.
                      else
                         append (spec_Source, "0 .." & Natural'Image (Element (the_variable.array_Bounds, Each)));
                      end if;
@@ -1772,7 +1854,28 @@ is
                      replace_All (the_Variable.Value, "U", "");          -- todo: Do we need a 'u' replace also ?
                   end if;
 
-                  append (spec_Source,  " := " & the_Variable.Value);
+                  declare
+                     --  The size of a C type ('sizeof(int)') is given by the size of its Ada type.
+                     --
+                     the_Value   : constant String := to_String (the_Variable.Value);
+                     is_a_sizeof : constant Boolean :=          the_Value'Length > 8
+                                                       and then the_Value (the_Value'First .. the_Value'First + 6) = "sizeof("
+                                                       and then the_Value (the_Value'Last) = ')';
+                  begin
+                     if         is_a_sizeof
+                       and then the_ada_Lang.name_Map_of_c_type.contains (+the_Value (the_Value'First + 7 .. the_Value'Last - 1))
+                       and then the_ada_Lang.c_type_Map_of_ada_type.contains (the_ada_Lang.name_Map_of_c_type.Element
+                                                                                (+the_Value (the_Value'First + 7 .. the_Value'Last - 1)))
+                     then
+                        append (spec_Source,
+                                  " := "
+                                & the_ada_Lang.c_type_Map_of_ada_type.Element (the_ada_Lang.name_Map_of_c_type.Element
+                                                                                 (+the_Value (the_Value'First + 7 .. the_Value'Last - 1))).qualified_Name
+                                & "'Size / interfaces.C.char'Size");
+                     else
+                        append (spec_Source,  " := " & the_Variable.Value);
+                     end if;
+                  end;
                end if;
             end if;
 
