@@ -27,6 +27,7 @@ is
    type Views is array (Positive range <>) of View;
 
    type nameSpace_view is access all c_nameSpace.item'Class;
+   type Function_view  is access all c_Function .item'Class;
 
 
    --  Containers
@@ -267,13 +268,13 @@ is
    --  'function_Pointer' Attributes
    --
 
-   function accessed_Function  (Self : access Item) return access c_Function.item'Class;
+   function accessed_Function  (Self : access Item) return Function_view;
 
 
    --  'typedef_Function' Attributes
    --
 
-   function typed_Function  (Self : access Item) return access c_Function.item'Class;
+   function typed_Function  (Self : access Item) return Function_view;
 
 
    --  'Typedef' Attributes

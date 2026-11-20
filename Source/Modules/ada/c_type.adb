@@ -1303,10 +1303,10 @@ is
    --  function_Pointer Subprograms
    --
 
-   function accessed_Function  (Self : access Item) return access c_Function.item'Class
+   function accessed_Function  (Self : access Item) return Function_view
    is
    begin
-      return Self.my.accessed_Function;
+      return Function_view (Self.my.accessed_Function);
    end accessed_Function;
 
 
@@ -1315,10 +1315,10 @@ is
    --  typedef_Function Subprograms
    --
 
-   function typed_Function  (Self : access Item) return access c_Function.item'Class
+   function typed_Function  (Self : access Item) return Function_view
    is
    begin
-      return Self.my.typed_Function;
+      return Function_view (Self.my.typed_Function);
    end typed_Function;
 
 

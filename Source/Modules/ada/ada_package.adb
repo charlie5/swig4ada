@@ -90,7 +90,7 @@ is
 
 
 
-   function Parent (Self : access Item) return access Item
+   function Parent (Self : access Item) return View
    is
    begin
       return Self.a_Parent;
@@ -226,7 +226,7 @@ is
 
 
 
-   function Context (Self : access Item) return access ada_Context.item
+   function Context (Self : access Item) return ada_Context.view
    is
    begin
       return Self.Context'Access;

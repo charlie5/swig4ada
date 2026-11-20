@@ -60,7 +60,7 @@ is
    procedure Kind_is                    (Self : access Item;   Now : in a_Kind);
 
 
-   function  Parent                     (Self : access Item)     return access Item;
+   function  Parent                     (Self : access Item)     return View;
 
    function  has_Ancestor               (Self : access Item;   possible_Ancestor : access ada_Package.item'Class)
                                                                  return Boolean;
@@ -100,7 +100,7 @@ is
    --  The modeled cpp_class_Type for the c++ class which the 'Self' ada_Package models.
    --  Returns 'null' when 'Self' does not model a c++ class.
 
-   function Context                     (Self : access Item) return access ada_Context.item;
+   function Context                     (Self : access Item) return ada_Context.view;
    function Subprograms                 (Self : access Item) return ada_subprogram.Vector;
    function Variables                   (Self : access Item) return ada_variable.Vector;
    function Types                       (Self : access Item) return ada_type.Vector;

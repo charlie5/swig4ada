@@ -18,6 +18,7 @@ is
    use ada.Strings.unbounded;
 
    type Item is tagged private;
+   type View is access all Item;
 
    --  Forge
    --

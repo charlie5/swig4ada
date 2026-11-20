@@ -59,7 +59,7 @@ is
    function  Kind           (Self : access Item)     return a_Kind;
    procedure Kind_is        (Self : access Item;   Now : in a_Kind);
 
-   function  Parent         (Self : access Item) return access Item;
+   function  Parent         (Self : access Item) return View;
 
    function  has_Ancestor   (Self : access Item;   possible_Ancestor : access c_Namespace.item'Class) return Boolean;
 

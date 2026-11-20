@@ -95,7 +95,7 @@ is
 
 
 
-   function Parent (Self : access Item) return access Item
+   function Parent (Self : access Item) return View
    is
    begin
       return Self.a_Parent;
