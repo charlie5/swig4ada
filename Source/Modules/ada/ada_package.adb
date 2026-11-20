@@ -66,7 +66,7 @@ is
    end Name;
 
 
-   function qualified_Name (Self : access Item) return unbounded_String
+   function ada_Name (Self : access Item) return unbounded_String
    is
    begin
       if Self.Name = "standard"
@@ -84,7 +84,38 @@ is
          end if;
 
       else
-         return Self.Parent.qualified_Name & "." & Self.Name;
+         --  A package with the name of the module (such as that of a class named after its module) would hide the
+         --  module within itself and its children, where no other package of the module could then be named.
+         --
+         declare
+            the_Module : access Item := Self.Parent;
+         begin
+            while the_Module.Parent.Name /= "standard"
+            loop
+               the_Module := the_Module.Parent;
+            end loop;
+
+            if to_Lower (to_String (Self.Name)) = to_Lower (to_String (the_Module.Name))
+            then
+               return "c_" & Self.Name;     -- Prevent clash.
+            else
+               return Self.Name;
+            end if;
+         end;
+      end if;
+   end ada_Name;
+
+
+
+   function qualified_Name (Self : access Item) return unbounded_String
+   is
+   begin
+      if        Self.Name        = "standard"
+        or else Self.Parent.Name = "standard"
+      then
+         return Self.ada_Name;
+      else
+         return Self.Parent.qualified_Name & "." & Self.ada_Name;
       end if;
    end qualified_Name;
 

@@ -136,7 +136,7 @@ is
                   append (the_Source,  NL & "                and ");
                end if;
 
-               append (the_Source,  Element (Cursor).declaration_package.Name & ".item");
+               append (the_Source,  Element (Cursor).declaration_package.ada_Name & ".item");
                next   (Cursor);
             end loop;
          end;
@@ -270,7 +270,7 @@ is
                   append (the_Source,  NL & "                and ");
                end if;
 
-               append (the_Source,  Element (Cursor).declaration_package.Name & ".item");
+               append (the_Source,  Element (Cursor).declaration_package.ada_Name & ".item");
                next   (Cursor);
             end loop;
          end;
@@ -1881,7 +1881,7 @@ is
 --                    log ("emit to view conversion subprog: '" & the_Subprogram.Name & "'");
                   declare
                      class_Type : constant ada_Type.view :=  the_Subprogram.return_Type;
-                     class_Name : constant String        := +class_Type.declaration_Package.Name;
+                     class_Name : constant String        := +class_Type.declaration_Package.ada_Name;
                   begin
                      append (spec_Source,  "   function to_View    (Self : in " & class_Name & "_Pointer) return " & class_Name & ".view;" & NL);
                   end;
@@ -1891,7 +1891,7 @@ is
 --                    log ("emit to pointer conversion subprog: '" & the_Subprogram.Name & "'");
                   declare
                      class_Type : constant ada_Type.view :=  the_Subprogram.Parameters.Element (1).my_Type;
-                     class_Name : constant String        := +class_Type.declaration_Package.Name;
+                     class_Name : constant String        := +class_Type.declaration_Package.ada_Name;
                   begin
                      append (spec_Source,  "   function to_Pointer (Self : in " & class_Name & ".view)    return " & class_Name & "_Pointer;" & NL);
                   end;

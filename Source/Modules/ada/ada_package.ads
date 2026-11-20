@@ -62,6 +62,11 @@ is
 
    function  Parent                     (Self : access Item)     return View;
 
+   function  ada_Name                   (Self : access Item)     return unbounded_String;
+   --
+   --  The simple name of the package in the generated Ada source, which is prefixed where the C name would clash.
+
+
    function  has_Ancestor               (Self : access Item;   possible_Ancestor : access ada_Package.item'Class)
                                                                  return Boolean;
    function  Name                       (Self : access Item)     return unbounded_String;
