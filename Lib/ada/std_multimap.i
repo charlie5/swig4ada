@@ -10,7 +10,7 @@
 
 namespace std {
 
-    template<class K, class T, class C = std::less<K> > class multimap {
+    template<class K, class T, class Compare = std::less<K> > class multimap {
       public:
         // The data members are those of the GNU libstdc++ implementation, so that
         // the Ada record has the layout of the C++ object.

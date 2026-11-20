@@ -37,7 +37,6 @@ namespace std {
         void pop_back();
         const_reference front() const;
         const_reference back() const;
-        void remove(const value_type& x);
         void reverse();
     };
 }

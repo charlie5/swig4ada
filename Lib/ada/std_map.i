@@ -23,7 +23,7 @@
 
 namespace std {
 
-    template<class K, class T, class C = std::less<K> > class map {
+    template<class K, class T, class Compare = std::less<K> > class map {
         // add typemaps here
       public:
 
@@ -36,14 +36,14 @@ namespace std {
 
 
         map();
-        map(const map<K,T> &);
+        map(const map& other);
         
         unsigned int size() const;
         bool empty() const;
         void clear();
         %extend {
             T& get(const K& key) throw (std::out_of_range) {
-                std::map<K,T >::iterator i = self->find(key);
+                typename std::map<K,T,Compare >::iterator i = self->find(key);
                 if (i != self->end())
                     return i->second;
                 else
@@ -53,14 +53,14 @@ namespace std {
                 (*self)[key] = x;
             }
             void del(const K& key) throw (std::out_of_range) {
-                std::map<K,T >::iterator i = self->find(key);
+                typename std::map<K,T,Compare >::iterator i = self->find(key);
                 if (i != self->end())
                     self->erase(i);
                 else
                     throw std::out_of_range("key not found");
             }
             bool has_key(const K& key) {
-                std::map<K,T >::iterator i = self->find(key);
+                typename std::map<K,T,Compare >::iterator i = self->find(key);
                 return i != self->end();
             }
         }

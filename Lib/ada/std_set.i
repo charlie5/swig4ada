@@ -10,7 +10,7 @@
 
 namespace std {
 
-    template<class T, class C = std::less<T> > class set {
+    template<class T, class Compare = std::less<T> > class set {
       public:
         // The data members are those of the GNU libstdc++ implementation, so that
         // the Ada record has the layout of the C++ object.
