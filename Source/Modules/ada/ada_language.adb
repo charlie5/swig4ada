@@ -1349,6 +1349,16 @@ is
       begin
          dlog ("value_Text => '" & value_Text & "'");
 
+         if        (         Index (value_Text, "&")  = 1
+                    and then Index (value_Text, "::") > 0)
+           or else Index (String'(+DOH_Pointer (the_swigType)), "m(") = 1
+         then   -- A pointer to a member of a class, for which Ada has no counterpart.
+            log ("Warning: unable to bind the constant '" & the_Name & "', as its value is a pointer to a class member.");
+            unindent_Log;
+
+            return SWIG_OK;
+         end if;
+
          if not (        new_c_Constant.my_Type.qualified_Name = "Character"
                  or else new_c_Constant.my_Type.qualified_Name = "char*")
          then   -- Is numeric.

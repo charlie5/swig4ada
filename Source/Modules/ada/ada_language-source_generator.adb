@@ -1227,7 +1227,18 @@ is
       --
       is
       begin
-         if the_Type.all in subType_class
+         if         the_Type.all in subType_class
+           and then subType_view (the_Type).base_Type.all in ic_Pointer_class
+         then   -- Nor can a pointer to an unconstrained array, 'interfaces.C.Pointers' requiring a definite element.
+            declare
+               the_accessed_Type : constant ada_Type.view := ic_Pointer_view (subType_view (the_Type).base_Type).accessed_Type;
+            begin
+               return        (         the_accessed_Type.all in an_Array_class
+                              and then an_Array_view (the_accessed_Type).is_Unconstrained)
+                     or else is_unusable_Array (the_accessed_Type);
+            end;
+
+         elsif the_Type.all in subType_class
          then
             return is_unusable_Array (subType_view (the_Type).base_Type);
 
@@ -1239,7 +1250,8 @@ is
                return        (         the_element_Type.resolved_Type.all in a_Record_class
                               and then a_Record_view (the_element_Type.resolved_Type).is_Abstract)
                      or else (         the_element_Type.all in an_Array_class
-                              and then an_Array_view (the_element_Type).is_Unconstrained);
+                              and then an_Array_view (the_element_Type).is_Unconstrained)
+                     or else is_unusable_Array (the_element_Type);
             end;
          end if;
 
@@ -1872,6 +1884,11 @@ is
                                 & the_ada_Lang.c_type_Map_of_ada_type.Element (the_ada_Lang.name_Map_of_c_type.Element
                                                                                  (+the_Value (the_Value'First + 7 .. the_Value'Last - 1))).qualified_Name
                                 & "'Size / interfaces.C.char'Size");
+                     elsif      the_Variable.my_Type.resolved_Type.all in ada_Type.elementary.scalar.discrete.enumeration.item'Class
+                       and then the_Value'Length > 0
+                       and then (for all Each of the_Value => Each in '0' .. '9')
+                     then   -- A constant of an enumeration type, whose value is known by its representation.
+                        append (spec_Source,  " := " & the_Variable.my_Type.qualified_Name & "'Enum_Val (" & the_Value & ")");
                      else
                         append (spec_Source,  " := " & the_Variable.Value);
                      end if;

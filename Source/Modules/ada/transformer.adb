@@ -346,12 +346,30 @@ is
                         dlog ("adding typedef: '" & the_c_Type.Name & "'      base_Type: '" & the_c_type.base_Type.Name & "'");
 
                         declare
+                           use type ada_Package.view;
                            new_ada_Type : ada_Type.view;
+
+                           base_Package : constant ada_Package.view
+                             := ada_Package.view (c_type_Map_of_ada_type.Element (the_c_Type.base_Type).declaration_Package);
                         begin
-                           if        the_c_Type.ultimate_base_Type.c_type_Kind = c_type.c_Class     -- Also a typedef of a typedef of a class.
+                           if         the_c_Type.ultimate_base_Type.c_type_Kind /= c_type.c_Class
+                             and then the_c_Type.ultimate_base_Type.c_type_Kind /= c_type.type_Pointer
+                             and then base_Package /= Result.Package_top
+                             and then c_namespace_Map_of_ada_Package.contains (c_nameSpace.view (the_c_Type.nameSpace))
+                             and then c_namespace_Map_of_ada_Package.Element  (c_nameSpace.view (the_c_Type.nameSpace)) = base_Package
+                           then   -- A typedef declared in a class, of a type of that class (such as one of its enumerations), is declared with it.
+                              new_ada_Type := ada_type.a_subtype.new_Subtype (base_Package,
+                                                                              unique_type_Name (base_Package,
+                                                                                                ada_Utility.to_ada_Identifier (the_c_Type.Name)),
+                                                                              c_type_Map_of_ada_type.Element (the_c_type.base_Type)).all'Access;
+                              new_ada_Type.declaration_Package.add (new_ada_Type);
+
+                           elsif     the_c_Type.ultimate_base_Type.c_type_Kind = c_type.c_Class     -- Also a typedef of a typedef of a class.
                              or else (         the_c_Type.ultimate_base_Type.c_type_Kind = c_type.type_Pointer     -- Or of a pointer.
                                       and then the_c_Type.ultimate_base_Type            /= fetch_c_Type (+"void*"))
-                           then
+                             or else (         ada_Package.view (c_type_Map_of_ada_type.Element (the_c_Type.base_Type).declaration_Package)        /= Result.Package_top     -- Or of a type declared in a child package
+                                      and then ada_Package.view (c_type_Map_of_ada_type.Element (the_c_Type.base_Type).declaration_Package).Parent  = Result.Package_top)    -- (an enumeration of a class), which the top
+                           then                                                                                                                                              -- package cannot see.
                               declare
                                  new_ada_Package  : constant ada_package.view
                                    := ada_Package.new_ada_Package (name   => to_String (ada_Utility.to_ada_Identifier (the_c_Type.Name)),
@@ -495,13 +513,17 @@ is
 
                         declare
                            use DOHs.Pointers;
+                           use type ada_Package.view;
                            the_ada_subProgram : constant ada_subProgram.view := Self.to_ada_subProgram (the_c_type.accessed_Function.all'Access);
                            the_type_Name      : constant unbounded_String    := to_ada_Identifier (Self.to_descriptor (DOH_Pointer (to_Doh (+the_c_type.Name))));
                            new_ada_Type       :          ada_Type.view;
                         begin
                            the_ada_subProgram.Parameters := Self.to_ada_Parameters (the_c_type.accessed_Function.Parameters);
 
-                           if the_ada_subProgram.depends_on_any_pointer
+                           if        the_ada_subProgram.depends_on_any_pointer
+                             or else (for some Each of the_ada_subProgram.required_Types                                            -- A type declared in a child package (a class)
+                                      =>       ada_Package.view (Each.declaration_Package)        /= Result.Package_top             -- cannot be seen by the top package.
+                                      and then ada_Package.view (Each.declaration_Package).Parent  = Result.Package_top)
                            then
                               declare
                                  new_ada_Package  : constant ada_package.view := ada_Package.new_ada_Package (name   => to_String (to_ada_Identifier (the_c_Type.Name)),
