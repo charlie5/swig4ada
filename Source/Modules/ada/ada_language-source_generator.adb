@@ -21,6 +21,8 @@ with a_Namespace,
 
      ada.Strings.Maps.constants,
      ada.Characters.handling,
+     ada.Containers.indefinite_hashed_Maps,
+     ada.Strings.unbounded.Hash,
      ada.Exceptions,
      ada.Text_IO,
      ada.unchecked_Conversion;
@@ -1133,6 +1135,38 @@ is
       spec_Source         : aliased  unbounded_String;
       spec_Source_private : aliased  unbounded_String;
 
+      package name_Maps is new ada.Containers.indefinite_hashed_Maps (Key_type        => unbounded_String,
+                                                                      Element_type    => String,
+                                                                      Hash            => ada.Strings.unbounded.Hash,
+                                                                      equivalent_Keys => "=");
+      variable_Names : name_Maps.Map;     -- The Ada name of each variable in the package, keyed by its C name.
+
+
+      function ada_Name_of (the_Variable : in ada_Variable.view) return String
+      --
+      --  C is case sensitive, so a variable may differ only in case from an enumeration literal
+      --  declared in the same package (such as 'enum E {slap} Slap;'). The variable is then prefixed.
+      --
+      is
+         the_Name : constant String := to_String (to_ada_Identifier (the_Variable.Name));
+      begin
+         for each_Type of all_Types
+         loop
+            if each_Type.all in ada_Type.elementary.scalar.discrete.enumeration.item'Class
+            then
+               for each_Literal of ada_Type.elementary.scalar.discrete.enumeration.view (each_Type).Literals
+               loop
+                  if to_Lower (to_String (each_Literal.Name)) = to_Lower (the_Name)
+                  then
+                     return "the_" & the_Name;
+                  end if;
+               end loop;
+            end if;
+         end loop;
+
+         return the_Name;
+      end ada_Name_of;
+
       use_of_iC_Int_type_Required                 : Boolean  := False;     -- 'use type interfaces.c.Int;' is required for variables with explicit signed values.
       use_of_iC_signed_Char_type_Required         : Boolean  := False;     -- ditto
       use_of_iC_unsigned_Char_type_Required       : Boolean  := False;     -- ditto
@@ -1584,9 +1618,11 @@ is
             use ada_Variable.array_bounds_Vectors;
             the_Variable : constant ada_Variable.view := Element (all_Variables,  Each);
          begin
+            variable_Names.include (the_Variable.Name, ada_Name_of (the_Variable));
+
             verify (the_Variable);
 
-            append (spec_Source,  NL & "   " & to_ada_Identifier (the_variable.Name) & " : ");
+            append (spec_Source,  NL & "   " & variable_Names.Element (the_Variable.Name) & " : ");
 
             if         the_Variable.is_Constant
               and then the_Variable.my_Type = the_ada_Lang.name_Map_of_ada_Type.Element (+"interfaces.c.int")
@@ -1730,7 +1766,7 @@ is
 
                begin
                   append (spec_Source_private,   NL & "   pragma import (" & import_Convention & ", "
-                                               & to_ada_Identifier (the_variable.Name)
+                                               & variable_Names.Element (the_Variable.Name)
                                                & ", """ & link_Symbol & """);");
                end emit_import_Pragma;
             end if;

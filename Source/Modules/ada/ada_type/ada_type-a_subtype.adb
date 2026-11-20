@@ -1,4 +1,6 @@
 with
+     ada_Type.elementary.an_access.to_type.interfaces_c_pointer,
+     ada_Type.composite.an_array,
      ada_Package;
 
 
@@ -44,8 +46,18 @@ is
    function  depends_directly_on (Self : access Item;   a_Type : in ada_Type.view;
                                                         Depth  : in Natural) return Boolean
    is
-      pragma Unreferenced (Depth);
+      use ada_Type.elementary.an_access.to_type;
    begin
+      if Self.base_Type.all in interfaces_c_pointer.item'Class
+      then   -- The subtype is declared along with an instantiation of 'interfaces.C.Pointers',
+             -- which needs the accessed type and its array type to be declared beforehand.
+         return        Self.base_Type.all'Access = a_Type
+               or else Self.base_Type.depends_directly_on (a_Type, Depth)
+               or else (         a_Type.all in ada_Type.composite.an_array.item'Class                          -- The array type of the
+                        and then    ada_Type.composite.an_array.view (a_Type).element_Type                     -- accessed type.
+                                  = interfaces_c_pointer.view (Self.base_Type).accessed_Type);
+      end if;
+
       return Self.base_Type.all'Access = a_Type;
    end depends_directly_on;
 

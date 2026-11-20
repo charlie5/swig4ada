@@ -673,13 +673,16 @@ is
          loop
             declare
                use c_type;
+               use type ada_Package.view;
 
                the_c_Variable   : constant c_Variable.view := Element (Cursor);
                the_ada_Variable :          ada_Variable.view;
             begin
                the_ada_Variable := Self.to_ada_Variable (the_c_Variable);
 
-               if the_c_Variable.my_Type.c_type_Kind = C_Class
+               if        the_c_Variable.my_Type.c_type_Kind = C_Class
+                 or else ada_Package.view (the_ada_Variable.my_Type.declaration_Package) = Result.Package_pointers           -- The top package cannot see
+                 or else ada_Package.view (the_ada_Variable.my_Type.declaration_Package) = Result.Package_pointer_pointers   -- its own child packages.
                then
                   Result.Package_binding.add (the_ada_Variable);
                else
