@@ -3,6 +3,7 @@ with
 
      ada_type.a_Subtype,
      ada_Type.elementary.scalar.discrete.enumeration,
+     ada_Type.elementary.scalar.real,
      ada_Type.elementary.an_access.to_type.interfaces_c_pointer,
      ada_Type.elementary.an_access.to_subProgram,
      ada_Type.composite.an_array,
@@ -110,6 +111,12 @@ is
 
       if not is_Empty (base_Classes)
       then
+         if         Self.is_Abstract
+           and then not Self.is_interface_Type
+         then   -- Has a pure virtual function of its own, or does not implement one which it inherits.
+            append (the_Source,  "abstract ");
+         end if;
+
          if Self.is_Limited
          then
             append (the_Source,  "limited ");
@@ -144,7 +151,7 @@ is
 
          elsif Self.virtual_member_function_Count > 0
          then
-            if Self.pure_virtual_member_function_Count > 0
+            if Self.is_Abstract
             then
                append (the_Source,  " abstract");
             end if;
@@ -235,6 +242,12 @@ is
 
       if not is_Empty (base_Classes)
       then
+         if         Self.is_Abstract
+           and then not Self.is_interface_Type
+         then   -- Has a pure virtual function of its own, or does not implement one which it inherits.
+            append (the_Source,  "abstract ");
+         end if;
+
          if Self.is_Limited
          then
             append (the_Source,  "limited ");
@@ -266,7 +279,7 @@ is
 
          elsif Self.virtual_member_function_Count > 0
          then
-            if Self.pure_virtual_member_function_Count > 0
+            if Self.is_Abstract
             then
                append (the_Source,  " abstract");
             end if;
@@ -983,6 +996,12 @@ is
                   elsif resolved_Type.qualified_Name = "system.Address"
                   then   -- Such as opaque structs and incomplete classes.
                      default_Terminator := +"system.null_Address";
+                  elsif resolved_Type.all in ada_Type.composite.an_array.item'Class
+                  then
+                     default_Terminator := +"[others => <>]";
+                  elsif resolved_Type.all in ada_Type.elementary.scalar.real.item'Class
+                  then
+                     default_Terminator := +"0.0";
                   else
                      default_Terminator := +"0";
                   end if;
@@ -1511,7 +1530,7 @@ is
 
             if not (          the_Type.all in an_array_class                                                                                  -- Ignore any array types whose
                     and then (        (         an_array_view (the_Type).element_Type.all in a_Record_class                                   -- element type is a C class and which
-                                       and then a_record_view (an_array_view (the_Type).element_Type).pure_virtual_member_function_Count > 0) -- is abstract, or whose
+                                       and then a_record_view (an_array_view (the_Type).element_Type).is_Abstract) -- is abstract, or whose
                               or else (         an_array_view (the_Type).element_Type.all in an_Array_class                                   -- element type is an array, which
                                        and then an_array_view (an_array_view (the_Type).element_Type).is_Unconstrained)))                     -- is unconstrained.
             then
@@ -1716,6 +1735,52 @@ is
       end loop;
 
 
+      emit_ic_pointer_Types :
+      declare
+         the_Type : ada_Type.view;
+      begin
+         for Each in 1 .. Natural (Length (ic_pointer_Types))
+         loop
+            the_Type := Element (ic_pointer_Types,  Each);
+
+            declare
+               subtype an_Array_view  is ada_Type.composite.an_array.view;
+               subtype an_Array_class is ada_Type.composite.an_array.item'Class;
+
+               subtype a_Record_view  is ada_Type.composite.a_record.view;
+               subtype a_Record_class is ada_Type.composite.a_record.item'Class;
+            begin
+               if not (          the_Type.all in an_array_class                                                                                  -- Ignore any array types whose
+                       and then (        (         an_array_view (the_Type).element_Type.all in a_record_class                                   -- element type is a C class and which
+                                          and then a_record_view (an_array_view (the_Type).element_Type).is_Abstract) -- is abstract, or whose
+                                 or else (         an_array_view (the_Type).element_Type.all in an_array_class                                   -- element type is an array, which
+                                          and then an_array_view (an_array_view (the_Type).element_Type).is_Unconstrained)))                     -- is unconstrained.
+               then
+                  if not (        Tail (the_Type.Name, 5) = "_view"
+                          or else Tail (the_Type.Name, 6) = "_array"
+                          or else the_Type.all in ic_Pointer_Class)
+                  then
+                     append (spec_Source, "   -- " & the_Type.Name & NL);
+                     append (spec_Source, "   -- "                 & NL);
+                  end if;
+
+                  append (spec_Source,  declaration_Text (the_Type, the_ada_Lang) & NL & NL);
+
+                  declare
+                     the_representation_Text : constant String := representation_Text (the_Type);
+                  begin
+                     if the_representation_Text /= ""
+                     then
+                        append (spec_Source_private,  the_representation_Text & NL & NL & NL);
+                     end if;
+                  end;
+               end if;
+            end;
+
+         end loop;
+      end emit_ic_pointer_Types;
+
+
       emit_Subprograms :
       declare
          functions_Namespace : a_Namespace.item;
@@ -1759,6 +1824,14 @@ is
                      the_Name             : constant a_namespace.Name_view := functions_Namespace.fetch_Name (the_Subprogram.Name);
                      is_overloaded        : constant Boolean               := the_Name.overload_Count > 1   and then   not the_Subprogram.is_Abstract;
                      unique_function_Name :          unbounded_String;
+
+                     --  A uniquely named twin of an overload would be a further primitive of a virtual class, and so take
+                     --  a slot of its own in the C++ vtable. An import pragma cannot be used either, as it applies to all
+                     --  prior overloads. An aspect applies to its own declaration only.
+                     --
+                     imported_by_Aspect   : constant Boolean               :=          is_overloaded
+                                                                              and then the_Package.models_a_virtual_cpp_Class
+                                                                              and then not the_Subprogram.is_Constructor;
                   begin
                      if         the_Subprogram.access_Mode /= ada_subProgram.private_Access
                        and not (         the_Subprogram.is_Destructor
@@ -1777,6 +1850,17 @@ is
                                                                     using_name          => the_Subprogram.Name,
                                                                     namespace_Prefix    => null_unbounded_String,
                                                                     the_ada_Lang       => the_ada_Lang));
+                        if imported_by_Aspect
+                        then
+                           if the_Package.models_an_interface_Type
+                           then
+                              append (spec_Source,  NL & "     with Convention => CPP");
+                           else
+                              append (spec_Source,  NL & "     with Import, Convention => CPP, External_Name => """
+                                                       & the_Subprogram.member_function_link_Symbol_for (in_cpp_Mode) & """");
+                           end if;
+                        end if;
+
                         append (spec_Source,  ";");
 
                         declare
@@ -1797,6 +1881,10 @@ is
                                       the_Subprogram.pragma_CPP_Constructor_Source (declaration_package  => the_Package.all'Access,
                                                                                     unique_function_name => the_Subprogram.Name,
                                                                                     in_cpp_Mode          => in_cpp_Mode));
+                           elsif imported_by_Aspect
+                           then
+                              null;
+
                            elsif is_overloaded
                            then
                               append (the_Source.all,
@@ -1828,52 +1916,6 @@ is
 
          append (spec_Source,   NL & NL & NL & NL);
       end emit_Subprograms;
-
-
-      emit_ic_pointer_Types :
-      declare
-         the_Type : ada_Type.view;
-      begin
-         for Each in 1 .. Natural (Length (ic_pointer_Types))
-         loop
-            the_Type := Element (ic_pointer_Types,  Each);
-
-            declare
-               subtype an_Array_view  is ada_Type.composite.an_array.view;
-               subtype an_Array_class is ada_Type.composite.an_array.item'Class;
-
-               subtype a_Record_view  is ada_Type.composite.a_record.view;
-               subtype a_Record_class is ada_Type.composite.a_record.item'Class;
-            begin
-               if not (          the_Type.all in an_array_class                                                                                  -- Ignore any array types whose
-                       and then (        (         an_array_view (the_Type).element_Type.all in a_record_class                                   -- element type is a C class and which
-                                          and then a_record_view (an_array_view (the_Type).element_Type).pure_virtual_member_function_Count > 0) -- is abstract, or whose
-                                 or else (         an_array_view (the_Type).element_Type.all in an_array_class                                   -- element type is an array, which
-                                          and then an_array_view (an_array_view (the_Type).element_Type).is_Unconstrained)))                     -- is unconstrained.
-               then
-                  if not (        Tail (the_Type.Name, 5) = "_view"
-                          or else Tail (the_Type.Name, 6) = "_array"
-                          or else the_Type.all in ic_Pointer_Class)
-                  then
-                     append (spec_Source, "   -- " & the_Type.Name & NL);
-                     append (spec_Source, "   -- "                 & NL);
-                  end if;
-
-                  append (spec_Source,  declaration_Text (the_Type, the_ada_Lang) & NL & NL);
-
-                  declare
-                     the_representation_Text : constant String := representation_Text (the_Type);
-                  begin
-                     if the_representation_Text /= ""
-                     then
-                        append (spec_Source_private,  the_representation_Text & NL & NL & NL);
-                     end if;
-                  end;
-               end if;
-            end;
-
-         end loop;
-      end emit_ic_pointer_Types;
 
 
       if             the_Package.models_a_virtual_cpp_Class

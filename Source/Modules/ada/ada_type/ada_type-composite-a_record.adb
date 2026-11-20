@@ -350,10 +350,65 @@ is
    end is_Virtual;
 
 
+   function unimplemented_pure_virtual_Functions (Self : access Item) return ada_Subprogram.Vector
+   --
+   --  The pure virtual functions of the class, and those of its base classes which the class does not implement.
+   --
+   is
+      use ada_Subprogram.Vectors,
+          ada_Type      .Vectors;
+      use type ada.Containers.Count_type;
+
+      own_Subprograms : constant ada_Subprogram.Vector := Self.declaration_Package.Subprograms;
+      the_Functions   :          ada_Subprogram.Vector;
+
+      function is_implemented (the_Function : in ada_Subprogram.view) return Boolean
+      is
+      begin
+         for Each of own_Subprograms
+         loop
+            if          Each.Name                 = the_Function.Name
+              and then  Each.Parameters.Length    = the_Function.Parameters.Length
+              and then  Each.is_Virtual
+              and then  not Each.is_Abstract
+            then
+               return True;
+            end if;
+         end loop;
+
+         return False;
+      end is_implemented;
+
+   begin
+      for Each of own_Subprograms
+      loop
+         if          Each.is_Virtual
+            and then Each.is_Abstract
+         then
+            the_Functions.append (Each);
+         end if;
+      end loop;
+
+      for each_Base of Self.base_Classes
+      loop
+         for Each of ada_Type.composite.a_record.view (each_Base).unimplemented_pure_virtual_Functions
+         loop
+            if not is_implemented (Each)
+            then
+               the_Functions.append (Each);
+            end if;
+         end loop;
+      end loop;
+
+      return the_Functions;
+   end unimplemented_pure_virtual_Functions;
+
+
+
    function is_Abstract (Self : access Item) return Boolean
    is
    begin
-      return pure_virtual_member_function_Count (Self) > 0;
+      return not unimplemented_pure_virtual_Functions (Self).is_Empty;
    end is_Abstract;
 
 
