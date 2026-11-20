@@ -712,6 +712,9 @@ is
                if        the_c_Variable.my_Type.c_type_Kind = C_Class
                  or else ada_Package.view (the_ada_Variable.my_Type.declaration_Package) = Result.Package_pointers           -- The top package cannot see
                  or else ada_Package.view (the_ada_Variable.my_Type.declaration_Package) = Result.Package_pointer_pointers   -- its own child packages.
+                 or else (         the_ada_Variable.is_Constant                                                              -- A constant pointer to a function
+                          and then the_ada_Variable.my_Type.resolved_Type.all                                                -- has a function of the binding
+                                   in ada_Type.elementary.an_access.to_subProgram.item'Class)                               -- package as its value.
                then
                   Result.Package_binding.add (the_ada_Variable);
                else

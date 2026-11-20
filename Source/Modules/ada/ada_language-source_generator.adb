@@ -1134,6 +1134,7 @@ is
 
       spec_Source         : aliased  unbounded_String;
       spec_Source_private : aliased  unbounded_String;
+      spec_Source_final   :          unbounded_String;     -- Placed at the end of the private part, after the import pragmas.
 
       package name_Maps is new ada.Containers.indefinite_hashed_Maps (Key_type        => unbounded_String,
                                                                       Element_type    => String,
@@ -1144,12 +1145,20 @@ is
 
       function ada_Name_of (the_Variable : in ada_Variable.view) return String
       --
-      --  C is case sensitive, so a variable may differ only in case from an enumeration literal
+      --  C is case sensitive, so a variable may differ only in case from an enumeration literal or a function
       --  declared in the same package (such as 'enum E {slap} Slap;'). The variable is then prefixed.
       --
       is
          the_Name : constant String := to_String (to_ada_Identifier (the_Variable.Name));
       begin
+         for each_Subprogram of all_Subprograms
+         loop
+            if to_Lower (to_String (each_Subprogram.Name)) = to_Lower (the_Name)
+            then
+               return "the_" & the_Name;
+            end if;
+         end loop;
+
          for each_Type of all_Types
          loop
             if each_Type.all in ada_Type.elementary.scalar.discrete.enumeration.item'Class
@@ -1696,7 +1705,16 @@ is
             end if;
 
 
-            if the_Variable.is_Constant
+            if         the_Variable.is_Constant
+              and then the_Variable.Value /= ""
+              and then the_Variable.my_Type.resolved_Type.all in ada_Type.elementary.an_access.to_subProgram.item'Class
+            then   -- The value is a function of the package. Taking its access freezes the function, which must not occur
+                   -- before its import pragma, so the constant is deferred and completed at the end of the private part.
+               append (spec_Source_final,    NL & "   " & variable_Names.Element (the_Variable.Name)
+                                           & " : aliased constant " & the_Variable.my_Type.qualified_Name
+                                           & " := " & to_ada_Identifier (the_Variable.Value) & "'Access;" & NL);
+
+            elsif the_Variable.is_Constant
             then
                if the_Variable.my_Type.resolved_Type.qualified_Name = "interfaces.c.strings.chars_ptr"
                then
@@ -1963,6 +1981,8 @@ is
       then
          append (spec_Source_private,   NL & NL & NL & "   package conversions is new System.Address_To_Access_Conversions (Item);" &  NL);
       end if;
+
+      append (spec_Source_private, spec_Source_final);
 
       if spec_Source_private /= ""
       then
