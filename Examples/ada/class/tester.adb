@@ -5,6 +5,9 @@ with class_example.Shape;        use  class_example.Shape;
 with class_example.Circle;       use  class_example.Circle;
 with class_example.Square;       use  class_example.Square;
 
+with class_example.Circle.Guards;
+with class_example.Square.Guards;
+
 with interfaces.C; use interfaces.C;
 with ada.text_IO;  use  ada.text_IO;
 
@@ -21,6 +24,12 @@ begin
    declare
       the_Square : aliased Square.item := construct (5.0);
       the_Circle : aliased Circle.item; -- := construct;
+
+      -- A C++ destructor is not called when its object leaves scope, so each object is given a guard,
+      -- which calls the destructor when the guard itself leaves scope.
+      --
+      the_square_Guard : Square.Guards.Guard (the_Square'Access) with Unreferenced;
+      the_circle_Guard : Circle.Guards.Guard (the_Circle'Access) with Unreferenced;
       --the_Circle2 : aliased Circle.item;
       --the_Circle3 : aliased Circle.item;
 --      the_Square : aliased Square.item'Class := construct (10.0);
@@ -77,7 +86,7 @@ begin
 --        destruct (the_Square);
    end;
    --
-   -- note: end of scope causes auto-destruction of the_Circle and the_Square.
+   -- note: end of scope causes destruction of the_Circle and the_Square, by way of their guards.
 
 --     put_Line (int'Image (shape.nshapes) & " shapes remain.");
 

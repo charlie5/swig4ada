@@ -4,7 +4,8 @@ project Test_Example is
    for Main use ("tester.adb");
    Prefix := external ("PREFIX", "");
 
-   for Exec_Dir   use ".";
+   for Source_Dirs use (".", "../../..");
+   for Exec_Dir    use ".";
    for Object_Dir use "build";
 
    package Linker is
