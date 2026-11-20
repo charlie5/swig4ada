@@ -133,7 +133,7 @@ begin
       generate ("multivalue.i");
       generate ("name.i");
       generate ("naturalvar.i");
-      --  generate ("nested.i");     -- Much pruning.
+      generate ("nested.i");
       generate ("null_pointer.i");
       generate ("ordering.i");
       generate ("ret_by_value.i");
@@ -185,7 +185,7 @@ begin
       generate ("cpp_static.i",                     use_CPP => True);
       generate ("default_constructor.i",            use_CPP => True);
       generate ("defvalue_constructor.i",           use_CPP => True);
-      --  generate ("derived_nested.i",                 use_CPP => True);     -- Crashes swig_ada.
+      generate ("derived_nested.i",                 use_CPP => True);
       generate ("destructor_reprotected.i",         use_CPP => True);
       generate ("disown.i",                         use_CPP => True);
       generate ("enum_template.i",                  use_CPP => True);
@@ -209,18 +209,18 @@ begin
       generate ("inherit_void_arg.i",               use_CPP => True);
       generate ("inline_initializer.i",             use_CPP => True);
       generate ("member_template.i",                use_CPP => True);
-      --  generate ("minherit.i",                       use_CPP => True);     -- Crashes swig_ada.
+      --  generate ("minherit.i",                       use_CPP => True);     -- Fails: a C type has no Ada type.
       generate ("mod_a.i",                          use_CPP => True);
       generate ("multi_import_b.i",                 use_CPP => True);
       generate ("name_cxx.i",                       use_CPP => True);
       generate ("namespace_enum.i",                 use_CPP => True);
       generate ("namespace_extend.i",               use_CPP => True);
-      --  generate ("namespace_template.i",             use_CPP => True);     -- Crashes swig_ada.
+      --  generate ("namespace_template.i",             use_CPP => True);     -- Fails: a C type has no Ada type.
       generate ("namespace_typedef_class.i",        use_CPP => True);
       generate ("newobject2.i",                     use_CPP => True);
       generate ("operator_overload_break.i",        use_CPP => True);
       generate ("overload_copy.i",                  use_CPP => True);
-      --  generate ("overload_extendc.i",               use_CPP => True);     -- Crashes swig_ada.
+      --  generate ("overload_extendc.i",               use_CPP => True);     -- There is no such test file.
       generate ("overload_extend.i",                use_CPP => True);
       generate ("overload_rename.i",                use_CPP => True);
       generate ("overload_simple.i",                use_CPP => True);
@@ -235,20 +235,20 @@ begin
       generate ("rename_camel.i",                   use_CPP => True);
       generate ("rename_scope.i",                   use_CPP => True);
       generate ("restrict_cplusplus.i",             use_CPP => True);
-      --  generate ("return_const_value.i",             use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("smart_pointer_const2.i",           use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("smart_pointer_const.i",            use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("smart_pointer_extend.i",           use_CPP => True);     -- Crashes swig_ada.
+      generate ("return_const_value.i",             use_CPP => True);
+      generate ("smart_pointer_const2.i",           use_CPP => True);
+      generate ("smart_pointer_const.i",            use_CPP => True);
+      --  generate ("smart_pointer_extend.i",           use_CPP => True);     -- Fails: a type is registered twice.
       generate ("smart_pointer_member.i",           use_CPP => True);
-      --  generate ("smart_pointer_multi.i",            use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("smart_pointer_namespace2.i",       use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("smart_pointer_namespace.i",        use_CPP => True);     -- Crashes swig_ada.
+      generate ("smart_pointer_multi.i",            use_CPP => True);
+      generate ("smart_pointer_namespace2.i",       use_CPP => True);
+      generate ("smart_pointer_namespace.i",        use_CPP => True);
       generate ("smart_pointer_not.i",              use_CPP => True);
-      --  generate ("smart_pointer_overload.i",         use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("smart_pointer_rename.i",           use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("smart_pointer_simple.i",           use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("smart_pointer_static.i",           use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("smart_pointer_typedef.i",          use_CPP => True);     -- Crashes swig_ada.
+      generate ("smart_pointer_overload.i",         use_CPP => True);
+      generate ("smart_pointer_rename.i",           use_CPP => True);
+      generate ("smart_pointer_simple.i",           use_CPP => True);
+      generate ("smart_pointer_static.i",           use_CPP => True);
+      generate ("smart_pointer_typedef.i",          use_CPP => True);
       generate ("static_array_member.i",            use_CPP => True);
       generate ("static_const_member_2.i",          use_CPP => True);
       generate ("static_const_member.i",            use_CPP => True);
@@ -262,13 +262,13 @@ begin
       generate ("template_default_qualify.i",       use_CPP => True);
       generate ("template_default_vw.i",            use_CPP => True);
       generate ("template_enum_ns_inherit.i",       use_CPP => True);
-      --   generate ("template_expr.i",                  use_CPP => True);     -- Hangs swig_ada.
+      --   generate ("template_expr.i",                  use_CPP => True);     -- Hangs.
       generate ("template_extend1.i",               use_CPP => True);
       generate ("template_extend2.i",               use_CPP => True);
       generate ("template_extend_overload_2.i",     use_CPP => True);
       generate ("template_inherit.i",               use_CPP => True);
       generate ("template_int_const.i",             use_CPP => True);
-      --  generate ("template_methods.i",               use_CPP => True);     -- Error: Unable to find 'std_string.i'
+      --  generate ("template_methods.i",               use_CPP => True);     -- Error: Unable to find 'std_string.i'.
       generate ("template_ns3.i",                   use_CPP => True);
       generate ("template_ns.i",                    use_CPP => True);
       generate ("template_ns_inherit.i",            use_CPP => True);
@@ -287,7 +287,7 @@ begin
       generate ("template_using.i",                 use_CPP => True);
       generate ("template_virtual.i",               use_CPP => True);
       generate ("throw_exception.i",                use_CPP => True);
-      --  generate ("typedef_class.i",                  use_CPP => True);     -- Crashes swig_ada.
+      --  generate ("typedef_class.i",                  use_CPP => True);     -- Fails: an Ada type name is used twice.
       generate ("typedef_inherit.i",                use_CPP => True);
       generate ("typemap_self.i",                   use_CPP => True);
       generate ("typemap_variables.i",              use_CPP => True);
@@ -299,7 +299,7 @@ begin
       generate ("using_private.i",                  use_CPP => True);
       generate ("using_protected.i",                use_CPP => True);
       generate ("valuewrapper_base.i",              use_CPP => True);
-      --  generate ("valuewrapper_const.i",             use_CPP => True);     -- Crashes swig_ada.
+      --  generate ("valuewrapper_const.i",             use_CPP => True);     -- Fails: a C type has no Ada type.
       generate ("valuewrapper.i",                   use_CPP => True);
       generate ("varargs.i",                        use_CPP => True);
       generate ("virtual_derivation.i",             use_CPP => True);
@@ -321,8 +321,8 @@ begin
       put_Line ("Generating uncompilable C tests.");
       new_Line;
 
-      --  generate ("li_carrays.i");     -- May not be relevant for Ada.
-      --  generate ("li_cmalloc.i");     -- May not be relevant for Ada.
+      --  generate ("li_carrays.i");     -- May not be relevant for Ada. Generates, but 7 of 7 specs do not compile.
+      --  generate ("li_cmalloc.i");     -- May not be relevant for Ada. Generates, but 2 of 2 specs do not compile.
 
       generate ("preproc.i");            -- Fails due to #define MASK(shift, size) (((1 << (size)) - 1) <<(shift))
                                          --              #define SOME_MASK_DEF (80*MASK(8, 10))
@@ -344,14 +344,14 @@ begin
       generate ("dynamic_cast.i",                   use_CPP => True);
       generate ("features.i",                       use_CPP => True);
       generate ("fvirtual.i",                       use_CPP => True);
-      --  generate ("import_nomodule.i",                use_CPP => True);     -- This test does not apply to langauges with static type checking.
+      --  generate ("import_nomodule.i",                use_CPP => True);     -- This test does not apply to languages with static type checking. Generates, but 2 of 3 specs do not compile.
       generate ("imports_b.i",                      use_CPP => True);
       generate ("inherit_same_name.i",              use_CPP => True);
-      --  generate ("li_attribute.i",                   use_CPP => True);     -- Error: Unable to find 'std_string.i'
+      --  generate ("li_attribute.i",                   use_CPP => True);     -- Error: Unable to find 'std_string.i'.
       generate ("minherit2.i",                      use_CPP => True);
       generate ("mod_b.i",                          use_CPP => True);
       generate ("multi_import_a.i",                 use_CPP => True);
-      --  generate ("namespace_virtual_method.i",       use_CPP => True);     -- Crashes swig_ada.
+      --  generate ("namespace_virtual_method.i",       use_CPP => True);     -- Fails: a type is registered twice.
       generate ("name_warnings.i",                  use_CPP => True);
       generate ("newobject1.i",                     use_CPP => True);
       generate ("operator_overload.i",              use_CPP => True);
@@ -359,12 +359,12 @@ begin
       generate ("pure_virtual.i",                   use_CPP => True);
       generate ("rname.i",                          use_CPP => True);
       generate ("samename.i",                       use_CPP => True);
-      --  generate ("smart_pointer_multi_typedef.i",    use_CPP => True);     -- Crashes swig_ada.
+      generate ("smart_pointer_multi_typedef.i",    use_CPP => True);
       generate ("smart_pointer_protected.i",        use_CPP => True);
       generate ("template_inherit_abstract.i",      use_CPP => True);
       generate ("template_specialization_enum.i",   use_CPP => True);
       generate ("template_typedef_import.i",        use_CPP => True);
-      --  generate ("using_pointers.i",                 use_CPP => True);     -- Crashes swig_ada.
+      generate ("using_pointers.i",                 use_CPP => True);
    end if;
 
 
@@ -381,48 +381,48 @@ begin
       put_Line ("Generating broken C tests.");
       new_Line;
 
-      --  generate ("anonymous_bitfield.i");     -- Crashes swig_ada.
-      --  generate ("apply_signed_char.i");      -- Error: Directors are not supported for C code and require the -c++ option.
-      --  generate ("apply_strings.i");          -- Error: Directors are not supported for C code and require the -c++ option.
-      --  generate ("arrayref.i");               -- Crashes swig_ada.
-      --  generate ("arrays_dimensionless.i");   -- Crashes swig_ada.
-      --  generate ("arrays_global.i");          -- Crashes swig_ada.
-      --  generate ("arrays_global_twodim.i");   -- Crashes swig_ada.
-      --  generate ("arrays.i");                 -- Crashes swig_ada.
-      --  generate ("arrays_scope.i");           -- Crashes swig_ada.
-      --  generate ("array_typedef_memberin.i"); -- Crashes swig_ada.
-      --  generate ("bloody_hell.i");            -- Crashes swig_ada.
-      --  generate ("char_strings.i");           -- Crashes swig_ada.
-      --  generate ("class_scope_weird.i");      -- Crashes swig_ada.
-      --  generate ("default_args.i");           -- Error: Unable to find 'std_string.i'.
-      --  generate ("enum_thorough_typeunsafe.i");   -- Error: Unable to find 'enumtypeunsafe.swg'.
-      --  generate ("file_test.i");                  -- Error: Unable to find 'file.i'.
-      --  generate ("funcptr.i");                    -- Crashes swig_ada.
-      --  generate ("function_typedef.i");           -- Crashes swig_ada.
-      --  generate ("global_vars.i");                -- Error: Unable to find 'std_string.i'
+      --  generate ("anonymous_bitfield.i");     -- Fails: needs a 'sizeof_unsigned_int' constant.
+      --  generate ("apply_signed_char.i");     -- Error: Directors are not supported for C code and require the -c++ option.
+      --  generate ("apply_strings.i");     -- Error: Directors are not supported for C code and require the -c++ option.
+      generate ("arrayref.i");
+      --  generate ("arrays_dimensionless.i");     -- Generates, but 3 of 3 specs do not compile.
+      --  generate ("arrays_global.i");     -- Fails: a C expression cannot be evaluated.
+      --  generate ("arrays_global_twodim.i");     -- Fails: a type name is not known.
+      generate ("arrays.i");
+      --  generate ("arrays_scope.i");     -- Fails: a type name is not known.
+      --  generate ("array_typedef_memberin.i");     -- Fails: a type name is not known.
+      --  generate ("bloody_hell.i");     -- Fails: needs a 'sizeof_int' constant.
+      --  generate ("char_strings.i");     -- Fails: needs a 'sizeof_CPLUSPLUS_MSG' constant.
+      --  generate ("class_scope_weird.i");     -- Fails: a type name is not known.
+      --  generate ("default_args.i");     -- Error: Unable to find 'std_string.i'.
+      --  generate ("enum_thorough_typeunsafe.i");     -- Error: Unable to find 'enumtypeunsafe.swg'.
+      --  generate ("file_test.i");     -- Error: Unable to find 'file.i'.
+      --  generate ("funcptr.i");     -- Fails: a type is registered twice.
+      generate ("function_typedef.i");
+      --  generate ("global_vars.i");     -- Error: Unable to find 'std_string.i'.
       generate ("grouping.i");
-      --  generate ("inctest.i");                    -- Crashes swig_ada.
-      --  generate ("li_std_map.i");                 -- Error: Unable to find 'std_pair.i'
-      --  generate ("li_std_pair.i");                -- Error: Unable to find 'std_pair.i'
-      --  generate ("li_std_set.i");                 -- Error: Unable to find 'std_string.i'
-      --  generate ("li_std_vector.i");              -- Error: Unable to find 'std_string.i'
-      --  generate ("li_std_wstring.i");             -- Error: Unable to find 'std_basic_string.i'
-      --  generate ("list_vector.i");                -- Error: Unable to find 'list-vector.i'
-      --  generate ("li_typemaps.i");                -- Crashes swig_ada.
-      --  generate ("li_windows.i");                 -- Crashes swig_ada.
-      --  generate ("long_long_apply.i");            -- Crashes swig_ada.
+      generate ("inctest.i");
+      --  generate ("li_std_map.i");     -- Error: Unable to find 'std_pair.i'.
+      --  generate ("li_std_pair.i");     -- Error: Unable to find 'std_pair.i'.
+      --  generate ("li_std_set.i");     -- Error: Unable to find 'std_string.i'.
+      --  generate ("li_std_vector.i");     -- Error: Unable to find 'std_string.i'.
+      --  generate ("li_std_wstring.i");     -- Error: Unable to find 'std_basic_string.i'.
+      --  generate ("list_vector.i");     -- Error: Unable to find 'list-vector.i'.
+      generate ("li_typemaps.i");
+      --  generate ("li_windows.i");     -- Generates, but 62 of 62 specs do not compile.
+      generate ("long_long_apply.i");
       generate ("nested_comment.i");
-      --  generate ("pointer_in_out.i");             -- Error: Unable to find 'pointer-in-out.i'
-      --  generate ("pointer_reference.i");          -- Crashes swig_ada.
-      --  generate ("register_par.i");               -- Crashes swig_ada.
-      --  generate ("sizeof_pointer.i");             -- Crashes swig_ada.
-      --  generate ("sizet.i");                      -- Crashes swig_ada.
+      --  generate ("pointer_in_out.i");     -- Error: Unable to find 'pointer-in-out.i'.
+      generate ("pointer_reference.i");
+      generate ("register_par.i");
+      --  generate ("sizeof_pointer.i");     -- Fails: needs a 'sizeof_char' constant.
+      generate ("sizet.i");
       generate ("sneaky1.i");
-      --  generate ("special_variables.i");          -- Error: Unable to find 'std_string.i'
-      --  generate ("threads.i");                    -- Error: Unable to find 'std_string.i'
-      --  generate ("typedef_array_member.i");       -- Crashes swig_ada.
-      --  generate ("typedef_funcptr.i");            -- Crashes swig_ada.
-      --  generate ("typedef_struct.i");             -- Crashes swig_ada.
+      --  generate ("special_variables.i");     -- Error: Unable to find 'std_string.i'.
+      --  generate ("threads.i");     -- Error: Unable to find 'std_string.i'.
+      --  generate ("typedef_array_member.i");     -- Fails: a type name is not known.
+      --  generate ("typedef_funcptr.i");     -- Fails: a type name is not known.
+      --  generate ("typedef_struct.i");     -- Fails: a type is registered twice.
    end if;
 
 
@@ -436,103 +436,103 @@ begin
       new_Line;
 
       generate ("add_link.i",                        use_CPP => True);
-      --  generate ("allprotected.i",                    use_CPP => True);     -- Error: Unable to find 'std_string.i'
+      --  generate ("allprotected.i",                    use_CPP => True);     -- Error: Unable to find 'std_string.i'.
 
-      --  generate ("abstract_typedef2.i",               use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("class_ignore.i",                    use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("constant_pointers.i",               use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("constants.i",                       use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("cpp_basic.i",                       use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("cpp_broken.i",                      use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("cpp_enum.i",                        use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("cpp_namespace.i",                   use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("cpp_typedef.i",                     use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("enum_scope_template.i",             use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("enum_thorough.i",                   use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("enum_thorough_proper.i",            use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("enum_thorough_simple.i",            use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("enum_thorough_typesafe.i",          use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("global_ns_arg.i",                   use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("ignore_template_constructor.i",     use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("inherit_target_language.i",         use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("intermediary_classname.i",          use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("kind.i",                            use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("li_boost_shared_ptr_bits.i",        use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("li_boost_shared_ptr.i",             use_CPP => True);     -- Error: Unable to find 'std_string.i'
-      --  generate ("li_cdata_carrays.i",                use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("li_cdata.i",                        use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("li_factory.i",                      use_CPP => True);     -- Error: Unable to find 'factory.i'
-      --  generate ("li_implicit.i",                     use_CPP => True);     -- Error: Unable to find 'implicit.i'
-      --  generate ("li_std_deque.i",                    use_CPP => True);     -- Error: Unable to find 'std_deque.i'
-      --  generate ("li_std_except.i",                   use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("li_std_stream.i",                   use_CPP => True);     -- Error: Unable to find 'std_iostream.i'
-      --  generate ("li_std_string.i",                   use_CPP => True);     -- Error: Unable to find 'std_string.i'
-      --  generate ("memberin1.i",                       use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("member_pointer.i",                  use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("mixed_types.i",                     use_CPP => True);     -- Crashes swig_ada.
+      --  generate ("abstract_typedef2.i",               use_CPP => True);     -- Fails: a C type has no Ada type.
+      --  generate ("class_ignore.i",                    use_CPP => True);     -- Fails: a type name is not known.
+      --  generate ("constant_pointers.i",               use_CPP => True);     -- Fails: a type is registered twice.
+      --  generate ("constants.i",                       use_CPP => True);     -- Error: Syntax error in input(1).
+      --  generate ("cpp_basic.i",                       use_CPP => True);     -- Fails: a C type has no Ada type.
+      --  generate ("cpp_broken.i",                      use_CPP => True);     -- There is no such test file.
+      --  generate ("cpp_enum.i",                        use_CPP => True);     -- Fails: a constant is defined twice.
+      --  generate ("cpp_namespace.i",                   use_CPP => True);     -- Generates, but 1 of 17 specs do not compile.
+      --  generate ("cpp_typedef.i",                     use_CPP => True);     -- Fails: a C type has no Ada type.
+      --  generate ("enum_scope_template.i",             use_CPP => True);     -- Fails: a type is registered twice.
+      --  generate ("enum_thorough.i",                   use_CPP => True);     -- Fails: a type is registered twice.
+      --  generate ("enum_thorough_proper.i",            use_CPP => True);     -- Fails: a type is registered twice.
+      --  generate ("enum_thorough_simple.i",            use_CPP => True);     -- Fails: a type is registered twice.
+      --  generate ("enum_thorough_typesafe.i",          use_CPP => True);     -- Fails: a type is registered twice.
+      generate ("global_ns_arg.i",                  use_CPP => True);
+      --  generate ("ignore_template_constructor.i",     use_CPP => True);     -- Fails: a C type has no Ada type.
+      --  generate ("inherit_target_language.i",         use_CPP => True);     -- Fails: a type name is not known.
+      --  generate ("intermediary_classname.i",          use_CPP => True);     -- Generates, but 5 of 8 specs do not compile.
+      --  generate ("kind.i",                            use_CPP => True);     -- Fails: a C type has no Ada type.
+      --  generate ("li_boost_shared_ptr_bits.i",        use_CPP => True);     -- Fails: a C type has no Ada type.
+      --  generate ("li_boost_shared_ptr.i",             use_CPP => True);     -- Error: Unable to find 'std_string.i'.
+      generate ("li_cdata_carrays.i",               use_CPP => True);
+      generate ("li_cdata.i",                       use_CPP => True);
+      --  generate ("li_factory.i",                      use_CPP => True);     -- Error: Unable to find 'factory.i'.
+      --  generate ("li_implicit.i",                     use_CPP => True);     -- Error: Unable to find 'implicit.i'.
+      --  generate ("li_std_deque.i",                    use_CPP => True);     -- Error: Unable to find 'std_deque.i'.
+      --  generate ("li_std_except.i",                   use_CPP => True);     -- Fails: a type name is not known.
+      --  generate ("li_std_stream.i",                   use_CPP => True);     -- Error: Unable to find 'std_iostream.i'.
+      --  generate ("li_std_string.i",                   use_CPP => True);     -- Error: Unable to find 'std_string.i'.
+      generate ("memberin1.i",                      use_CPP => True);
+      --  generate ("member_pointer.i",                  use_CPP => True);     -- Fails: a type name is not known.
+      --  generate ("mixed_types.i",                     use_CPP => True);     -- Fails: a C expression cannot be evaluated.
       --  generate ("multi_import_c.i",                  use_CPP => True);     -- No module name specified using %module or -module.
-      --  generate ("multiple_inheritance.i",            use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("namespace_class.i",                 use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("namespace_nested.i",                use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("namespace_spaces.i",                use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("namespace_typemap.i",               use_CPP => True);     -- Crashes swig_ada.
+      --  generate ("multiple_inheritance.i",            use_CPP => True);     -- Fails: a type name is not known.
+      --  generate ("namespace_class.i",                 use_CPP => True);     -- Fails: a type is registered twice.
+      --  generate ("namespace_nested.i",                use_CPP => True);     -- Fails: a C type has no Ada type.
+      generate ("namespace_spaces.i",               use_CPP => True);
+      generate ("namespace_typemap.i",              use_CPP => True);
       generate ("namespace_union.i",                 use_CPP => True);
-      --  generate ("overload_complicated.i",            use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("primitive_ref.i",                   use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("primitive_types.i",                 use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("refcount.i",                        use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("reference_global_vars.i",           use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("rename1.i",                         use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("rename2.i",                         use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("rename3.i",                         use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("rename4.i",                         use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("return_value_scope.i",              use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("smart_pointer_inherit.i",           use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("smart_pointer_templatemethods.i",   use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("smart_pointer_templatevariables.i", use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("std_containers.i",                  use_CPP => True);     -- Error: Unable to find 'std_string.i'
-      --  generate ("template_arg_scope.i",              use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("template_arg_typename.i",           use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("template_classes.i",                use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("template_const_ref.i",              use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("template_default_arg.i",            use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("template_default.i",                use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("template_default_inherit.i",        use_CPP => True);     -- Crashes swig_ada.
+      --  generate ("overload_complicated.i",            use_CPP => True);     -- Fails: a null access is dereferenced (ada_language.adb:1664).
+      generate ("primitive_ref.i",                  use_CPP => True);
+      --  generate ("primitive_types.i",                 use_CPP => True);     -- Fails: a type name is not known.
+      --  generate ("refcount.i",                        use_CPP => True);     -- Fails: a C type has no Ada type.
+      --  generate ("reference_global_vars.i",           use_CPP => True);     -- Generates, but 3 of 3 specs do not compile.
+      --  generate ("rename1.i",                         use_CPP => True);     -- Fails: a type is registered twice.
+      --  generate ("rename2.i",                         use_CPP => True);     -- Fails: a type is registered twice.
+      --  generate ("rename3.i",                         use_CPP => True);     -- Fails: a type is registered twice.
+      --  generate ("rename4.i",                         use_CPP => True);     -- Fails: a type is registered twice.
+      --  generate ("return_value_scope.i",              use_CPP => True);     -- Fails: a C type has no Ada type.
+      --  generate ("smart_pointer_inherit.i",           use_CPP => True);     -- Fails: a C type has no Ada type.
+      --  generate ("smart_pointer_templatemethods.i",   use_CPP => True);     -- Generates, but 3 of 11 specs do not compile.
+      --  generate ("smart_pointer_templatevariables.i", use_CPP => True);     -- Fails: a type is registered twice.
+      --  generate ("std_containers.i",                  use_CPP => True);     -- Error: Unable to find 'std_string.i'.
+      --  generate ("template_arg_scope.i",              use_CPP => True);     -- Fails: a C type has no Ada type.
+      --  generate ("template_arg_typename.i",           use_CPP => True);     -- Fails: a C type has no Ada type.
+      generate ("template_classes.i",               use_CPP => True);
+      --  generate ("template_const_ref.i",              use_CPP => True);     -- Fails: a C type has no Ada type.
+      --  generate ("template_default_arg.i",            use_CPP => True);     -- Fails: a type is registered twice.
+      --  generate ("template_default.i",                use_CPP => True);     -- Fails: a type name is not known.
+      --  generate ("template_default_inherit.i",        use_CPP => True);     -- Fails: a C type has no Ada type.
       --  generate ("template_default_pointer.i",        use_CPP => True);     -- Error: Syntax error in input(1).
-      --  generate ("template_enum.i",                   use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("template_enum_typedef.i",           use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("template_explicit.i",               use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("template_extend_overload.i",        use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("template_forward.i",                use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("template.i",                        use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("template_ns2.i",                    use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("template_ns4.i",                    use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("template_ns_enum2.i",               use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("template_ns_enum.i",                use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("template_opaque.i",                 use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("template_retvalue.i",               use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("template_tbase_template.i",         use_CPP => True);     -- Crashes swig_ada.
+      --  generate ("template_enum.i",                   use_CPP => True);     -- Fails: a constant is defined twice.
+      --  generate ("template_enum_typedef.i",           use_CPP => True);     -- Fails: a C type has no Ada type.
+      generate ("template_explicit.i",              use_CPP => True);
+      --  generate ("template_extend_overload.i",        use_CPP => True);     -- Fails: a C type has no Ada type.
+      --  generate ("template_forward.i",                use_CPP => True);     -- Fails: a type is registered twice.
+      --  generate ("template.i",                        use_CPP => True);     -- There is no such test file.
+      generate ("template_ns2.i",                   use_CPP => True);
+      --  generate ("template_ns4.i",                    use_CPP => True);     -- Fails: a type name is not known.
+      --  generate ("template_ns_enum2.i",               use_CPP => True);     -- Fails: a C type has no Ada type.
+      generate ("template_ns_enum.i",               use_CPP => True);
+      --  generate ("template_opaque.i",                 use_CPP => True);     -- Fails: a C type has no Ada type.
+      --  generate ("template_retvalue.i",               use_CPP => True);     -- Fails: a C type has no Ada type.
+      generate ("template_tbase_template.i",        use_CPP => True);
       generate ("template_typedef_cplx2.i",          use_CPP => True);
-      --  generate ("template_typedef_cplx3.i",          use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("template_typedef_cplx4.i",          use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("template_typedef_cplx5.i",          use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("template_typedef_cplx.i",           use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("template_typedef_fnc.i",            use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("template_typedef_funcptr.i",        use_CPP => True);     -- Error: Unable to find 'std_string.i'
-      --  generate ("template_typedef.i",                use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("template_typemaps.i",               use_CPP => True);     -- Crashes swig_ada.
-      --  generate ("template_type_namespace.i",         use_CPP => True);     -- Error: Unable to find 'std_string.i'
-      --  generate ("template_whitespace.i",             use_CPP => True);
-      --  generate ("typedef_scope.i",                   use_CPP => True);
-      --  generate ("typemap_namespace.i",               use_CPP => True);
-      --  generate ("typemap_ns_using.i",                use_CPP => True);
-      --  generate ("typemap_various.i",                 use_CPP => True);
-      --  generate ("typename.i",                        use_CPP => True);
-      --  generate ("using1.i",                          use_CPP => True);
-      --  generate ("using2.i",                          use_CPP => True);
-      --  generate ("using_namespace.i",                 use_CPP => True);
-      --  generate ("valuewrapper_opaque.i",             use_CPP => True);
-      --  generate ("virtual_poly.i",                    use_CPP => True);
+      generate ("template_typedef_cplx3.i",         use_CPP => True);
+      generate ("template_typedef_cplx4.i",         use_CPP => True);
+      generate ("template_typedef_cplx5.i",         use_CPP => True);
+      generate ("template_typedef_cplx.i",          use_CPP => True);
+      --  generate ("template_typedef_fnc.i",            use_CPP => True);     -- Fails: a C type has no Ada type.
+      --  generate ("template_typedef_funcptr.i",        use_CPP => True);     -- Error: Unable to find 'std_string.i'.
+      generate ("template_typedef.i",               use_CPP => True);
+      generate ("template_typemaps.i",              use_CPP => True);
+      --  generate ("template_type_namespace.i",         use_CPP => True);     -- Error: Unable to find 'std_string.i'.
+      generate ("template_whitespace.i",            use_CPP => True);
+      --  generate ("typedef_scope.i",                   use_CPP => True);     -- Fails: a C type has no Ada type.
+      --  generate ("typemap_namespace.i",               use_CPP => True);     -- Error: Can't copy typemap (freearg) char * = Foo::Str1 *.
+      generate ("typemap_ns_using.i",               use_CPP => True);
+      generate ("typemap_various.i",                use_CPP => True);
+      --  generate ("typename.i",                        use_CPP => True);     -- Fails: a C type has no Ada type.
+      generate ("using1.i",                         use_CPP => True);
+      generate ("using2.i",                         use_CPP => True);
+      --  generate ("using_namespace.i",                 use_CPP => True);     -- Fails: an Ada type name is used twice.
+      generate ("valuewrapper_opaque.i",            use_CPP => True);
+      --  generate ("virtual_poly.i",                    use_CPP => True);     -- Fails: a C type has no Ada type.
    end if;
 
 
