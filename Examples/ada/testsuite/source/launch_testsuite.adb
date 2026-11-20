@@ -21,6 +21,10 @@ procedure launch_testsuite
 --  module needs the specs of that module. A failure leaves a log in the 'generated' folder,
 --  named '<case>-generator.log', '-pretty_print.log', '-wrapper.log' or '-compile.log'.
 --
+--  It then runs the run-time cases of the 'runtime' folder. Each has a C++ header, an interface file
+--  and an Ada tester, which is built with the address sanitizer and run. A failure leaves a log
+--  named 'generated/<case>-runtime.log'.
+--
 is
    use lace.Environ,
        ada.Strings.fixed,
@@ -35,6 +39,7 @@ is
 
    check_Wrappers      : constant Boolean := True;     -- Compile each generated wrapper.
    check_Specs         : constant Boolean := True;     -- Compile each generated spec.
+   do_Runtime          : constant Boolean := True;     -- Build and run the run-time cases.
 
    Root                : constant String  := "../../../..";     -- The repository root, as seen from the 'generated' folder.
 
@@ -55,6 +60,8 @@ is
    syntax_Failures    : Natural := 0;
    wrapper_Failures   : Natural := 0;
    compile_Failures   : Natural := 0;
+   runtime_Cases      : Natural := 0;
+   runtime_Failures   : Natural := 0;
    unexpected_Passes  : Natural := 0;
 
 
@@ -230,6 +237,40 @@ is
 
       go_to_Folder (to_Folder (".."));
    end generate;
+
+
+
+   procedure run (the_Case : in String)
+   --
+   --  Generates the binding of a run-time case, builds its tester and runs it.
+   --
+   is
+      Build : constant String := "runtime-build/" & the_Case;
+      Log   : constant String := "runtime-build/" & the_Case & ".log";
+   begin
+      put_Line ("Running the run-time case '" & the_Case & "'.");
+      runtime_Cases := runtime_Cases + 1;
+
+      ada.Directories.create_Path ("runtime-build");     -- The log is written there.
+
+      if not run (  "mkdir -p " & Build
+                  & " && cd " & Build
+                  & " && rm -rf obj tester *.ads *_wrap.cxx"
+                  & " && echo 'Generating.'"
+                  & " && ../../../../../ada-build/swig4ada -ada -c++ -outdir . -o ./example_wrap.cxx"
+                  &                                       " -I../../runtime/" & the_Case & " ../../runtime/" & the_Case & "/example.i"
+                  & " && echo 'Building.'"
+                  & " && gprbuild -q -p -P ../../runtime/runtime_test.gpr -XCASE=" & the_Case
+                  & " && echo 'Running.'"
+                  & " && ./tester",
+                  Log)
+      then
+         ada.Directories.create_Path ("generated");
+         keep (Log, as_Log => "generated/" & the_Case & "-runtime.log");
+         runtime_Failures := runtime_Failures + 1;
+         put_Line ("   The run-time case failed !");
+      end if;
+   end run;
 
 
 
@@ -711,6 +752,24 @@ begin
    end if;
 
 
+   -----------------
+   --- Run-time cases
+   --
+   if do_Runtime
+   then
+      new_Line;
+      put_Line ("Running the run-time cases.");
+      new_Line;
+
+      run ("values");              -- References, pointers, enumerations, plain structures and callbacks.
+      run ("class_values");        -- A class which is not trivial, constructed, returned and passed by value.
+      run ("virtual_classes");     -- Dispatching in both directions, a class derived in Ada, and guards.
+      run ("mutual_classes");      -- Two classes, each of which uses the other.
+      run ("containers");          -- The containers of the C++ standard library.
+      run ("exceptions");          -- The record of a C++ exception which a wrapper has caught.
+   end if;
+
+
    --------
    --- Done
    --
@@ -726,9 +785,12 @@ begin
       put_Line ("Wrappers which now compile:   " & unexpected_Passes'Image);
    end if;
 
+   put_Line ("Run-time cases:               " & runtime_Cases   'Image);
+   put_Line ("Run-time cases which fail:    " & runtime_Failures'Image);
+
    new_Line;
 
-   if generator_Failures + syntax_Failures + wrapper_Failures + compile_Failures = 0
+   if generator_Failures + syntax_Failures + wrapper_Failures + compile_Failures + runtime_Failures = 0
    then
       put_Line ("Complete.");
    else

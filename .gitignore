@@ -35,6 +35,7 @@ class-simple
 class-simplest
 Examples/ada/class
 Examples/ada/testsuite/generated
+Examples/ada/testsuite/runtime-build
 ada/attic
 
 

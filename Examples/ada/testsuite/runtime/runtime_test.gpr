@@ -1,0 +1,40 @@
+--  Builds the tester of one run-time test case, with the address sanitizer.
+--
+--  The launcher generates the binding of the case into 'runtime-build/<case>' and then
+--  builds this project with '-XCASE=<case>'.
+--
+project Runtime_Test is
+
+   the_Case := external ("CASE");
+   Build    := "../runtime-build/" & the_Case;
+
+   for Languages   use ("Ada", "C++");
+   for Main        use ("tester.adb");
+
+   for Source_Dirs use ("support",              -- The 'Checks' package.
+                        the_Case,               -- The tester and the C++ header.
+                        Build,                  -- The generated specs and wrapper.
+                        "../../../..");         -- The support packages ('swig', 'swig.pointers', ...), at the repository root.
+   for Exec_Dir    use Build;
+   for Object_Dir  use Build & "/obj";
+
+   package Naming is
+      for Specification_Suffix  ("c++") use ".h";
+      for Implementation_Suffix ("c++") use ".cxx";
+   end Naming;
+
+   package Builder is
+      for Executable ("tester.adb") use "tester";
+   end Builder;
+
+   package Compiler is
+      for Default_Switches ("ada") use ("-g", "-gnat2022", "-gnata", "-fsanitize=address");
+      for Default_Switches ("c++") use ("-g", "-fno-access-control", "-fsanitize=address", "-fno-omit-frame-pointer",
+                                        "-I" & Runtime_Test'Project_Dir & the_Case);
+   end Compiler;
+
+   package Linker is
+      for Default_Switches ("ada") use ("-fsanitize=address");
+   end Linker;
+
+end Runtime_Test;
