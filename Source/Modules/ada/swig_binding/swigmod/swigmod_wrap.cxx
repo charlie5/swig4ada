@@ -176,8 +176,6 @@ template <typename T> T SwigValueInit() {
 
 
 
-#define protected public
-#define private   public
 
 #include "swigconfig.h"
 #include "swigwarn.h"
@@ -187,7 +185,13 @@ template <typename T> T SwigValueInit() {
 
 #include "swigtree.h"
 #include "swigopt.h"
+
+// The Ada module binds the protected members of the 'Language' class, so the wrappers need access to them.
+//
+#define protected public
 #include "swigmod.h"
+#undef protected
+
 #include "swigfile.h"
 
 
@@ -207,18 +211,16 @@ template <typename T> T SwigValueInit() {
   }
 
 
-#undef protected
-#undef private
 #ifdef __cplusplus 
 extern "C" {
 #endif
 DllExport void SWIGSTDCALL Ada_delete_Dispatcher (
-  void * jarg1
+  void * a_arg1
   )
 {
   Dispatcher *arg1 = (Dispatcher *) 0 ;
   
-  arg1 = (Dispatcher *)jarg1; 
+  arg1 = (Dispatcher *)a_arg1; 
   
   delete arg1;
   
@@ -228,10 +230,10 @@ DllExport void SWIGSTDCALL Ada_delete_Dispatcher (
 
 
 DllExport int SWIGSTDCALL Ada_Dispatcher_emit_one (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -239,9 +241,9 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_emit_one (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Dispatcher *)jarg1; 
+  arg1 = (Dispatcher *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Dispatcher::emit_one(arg2);
   jresult = result; 
@@ -255,10 +257,10 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_emit_one (
 
 
 DllExport int SWIGSTDCALL Ada_Dispatcher_emit_children (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -266,9 +268,9 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_emit_children (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Dispatcher *)jarg1; 
+  arg1 = (Dispatcher *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Dispatcher::emit_children(arg2);
   jresult = result; 
@@ -282,10 +284,10 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_emit_children (
 
 
 DllExport int SWIGSTDCALL Ada_Dispatcher_defaultHandler (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -293,9 +295,9 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_defaultHandler (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Dispatcher *)jarg1; 
+  arg1 = (Dispatcher *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Dispatcher::defaultHandler(arg2);
   jresult = result; 
@@ -309,10 +311,10 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_defaultHandler (
 
 
 DllExport int SWIGSTDCALL Ada_Dispatcher_top (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -320,9 +322,9 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_top (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Dispatcher *)jarg1; 
+  arg1 = (Dispatcher *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->top(arg2);
   jresult = result; 
@@ -336,10 +338,10 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_top (
 
 
 DllExport int SWIGSTDCALL Ada_Dispatcher_applyDirective (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -347,9 +349,9 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_applyDirective (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Dispatcher *)jarg1; 
+  arg1 = (Dispatcher *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Dispatcher::applyDirective(arg2);
   jresult = result; 
@@ -363,10 +365,10 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_applyDirective (
 
 
 DllExport int SWIGSTDCALL Ada_Dispatcher_clearDirective (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -374,9 +376,9 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_clearDirective (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Dispatcher *)jarg1; 
+  arg1 = (Dispatcher *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Dispatcher::clearDirective(arg2);
   jresult = result; 
@@ -390,10 +392,10 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_clearDirective (
 
 
 DllExport int SWIGSTDCALL Ada_Dispatcher_constantDirective (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -401,9 +403,9 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_constantDirective (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Dispatcher *)jarg1; 
+  arg1 = (Dispatcher *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Dispatcher::constantDirective(arg2);
   jresult = result; 
@@ -417,10 +419,10 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_constantDirective (
 
 
 DllExport int SWIGSTDCALL Ada_Dispatcher_extendDirective (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -428,9 +430,9 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_extendDirective (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Dispatcher *)jarg1; 
+  arg1 = (Dispatcher *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Dispatcher::extendDirective(arg2);
   jresult = result; 
@@ -444,10 +446,10 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_extendDirective (
 
 
 DllExport int SWIGSTDCALL Ada_Dispatcher_fragmentDirective (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -455,9 +457,9 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_fragmentDirective (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Dispatcher *)jarg1; 
+  arg1 = (Dispatcher *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Dispatcher::fragmentDirective(arg2);
   jresult = result; 
@@ -471,10 +473,10 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_fragmentDirective (
 
 
 DllExport int SWIGSTDCALL Ada_Dispatcher_importDirective (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -482,9 +484,9 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_importDirective (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Dispatcher *)jarg1; 
+  arg1 = (Dispatcher *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Dispatcher::importDirective(arg2);
   jresult = result; 
@@ -498,10 +500,10 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_importDirective (
 
 
 DllExport int SWIGSTDCALL Ada_Dispatcher_includeDirective (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -509,9 +511,9 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_includeDirective (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Dispatcher *)jarg1; 
+  arg1 = (Dispatcher *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Dispatcher::includeDirective(arg2);
   jresult = result; 
@@ -525,10 +527,10 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_includeDirective (
 
 
 DllExport int SWIGSTDCALL Ada_Dispatcher_insertDirective (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -536,9 +538,9 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_insertDirective (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Dispatcher *)jarg1; 
+  arg1 = (Dispatcher *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Dispatcher::insertDirective(arg2);
   jresult = result; 
@@ -552,10 +554,10 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_insertDirective (
 
 
 DllExport int SWIGSTDCALL Ada_Dispatcher_moduleDirective (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -563,9 +565,9 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_moduleDirective (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Dispatcher *)jarg1; 
+  arg1 = (Dispatcher *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Dispatcher::moduleDirective(arg2);
   jresult = result; 
@@ -579,10 +581,10 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_moduleDirective (
 
 
 DllExport int SWIGSTDCALL Ada_Dispatcher_nativeDirective (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -590,9 +592,9 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_nativeDirective (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Dispatcher *)jarg1; 
+  arg1 = (Dispatcher *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Dispatcher::nativeDirective(arg2);
   jresult = result; 
@@ -606,10 +608,10 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_nativeDirective (
 
 
 DllExport int SWIGSTDCALL Ada_Dispatcher_pragmaDirective (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -617,9 +619,9 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_pragmaDirective (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Dispatcher *)jarg1; 
+  arg1 = (Dispatcher *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Dispatcher::pragmaDirective(arg2);
   jresult = result; 
@@ -633,10 +635,10 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_pragmaDirective (
 
 
 DllExport int SWIGSTDCALL Ada_Dispatcher_typemapDirective (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -644,9 +646,9 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_typemapDirective (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Dispatcher *)jarg1; 
+  arg1 = (Dispatcher *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Dispatcher::typemapDirective(arg2);
   jresult = result; 
@@ -660,10 +662,10 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_typemapDirective (
 
 
 DllExport int SWIGSTDCALL Ada_Dispatcher_typemapitemDirective (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -671,9 +673,9 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_typemapitemDirective (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Dispatcher *)jarg1; 
+  arg1 = (Dispatcher *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Dispatcher::typemapitemDirective(arg2);
   jresult = result; 
@@ -687,10 +689,10 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_typemapitemDirective (
 
 
 DllExport int SWIGSTDCALL Ada_Dispatcher_typemapcopyDirective (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -698,9 +700,9 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_typemapcopyDirective (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Dispatcher *)jarg1; 
+  arg1 = (Dispatcher *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Dispatcher::typemapcopyDirective(arg2);
   jresult = result; 
@@ -714,10 +716,10 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_typemapcopyDirective (
 
 
 DllExport int SWIGSTDCALL Ada_Dispatcher_typesDirective (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -725,9 +727,9 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_typesDirective (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Dispatcher *)jarg1; 
+  arg1 = (Dispatcher *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Dispatcher::typesDirective(arg2);
   jresult = result; 
@@ -741,10 +743,10 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_typesDirective (
 
 
 DllExport int SWIGSTDCALL Ada_Dispatcher_cDeclaration (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -752,9 +754,9 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_cDeclaration (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Dispatcher *)jarg1; 
+  arg1 = (Dispatcher *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Dispatcher::cDeclaration(arg2);
   jresult = result; 
@@ -768,10 +770,10 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_cDeclaration (
 
 
 DllExport int SWIGSTDCALL Ada_Dispatcher_externDeclaration (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -779,9 +781,9 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_externDeclaration (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Dispatcher *)jarg1; 
+  arg1 = (Dispatcher *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Dispatcher::externDeclaration(arg2);
   jresult = result; 
@@ -795,10 +797,10 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_externDeclaration (
 
 
 DllExport int SWIGSTDCALL Ada_Dispatcher_enumDeclaration (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -806,9 +808,9 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_enumDeclaration (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Dispatcher *)jarg1; 
+  arg1 = (Dispatcher *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Dispatcher::enumDeclaration(arg2);
   jresult = result; 
@@ -822,10 +824,10 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_enumDeclaration (
 
 
 DllExport int SWIGSTDCALL Ada_Dispatcher_enumvalueDeclaration (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -833,9 +835,9 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_enumvalueDeclaration (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Dispatcher *)jarg1; 
+  arg1 = (Dispatcher *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Dispatcher::enumvalueDeclaration(arg2);
   jresult = result; 
@@ -849,10 +851,10 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_enumvalueDeclaration (
 
 
 DllExport int SWIGSTDCALL Ada_Dispatcher_enumforwardDeclaration (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -860,9 +862,9 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_enumforwardDeclaration (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Dispatcher *)jarg1; 
+  arg1 = (Dispatcher *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Dispatcher::enumforwardDeclaration(arg2);
   jresult = result; 
@@ -876,10 +878,10 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_enumforwardDeclaration (
 
 
 DllExport int SWIGSTDCALL Ada_Dispatcher_classDeclaration (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -887,9 +889,9 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_classDeclaration (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Dispatcher *)jarg1; 
+  arg1 = (Dispatcher *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Dispatcher::classDeclaration(arg2);
   jresult = result; 
@@ -903,10 +905,10 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_classDeclaration (
 
 
 DllExport int SWIGSTDCALL Ada_Dispatcher_classforwardDeclaration (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -914,9 +916,9 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_classforwardDeclaration (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Dispatcher *)jarg1; 
+  arg1 = (Dispatcher *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Dispatcher::classforwardDeclaration(arg2);
   jresult = result; 
@@ -930,10 +932,10 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_classforwardDeclaration (
 
 
 DllExport int SWIGSTDCALL Ada_Dispatcher_constructorDeclaration (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -941,9 +943,9 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_constructorDeclaration (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Dispatcher *)jarg1; 
+  arg1 = (Dispatcher *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Dispatcher::constructorDeclaration(arg2);
   jresult = result; 
@@ -957,10 +959,10 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_constructorDeclaration (
 
 
 DllExport int SWIGSTDCALL Ada_Dispatcher_destructorDeclaration (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -968,9 +970,9 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_destructorDeclaration (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Dispatcher *)jarg1; 
+  arg1 = (Dispatcher *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Dispatcher::destructorDeclaration(arg2);
   jresult = result; 
@@ -984,10 +986,10 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_destructorDeclaration (
 
 
 DllExport int SWIGSTDCALL Ada_Dispatcher_accessDeclaration (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -995,9 +997,9 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_accessDeclaration (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Dispatcher *)jarg1; 
+  arg1 = (Dispatcher *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Dispatcher::accessDeclaration(arg2);
   jresult = result; 
@@ -1011,10 +1013,10 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_accessDeclaration (
 
 
 DllExport int SWIGSTDCALL Ada_Dispatcher_usingDeclaration (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -1022,9 +1024,9 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_usingDeclaration (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Dispatcher *)jarg1; 
+  arg1 = (Dispatcher *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Dispatcher::usingDeclaration(arg2);
   jresult = result; 
@@ -1038,10 +1040,10 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_usingDeclaration (
 
 
 DllExport int SWIGSTDCALL Ada_Dispatcher_namespaceDeclaration (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -1049,9 +1051,9 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_namespaceDeclaration (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Dispatcher *)jarg1; 
+  arg1 = (Dispatcher *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Dispatcher::namespaceDeclaration(arg2);
   jresult = result; 
@@ -1065,10 +1067,10 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_namespaceDeclaration (
 
 
 DllExport int SWIGSTDCALL Ada_Dispatcher_templateDeclaration (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -1076,9 +1078,9 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_templateDeclaration (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Dispatcher *)jarg1; 
+  arg1 = (Dispatcher *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Dispatcher::templateDeclaration(arg2);
   jresult = result; 
@@ -1092,10 +1094,10 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_templateDeclaration (
 
 
 DllExport int SWIGSTDCALL Ada_Dispatcher_lambdaDeclaration (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -1103,9 +1105,9 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_lambdaDeclaration (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Dispatcher *)jarg1; 
+  arg1 = (Dispatcher *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Dispatcher::lambdaDeclaration(arg2);
   jresult = result; 
@@ -1119,12 +1121,12 @@ DllExport int SWIGSTDCALL Ada_Dispatcher_lambdaDeclaration (
 
 
 DllExport void SWIGSTDCALL Ada_delete_Language (
-  void * jarg1
+  void * a_arg1
   )
 {
   Language *arg1 = (Language *) 0 ;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
   delete arg1;
   
@@ -1134,10 +1136,10 @@ DllExport void SWIGSTDCALL Ada_delete_Language (
 
 
 DllExport int SWIGSTDCALL Ada_Language_emit_one (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -1145,9 +1147,9 @@ DllExport int SWIGSTDCALL Ada_Language_emit_one (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::emit_one(arg2);
   jresult = result; 
@@ -1161,10 +1163,10 @@ DllExport int SWIGSTDCALL Ada_Language_emit_one (
 
 
 DllExport void* SWIGSTDCALL Ada_Language_directorClassName (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   void* jresult ;
@@ -1172,9 +1174,9 @@ DllExport void* SWIGSTDCALL Ada_Language_directorClassName (
   Node *arg2 = (Node *) 0 ;
   String *result = 0 ;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (String *)(arg1)->Language::directorClassName(arg2);
   jresult = (void *) result;      
@@ -1188,26 +1190,26 @@ DllExport void* SWIGSTDCALL Ada_Language_directorClassName (
 
 
 DllExport void SWIGSTDCALL Ada_Language_main (
-  void * jarg1
+  void * a_arg1
   ,
   
-  int jarg2
+  int a_arg2
   ,
   
-  void * jarg3
+  void * a_arg3
   )
 {
   Language *arg1 = (Language *) 0 ;
   int arg2 ;
   char **arg3 ;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
   
-  arg2 = (int) jarg2; 
+  arg2 = (int) a_arg2; 
   
   
-  arg3      = (char **) jarg3; 
+  arg3      = (char **) a_arg3; 
   
   (arg1)->Language::main(arg2,arg3);
   
@@ -1217,10 +1219,10 @@ DllExport void SWIGSTDCALL Ada_Language_main (
 
 
 DllExport int SWIGSTDCALL Ada_Language_top (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -1228,9 +1230,9 @@ DllExport int SWIGSTDCALL Ada_Language_top (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::top(arg2);
   jresult = result; 
@@ -1244,10 +1246,10 @@ DllExport int SWIGSTDCALL Ada_Language_top (
 
 
 DllExport int SWIGSTDCALL Ada_Language_applyDirective (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -1255,9 +1257,9 @@ DllExport int SWIGSTDCALL Ada_Language_applyDirective (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::applyDirective(arg2);
   jresult = result; 
@@ -1271,10 +1273,10 @@ DllExport int SWIGSTDCALL Ada_Language_applyDirective (
 
 
 DllExport int SWIGSTDCALL Ada_Language_clearDirective (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -1282,9 +1284,9 @@ DllExport int SWIGSTDCALL Ada_Language_clearDirective (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::clearDirective(arg2);
   jresult = result; 
@@ -1298,10 +1300,10 @@ DllExport int SWIGSTDCALL Ada_Language_clearDirective (
 
 
 DllExport int SWIGSTDCALL Ada_Language_constantDirective (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -1309,9 +1311,9 @@ DllExport int SWIGSTDCALL Ada_Language_constantDirective (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::constantDirective(arg2);
   jresult = result; 
@@ -1325,10 +1327,10 @@ DllExport int SWIGSTDCALL Ada_Language_constantDirective (
 
 
 DllExport int SWIGSTDCALL Ada_Language_extendDirective (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -1336,9 +1338,9 @@ DllExport int SWIGSTDCALL Ada_Language_extendDirective (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::extendDirective(arg2);
   jresult = result; 
@@ -1352,10 +1354,10 @@ DllExport int SWIGSTDCALL Ada_Language_extendDirective (
 
 
 DllExport int SWIGSTDCALL Ada_Language_fragmentDirective (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -1363,9 +1365,9 @@ DllExport int SWIGSTDCALL Ada_Language_fragmentDirective (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::fragmentDirective(arg2);
   jresult = result; 
@@ -1379,10 +1381,10 @@ DllExport int SWIGSTDCALL Ada_Language_fragmentDirective (
 
 
 DllExport int SWIGSTDCALL Ada_Language_importDirective (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -1390,9 +1392,9 @@ DllExport int SWIGSTDCALL Ada_Language_importDirective (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::importDirective(arg2);
   jresult = result; 
@@ -1406,10 +1408,10 @@ DllExport int SWIGSTDCALL Ada_Language_importDirective (
 
 
 DllExport int SWIGSTDCALL Ada_Language_includeDirective (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -1417,9 +1419,9 @@ DllExport int SWIGSTDCALL Ada_Language_includeDirective (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::includeDirective(arg2);
   jresult = result; 
@@ -1433,10 +1435,10 @@ DllExport int SWIGSTDCALL Ada_Language_includeDirective (
 
 
 DllExport int SWIGSTDCALL Ada_Language_insertDirective (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -1444,9 +1446,9 @@ DllExport int SWIGSTDCALL Ada_Language_insertDirective (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::insertDirective(arg2);
   jresult = result; 
@@ -1460,10 +1462,10 @@ DllExport int SWIGSTDCALL Ada_Language_insertDirective (
 
 
 DllExport int SWIGSTDCALL Ada_Language_moduleDirective (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -1471,9 +1473,9 @@ DllExport int SWIGSTDCALL Ada_Language_moduleDirective (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::moduleDirective(arg2);
   jresult = result; 
@@ -1487,10 +1489,10 @@ DllExport int SWIGSTDCALL Ada_Language_moduleDirective (
 
 
 DllExport int SWIGSTDCALL Ada_Language_nativeDirective (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -1498,9 +1500,9 @@ DllExport int SWIGSTDCALL Ada_Language_nativeDirective (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::nativeDirective(arg2);
   jresult = result; 
@@ -1514,10 +1516,10 @@ DllExport int SWIGSTDCALL Ada_Language_nativeDirective (
 
 
 DllExport int SWIGSTDCALL Ada_Language_pragmaDirective (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -1525,9 +1527,9 @@ DllExport int SWIGSTDCALL Ada_Language_pragmaDirective (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::pragmaDirective(arg2);
   jresult = result; 
@@ -1541,10 +1543,10 @@ DllExport int SWIGSTDCALL Ada_Language_pragmaDirective (
 
 
 DllExport int SWIGSTDCALL Ada_Language_typemapDirective (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -1552,9 +1554,9 @@ DllExport int SWIGSTDCALL Ada_Language_typemapDirective (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::typemapDirective(arg2);
   jresult = result; 
@@ -1568,10 +1570,10 @@ DllExport int SWIGSTDCALL Ada_Language_typemapDirective (
 
 
 DllExport int SWIGSTDCALL Ada_Language_typemapcopyDirective (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -1579,9 +1581,9 @@ DllExport int SWIGSTDCALL Ada_Language_typemapcopyDirective (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::typemapcopyDirective(arg2);
   jresult = result; 
@@ -1595,10 +1597,10 @@ DllExport int SWIGSTDCALL Ada_Language_typemapcopyDirective (
 
 
 DllExport int SWIGSTDCALL Ada_Language_typesDirective (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -1606,9 +1608,9 @@ DllExport int SWIGSTDCALL Ada_Language_typesDirective (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::typesDirective(arg2);
   jresult = result; 
@@ -1622,10 +1624,10 @@ DllExport int SWIGSTDCALL Ada_Language_typesDirective (
 
 
 DllExport int SWIGSTDCALL Ada_Language_cDeclaration (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -1633,9 +1635,9 @@ DllExport int SWIGSTDCALL Ada_Language_cDeclaration (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::cDeclaration(arg2);
   jresult = result; 
@@ -1649,10 +1651,10 @@ DllExport int SWIGSTDCALL Ada_Language_cDeclaration (
 
 
 DllExport int SWIGSTDCALL Ada_Language_externDeclaration (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -1660,9 +1662,9 @@ DllExport int SWIGSTDCALL Ada_Language_externDeclaration (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::externDeclaration(arg2);
   jresult = result; 
@@ -1676,10 +1678,10 @@ DllExport int SWIGSTDCALL Ada_Language_externDeclaration (
 
 
 DllExport int SWIGSTDCALL Ada_Language_enumDeclaration (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -1687,9 +1689,9 @@ DllExport int SWIGSTDCALL Ada_Language_enumDeclaration (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::enumDeclaration(arg2);
   jresult = result; 
@@ -1703,10 +1705,10 @@ DllExport int SWIGSTDCALL Ada_Language_enumDeclaration (
 
 
 DllExport int SWIGSTDCALL Ada_Language_enumvalueDeclaration (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -1714,9 +1716,9 @@ DllExport int SWIGSTDCALL Ada_Language_enumvalueDeclaration (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::enumvalueDeclaration(arg2);
   jresult = result; 
@@ -1730,10 +1732,10 @@ DllExport int SWIGSTDCALL Ada_Language_enumvalueDeclaration (
 
 
 DllExport int SWIGSTDCALL Ada_Language_enumforwardDeclaration (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -1741,9 +1743,9 @@ DllExport int SWIGSTDCALL Ada_Language_enumforwardDeclaration (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::enumforwardDeclaration(arg2);
   jresult = result; 
@@ -1757,10 +1759,10 @@ DllExport int SWIGSTDCALL Ada_Language_enumforwardDeclaration (
 
 
 DllExport int SWIGSTDCALL Ada_Language_classDeclaration (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -1768,9 +1770,9 @@ DllExport int SWIGSTDCALL Ada_Language_classDeclaration (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::classDeclaration(arg2);
   jresult = result; 
@@ -1784,10 +1786,10 @@ DllExport int SWIGSTDCALL Ada_Language_classDeclaration (
 
 
 DllExport int SWIGSTDCALL Ada_Language_classforwardDeclaration (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -1795,9 +1797,9 @@ DllExport int SWIGSTDCALL Ada_Language_classforwardDeclaration (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::classforwardDeclaration(arg2);
   jresult = result; 
@@ -1811,10 +1813,10 @@ DllExport int SWIGSTDCALL Ada_Language_classforwardDeclaration (
 
 
 DllExport int SWIGSTDCALL Ada_Language_constructorDeclaration (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -1822,9 +1824,9 @@ DllExport int SWIGSTDCALL Ada_Language_constructorDeclaration (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::constructorDeclaration(arg2);
   jresult = result; 
@@ -1838,10 +1840,10 @@ DllExport int SWIGSTDCALL Ada_Language_constructorDeclaration (
 
 
 DllExport int SWIGSTDCALL Ada_Language_destructorDeclaration (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -1849,9 +1851,9 @@ DllExport int SWIGSTDCALL Ada_Language_destructorDeclaration (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::destructorDeclaration(arg2);
   jresult = result; 
@@ -1865,10 +1867,10 @@ DllExport int SWIGSTDCALL Ada_Language_destructorDeclaration (
 
 
 DllExport int SWIGSTDCALL Ada_Language_accessDeclaration (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -1876,9 +1878,9 @@ DllExport int SWIGSTDCALL Ada_Language_accessDeclaration (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::accessDeclaration(arg2);
   jresult = result; 
@@ -1892,10 +1894,10 @@ DllExport int SWIGSTDCALL Ada_Language_accessDeclaration (
 
 
 DllExport int SWIGSTDCALL Ada_Language_namespaceDeclaration (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -1903,9 +1905,9 @@ DllExport int SWIGSTDCALL Ada_Language_namespaceDeclaration (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::namespaceDeclaration(arg2);
   jresult = result; 
@@ -1919,10 +1921,10 @@ DllExport int SWIGSTDCALL Ada_Language_namespaceDeclaration (
 
 
 DllExport int SWIGSTDCALL Ada_Language_usingDeclaration (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -1930,9 +1932,9 @@ DllExport int SWIGSTDCALL Ada_Language_usingDeclaration (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::usingDeclaration(arg2);
   jresult = result; 
@@ -1946,10 +1948,10 @@ DllExport int SWIGSTDCALL Ada_Language_usingDeclaration (
 
 
 DllExport int SWIGSTDCALL Ada_Language_functionHandler (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -1957,9 +1959,9 @@ DllExport int SWIGSTDCALL Ada_Language_functionHandler (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::functionHandler(arg2);
   jresult = result; 
@@ -1973,10 +1975,10 @@ DllExport int SWIGSTDCALL Ada_Language_functionHandler (
 
 
 DllExport int SWIGSTDCALL Ada_Language_globalfunctionHandler (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -1984,9 +1986,9 @@ DllExport int SWIGSTDCALL Ada_Language_globalfunctionHandler (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::globalfunctionHandler(arg2);
   jresult = result; 
@@ -2000,10 +2002,10 @@ DllExport int SWIGSTDCALL Ada_Language_globalfunctionHandler (
 
 
 DllExport int SWIGSTDCALL Ada_Language_memberfunctionHandler (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -2011,9 +2013,9 @@ DllExport int SWIGSTDCALL Ada_Language_memberfunctionHandler (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::memberfunctionHandler(arg2);
   jresult = result; 
@@ -2027,10 +2029,10 @@ DllExport int SWIGSTDCALL Ada_Language_memberfunctionHandler (
 
 
 DllExport int SWIGSTDCALL Ada_Language_staticmemberfunctionHandler (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -2038,9 +2040,9 @@ DllExport int SWIGSTDCALL Ada_Language_staticmemberfunctionHandler (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::staticmemberfunctionHandler(arg2);
   jresult = result; 
@@ -2054,10 +2056,10 @@ DllExport int SWIGSTDCALL Ada_Language_staticmemberfunctionHandler (
 
 
 DllExport int SWIGSTDCALL Ada_Language_callbackfunctionHandler (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -2065,9 +2067,9 @@ DllExport int SWIGSTDCALL Ada_Language_callbackfunctionHandler (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::callbackfunctionHandler(arg2);
   jresult = result; 
@@ -2081,10 +2083,10 @@ DllExport int SWIGSTDCALL Ada_Language_callbackfunctionHandler (
 
 
 DllExport int SWIGSTDCALL Ada_Language_variableHandler (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -2092,9 +2094,9 @@ DllExport int SWIGSTDCALL Ada_Language_variableHandler (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::variableHandler(arg2);
   jresult = result; 
@@ -2108,10 +2110,10 @@ DllExport int SWIGSTDCALL Ada_Language_variableHandler (
 
 
 DllExport int SWIGSTDCALL Ada_Language_globalvariableHandler (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -2119,9 +2121,9 @@ DllExport int SWIGSTDCALL Ada_Language_globalvariableHandler (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::globalvariableHandler(arg2);
   jresult = result; 
@@ -2135,10 +2137,10 @@ DllExport int SWIGSTDCALL Ada_Language_globalvariableHandler (
 
 
 DllExport int SWIGSTDCALL Ada_Language_membervariableHandler (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -2146,9 +2148,9 @@ DllExport int SWIGSTDCALL Ada_Language_membervariableHandler (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::membervariableHandler(arg2);
   jresult = result; 
@@ -2162,10 +2164,10 @@ DllExport int SWIGSTDCALL Ada_Language_membervariableHandler (
 
 
 DllExport int SWIGSTDCALL Ada_Language_staticmembervariableHandler (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -2173,9 +2175,9 @@ DllExport int SWIGSTDCALL Ada_Language_staticmembervariableHandler (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::staticmembervariableHandler(arg2);
   jresult = result; 
@@ -2189,10 +2191,10 @@ DllExport int SWIGSTDCALL Ada_Language_staticmembervariableHandler (
 
 
 DllExport int SWIGSTDCALL Ada_Language_memberconstantHandler (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -2200,9 +2202,9 @@ DllExport int SWIGSTDCALL Ada_Language_memberconstantHandler (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::memberconstantHandler(arg2);
   jresult = result; 
@@ -2216,10 +2218,10 @@ DllExport int SWIGSTDCALL Ada_Language_memberconstantHandler (
 
 
 DllExport int SWIGSTDCALL Ada_Language_constructorHandler (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -2227,9 +2229,9 @@ DllExport int SWIGSTDCALL Ada_Language_constructorHandler (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::constructorHandler(arg2);
   jresult = result; 
@@ -2243,10 +2245,10 @@ DllExport int SWIGSTDCALL Ada_Language_constructorHandler (
 
 
 DllExport int SWIGSTDCALL Ada_Language_copyconstructorHandler (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -2254,9 +2256,9 @@ DllExport int SWIGSTDCALL Ada_Language_copyconstructorHandler (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::copyconstructorHandler(arg2);
   jresult = result; 
@@ -2270,10 +2272,10 @@ DllExport int SWIGSTDCALL Ada_Language_copyconstructorHandler (
 
 
 DllExport int SWIGSTDCALL Ada_Language_destructorHandler (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -2281,9 +2283,9 @@ DllExport int SWIGSTDCALL Ada_Language_destructorHandler (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::destructorHandler(arg2);
   jresult = result; 
@@ -2297,10 +2299,10 @@ DllExport int SWIGSTDCALL Ada_Language_destructorHandler (
 
 
 DllExport int SWIGSTDCALL Ada_Language_classHandler (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -2308,9 +2310,9 @@ DllExport int SWIGSTDCALL Ada_Language_classHandler (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::classHandler(arg2);
   jresult = result; 
@@ -2324,10 +2326,10 @@ DllExport int SWIGSTDCALL Ada_Language_classHandler (
 
 
 DllExport int SWIGSTDCALL Ada_Language_typedefHandler (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -2335,9 +2337,9 @@ DllExport int SWIGSTDCALL Ada_Language_typedefHandler (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::typedefHandler(arg2);
   jresult = result; 
@@ -2351,10 +2353,10 @@ DllExport int SWIGSTDCALL Ada_Language_typedefHandler (
 
 
 DllExport int SWIGSTDCALL Ada_Language_constantWrapper (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -2362,9 +2364,9 @@ DllExport int SWIGSTDCALL Ada_Language_constantWrapper (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::constantWrapper(arg2);
   jresult = result; 
@@ -2378,10 +2380,10 @@ DllExport int SWIGSTDCALL Ada_Language_constantWrapper (
 
 
 DllExport int SWIGSTDCALL Ada_Language_variableWrapper (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -2389,9 +2391,9 @@ DllExport int SWIGSTDCALL Ada_Language_variableWrapper (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::variableWrapper(arg2);
   jresult = result; 
@@ -2405,10 +2407,10 @@ DllExport int SWIGSTDCALL Ada_Language_variableWrapper (
 
 
 DllExport int SWIGSTDCALL Ada_Language_functionWrapper (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -2416,9 +2418,9 @@ DllExport int SWIGSTDCALL Ada_Language_functionWrapper (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::functionWrapper(arg2);
   jresult = result; 
@@ -2432,10 +2434,10 @@ DllExport int SWIGSTDCALL Ada_Language_functionWrapper (
 
 
 DllExport int SWIGSTDCALL Ada_Language_nativeWrapper (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -2443,9 +2445,9 @@ DllExport int SWIGSTDCALL Ada_Language_nativeWrapper (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::nativeWrapper(arg2);
   jresult = result; 
@@ -2459,10 +2461,10 @@ DllExport int SWIGSTDCALL Ada_Language_nativeWrapper (
 
 
 DllExport int SWIGSTDCALL Ada_Language_classDirector (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -2470,9 +2472,9 @@ DllExport int SWIGSTDCALL Ada_Language_classDirector (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::classDirector(arg2);
   jresult = result; 
@@ -2486,10 +2488,10 @@ DllExport int SWIGSTDCALL Ada_Language_classDirector (
 
 
 DllExport int SWIGSTDCALL Ada_Language_classDirectorInit (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -2497,9 +2499,9 @@ DllExport int SWIGSTDCALL Ada_Language_classDirectorInit (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::classDirectorInit(arg2);
   jresult = result; 
@@ -2513,10 +2515,10 @@ DllExport int SWIGSTDCALL Ada_Language_classDirectorInit (
 
 
 DllExport int SWIGSTDCALL Ada_Language_classDirectorEnd (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -2524,9 +2526,9 @@ DllExport int SWIGSTDCALL Ada_Language_classDirectorEnd (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::classDirectorEnd(arg2);
   jresult = result; 
@@ -2540,25 +2542,25 @@ DllExport int SWIGSTDCALL Ada_Language_classDirectorEnd (
 
 
 DllExport int SWIGSTDCALL Ada_Language_unrollVirtualMethods__SWIG_0 (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   ,
   
-  void* jarg3
+  void* a_arg3
   ,
   
-  void* jarg4
+  void* a_arg4
   ,
   
-  int jarg5
+  int a_arg5
   ,
   
-  int* jarg6
+  int* a_arg6
   ,
   
-  int jarg7
+  int a_arg7
   )
 {
   int jresult ;
@@ -2571,24 +2573,24 @@ DllExport int SWIGSTDCALL Ada_Language_unrollVirtualMethods__SWIG_0 (
   int arg7 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
-  arg3 = (Node *)jarg3; 
+  arg3 = (Node *)a_arg3; 
   
-  arg4 = (List *)jarg4; 
-  
-  
-  arg5 = (int) jarg5; 
+  arg4 = (List *)a_arg4; 
   
   
-  
-  arg6 = (int *)jarg6;
+  arg5 = (int) a_arg5; 
   
   
   
-  arg7 = (int) jarg7; 
+  arg6 = (int *)a_arg6;
+  
+  
+  
+  arg7 = (int) a_arg7; 
   
   
   result = (int)(arg1)->Language::unrollVirtualMethods(arg2,arg3,arg4,arg5,*arg6,arg7);
@@ -2603,22 +2605,22 @@ DllExport int SWIGSTDCALL Ada_Language_unrollVirtualMethods__SWIG_0 (
 
 
 DllExport int SWIGSTDCALL Ada_Language_unrollVirtualMethods__SWIG_1 (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   ,
   
-  void* jarg3
+  void* a_arg3
   ,
   
-  void* jarg4
+  void* a_arg4
   ,
   
-  int jarg5
+  int a_arg5
   ,
   
-  int* jarg6
+  int* a_arg6
   )
 {
   int jresult ;
@@ -2630,20 +2632,20 @@ DllExport int SWIGSTDCALL Ada_Language_unrollVirtualMethods__SWIG_1 (
   int *arg6 = 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
-  arg3 = (Node *)jarg3; 
+  arg3 = (Node *)a_arg3; 
   
-  arg4 = (List *)jarg4; 
-  
-  
-  arg5 = (int) jarg5; 
+  arg4 = (List *)a_arg4; 
   
   
+  arg5 = (int) a_arg5; 
   
-  arg6 = (int *)jarg6;
+  
+  
+  arg6 = (int *)a_arg6;
   
   
   result = (int)(arg1)->Language::unrollVirtualMethods(arg2,arg3,arg4,arg5,*arg6);
@@ -2658,10 +2660,10 @@ DllExport int SWIGSTDCALL Ada_Language_unrollVirtualMethods__SWIG_1 (
 
 
 DllExport int SWIGSTDCALL Ada_Language_classDirectorConstructor (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -2669,9 +2671,9 @@ DllExport int SWIGSTDCALL Ada_Language_classDirectorConstructor (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::classDirectorConstructor(arg2);
   jresult = result; 
@@ -2685,10 +2687,10 @@ DllExport int SWIGSTDCALL Ada_Language_classDirectorConstructor (
 
 
 DllExport int SWIGSTDCALL Ada_Language_classDirectorDefaultConstructor (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -2696,9 +2698,9 @@ DllExport int SWIGSTDCALL Ada_Language_classDirectorDefaultConstructor (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::classDirectorDefaultConstructor(arg2);
   jresult = result; 
@@ -2712,16 +2714,16 @@ DllExport int SWIGSTDCALL Ada_Language_classDirectorDefaultConstructor (
 
 
 DllExport int SWIGSTDCALL Ada_Language_classDirectorMethod (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   ,
   
-  void* jarg3
+  void* a_arg3
   ,
   
-  void* jarg4
+  void* a_arg4
   )
 {
   int jresult ;
@@ -2731,13 +2733,13 @@ DllExport int SWIGSTDCALL Ada_Language_classDirectorMethod (
   String *arg4 = (String *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
-  arg3 = (Node *)jarg3; 
+  arg3 = (Node *)a_arg3; 
   
-  arg4 = (String *)jarg4; 
+  arg4 = (String *)a_arg4; 
   
   result = (int)(arg1)->Language::classDirectorMethod(arg2,arg3,arg4);
   jresult = result; 
@@ -2751,10 +2753,10 @@ DllExport int SWIGSTDCALL Ada_Language_classDirectorMethod (
 
 
 DllExport int SWIGSTDCALL Ada_Language_classDirectorConstructors (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -2762,9 +2764,9 @@ DllExport int SWIGSTDCALL Ada_Language_classDirectorConstructors (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::classDirectorConstructors(arg2);
   jresult = result; 
@@ -2778,10 +2780,10 @@ DllExport int SWIGSTDCALL Ada_Language_classDirectorConstructors (
 
 
 DllExport int SWIGSTDCALL Ada_Language_classDirectorDestructor (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -2789,9 +2791,9 @@ DllExport int SWIGSTDCALL Ada_Language_classDirectorDestructor (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::classDirectorDestructor(arg2);
   jresult = result; 
@@ -2805,10 +2807,10 @@ DllExport int SWIGSTDCALL Ada_Language_classDirectorDestructor (
 
 
 DllExport int SWIGSTDCALL Ada_Language_classDirectorMethods (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -2816,9 +2818,9 @@ DllExport int SWIGSTDCALL Ada_Language_classDirectorMethods (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::classDirectorMethods(arg2);
   jresult = result; 
@@ -2832,10 +2834,10 @@ DllExport int SWIGSTDCALL Ada_Language_classDirectorMethods (
 
 
 DllExport int SWIGSTDCALL Ada_Language_classDirectorDisown (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -2843,9 +2845,9 @@ DllExport int SWIGSTDCALL Ada_Language_classDirectorDisown (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::classDirectorDisown(arg2);
   jresult = result; 
@@ -2859,10 +2861,10 @@ DllExport int SWIGSTDCALL Ada_Language_classDirectorDisown (
 
 
 DllExport int SWIGSTDCALL Ada_Language_validIdentifier (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -2870,9 +2872,9 @@ DllExport int SWIGSTDCALL Ada_Language_validIdentifier (
   String *arg2 = (String *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (String *)jarg2; 
+  arg2 = (String *)a_arg2; 
   
   result = (int)(arg1)->Language::validIdentifier(arg2);
   jresult = result; 
@@ -2886,16 +2888,16 @@ DllExport int SWIGSTDCALL Ada_Language_validIdentifier (
 
 
 DllExport int SWIGSTDCALL Ada_Language_addSymbol__SWIG_0 (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   ,
   
-  void* jarg3
+  void* a_arg3
   ,
   
-  void* jarg4
+  void* a_arg4
   )
 {
   int jresult ;
@@ -2905,13 +2907,13 @@ DllExport int SWIGSTDCALL Ada_Language_addSymbol__SWIG_0 (
   const_String_or_char_ptr arg4 = (const_String_or_char_ptr) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (String *)jarg2; 
+  arg2 = (String *)a_arg2; 
   
-  arg3 = (Node *)jarg3; 
+  arg3 = (Node *)a_arg3; 
   
-  arg4 = (const_String_or_char_ptr)jarg4; 
+  arg4 = (const_String_or_char_ptr)a_arg4; 
   
   result = (int)(arg1)->Language::addSymbol((String const *)arg2,(Node const *)arg3,arg4);
   jresult = result; 
@@ -2925,13 +2927,13 @@ DllExport int SWIGSTDCALL Ada_Language_addSymbol__SWIG_0 (
 
 
 DllExport int SWIGSTDCALL Ada_Language_addSymbol__SWIG_1 (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   ,
   
-  void* jarg3
+  void* a_arg3
   )
 {
   int jresult ;
@@ -2940,11 +2942,11 @@ DllExport int SWIGSTDCALL Ada_Language_addSymbol__SWIG_1 (
   Node *arg3 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (String *)jarg2; 
+  arg2 = (String *)a_arg2; 
   
-  arg3 = (Node *)jarg3; 
+  arg3 = (Node *)a_arg3; 
   
   result = (int)(arg1)->Language::addSymbol((String const *)arg2,(Node const *)arg3);
   jresult = result; 
@@ -2958,16 +2960,16 @@ DllExport int SWIGSTDCALL Ada_Language_addSymbol__SWIG_1 (
 
 
 DllExport int SWIGSTDCALL Ada_Language_addInterfaceSymbol__SWIG_0 (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   ,
   
-  void* jarg3
+  void* a_arg3
   ,
   
-  void* jarg4
+  void* a_arg4
   )
 {
   int jresult ;
@@ -2977,13 +2979,13 @@ DllExport int SWIGSTDCALL Ada_Language_addInterfaceSymbol__SWIG_0 (
   const_String_or_char_ptr arg4 = (const_String_or_char_ptr) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (String *)jarg2; 
+  arg2 = (String *)a_arg2; 
   
-  arg3 = (Node *)jarg3; 
+  arg3 = (Node *)a_arg3; 
   
-  arg4 = (const_String_or_char_ptr)jarg4; 
+  arg4 = (const_String_or_char_ptr)a_arg4; 
   
   result = (int)(arg1)->Language::addInterfaceSymbol((String const *)arg2,arg3,arg4);
   jresult = result; 
@@ -2997,13 +2999,13 @@ DllExport int SWIGSTDCALL Ada_Language_addInterfaceSymbol__SWIG_0 (
 
 
 DllExport int SWIGSTDCALL Ada_Language_addInterfaceSymbol__SWIG_1 (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   ,
   
-  void* jarg3
+  void* a_arg3
   )
 {
   int jresult ;
@@ -3012,11 +3014,11 @@ DllExport int SWIGSTDCALL Ada_Language_addInterfaceSymbol__SWIG_1 (
   Node *arg3 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (String *)jarg2; 
+  arg2 = (String *)a_arg2; 
   
-  arg3 = (Node *)jarg3; 
+  arg3 = (Node *)a_arg3; 
   
   result = (int)(arg1)->Language::addInterfaceSymbol((String const *)arg2,arg3);
   jresult = result; 
@@ -3030,12 +3032,12 @@ DllExport int SWIGSTDCALL Ada_Language_addInterfaceSymbol__SWIG_1 (
 
 
 DllExport void SWIGSTDCALL Ada_Language_dumpSymbols (
-  void * jarg1
+  void * a_arg1
   )
 {
   Language *arg1 = (Language *) 0 ;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
   (arg1)->Language::dumpSymbols();
   
@@ -3045,13 +3047,13 @@ DllExport void SWIGSTDCALL Ada_Language_dumpSymbols (
 
 
 DllExport void* SWIGSTDCALL Ada_Language_symbolLookup__SWIG_0 (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   ,
   
-  void* jarg3
+  void* a_arg3
   )
 {
   void* jresult ;
@@ -3060,11 +3062,11 @@ DllExport void* SWIGSTDCALL Ada_Language_symbolLookup__SWIG_0 (
   const_String_or_char_ptr arg3 = (const_String_or_char_ptr) 0 ;
   Node *result = 0 ;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (String *)jarg2; 
+  arg2 = (String *)a_arg2; 
   
-  arg3 = (const_String_or_char_ptr)jarg3; 
+  arg3 = (const_String_or_char_ptr)a_arg3; 
   
   result = (Node *)(arg1)->Language::symbolLookup((String const *)arg2,arg3);
   jresult = (void *) result;      
@@ -3078,10 +3080,10 @@ DllExport void* SWIGSTDCALL Ada_Language_symbolLookup__SWIG_0 (
 
 
 DllExport void* SWIGSTDCALL Ada_Language_symbolLookup__SWIG_1 (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   void* jresult ;
@@ -3089,9 +3091,9 @@ DllExport void* SWIGSTDCALL Ada_Language_symbolLookup__SWIG_1 (
   String *arg2 = (String *) 0 ;
   Node *result = 0 ;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (String *)jarg2; 
+  arg2 = (String *)a_arg2; 
   
   result = (Node *)(arg1)->Language::symbolLookup((String const *)arg2);
   jresult = (void *) result;      
@@ -3105,10 +3107,10 @@ DllExport void* SWIGSTDCALL Ada_Language_symbolLookup__SWIG_1 (
 
 
 DllExport void* SWIGSTDCALL Ada_Language_symbolAddScope (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   void* jresult ;
@@ -3116,9 +3118,9 @@ DllExport void* SWIGSTDCALL Ada_Language_symbolAddScope (
   const_String_or_char_ptr arg2 = (const_String_or_char_ptr) 0 ;
   Hash *result = 0 ;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (const_String_or_char_ptr)jarg2; 
+  arg2 = (const_String_or_char_ptr)a_arg2; 
   
   result = (Hash *)(arg1)->Language::symbolAddScope(arg2);
   jresult = (void *) result;      
@@ -3132,10 +3134,10 @@ DllExport void* SWIGSTDCALL Ada_Language_symbolAddScope (
 
 
 DllExport void* SWIGSTDCALL Ada_Language_symbolScopeLookup (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   void* jresult ;
@@ -3143,9 +3145,9 @@ DllExport void* SWIGSTDCALL Ada_Language_symbolScopeLookup (
   const_String_or_char_ptr arg2 = (const_String_or_char_ptr) 0 ;
   Hash *result = 0 ;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (const_String_or_char_ptr)jarg2; 
+  arg2 = (const_String_or_char_ptr)a_arg2; 
   
   result = (Hash *)(arg1)->Language::symbolScopeLookup(arg2);
   jresult = (void *) result;      
@@ -3159,10 +3161,10 @@ DllExport void* SWIGSTDCALL Ada_Language_symbolScopeLookup (
 
 
 DllExport void* SWIGSTDCALL Ada_Language_symbolScopePseudoSymbolLookup (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   void* jresult ;
@@ -3170,9 +3172,9 @@ DllExport void* SWIGSTDCALL Ada_Language_symbolScopePseudoSymbolLookup (
   const_String_or_char_ptr arg2 = (const_String_or_char_ptr) 0 ;
   Hash *result = 0 ;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (const_String_or_char_ptr)jarg2; 
+  arg2 = (const_String_or_char_ptr)a_arg2; 
   
   result = (Hash *)(arg1)->Language::symbolScopePseudoSymbolLookup(arg2);
   jresult = (void *) result;      
@@ -3186,14 +3188,14 @@ DllExport void* SWIGSTDCALL Ada_Language_symbolScopePseudoSymbolLookup (
 
 
 DllExport void* SWIGSTDCALL Ada_Language_classLookup (
-  void* jarg1
+  void* a_arg1
   )
 {
   void* jresult ;
   SwigType *arg1 = (SwigType *) 0 ;
   Node *result = 0 ;
   
-  arg1 = (SwigType *)jarg1; 
+  arg1 = (SwigType *)a_arg1; 
   
   result = (Node *)Language::classLookup((void const *)arg1);
   jresult = (void *) result;      
@@ -3207,14 +3209,14 @@ DllExport void* SWIGSTDCALL Ada_Language_classLookup (
 
 
 DllExport void* SWIGSTDCALL Ada_Language_enumLookup (
-  void* jarg1
+  void* a_arg1
   )
 {
   void* jresult ;
   SwigType *arg1 = (SwigType *) 0 ;
   Node *result = 0 ;
   
-  arg1 = (SwigType *)jarg1; 
+  arg1 = (SwigType *)a_arg1; 
   
   result = (Node *)Language::enumLookup(arg1);
   jresult = (void *) result;      
@@ -3228,10 +3230,10 @@ DllExport void* SWIGSTDCALL Ada_Language_enumLookup (
 
 
 DllExport int SWIGSTDCALL Ada_Language_abstractClassTest (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -3239,9 +3241,9 @@ DllExport int SWIGSTDCALL Ada_Language_abstractClassTest (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::abstractClassTest(arg2);
   jresult = result; 
@@ -3255,10 +3257,10 @@ DllExport int SWIGSTDCALL Ada_Language_abstractClassTest (
 
 
 DllExport int SWIGSTDCALL Ada_Language_is_assignable (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -3266,9 +3268,9 @@ DllExport int SWIGSTDCALL Ada_Language_is_assignable (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::is_assignable(arg2);
   jresult = result; 
@@ -3282,14 +3284,14 @@ DllExport int SWIGSTDCALL Ada_Language_is_assignable (
 
 
 DllExport void* SWIGSTDCALL Ada_Language_runtimeCode (
-  void * jarg1
+  void * a_arg1
   )
 {
   void* jresult ;
   Language *arg1 = (Language *) 0 ;
   String *result = 0 ;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
   result = (String *)(arg1)->Language::runtimeCode();
   jresult = (void *) result;      
@@ -3303,14 +3305,14 @@ DllExport void* SWIGSTDCALL Ada_Language_runtimeCode (
 
 
 DllExport void* SWIGSTDCALL Ada_Language_defaultExternalRuntimeFilename (
-  void * jarg1
+  void * a_arg1
   )
 {
   void* jresult ;
   Language *arg1 = (Language *) 0 ;
   String *result = 0 ;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
   result = (String *)(arg1)->Language::defaultExternalRuntimeFilename();
   jresult = (void *) result;      
@@ -3324,16 +3326,16 @@ DllExport void* SWIGSTDCALL Ada_Language_defaultExternalRuntimeFilename (
 
 
 DllExport void SWIGSTDCALL Ada_Language_replaceSpecialVariables (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   ,
   
-  void* jarg3
+  void* a_arg3
   ,
   
-  void* jarg4
+  void* a_arg4
   )
 {
   Language *arg1 = (Language *) 0 ;
@@ -3341,13 +3343,13 @@ DllExport void SWIGSTDCALL Ada_Language_replaceSpecialVariables (
   String *arg3 = (String *) 0 ;
   Parm *arg4 = (Parm *) 0 ;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (String *)jarg2; 
+  arg2 = (String *)a_arg2; 
   
-  arg3 = (String *)jarg3; 
+  arg3 = (String *)a_arg3; 
   
-  arg4 = (Parm *)jarg4; 
+  arg4 = (Parm *)a_arg4; 
   
   (arg1)->Language::replaceSpecialVariables(arg2,arg3,arg4);
   
@@ -3357,12 +3359,12 @@ DllExport void SWIGSTDCALL Ada_Language_replaceSpecialVariables (
 
 
 DllExport void SWIGSTDCALL Ada_Language_enable_cplus_runtime_mode (
-  void * jarg1
+  void * a_arg1
   )
 {
   Language *arg1 = (Language *) 0 ;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
   (arg1)->Language::enable_cplus_runtime_mode();
   
@@ -3372,14 +3374,14 @@ DllExport void SWIGSTDCALL Ada_Language_enable_cplus_runtime_mode (
 
 
 DllExport int SWIGSTDCALL Ada_Language_cplus_runtime_mode (
-  void * jarg1
+  void * a_arg1
   )
 {
   int jresult ;
   Language *arg1 = (Language *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
   result = (int)(arg1)->Language::cplus_runtime_mode();
   jresult = result; 
@@ -3393,12 +3395,12 @@ DllExport int SWIGSTDCALL Ada_Language_cplus_runtime_mode (
 
 
 DllExport void SWIGSTDCALL Ada_Language_allow_protected_and_private_Members (
-  void * jarg1
+  void * a_arg1
   )
 {
   Language *arg1 = (Language *) 0 ;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
   (arg1)->Language::allow_protected_and_private_Members();
   
@@ -3408,19 +3410,19 @@ DllExport void SWIGSTDCALL Ada_Language_allow_protected_and_private_Members (
 
 
 DllExport void SWIGSTDCALL Ada_Language_allow_directors__SWIG_0 (
-  void * jarg1
+  void * a_arg1
   ,
   
-  int jarg2
+  int a_arg2
   )
 {
   Language *arg1 = (Language *) 0 ;
   int arg2 ;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
   
-  arg2 = (int) jarg2; 
+  arg2 = (int) a_arg2; 
   
   
   (arg1)->Language::allow_directors(arg2);
@@ -3431,12 +3433,12 @@ DllExport void SWIGSTDCALL Ada_Language_allow_directors__SWIG_0 (
 
 
 DllExport void SWIGSTDCALL Ada_Language_allow_directors__SWIG_1 (
-  void * jarg1
+  void * a_arg1
   )
 {
   Language *arg1 = (Language *) 0 ;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
   (arg1)->Language::allow_directors();
   
@@ -3446,14 +3448,14 @@ DllExport void SWIGSTDCALL Ada_Language_allow_directors__SWIG_1 (
 
 
 DllExport int SWIGSTDCALL Ada_Language_directorsEnabled (
-  void * jarg1
+  void * a_arg1
   )
 {
   int jresult ;
   Language *arg1 = (Language *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
   result = (int)((Language const *)arg1)->Language::directorsEnabled();
   jresult = result; 
@@ -3467,19 +3469,19 @@ DllExport int SWIGSTDCALL Ada_Language_directorsEnabled (
 
 
 DllExport void SWIGSTDCALL Ada_Language_allow_dirprot__SWIG_0 (
-  void * jarg1
+  void * a_arg1
   ,
   
-  int jarg2
+  int a_arg2
   )
 {
   Language *arg1 = (Language *) 0 ;
   int arg2 ;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
   
-  arg2 = (int) jarg2; 
+  arg2 = (int) a_arg2; 
   
   
   (arg1)->Language::allow_dirprot(arg2);
@@ -3490,12 +3492,12 @@ DllExport void SWIGSTDCALL Ada_Language_allow_dirprot__SWIG_0 (
 
 
 DllExport void SWIGSTDCALL Ada_Language_allow_dirprot__SWIG_1 (
-  void * jarg1
+  void * a_arg1
   )
 {
   Language *arg1 = (Language *) 0 ;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
   (arg1)->Language::allow_dirprot();
   
@@ -3505,19 +3507,19 @@ DllExport void SWIGSTDCALL Ada_Language_allow_dirprot__SWIG_1 (
 
 
 DllExport void SWIGSTDCALL Ada_Language_allow_allprotected__SWIG_0 (
-  void * jarg1
+  void * a_arg1
   ,
   
-  int jarg2
+  int a_arg2
   )
 {
   Language *arg1 = (Language *) 0 ;
   int arg2 ;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
   
-  arg2 = (int) jarg2; 
+  arg2 = (int) a_arg2; 
   
   
   (arg1)->Language::allow_allprotected(arg2);
@@ -3528,12 +3530,12 @@ DllExport void SWIGSTDCALL Ada_Language_allow_allprotected__SWIG_0 (
 
 
 DllExport void SWIGSTDCALL Ada_Language_allow_allprotected__SWIG_1 (
-  void * jarg1
+  void * a_arg1
   )
 {
   Language *arg1 = (Language *) 0 ;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
   (arg1)->Language::allow_allprotected();
   
@@ -3543,14 +3545,14 @@ DllExport void SWIGSTDCALL Ada_Language_allow_allprotected__SWIG_1 (
 
 
 DllExport int SWIGSTDCALL Ada_Language_dirprot_mode (
-  void * jarg1
+  void * a_arg1
   )
 {
   int jresult ;
   Language *arg1 = (Language *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
   result = (int)((Language const *)arg1)->Language::dirprot_mode();
   jresult = result; 
@@ -3564,10 +3566,10 @@ DllExport int SWIGSTDCALL Ada_Language_dirprot_mode (
 
 
 DllExport int SWIGSTDCALL Ada_Language_need_nonpublic_ctor (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -3575,9 +3577,9 @@ DllExport int SWIGSTDCALL Ada_Language_need_nonpublic_ctor (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::need_nonpublic_ctor(arg2);
   jresult = result; 
@@ -3591,10 +3593,10 @@ DllExport int SWIGSTDCALL Ada_Language_need_nonpublic_ctor (
 
 
 DllExport int SWIGSTDCALL Ada_Language_need_nonpublic_member (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -3602,9 +3604,9 @@ DllExport int SWIGSTDCALL Ada_Language_need_nonpublic_member (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)(arg1)->Language::need_nonpublic_member(arg2);
   jresult = result; 
@@ -3618,18 +3620,18 @@ DllExport int SWIGSTDCALL Ada_Language_need_nonpublic_member (
 
 
 DllExport void SWIGSTDCALL Ada_Language_setSubclassInstanceCheck (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   Language *arg1 = (Language *) 0 ;
   String *arg2 = (String *) 0 ;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (String *)jarg2; 
+  arg2 = (String *)a_arg2; 
   
   (arg1)->Language::setSubclassInstanceCheck(arg2);
   
@@ -3639,24 +3641,24 @@ DllExport void SWIGSTDCALL Ada_Language_setSubclassInstanceCheck (
 
 
 DllExport void SWIGSTDCALL Ada_Language_setOverloadResolutionTemplates (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   ,
   
-  void* jarg3
+  void* a_arg3
   )
 {
   Language *arg1 = (Language *) 0 ;
   String *arg2 = (String *) 0 ;
   String *arg3 = (String *) 0 ;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (String *)jarg2; 
+  arg2 = (String *)a_arg2; 
   
-  arg3 = (String *)jarg3; 
+  arg3 = (String *)a_arg3; 
   
   (arg1)->Language::setOverloadResolutionTemplates(arg2,arg3);
   
@@ -3682,20 +3684,20 @@ DllExport void * SWIGSTDCALL Ada_Language_instance (
 
 
 
-DllExport void SWIGSTDCALL Ada_Language_allow_multiple_input (
-  void * jarg1
+DllExport void SWIGSTDCALL Ada_Language_allow_multiple_input__SWIG_0 (
+  void * a_arg1
   ,
   
-  int jarg2
+  int a_arg2
   )
 {
   Language *arg1 = (Language *) 0 ;
   int arg2 ;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
   
-  arg2 = (int) jarg2; 
+  arg2 = (int) a_arg2; 
   
   
   (arg1)->Language::allow_multiple_input(arg2);
@@ -3705,20 +3707,35 @@ DllExport void SWIGSTDCALL Ada_Language_allow_multiple_input (
 
 
 
-DllExport void SWIGSTDCALL Ada_Language_allow_overloading (
-  void * jarg1
+DllExport void SWIGSTDCALL Ada_Language_allow_multiple_input__SWIG_1 (
+  void * a_arg1
+  )
+{
+  Language *arg1 = (Language *) 0 ;
+  
+  arg1 = (Language *)a_arg1; 
+  
+  (arg1)->Language::allow_multiple_input();
+  
+  
+}
+
+
+
+DllExport void SWIGSTDCALL Ada_Language_allow_overloading__SWIG_0 (
+  void * a_arg1
   ,
   
-  int jarg2
+  int a_arg2
   )
 {
   Language *arg1 = (Language *) 0 ;
   int arg2 ;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
   
-  arg2 = (int) jarg2; 
+  arg2 = (int) a_arg2; 
   
   
   (arg1)->Language::allow_overloading(arg2);
@@ -3728,15 +3745,30 @@ DllExport void SWIGSTDCALL Ada_Language_allow_overloading (
 
 
 
+DllExport void SWIGSTDCALL Ada_Language_allow_overloading__SWIG_1 (
+  void * a_arg1
+  )
+{
+  Language *arg1 = (Language *) 0 ;
+  
+  arg1 = (Language *)a_arg1; 
+  
+  (arg1)->Language::allow_overloading();
+  
+  
+}
+
+
+
 DllExport int SWIGSTDCALL Ada_Language_is_wrapping_class (
-  void * jarg1
+  void * a_arg1
   )
 {
   int jresult ;
   Language *arg1 = (Language *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
   result = (int)((Language const *)arg1)->Language::is_wrapping_class();
   jresult = result; 
@@ -3750,14 +3782,14 @@ DllExport int SWIGSTDCALL Ada_Language_is_wrapping_class (
 
 
 DllExport void* SWIGSTDCALL Ada_Language_getCurrentClass (
-  void * jarg1
+  void * a_arg1
   )
 {
   void* jresult ;
   Language *arg1 = (Language *) 0 ;
   Node *result = 0 ;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
   result = (Node *)((Language const *)arg1)->Language::getCurrentClass();
   jresult = (void *) result;      
@@ -3771,14 +3803,14 @@ DllExport void* SWIGSTDCALL Ada_Language_getCurrentClass (
 
 
 DllExport void* SWIGSTDCALL Ada_Language_getNSpace (
-  void * jarg1
+  void * a_arg1
   )
 {
   void* jresult ;
   Language *arg1 = (Language *) 0 ;
   String *result = 0 ;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
   result = (String *)((Language const *)arg1)->Language::getNSpace();
   jresult = (void *) result;      
@@ -3792,14 +3824,14 @@ DllExport void* SWIGSTDCALL Ada_Language_getNSpace (
 
 
 DllExport void* SWIGSTDCALL Ada_Language_getClassName (
-  void * jarg1
+  void * a_arg1
   )
 {
   void* jresult ;
   Language *arg1 = (Language *) 0 ;
   String *result = 0 ;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
   result = (String *)((Language const *)arg1)->Language::getClassName();
   jresult = (void *) result;      
@@ -3813,14 +3845,14 @@ DllExport void* SWIGSTDCALL Ada_Language_getClassName (
 
 
 DllExport void* SWIGSTDCALL Ada_Language_getClassHash (
-  void * jarg1
+  void * a_arg1
   )
 {
   void* jresult ;
   Language *arg1 = (Language *) 0 ;
   Hash *result = 0 ;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
   result = (Hash *)((Language const *)arg1)->Language::getClassHash();
   jresult = (void *) result;      
@@ -3834,14 +3866,14 @@ DllExport void* SWIGSTDCALL Ada_Language_getClassHash (
 
 
 DllExport void* SWIGSTDCALL Ada_Language_getClassPrefix (
-  void * jarg1
+  void * a_arg1
   )
 {
   void* jresult ;
   Language *arg1 = (Language *) 0 ;
   String *result = 0 ;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
   result = (String *)((Language const *)arg1)->Language::getClassPrefix();
   jresult = (void *) result;      
@@ -3855,14 +3887,14 @@ DllExport void* SWIGSTDCALL Ada_Language_getClassPrefix (
 
 
 DllExport void* SWIGSTDCALL Ada_Language_getEnumClassPrefix (
-  void * jarg1
+  void * a_arg1
   )
 {
   void* jresult ;
   Language *arg1 = (Language *) 0 ;
   String *result = 0 ;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
   result = (String *)((Language const *)arg1)->Language::getEnumClassPrefix();
   jresult = (void *) result;      
@@ -3876,14 +3908,14 @@ DllExport void* SWIGSTDCALL Ada_Language_getEnumClassPrefix (
 
 
 DllExport void* SWIGSTDCALL Ada_Language_getClassType (
-  void * jarg1
+  void * a_arg1
   )
 {
   void* jresult ;
   Language *arg1 = (Language *) 0 ;
   String *result = 0 ;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
   result = (String *)((Language const *)arg1)->Language::getClassType();
   jresult = (void *) result;      
@@ -3897,14 +3929,14 @@ DllExport void* SWIGSTDCALL Ada_Language_getClassType (
 
 
 DllExport int SWIGSTDCALL Ada_Language_is_smart_pointer (
-  void * jarg1
+  void * a_arg1
   )
 {
   int jresult ;
   Language *arg1 = (Language *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
   result = (int)((Language const *)arg1)->Language::is_smart_pointer();
   jresult = result; 
@@ -3917,20 +3949,20 @@ DllExport int SWIGSTDCALL Ada_Language_is_smart_pointer (
 
 
 
-DllExport void* SWIGSTDCALL Ada_Language_makeParameterName (
-  void * jarg1
+DllExport void* SWIGSTDCALL Ada_Language_makeParameterName__SWIG_0 (
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   ,
   
-  void* jarg3
+  void* a_arg3
   ,
   
-  int jarg4
+  int a_arg4
   ,
   
-  unsigned int jarg5
+  unsigned int a_arg5
   )
 {
   void* jresult ;
@@ -3941,18 +3973,18 @@ DllExport void* SWIGSTDCALL Ada_Language_makeParameterName (
   bool arg5 ;
   String *result = 0 ;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
-  arg3 = (Parm *)jarg3; 
-  
-  
-  arg4 = (int) jarg4; 
+  arg3 = (Parm *)a_arg3; 
   
   
+  arg4 = (int) a_arg4; 
   
-  arg5 = jarg5 ? true : false; 
+  
+  
+  arg5 = a_arg5 ? true : false; 
   
   
   result = (String *)((Language const *)arg1)->Language::makeParameterName(arg2,arg3,arg4,arg5);
@@ -3966,15 +3998,56 @@ DllExport void* SWIGSTDCALL Ada_Language_makeParameterName (
 
 
 
+DllExport void* SWIGSTDCALL Ada_Language_makeParameterName__SWIG_1 (
+  void * a_arg1
+  ,
+  
+  void* a_arg2
+  ,
+  
+  void* a_arg3
+  ,
+  
+  int a_arg4
+  )
+{
+  void* jresult ;
+  Language *arg1 = (Language *) 0 ;
+  Node *arg2 = (Node *) 0 ;
+  Parm *arg3 = (Parm *) 0 ;
+  int arg4 ;
+  String *result = 0 ;
+  
+  arg1 = (Language *)a_arg1; 
+  
+  arg2 = (Node *)a_arg2; 
+  
+  arg3 = (Parm *)a_arg3; 
+  
+  
+  arg4 = (int) a_arg4; 
+  
+  
+  result = (String *)((Language const *)arg1)->Language::makeParameterName(arg2,arg3,arg4);
+  jresult = (void *) result;      
+  
+  
+  
+  return jresult;
+  
+}
+
+
+
 DllExport unsigned int SWIGSTDCALL Ada_Language_extraDirectorProtectedCPPMethodsRequired (
-  void * jarg1
+  void * a_arg1
   )
 {
   unsigned int jresult ;
   Language *arg1 = (Language *) 0 ;
   bool result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
   result = (bool)((Language const *)arg1)->Language::extraDirectorProtectedCPPMethodsRequired();
   jresult = result; 
@@ -3988,14 +4061,14 @@ DllExport unsigned int SWIGSTDCALL Ada_Language_extraDirectorProtectedCPPMethods
 
 
 DllExport int SWIGSTDCALL Ada_Language_nestedClassesSupport (
-  void * jarg1
+  void * a_arg1
   )
 {
   int jresult ;
   Language *arg1 = (Language *) 0 ;
   Language::NestedClassSupport result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
   result = (Language::NestedClassSupport)((Language const *)arg1)->Language::nestedClassesSupport();
   jresult = result; 
@@ -4009,14 +4082,14 @@ DllExport int SWIGSTDCALL Ada_Language_nestedClassesSupport (
 
 
 DllExport unsigned int SWIGSTDCALL Ada_Language_kwargsSupport (
-  void * jarg1
+  void * a_arg1
   )
 {
   unsigned int jresult ;
   Language *arg1 = (Language *) 0 ;
   bool result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
   result = (bool)((Language const *)arg1)->Language::kwargsSupport();
   jresult = result; 
@@ -4030,10 +4103,10 @@ DllExport unsigned int SWIGSTDCALL Ada_Language_kwargsSupport (
 
 
 DllExport unsigned int SWIGSTDCALL Ada_Language_isNonVirtualProtectedAccess (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   unsigned int jresult ;
@@ -4041,9 +4114,9 @@ DllExport unsigned int SWIGSTDCALL Ada_Language_isNonVirtualProtectedAccess (
   Node *arg2 = (Node *) 0 ;
   bool result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (bool)((Language const *)arg1)->Language::isNonVirtualProtectedAccess(arg2);
   jresult = result; 
@@ -4057,10 +4130,10 @@ DllExport unsigned int SWIGSTDCALL Ada_Language_isNonVirtualProtectedAccess (
 
 
 DllExport int SWIGSTDCALL Ada_Language_use_naturalvar_mode (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -4068,9 +4141,9 @@ DllExport int SWIGSTDCALL Ada_Language_use_naturalvar_mode (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)((Language const *)arg1)->Language::use_naturalvar_mode(arg2);
   jresult = result; 
@@ -4084,12 +4157,12 @@ DllExport int SWIGSTDCALL Ada_Language_use_naturalvar_mode (
 
 
 DllExport void SWIGSTDCALL Ada_SWIG_typemap_lang (
-  char * jarg1
+  char * a_arg1
   )
 {
   char *arg1 = (char *) 0 ;
   
-  arg1 = jarg1; 
+  arg1 = a_arg1; 
   
   SWIG_typemap_lang((char const *)arg1);
   
@@ -4099,18 +4172,18 @@ DllExport void SWIGSTDCALL Ada_SWIG_typemap_lang (
 
 
 DllExport void SWIGSTDCALL Ada_emit_parameter_variables (
-  void* jarg1
+  void* a_arg1
   ,
   
-  void * jarg2
+  void * a_arg2
   )
 {
   ParmList *arg1 = (ParmList *) 0 ;
   Wrapper *arg2 = (Wrapper *) 0 ;
   
-  arg1 = (ParmList *)jarg1; 
+  arg1 = (ParmList *)a_arg1; 
   
-  arg2 = (Wrapper *)jarg2; 
+  arg2 = (Wrapper *)a_arg2; 
   
   emit_parameter_variables(arg1,arg2);
   
@@ -4120,24 +4193,24 @@ DllExport void SWIGSTDCALL Ada_emit_parameter_variables (
 
 
 DllExport void SWIGSTDCALL Ada_emit_return_variable (
-  void* jarg1
+  void* a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   ,
   
-  void * jarg3
+  void * a_arg3
   )
 {
   Node *arg1 = (Node *) 0 ;
   SwigType *arg2 = (SwigType *) 0 ;
   Wrapper *arg3 = (Wrapper *) 0 ;
   
-  arg1 = (Node *)jarg1; 
+  arg1 = (Node *)a_arg1; 
   
-  arg2 = (SwigType *)jarg2; 
+  arg2 = (SwigType *)a_arg2; 
   
-  arg3 = (Wrapper *)jarg3; 
+  arg3 = (Wrapper *)a_arg3; 
   
   emit_return_variable(arg1,arg2,arg3);
   
@@ -4147,13 +4220,13 @@ DllExport void SWIGSTDCALL Ada_emit_return_variable (
 
 
 DllExport void SWIGSTDCALL Ada_SWIG_exit (
-  int jarg1
+  int a_arg1
   )
 {
   int arg1 ;
   
   
-  arg1 = (int) jarg1; 
+  arg1 = (int) a_arg1; 
   
   
   SWIG_exit(arg1);
@@ -4164,12 +4237,12 @@ DllExport void SWIGSTDCALL Ada_SWIG_exit (
 
 
 DllExport void SWIGSTDCALL Ada_SWIG_config_file (
-  void* jarg1
+  void* a_arg1
   )
 {
   const_String_or_char_ptr arg1 = (const_String_or_char_ptr) 0 ;
   
-  arg1 = (const_String_or_char_ptr)jarg1; 
+  arg1 = (const_String_or_char_ptr)a_arg1; 
   
   SWIG_config_file((void const *)arg1);
   
@@ -4196,12 +4269,12 @@ DllExport void* SWIGSTDCALL Ada_SWIG_output_directory (
 
 
 DllExport void SWIGSTDCALL Ada_SWIG_config_cppext (
-  char * jarg1
+  char * a_arg1
   )
 {
   char *arg1 = (char *) 0 ;
   
-  arg1 = jarg1; 
+  arg1 = a_arg1; 
   
   SWIG_config_cppext((char const *)arg1);
   
@@ -4211,18 +4284,18 @@ DllExport void SWIGSTDCALL Ada_SWIG_config_cppext (
 
 
 DllExport void SWIGSTDCALL Ada_Swig_print_xml (
-  void* jarg1
+  void* a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   Node *arg1 = (Node *) 0 ;
   String *arg2 = (String *) 0 ;
   
-  arg1 = (Node *)jarg1; 
+  arg1 = (Node *)a_arg1; 
   
-  arg2 = (String *)jarg2; 
+  arg2 = (String *)a_arg2; 
   
   Swig_print_xml(arg1,arg2);
   
@@ -4249,12 +4322,12 @@ DllExport void* SWIGSTDCALL Ada_SWIG_output_files (
 
 
 DllExport void SWIGSTDCALL Ada_SWIG_library_directory (
-  char * jarg1
+  char * a_arg1
   )
 {
   char *arg1 = (char *) 0 ;
   
-  arg1 = jarg1; 
+  arg1 = a_arg1; 
   
   SWIG_library_directory((char const *)arg1);
   
@@ -4264,14 +4337,14 @@ DllExport void SWIGSTDCALL Ada_SWIG_library_directory (
 
 
 DllExport int SWIGSTDCALL Ada_emit_num_arguments (
-  void* jarg1
+  void* a_arg1
   )
 {
   int jresult ;
   ParmList *arg1 = (ParmList *) 0 ;
   int result;
   
-  arg1 = (ParmList *)jarg1; 
+  arg1 = (ParmList *)a_arg1; 
   
   result = (int)emit_num_arguments(arg1);
   jresult = result; 
@@ -4285,14 +4358,14 @@ DllExport int SWIGSTDCALL Ada_emit_num_arguments (
 
 
 DllExport int SWIGSTDCALL Ada_emit_num_required (
-  void* jarg1
+  void* a_arg1
   )
 {
   int jresult ;
   ParmList *arg1 = (ParmList *) 0 ;
   int result;
   
-  arg1 = (ParmList *)jarg1; 
+  arg1 = (ParmList *)a_arg1; 
   
   result = (int)emit_num_required(arg1);
   jresult = result; 
@@ -4306,14 +4379,14 @@ DllExport int SWIGSTDCALL Ada_emit_num_required (
 
 
 DllExport int SWIGSTDCALL Ada_emit_isvarargs (
-  void* jarg1
+  void* a_arg1
   )
 {
   int jresult ;
   ParmList *arg1 = (ParmList *) 0 ;
   int result;
   
-  arg1 = (ParmList *)jarg1; 
+  arg1 = (ParmList *)a_arg1; 
   
   result = (int)emit_isvarargs(arg1);
   jresult = result; 
@@ -4327,14 +4400,14 @@ DllExport int SWIGSTDCALL Ada_emit_isvarargs (
 
 
 DllExport unsigned int SWIGSTDCALL Ada_emit_isvarargs_function (
-  void* jarg1
+  void* a_arg1
   )
 {
   unsigned int jresult ;
   Node *arg1 = (Node *) 0 ;
   bool result;
   
-  arg1 = (Node *)jarg1; 
+  arg1 = (Node *)a_arg1; 
   
   result = (bool)emit_isvarargs_function(arg1);
   jresult = result; 
@@ -4348,18 +4421,18 @@ DllExport unsigned int SWIGSTDCALL Ada_emit_isvarargs_function (
 
 
 DllExport void SWIGSTDCALL Ada_emit_attach_parmmaps (
-  void* jarg1
+  void* a_arg1
   ,
   
-  void * jarg2
+  void * a_arg2
   )
 {
   ParmList *arg1 = (ParmList *) 0 ;
   Wrapper *arg2 = (Wrapper *) 0 ;
   
-  arg1 = (ParmList *)jarg1; 
+  arg1 = (ParmList *)a_arg1; 
   
-  arg2 = (Wrapper *)jarg2; 
+  arg2 = (Wrapper *)a_arg2; 
   
   emit_attach_parmmaps(arg1,arg2);
   
@@ -4369,12 +4442,12 @@ DllExport void SWIGSTDCALL Ada_emit_attach_parmmaps (
 
 
 DllExport void SWIGSTDCALL Ada_emit_mark_varargs (
-  void* jarg1
+  void* a_arg1
   )
 {
   ParmList *arg1 = (ParmList *) 0 ;
   
-  arg1 = (ParmList *)jarg1; 
+  arg1 = (ParmList *)a_arg1; 
   
   emit_mark_varargs(arg1);
   
@@ -4384,14 +4457,14 @@ DllExport void SWIGSTDCALL Ada_emit_mark_varargs (
 
 
 DllExport void* SWIGSTDCALL Ada_emit_action (
-  void* jarg1
+  void* a_arg1
   )
 {
   void* jresult ;
   Node *arg1 = (Node *) 0 ;
   String *result = 0 ;
   
-  arg1 = (Node *)jarg1; 
+  arg1 = (Node *)a_arg1; 
   
   result = (String *)emit_action(arg1);
   jresult = (void *) result;      
@@ -4405,13 +4478,13 @@ DllExport void* SWIGSTDCALL Ada_emit_action (
 
 
 DllExport int SWIGSTDCALL Ada_emit_action_code (
-  void* jarg1
+  void* a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   ,
   
-  void* jarg3
+  void* a_arg3
   )
 {
   int jresult ;
@@ -4420,11 +4493,11 @@ DllExport int SWIGSTDCALL Ada_emit_action_code (
   String *arg3 = (String *) 0 ;
   int result;
   
-  arg1 = (Node *)jarg1; 
+  arg1 = (Node *)a_arg1; 
   
-  arg2 = (String *)jarg2; 
+  arg2 = (String *)a_arg2; 
   
-  arg3 = (String *)jarg3; 
+  arg3 = (String *)a_arg3; 
   
   result = (int)emit_action_code(arg1,arg2,arg3);
   jresult = result; 
@@ -4438,12 +4511,12 @@ DllExport int SWIGSTDCALL Ada_emit_action_code (
 
 
 DllExport void SWIGSTDCALL Ada_Swig_overload_check (
-  void* jarg1
+  void* a_arg1
   )
 {
   Node *arg1 = (Node *) 0 ;
   
-  arg1 = (Node *)jarg1; 
+  arg1 = (Node *)a_arg1; 
   
   Swig_overload_check(arg1);
   
@@ -4453,16 +4526,16 @@ DllExport void SWIGSTDCALL Ada_Swig_overload_check (
 
 
 DllExport void* SWIGSTDCALL Ada_Swig_overload_dispatch__SWIG_0 (
-  void* jarg1
+  void* a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   ,
   
-  int* jarg3
+  int* a_arg3
   ,
   
-  void* jarg4
+  void* a_arg4
   )
 {
   void* jresult ;
@@ -4472,15 +4545,15 @@ DllExport void* SWIGSTDCALL Ada_Swig_overload_dispatch__SWIG_0 (
   const_String_or_char_ptr arg4 = (const_String_or_char_ptr) 0 ;
   String *result = 0 ;
   
-  arg1 = (Node *)jarg1; 
+  arg1 = (Node *)a_arg1; 
   
-  arg2 = (const_String_or_char_ptr)jarg2; 
-  
-  
-  arg3 = (int *) jarg3;
+  arg2 = (const_String_or_char_ptr)a_arg2; 
   
   
-  arg4 = (const_String_or_char_ptr)jarg4; 
+  arg3 = (int *) a_arg3;
+  
+  
+  arg4 = (const_String_or_char_ptr)a_arg4; 
   
   result = (String *)Swig_overload_dispatch(arg1,(void const *)arg2,arg3,(void const *)arg4);
   jresult = (void *) result;      
@@ -4494,13 +4567,13 @@ DllExport void* SWIGSTDCALL Ada_Swig_overload_dispatch__SWIG_0 (
 
 
 DllExport void* SWIGSTDCALL Ada_Swig_overload_dispatch__SWIG_1 (
-  void* jarg1
+  void* a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   ,
   
-  int* jarg3
+  int* a_arg3
   )
 {
   void* jresult ;
@@ -4509,12 +4582,12 @@ DllExport void* SWIGSTDCALL Ada_Swig_overload_dispatch__SWIG_1 (
   int *arg3 = (int *) 0 ;
   String *result = 0 ;
   
-  arg1 = (Node *)jarg1; 
+  arg1 = (Node *)a_arg1; 
   
-  arg2 = (const_String_or_char_ptr)jarg2; 
+  arg2 = (const_String_or_char_ptr)a_arg2; 
   
   
-  arg3 = (int *) jarg3;
+  arg3 = (int *) a_arg3;
   
   
   result = (String *)Swig_overload_dispatch(arg1,(void const *)arg2,arg3);
@@ -4529,13 +4602,13 @@ DllExport void* SWIGSTDCALL Ada_Swig_overload_dispatch__SWIG_1 (
 
 
 DllExport void* SWIGSTDCALL Ada_Swig_overload_dispatch_cast (
-  void* jarg1
+  void* a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   ,
   
-  int* jarg3
+  int* a_arg3
   )
 {
   void* jresult ;
@@ -4544,12 +4617,12 @@ DllExport void* SWIGSTDCALL Ada_Swig_overload_dispatch_cast (
   int *arg3 = (int *) 0 ;
   String *result = 0 ;
   
-  arg1 = (Node *)jarg1; 
+  arg1 = (Node *)a_arg1; 
   
-  arg2 = (const_String_or_char_ptr)jarg2; 
+  arg2 = (const_String_or_char_ptr)a_arg2; 
   
   
-  arg3 = (int *) jarg3;
+  arg3 = (int *) a_arg3;
   
   
   result = (String *)Swig_overload_dispatch_cast(arg1,(void const *)arg2,arg3);
@@ -4564,10 +4637,10 @@ DllExport void* SWIGSTDCALL Ada_Swig_overload_dispatch_cast (
 
 
 DllExport void* SWIGSTDCALL Ada_Swig_overload_rank (
-  void* jarg1
+  void* a_arg1
   ,
   
-  unsigned int jarg2
+  unsigned int a_arg2
   )
 {
   void* jresult ;
@@ -4575,10 +4648,10 @@ DllExport void* SWIGSTDCALL Ada_Swig_overload_rank (
   bool arg2 ;
   List *result = 0 ;
   
-  arg1 = (Node *)jarg1; 
+  arg1 = (Node *)a_arg1; 
   
   
-  arg2 = jarg2 ? true : false; 
+  arg2 = a_arg2 ? true : false; 
   
   
   result = (List *)Swig_overload_rank(arg1,arg2);
@@ -4593,14 +4666,14 @@ DllExport void* SWIGSTDCALL Ada_Swig_overload_rank (
 
 
 DllExport void* SWIGSTDCALL Ada_cplus_value_type (
-  void* jarg1
+  void* a_arg1
   )
 {
   void* jresult ;
   SwigType *arg1 = (SwigType *) 0 ;
   SwigType *result = 0 ;
   
-  arg1 = (SwigType *)jarg1; 
+  arg1 = (SwigType *)a_arg1; 
   
   result = (SwigType *)cplus_value_type(arg1);
   jresult = (void *) result;      
@@ -4614,13 +4687,13 @@ DllExport void* SWIGSTDCALL Ada_cplus_value_type (
 
 
 DllExport void* SWIGSTDCALL Ada_Swig_csuperclass_call (
-  void* jarg1
+  void* a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   ,
   
-  void* jarg3
+  void* a_arg3
   )
 {
   void* jresult ;
@@ -4629,11 +4702,11 @@ DllExport void* SWIGSTDCALL Ada_Swig_csuperclass_call (
   ParmList *arg3 = (ParmList *) 0 ;
   String *result = 0 ;
   
-  arg1 = (String *)jarg1; 
+  arg1 = (String *)a_arg1; 
   
-  arg2 = (String *)jarg2; 
+  arg2 = (String *)a_arg2; 
   
-  arg3 = (ParmList *)jarg3; 
+  arg3 = (ParmList *)a_arg3; 
   
   result = (String *)Swig_csuperclass_call(arg1,arg2,arg3);
   jresult = (void *) result;      
@@ -4647,10 +4720,10 @@ DllExport void* SWIGSTDCALL Ada_Swig_csuperclass_call (
 
 
 DllExport void* SWIGSTDCALL Ada_Swig_class_declaration (
-  void* jarg1
+  void* a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   void* jresult ;
@@ -4658,9 +4731,9 @@ DllExport void* SWIGSTDCALL Ada_Swig_class_declaration (
   String *arg2 = (String *) 0 ;
   String *result = 0 ;
   
-  arg1 = (Node *)jarg1; 
+  arg1 = (Node *)a_arg1; 
   
-  arg2 = (String *)jarg2; 
+  arg2 = (String *)a_arg2; 
   
   result = (String *)Swig_class_declaration(arg1,arg2);
   jresult = (void *) result;      
@@ -4674,14 +4747,14 @@ DllExport void* SWIGSTDCALL Ada_Swig_class_declaration (
 
 
 DllExport void* SWIGSTDCALL Ada_Swig_class_name (
-  void* jarg1
+  void* a_arg1
   )
 {
   void* jresult ;
   Node *arg1 = (Node *) 0 ;
   String *result = 0 ;
   
-  arg1 = (Node *)jarg1; 
+  arg1 = (Node *)a_arg1; 
   
   result = (String *)Swig_class_name(arg1);
   jresult = (void *) result;      
@@ -4695,10 +4768,10 @@ DllExport void* SWIGSTDCALL Ada_Swig_class_name (
 
 
 DllExport void* SWIGSTDCALL Ada_Swig_method_call (
-  void* jarg1
+  void* a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   void* jresult ;
@@ -4706,9 +4779,9 @@ DllExport void* SWIGSTDCALL Ada_Swig_method_call (
   ParmList *arg2 = (ParmList *) 0 ;
   String *result = 0 ;
   
-  arg1 = (const_String_or_char_ptr)jarg1; 
+  arg1 = (const_String_or_char_ptr)a_arg1; 
   
-  arg2 = (ParmList *)jarg2; 
+  arg2 = (ParmList *)a_arg2; 
   
   result = (String *)Swig_method_call((void const *)arg1,arg2);
   jresult = (void *) result;      
@@ -4722,19 +4795,19 @@ DllExport void* SWIGSTDCALL Ada_Swig_method_call (
 
 
 DllExport void* SWIGSTDCALL Ada_Swig_method_decl (
-  void* jarg1
+  void* a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   ,
   
-  void* jarg3
+  void* a_arg3
   ,
   
-  void* jarg4
+  void* a_arg4
   ,
   
-  int jarg5
+  int a_arg5
   )
 {
   void* jresult ;
@@ -4745,16 +4818,16 @@ DllExport void* SWIGSTDCALL Ada_Swig_method_decl (
   int arg5 ;
   String *result = 0 ;
   
-  arg1 = (SwigType *)jarg1; 
+  arg1 = (SwigType *)a_arg1; 
   
-  arg2 = (SwigType *)jarg2; 
+  arg2 = (SwigType *)a_arg2; 
   
-  arg3 = (const_String_or_char_ptr)jarg3; 
+  arg3 = (const_String_or_char_ptr)a_arg3; 
   
-  arg4 = (List *)jarg4; 
+  arg4 = (List *)a_arg4; 
   
   
-  arg5 = (int) jarg5; 
+  arg5 = (int) a_arg5; 
   
   
   result = (String *)Swig_method_decl(arg1,arg2,(void const *)arg3,arg4,arg5);
@@ -4769,14 +4842,14 @@ DllExport void* SWIGSTDCALL Ada_Swig_method_decl (
 
 
 DllExport void* SWIGSTDCALL Ada_Swig_director_declaration (
-  void* jarg1
+  void* a_arg1
   )
 {
   void* jresult ;
   Node *arg1 = (Node *) 0 ;
   String *result = 0 ;
   
-  arg1 = (Node *)jarg1; 
+  arg1 = (Node *)a_arg1; 
   
   result = (String *)Swig_director_declaration(arg1);
   jresult = (void *) result;      
@@ -4790,18 +4863,18 @@ DllExport void* SWIGSTDCALL Ada_Swig_director_declaration (
 
 
 DllExport void SWIGSTDCALL Ada_Swig_director_emit_dynamic_cast (
-  void* jarg1
+  void* a_arg1
   ,
   
-  void * jarg2
+  void * a_arg2
   )
 {
   Node *arg1 = (Node *) 0 ;
   Wrapper *arg2 = (Wrapper *) 0 ;
   
-  arg1 = (Node *)jarg1; 
+  arg1 = (Node *)a_arg1; 
   
-  arg2 = (Wrapper *)jarg2; 
+  arg2 = (Wrapper *)a_arg2; 
   
   Swig_director_emit_dynamic_cast(arg1,arg2);
   
@@ -4811,12 +4884,12 @@ DllExport void SWIGSTDCALL Ada_Swig_director_emit_dynamic_cast (
 
 
 DllExport void SWIGSTDCALL Ada_Swig_director_parms_fixup (
-  void* jarg1
+  void* a_arg1
   )
 {
   ParmList *arg1 = (ParmList *) 0 ;
   
-  arg1 = (ParmList *)jarg1; 
+  arg1 = (ParmList *)a_arg1; 
   
   Swig_director_parms_fixup(arg1);
   
@@ -4826,14 +4899,14 @@ DllExport void SWIGSTDCALL Ada_Swig_director_parms_fixup (
 
 
 DllExport int SWIGSTDCALL Ada_is_public (
-  void* jarg1
+  void* a_arg1
   )
 {
   int jresult ;
   Node *arg1 = (Node *) 0 ;
   int result;
   
-  arg1 = (Node *)jarg1; 
+  arg1 = (Node *)a_arg1; 
   
   result = (int)is_public(arg1);
   jresult = result; 
@@ -4847,14 +4920,14 @@ DllExport int SWIGSTDCALL Ada_is_public (
 
 
 DllExport int SWIGSTDCALL Ada_is_private (
-  void* jarg1
+  void* a_arg1
   )
 {
   int jresult ;
   Node *arg1 = (Node *) 0 ;
   int result;
   
-  arg1 = (Node *)jarg1; 
+  arg1 = (Node *)a_arg1; 
   
   result = (int)is_private(arg1);
   jresult = result; 
@@ -4868,14 +4941,14 @@ DllExport int SWIGSTDCALL Ada_is_private (
 
 
 DllExport int SWIGSTDCALL Ada_is_protected (
-  void* jarg1
+  void* a_arg1
   )
 {
   int jresult ;
   Node *arg1 = (Node *) 0 ;
   int result;
   
-  arg1 = (Node *)jarg1; 
+  arg1 = (Node *)a_arg1; 
   
   result = (int)is_protected(arg1);
   jresult = result; 
@@ -4889,10 +4962,10 @@ DllExport int SWIGSTDCALL Ada_is_protected (
 
 
 DllExport int SWIGSTDCALL Ada_is_member_director__SWIG_0 (
-  void* jarg1
+  void* a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   int jresult ;
@@ -4900,9 +4973,9 @@ DllExport int SWIGSTDCALL Ada_is_member_director__SWIG_0 (
   Node *arg2 = (Node *) 0 ;
   int result;
   
-  arg1 = (Node *)jarg1; 
+  arg1 = (Node *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   result = (int)is_member_director(arg1,arg2);
   jresult = result; 
@@ -4916,14 +4989,14 @@ DllExport int SWIGSTDCALL Ada_is_member_director__SWIG_0 (
 
 
 DllExport int SWIGSTDCALL Ada_is_member_director__SWIG_1 (
-  void* jarg1
+  void* a_arg1
   )
 {
   int jresult ;
   Node *arg1 = (Node *) 0 ;
   int result;
   
-  arg1 = (Node *)jarg1; 
+  arg1 = (Node *)a_arg1; 
   
   result = (int)is_member_director(arg1);
   jresult = result; 
@@ -4937,14 +5010,14 @@ DllExport int SWIGSTDCALL Ada_is_member_director__SWIG_1 (
 
 
 DllExport int SWIGSTDCALL Ada_is_non_virtual_protected_access (
-  void* jarg1
+  void* a_arg1
   )
 {
   int jresult ;
   Node *arg1 = (Node *) 0 ;
   int result;
   
-  arg1 = (Node *)jarg1; 
+  arg1 = (Node *)a_arg1; 
   
   result = (int)is_non_virtual_protected_access(arg1);
   jresult = result; 
@@ -4957,14 +5030,31 @@ DllExport int SWIGSTDCALL Ada_is_non_virtual_protected_access (
 
 
 
+DllExport int SWIGSTDCALL Ada_protected_and_private_members_mode_is_set (
+  )
+{
+  int jresult ;
+  int result;
+  
+  result = (int)protected_and_private_members_mode_is_set();
+  jresult = result; 
+  
+  
+  
+  return jresult;
+  
+}
+
+
+
 DllExport void SWIGSTDCALL Ada_Wrapper_virtual_elimination_mode_set (
-  int jarg1
+  int a_arg1
   )
 {
   int arg1 ;
   
   
-  arg1 = (int) jarg1; 
+  arg1 = (int) a_arg1; 
   
   
   Wrapper_virtual_elimination_mode_set(arg1);
@@ -4975,13 +5065,13 @@ DllExport void SWIGSTDCALL Ada_Wrapper_virtual_elimination_mode_set (
 
 
 DllExport void SWIGSTDCALL Ada_Wrapper_fast_dispatch_mode_set (
-  int jarg1
+  int a_arg1
   )
 {
   int arg1 ;
   
   
-  arg1 = (int) jarg1; 
+  arg1 = (int) a_arg1; 
   
   
   Wrapper_fast_dispatch_mode_set(arg1);
@@ -4992,13 +5082,13 @@ DllExport void SWIGSTDCALL Ada_Wrapper_fast_dispatch_mode_set (
 
 
 DllExport void SWIGSTDCALL Ada_Wrapper_cast_dispatch_mode_set (
-  int jarg1
+  int a_arg1
   )
 {
   int arg1 ;
   
   
-  arg1 = (int) jarg1; 
+  arg1 = (int) a_arg1; 
   
   
   Wrapper_cast_dispatch_mode_set(arg1);
@@ -5009,13 +5099,13 @@ DllExport void SWIGSTDCALL Ada_Wrapper_cast_dispatch_mode_set (
 
 
 DllExport void SWIGSTDCALL Ada_Wrapper_naturalvar_mode_set (
-  int jarg1
+  int a_arg1
   )
 {
   int arg1 ;
   
   
-  arg1 = (int) jarg1; 
+  arg1 = (int) a_arg1; 
   
   
   Wrapper_naturalvar_mode_set(arg1);
@@ -5026,12 +5116,12 @@ DllExport void SWIGSTDCALL Ada_Wrapper_naturalvar_mode_set (
 
 
 DllExport void SWIGSTDCALL Ada_clean_overloaded (
-  void* jarg1
+  void* a_arg1
   )
 {
   Node *arg1 = (Node *) 0 ;
   
-  arg1 = (Node *)jarg1; 
+  arg1 = (Node *)a_arg1; 
   
   clean_overloaded(arg1);
   
@@ -5041,10 +5131,10 @@ DllExport void SWIGSTDCALL Ada_clean_overloaded (
 
 
 DllExport char * SWIGSTDCALL Ada_Swig_to_string (
-  void* jarg1
+  void* a_arg1
   ,
   
-  int jarg2
+  int a_arg2
   )
 {
   char * jresult ;
@@ -5052,10 +5142,10 @@ DllExport char * SWIGSTDCALL Ada_Swig_to_string (
   int arg2 = (int) -1 ;
   char *result = 0 ;
   
-  arg1 = (DOH *)jarg1; 
+  arg1 = (DOH *)a_arg1; 
   
   
-  arg2 = (int) jarg2; 
+  arg2 = (int) a_arg2; 
   
   
   result = (char *)Swig_to_string(arg1,arg2);
@@ -5070,10 +5160,10 @@ DllExport char * SWIGSTDCALL Ada_Swig_to_string (
 
 
 DllExport char * SWIGSTDCALL Ada_Swig_to_string_with_location (
-  void* jarg1
+  void* a_arg1
   ,
   
-  int jarg2
+  int a_arg2
   )
 {
   char * jresult ;
@@ -5081,10 +5171,10 @@ DllExport char * SWIGSTDCALL Ada_Swig_to_string_with_location (
   int arg2 = (int) -1 ;
   char *result = 0 ;
   
-  arg1 = (DOH *)jarg1; 
+  arg1 = (DOH *)a_arg1; 
   
   
-  arg2 = (int) jarg2; 
+  arg2 = (int) a_arg2; 
   
   
   result = (char *)Swig_to_string_with_location(arg1,arg2);
@@ -5099,12 +5189,12 @@ DllExport char * SWIGSTDCALL Ada_Swig_to_string_with_location (
 
 
 DllExport void SWIGSTDCALL Ada_Swig_contracts (
-  void* jarg1
+  void* a_arg1
   )
 {
   Node *arg1 = (Node *) 0 ;
   
-  arg1 = (Node *)jarg1; 
+  arg1 = (Node *)a_arg1; 
   
   Swig_contracts(arg1);
   
@@ -5114,13 +5204,13 @@ DllExport void SWIGSTDCALL Ada_Swig_contracts (
 
 
 DllExport void SWIGSTDCALL Ada_Swig_contract_mode_set (
-  int jarg1
+  int a_arg1
   )
 {
   int arg1 ;
   
   
-  arg1 = (int) jarg1; 
+  arg1 = (int) a_arg1; 
   
   
   Swig_contract_mode_set(arg1);
@@ -5148,19 +5238,19 @@ DllExport int SWIGSTDCALL Ada_Swig_contract_mode_get (
 
 
 DllExport void SWIGSTDCALL Ada_Swig_browser (
-  void* jarg1
+  void* a_arg1
   ,
   
-  int jarg2
+  int a_arg2
   )
 {
   Node *arg1 = (Node *) 0 ;
   int arg2 ;
   
-  arg1 = (Node *)jarg1; 
+  arg1 = (Node *)a_arg1; 
   
   
-  arg2 = (int) jarg2; 
+  arg2 = (int) a_arg2; 
   
   
   Swig_browser(arg1,arg2);
@@ -5171,12 +5261,12 @@ DllExport void SWIGSTDCALL Ada_Swig_browser (
 
 
 DllExport void SWIGSTDCALL Ada_Swig_default_allocators (
-  void* jarg1
+  void* a_arg1
   )
 {
   Node *arg1 = (Node *) 0 ;
   
-  arg1 = (Node *)jarg1; 
+  arg1 = (Node *)a_arg1; 
   
   Swig_default_allocators(arg1);
   
@@ -5186,12 +5276,12 @@ DllExport void SWIGSTDCALL Ada_Swig_default_allocators (
 
 
 DllExport void SWIGSTDCALL Ada_Swig_process_types (
-  void* jarg1
+  void* a_arg1
   )
 {
   Node *arg1 = (Node *) 0 ;
   
-  arg1 = (Node *)jarg1; 
+  arg1 = (Node *)a_arg1; 
   
   Swig_process_types(arg1);
   
@@ -5201,12 +5291,12 @@ DllExport void SWIGSTDCALL Ada_Swig_process_types (
 
 
 DllExport void SWIGSTDCALL Ada_Swig_nested_process_classes (
-  void* jarg1
+  void* a_arg1
   )
 {
   Node *arg1 = (Node *) 0 ;
   
-  arg1 = (Node *)jarg1; 
+  arg1 = (Node *)a_arg1; 
   
   Swig_nested_process_classes(arg1);
   
@@ -5216,12 +5306,12 @@ DllExport void SWIGSTDCALL Ada_Swig_nested_process_classes (
 
 
 DllExport void SWIGSTDCALL Ada_Swig_nested_name_unnamed_c_structs (
-  void* jarg1
+  void* a_arg1
   )
 {
   Node *arg1 = (Node *) 0 ;
   
-  arg1 = (Node *)jarg1; 
+  arg1 = (Node *)a_arg1; 
   
   Swig_nested_name_unnamed_c_structs(arg1);
   
@@ -5241,12 +5331,12 @@ DllExport void SWIGSTDCALL Ada_Swig_interface_feature_enable (
 
 
 DllExport void SWIGSTDCALL Ada_Swig_interface_propagate_methods (
-  void* jarg1
+  void* a_arg1
   )
 {
   Node *arg1 = (Node *) 0 ;
   
-  arg1 = (Node *)jarg1; 
+  arg1 = (Node *)a_arg1; 
   
   Swig_interface_propagate_methods(arg1);
   
@@ -5266,18 +5356,18 @@ DllExport void SWIGSTDCALL Ada_exit_with_Fail (
 
 
 DllExport void SWIGSTDCALL Ada_do_base_top (
-  void * jarg1
+  void * a_arg1
   ,
   
-  void* jarg2
+  void* a_arg2
   )
 {
   Language *arg1 = (Language *) 0 ;
   Node *arg2 = (Node *) 0 ;
   
-  arg1 = (Language *)jarg1; 
+  arg1 = (Language *)a_arg1; 
   
-  arg2 = (Node *)jarg2; 
+  arg2 = (Node *)a_arg2; 
   
   do_base_top(arg1,arg2);
   

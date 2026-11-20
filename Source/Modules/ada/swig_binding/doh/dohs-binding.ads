@@ -2,14 +2,16 @@
 --
 with DOHs.DohIterator;
 with DOHs.Pointers;
-with interfaces.c;
-with interfaces.c.strings;
+with Interfaces.C;
+with Interfaces.C.Strings;
 with swig;
+with Interfaces.C;
+use Interfaces.C;
 
 package DOHs.Binding is
 
    function DohCheck
-     (ptr : in DOHs.Pointers.DOH_Pointer) return interfaces.c.int;
+     (ptr : in DOHs.Pointers.DOH_Pointer) return Interfaces.C.int;
 
    procedure DohIntern (arg_1 : in DOHs.Pointers.DOH_Pointer);
 
@@ -25,120 +27,137 @@ package DOHs.Binding is
 
    function DohData (obj : in DOHs.Pointers.DOH_Pointer) return swig.void_ptr;
 
-   function DohDump (obj : in DOHs.Pointers.DOH_Pointer;
-      the_out : in DOHs.Pointers.DOH_Pointer) return interfaces.c.int;
+   function DohDump
+     (obj     : in DOHs.Pointers.DOH_Pointer;
+      the_out : in DOHs.Pointers.DOH_Pointer) return Interfaces.C.int;
 
    function DohLen
-     (obj : in DOHs.Pointers.DOH_Pointer) return interfaces.c.int;
+     (obj : in DOHs.Pointers.DOH_Pointer) return Interfaces.C.int;
 
    function DohHashval
-     (obj : in DOHs.Pointers.DOH_Pointer) return interfaces.c.int;
+     (obj : in DOHs.Pointers.DOH_Pointer) return Interfaces.C.int;
 
-   function DohCmp (obj1 : in DOHs.Pointers.DOH_Pointer;
-      obj2 : in DOHs.Pointers.DOH_Pointer) return interfaces.c.int;
+   function DohCmp
+     (obj1 : in DOHs.Pointers.DOH_Pointer; obj2 : in DOHs.Pointers.DOH_Pointer)
+      return Interfaces.C.int;
 
-   function DohEqual (obj1 : in DOHs.Pointers.DOH_Pointer;
-      obj2 : in DOHs.Pointers.DOH_Pointer) return interfaces.c.int;
+   function DohEqual
+     (obj1 : in DOHs.Pointers.DOH_Pointer; obj2 : in DOHs.Pointers.DOH_Pointer)
+      return Interfaces.C.int;
 
    procedure DohIncref (obj : in DOHs.Pointers.DOH_Pointer);
 
-   function DohGetattr (obj : in DOHs.Pointers.DOH_Pointer;
-      name : in DOHs.Pointers.DOH_Pointer) return DOHs.Pointers.DOH_Pointer;
+   function DohGetattr
+     (obj : in DOHs.Pointers.DOH_Pointer; name : in DOHs.Pointers.DOH_Pointer)
+      return DOHs.Pointers.DOH_Pointer;
 
-   function DohSetattr (obj : in DOHs.Pointers.DOH_Pointer;
-      name                  : in DOHs.Pointers.DOH_Pointer;
-      value : in DOHs.Pointers.DOH_Pointer) return interfaces.c.int;
+   function DohSetattr
+     (obj : in DOHs.Pointers.DOH_Pointer; name : in DOHs.Pointers.DOH_Pointer;
+      value : in DOHs.Pointers.DOH_Pointer) return Interfaces.C.int;
 
-   function DohDelattr (obj : in DOHs.Pointers.DOH_Pointer;
-      name : in DOHs.Pointers.DOH_Pointer) return interfaces.c.int;
+   function DohDelattr
+     (obj : in DOHs.Pointers.DOH_Pointer; name : in DOHs.Pointers.DOH_Pointer)
+      return Interfaces.C.int;
 
-   function DohCheckattr (obj : in DOHs.Pointers.DOH_Pointer;
-      name                    : in DOHs.Pointers.DOH_Pointer;
-      value : in DOHs.Pointers.DOH_Pointer) return interfaces.c.int;
+   function DohCheckattr
+     (obj : in DOHs.Pointers.DOH_Pointer; name : in DOHs.Pointers.DOH_Pointer;
+      value : in DOHs.Pointers.DOH_Pointer) return Interfaces.C.int;
 
    function DohKeys
      (obj : in DOHs.Pointers.DOH_Pointer) return DOHs.Pointers.DOH_Pointer;
 
-   function DohGetInt (obj : in DOHs.Pointers.DOH_Pointer;
-      name : in DOHs.Pointers.DOH_Pointer) return interfaces.c.int;
+   function DohGetInt
+     (obj : in DOHs.Pointers.DOH_Pointer; name : in DOHs.Pointers.DOH_Pointer)
+      return Interfaces.C.int;
 
-   procedure DohSetInt (obj : in DOHs.Pointers.DOH_Pointer;
-      name : in DOHs.Pointers.DOH_Pointer; arg_1 : in interfaces.c.int);
+   procedure DohSetInt
+     (obj : in DOHs.Pointers.DOH_Pointer; name : in DOHs.Pointers.DOH_Pointer;
+      arg_1 : in Interfaces.C.int);
 
-   function DohGetDouble (obj : in DOHs.Pointers.DOH_Pointer;
-      name : in DOHs.Pointers.DOH_Pointer) return interfaces.c.double;
+   function DohGetDouble
+     (obj : in DOHs.Pointers.DOH_Pointer; name : in DOHs.Pointers.DOH_Pointer)
+      return Interfaces.C.double;
 
-   procedure DohSetDouble (obj : in DOHs.Pointers.DOH_Pointer;
-      name : in DOHs.Pointers.DOH_Pointer; arg_1 : in interfaces.c.double);
+   procedure DohSetDouble
+     (obj : in DOHs.Pointers.DOH_Pointer; name : in DOHs.Pointers.DOH_Pointer;
+      arg_1 : in Interfaces.C.double);
 
-   function DohGetChar (obj : in DOHs.Pointers.DOH_Pointer;
-      name : in DOHs.Pointers.DOH_Pointer) return interfaces.c.strings
-     .chars_ptr;
+   function DohGetChar
+     (obj : in DOHs.Pointers.DOH_Pointer; name : in DOHs.Pointers.DOH_Pointer)
+      return Interfaces.C.Strings.chars_ptr;
 
-   procedure DohSetChar (obj : in DOHs.Pointers.DOH_Pointer;
-      name                   : in DOHs.Pointers.DOH_Pointer;
-      value                  : in interfaces.c.strings.chars_ptr);
+   procedure DohSetChar
+     (obj : in DOHs.Pointers.DOH_Pointer; name : in DOHs.Pointers.DOH_Pointer;
+      value : in Interfaces.C.Strings.chars_ptr);
 
-   function DohGetFlagAttr (obj : in DOHs.Pointers.DOH_Pointer;
-      name : in DOHs.Pointers.DOH_Pointer) return swig.void_ptr;
+   function DohGetFlagAttr
+     (obj : in DOHs.Pointers.DOH_Pointer; name : in DOHs.Pointers.DOH_Pointer)
+      return swig.void_ptr;
 
-   function DohGetFlag (obj : in DOHs.Pointers.DOH_Pointer;
-      name : in DOHs.Pointers.DOH_Pointer) return interfaces.c.int;
+   function DohGetFlag
+     (obj : in DOHs.Pointers.DOH_Pointer; name : in DOHs.Pointers.DOH_Pointer)
+      return Interfaces.C.int;
 
-   procedure DohSetFlagAttr (obj : in DOHs.Pointers.DOH_Pointer;
-      name                       : in DOHs.Pointers.DOH_Pointer;
-      attr                       : in DOHs.Pointers.DOH_Pointer);
+   procedure DohSetFlagAttr
+     (obj  : in DOHs.Pointers.DOH_Pointer; name : in DOHs.Pointers.DOH_Pointer;
+      attr : in DOHs.Pointers.DOH_Pointer);
 
-   procedure DohSetFlag (obj : in DOHs.Pointers.DOH_Pointer;
-      name                   : in DOHs.Pointers.DOH_Pointer);
+   procedure DohSetFlag
+     (obj : in DOHs.Pointers.DOH_Pointer; name : in DOHs.Pointers.DOH_Pointer);
 
-   function DohGetVoid (obj : in DOHs.Pointers.DOH_Pointer;
-      name : in DOHs.Pointers.DOH_Pointer) return swig.void_ptr;
+   function DohGetVoid
+     (obj : in DOHs.Pointers.DOH_Pointer; name : in DOHs.Pointers.DOH_Pointer)
+      return swig.void_ptr;
 
-   procedure DohSetVoid (obj : in DOHs.Pointers.DOH_Pointer;
-      name : in DOHs.Pointers.DOH_Pointer; value : in swig.void_ptr);
+   procedure DohSetVoid
+     (obj : in DOHs.Pointers.DOH_Pointer; name : in DOHs.Pointers.DOH_Pointer;
+      value : in swig.void_ptr);
 
-   function DohGetitem (obj : in DOHs.Pointers.DOH_Pointer;
-      index : in interfaces.c.int) return DOHs.Pointers.DOH_Pointer;
+   function DohGetitem
+     (obj : in DOHs.Pointers.DOH_Pointer; index : in Interfaces.C.int)
+      return DOHs.Pointers.DOH_Pointer;
 
-   function DohSetitem (obj : in DOHs.Pointers.DOH_Pointer;
-      index                 : in interfaces.c.int;
-      value : in DOHs.Pointers.DOH_Pointer) return interfaces.c.int;
+   function DohSetitem
+     (obj   : in DOHs.Pointers.DOH_Pointer; index : in Interfaces.C.int;
+      value : in DOHs.Pointers.DOH_Pointer) return Interfaces.C.int;
 
-   function DohDelitem (obj : in DOHs.Pointers.DOH_Pointer;
-      index                 : in interfaces.c.int) return interfaces.c.int;
+   function DohDelitem
+     (obj : in DOHs.Pointers.DOH_Pointer; index : in Interfaces.C.int)
+      return Interfaces.C.int;
 
-   function DohInsertitem (obj : in DOHs.Pointers.DOH_Pointer;
-      index                    : in interfaces.c.int;
-      value : in DOHs.Pointers.DOH_Pointer) return interfaces.c.int;
+   function DohInsertitem
+     (obj   : in DOHs.Pointers.DOH_Pointer; index : in Interfaces.C.int;
+      value : in DOHs.Pointers.DOH_Pointer) return Interfaces.C.int;
 
-   function DohDelslice (obj : in DOHs.Pointers.DOH_Pointer;
-      sindex                 : in interfaces.c.int;
-      eindex                 : in interfaces.c.int) return interfaces.c.int;
+   function DohDelslice
+     (obj    : in DOHs.Pointers.DOH_Pointer; sindex : in Interfaces.C.int;
+      eindex : in Interfaces.C.int) return Interfaces.C.int;
 
-   function DohWrite (obj : in DOHs.Pointers.DOH_Pointer;
-      buffer              : in swig.void_ptr;
-      length              : in interfaces.c.int) return interfaces.c.int;
+   function DohWrite
+     (obj    : in DOHs.Pointers.DOH_Pointer; buffer : in swig.void_ptr;
+      length : in Interfaces.C.int) return Interfaces.C.int;
 
-   function DohRead (obj : in DOHs.Pointers.DOH_Pointer;
-      buffer             : in swig.void_ptr;
-      length             : in interfaces.c.int) return interfaces.c.int;
+   function DohRead
+     (obj    : in DOHs.Pointers.DOH_Pointer; buffer : in swig.void_ptr;
+      length : in Interfaces.C.int) return Interfaces.C.int;
 
-   function DohSeek (obj : in DOHs.Pointers.DOH_Pointer;
-      offset             : in interfaces.c.long;
-      whence             : in interfaces.c.int) return interfaces.c.int;
+   function DohSeek
+     (obj    : in DOHs.Pointers.DOH_Pointer; offset : in Interfaces.C.long;
+      whence : in Interfaces.C.int) return Interfaces.C.int;
 
    function DohTell
-     (obj : in DOHs.Pointers.DOH_Pointer) return interfaces.c.long;
+     (obj : in DOHs.Pointers.DOH_Pointer) return Interfaces.C.long;
 
    function DohGetc
-     (obj : in DOHs.Pointers.DOH_Pointer) return interfaces.c.int;
+     (obj : in DOHs.Pointers.DOH_Pointer) return Interfaces.C.int;
 
-   function DohPutc (ch : in interfaces.c.int;
-      obj : in DOHs.Pointers.DOH_Pointer) return interfaces.c.int;
+   function DohPutc
+     (ch : in Interfaces.C.int; obj : in DOHs.Pointers.DOH_Pointer)
+      return Interfaces.C.int;
 
-   function DohUngetc (ch : in interfaces.c.int;
-      obj : in DOHs.Pointers.DOH_Pointer) return interfaces.c.int;
+   function DohUngetc
+     (ch : in Interfaces.C.int; obj : in DOHs.Pointers.DOH_Pointer)
+      return Interfaces.C.int;
 
    function DohFirst
      (obj : in DOHs.Pointers.DOH_Pointer) return DOHs.DohIterator.Item;
@@ -147,108 +166,119 @@ package DOHs.Binding is
      (x : in DOHs.DohIterator.Item) return DOHs.DohIterator.Item;
 
    function DohGetline
-     (obj : in DOHs.Pointers.DOH_Pointer) return interfaces.c.int;
+     (obj : in DOHs.Pointers.DOH_Pointer) return Interfaces.C.int;
 
-   procedure DohSetline (obj : in DOHs.Pointers.DOH_Pointer;
-      line                   : in interfaces.c.int);
+   procedure DohSetline
+     (obj : in DOHs.Pointers.DOH_Pointer; line : in Interfaces.C.int);
 
    function DohGetfile
      (obj : in DOHs.Pointers.DOH_Pointer) return DOHs.Pointers.DOH_Pointer;
 
-   procedure DohSetfile (obj : in DOHs.Pointers.DOH_Pointer;
-      file                   : in DOHs.Pointers.DOH_Pointer);
+   procedure DohSetfile
+     (obj : in DOHs.Pointers.DOH_Pointer; file : in DOHs.Pointers.DOH_Pointer);
 
-   function DohReplace (src : in DOHs.Pointers.DOH_Pointer;
-      token : in DOHs.Pointers.DOH_Pointer; rep : in DOHs.Pointers.DOH_Pointer;
-      flags                 : in interfaces.c.int) return interfaces.c.int;
+   function DohReplace
+     (src : in DOHs.Pointers.DOH_Pointer; token : in DOHs.Pointers.DOH_Pointer;
+      rep : in DOHs.Pointers.DOH_Pointer; flags : in Interfaces.C.int)
+      return Interfaces.C.int;
 
    procedure DohChop (src : in DOHs.Pointers.DOH_Pointer);
 
-   function DohGetmeta (arg_2_1 : in DOHs.Pointers.DOH_Pointer;
+   function DohGetmeta
+     (arg_2_1 : in DOHs.Pointers.DOH_Pointer;
       arg_2_2 : in DOHs.Pointers.DOH_Pointer) return DOHs.Pointers.DOH_Pointer;
 
-   function DohSetmeta (arg_2_1 : in DOHs.Pointers.DOH_Pointer;
-      arg_2_2                   : in DOHs.Pointers.DOH_Pointer;
-      value : in DOHs.Pointers.DOH_Pointer) return interfaces.c.int;
+   function DohSetmeta
+     (arg_2_1 : in DOHs.Pointers.DOH_Pointer;
+      arg_2_2 : in DOHs.Pointers.DOH_Pointer;
+      value   : in DOHs.Pointers.DOH_Pointer) return Interfaces.C.int;
 
-   function DohDelmeta (arg_2_1 : in DOHs.Pointers.DOH_Pointer;
-      arg_2_2 : in DOHs.Pointers.DOH_Pointer) return interfaces.c.int;
+   function DohDelmeta
+     (arg_2_1 : in DOHs.Pointers.DOH_Pointer;
+      arg_2_2 : in DOHs.Pointers.DOH_Pointer) return Interfaces.C.int;
 
-   function DohPrintf (obj : in DOHs.Pointers.DOH_Pointer;
-      format : in interfaces.c.strings.chars_ptr) return interfaces.c.int;
+   function DohPrintf
+     (obj    : in DOHs.Pointers.DOH_Pointer;
+      format : in Interfaces.C.Strings.chars_ptr) return Interfaces.C.int;
 
    function DohPrintv
-     (obj : in DOHs.Pointers.DOH_Pointer) return interfaces.c.int;
+     (obj : in DOHs.Pointers.DOH_Pointer) return Interfaces.C.int;
 
    function DohReadline
      (the_in : in DOHs.Pointers.DOH_Pointer) return DOHs.Pointers.DOH_Pointer;
 
    function DohIsMapping
-     (obj : in DOHs.Pointers.DOH_Pointer) return interfaces.c.int;
+     (obj : in DOHs.Pointers.DOH_Pointer) return Interfaces.C.int;
 
    function DohIsSequence
-     (obj : in DOHs.Pointers.DOH_Pointer) return interfaces.c.int;
+     (obj : in DOHs.Pointers.DOH_Pointer) return Interfaces.C.int;
 
    function DohIsString
-     (obj : in DOHs.Pointers.DOH_Pointer) return interfaces.c.int;
+     (obj : in DOHs.Pointers.DOH_Pointer) return Interfaces.C.int;
 
    function DohIsFile
-     (obj : in DOHs.Pointers.DOH_Pointer) return interfaces.c.int;
+     (obj : in DOHs.Pointers.DOH_Pointer) return Interfaces.C.int;
 
-   procedure DohSetMaxHashExpand (count : in interfaces.c.int);
+   procedure DohSetMaxHashExpand (count : in Interfaces.C.int);
 
-   function DohGetMaxHashExpand return interfaces.c.int;
+   function DohGetMaxHashExpand return Interfaces.C.int;
 
-   procedure DohSetmark (obj : in DOHs.Pointers.DOH_Pointer;
-      x                      : in interfaces.c.int);
+   procedure DohSetmark
+     (obj : in DOHs.Pointers.DOH_Pointer; x : in Interfaces.C.int);
 
    function DohGetmark
-     (obj : in DOHs.Pointers.DOH_Pointer) return interfaces.c.int;
+     (obj : in DOHs.Pointers.DOH_Pointer) return Interfaces.C.int;
 
    function DohNewStringEmpty return DOHs.Pointers.DOH_Pointer;
 
    function DohNewString
      (c : in DOHs.Pointers.DOH_Pointer) return DOHs.Pointers.DOH_Pointer;
 
-   function DohNewStringWithSize (c : in DOHs.Pointers.DOH_Pointer;
-      len : in interfaces.c.int) return DOHs.Pointers.DOH_Pointer;
+   function DohNewStringWithSize
+     (c : in DOHs.Pointers.DOH_Pointer; len : in Interfaces.C.int)
+      return DOHs.Pointers.DOH_Pointer;
 
    function DohNewStringf
      (fmt : in DOHs.Pointers.DOH_Pointer) return DOHs.Pointers.DOH_Pointer;
 
-   function DohStrcmp (s1 : in DOHs.Pointers.DOH_Pointer;
-      s2 : in DOHs.Pointers.DOH_Pointer) return interfaces.c.int;
+   function DohStrcmp
+     (s1 : in DOHs.Pointers.DOH_Pointer; s2 : in DOHs.Pointers.DOH_Pointer)
+      return Interfaces.C.int;
 
-   function DohStrncmp (s1 : in DOHs.Pointers.DOH_Pointer;
-      s2                   : in DOHs.Pointers.DOH_Pointer;
-      n                    : in interfaces.c.int) return interfaces.c.int;
+   function DohStrncmp
+     (s1 : in DOHs.Pointers.DOH_Pointer; s2 : in DOHs.Pointers.DOH_Pointer;
+      n  : in Interfaces.C.int) return Interfaces.C.int;
 
-   function DohStrstr (s1 : in DOHs.Pointers.DOH_Pointer;
-      s2 : in DOHs.Pointers.DOH_Pointer) return interfaces.c.strings.chars_ptr;
+   function DohStrstr
+     (s1 : in DOHs.Pointers.DOH_Pointer; s2 : in DOHs.Pointers.DOH_Pointer)
+      return Interfaces.C.Strings.chars_ptr;
 
-   function DohStrchr (s1 : in DOHs.Pointers.DOH_Pointer;
-      ch : in interfaces.c.int) return interfaces.c.strings.chars_ptr;
+   function DohStrchr
+     (s1 : in DOHs.Pointers.DOH_Pointer; ch : in Interfaces.C.int)
+      return Interfaces.C.Strings.chars_ptr;
 
-   function DohNewFile (filename : in DOHs.Pointers.DOH_Pointer;
-      mode                       : in interfaces.c.strings.chars_ptr;
-      outfiles : in DOHs.Pointers.DOH_Pointer) return DOHs.Pointers
-     .DOH_Pointer;
+   function DohNewFile
+     (filename : in DOHs.Pointers.DOH_Pointer;
+      mode     : in Interfaces.C.Strings.chars_ptr;
+      outfiles : in DOHs.Pointers.DOH_Pointer)
+      return DOHs.Pointers.DOH_Pointer;
 
    function DohNewFileFromFd
-     (fd : in interfaces.c.int) return DOHs.Pointers.DOH_Pointer;
+     (fd : in Interfaces.C.int) return DOHs.Pointers.DOH_Pointer;
 
    procedure DohFileErrorDisplay (filename : in DOHs.Pointers.DOH_Pointer);
 
-   function DohCopyto (input : in DOHs.Pointers.DOH_Pointer;
-      output : in DOHs.Pointers.DOH_Pointer) return interfaces.c.int;
+   function DohCopyto
+     (input  : in DOHs.Pointers.DOH_Pointer;
+      output : in DOHs.Pointers.DOH_Pointer) return Interfaces.C.int;
 
    function DohNewList return DOHs.Pointers.DOH_Pointer;
 
    function DohNewHash return DOHs.Pointers.DOH_Pointer;
 
-   function DohSplit (input : in DOHs.Pointers.DOH_Pointer;
-      ch                    : in interfaces.c.char;
-      nsplits : in interfaces.c.int) return DOHs.Pointers.DOH_Pointer;
+   function DohSplit
+     (input   : in DOHs.Pointers.DOH_Pointer; ch : in Interfaces.C.char;
+      nsplits : in Interfaces.C.int) return DOHs.Pointers.DOH_Pointer;
 
    function DohSplitLines
      (input : in DOHs.Pointers.DOH_Pointer) return DOHs.Pointers.DOH_Pointer;
@@ -269,90 +299,90 @@ package DOHs.Binding is
 
 private
 
-   pragma Import (C, DohCheck, "DohCheck");
-   pragma Import (C, DohIntern, "DohIntern");
-   pragma Import (C, DohDelete, "DohDelete");
-   pragma Import (C, DohCopy, "DohCopy");
-   pragma Import (C, DohClear, "DohClear");
-   pragma Import (C, DohStr, "DohStr");
-   pragma Import (C, DohData, "DohData");
-   pragma Import (C, DohDump, "DohDump");
-   pragma Import (C, DohLen, "DohLen");
-   pragma Import (C, DohHashval, "DohHashval");
-   pragma Import (C, DohCmp, "DohCmp");
-   pragma Import (C, DohEqual, "DohEqual");
-   pragma Import (C, DohIncref, "DohIncref");
-   pragma Import (C, DohGetattr, "DohGetattr");
-   pragma Import (C, DohSetattr, "DohSetattr");
-   pragma Import (C, DohDelattr, "DohDelattr");
-   pragma Import (C, DohCheckattr, "DohCheckattr");
-   pragma Import (C, DohKeys, "DohKeys");
-   pragma Import (C, DohGetInt, "DohGetInt");
-   pragma Import (C, DohSetInt, "DohSetInt");
-   pragma Import (C, DohGetDouble, "DohGetDouble");
-   pragma Import (C, DohSetDouble, "DohSetDouble");
-   pragma Import (C, DohGetChar, "DohGetChar");
-   pragma Import (C, DohSetChar, "DohSetChar");
-   pragma Import (C, DohGetFlagAttr, "DohGetFlagAttr");
-   pragma Import (C, DohGetFlag, "DohGetFlag");
-   pragma Import (C, DohSetFlagAttr, "DohSetFlagAttr");
-   pragma Import (C, DohSetFlag, "DohSetFlag");
-   pragma Import (C, DohGetVoid, "DohGetVoid");
-   pragma Import (C, DohSetVoid, "DohSetVoid");
-   pragma Import (C, DohGetitem, "DohGetitem");
-   pragma Import (C, DohSetitem, "DohSetitem");
-   pragma Import (C, DohDelitem, "DohDelitem");
-   pragma Import (C, DohInsertitem, "DohInsertitem");
-   pragma Import (C, DohDelslice, "DohDelslice");
-   pragma Import (C, DohWrite, "DohWrite");
-   pragma Import (C, DohRead, "DohRead");
-   pragma Import (C, DohSeek, "DohSeek");
-   pragma Import (C, DohTell, "DohTell");
-   pragma Import (C, DohGetc, "DohGetc");
-   pragma Import (C, DohPutc, "DohPutc");
-   pragma Import (C, DohUngetc, "DohUngetc");
-   pragma Import (C, DohFirst, "DohFirst");
-   pragma Import (C, DohNext, "DohNext");
-   pragma Import (C, DohGetline, "DohGetline");
-   pragma Import (C, DohSetline, "DohSetline");
-   pragma Import (C, DohGetfile, "DohGetfile");
-   pragma Import (C, DohSetfile, "DohSetfile");
-   pragma Import (C, DohReplace, "DohReplace");
-   pragma Import (C, DohChop, "DohChop");
-   pragma Import (C, DohGetmeta, "DohGetmeta");
-   pragma Import (C, DohSetmeta, "DohSetmeta");
-   pragma Import (C, DohDelmeta, "DohDelmeta");
-   pragma Import (C, DohPrintf, "DohPrintf");
-   pragma Import (C, DohPrintv, "DohPrintv");
-   pragma Import (C, DohReadline, "DohReadline");
-   pragma Import (C, DohIsMapping, "DohIsMapping");
-   pragma Import (C, DohIsSequence, "DohIsSequence");
-   pragma Import (C, DohIsString, "DohIsString");
-   pragma Import (C, DohIsFile, "DohIsFile");
-   pragma Import (C, DohSetMaxHashExpand, "DohSetMaxHashExpand");
-   pragma Import (C, DohGetMaxHashExpand, "DohGetMaxHashExpand");
-   pragma Import (C, DohSetmark, "DohSetmark");
-   pragma Import (C, DohGetmark, "DohGetmark");
-   pragma Import (C, DohNewStringEmpty, "DohNewStringEmpty");
-   pragma Import (C, DohNewString, "DohNewString");
-   pragma Import (C, DohNewStringWithSize, "DohNewStringWithSize");
-   pragma Import (C, DohNewStringf, "DohNewStringf");
-   pragma Import (C, DohStrcmp, "DohStrcmp");
-   pragma Import (C, DohStrncmp, "DohStrncmp");
-   pragma Import (C, DohStrstr, "DohStrstr");
-   pragma Import (C, DohStrchr, "DohStrchr");
-   pragma Import (C, DohNewFile, "DohNewFile");
-   pragma Import (C, DohNewFileFromFd, "DohNewFileFromFd");
-   pragma Import (C, DohFileErrorDisplay, "DohFileErrorDisplay");
-   pragma Import (C, DohCopyto, "DohCopyto");
-   pragma Import (C, DohNewList, "DohNewList");
-   pragma Import (C, DohNewHash, "DohNewHash");
-   pragma Import (C, DohSplit, "DohSplit");
-   pragma Import (C, DohSplitLines, "DohSplitLines");
-   pragma Import (C, DohMemoryDebug, "DohMemoryDebug");
-   pragma Import (C, doh_Copy, "doh_Copy");
-   pragma Import (C, doh_First, "doh_First");
-   pragma Import (C, doh_Next, "doh_Next");
-   pragma Import (C, get_Item, "get_Item");
+   pragma Import (C, DohCheck, "Ada_DohCheck");
+   pragma Import (C, DohIntern, "Ada_DohIntern");
+   pragma Import (C, DohDelete, "Ada_DohDelete");
+   pragma Import (C, DohCopy, "Ada_DohCopy");
+   pragma Import (C, DohClear, "Ada_DohClear");
+   pragma Import (C, DohStr, "Ada_DohStr");
+   pragma Import (C, DohData, "Ada_DohData");
+   pragma Import (C, DohDump, "Ada_DohDump");
+   pragma Import (C, DohLen, "Ada_DohLen");
+   pragma Import (C, DohHashval, "Ada_DohHashval");
+   pragma Import (C, DohCmp, "Ada_DohCmp");
+   pragma Import (C, DohEqual, "Ada_DohEqual");
+   pragma Import (C, DohIncref, "Ada_DohIncref");
+   pragma Import (C, DohGetattr, "Ada_DohGetattr");
+   pragma Import (C, DohSetattr, "Ada_DohSetattr");
+   pragma Import (C, DohDelattr, "Ada_DohDelattr");
+   pragma Import (C, DohCheckattr, "Ada_DohCheckattr");
+   pragma Import (C, DohKeys, "Ada_DohKeys");
+   pragma Import (C, DohGetInt, "Ada_DohGetInt");
+   pragma Import (C, DohSetInt, "Ada_DohSetInt");
+   pragma Import (C, DohGetDouble, "Ada_DohGetDouble");
+   pragma Import (C, DohSetDouble, "Ada_DohSetDouble");
+   pragma Import (C, DohGetChar, "Ada_DohGetChar");
+   pragma Import (C, DohSetChar, "Ada_DohSetChar");
+   pragma Import (C, DohGetFlagAttr, "Ada_DohGetFlagAttr");
+   pragma Import (C, DohGetFlag, "Ada_DohGetFlag");
+   pragma Import (C, DohSetFlagAttr, "Ada_DohSetFlagAttr");
+   pragma Import (C, DohSetFlag, "Ada_DohSetFlag");
+   pragma Import (C, DohGetVoid, "Ada_DohGetVoid");
+   pragma Import (C, DohSetVoid, "Ada_DohSetVoid");
+   pragma Import (C, DohGetitem, "Ada_DohGetitem");
+   pragma Import (C, DohSetitem, "Ada_DohSetitem");
+   pragma Import (C, DohDelitem, "Ada_DohDelitem");
+   pragma Import (C, DohInsertitem, "Ada_DohInsertitem");
+   pragma Import (C, DohDelslice, "Ada_DohDelslice");
+   pragma Import (C, DohWrite, "Ada_DohWrite");
+   pragma Import (C, DohRead, "Ada_DohRead");
+   pragma Import (C, DohSeek, "Ada_DohSeek");
+   pragma Import (C, DohTell, "Ada_DohTell");
+   pragma Import (C, DohGetc, "Ada_DohGetc");
+   pragma Import (C, DohPutc, "Ada_DohPutc");
+   pragma Import (C, DohUngetc, "Ada_DohUngetc");
+   pragma Import (C, DohFirst, "Ada_DohFirst");
+   pragma Import (C, DohNext, "Ada_DohNext");
+   pragma Import (C, DohGetline, "Ada_DohGetline");
+   pragma Import (C, DohSetline, "Ada_DohSetline");
+   pragma Import (C, DohGetfile, "Ada_DohGetfile");
+   pragma Import (C, DohSetfile, "Ada_DohSetfile");
+   pragma Import (C, DohReplace, "Ada_DohReplace");
+   pragma Import (C, DohChop, "Ada_DohChop");
+   pragma Import (C, DohGetmeta, "Ada_DohGetmeta");
+   pragma Import (C, DohSetmeta, "Ada_DohSetmeta");
+   pragma Import (C, DohDelmeta, "Ada_DohDelmeta");
+   pragma Import (C, DohPrintf, "Ada_DohPrintf");
+   pragma Import (C, DohPrintv, "Ada_DohPrintv");
+   pragma Import (C, DohReadline, "Ada_DohReadline");
+   pragma Import (C, DohIsMapping, "Ada_DohIsMapping");
+   pragma Import (C, DohIsSequence, "Ada_DohIsSequence");
+   pragma Import (C, DohIsString, "Ada_DohIsString");
+   pragma Import (C, DohIsFile, "Ada_DohIsFile");
+   pragma Import (C, DohSetMaxHashExpand, "Ada_DohSetMaxHashExpand");
+   pragma Import (C, DohGetMaxHashExpand, "Ada_DohGetMaxHashExpand");
+   pragma Import (C, DohSetmark, "Ada_DohSetmark");
+   pragma Import (C, DohGetmark, "Ada_DohGetmark");
+   pragma Import (C, DohNewStringEmpty, "Ada_DohNewStringEmpty");
+   pragma Import (C, DohNewString, "Ada_DohNewString");
+   pragma Import (C, DohNewStringWithSize, "Ada_DohNewStringWithSize");
+   pragma Import (C, DohNewStringf, "Ada_DohNewStringf");
+   pragma Import (C, DohStrcmp, "Ada_DohStrcmp");
+   pragma Import (C, DohStrncmp, "Ada_DohStrncmp");
+   pragma Import (C, DohStrstr, "Ada_DohStrstr");
+   pragma Import (C, DohStrchr, "Ada_DohStrchr");
+   pragma Import (C, DohNewFile, "Ada_DohNewFile");
+   pragma Import (C, DohNewFileFromFd, "Ada_DohNewFileFromFd");
+   pragma Import (C, DohFileErrorDisplay, "Ada_DohFileErrorDisplay");
+   pragma Import (C, DohCopyto, "Ada_DohCopyto");
+   pragma Import (C, DohNewList, "Ada_DohNewList");
+   pragma Import (C, DohNewHash, "Ada_DohNewHash");
+   pragma Import (C, DohSplit, "Ada_DohSplit");
+   pragma Import (C, DohSplitLines, "Ada_DohSplitLines");
+   pragma Import (C, DohMemoryDebug, "Ada_DohMemoryDebug");
+   pragma Import (C, doh_Copy, "Ada_doh_Copy");
+   pragma Import (C, doh_First, "Ada_doh_First");
+   pragma Import (C, doh_Next, "Ada_doh_Next");
+   pragma Import (C, get_Item, "Ada_get_Item");
 
 end DOHs.Binding;
