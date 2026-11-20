@@ -1143,6 +1143,34 @@ is
       variable_Names : name_Maps.Map;     -- The Ada name of each variable in the package, keyed by its C name.
 
 
+      function is_unusable_Array (the_Type : in ada_Type.view) return Boolean
+      --
+      --  An array type cannot be declared when its element type is an abstract C++ class or is an
+      --  unconstrained array. Nor can a subtype of such an array type.
+      --
+      is
+      begin
+         if the_Type.all in subType_class
+         then
+            return is_unusable_Array (subType_view (the_Type).base_Type);
+
+         elsif the_Type.all in an_Array_class
+         then
+            declare
+               the_element_Type : constant ada_Type.view := an_Array_view (the_Type).element_Type;
+            begin
+               return        (         the_element_Type.resolved_Type.all in a_Record_class
+                              and then a_Record_view (the_element_Type.resolved_Type).is_Abstract)
+                     or else (         the_element_Type.all in an_Array_class
+                              and then an_Array_view (the_element_Type).is_Unconstrained);
+            end;
+         end if;
+
+         return False;
+      end is_unusable_Array;
+
+
+
       function ada_Name_of (the_Variable : in ada_Variable.view) return String
       --
       --  C is case sensitive, so a variable may differ only in case from an enumeration literal or a function
@@ -1574,11 +1602,7 @@ is
          loop
             the_Type := Element (main_Types,  Each);
 
-            if not (          the_Type.all in an_array_class                                                                                  -- Ignore any array types whose
-                    and then (        (         an_array_view (the_Type).element_Type.all in a_Record_class                                   -- element type is a C class and which
-                                       and then a_record_view (an_array_view (the_Type).element_Type).is_Abstract) -- is abstract, or whose
-                              or else (         an_array_view (the_Type).element_Type.all in an_Array_class                                   -- element type is an array, which
-                                       and then an_array_view (an_array_view (the_Type).element_Type).is_Unconstrained)))                     -- is unconstrained.
+            if not is_unusable_Array (the_Type)
             then
                if not (        Tail (the_Type.Name, 5) = "_view"
                        or else Tail (the_Type.Name, 6) = "_array"
@@ -1807,11 +1831,7 @@ is
                subtype a_Record_view  is ada_Type.composite.a_record.view;
                subtype a_Record_class is ada_Type.composite.a_record.item'Class;
             begin
-               if not (          the_Type.all in an_array_class                                                                                  -- Ignore any array types whose
-                       and then (        (         an_array_view (the_Type).element_Type.all in a_record_class                                   -- element type is a C class and which
-                                          and then a_record_view (an_array_view (the_Type).element_Type).is_Abstract) -- is abstract, or whose
-                                 or else (         an_array_view (the_Type).element_Type.all in an_array_class                                   -- element type is an array, which
-                                          and then an_array_view (an_array_view (the_Type).element_Type).is_Unconstrained)))                     -- is unconstrained.
+               if not is_unusable_Array (the_Type)
                then
                   if not (        Tail (the_Type.Name, 5) = "_view"
                           or else Tail (the_Type.Name, 6) = "_array"

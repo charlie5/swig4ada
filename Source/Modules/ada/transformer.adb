@@ -237,8 +237,43 @@ is
 
                                  new_ada_Type.declaration_Package.add (new_ada_Type);
 
-                                 add_array_Type_for   (new_ada_Type.all'Access, the_c_Type);
-                                 add_type_Pointer_for (new_ada_Type.all'Access, the_c_Type);
+                                 if the_c_Type.base_Type.c_type_Kind = c_type.c_Class
+                                 then   -- The array and pointer types of a typedef of a class are subtypes of those of the class, so
+                                        -- that the typedef and the class may be used interchangeably, as they may in C++. A function
+                                        -- with a parameter of the typedef then overrides one with a parameter of the class.
+                                    declare
+                                       procedure add_Alias (Suffix : in String;   Name : in String)
+                                       is
+                                          own_c_Name  : constant unbounded_String := the_c_Type          .Name & Suffix;
+                                          base_c_Name : constant unbounded_String := the_c_Type.base_Type.Name & Suffix;
+                                       begin
+                                          if         name_Map_of_c_type.contains (own_c_Name)
+                                            and then name_Map_of_c_type.contains (base_c_Name)
+                                            and then c_type_Map_of_ada_type.contains (name_Map_of_c_type.Element (base_c_Name))
+                                          then
+                                             declare
+                                                the_Alias : constant ada_Type.view
+                                                  := ada_Type.a_subType.new_Subtype (new_ada_Package,
+                                                                                     +Name,
+                                                                                     c_type_Map_of_ada_type.Element (name_Map_of_c_type.Element (base_c_Name))).all'Access;
+                                             begin
+                                                the_Alias.declaration_Package.add (the_Alias);
+
+                                                name_Map_of_ada_type  .insert (the_Alias.qualified_Name,                 the_Alias);
+                                                c_type_Map_of_ada_type.insert (name_Map_of_c_type.Element (own_c_Name), the_Alias);
+                                             end;
+                                          end if;
+                                       end add_Alias;
+                                    begin
+                                       add_Alias ("[]",   "Item_Array");
+                                       add_Alias ("*",    "Pointer");
+                                       add_Alias ("*[]",  "Pointer_Array");
+                                       add_Alias ("**",   "Pointer_Pointer");
+                                    end;
+                                 else
+                                    add_array_Type_for   (new_ada_Type.all'Access, the_c_Type);
+                                    add_type_Pointer_for (new_ada_Type.all'Access, the_c_Type);
+                                 end if;
                               end;
 
                            else
