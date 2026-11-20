@@ -1,0 +1,39 @@
+
+echo
+echo removing prior build
+
+rm -f ./tester
+rm *.ads
+rm *.adb
+rm example_wrap.c
+rm example_wrap.cxx
+rm *.o
+rm *.ali
+rm *.a
+
+
+echo
+echo generating bindings
+
+#./swig_gnat  -gnat -c++  -cpperraswarn  -I/usr/include  example.i 
+#./swig_gnat  -gnat -I/usr/include  import.i 
+./swig4ada  -ada -c++ -I/usr/include  example.i 
+
+
+echo
+echo pretty printing ...
+
+gnatpp  -rnb  -I../../..      *.ads    -cargs -gnatX
+
+
+echo
+echo compiling
+
+#gprbuild  -P   test_example.gpr 
+
+
+
+echo
+echo running tester ...
+
+#./tester
