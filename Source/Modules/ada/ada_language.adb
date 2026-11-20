@@ -1552,7 +1552,45 @@ is
       is_pure_Virtual : constant Boolean := is_Pure and is_Virtual;
 
       overriding_Value : constant Node_Pointer := get_Attribute (the_Node, "override");
-      is_Overriding    : constant Boolean      := overriding_Value /= null;
+
+      function is_Overriding return Boolean
+      --
+      --  Only the first base class of a class is kept, so a function which overrides one
+      --  from a second or later base class has nothing to override in the Ada binding.
+      --
+      is
+         function owner_is_among_Bases (the_Class : in c_Type.view;   Owner            : in String;
+                                                                      first_Bases_only : in Boolean) return Boolean
+         is
+            Bases : constant c_Type.Vector := the_Class.base_Classes;
+         begin
+            for Each of Bases
+            loop
+               if        Each.Name = Owner
+                 or else owner_is_among_Bases (Each, Owner, first_Bases_only)
+               then
+                  return True;
+               end if;
+
+               exit when first_Bases_only;
+            end loop;
+
+            return False;
+         end owner_is_among_Bases;
+
+      begin
+         if overriding_Value = null
+         then
+            return False;
+         end if;
+
+         declare
+            Owner : constant String := Attribute (parent_Node (overriding_Value), "sym:name");
+         begin
+            return        owner_is_among_Bases (Self.current_c_Class, Owner, first_Bases_only => True)
+                  or else not owner_is_among_Bases (Self.current_c_Class, Owner, first_Bases_only => False);     -- The owner is not known by this name.
+         end;
+      end is_Overriding;
 
       function get_Namespace return String
       is
@@ -1783,14 +1821,11 @@ is
       declare
          Bases : constant c_Type.Vector := Self.current_c_Class.base_Classes;
       begin
-         for Each of Bases
-         loop
-            if Each.has_virtual_Destructor
-            then
-               is_Overriding := True;
-               exit;
-            end if;
-         end loop;
+         if         not Bases.is_Empty
+           and then Bases.first_Element.has_virtual_Destructor     -- Only the first base class is kept.
+         then
+            is_Overriding := True;
+         end if;
       end;
 
       Self.current_c_Node := doh_Node (the_Node);

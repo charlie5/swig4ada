@@ -592,10 +592,16 @@ is
                               the_c_Bases : constant c_Type.Vector := the_c_Type.base_Classes;
                               Cursor      :          c_Type.Cursor := the_c_Bases.First;
                            begin
-                              while has_Element (Cursor)
-                              loop
+                              if has_Element (Cursor)
+                              then
                                  the_ada_Record.add_Base (c_type_Map_of_ada_type.Element (Element (Cursor)));
+                                 next (Cursor);
+                              end if;
 
+                              while has_Element (Cursor)     -- Only the first base class is kept, as a tagged type has a single parent.
+                              loop
+                                 log (  "Warning: the base class '" & Element (Cursor).Name & "' of class '" & the_c_Type.Name
+                                      & "' is ignored, as multiple inheritance is not supported.");
                                  next (Cursor);
                               end loop;
                            end add_base_Classes;
