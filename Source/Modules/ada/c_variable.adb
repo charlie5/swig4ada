@@ -75,7 +75,7 @@ is
    function  directly_depended_on_Declarations (Self : access Item) return c_Declarable.views
    is
    begin
-      return (1 => Self.my_Type.all'Access);
+      return [1 => Self.my_Type.all'Access];
    end directly_depended_on_Declarations;
 
 

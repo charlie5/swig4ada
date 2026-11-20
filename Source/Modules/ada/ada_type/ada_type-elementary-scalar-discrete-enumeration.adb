@@ -28,8 +28,8 @@ is
    is
       use enum_literal_Vectors;
    begin
-      append (Self.Literals, (Name  => Name,
-                              Value => Value));
+      append (Self.Literals, enum_Literal'(Name  => Name,
+                                           Value => Value));
    end add_Literal;
 
 
@@ -85,7 +85,7 @@ is
    is
       pragma Unreferenced (Self);
    begin
-      return (1 .. 0 => <>);
+      return [1 .. 0 => <>];
    end context_required_Types;
 
 

@@ -378,7 +378,7 @@ is
 
             the_ada_Type := ada_Type.composite.an_array.new_Item (Self.Package_interfaces_c,
                                                                   +"char_array",
-                                                                  the_array_dimension_upper_Bounds => (1 => ada_Type.composite.an_array.unConstrained),
+                                                                  the_array_dimension_upper_Bounds => [1 => ada_Type.composite.an_array.unConstrained],
                                                                   element_type                     => Self.fetch_ada_Type (+"interfaces.c.char")).all'Access;
             Self.name_Map_of_ada_type.insert (the_ada_Type.qualified_Name,
                                               the_ada_Type);
@@ -393,7 +393,7 @@ is
 
             the_ada_Type := ada_Type.composite.an_array.new_Item (Self.Package_interfaces_c,
                                                                   +"wchar_array",
-                                                                  the_array_dimension_upper_Bounds => (1 => ada_Type.composite.an_array.unConstrained),
+                                                                  the_array_dimension_upper_Bounds => [1 => ada_Type.composite.an_array.unConstrained],
                                                                   element_type                     => Self.fetch_ada_Type (+"interfaces.c.wchar_t")).all'Access;
             Self.name_Map_of_ada_type.insert (the_ada_Type.qualified_Name,
                                               the_ada_Type);
@@ -444,7 +444,7 @@ is
 
             the_ada_Type := ada_Type.composite.an_array.new_Item (Self.Package_interfaces_c_strings,
                                                                   +"chars_ptr_array",
-                                                                  the_array_dimension_upper_Bounds => (1 => ada_Type.composite.an_array.unConstrained),
+                                                                  the_array_dimension_upper_Bounds => [1 => ada_Type.composite.an_array.unConstrained],
                                                                   element_type                     => Self.fetch_ada_Type (+"interfaces.c.strings.chars_ptr")).all'Access;
             Self.name_Map_of_ada_type.insert (the_ada_Type.qualified_Name,
                                               the_ada_Type);
@@ -532,7 +532,7 @@ is
                   --
                   the_ada_array_Type := ada_Type.composite.an_array.new_Item (the_declaration_package,
                                                                               +the_c_type_Name & "_Array",
-                                                                              the_array_dimension_upper_Bounds => (1 => unConstrained),
+                                                                              the_array_dimension_upper_Bounds => [1 => unConstrained],
                                                                               element_type                     => the_ada_Type).all'Access;
                   Self.name_Map_of_ada_type.insert (the_ada_array_Type.qualified_Name,
                                                     the_ada_array_Type);
@@ -562,7 +562,7 @@ is
                   --
                   the_ada_array_Type := ada_Type.composite.an_array.new_Item (Self.Package_swig_pointers,
                                                                               +the_c_type_Name & "_pointer_Array",
-                                                                              the_array_dimension_upper_Bounds => (1 => unConstrained),
+                                                                              the_array_dimension_upper_Bounds => [1 => unConstrained],
                                                                               element_type                     => level_1_pointer_subType).all'Access;
                   Self.name_Map_of_ada_type.insert (the_ada_array_Type.qualified_Name,
                                                     the_ada_array_Type);

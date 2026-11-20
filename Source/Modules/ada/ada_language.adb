@@ -57,8 +57,8 @@ is
    --
 
    usage_help_Text : constant array (1 .. 2) of access String
-     := (new String'("Ada Options (available with -ada)"),
-         new String'("       -namespace <ns> - Generate wrappers into Ada namespace <ns>"));
+     := [new String'("Ada Options (available with -ada)"),
+         new String'("       -namespace <ns> - Generate wrappers into Ada namespace <ns>")];
 
    NL : constant String := new_line_Token;
 

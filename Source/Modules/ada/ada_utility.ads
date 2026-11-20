@@ -19,7 +19,7 @@ is
 
    --  Other
    --
-   new_line_Token : constant String := (1 => ada.Characters.Latin_1.LF);
+   new_line_Token : constant String := [1 => ada.Characters.Latin_1.LF];
 
 
    procedure replace_All (Self       : in out ada.strings.unbounded.unbounded_String;

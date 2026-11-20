@@ -9,7 +9,7 @@ is
    is
    begin
       raise Program_Error with "Not yet implemented."; -- todo
-      return (1 .. 0 => <>);
+      return [1 .. 0 => <>];
    end required_Types;
 
 
@@ -18,7 +18,7 @@ is
    is
    begin
       raise Program_Error with "Not yet implemented."; -- todo
-      return (1 .. 0 => <>);
+      return [1 .. 0 => <>];
    end context_required_Types;
 
 

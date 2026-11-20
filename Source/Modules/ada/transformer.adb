@@ -98,7 +98,7 @@ is
                begin
                   new_ada_Array := ada_Type.composite.an_array.new_Item (the_element_Type.declaration_Package,
                                                                          the_base_ada_Type.Name & "_Array",
-                                                                         the_array_dimension_upper_Bounds => (1 => ada_Type.composite.an_array.unConstrained),
+                                                                         the_array_dimension_upper_Bounds => [1 => ada_Type.composite.an_array.unConstrained],
                                                                          element_type                     => the_element_Type);
 
                   new_ada_Array.declaration_Package.add (new_ada_Array.all'Access);

@@ -512,7 +512,7 @@ is
             | standard_c_Type
             | Unknown =>
 
-            return (1 .. 0 => <>);    -- No types are required.
+            return [1 .. 0 => <>];    -- No types are required.
 
          when function_Pointer =>
             return   Self.my.accessed_Function.all'Access
@@ -534,7 +534,7 @@ is
 
 
          when virtual_class_Pointer =>
-            return (1 .. 0 => <>);    -- No types are required.
+            return [1 .. 0 => <>];    -- No types are required.
       end case;
    end depended_on_Declarations;
 
@@ -546,7 +546,7 @@ is
       case Self.my.c_type_Kind
       is
          when array_Type =>
-            return (1 => Self.my.element_Type);
+            return [1 => Self.my.element_Type];
 
          when c_Class =>
             declare
@@ -571,7 +571,7 @@ is
             | Enum
             | standard_c_Type
             | Unknown          =>
-            return (1 .. 0 => <>);    -- No types are required.
+            return [1 .. 0 => <>];    -- No types are required.
 
          when function_Pointer =>
             return Self.my.accessed_Function.required_Types;
@@ -580,13 +580,13 @@ is
             return Self.my.typed_Function.required_Types;
 
          when type_Pointer =>
-            return (1 => Self.my.accessed_Type);
+            return [1 => Self.my.accessed_Type];
 
          when Typedef =>
-            return (1 => Self.my.base_Type);
+            return [1 => Self.my.base_Type];
 
          when virtual_class_Pointer =>
-            return (1 .. 0 => <>);    -- No types are required.
+            return [1 .. 0 => <>];    -- No types are required.
       end case;
    end required_Types;
 
@@ -727,7 +727,7 @@ is
       case Self.my.c_type_Kind
       is
          when array_Type =>
-            return    (1 => Self.my.element_Type.all'Access);
+            return    [1 => Self.my.element_Type.all'Access];
 
          when c_Class =>
             declare
@@ -746,7 +746,7 @@ is
             | Enum
             | standard_c_Type
             | Unknown =>
-            return (1 .. 0 => <>);
+            return [1 .. 0 => <>];
 
          when function_Pointer =>
             return   Self.my.accessed_Function.all'Access
@@ -757,13 +757,13 @@ is
                    & Self.my.typed_Function.directly_depended_on_Declarations;
 
          when type_Pointer =>
-            return (1 => Self.my.accessed_Type.all'Access);
+            return [1 => Self.my.accessed_Type.all'Access];
 
          when Typedef =>
-            return (1 => Self.my.base_Type.all'Access);
+            return [1 => Self.my.base_Type.all'Access];
 
          when virtual_class_Pointer =>
-            return (1 .. 0 => <>);
+            return [1 .. 0 => <>];
       end case;
    end directly_depended_on_Declarations;
 
@@ -985,8 +985,8 @@ is
                                                 Value : in gmp.discrete.Integer)
    is
    begin
-      append (Self.my.Literals, (name => Name,
-                                 value => Value));
+      append (Self.my.Literals, enum_Literal'(name => Name,
+                                              value => Value));
    end add_Literal;
 
 

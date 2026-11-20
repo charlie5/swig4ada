@@ -425,78 +425,78 @@ is
                   expression_Type  : unbounded_String;
                begin
                   resolve_c_integer_Expression_recursive (Expression_pad, known_Symbols, is_Single, expression_Value, expression_Type);
-                  append (the_Elements,  (kind           => Value,
-                                          value          => expression_Value,
-                                          type_Qualifier => expression_Type));
+                  append (the_Elements,  an_Element'(kind           => Value,
+                                                     value          => expression_Value,
+                                                     type_Qualifier => expression_Type));
                end;
 
             elsif Element (Expression_pad.all, 1) = '!'
             then
                delete (Expression_pad.all,  1, 1);
-               append (the_Elements,  (kind  => Operator,
-                                       code  => +"!"));
+               append (the_Elements,  an_Element'(kind  => Operator,
+                                                  code  => +"!"));
 
             elsif Element (Expression_pad.all, 1) = '+'
             then
                delete (Expression_pad.all,  1, 1);
-               append (the_Elements,  (kind  => Operator,
-                                       code  => +"+"));
+               append (the_Elements,  an_Element'(kind  => Operator,
+                                                  code  => +"+"));
 
             elsif Element (Expression_pad.all, 1) = '-'
             then
                delete (Expression_pad.all,  1, 1);
-               append (the_Elements,  (kind  => Operator,
-                                       code  => +"-"));
+               append (the_Elements,  an_Element'(kind  => Operator,
+                                                  code  => +"-"));
 
             elsif Element (Expression_pad.all, 1) = '~'
             then
                delete (Expression_pad.all,  1, 1);
-               append (the_Elements,  (kind  => Operator,
-                                       code  => +"~"));
+               append (the_Elements,  an_Element'(kind  => Operator,
+                                                  code  => +"~"));
 
 
             elsif Element (Expression_pad.all, 1) = '*'
             then
                delete (Expression_pad.all,  1, 1);
-               append (the_Elements,  (kind  => Operator,
-                                       code  => +"*"));
+               append (the_Elements,  an_Element'(kind  => Operator,
+                                                  code  => +"*"));
 
 
             elsif Element (Expression_pad.all, 1) = '/'
             then
                delete (Expression_pad.all,  1, 1);
-               append (the_Elements,  (kind  => Operator,
-                                       code  => +"/"));
+               append (the_Elements,  an_Element'(kind  => Operator,
+                                                  code  => +"/"));
 
             elsif Length (Expression_pad.all) >= 2 and then Slice (Expression_pad.all, 1, 2) = "||"
             then
                delete (Expression_pad.all,  1, 2);
-               append (the_Elements,  (kind  => Operator,
-                                       code  => +"||"));
+               append (the_Elements,  an_Element'(kind  => Operator,
+                                                  code  => +"||"));
 
             elsif Element (Expression_pad.all, 1) = '|'
             then
                delete (Expression_pad.all,  1, 1);
-               append (the_Elements,  (kind  => Operator,
-                                       code  => +"|"));
+               append (the_Elements,  an_Element'(kind  => Operator,
+                                                  code  => +"|"));
 
             elsif Length (Expression_pad.all) >= 2 and then Slice (Expression_pad.all, 1, 2) = "&&"
             then
                delete (Expression_pad.all,  1, 2);
-               append (the_Elements,  (kind  => Operator,
-                                       code  => +"&&"));
+               append (the_Elements,  an_Element'(kind  => Operator,
+                                                  code  => +"&&"));
 
             elsif Element (Expression_pad.all, 1) = '&'
             then
                delete (Expression_pad.all,  1, 1);
-               append (the_Elements,  (kind  => Operator,
-                                       code  => +"&"));
+               append (the_Elements,  an_Element'(kind  => Operator,
+                                                  code  => +"&"));
 
             elsif Element (Expression_pad.all, 1) = '^'
             then
                delete (Expression_pad.all,  1, 1);
-               append (the_Elements,  (kind  => Operator,
-                                       code  => +"^"));
+               append (the_Elements,  an_Element'(kind  => Operator,
+                                                  code  => +"^"));
 
             elsif      Length (Expression_pad.all)       >= 7
               and then Slice  (Expression_pad.all, 1, 7)  = "sizeof("
@@ -507,12 +507,12 @@ is
                   Last         : constant Positive         := Index (Expression_pad.all, ")");
                   sizeof_Slice : constant unbounded_String := unbounded_Slice (Expression_pad.all,  1,  Last - 1);
                begin
-                  append (the_Elements,  (kind  => Value,
-                                          value => to_Integer (Long_Long_Integer (resolved_sizeof_Expression (Self,
-                                                                                                              sizeof_Slice,
-                                                                                                              known_Symbols,
-                                                                                                              Namespace))),
-                                          others => <>));
+                  append (the_Elements,  an_Element'(kind  => Value,
+                                                     value => to_Integer (Long_Long_Integer (resolved_sizeof_Expression (Self,
+                                                                                                                         sizeof_Slice,
+                                                                                                                         known_Symbols,
+                                                                                                                         Namespace))),
+                                                     others => <>));
                   delete (Expression_pad.all,  1, Last);
                end;
 
@@ -520,15 +520,15 @@ is
               and then Slice  (Expression_pad.all, 1, 2)  = "<<"
             then
                delete (Expression_pad.all,  1, 2);
-               append (the_Elements,  (kind  => Operator,
-                                       code  => +"<<"));
+               append (the_Elements,  an_Element'(kind  => Operator,
+                                                  code  => +"<<"));
 
             elsif      Length (Expression_pad.all)       >= 2
               and then Slice  (Expression_pad.all, 1, 2)  = ">>"
             then
                delete (Expression_pad.all,  1, 2);
-               append (the_Elements,  (kind  => Operator,
-                                       code  => +">>"));
+               append (the_Elements,  an_Element'(kind  => Operator,
+                                                  code  => +">>"));
 
             elsif Element (Expression_pad.all, 1) = ')'
             then
@@ -544,9 +544,9 @@ is
                begin
                   find_Token (Expression_pad.all, to_Set ("0123456789xABCDEFabcdef"), Inside,  First, Last);
 
-                  append (the_Elements,  (Kind  => Value,
-                                          Value => to_Int (Slice (Expression_pad.all,  First, Last)),
-                                          others => <>));
+                  append (the_Elements,  an_Element'(Kind  => Value,
+                                                     Value => to_Int (Slice (Expression_pad.all,  First, Last)),
+                                                     others => <>));
                   delete (Expression_pad.all,  First, Last);
                end;
 
@@ -558,9 +558,9 @@ is
                begin
                   find_Token (Expression_pad.all, to_Set ("0123456789"), Inside,  First, Last);
 
-                  append (the_Elements,  (Kind  => Value,
-                                          Value => to_Int (Slice (Expression_pad.all,  First, Last)),
-                                          others => <>));
+                  append (the_Elements,  an_Element'(Kind  => Value,
+                                                     Value => to_Int (Slice (Expression_pad.all,  First, Last)),
+                                                     others => <>));
                   delete (Expression_pad.all,  First, Last);
                end;
 
@@ -570,13 +570,13 @@ is
                begin
                   if Element (Expression_pad.all, 1) in '0' .. '9'
                   then
-                     append (the_Elements,  (Kind  => Value,
-                                             Value => to_Int (Expression_pad.all),
-                                             others => <>));
+                     append (the_Elements,  an_Element'(Kind  => Value,
+                                                        Value => to_Int (Expression_pad.all),
+                                                        others => <>));
                   else
-                     append (the_Elements,  (Kind  => Value,
-                                             Value => to_Integer (Character'Pos (Element (Expression_pad.all, 1))),
-                                             others => <>));
+                     append (the_Elements,  an_Element'(Kind  => Value,
+                                                        Value => to_Integer (Character'Pos (Element (Expression_pad.all, 1))),
+                                                        others => <>));
                   end if;
 
                   delete (Expression_pad.all,  1, 1);
@@ -592,14 +592,14 @@ is
                   the_Symbol := unbounded_Slice (Expression_pad.all,  First, Last);
 
                   begin
-                     append (the_Elements,  (kind  => Value,
-                                             value => Element (known_Symbols,  Namespace & the_Symbol),
-                                             others => <>));
+                     append (the_Elements,  an_Element'(kind  => Value,
+                                                        value => Element (known_Symbols,  Namespace & the_Symbol),
+                                                        others => <>));
                   exception
                      when Constraint_Error => -- Key not found, so try without namespace.
-                        append (the_Elements,  (kind  => Value,
-                                                value => Element (known_Symbols,  the_Symbol),
-                                                others => <>));
+                        append (the_Elements,  an_Element'(kind  => Value,
+                                                           value => Element (known_Symbols,  the_Symbol),
+                                                           others => <>));
                   end;
 
                   delete (Expression_pad.all,  First, Last);

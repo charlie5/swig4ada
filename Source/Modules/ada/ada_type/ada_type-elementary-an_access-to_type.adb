@@ -30,7 +30,7 @@ is
    function required_Types (Self : access Item)  return ada_Type.views
    is
    begin
-      return (1 => Self.accessed_Type);
+      return [1 => Self.accessed_Type];
    end required_Types;
 
 
@@ -38,7 +38,7 @@ is
    function context_required_Types (Self : access Item)  return ada_Type.views
    is
    begin
-      return (1 => Self.accessed_Type);
+      return [1 => Self.accessed_Type];
    end context_required_Types;
 
 

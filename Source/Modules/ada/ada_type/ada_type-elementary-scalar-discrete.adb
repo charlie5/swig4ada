@@ -6,7 +6,7 @@ is
    is
       pragma Unreferenced (Self);
    begin
-      return (1 .. 0 => <>);
+      return [1 .. 0 => <>];
    end required_Types;
 
 
@@ -15,7 +15,7 @@ is
    is
       pragma Unreferenced (Self);
    begin
-      return (1 .. 0 => <>);
+      return [1 .. 0 => <>];
    end context_required_Types;
 
 
