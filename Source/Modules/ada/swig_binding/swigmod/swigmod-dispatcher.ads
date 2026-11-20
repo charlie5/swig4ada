@@ -213,6 +213,8 @@ package swigmod.Dispatcher is
      (Self :    access swigmod.Dispatcher.Item;
       n    : in swig_Core.Pointers.Node_Pointer) return Interfaces.C.int;
 
+   function construct return swigmod.Dispatcher.Item'Class;
+
 private
 
    pragma Import (CPP, destruct_0, "_ZN10DispatcherD1Ev");
@@ -258,5 +260,7 @@ private
    pragma Import
      (CPP, templateDeclaration, "Ada_Dispatcher_templateDeclaration");
    pragma Import (CPP, lambdaDeclaration, "Ada_Dispatcher_lambdaDeclaration");
+
+   pragma CPP_Constructor (construct, "ada_new_Dispatcher_Dispatcher");
 
 end swigmod.Dispatcher;

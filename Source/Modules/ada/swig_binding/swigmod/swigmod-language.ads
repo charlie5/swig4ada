@@ -7,6 +7,7 @@ with swig.pointers;
 with swig_Core;
 with swig_Core.Pointers;
 with swigmod.Dispatcher;
+with swigmod.Pointers;
 with Interfaces.C;
 use Interfaces.C;
 with Interfaces.C.Pointers;
@@ -618,6 +619,52 @@ package swigmod.Language is
      (Self :    access swigmod.Language.Item'Class;
       n    : in swig_Core.Pointers.Node_Pointer) return Interfaces.C.int;
 
+   procedure set_none_comparison
+     (Self            : in out swigmod.Language.Item'Class;
+      none_comparison : in     swig_Core.Pointers.String_Pointer);
+
+   function none_comparison
+     (Self : access swigmod.Language.Item'Class)
+      return swig_Core.Pointers.String_Pointer;
+
+   procedure set_director_ctor_code
+     (Self               : in out swigmod.Language.Item'Class;
+      director_ctor_code : in     swig_Core.Pointers.String_Pointer);
+
+   function director_ctor_code
+     (Self : access swigmod.Language.Item'Class)
+      return swig_Core.Pointers.String_Pointer;
+
+   procedure set_director_prot_ctor_code
+     (Self                    : in out swigmod.Language.Item'Class;
+      director_prot_ctor_code : in     swig_Core.Pointers.String_Pointer);
+
+   function director_prot_ctor_code
+     (Self : access swigmod.Language.Item'Class)
+      return swig_Core.Pointers.String_Pointer;
+
+   procedure set_director_multiple_inheritance
+     (Self                          : in out swigmod.Language.Item'Class;
+      director_multiple_inheritance : in     Interfaces.C.int);
+
+   function director_multiple_inheritance
+     (Self : access swigmod.Language.Item'Class) return Interfaces.C.int;
+
+   procedure set_director_language
+     (Self              : in out swigmod.Language.Item'Class;
+      director_language : in     Interfaces.C.int);
+
+   function director_language
+     (Self : access swigmod.Language.Item'Class) return Interfaces.C.int;
+
+   procedure set_doxygenTranslator
+     (Self              : in out swigmod.Language.Item'Class;
+      doxygenTranslator : in     swigmod.Pointers.DoxygenTranslator_Pointer);
+
+   function doxygenTranslator
+     (Self : access swigmod.Language.Item'Class)
+      return swigmod.Pointers.DoxygenTranslator_Pointer;
+
 private
 
    pragma CPP_Constructor (construct, "ada_new_Language_Language");
@@ -765,6 +812,33 @@ private
       "Ada_Language_isNonVirtualProtectedAccess");
    pragma Import
      (CPP, use_naturalvar_mode, "Ada_Language_use_naturalvar_mode");
+   pragma Import
+     (CPP, set_none_comparison, "Ada_set_Language_none_comparison");
+   pragma Import (CPP, none_comparison, "Ada_get_Language_none_comparison");
+   pragma Import
+     (CPP, set_director_ctor_code, "Ada_set_Language_director_ctor_code");
+   pragma Import
+     (CPP, director_ctor_code, "Ada_get_Language_director_ctor_code");
+   pragma Import
+     (CPP, set_director_prot_ctor_code,
+      "Ada_set_Language_director_prot_ctor_code");
+   pragma Import
+     (CPP, director_prot_ctor_code,
+      "Ada_get_Language_director_prot_ctor_code");
+   pragma Import
+     (CPP, set_director_multiple_inheritance,
+      "Ada_set_Language_director_multiple_inheritance");
+   pragma Import
+     (CPP, director_multiple_inheritance,
+      "Ada_get_Language_director_multiple_inheritance");
+   pragma Import
+     (CPP, set_director_language, "Ada_set_Language_director_language");
+   pragma Import
+     (CPP, director_language, "Ada_get_Language_director_language");
+   pragma Import
+     (CPP, set_doxygenTranslator, "Ada_set_Language_doxygenTranslator");
+   pragma Import
+     (CPP, doxygenTranslator, "Ada_get_Language_doxygenTranslator");
 
    package conversions is new System.Address_To_Access_Conversions (Item);
 

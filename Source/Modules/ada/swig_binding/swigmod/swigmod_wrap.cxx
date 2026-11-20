@@ -4218,6 +4218,262 @@ DllExport int SWIGSTDCALL Ada_Language_use_naturalvar_mode (
 
 
 
+DllExport void SWIGSTDCALL Ada_set_Language_none_comparison (
+  void * a_arg1
+  ,
+  
+  void* a_arg2
+  )
+{
+  Language *arg1 = (Language *) 0 ;
+  String *arg2 = (String *) 0 ;
+  
+  arg1 = (Language *)a_arg1; 
+  
+  arg2 = (String *)a_arg2; 
+  
+  if (arg1) (arg1)->none_comparison = arg2;
+  
+  
+}
+
+
+
+DllExport void* SWIGSTDCALL Ada_get_Language_none_comparison (
+  void * a_arg1
+  )
+{
+  void* jresult ;
+  Language *arg1 = (Language *) 0 ;
+  String *result = 0 ;
+  
+  arg1 = (Language *)a_arg1; 
+  
+  result = (String *) ((arg1)->none_comparison);
+  jresult = (void *) result;      
+  
+  
+  
+  return jresult;
+  
+}
+
+
+
+DllExport void SWIGSTDCALL Ada_set_Language_director_ctor_code (
+  void * a_arg1
+  ,
+  
+  void* a_arg2
+  )
+{
+  Language *arg1 = (Language *) 0 ;
+  String *arg2 = (String *) 0 ;
+  
+  arg1 = (Language *)a_arg1; 
+  
+  arg2 = (String *)a_arg2; 
+  
+  if (arg1) (arg1)->director_ctor_code = arg2;
+  
+  
+}
+
+
+
+DllExport void* SWIGSTDCALL Ada_get_Language_director_ctor_code (
+  void * a_arg1
+  )
+{
+  void* jresult ;
+  Language *arg1 = (Language *) 0 ;
+  String *result = 0 ;
+  
+  arg1 = (Language *)a_arg1; 
+  
+  result = (String *) ((arg1)->director_ctor_code);
+  jresult = (void *) result;      
+  
+  
+  
+  return jresult;
+  
+}
+
+
+
+DllExport void SWIGSTDCALL Ada_set_Language_director_prot_ctor_code (
+  void * a_arg1
+  ,
+  
+  void* a_arg2
+  )
+{
+  Language *arg1 = (Language *) 0 ;
+  String *arg2 = (String *) 0 ;
+  
+  arg1 = (Language *)a_arg1; 
+  
+  arg2 = (String *)a_arg2; 
+  
+  if (arg1) (arg1)->director_prot_ctor_code = arg2;
+  
+  
+}
+
+
+
+DllExport void* SWIGSTDCALL Ada_get_Language_director_prot_ctor_code (
+  void * a_arg1
+  )
+{
+  void* jresult ;
+  Language *arg1 = (Language *) 0 ;
+  String *result = 0 ;
+  
+  arg1 = (Language *)a_arg1; 
+  
+  result = (String *) ((arg1)->director_prot_ctor_code);
+  jresult = (void *) result;      
+  
+  
+  
+  return jresult;
+  
+}
+
+
+
+DllExport void SWIGSTDCALL Ada_set_Language_director_multiple_inheritance (
+  void * a_arg1
+  ,
+  
+  int a_arg2
+  )
+{
+  Language *arg1 = (Language *) 0 ;
+  int arg2 ;
+  
+  arg1 = (Language *)a_arg1; 
+  
+  
+  arg2 = (int) a_arg2; 
+  
+  
+  if (arg1) (arg1)->director_multiple_inheritance = arg2;
+  
+  
+}
+
+
+
+DllExport int SWIGSTDCALL Ada_get_Language_director_multiple_inheritance (
+  void * a_arg1
+  )
+{
+  int jresult ;
+  Language *arg1 = (Language *) 0 ;
+  int result;
+  
+  arg1 = (Language *)a_arg1; 
+  
+  result = (int) ((arg1)->director_multiple_inheritance);
+  jresult = result; 
+  
+  
+  
+  return jresult;
+  
+}
+
+
+
+DllExport void SWIGSTDCALL Ada_set_Language_director_language (
+  void * a_arg1
+  ,
+  
+  int a_arg2
+  )
+{
+  Language *arg1 = (Language *) 0 ;
+  int arg2 ;
+  
+  arg1 = (Language *)a_arg1; 
+  
+  
+  arg2 = (int) a_arg2; 
+  
+  
+  if (arg1) (arg1)->director_language = arg2;
+  
+  
+}
+
+
+
+DllExport int SWIGSTDCALL Ada_get_Language_director_language (
+  void * a_arg1
+  )
+{
+  int jresult ;
+  Language *arg1 = (Language *) 0 ;
+  int result;
+  
+  arg1 = (Language *)a_arg1; 
+  
+  result = (int) ((arg1)->director_language);
+  jresult = result; 
+  
+  
+  
+  return jresult;
+  
+}
+
+
+
+DllExport void SWIGSTDCALL Ada_set_Language_doxygenTranslator (
+  void * a_arg1
+  ,
+  
+  void * a_arg2
+  )
+{
+  Language *arg1 = (Language *) 0 ;
+  DoxygenTranslator *arg2 = (DoxygenTranslator *) 0 ;
+  
+  arg1 = (Language *)a_arg1; 
+  
+  arg2 = (DoxygenTranslator *)a_arg2; 
+  
+  if (arg1) (arg1)->doxygenTranslator = arg2;
+  
+  
+}
+
+
+
+DllExport void * SWIGSTDCALL Ada_get_Language_doxygenTranslator (
+  void * a_arg1
+  )
+{
+  void * jresult ;
+  Language *arg1 = (Language *) 0 ;
+  DoxygenTranslator *result = 0 ;
+  
+  arg1 = (Language *)a_arg1; 
+  
+  result = (DoxygenTranslator *) ((arg1)->doxygenTranslator);
+  jresult = (void *) result;      
+  
+  
+  
+  return jresult;
+  
+}
+
+
+
 DllExport void SWIGSTDCALL Ada_SWIG_typemap_lang (
   char * a_arg1
   )
@@ -5444,6 +5700,19 @@ DllExport void SWIGSTDCALL Ada_do_base_top (
 #ifdef __cplusplus
 extern "C" {
 #endif
+class ada_concrete_Dispatcher : public Dispatcher
+{
+public:
+  ada_concrete_Dispatcher () : Dispatcher () {}
+  virtual int top(Node *) { abort (); }
+};
+
+extern void ada_new_Dispatcher_Dispatcher (Dispatcher * self)
+{
+  new (self) ada_concrete_Dispatcher ();
+}
+
+
 extern Language    ada_new_Language_Language()
 {
   return Language();
