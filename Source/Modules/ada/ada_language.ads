@@ -279,6 +279,14 @@ private
          static_flag                   : Boolean := False;       -- Flag for wrapping a static functions or member variables.
          wrapping_member_flag          : Boolean := False;       -- Flag for wrapping a member variable/enum/const.
          is_anonymous_Enum             : Boolean := False;
+         --  An abstract class cannot be constructed, so its constructors are those of a concrete class of the wrapper
+         --  which is derived from it (see 'classHandler'). These hold the name of that class, where one is being made,
+         --  and its constructors and the functions which call them.
+         --
+         abstract_shim_Name            : unbounded_String;
+         abstract_shim_Constructors    : unbounded_String;
+         abstract_shim_Functions       : unbounded_String;
+
          accessor_member_Name          : unbounded_String;       -- The member variable whose 'get' and 'set' functions are being wrapped, if any.
          variable_wrapper_flag         : Boolean := False;       -- Flag for wrapping a nonstatic member variable. TODO: possibly oboslete.
          have_default_constructor_flag : Boolean := False;       -- TODO: Possibly obsolete.

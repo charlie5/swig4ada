@@ -74,6 +74,9 @@ is
                                    have_default_constructor_flag
                                                             => False,
                                    static_flag              => False,
+                                   abstract_shim_Name         => <>,
+                                   abstract_shim_Constructors => <>,
+                                   abstract_shim_Functions    => <>,
                                    accessor_member_Name     => <>,
                                    variable_wrapper_flag    => False,
                                    wrapping_member_flag     => False,

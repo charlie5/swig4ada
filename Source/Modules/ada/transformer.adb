@@ -902,9 +902,7 @@ is
                                     --  A component of a type extension may not be where C++ has its member (see 'memberVariableHandler'
                                     --  in 'ada_Language'), so it only reserves storage, and is named to say so. The member has functions.
                                     --
-                                    if         not the_ada_Record.base_Classes.is_Empty
-                                      and then the_c_Components (Each).array_Bounds.is_Empty
-                                      and then the_c_Components (Each).bit_Field = c_Variable.undefined_Bitfield
+                                    if not the_ada_Record.base_Classes.is_Empty
                                     then
                                        the_Component.Name := the_Component.Name & "_storage";
                                     end if;

@@ -81,6 +81,7 @@ is
    function  is_a_function_Pointer (swig_Type : in doh_swigType) return Boolean;
    function  returns_a_cpp_constructed_Type (Self : access Item;   the_Node : in doh_Node) return Boolean;
    function  cpp_Symbol (qualified_Name : in String;   Suffix : in String) return String;
+   procedure bind_constructors_of_abstract_Class (Self : access Item;   the_Class : in Node_Pointer);
 
    procedure register_Mirror (Self : access Item;   proxy_Name              : in unbounded_String;
                                                     the_c_Type              : in c_Type.view;
@@ -1785,6 +1786,8 @@ is
 
       Status := swigMod.Language.item (Self.all).classHandler (the_Node);     -- Process all class members.
 
+      bind_constructors_of_abstract_Class (Self, the_Node);
+
       --  new ...
       --
       Self.c_class_Stack    .delete_Last;
@@ -1954,6 +1957,8 @@ is
    is
       the_Node : Node_Pointer renames N;
       Status   : C.int with Unreferenced;
+
+      for_abstract_Class : constant Boolean := Self.abstract_shim_Name /= "";
    begin
       if not Self.in_cpp_Mode
       then
@@ -1973,7 +1978,8 @@ is
       Self.current_c_Node := doh_Node (the_Node);
 
       if not (   check_Attribute (the_Node, "access", "protected")
-              or check_Attribute (the_Node, "access", "private"))
+              or check_Attribute (the_Node, "access", "private")
+              or for_abstract_Class)     -- The core's wrapper makes a new object of the class, which an abstract class cannot have.
       then
          Self.doing_constructorDeclaration := True;
          Status := swigMod.Language.item (Self.all).constructorHandler (the_Node);
@@ -1999,6 +2005,7 @@ is
          Index          : Natural      := 0;
          genComma       : Boolean      := False;
 
+         parameters_First : Positive;     -- Where the parameters begin in 'construct_Call'.
 
          function has_hidden_Destructor return Boolean
          --
@@ -2037,6 +2044,7 @@ is
          end loop;
 
          append (construct_Call, "extern "  & Self.current_lStr & "    " & constructor_Symbol & "(");
+         parameters_First := Length (construct_Call) + 1;
 
          Swig_typemap_attach_parms (const_String (-"ctype"), parameter_List, null);    -- Attach the non-standard typemaps to the parameter list.
          Swig_typemap_attach_parms (const_String (-"in"),    parameter_List, null);
@@ -2089,9 +2097,29 @@ is
             end if;
          end loop;
 
-         append (construct_Call,  ")" & NL & "{");
-         append (construct_Call,  NL  &  "  return "  &  Self.current_lStr  &  "("  &  construct_call_Args  &  ");"  & NL);
-         append (construct_Call,  "}" & NL);
+         if for_abstract_Class
+         then
+            --  The function has the profile of a constructor: it is given the address of the storage, in which it
+            --  constructs an object of the concrete class. Ada then makes the object one of its own derived type.
+            --
+            declare
+               the_Class      : constant String := +doh_Item (SwigType_namestr (SwigType_Pointer (get_Attribute (Self.getCurrentClass, "name"))));
+               the_Parameters : constant String := Slice (construct_Call, parameters_First, Length (construct_Call));
+            begin
+               append (Self.abstract_shim_Constructors,
+                         "  " & Self.abstract_shim_Name & " (" & the_Parameters & ") : " & the_Class & " (" & construct_call_Args & ") {}" & NL);
+
+               construct_Call := +(  "extern void " & to_String (constructor_Symbol) & " (" & the_Class & " * self"
+                                   & (if the_Parameters = "" then "" else ",   " & the_Parameters) & ")"                   & NL
+                                   & "{"                                                                                   & NL
+                                   & "  new (self) " & to_String (Self.abstract_shim_Name) & " (" & to_String (construct_call_Args) & ");" & NL
+                                   & "}"                                                                                   & NL);
+            end;
+         else
+            append (construct_Call,  ")" & NL & "{");
+            append (construct_Call,  NL  &  "  return "  &  Self.current_lStr  &  "("  &  construct_call_Args  &  ");"  & NL);
+            append (construct_Call,  "}" & NL);
+         end if;
 
          if not genComma
          then
@@ -2111,10 +2139,14 @@ is
             the_Constructor.constructor_Symbol := constructor_Symbol;
          end;
 
-         if not (    check_Attribute (the_Node, "access", "protected")
-                 or  check_Attribute (the_Node, "access", "private")
-                 or  has_hidden_Destructor
-                 or  Attribute (the_Node, "feature:extend") /= "")     -- A constructor added by '%extend' is not one which C++ can call.
+         if for_abstract_Class
+         then   -- Written once the concrete class is complete (see 'classHandler').
+            append (Self.abstract_shim_Functions, construct_Call & NL);
+
+         elsif not (    check_Attribute (the_Node, "access", "protected")
+                    or  check_Attribute (the_Node, "access", "private")
+                    or  has_hidden_Destructor
+                    or  Attribute (the_Node, "feature:extend") /= "")     -- A constructor added by '%extend' is not one which C++ can call.
          then
             print_to (DOH_Pointer (Self.f_Ada), construct_Call & NL);
          end if;
@@ -2316,10 +2348,7 @@ is
          --
          if         Self.in_cpp_Mode
            and then has_virtual_Base
-           and then not swig_Type_is_Array
-           and then bit_Field_text = ""
-           and then not (   check_Attribute (the_Node, "access", "protected")
-                         or check_Attribute (the_Node, "access", "private"))
+           and then not check_Attribute (the_Node, "access", "private")     -- No wrapper is made for a private member.
          then
             declare
                Status : C.int with Unreferenced;
@@ -2645,6 +2674,142 @@ is
    --- Utility
    --
 
+   procedure bind_constructors_of_abstract_Class (Self : access Item;   the_Class : in Node_Pointer)
+   --
+   --  An abstract class cannot be constructed, and the core gives it no constructor. A class which is derived
+   --  from it in Ada needs one all the same, to construct the part of its object which is the abstract class.
+   --
+   --  The wrapper is therefore given a concrete class which is derived from the abstract class, has each of its
+   --  constructors and defines each of its pure virtual functions (which are never called, as Ada replaces the
+   --  vtable of the object by that of its own type). A constructor of the abstract class is bound to a function
+   --  which constructs an object of the concrete class in the storage it is given.
+   --
+   is
+      use DOHs.Binding;
+      use type C.int;
+      use type DOH_Pointer;
+      use type swig_Module.swig_Module_view;
+
+      the_Abstracts : constant DOH_Pointer := DOH_Pointer (get_Attribute (the_Class, "abstracts"));
+      the_Name      : unbounded_String     := +("ada_concrete_" & String'(+DOH_Pointer (get_Attribute (the_Class, "name"))));
+      the_cpp_Class : constant String      := (if get_Attribute (the_Class, "name") = null then ""
+                                               else +doh_Item (SwigType_namestr (SwigType_Pointer (get_Attribute (the_Class, "name")))));
+      the_Functions : unbounded_String;
+      has_Constructor : Boolean := False;
+      the_Child       : Node_Pointer;
+      Status          : C.int with Unreferenced;
+   begin
+      if        not Self.in_cpp_Mode
+        or else the_Abstracts = null
+        or else DohLen (the_Abstracts) = 0
+        or else Self.current_Module /= Self.Module_top'Access                 -- The wrapper of an imported module is not written here.
+        or else get_Attribute (the_Class, "allocate:private_destructor") /= null
+        or else get_Attribute (the_Class, "allocate:nonew")              /= null
+        or else get_Attribute (the_Class, "feature:notabstract")         /= null     -- The core has given it its constructors.
+      then
+         return;
+      end if;
+
+      for Each in 1 .. Length (the_Name)
+      loop
+         if Element (the_Name, Each) not in 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_'
+         then
+            replace_Element (the_Name, Each, '_');
+         end if;
+      end loop;
+
+      --  A definition of each pure virtual function.
+      --
+      for Each in 0 .. DohLen (the_Abstracts) - 1
+      loop
+         declare
+            the_Function : constant Node_Pointer := Node_Pointer (DohGetitem (the_Abstracts, Each));
+         begin
+            if Attribute (the_Function, "nodeType") = "destructor"
+            then
+               return;     -- A pure virtual destructor cannot be defined within a class.
+            end if;
+
+            declare
+               the_Type  : constant SwigType_Pointer := SwigType_Pointer (doh_Copy (doh_Item (get_Attribute (the_Function, "type"))));
+               Name      :          unbounded_String := +Attribute (the_Function, "name");
+               the_Decl  :          unbounded_String := +Attribute (the_Function, "decl");
+               Qualifier :          unbounded_String;     -- That of the function itself, as in 'int f () const'.
+            begin
+               strip_Namespaces (Name);
+
+               if Index (the_Decl, "q(") = 1
+               then
+                  declare
+                     Last : constant Natural := Index (the_Decl, ").");
+                  begin
+                     Qualifier := " " & unbounded_Slice (the_Decl, 3, Last - 1);
+                     the_Decl  := unbounded_Slice (the_Decl, Last + 2, Length (the_Decl));
+                  end;
+               end if;
+
+               SwigType_push (the_Type, String_Pointer (to_Doh (to_String (the_Decl))));
+
+               append (the_Functions,   "  virtual " & String'(+doh_Item (SwigType_str (the_Type, const_String (-to_String (Name)))))
+                                      & Qualifier & " { abort (); }" & NL);
+            end;
+         end;
+      end loop;
+
+      --  A constructor for each of those of the class.
+      --
+      Self.abstract_shim_Name         := the_Name;
+      Self.abstract_shim_Constructors := null_unbounded_String;
+      Self.abstract_shim_Functions    := null_unbounded_String;
+
+      the_Child := first_Child (the_Class);
+
+      while the_Child /= null
+      loop
+         if         Attribute (the_Child, "nodeType") = "constructor"
+           and then get_Attribute (the_Child, "template") = null
+         then
+            has_Constructor := True;
+
+            if not check_Attribute (the_Child, "access", "private")
+            then
+               Status := Self.constructorHandler (the_Child);
+            end if;
+         end if;
+
+         the_Child := next_Sibling (the_Child);
+      end loop;
+
+      if not has_Constructor
+      then   -- The class has the default constructor which C++ gives it.
+         declare
+            the_Constructor : constant Node_Pointer := Node_Pointer (DohNewHash);
+         begin
+            set_Attribute (the_Constructor, "nodeType", "constructor");
+            set_Attribute (the_Constructor, "name",     Attribute (the_Class, "sym:name"));
+            set_Attribute (the_Constructor, "sym:name", Attribute (the_Class, "sym:name"));
+            set_Attribute (the_Constructor, "access",   "public");
+
+            Status := Self.constructorHandler (the_Constructor);
+         end;
+      end if;
+
+      if Self.abstract_shim_Functions /= ""
+      then
+         print_to (DOH_Pointer (Self.f_Ada),   "class " & to_String (the_Name) & " : public " & the_cpp_Class & NL
+                                             & "{"                                                           & NL
+                                             & "public:"                                                     & NL
+                                             & to_String (Self.abstract_shim_Constructors)
+                                             & to_String (the_Functions)
+                                             & "};"                                                          & NL & NL
+                                             & to_String (Self.abstract_shim_Functions));
+      end if;
+
+      Self.abstract_shim_Name := null_unbounded_String;
+   end bind_constructors_of_abstract_Class;
+
+
+
    function cpp_Symbol (qualified_Name : in String;   Suffix : in String) return String
    --
    --  The C++ symbol of an entity with the given name ('geometry::solid::Box') and the suffix of its kind ('E' for
@@ -2652,8 +2817,6 @@ is
    --  template instance, whose symbol cannot be made from its name alone.
    --
    is
-      use ada.Strings.fixed;
-
       the_Symbol : unbounded_String := +"_ZN";
       First      : Positive         := qualified_Name'First;
       Last       : Natural;
@@ -3759,7 +3922,23 @@ is
                     & String'(+doh_Item (SwigType_str (SwigType_Pointer (virtualType), null))));     -- TODO: ?
             else
                strip_all_Qualifiers (doh_Item (the_swigType));
-               the_return_Type := Self.demand_c_Type_for (doh_Item (the_swigType));
+
+               if         Self.accessor_member_Name /= ""
+                 and then SwigType_isArray (the_swigType) /= 0
+               then   -- The function which returns a member which is an array returns a pointer to its first element.
+                  declare
+                     element_Type : unbounded_String := +doh_Item (the_swigType);
+                  begin
+                     while Index (element_Type, "a(") = 1
+                     loop
+                        element_Type := unbounded_Slice (element_Type, Index (element_Type, ").") + 2, Length (element_Type));
+                     end loop;
+
+                     the_return_Type := Self.demand_c_Type_for (doh_swigType (to_Doh ("p." & to_String (element_Type))));
+                  end;
+               else
+                  the_return_Type := Self.demand_c_Type_for (doh_Item (the_swigType));
+               end if;
             end if;
          end;
       end if;
