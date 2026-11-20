@@ -28,7 +28,7 @@ sudo ./install_ada_swig.sh     # copies ada-build/swig4ada to /usr/local/bin and
 
 Invocation: `swig4ada -ada [-c++] [-I<dir>] [-outdir <dir>] [-namespace <ns>] foo.i`. It emits `foo_wrap.c`/`.cxx` plus a family of `.ads` specs, and always writes a `swig4ada-debug.log` (the `dlog` output of the `Logger` package) into the current directory — this is the primary debugging aid.
 
-Generated specs depend on the support packages `swig.ads` and `swig-pointers.ads` at the repository root, which is why scripts pass `-I../../..` to `gnatpp`/`gnatmake`.
+Generated specs depend on the support packages `swig.ads`, `swig-pointers.ads` and `swig-guards.ads/.adb` at the repository root, which is why scripts pass `-I../../..` to `gnatpp`/`gnatmake`. The tool itself, and cBound based projects, take `swig.ads` and `swig-pointers.ads` from cBound's `tier-0/swig` library instead, which does not have `swig.Guards` (as of 2026-11-20); the `swigmod` builder therefore deletes the guard specs it generates.
 
 **Single example** — each `Examples/ada/<name>/` has a `builder` script, to be run from within that directory (it uses relative paths to `ada-build/swig4ada`): it cleans, generates, pretty prints with `gnatpp`, and (in most examples) builds `test_example.gpr` and runs `./tester`. A builder deletes and regenerates the specs in its directory, several of which are tracked, so expect a diff after running one. Known not to generate (2026-11-20): `addlink`, `anonymous_bitfield`, `llvm` and `std_vector`.
 
@@ -77,6 +77,7 @@ For a module `foo` (see `ada_module.ads`):
 - `foo-binding.ads` — the imported (non-class) C functions.
 - `foo-pointers.ads`, `foo-pointer_pointers.ads` — pointer and pointer-to-pointer types.
 - `foo-<type>.ads` — one child package per struct/class (and per function pointer type).
+- `foo-<class>-guards.ads` — for a C++ class with a virtual destructor, an instantiation of `swig.Guards`. GNAT never calls a C++ destructor by itself, so a `Guards.Guard (the_Object'Access)` declared after the object calls it (via the non-deleting `destruct_0`) when the guard leaves scope. Note that a *dispatching* call of `destruct` reaches the deleting destructor, which frees the object, and so must not be used on a stack object.
 
 ## Conventions
 
