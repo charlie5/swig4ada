@@ -52,10 +52,14 @@ package li_carrays.XYArray is
    function cast
      (Self : in li_carrays.XYArray.Item) return li_carrays.XY.Pointer;
 
+   function frompointer
+     (t : in li_carrays.XY.Pointer) return li_carrays.XYArray.Pointer;
+
 private
 
    pragma Import (C, getitem, "Ada_XYArray_getitem");
    pragma Import (C, setitem, "Ada_XYArray_setitem");
    pragma Import (C, cast, "Ada_XYArray_cast");
+   pragma Import (C, frompointer, "Ada_XYArray_frompointer");
 
 end li_carrays.XYArray;

@@ -55,10 +55,15 @@ package li_carrays.doubleArray is
      (Self : in li_carrays.doubleArray.Item)
       return swig.pointers.double_Pointer;
 
+   function frompointer
+     (t : in swig.pointers.double_Pointer)
+      return li_carrays.doubleArray.Pointer;
+
 private
 
    pragma Import (C, getitem, "Ada_doubleArray_getitem");
    pragma Import (C, setitem, "Ada_doubleArray_setitem");
    pragma Import (C, cast, "Ada_doubleArray_cast");
+   pragma Import (C, frompointer, "Ada_doubleArray_frompointer");
 
 end li_carrays.doubleArray;
