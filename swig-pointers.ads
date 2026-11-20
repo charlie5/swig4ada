@@ -379,9 +379,13 @@ is
    ---------------
    -- std::string*
    --
+   pragma Warnings (Off, "array aggregate using () is an obsolescent syntax*");     -- This is compiled both as Ada 2012 and as Ada 2022.
+
    null_std_string : constant std_string := (M_dataplus      => system.null_Address,
                                              M_string_length => 0,
-                                             M_local_buf     => [others => C.nul]);
+                                             M_local_buf     => (others => C.nul));
+
+   pragma Warnings (On,  "array aggregate using () is an obsolescent syntax*");
 
    package c_std_string_Pointers is new C.Pointers (Index              => C.size_t,
                                                     Element            => std_string,
