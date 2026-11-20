@@ -14,7 +14,7 @@ b~*.ad[sb]
 *.bexch
 *.db
 *.cgpr
-*.c~
+*~
 *-loc.xml
 *.idx
 .clang-format
@@ -36,6 +36,21 @@ class-simplest
 Examples/ada/class
 Examples/ada/testsuite/generated
 ada/attic
+
+
+########################
+### Generated Bindings
+#
+# Output of swig4ada in the scratch areas (the inputs remain visible).
+#
+Examples/ada/current_*_bug/*.ads
+Examples/ada/current_*_bug/*_wrap.c
+Examples/ada/current_*_bug/*_wrap.cxx
+Examples/test-suite/*_wrap.c
+Examples/test-suite/*_wrap.cxx
+ada-build/*.ads
+ada-build/*_wrap.c
+ada-build/*_wrap.cxx
 
 
 #################
