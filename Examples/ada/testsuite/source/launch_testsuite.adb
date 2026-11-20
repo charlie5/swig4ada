@@ -268,7 +268,7 @@ begin
       generate ("template_extend_overload_2.i",     use_CPP => True);
       generate ("template_inherit.i",               use_CPP => True);
       generate ("template_int_const.i",             use_CPP => True);
-      --  generate ("template_methods.i",               use_CPP => True);     -- Error: Unable to find 'std_string.i'.
+      generate ("template_methods.i",               use_CPP => True);
       generate ("template_ns3.i",                   use_CPP => True);
       generate ("template_ns.i",                    use_CPP => True);
       generate ("template_ns_inherit.i",            use_CPP => True);
@@ -347,7 +347,7 @@ begin
       generate ("import_nomodule.i",                use_CPP => True);
       generate ("imports_b.i",                      use_CPP => True);
       generate ("inherit_same_name.i",              use_CPP => True);
-      --  generate ("li_attribute.i",                   use_CPP => True);     -- Error: Unable to find 'std_string.i'.
+      generate ("li_attribute.i",                   use_CPP => True);
       generate ("minherit2.i",                      use_CPP => True);
       generate ("mod_b.i",                          use_CPP => True);
       generate ("multi_import_a.i",                 use_CPP => True);
@@ -382,8 +382,8 @@ begin
       new_Line;
 
       generate ("anonymous_bitfield.i");
-      --  generate ("apply_signed_char.i");     -- Error: Directors are not supported for C code and require the -c++ option.
-      --  generate ("apply_strings.i");     -- Error: Directors are not supported for C code and require the -c++ option.
+      generate ("apply_signed_char.i",              use_CPP => True);
+      generate ("apply_strings.i",                  use_CPP => True);
       generate ("arrayref.i");
       generate ("arrays_dimensionless.i");
       generate ("arrays_global.i");
@@ -394,32 +394,32 @@ begin
       generate ("bloody_hell.i");
       generate ("char_strings.i");
       generate ("class_scope_weird.i");
-      --  generate ("default_args.i");     -- Error: Unable to find 'std_string.i'.
-      --  generate ("enum_thorough_typeunsafe.i");     -- Error: Unable to find 'enumtypeunsafe.swg'.
-      --  generate ("file_test.i");     -- Error: Unable to find 'file.i'.
+      generate ("default_args.i",                   use_CPP => True);
+      generate ("enum_thorough_typeunsafe.i",       use_CPP => True);
+      generate ("file_test.i");
       generate ("funcptr.i");
       generate ("function_typedef.i");
-      --  generate ("global_vars.i");     -- Error: Unable to find 'std_string.i'.
+      generate ("global_vars.i",                    use_CPP => True);
       generate ("grouping.i");
       generate ("inctest.i");
-      --  generate ("li_std_map.i");     -- Error: Unable to find 'std_pair.i'.
-      --  generate ("li_std_pair.i");     -- Error: Unable to find 'std_pair.i'.
-      --  generate ("li_std_set.i");     -- Error: Unable to find 'std_string.i'.
-      --  generate ("li_std_vector.i");     -- Error: Unable to find 'std_string.i'.
-      --  generate ("li_std_wstring.i");     -- Error: Unable to find 'std_basic_string.i'.
-      --  generate ("list_vector.i");     -- Error: Unable to find 'list-vector.i'.
+      generate ("li_std_map.i",                     use_CPP => True);
+      generate ("li_std_pair.i",                    use_CPP => True);
+      generate ("li_std_set.i",                     use_CPP => True);
+      generate ("li_std_vector.i",                  use_CPP => True);
+      generate ("li_std_wstring.i",                 use_CPP => True);
+      --  generate ("list_vector.i");     -- Not applicable: uses a library of Guile typemaps.
       generate ("li_typemaps.i");
       generate ("li_windows.i");
       generate ("long_long_apply.i");
       generate ("nested_comment.i");
-      --  generate ("pointer_in_out.i");     -- Error: Unable to find 'pointer-in-out.i'.
+      --  generate ("pointer_in_out.i");     -- Not applicable: uses a library of Guile typemaps.
       generate ("pointer_reference.i");
       generate ("register_par.i");
       generate ("sizeof_pointer.i");
       generate ("sizet.i");
       generate ("sneaky1.i");
-      --  generate ("special_variables.i");     -- Error: Unable to find 'std_string.i'.
-      --  generate ("threads.i");     -- Error: Unable to find 'std_string.i'.
+      generate ("special_variables.i",              use_CPP => True);
+      generate ("threads.i",                        use_CPP => True);
       generate ("typedef_array_member.i");
       generate ("typedef_funcptr.i");
       generate ("typedef_struct.i");
@@ -436,7 +436,7 @@ begin
       new_Line;
 
       generate ("add_link.i",                       use_CPP => True);
-      --  generate ("allprotected.i",                    use_CPP => True);     -- Error: Unable to find 'std_string.i'.
+      generate ("allprotected.i",                   use_CPP => True);
 
       generate ("abstract_typedef2.i",              use_CPP => True);
       generate ("class_ignore.i",                   use_CPP => True);
@@ -458,15 +458,15 @@ begin
       generate ("intermediary_classname.i",         use_CPP => True);
       generate ("kind.i",                           use_CPP => True);
       generate ("li_boost_shared_ptr_bits.i",       use_CPP => True);
-      --  generate ("li_boost_shared_ptr.i",             use_CPP => True);     -- Error: Unable to find 'std_string.i'.
+      generate ("li_boost_shared_ptr.i",            use_CPP => True);
       generate ("li_cdata_carrays.i",               use_CPP => True);
       generate ("li_cdata.i",                       use_CPP => True);
-      --  generate ("li_factory.i",                      use_CPP => True);     -- Error: Unable to find 'factory.i'.
-      --  generate ("li_implicit.i",                     use_CPP => True);     -- Error: Unable to find 'implicit.i'.
-      --  generate ("li_std_deque.i",                    use_CPP => True);     -- Error: Unable to find 'std_deque.i'.
+      generate ("li_factory.i",                     use_CPP => True);
+      generate ("li_implicit.i",                    use_CPP => True);
+      generate ("li_std_deque.i",                   use_CPP => True);
       generate ("li_std_except.i",                  use_CPP => True);
-      --  generate ("li_std_stream.i",                   use_CPP => True);     -- Error: Unable to find 'std_iostream.i'.
-      --  generate ("li_std_string.i",                   use_CPP => True);     -- Error: Unable to find 'std_string.i'.
+      generate ("li_std_stream.i",                  use_CPP => True);
+      generate ("li_std_string.i",                  use_CPP => True);
       generate ("memberin1.i",                      use_CPP => True);
       generate ("member_pointer.i",                 use_CPP => True);
       generate ("mixed_types.i",                    use_CPP => True);
@@ -490,7 +490,7 @@ begin
       generate ("smart_pointer_inherit.i",          use_CPP => True);
       generate ("smart_pointer_templatemethods.i",  use_CPP => True);
       generate ("smart_pointer_templatevariables.i", use_CPP => True);
-      --  generate ("std_containers.i",                  use_CPP => True);     -- Error: Unable to find 'std_string.i'.
+      generate ("std_containers.i",                 use_CPP => True);
       generate ("template_arg_scope.i",             use_CPP => True);
       generate ("template_arg_typename.i",          use_CPP => True);
       generate ("template_classes.i",               use_CPP => True);
@@ -518,10 +518,10 @@ begin
       generate ("template_typedef_cplx5.i",         use_CPP => True);
       generate ("template_typedef_cplx.i",          use_CPP => True);
       generate ("template_typedef_fnc.i",           use_CPP => True);
-      --  generate ("template_typedef_funcptr.i",        use_CPP => True);     -- Error: Unable to find 'std_string.i'.
+      generate ("template_typedef_funcptr.i",       use_CPP => True);
       generate ("template_typedef.i",               use_CPP => True);
       generate ("template_typemaps.i",              use_CPP => True);
-      --  generate ("template_type_namespace.i",         use_CPP => True);     -- Error: Unable to find 'std_string.i'.
+      generate ("template_type_namespace.i",        use_CPP => True);
       generate ("template_whitespace.i",            use_CPP => True);
       generate ("typedef_scope.i",                  use_CPP => True);
       --  generate ("typemap_namespace.i",               use_CPP => True);     -- Error: Can't copy typemap (freearg) char * = Foo::Str1 *.
