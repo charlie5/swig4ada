@@ -148,7 +148,7 @@ is
    begin
       if hex_Index = 0
       then
-         for Each in self'Range
+         for Each in Self'Range
          loop
             case Self (Each)
             is
