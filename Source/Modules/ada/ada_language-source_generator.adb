@@ -979,6 +979,9 @@ is
                   elsif resolved_Type.all in ada_Type.elementary.scalar.discrete.enumeration.item'Class
                   then
                      default_Terminator := +accessed_type_Name & "'Val (0)";
+                  elsif resolved_Type.qualified_Name = "system.Address"
+                  then   -- Such as opaque structs and incomplete classes.
+                     default_Terminator := +"system.null_Address";
                   else
                      default_Terminator := +"0";
                   end if;
@@ -1133,6 +1136,7 @@ is
          with_of_swig_Required                    :          Boolean          := False;        -- Used for special case where variable of i.c.char_Array is transformed to a Swig.indefinate_char_Array.
          with_of_interfaces_c_extensions_Required : constant Boolean          := False;        -- Ditto, but for opaque stucts and incomplete classes.
          with_of_interfaces_c_Required            :          Boolean          := True;
+         with_of_system_Required                  :          Boolean          := False;        -- For pointers whose terminator is 'system.null_Address'.
 
          the_Subprogram                           :          ada_Subprogram.view;
       begin
@@ -1255,6 +1259,13 @@ is
             declare
                the_Type : constant ada_Type.view := Element (all_Types,  Each);
             begin
+               if         the_Type.all                          in subType_class
+                 and then subType_view (the_Type).base_Type.all in ic_Pointer_class
+                 and then ic_Pointer_view (subType_view (the_Type).base_Type).accessed_Type.resolved_Type.qualified_Name = "system.Address"
+               then
+                  with_of_system_Required := True;
+               end if;
+
                if the_Type.all in ada_Type.composite.a_Record.item'Class
                then
                   declare
@@ -1337,6 +1348,17 @@ is
          if with_IC_Pointers
          then
             append (spec_Source,   "with interfaces.C.Pointers;" &  NL);
+         end if;
+
+         if             the_Package.models_a_virtual_cpp_Class
+           and then not the_Package.models_an_interface_Type
+         then
+            with_of_system_Required := False;     -- 'System' is with'ed below.
+         end if;
+
+         if with_of_system_Required
+         then
+            append (spec_Source,   "with System;" &  NL);
          end if;
 
          if             the_Package.models_a_virtual_cpp_Class
