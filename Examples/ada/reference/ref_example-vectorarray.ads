@@ -11,10 +11,12 @@ package ref_example.VectorArray is
    -- Item
    --
 
-   type Item is record
+   type Item is limited record
       items   : access ref_example.Vector.Item;
       maxsize : aliased Interfaces.C.int;
    end record;
+
+   pragma Import (CPP, Entity => Item);
 
    -- Item_Array
    --
@@ -24,12 +26,7 @@ package ref_example.VectorArray is
 
    -- Pointer
    --
-   package C_Pointers is new Interfaces.C.Pointers
-     (Index => Interfaces.C.size_t, Element => ref_example.VectorArray.Item,
-      Element_Array      => ref_example.VectorArray.Item_Array,
-      Default_Terminator => (others => <>));
-
-   subtype Pointer is C_Pointers.Pointer;
+   type Pointer is access all ref_example.VectorArray.Item;
 
    -- Pointer_Array
    --
@@ -49,8 +46,14 @@ package ref_example.VectorArray is
 
    function construct return ref_example.VectorArray.Item;
 
+   pragma CPP_Constructor
+     (construct, "ada_new_VectorArray_VectorArray__SWIG_0");
+
    function construct
      (maxsize : in Interfaces.C.int) return ref_example.VectorArray.Item;
+
+   pragma CPP_Constructor
+     (construct, "ada_new_VectorArray_VectorArray__SWIG_1");
 
    procedure destruct_0 (Self : in ref_example.VectorArray.Item);
 
@@ -68,24 +71,6 @@ package ref_example.VectorArray is
       a    : in ref_example.Vector.Pointer);
 
 private
-
-   function construct_v1 return ref_example.VectorArray.Item;
-
-   pragma Import
-     (CPP, construct_v1, "ada_new_VectorArray_VectorArray__SWIG_0");
-
-   function construct return ref_example.VectorArray.Item renames construct_v1;
-
-   function construct_v2
-     (maxsize : in Interfaces.C.int) return ref_example.VectorArray.Item;
-
-   pragma Import
-     (CPP, construct_v2, "ada_new_VectorArray_VectorArray__SWIG_1");
-
-   function construct
-     (maxsize : in Interfaces.C.int)
-      return ref_example.VectorArray.Item renames
-     construct_v2;
 
    pragma Import (CPP, destruct_0, "_ZN11VectorArrayD1Ev");
    pragma Import (CPP, destruct, "_ZN11VectorArrayD1Ev");
