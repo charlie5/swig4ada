@@ -1810,7 +1810,8 @@ is
                                                                            is_Destructor => True,
                                                                            is_Overriding => is_Overriding);
       begin
-         the_Destructor.is_Static := False;
+         the_Destructor.is_Static  := False;
+         the_Destructor.is_Virtual := the_Destructor.is_Virtual or is_Overriding;     -- An implicit destructor is virtual when a base class destructor is.
       end;
 
       declare
@@ -1820,7 +1821,8 @@ is
                                                                            is_Destructor => True,
                                                                            is_Overriding => is_Overriding);
       begin
-         the_Destructor.is_Static := False;
+         the_Destructor.is_Static  := False;
+         the_Destructor.is_Virtual := the_Destructor.is_Virtual or is_Overriding;     -- An implicit destructor is virtual when a base class destructor is.
       end;
 
       unindent_Log;
