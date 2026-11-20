@@ -16,6 +16,8 @@ cp ./ada-build/swig4ada ./usr/local/bin
 
 cp ./swig.ads                    ./usr/local/include
 cp ./swig-pointers.ads           ./usr/local/include
+cp ./swig-guards.ads             ./usr/local/include
+cp ./swig-guards.adb             ./usr/local/include
 #cp ./interfaces_cpp_pointers.ads ./usr/local/include
 #cp ./interfaces_cpp_pointers.adb ./usr/local/include
 
