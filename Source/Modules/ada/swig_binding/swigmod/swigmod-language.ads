@@ -18,7 +18,7 @@ package swigmod.Language is
    -- Item
    --
 
-   type Item is new Dispatcher.Item with record
+   type Item is new swigmod.Dispatcher.Item with record
       none_comparison                       : access swig_Core.String;
       director_ctor_code                    : access swig_Core.String;
       director_prot_ctor_code               : access swig_Core.String;

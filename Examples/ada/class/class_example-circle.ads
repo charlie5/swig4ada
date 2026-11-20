@@ -16,7 +16,7 @@ package class_example.Circle is
    -- Item
    -- 
 
-type Item is new Shape.item with
+type Item is new class_example.Shape.item with
       record
          radius : aliased interfaces.c.double;
       end record;

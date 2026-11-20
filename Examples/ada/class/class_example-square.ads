@@ -16,7 +16,7 @@ package class_example.Square is
    -- Item
    -- 
 
-type Item is new Shape.item with
+type Item is new class_example.Shape.item with
       record
          width : aliased interfaces.c.double;
       end record;
