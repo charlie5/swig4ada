@@ -127,7 +127,8 @@ is
                                              DOH_Pointer ( Value));
       use type C.int;
    begin
-      if Status /= 0
+      if    Status /= 0   -- Success.
+        and Status /= 1   -- Successful replacement.
       then
          raise Constraint_Error with "Status:" & C.int'Image (Status);
       end if;
