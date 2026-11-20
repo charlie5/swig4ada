@@ -26,35 +26,32 @@ namespace std {
         void*        impl_M_finish__M_last;
         void*        impl_M_finish__M_node;
 
-        typedef size_t size_type;
-        typedef T value_type;
-        typedef const value_type& const_reference;
-
         deque();
-        deque(size_type n);
+        deque(size_t n);
         deque(const deque& other);
+        ~deque();
 
-        size_type size() const;
+        size_t size() const;
         %rename(isEmpty) empty;
         bool empty() const;
         void clear();
 
-        void push_front(const value_type& x);
-        void push_back(const value_type& x);
+        void push_front(const T& x);
+        void push_back(const T& x);
         void pop_front();
         void pop_back();
-        const_reference front() const;
-        const_reference back() const;
+        const T& front() const;
+        const T& back() const;
 
         %extend {
-            const_reference get(int i) throw (std::out_of_range) {
+            const T& get(int i) throw (std::out_of_range) {
                 int size = int(self->size());
                 if (i>=0 && i<size)
                     return (*self)[i];
                 else
                     throw std::out_of_range("deque index out of range");
             }
-            void set(int i, const value_type& x) throw (std::out_of_range) {
+            void set(int i, const T& x) throw (std::out_of_range) {
                 int size = int(self->size());
                 if (i>=0 && i<size)
                     (*self)[i] = x;

@@ -37,6 +37,7 @@ namespace std {
 
         map();
         map(const map& other);
+        ~map();
         
         unsigned int size() const;
         bool empty() const;

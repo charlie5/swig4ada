@@ -19,24 +19,21 @@ namespace std {
         void*        impl_M_node__M_prev;
         size_t       impl_M_node__M_size;
 
-        typedef size_t size_type;
-        typedef T value_type;
-        typedef const value_type& const_reference;
-
         list();
         list(const list& other);
+        ~list();
 
-        size_type size() const;
+        size_t size() const;
         %rename(isEmpty) empty;
         bool empty() const;
         void clear();
 
-        void push_front(const value_type& x);
-        void push_back(const value_type& x);
+        void push_front(const T& x);
+        void push_back(const T& x);
         void pop_front();
         void pop_back();
-        const_reference front() const;
-        const_reference back() const;
+        const T& front() const;
+        const T& back() const;
         void reverse();
     };
 }

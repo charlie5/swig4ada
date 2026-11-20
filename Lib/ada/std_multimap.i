@@ -21,26 +21,23 @@ namespace std {
         void*        _M_t__M_impl__M_header__M_right;
         size_t       _M_t__M_impl__M_node_count;
 
-        typedef size_t size_type;
-        typedef K key_type;
-        typedef T mapped_type;
-
         multimap();
         multimap(const multimap& other);
+        ~multimap();
 
-        size_type size() const;
+        size_t size() const;
         %rename(isEmpty) empty;
         bool empty() const;
         void clear();
 
-        size_type erase(const key_type& x);
-        size_type count(const key_type& x) const;
+        size_t erase(const K& x);
+        size_t count(const K& x) const;
 
         %extend {
-            void add(const key_type& key, const mapped_type& x) {
+            void add(const K& key, const T& x) {
                 self->insert(std::pair<K,T >(key, x));
             }
-            bool has_key(const key_type& key) {
+            bool has_key(const K& key) {
                 return self->find(key) != self->end();
             }
         }

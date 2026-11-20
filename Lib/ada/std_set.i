@@ -21,26 +21,23 @@ namespace std {
         void*        _M_t__M_impl__M_header__M_right;
         size_t       _M_t__M_impl__M_node_count;
 
-        typedef size_t size_type;
-        typedef T key_type;
-        typedef T value_type;
-
         set();
         set(const set& other);
+        ~set();
 
-        size_type size() const;
+        size_t size() const;
         %rename(isEmpty) empty;
         bool empty() const;
         void clear();
 
-        size_type erase(const key_type& x);
-        size_type count(const key_type& x) const;
+        size_t erase(const T& x);
+        size_t count(const T& x) const;
 
         %extend {
-            void add(const value_type& x) {
+            void add(const T& x) {
                 self->insert(x);
             }
-            bool contains(const key_type& x) {
+            bool contains(const T& x) {
                 return self->find(x) != self->end();
             }
         }
