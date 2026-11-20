@@ -40,6 +40,7 @@ is
 
                                    Package_swig          => <>,
                                    Package_swig_pointers => <>,
+                                   Package_swig_std_strings => <>,
 
                                    incomplete_access_to_Type_i_c_pointer_List
                                                          => <>,
@@ -115,6 +116,7 @@ is
 
       Self.Package_swig                 := new_ada_Package (name => "swig",       parent => Self.Package_standard,     is_Core => True);
       Self.Package_swig_pointers        := new_ada_Package (name => "pointers",   parent => Self.Package_swig,         is_Core => True);
+      Self.Package_swig_std_strings     := new_ada_Package (name => "std_Strings", parent => Self.Package_swig,        is_Core => True);
 
       create_C_core_Types :
       declare
@@ -484,7 +486,8 @@ is
 
             --  std::string
             --
-            the_ada_Type := ada_type.composite.a_record.new_Item (Self.Package_swig,  +"std_String").all'Access;     -- Declared in 'swig', not in 'swig.pointers'.
+            the_ada_Type := ada_type.composite.a_record.new_Item (Self.Package_swig_std_strings,  +"std_String").all'Access;     -- With its array and pointers, in a package of its own.
+            ada_Type.composite.a_record.view (the_ada_Type).has_nontrivial_Members;                               -- A limited type of convention CPP, which C++ constructs.
             Self.name_Map_of_ada_type.insert (the_ada_Type.qualified_Name, the_ada_Type);
          end package_Interfaces_C_extensions;
 
@@ -494,8 +497,11 @@ is
             use ada_Type.composite.an_array;
 
             procedure add_associated_swig_package_Types_for (the_ada_Type : in ada_Type.view;
-                                                             c_type_Name  : in String)
+                                                             c_type_Name  : in String;
+                                                             in_Package   : in ada_Package.view := null)     -- When given, the package of all of the types.
             is
+               pointers_Package : constant ada_Package.view := (if in_Package = null then Self.Package_swig_pointers else in_Package);
+
                function translated_c_type_Name return String
                is
                   Pad   :          unbounded_String := +c_type_Name;
@@ -520,7 +526,11 @@ is
                   function the_declaration_package return ada_Package.view
                   is
                   begin
-                     if the_ada_Type.resolved_Type.all in ada_Type.elementary.an_access.Item'Class
+                     if in_Package /= null
+                     then
+                        return in_Package;
+
+                     elsif the_ada_Type.resolved_Type.all in ada_Type.elementary.an_access.Item'Class
                      then
                         return Self.Package_swig_pointers;
                      else
@@ -539,13 +549,13 @@ is
                                                     the_ada_array_Type);
                   --  pointer
                   --
-                  level_1_pointer_Type := ada_Type.elementary.an_access.to_type.new_Item (Self.Package_swig_pointers,
+                  level_1_pointer_Type := ada_Type.elementary.an_access.to_type.new_Item (pointers_Package,
                                                                                           +"c_" & the_c_type_Name & "_Pointer.Pointers",
                                                                                           accessed_type => the_ada_Type).all'Access;
                   Self.name_Map_of_ada_type.insert (level_1_pointer_Type.qualified_Name,
                                                     level_1_pointer_Type);
 
-                  level_1_pointer_subType := ada_type.a_subtype.new_subType (Self.Package_swig_pointers,
+                  level_1_pointer_subType := ada_type.a_subtype.new_subType (pointers_Package,
                                                                              +the_c_type_Name & "_Pointer",
                                                                              base_type => level_1_pointer_Type).all'Access;
                   Self.name_Map_of_ada_type.insert (level_1_pointer_subType.qualified_Name,
@@ -561,7 +571,7 @@ is
                begin
                   --  array
                   --
-                  the_ada_array_Type := ada_Type.composite.an_array.new_Item (Self.Package_swig_pointers,
+                  the_ada_array_Type := ada_Type.composite.an_array.new_Item (pointers_Package,
                                                                               +the_c_type_Name & "_pointer_Array",
                                                                               the_array_dimension_upper_Bounds => [1 => unConstrained],
                                                                               element_type                     => level_1_pointer_subType).all'Access;
@@ -569,14 +579,14 @@ is
                                                     the_ada_array_Type);
                   --  pointer
                   --
-                  level_2_pointer_Type := ada_Type.elementary.an_access.to_type.new_Item (Self.Package_swig_pointers,
+                  level_2_pointer_Type := ada_Type.elementary.an_access.to_type.new_Item (pointers_Package,
                                                                                           +"c_" & the_c_type_Name & "_pointer_Pointer.Pointers",
                                                                                           accessed_type => level_1_pointer_subType).all'Access;
                   Self.name_Map_of_ada_type.insert (level_2_pointer_Type.qualified_Name,
                                                     level_2_pointer_Type);
 
 
-                  level_2_pointer_subType := ada_type.a_subtype.new_subType (Self.Package_swig_pointers,
+                  level_2_pointer_subType := ada_type.a_subtype.new_subType (pointers_Package,
                                                                              +the_c_type_Name & "_pointer_Pointer",
                                                                              base_type => level_2_pointer_Type).all'Access;
                   Self.name_Map_of_ada_type.insert (level_2_pointer_subType.qualified_Name,
@@ -587,7 +597,7 @@ is
 
          begin
             add_associated_swig_package_Types_for (Self.fetch_ada_Type (+"swig.void_ptr"),             c_type_name => "void_ptr");
-            add_associated_swig_package_Types_for (Self.fetch_ada_Type (+"swig.std_String"),           c_type_name => "std::string");
+            add_associated_swig_package_Types_for (Self.fetch_ada_Type (+"swig.std_Strings.std_String"),   c_type_name => "std::string",   in_Package => Self.Package_swig_std_strings);
 
             add_associated_swig_package_Types_for (Self.fetch_ada_Type (+"interfaces.c.size_t"),       c_type_name => "size_t");
             add_associated_swig_package_Types_for (Self.fetch_ada_Type (+"interfaces.c.ptrdiff_t"),    c_type_name => "ptrdiff_t");
@@ -696,13 +706,13 @@ is
          -------------------
          --  C 'std::string'
          --
-         Self.associate (Self.fetch_ada_Type (+"swig.std_String"),                          Self.fetch_c_Type (+"std::string"));
+         Self.associate (Self.fetch_ada_Type (+"swig.std_Strings.std_String"),                          Self.fetch_c_Type (+"std::string"));
 
-         Self.associate (Self.fetch_ada_Type (+"swig.std_string_Array"),                    Self.fetch_c_Type (+"std::string[]"));
-         Self.associate (Self.fetch_ada_Type (+"swig.pointers.std_string_Pointer"),         Self.fetch_c_Type (+"std::string*" ));
+         Self.associate (Self.fetch_ada_Type (+"swig.std_Strings.std_string_Array"),                    Self.fetch_c_Type (+"std::string[]"));
+         Self.associate (Self.fetch_ada_Type (+"swig.std_Strings.std_string_Pointer"),         Self.fetch_c_Type (+"std::string*" ));
 
-         Self.associate (Self.fetch_ada_Type (+"swig.pointers.std_string_pointer_Array"),   Self.fetch_c_Type (+"std::string*[]"));
-         Self.associate (Self.fetch_ada_Type (+"swig.pointers.std_string_pointer_Pointer"), Self.fetch_c_Type (+"std::string**" ));
+         Self.associate (Self.fetch_ada_Type (+"swig.std_Strings.std_string_pointer_Array"),   Self.fetch_c_Type (+"std::string*[]"));
+         Self.associate (Self.fetch_ada_Type (+"swig.std_Strings.std_string_pointer_Pointer"), Self.fetch_c_Type (+"std::string**" ));
 
 
          --------------

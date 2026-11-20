@@ -1177,6 +1177,56 @@ is
 
 
 
+   function is_constructed_by_Cpp (Self : access Item) return Boolean
+   is
+   begin
+      case Self.my.c_type_Kind
+      is
+         when Typedef =>
+            return Self.ultimate_base_Type.is_constructed_by_Cpp;
+
+         when c_Class =>
+            if Self.my.is_Union
+            then
+               return False;
+            end if;
+
+            if        Self.my.has_nontrivial_Members
+              or else Self.is_Virtual
+            then
+               return True;
+            end if;
+
+            declare
+               the_Bases : constant c_Type.Vector := Self.base_Classes;
+            begin
+               for Each of the_Bases
+               loop
+                  if Each.is_constructed_by_Cpp
+                  then
+                     return True;
+                  end if;
+               end loop;
+            end;
+
+            for Each in 1 .. Self.my.component_Count
+            loop
+               if         Self.my.Components (Each).my_Type /= null
+                 and then Self.my.Components (Each).my_Type.is_constructed_by_Cpp
+               then
+                  return True;
+               end if;
+            end loop;
+
+            return False;
+
+         when others =>
+            return Self.Name = "std::string";
+      end case;
+   end is_constructed_by_Cpp;
+
+
+
    function has_nontrivial_Members (Self : access Item) return Boolean
    is
    begin

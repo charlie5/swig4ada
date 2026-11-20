@@ -249,6 +249,7 @@ private
          Package_interfaces_c_strings : ada_Package.view;
          Package_swig                 : ada_Package.view;
          Package_swig_pointers        : ada_Package.view;
+         Package_swig_std_strings     : ada_Package.view;
 
          --  'current' Declarations
          --

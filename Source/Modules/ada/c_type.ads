@@ -262,6 +262,12 @@ is
    --
    --  The class declares a destructor or a copy constructor, so C++ passes and returns it by reference.
 
+   function  is_constructed_by_Cpp               (Self : access Item) return Boolean;
+   --
+   --  True for a class which is virtual or is not trivial (it declares a destructor or a copy constructor, or has a
+   --  base class or a member which does), for a 'std::string', and for a typedef of either. C++ passes and returns
+   --  such a type through a hidden pointer.
+
    procedure has_virtual_Members                 (Self : access Item);
    --
    --  The member functions of a class in an imported module are not collected, so that the class is virtual is noted when the class is declared.

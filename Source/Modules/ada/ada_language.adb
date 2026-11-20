@@ -79,6 +79,7 @@ is
    --
 
    function  is_a_function_Pointer (swig_Type : in doh_swigType) return Boolean;
+   function  returns_a_cpp_constructed_Type (Self : access Item;   the_Node : in doh_Node) return Boolean;
 
    procedure register_Mirror (Self : access Item;   proxy_Name              : in unbounded_String;
                                                     the_c_Type              : in c_Type.view;
@@ -756,8 +757,18 @@ is
                                                                                                 the_Node,
                                                                                                 const_String (-""),
                                                                                                 null));
-            is_void_return  : constant Boolean := (c_return_Type = "void");
-            returns_a_Class : constant Boolean := (c_return_Type = "$c_classname");     -- A class, returned by value.
+            --  A type which C++ constructs (a class which is virtual or not trivial, or a 'std::string') cannot be the result
+            --  of an Ada function, as Ada takes the result of such a function to be a reference to an existing object, where
+            --  C++ builds a new one in storage given by the caller. The wrapper therefore takes a pointer to an object of the
+            --  caller as its last parameter, and replaces that object by the result.
+            --
+            result_by_Parameter : constant Boolean :=          Self.in_cpp_Mode
+                                                      and then not Self.doing_constructorDeclaration
+                                                      and then returns_a_cpp_constructed_Type (Self, the_Node);
+
+            is_void_return  : constant Boolean := (c_return_Type = "void") or result_by_Parameter;
+            returns_a_Class : constant Boolean := (c_return_Type = "$c_classname") and not result_by_Parameter;     -- A class, returned by value.
+            has_Parameters  :          Boolean := False;
 
             Num_arguments   : Natural          := 0;
             Num_required    : Natural with Unreferenced;
@@ -789,7 +800,7 @@ is
                                                            new_String ("jresult"));                     -- Was formerly "jresult = 0".
             end if;
 
-            Print_to (wrapper_Def, to_String (" DllExport " & c_return_Type & " SWIGSTDCALL " & wrapper_Name & " ("));
+            Print_to (wrapper_Def, to_String (" DllExport " & (if result_by_Parameter then +"void" else c_return_Type) & " SWIGSTDCALL " & wrapper_Name & " ("));
 
             Self.current_linkage_Symbol := to_unbounded_String (wrapper_Name);
 
@@ -857,7 +868,8 @@ is
                      end if;
 
                      print_to (wrapper_Def, to_String (param_c_Type & " " & arg));     -- Add parameter to C function.
-                     gen_Comma := True;
+                     gen_Comma      := True;
+                     has_Parameters := True;
 
                      --  Get typemap for this argument.
                      --
@@ -1002,7 +1014,14 @@ is
                                                                                     const_String (-"result"),
                                                                                     null));
                begin
-                  if the_typeMap /= ""
+                  if result_by_Parameter
+                  then   -- Replace the object of the caller by the result.
+                     print_to (wrapper_Code,   "  {"                                                                                     & NL
+                                             & "    typedef " & to_String (c_return_Type) & " swig_ada_result_type;"                    & NL
+                                             & "    a_result->~swig_ada_result_type ();"                                                 & NL
+                                             & "    new (a_result) swig_ada_result_type ((swig_ada_result_type &) result);"              & NL
+                                             & "  }"                                                                                     & NL);
+                  elsif the_typeMap /= ""
                   then
                      replace_All (the_typeMap, "$result", "jresult");
                      print_to (wrapper_Code, the_typeMap & NL);
@@ -1054,6 +1073,11 @@ is
 
             --  Finish C function definitions.
             --
+            if result_by_Parameter
+            then
+               print_to (wrapper_Def, to_String ((if has_Parameters then +("," & NL) else +"") & c_return_Type & " * a_result"));
+            end if;
+
             print_to (wrapper_Def, ")" & NL & "{" & NL);
 
             if not is_Void_return
@@ -2390,6 +2414,40 @@ is
    --- Utility
    --
 
+   function returns_a_cpp_constructed_Type (Self : access Item;   the_Node : in doh_Node) return Boolean
+   --
+   --  True when the function of the node returns, by value, a type which C++ constructs.
+   --
+   is
+      use swigg.Utility;
+      use type C.int;
+
+      the_swig_Type : constant SwigType_Pointer := SwigType_Pointer (doh_Copy (doh_Item (get_Attribute (the_Node, "type"))));
+   begin
+      if get_Attribute (the_Node, "type") = null
+      then
+         return False;
+      end if;
+
+      declare
+         Pad : doh_swigType := doh_Item (the_swig_Type);
+      begin
+         strip_all_Qualifiers (Pad);
+      end;
+
+      if        SwigType_isPointer   (the_swig_Type) /= 0
+        or else SwigType_isReference (the_swig_Type) /= 0
+        or else SwigType_isArray     (the_swig_Type) /= 0
+        or else not Self.swig_type_Map_of_c_type.contains (+doh_Item (the_swig_Type))
+      then
+         return False;
+      end if;
+
+      return Self.swig_type_Map_of_c_type.Element (+doh_Item (the_swig_Type)).is_constructed_by_Cpp;
+   end returns_a_cpp_constructed_Type;
+
+
+
    function is_a_function_Pointer (swig_Type : in doh_swigType) return Boolean
    is
       the_swig_Type : constant SwigType_Pointer := SwigType_Pointer (doh_Copy (swig_Type));
@@ -3400,6 +3458,25 @@ is
                the_return_Type := Self.demand_c_Type_for (doh_Item (the_swigType));
             end if;
          end;
+      end if;
+
+      --  A type which C++ constructs is not returned, but replaces an object of the caller (see 'functionWrapper').
+      --
+      if         Self.in_cpp_Mode
+        and then not is_Constructor
+        and then not is_Destructor
+        and then returns_a_cpp_constructed_Type (Self, the_Node)
+        and then Self.name_Map_of_c_type.contains (the_return_Type.Name & "*")
+      then
+         declare
+            result_Parameter : constant c_Parameter.view := new_c_Parameter (the_Name => to_unbounded_String ("Result"),
+                                                                             the_Type => Self.name_Map_of_c_type.Element (the_return_Type.Name & "*"));
+         begin
+            result_Parameter.is_Pointer := True;
+            append (the_Parameters, result_Parameter);
+         end;
+
+         the_return_Type := Self.swig_type_Map_of_c_type.Element (+"void");
       end if;
 
 

@@ -363,9 +363,8 @@ is
             then
                null;
 
-            elsif     (         the_Type.all in Item'Class
-                       and then View (the_Type).is_constructed_by_Cpp)
-              or else ada.Characters.handling.to_Lower (to_String (the_Type.qualified_Name)) = "swig.std_string"     -- A C++ 'std::string'.
+            elsif      the_Type.all in Item'Class                  -- Among them a C++ 'std::string'.
+              and then View (the_Type).is_constructed_by_Cpp
             then
                return True;
             end if;
