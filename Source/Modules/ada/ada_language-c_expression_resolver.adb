@@ -99,12 +99,12 @@ is
          if contains (known_Symbols,  "sizeof_" & new_expression_Type)
          then
             return Natural (Value (Element (known_Symbols,  "sizeof_" & new_expression_Type)));
-         else
-            log (+"Cannot determine size of " & new_expression_Type);
 
          elsif standard_c_type_Size (to_String (the_type_Text)) /= 0
          then
             return standard_c_type_Size (to_String (the_type_Text)) * array_Multiplier;
+         else
+            log (+"Cannot determine size of " & new_expression_Type);
             log ("Please add the following line to your swig interface file ('.i'), where <n> is the appropriate size");
             log ( "%constant   int   sizeof_" & new_expression_Type & " = <n>;");
 
@@ -384,6 +384,18 @@ is
       is
          the_Elements : aliased element_Vectors.Vector;
 
+
+         function follows_a_Value return Boolean
+         --
+         --  A 'U' or 'L' is the suffix of an integer literal only when it follows a value. Otherwise
+         --  it begins an identifier (as in 'llast').
+         --
+         is
+         begin
+            return         not the_Elements.is_Empty
+                  and then the_Elements.last_Element.Kind = Value;
+         end follows_a_Value;
+
       begin
          log ("'resolved_c_integer_Expression_recursive'   ~   Expression_pad: '" & Expression_pad.all & "'");
 
@@ -397,6 +409,7 @@ is
 
             elsif      Length (Expression_pad.all)                 >= 3
               and then to_Upper (Slice (Expression_pad.all, 1, 3))  = "ULL"
+              and then follows_a_Value
             then
                delete (Expression_pad.all,  1, 3);
 
@@ -409,6 +422,7 @@ is
 
             elsif      Length (Expression_pad.all)                 >= 2
               and then to_Upper (Slice (Expression_pad.all, 1, 2))  = "UL"
+              and then follows_a_Value
             then
                delete (Expression_pad.all,  1, 2);
 
@@ -416,23 +430,12 @@ is
                   Prior : an_Element := last_Element (the_Elements);
                begin
                   Prior.type_Qualifier := to_unbounded_String ("UL");
-
-         function follows_a_Value return Boolean
-         --
-         --  A 'U' or 'L' is the suffix of an integer literal only when it follows a value. Otherwise
-         --  it begins an identifier (as in 'llast').
-         --
-         is
-         begin
-            return         not the_Elements.is_Empty
-                  and then the_Elements.last_Element.Kind = Value;
-         end follows_a_Value;
-
                   replace_Element (the_Elements, Last (the_Elements), Prior);
                end;
 
             elsif      not is_Single
               and then     to_Upper (Element (Expression_pad.all, 1)) = 'L'
+              and then     follows_a_Value
             then
                delete (Expression_pad.all,  1, 1);
 
@@ -441,11 +444,11 @@ is
                begin
                   Prior.type_Qualifier := to_unbounded_String ("L");
                   replace_Element (the_Elements, Last (the_Elements), Prior);
-              and then follows_a_Value
                end;
 
             elsif      not is_Single
               and then     to_Upper (Element (Expression_pad.all, 1)) = 'U'
+              and then     follows_a_Value
             then
                delete (Expression_pad.all,  1, 1);
 
@@ -454,7 +457,6 @@ is
                begin
                   Prior.type_Qualifier := to_unbounded_String ("U");
                   replace_Element (the_Elements, Last (the_Elements), Prior);
-              and then follows_a_Value
                end;
 
             elsif Element (Expression_pad.all, 1) = '('
@@ -467,7 +469,6 @@ is
                begin
                   resolve_c_integer_Expression_recursive (Expression_pad, known_Symbols, is_Single, expression_Value, expression_Type);
                   append (the_Elements,  an_Element'(kind           => Value,
-              and then     follows_a_Value
                                                      value          => expression_Value,
                                                      type_Qualifier => expression_Type));
                end;
@@ -480,7 +481,6 @@ is
 
             elsif Element (Expression_pad.all, 1) = '+'
             then
-              and then     follows_a_Value
                delete (Expression_pad.all,  1, 1);
                append (the_Elements,  an_Element'(kind  => Operator,
                                                   code  => +"+"));
