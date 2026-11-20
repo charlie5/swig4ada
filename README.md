@@ -52,7 +52,8 @@ For a module 'foo' this writes the wrapper 'foo_wrap.c' (or 'foo_wrap.cxx') and 
 - foo-pointers.ads         ~ Pointer types, where any are needed.
 
 A program which uses the binding compiles the specs and the wrapper, and needs the support packages
-'swig', 'swig.pointers', 'swig.guards' and (for C++ strings) 'swig.std_Strings'. These are the 'swig*.ads'
+'swig', 'swig.pointers', 'swig.guards' and, where they are used, 'swig.std_Strings' (C++ strings) and
+'swig.Exceptions' (C++ exceptions). These are the 'swig*.ads'
 and 'swig*.adb' files at the root of this repository; they are not installed, so add that folder to the
 source directories of your project. The projects under 'Examples/ada' show how.
 
@@ -155,6 +156,20 @@ adds to the wrapper the functions which that package imports.
 'std_pair.i' and 'std_complex.i' provide the containers, each instantiated with '%template' as usual. They
 bind the common members (size, element access, insertion and removal), and assume the GNU libstdc++.
 
+Exceptions
+----------
+
+A C++ exception does not reach Ada. A wrapper which catches one records it, and the call returns as though
+nothing had happened, so a program asks after the call whether an exception is pending:
+
+    Result := element (7);                               -- int element (int index);
+    swig.Exceptions.check;                               -- Raises 'swig.Exceptions.Error' if C++ threw.
+
+The interface file says which exceptions a function may throw, with '%catches' or an exception
+specification. With '%include <std_except.i>' a standard exception is recorded by its kind and its own
+message ('swig.Exceptions.pending_Kind', 'pending_Message'), and the message becomes that of the Ada
+exception. An exception which the wrapper does not catch ends the program.
+
 Other things to know
 --------------------
 
@@ -164,10 +179,6 @@ Other things to know
 - 'operator->' is the function 'dereference', and the functions of the class which a smart pointer points
   to are also functions of the smart pointer.
 - A class of a namespace has its package directly under the module, as namespaces are not kept.
-- A C++ exception does not reach Ada. A wrapper which catches one (see '%catches') records it, and the
-  call returns. The record is read with the C functions 'swig_ada_pending_exception',
-  'swig_ada_pending_exception_text' and 'swig_ada_clear_pending_exception', which a program imports for
-  itself.
 - A wrapper calls the protected members of a class, so a C++ wrapper is compiled with access opened to it:
   by 'g++ -fno-access-control', or by '#define protected public' ahead of the class in the interface file.
 
