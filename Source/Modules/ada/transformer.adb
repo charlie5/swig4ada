@@ -896,7 +896,21 @@ is
                            loop
                               if c_type_Map_of_ada_type.contains (the_c_Components (Each).my_Type)
                               then
-                                 the_ada_Record.add_Component (Self.to_ada_Variable (the_c_Components (Each).all'Access));
+                                 declare
+                                    the_Component : constant ada_Variable.view := Self.to_ada_Variable (the_c_Components (Each).all'Access);
+                                 begin
+                                    --  A component of a type extension may not be where C++ has its member (see 'memberVariableHandler'
+                                    --  in 'ada_Language'), so it only reserves storage, and is named to say so. The member has functions.
+                                    --
+                                    if         not the_ada_Record.base_Classes.is_Empty
+                                      and then the_c_Components (Each).array_Bounds.is_Empty
+                                      and then the_c_Components (Each).bit_Field = c_Variable.undefined_Bitfield
+                                    then
+                                       the_Component.Name := the_Component.Name & "_storage";
+                                    end if;
+
+                                    the_ada_Record.add_Component (the_Component);
+                                 end;
                               else
                                  log (  "Warning: the member '" & the_c_Components (Each).Name & "' of class '" & the_c_Type.Name
                                       & "' has a type which is not known, and is left out. The layout of the record does not match that of the class.");

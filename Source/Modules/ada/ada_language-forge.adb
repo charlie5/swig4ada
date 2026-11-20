@@ -74,6 +74,7 @@ is
                                    have_default_constructor_flag
                                                             => False,
                                    static_flag              => False,
+                                   accessor_member_Name     => <>,
                                    variable_wrapper_flag    => False,
                                    wrapping_member_flag     => False,
                                    is_anonymous_Enum        => False,

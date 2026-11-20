@@ -279,6 +279,7 @@ private
          static_flag                   : Boolean := False;       -- Flag for wrapping a static functions or member variables.
          wrapping_member_flag          : Boolean := False;       -- Flag for wrapping a member variable/enum/const.
          is_anonymous_Enum             : Boolean := False;
+         accessor_member_Name          : unbounded_String;       -- The member variable whose 'get' and 'set' functions are being wrapped, if any.
          variable_wrapper_flag         : Boolean := False;       -- Flag for wrapping a nonstatic member variable. TODO: possibly oboslete.
          have_default_constructor_flag : Boolean := False;       -- TODO: Possibly obsolete.
          enum_rep_clause_required      : Boolean := False;       -- TODO: Possibly obsolete.

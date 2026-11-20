@@ -1170,6 +1170,24 @@ is
                end;
             end if;
 
+            --  The 'get' or the 'set' function of a member variable (see 'memberVariableHandler').
+            --
+            if Self.accessor_member_Name /= ""
+            then
+               declare
+                  the_Name     : constant String  := sym_Name;
+                  is_Setter    : constant Boolean := the_Name'Length > 4 and then the_Name (the_Name'First .. the_Name'First + 3) = "set_";     -- The core names them 'set_<class>_<member>' and 'get_...'.
+                  the_Accessor : c_Function.view;
+               begin
+                  the_Accessor := Self.new_c_Function (the_Node,
+                                                       (if is_Setter then "set_" & Self.accessor_member_Name
+                                                                     else Self.accessor_member_Name),
+                                                       Self.current_c_Class.nameSpace.all'Access,
+                                                       is_Destructor => False);
+                  pragma Unreferenced (the_Accessor);
+               end;
+            end if;
+
             delWrapper (the_function_Wrapper);
          end;
       end;
@@ -2235,6 +2253,15 @@ is
       swig_Type_is_array : constant Boolean          := SwigType_isArray   (swig_Type) /= 0;
       is_Pointer         : constant Boolean          := SwigType_isPointer (swig_Type) /= 0;
       variable_Name      : constant unbounded_String := +Attribute (the_Node, "sym:name");
+      bit_Field_text     : constant String           :=  Attribute (the_Node, "bitfield");
+
+      function has_virtual_Base return Boolean
+      is
+         Bases : constant c_Type.Vector := Self.current_c_Class.base_Classes;
+      begin
+         return (for some Each of Bases => Each.is_Virtual);
+      end has_virtual_Base;
+
    begin
       indent_Log;
       dlog (+"");
@@ -2281,6 +2308,31 @@ is
 
             Self.current_c_Class.add_Component (new_Variable);
          end;
+
+         --  A class which is derived from a virtual class is a type extension in Ada, whose components begin after the
+         --  whole of the parent. C++ begins the members of the derived class in the unused tail of its base class, where
+         --  they fit, so a component may not be where its member is. Such a member is therefore read and written through
+         --  functions of the wrapper, and its component only reserves storage (see the transformer).
+         --
+         if         Self.in_cpp_Mode
+           and then has_virtual_Base
+           and then not swig_Type_is_Array
+           and then bit_Field_text = ""
+           and then not (   check_Attribute (the_Node, "access", "protected")
+                         or check_Attribute (the_Node, "access", "private"))
+         then
+            declare
+               Status : C.int with Unreferenced;
+            begin
+               Self.accessor_member_Name  := variable_Name;
+               Self.variable_wrapper_flag := True;
+
+               Status := swigMod.Language.item (Self.all).memberVariableHandler (the_Node);
+
+               Self.variable_wrapper_flag := False;
+               Self.accessor_member_Name  := null_unbounded_String;
+            end;
+         end if;
       end if;
 
       unindent_Log;
