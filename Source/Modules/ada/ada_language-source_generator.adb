@@ -841,7 +841,8 @@ is
                 and then return_type_Package.cpp_class_Type.all'Access = Self.return_Type    -- The return type is the main type of a class package.
                 and then return_type_Package.cpp_class_Type.is_Virtual
                 and then return_type_Package /= declaration_Package)                         -- The return type is not the main type of the functions package.
-              or Self.is_Constructor
+              or (         Self.is_Constructor
+                  and then declaration_Package.models_a_virtual_cpp_Class)                   -- Only a virtual class is modelled as a tagged type.
             then
                append (the_Source,  "'Class");
             end if;
