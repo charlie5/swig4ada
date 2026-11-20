@@ -49,7 +49,7 @@ gprbuild -P testsuite.gpr
 
 - The test list is hard coded in `source/launch_testsuite.adb` as `generate ("x.i")` / `generate ("x.i", use_CPP => True)` calls, grouped by the `do_C`, `do_Cxx`, `do_uncompilable_*`, `do_broken_*` flags. Commented out cases carry a note saying why.
 - To run a single test case, put a `generate (...)` call followed by `return;` at the top of the main body (check the file is not already in this state before assuming a full run) and rebuild.
-- A test only checks that generation does not raise an unhandled exception and that `gnatpp` finds no syntax errors; failures are saved as `generated/<module>-generator.log` and `generated/<module>-pretty_print.log`. Nothing is compiled or executed. Baseline (2026-11-20): all 197 enabled cases generate without either failure. A separate measure, not made by the launcher: of the 938 specs generated, 898 pass a compile check (`gcc -c -gnatc -gnat2022 -I<repository root>` run in the output directory) and 40 do not. The 40 are in 10 cases: `%import` of a module outside the test list or a circular dependency (`clientdata_prop_b`, `template_typedef_import`, `imports_b`, `mod_b`, `multi_import_a`), and individual problems in `template_specialization_enum`, `template_inherit_abstract`, `grouping`, `abstract_typedef` and `samename`.
+- A test only checks that generation does not raise an unhandled exception and that `gnatpp` finds no syntax errors; failures are saved as `generated/<module>-generator.log` and `generated/<module>-pretty_print.log`. Nothing is compiled or executed. Baseline (2026-11-20): all 197 enabled cases generate without either failure. A separate measure, not made by the launcher: of the 938 specs generated, 905 pass a compile check (`gcc -c -gnatc -gnat2022 -I<repository root>` run in the output directory) and 33 do not. The 33 are in 9 cases: `%import` of a module outside the test list or a circular dependency (`clientdata_prop_b`, `template_typedef_import`, `imports_b`, `mod_b`, `multi_import_a`), and individual problems in `template_inherit_abstract`, `grouping`, `abstract_typedef` and `samename`.
 
 ## Architecture
 
@@ -82,7 +82,7 @@ GCC has its own C/C++ to Ada spec generator: `g++ -c -fdump-ada-spec -fsyntax-on
 
 For a module `foo` (see `ada_module.ads`):
 
-- `foo.ads` — top package, containing the simple types, constants and global variables. A global variable whose type is a class, or lives in the pointers packages, is declared in `foo-binding.ads` instead, as the top package cannot see its own children. A variable which differs only in case from an enumeration literal of the package is given a `the_` prefix (C `enum E {slap} Slap;` gives `the_Slap`), still importing the C symbol.
+- `foo.ads` — top package, containing the simple types, constants and global variables. A global variable whose type is a class, or lives in the pointers packages, is declared in `foo-binding.ads` instead, as the top package cannot see its own children. A variable which differs only in case from an enumeration literal of the package is given a `the_` prefix (C `enum E {slap} Slap;` gives `the_Slap`), still importing the C symbol. Likewise an enumeration literal which differs only in case from the name of its own type (C `enum Hello {hi, hello};` gives `the_hello`).
 - `foo-binding.ads` — the imported (non-class) C functions.
 - `foo-pointers.ads`, `foo-pointer_pointers.ads` — pointer and pointer-to-pointer types.
 - `foo-<type>.ads` — one child package per struct/class (and per function pointer type).
