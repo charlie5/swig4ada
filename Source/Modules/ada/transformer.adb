@@ -19,12 +19,14 @@ with
      c_Declarable,
      c_Function,
      c_nameSpace,
+     c_Parameter,
      c_Variable,
 
      DOHs.Pointers,
 
      ada.Containers.hashed_Maps,
-     ada.Strings.fixed.Hash;
+     ada.Strings.fixed.Hash,
+     ada.Strings.fixed;
 
 
 package body Transformer
@@ -56,6 +58,31 @@ is
       begin
          return name_Map_of_c_type.Element (Named);
       end fetch_c_Type;
+
+
+
+      function is_Bindable (the_c_Function : in c_Function.view) return Boolean
+      --
+      --  A function can only be bound when its return type and the type of each of its parameters has an Ada type.
+      --  (A type may have none when it could not be resolved, such as a typedef nested in a class template.)
+      --
+      is
+      begin
+         if not c_type_Map_of_ada_type.contains (the_c_Function.return_Type)
+         then
+            return False;
+         end if;
+
+         for Each of the_c_Function.Parameters
+         loop
+            if not c_type_Map_of_ada_type.contains (Each.my_Type)
+            then
+               return False;
+            end if;
+         end loop;
+
+         return True;
+      end is_Bindable;
 
    begin
       add_ada_Type_for_each_c_Type :
@@ -715,16 +742,57 @@ is
                            use c_function.Vectors;
                            the_c_Functions  : constant c_Function.Vector := the_c_Type.nameSpace.Subprograms;
                            Cursor           :          c_function.Cursor := the_c_Functions.First;
+                           unbound_Count    :          Natural           := 0;
                         begin
                            while has_Element (Cursor)
                            loop
-                              declare
-                                 the_c_Function     : constant c_Function.view     := Element (Cursor);
-                                 the_ada_subProgram : constant ada_subProgram.view := Self.to_ada_subProgram (the_c_Function);
-                              begin
-                                 the_ada_subProgram.Parameters := Self.to_ada_Parameters (the_c_function.Parameters);
-                                 the_ada_Record.declaration_Package.add (the_ada_subProgram);
-                              end;
+                              if is_Bindable (Element (Cursor))
+                              then
+                                 declare
+                                    the_c_Function     : constant c_Function.view     := Element (Cursor);
+                                    the_ada_subProgram : constant ada_subProgram.view := Self.to_ada_subProgram (the_c_Function);
+                                 begin
+                                    the_ada_subProgram.Parameters := Self.to_ada_Parameters (the_c_function.Parameters);
+                                    the_ada_Record.declaration_Package.add (the_ada_subProgram);
+                                 end;
+
+                              elsif      Element (Cursor).is_Virtual
+                                and then not Element (Cursor).is_Overriding
+                                and then not Element (Cursor).Parameters.is_Empty
+                              then
+                                 --  A virtual function has a slot in the C++ vtable, whether or not it can be bound. A primitive
+                                 --  operation with only the 'Self' parameter stands in for it, so that the slots which follow
+                                 --  keep their place. (A function which overrides needs none, as it has the slot of its parent.)
+                                 --
+                                 declare
+                                    use c_Parameter.Vectors;
+
+                                    the_c_Function     : constant c_Function.view := Element (Cursor);
+                                    the_self_Parameter :          c_Parameter.Vector;
+                                    the_ada_subProgram :          ada_subProgram.view;
+                                 begin
+                                    unbound_Count      := unbound_Count + 1;
+                                    the_ada_subProgram := ada_subProgram.new_ada_subProgram
+                                                            (+("unbound_virtual_" & ada.Strings.fixed.Trim (unbound_Count'Image, ada.Strings.Left)),
+                                                             c_type_Map_of_ada_type.Element (fetch_c_Type (+"void")));
+
+                                    the_self_Parameter.append (the_c_Function.Parameters.first_Element);
+
+                                    the_ada_subProgram.Parameters  := Self.to_ada_Parameters (the_self_Parameter);
+                                    the_ada_subProgram.is_Virtual  := True;
+                                    the_ada_subProgram.is_Abstract := the_c_Function.is_Abstract;
+                                    the_ada_subProgram.link_Symbol := +"unbound";
+
+                                    the_ada_Record.declaration_Package.add (the_ada_subProgram);
+
+                                    log (  "Warning: unable to bind the virtual function '" & the_c_Function.Name & "' of class '" & the_c_Type.Name
+                                         & "', as one of its types is not known. '" & the_ada_subProgram.Name & "' holds its place.");
+                                 end;
+
+                              else
+                                 log (  "Warning: unable to bind the function '" & Element (Cursor).Name & "' of class '" & the_c_Type.Name
+                                      & "', as one of its types is not known.");
+                              end if;
 
                               next (Cursor);
                            end loop;
@@ -782,13 +850,18 @@ is
       begin
          while has_Element (Cursor)
          loop
-            declare
-               the_c_Function     : constant c_Function.view     := Element (Cursor);
-               the_ada_subProgram : constant ada_subProgram.view := Self.to_ada_subProgram (the_c_Function);
-            begin
-               the_ada_subProgram.Parameters := Self.to_ada_Parameters (the_c_Function.Parameters);
-               Result.Package_binding.add (the_ada_subProgram);
-            end;
+            if is_Bindable (Element (Cursor))
+            then
+               declare
+                  the_c_Function     : constant c_Function.view     := Element (Cursor);
+                  the_ada_subProgram : constant ada_subProgram.view := Self.to_ada_subProgram (the_c_Function);
+               begin
+                  the_ada_subProgram.Parameters := Self.to_ada_Parameters (the_c_Function.Parameters);
+                  Result.Package_binding.add (the_ada_subProgram);
+               end;
+            else
+               log ("Warning: unable to bind the function '" & Element (Cursor).Name & "', as one of its types is not known.");
+            end if;
 
             next (Cursor);
          end loop;
