@@ -226,8 +226,11 @@ is
 
                   dlog ("the_base_c_Type.Name: " & the_base_c_Type.Name & "[]");
 
-                  c_type_Map_of_ada_type.insert (name_Map_of_c_type.Element (the_base_c_Type.Name & "[]"),   -- Register the new pointer.
-                                                 new_ada_Array.all'Access);
+                  if not c_type_Map_of_ada_type.contains (name_Map_of_c_type.Element (the_base_c_Type.Name & "[]"))     -- Two C types may share a name.
+                  then
+                     c_type_Map_of_ada_type.insert (name_Map_of_c_type.Element (the_base_c_Type.Name & "[]"),   -- Register the new pointer.
+                                                    new_ada_Array.all'Access);
+                  end if;
                end add_array_Type_for;
 
 
@@ -297,8 +300,15 @@ is
                                                                   base_type => new_ada_Type).all'Access;
                   new_ada_Type.declaration_Package.add (new_ada_Type);
 
-                  name_Map_of_ada_type  .insert (new_ada_Type.qualified_Name,                                  new_ada_Type);
-                  c_type_Map_of_ada_type.insert (name_Map_of_c_type.Element (the_accessed_c_Type.Name & "*"),  new_ada_Type);   -- Register the new pointer.
+                  if not name_Map_of_ada_type.contains (new_ada_Type.qualified_Name)     -- Two C types may share a name.
+                  then
+                     name_Map_of_ada_type.insert (new_ada_Type.qualified_Name, new_ada_Type);
+                  end if;
+
+                  if not c_type_Map_of_ada_type.contains (name_Map_of_c_type.Element (the_accessed_c_Type.Name & "*"))
+                  then
+                     c_type_Map_of_ada_type.insert (name_Map_of_c_type.Element (the_accessed_c_Type.Name & "*"),  new_ada_Type);   -- Register the new pointer.
+                  end if;
 
                   return new_ada_Type;
                end new_pointer_Type_for;
@@ -467,6 +477,10 @@ is
                               c_type_Map_of_ada_type.insert (the_c_Type,    new_ada_Type);
                            end;
 
+                        elsif not c_type_Map_of_ada_type.contains (the_c_Type.accessed_Type)
+                        then
+                           log ("Warning: unable to bind the pointer type '" & the_c_Type.Name & "', as the type it points to is not known.");
+
                         else
                            dlog ("the_c_Type.accessed_Type:   " & the_c_Type.accessed_Type.Name);
                            dlog ("the corresponding ada Type: " & c_type_Map_of_ada_type.Element (the_c_Type.accessed_Type).Name);
@@ -580,7 +594,9 @@ is
                            use c_type.enum_literal_Vectors, GMP.discrete;
 
                            the_declaration_Package : constant access ada_Package.Item'Class
-                             := c_namespace_Map_of_ada_Package.Element (c_nameSpace.view (the_c_Type.Namespace));
+                             := (if c_namespace_Map_of_ada_Package.contains (c_nameSpace.view (the_c_Type.Namespace))
+                                 then c_namespace_Map_of_ada_Package.Element (c_nameSpace.view (the_c_Type.Namespace))
+                                 else Result.Package_top);     -- The namespace of the enumeration has no package of its own.
 
                            new_ada_Enumeration     : constant ada_Type.elementary.scalar.discrete.enumeration.view
                              := ada_Type.elementary.scalar.discrete.enumeration.new_Item (the_declaration_Package,
@@ -660,7 +676,11 @@ is
                         dlog (+"");
                         dlog ("adding array_Type '" & the_c_Type.Name & "' of element type: '" & the_c_Type.element_Type.qualified_Name & "'");
 
-                        if         the_c_Type.element_Type.c_type_Kind = c_type.c_Class   -- Array of a class is already created when the class is
+                        if not c_type_Map_of_ada_type.contains (the_c_Type.element_Type)
+                        then
+                           log ("Warning: unable to bind the array type '" & the_c_Type.Name & "', as its element type is not known.");
+
+                        elsif      the_c_Type.element_Type.c_type_Kind = c_type.c_Class   -- Array of a class is already created when the class is
                           and then c_type_Map_of_ada_type.contains (the_c_Type)           -- created, to allow for Self-referential class members (see below).
                         then
                            dlog (+"Skipping array of class.");
@@ -821,8 +841,15 @@ is
                            begin
                               while has_Element (Cursor)
                               loop
-                                 the_ada_Record.add_Component (ada_Variable.new_ada_Variable (to_ada_Identifier (Element (Cursor).Name),
-                                                                                              c_type_Map_of_ada_type.Element (Element (Cursor))));
+                                 if c_type_Map_of_ada_type.contains (Element (Cursor))
+                                 then
+                                    the_ada_Record.add_Component (ada_Variable.new_ada_Variable (to_ada_Identifier (Element (Cursor).Name),
+                                                                                                 c_type_Map_of_ada_type.Element (Element (Cursor))));
+                                 else
+                                    log (  "Warning: the base class '" & Element (Cursor).Name & "' of class '" & the_c_Type.Name
+                                         & "' has no Ada type, and is left out. The layout of the record does not match that of the class.");
+                                 end if;
+
                                  next (Cursor);
                               end loop;
                            end transform_base_Classes_to_record_Components;
@@ -835,7 +862,13 @@ is
                         begin
                            for Each in the_c_Components'Range
                            loop
-                              the_ada_Record.add_Component (Self.to_ada_Variable (the_c_Components (Each).all'Access));
+                              if c_type_Map_of_ada_type.contains (the_c_Components (Each).my_Type)
+                              then
+                                 the_ada_Record.add_Component (Self.to_ada_Variable (the_c_Components (Each).all'Access));
+                              else
+                                 log (  "Warning: the member '" & the_c_Components (Each).Name & "' of class '" & the_c_Type.Name
+                                      & "' has a type which is not known, and is left out. The layout of the record does not match that of the class.");
+                              end if;
                            end loop;
                         end add_Components;
 
@@ -977,18 +1010,23 @@ is
                the_c_Variable   : constant c_Variable.view := Element (Cursor);
                the_ada_Variable :          ada_Variable.view;
             begin
-               the_ada_Variable := Self.to_ada_Variable (the_c_Variable);
-
-               if        the_c_Variable.my_Type.c_type_Kind = C_Class
-                 or else (         ada_Package.view (the_ada_Variable.my_Type.declaration_Package)        /= Result.Package_top     -- The top package cannot see
-                          and then ada_Package.view (the_ada_Variable.my_Type.declaration_Package).Parent  = Result.Package_top)    -- its own child packages.
-                 or else (         the_ada_Variable.is_Constant                                                              -- A constant pointer to a function
-                          and then the_ada_Variable.my_Type.resolved_Type.all                                                -- has a function of the binding
-                                   in ada_Type.elementary.an_access.to_subProgram.item'Class)                               -- package as its value.
+               if not c_type_Map_of_ada_type.contains (the_c_Variable.my_Type)
                then
-                  Result.Package_binding.add (the_ada_Variable);
+                  log ("Warning: unable to bind the variable '" & the_c_Variable.Name & "', as its type is not known.");
                else
-                  Result.Package_top    .add (the_ada_Variable);
+                  the_ada_Variable := Self.to_ada_Variable (the_c_Variable);
+
+                  if        the_c_Variable.my_Type.c_type_Kind = C_Class
+                    or else (         ada_Package.view (the_ada_Variable.my_Type.declaration_Package)        /= Result.Package_top     -- The top package cannot see
+                             and then ada_Package.view (the_ada_Variable.my_Type.declaration_Package).Parent  = Result.Package_top)    -- its own child packages.
+                    or else (         the_ada_Variable.is_Constant                                                              -- A constant pointer to a function
+                             and then the_ada_Variable.my_Type.resolved_Type.all                                                -- has a function of the binding
+                                      in ada_Type.elementary.an_access.to_subProgram.item'Class)                               -- package as its value.
+                  then
+                     Result.Package_binding.add (the_ada_Variable);
+                  else
+                     Result.Package_top    .add (the_ada_Variable);
+                  end if;
                end if;
             end;
 

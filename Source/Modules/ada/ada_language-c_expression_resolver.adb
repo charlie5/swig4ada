@@ -37,6 +37,29 @@ is
 
       required_sizeof_not_defined : exception;
 
+
+      function standard_c_type_Size (the_Type : in String) return Natural
+      --
+      --  The size of a standard C type, or 0 when 'the_Type' is not one. The size is that of the machine on
+      --  which the binding is generated, which is taken to be the machine on which the binding is used.
+      --
+      is
+         Unit : constant := C.char'Size;
+      begin
+         if    the_Type in "char"  | "signed char" | "unsigned char" | "bool"                                 then   return 1;
+         elsif the_Type in "short" | "signed short" | "unsigned short" | "short int" | "unsigned short int"   then   return C.short'Size / Unit;
+         elsif the_Type in "int"   | "signed int"   | "unsigned int"   | "unsigned"  | "signed"               then   return C.int'Size   / Unit;
+         elsif the_Type in "long"  | "signed long"  | "unsigned long"  | "long int"  | "unsigned long int"    then   return C.long'Size  / Unit;
+         elsif the_Type in "long long" | "unsigned long long" | "long long int" | "unsigned long long int"    then   return long_long_Integer'Size / Unit;
+         elsif the_Type =  "float"                                                                            then   return C.C_float'Size     / Unit;
+         elsif the_Type =  "double"                                                                           then   return C.double'Size      / Unit;
+         elsif the_Type =  "long double"                                                                      then   return C.long_double'Size / Unit;
+         elsif the_Type =  "wchar_t"                                                                          then   return C.wchar_t'Size     / Unit;
+         elsif the_Type =  "size_t"                                                                           then   return C.size_t'Size      / Unit;
+         else                                                                                                        return 0;
+         end if;
+      end standard_c_type_Size;
+
    begin
       replace_All (the_type_Text,  "&", "");    -- Strip references, since they have no impact on size.
 
@@ -78,6 +101,10 @@ is
             return Natural (Value (Element (known_Symbols,  "sizeof_" & new_expression_Type)));
          else
             log (+"Cannot determine size of " & new_expression_Type);
+
+         elsif standard_c_type_Size (to_String (the_type_Text)) /= 0
+         then
+            return standard_c_type_Size (to_String (the_type_Text)) * array_Multiplier;
             log ("Please add the following line to your swig interface file ('.i'), where <n> is the appropriate size");
             log ( "%constant   int   sizeof_" & new_expression_Type & " = <n>;");
 
@@ -389,6 +416,18 @@ is
                   Prior : an_Element := last_Element (the_Elements);
                begin
                   Prior.type_Qualifier := to_unbounded_String ("UL");
+
+         function follows_a_Value return Boolean
+         --
+         --  A 'U' or 'L' is the suffix of an integer literal only when it follows a value. Otherwise
+         --  it begins an identifier (as in 'llast').
+         --
+         is
+         begin
+            return         not the_Elements.is_Empty
+                  and then the_Elements.last_Element.Kind = Value;
+         end follows_a_Value;
+
                   replace_Element (the_Elements, Last (the_Elements), Prior);
                end;
 
@@ -402,6 +441,7 @@ is
                begin
                   Prior.type_Qualifier := to_unbounded_String ("L");
                   replace_Element (the_Elements, Last (the_Elements), Prior);
+              and then follows_a_Value
                end;
 
             elsif      not is_Single
@@ -414,6 +454,7 @@ is
                begin
                   Prior.type_Qualifier := to_unbounded_String ("U");
                   replace_Element (the_Elements, Last (the_Elements), Prior);
+              and then follows_a_Value
                end;
 
             elsif Element (Expression_pad.all, 1) = '('
@@ -426,6 +467,7 @@ is
                begin
                   resolve_c_integer_Expression_recursive (Expression_pad, known_Symbols, is_Single, expression_Value, expression_Type);
                   append (the_Elements,  an_Element'(kind           => Value,
+              and then     follows_a_Value
                                                      value          => expression_Value,
                                                      type_Qualifier => expression_Type));
                end;
@@ -438,6 +480,7 @@ is
 
             elsif Element (Expression_pad.all, 1) = '+'
             then
+              and then     follows_a_Value
                delete (Expression_pad.all,  1, 1);
                append (the_Elements,  an_Element'(kind  => Operator,
                                                   code  => +"+"));
@@ -591,16 +634,24 @@ is
                   find_Token (Expression_pad.all, to_Set ("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789"), Inside,  First, Last);
                   the_Symbol := unbounded_Slice (Expression_pad.all,  First, Last);
 
-                  begin
-                     append (the_Elements,  an_Element'(kind  => Value,
-                                                        value => Element (known_Symbols,  Namespace & the_Symbol),
+                  if        the_Symbol = "true"
+                    or else the_Symbol = "false"
+                  then   -- The C++ boolean literals.
+                     append (the_Elements,  an_Element'(Kind   => Value,
+                                                        Value  => to_Integer (if the_Symbol = "true" then 1 else 0),
                                                         others => <>));
-                  exception
-                     when Constraint_Error => -- Key not found, so try without namespace.
+                  else
+                     begin
                         append (the_Elements,  an_Element'(kind  => Value,
-                                                           value => Element (known_Symbols,  the_Symbol),
+                                                           value => Element (known_Symbols,  Namespace & the_Symbol),
                                                            others => <>));
-                  end;
+                     exception
+                        when Constraint_Error => -- Key not found, so try without namespace.
+                           append (the_Elements,  an_Element'(kind  => Value,
+                                                              value => Element (known_Symbols,  the_Symbol),
+                                                              others => <>));
+                     end;
+                  end if;
 
                   delete (Expression_pad.all,  First, Last);
                end;

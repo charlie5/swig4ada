@@ -1254,8 +1254,15 @@ is
    function total_virtual_member_function_Count (Self : access Item) return Natural
    is
       use c_Type.Vectors;
-      the_Count : Natural := virtual_member_function_Count (Self);
+      the_Count : Natural;
    begin
+      if Self.my.c_type_Kind /= c_Class     -- Such as a base class which is not known, or is known only by a typedef.
+      then
+         return 0;
+      end if;
+
+      the_Count := virtual_member_function_Count (Self);
+
       if         the_Count = 0
         and then Self.my.c_type_Kind = c_Class
         and then Self.my.has_virtual_Members

@@ -198,6 +198,7 @@ is
       swig_register_FileByName (const_String (-"wrapper"),     Self.f_Wrappers);
       swig_register_FileByName (const_String (-"runtime"),     Self.f_Runtime);
       swig_register_FileByName (const_String (-"init"),        Self.f_Init);
+      swig_register_FileByName (const_String (-"begin"),       Self.f_Runtime);    -- There is no separate 'begin' section, the runtime section being the first one written.
       swig_register_FileByName (const_String (-"ada_support"), Self.f_Ada);
 
       --  Setup the principal namespace and module package names.
@@ -1130,7 +1131,7 @@ is
                  & "'   type name: '"
                  & to_String (the_swig_type_Name)
                  & "'");
-            new_Variable.my_Type := Self.swig_type_Map_of_c_type.Element (the_swig_type_Name);
+            new_Variable.my_Type := Self.demand_c_Type_for (doh_swigType (to_Doh (to_String (the_swig_type_Name))));     -- An unknown type is pruned later.
          end;
 
          Self.Module_top.C.new_c_Variables.append (new_Variable);
@@ -1266,12 +1267,26 @@ is
             Self.last_c_enum_rep_Value := Self.last_c_enum_rep_Value + 1;
 
          else
-            Self.last_c_enum_rep_Value := Value (resolved_c_integer_Expression (Self, enum_value_Text,
-                                                                                      Self.integer_symbol_value_Map,
-                                                                                      Self.current_class_namespace_Prefix));
+            begin
+               Self.last_c_enum_rep_Value := Value (resolved_c_integer_Expression (Self, enum_value_Text,
+                                                                                         Self.integer_symbol_value_Map,
+                                                                                         Self.current_class_namespace_Prefix));
+            exception
+               when constraint_Error =>
+                  --  Such as a value which depends upon a template parameter. The next value is used, as it is for a literal
+                  --  given no value, which keeps the literals of the enumeration distinct.
+                  --
+                  Self.last_c_enum_rep_Value := Self.last_c_enum_rep_Value + 1;
+
+                  log (  "Warning: unable to evaluate the value '" & enum_value_Text & "' of the enumeration literal '" & symName
+                       & "', which is given the value" & Self.last_c_enum_rep_Value'Image & ".");
+            end;
          end if;
 
-         insert (Self.integer_symbol_value_Map, symName, to_Integer (Self.last_c_enum_rep_Value));
+         if not Self.integer_symbol_value_Map.contains (symName)     -- A literal of the same name may belong to an enumeration of another scope.
+         then
+            insert (Self.integer_symbol_value_Map, symName, to_Integer (Self.last_c_enum_rep_Value));
+         end if;
 
          Self.current_c_Enum.add_Literal (Name  => symName,
                                           Value => to_Integer (Self.last_c_enum_rep_Value));
@@ -1324,7 +1339,7 @@ is
            & "'");
 
       Self.current_c_Node := doh_Node (the_Node);
-      the_Type            := Self.swig_type_Map_of_c_type.Element (+DOH_Pointer (the_swigType));
+      the_Type            := Self.demand_c_Type_for (doh_swigType (the_swigType));     -- An unknown type is pruned later.
       new_c_Constant      := c_variable.new_c_Variable (Name    => the_Name,
                                                         of_Type => the_Type);
       dlog ("the_Type.Name => '" & the_Type.Name & "'");
@@ -1344,7 +1359,15 @@ is
                                                            Value_Text,
                                                            Self.integer_symbol_value_Map,
                                                            Self.current_class_namespace_Prefix);
-               if    Slice (value_Text, 1, 2) = "0x"
+               if        value_Text = "true"
+                 or else value_Text = "false"
+                 or else (         Index (value_Text, "sizeof(") = 1
+                          and then Index (value_Text, ")")       = Length (value_Text)
+                          and then Self.name_Map_of_c_type.contains (unbounded_Slice (value_Text, 8, Length (value_Text) - 1)))
+               then
+                  null;   -- The source generator gives these in terms of Ada, so the text is kept.
+
+               elsif Slice (value_Text, 1, 2) = "0x"
                then
                   value_Text := +hex_Image (the_Value);
 
@@ -1550,7 +1573,12 @@ is
             declare
                base_Name : constant String := Attribute (Node_Pointer (the_Item), "sym:name");
             begin
-               Self.current_c_Class.add_Base (Self.name_Map_of_c_type.Element (+base_Name));
+               if Self.name_Map_of_c_type.contains (+base_Name)
+               then
+                  Self.current_c_Class.add_Base (Self.name_Map_of_c_type.Element (+base_Name));
+               else   -- Such as a base class which is ignored, or is a template which has not been instantiated.
+                  log ("Warning: the base class '" & base_Name & "' of class '" & class_Name & "' is not known, and is ignored.");
+               end if;
             end;
          end loop;
       end;
@@ -1662,7 +1690,10 @@ is
                                                   is_Destructor => False,
                                                   is_Overriding => is_Overriding);
 
-         Self.prior_c_Declaration := the_new_Function.all'Access;
+         if c_Function."/=" (the_new_Function, null)     -- No function is made for an overload which cannot be told apart in Ada.
+         then
+            Self.prior_c_Declaration := the_new_Function.all'Access;
+         end if;
       end;
 
       unindent_Log;
@@ -1940,7 +1971,7 @@ is
                   unconstrained_array_swigType : constant unbounded_String := strip_array_Bounds (doh_Copy (doh_Item (swig_Type)));
                begin
                   new_Variable := new_c_Variable (variable_Name,
-                                                  Self.swig_type_Map_of_c_type.Element (unconstrained_array_swigType));
+                                                  Self.demand_c_Type_for (doh_swigType (to_Doh (to_String (unconstrained_array_swigType)))));
                end;
             else
                new_Variable := new_c_Variable (variable_Name,
@@ -2093,16 +2124,31 @@ is
                begin
                   new_c_Array := c_type.new_array_Type (Namespace    => Self.current_c_Namespace,
                                                         Name         => the_type_Name,
-                                                        element_Type => Self.swig_type_Map_of_c_type.Element (+doh_Item (element_Type)));
+                                                        element_Type => Self.demand_c_Type_for (doh_Item (element_Type)));
                   for Each in 1 .. dimension_Count
                   loop
                      array_dimension_Text := +doh_Item (SwigType_array_getdim (the_Array, Each - 1));
 
-                     c_type.add_array_Dimension (new_c_Array,
-                                                 upper_Bound => Integer (Value (resolved_c_integer_Expression (Self,
-                                                                                                               array_dimension_Text,
-                                                                                                               Self.integer_symbol_value_Map,
-                                                                                                               Self.current_class_namespace_Prefix))) - 1);
+                     declare
+                        the_Dimension : Integer := 0;     -- A dimension of 0 stands for an unknown length (as in 'typedef char name[];').
+                     begin
+                        if array_dimension_Text /= ""
+                        then
+                           begin
+                              the_Dimension := Integer (Value (resolved_c_integer_Expression (Self,
+                                                                                              array_dimension_Text,
+                                                                                              Self.integer_symbol_value_Map,
+                                                                                              Self.current_class_namespace_Prefix)));
+                           exception
+                              when others =>
+                                 log (  "Warning: unable to evaluate the array dimension '" & array_dimension_Text & "' of '" & the_type_Name
+                                      & "', whose length is taken to be unknown.");
+                           end;
+                        end if;
+
+                        c_type.add_array_Dimension (new_c_Array,
+                                                    upper_Bound => the_Dimension - 1);
+                     end;
                   end loop;
 
                   Self.register (new_c_Array, the_doh_type_Name);
@@ -2310,13 +2356,35 @@ is
       the_c_type_Pointer         : c_Type.view;
       the_c_type_pointer_Pointer : c_Type.view;
 
+      --  A type is known by its swig type and also, for convenience, by its unqualified name and the names of its
+      --  array, pointer and reference types. Two types of different scopes may share such a name (an enumeration
+      --  of the same name in each of two classes, say), in which case the name remains that of the first.
+      --
+      procedure enter_swig_Type (Key : in unbounded_String;   the_Type : in c_Type.view)
+      is
+      begin
+         if not Self.swig_type_Map_of_c_type.contains (Key)
+         then
+            Self.swig_type_Map_of_c_type.insert (Key, the_Type);
+         end if;
+      end enter_swig_Type;
+
+      procedure enter_Name (Key : in unbounded_String;   the_Type : in c_Type.view)
+      is
+      begin
+         if not Self.name_Map_of_c_type.contains (Key)
+         then
+            Self.name_Map_of_c_type.insert (Key, the_Type);
+         end if;
+      end enter_Name;
+
    begin
       strip_all_Qualifiers (the_swig_Type);
 
       if Self.swig_type_Map_of_c_type.Contains (+the_swig_Type)
-      then
-         dlog (+"Attempting to re-register the C type named '" & the_c_Type.Name & "' for swig type '" & to_String (the_swig_Type) & "'    is a new Type: " & Boolean'Image (is_a_new_Type));
-         raise Aborted with "Attempt to re-register the C type named '" & to_String (the_c_Type.Name) & "'.";
+      then   -- The swig type is already registered (such as by 'typedef struct foo {...} foo;').
+         dlog (+"The C type named '" & the_c_Type.Name & "' for swig type '" & to_String (the_swig_Type) & "' is already registered.");
+         return;
       end if;
 
       --  dlog ("");
@@ -2324,14 +2392,14 @@ is
 
       do_c_Type:
       begin
-         Self.swig_type_Map_of_c_type.insert (+the_swig_Type, the_c_Type);
+         enter_swig_Type (+the_swig_Type, the_c_Type);
 
          if unbounded_String' (+the_swig_Type) /= the_c_Type.Name
          then
-            Self.swig_type_Map_of_c_type.insert (the_c_Type.Name, the_c_Type);
+            enter_swig_Type (the_c_Type.Name, the_c_Type);
          end if;
 
-         Self.name_Map_of_c_type.insert (the_c_Type.Name, the_c_Type);
+         enter_Name (the_c_Type.Name, the_c_Type);
 
          if is_a_new_Type
          then
@@ -2356,14 +2424,14 @@ is
 
                the_c_type_Array.add_array_Dimension;
 
-               Self.swig_type_Map_of_c_type.insert (+array_swigType, the_c_type_Array);
+               enter_swig_Type (+array_swigType, the_c_type_Array);
 
                if unbounded_String'(+the_swig_Type) /= the_c_Type.Name
                then
-                  Self.swig_type_Map_of_c_type.insert ("a." & the_c_Type.Name, the_c_Type_Array);
+                  enter_swig_Type ("a." & the_c_Type.Name, the_c_Type_Array);
                end if;
 
-               Self.name_Map_of_c_type.insert (the_c_type_Array.Name, the_c_type_Array);
+               enter_Name (the_c_type_Array.Name, the_c_type_Array);
 
                if is_a_new_Type
                then
@@ -2381,14 +2449,14 @@ is
 
             --  dlog ("Adding C pointer type for swig type '" &  to_String (pointer_swigType) & "'    C pointer name is '" & (+the_c_type_Pointer.qualified_Name) & "'");
 
-            Self.swig_type_Map_of_c_type.insert (+pointer_swigType, the_c_type_Pointer);
+            enter_swig_Type (+pointer_swigType, the_c_type_Pointer);
 
             if unbounded_String'(+the_swig_Type) /= the_c_Type.Name
             then
-               Self.swig_type_Map_of_c_type.insert ("p." & the_c_Type.Name, the_c_Type_Pointer);
+               enter_swig_Type ("p." & the_c_Type.Name, the_c_Type_Pointer);
             end if;
 
-            Self.name_Map_of_c_type.insert (the_c_type_Pointer.Name, the_c_type_Pointer);
+            enter_Name (the_c_type_Pointer.Name, the_c_type_Pointer);
 
             declare   -- Register pointer to 'const'.
                the_pointer_to_const_swigType : constant doh_swigType
@@ -2396,14 +2464,14 @@ is
                                                                                const_String (to_Doh ("const")))));
                the_c_pointer_to_const_Name   : constant unbounded_String := "const " & the_c_Type.Name & "*";
             begin
-               Self.swig_type_Map_of_c_type.insert (+the_pointer_to_const_swigType, the_c_type_Pointer);
+               enter_swig_Type (+the_pointer_to_const_swigType, the_c_type_Pointer);
 
                if unbounded_String'(+the_swig_Type) /= the_c_Type.Name
                then
-                  Self.swig_type_Map_of_c_type.insert ("p.q(const)." & the_c_Type.Name, the_c_Type_Pointer);
+                  enter_swig_Type ("p.q(const)." & the_c_Type.Name, the_c_Type_Pointer);
                end if;
 
-               Self.name_Map_of_c_type.insert (the_c_pointer_to_const_Name, the_c_type_Pointer);
+               enter_Name (the_c_pointer_to_const_Name, the_c_type_Pointer);
             end;
 
             if is_a_new_Type
@@ -2415,14 +2483,14 @@ is
          declare   -- Add associated reference.
             reference_swigType : constant doh_swigType := doh_swigType (SwigType_add_reference (SwigType_Pointer (doh_copy (the_swig_Type))));
          begin
-            Self.swig_type_Map_of_c_type.insert (+reference_swigType, the_c_type_Pointer);
+            enter_swig_Type (+reference_swigType, the_c_type_Pointer);
 
             if unbounded_String'(+the_swig_Type) /= the_c_Type.Name
             then
-               Self.swig_type_Map_of_c_type.insert ("r." & the_c_Type.Name, the_c_Type_Pointer);
+               enter_swig_Type ("r." & the_c_Type.Name, the_c_Type_Pointer);
             end if;
 
-            Self.name_Map_of_c_type.insert (the_c_type.Name & "&", the_c_type_Pointer);
+            enter_Name (the_c_type.Name & "&", the_c_type_Pointer);
 
             declare   -- Register reference to 'const'.
                the_reference_to_const_swigType : constant doh_swigType
@@ -2430,14 +2498,14 @@ is
                                                                                  const_String (to_Doh ("const")))));
                the_c_reference_to_const_Name   : constant unbounded_String := "const " & the_c_Type.Name & "&";
             begin
-               Self.swig_type_Map_of_c_type.insert (+the_reference_to_const_swigType, the_c_type_Pointer);
+               enter_swig_Type (+the_reference_to_const_swigType, the_c_type_Pointer);
 
                if unbounded_String'(+the_swig_Type) /= the_c_Type.Name
                then
-                  Self.swig_type_Map_of_c_type.insert ("r.q(const)." & the_c_Type.Name & "&", the_c_type_Pointer);
+                  enter_swig_Type ("r.q(const)." & the_c_Type.Name & "&", the_c_type_Pointer);
                end if;
 
-               Self.name_Map_of_c_type.insert (the_c_reference_to_const_Name, the_c_type_Pointer);
+               enter_Name (the_c_reference_to_const_Name, the_c_type_Pointer);
             end;
          end;
       end do_level_1_indirection;
@@ -2455,14 +2523,14 @@ is
                                                                element_Type => the_c_type_Pointer);
             the_c_type_pointer_Array.add_array_Dimension;
 
-            Self.swig_type_Map_of_c_type.insert (+array_of_pointers_swigType, the_c_type_pointer_Array);
+            enter_swig_Type (+array_of_pointers_swigType, the_c_type_pointer_Array);
 
             if unbounded_String' (+the_swig_Type) /= the_c_Type.Name
             then
-               Self.swig_type_Map_of_c_type.insert ("a.p." & the_c_Type.Name, the_c_type_pointer_Array);
+               enter_swig_Type ("a.p." & the_c_Type.Name, the_c_type_pointer_Array);
             end if;
 
-            Self.name_Map_of_c_type.insert (the_c_type_pointer_Array.Name, the_c_type_pointer_Array);
+            enter_Name (the_c_type_pointer_Array.Name, the_c_type_pointer_Array);
 
             if is_a_new_Type
             then
@@ -2478,14 +2546,14 @@ is
             pointer_to_pointer_swigType : constant doh_swigType
               := doh_SwigType (swigtype_add_Pointer (swigtype_add_Pointer (SwigType_Pointer (doh_copy (the_swig_Type)))));
          begin
-            Self.swig_type_Map_of_c_type.insert (+pointer_to_pointer_swigType, the_c_type_pointer_Pointer);
+            enter_swig_Type (+pointer_to_pointer_swigType, the_c_type_pointer_Pointer);
 
             if unbounded_String' (+the_swig_Type) /= the_c_Type.Name
             then
-               Self.swig_type_Map_of_c_type.insert ("p.p." & the_c_Type.Name, the_c_type_pointer_Pointer);
+               enter_swig_Type ("p.p." & the_c_Type.Name, the_c_type_pointer_Pointer);
             end if;
 
-            Self.name_Map_of_c_type.insert (the_c_type_pointer_Pointer.Name, the_c_type_pointer_Pointer);
+            enter_Name (the_c_type_pointer_Pointer.Name, the_c_type_pointer_Pointer);
          end;
 
 
@@ -2495,14 +2563,14 @@ is
                                                                                                   const_String (to_Doh ("const"))))));
             the_c_pointer_to_pointer_to_const_Name   : constant unbounded_String   := "const " & the_c_Type.Name & "**";
          begin
-            Self.swig_type_Map_of_c_type.insert (+the_pointer_to_pointer_to_const_swigType, the_c_type_pointer_Pointer);
+            enter_swig_Type (+the_pointer_to_pointer_to_const_swigType, the_c_type_pointer_Pointer);
 
             if unbounded_String'(+the_swig_Type) /= the_c_Type.Name
             then
-               Self.swig_type_Map_of_c_type.insert ("p.p.q(const)." & the_c_Type.Name, the_c_type_pointer_Pointer);
+               enter_swig_Type ("p.p.q(const)." & the_c_Type.Name, the_c_type_pointer_Pointer);
             end if;
 
-            Self.name_Map_of_c_type.insert (the_c_pointer_to_pointer_to_const_Name, the_c_type_pointer_Pointer);
+            enter_Name (the_c_pointer_to_pointer_to_const_Name, the_c_type_pointer_Pointer);
          end;
 
          if is_a_new_Type
@@ -2532,14 +2600,14 @@ is
                                                                           element_Type => the_c_type_pointer_Pointer);
                the_c_type_pointer_pointer_Array.add_array_Dimension;
 
-               Self.swig_type_Map_of_c_type.insert (+array_of_pointer_pointers_swigType, the_c_type_pointer_pointer_Array);
+               enter_swig_Type (+array_of_pointer_pointers_swigType, the_c_type_pointer_pointer_Array);
 
                if unbounded_String' (+the_swig_Type) /= the_c_Type.Name
                then
-                  Self.swig_type_Map_of_c_type.insert ("a.p.p" & the_c_Type.Name, the_c_type_pointer_pointer_Array);
+                  enter_swig_Type ("a.p.p" & the_c_Type.Name, the_c_type_pointer_pointer_Array);
                end if;
 
-               Self.name_Map_of_c_type.insert (the_c_type_pointer_pointer_Array.Name, the_c_type_pointer_pointer_Array);
+               enter_Name (the_c_type_pointer_pointer_Array.Name, the_c_type_pointer_pointer_Array);
 
                if is_a_new_Type
                then
@@ -2551,14 +2619,14 @@ is
                pointer_to_pointer_pointer_swigType : constant doh_swigType
                  := doh_SwigType (swigtype_add_Pointer (swigtype_add_Pointer (swigtype_add_Pointer (SwigType_Pointer (doh_copy (the_swig_Type))))));
             begin
-               Self.swig_type_Map_of_c_type.insert (+pointer_to_pointer_pointer_swigType, the_c_type_pointer_pointer_Pointer);
+               enter_swig_Type (+pointer_to_pointer_pointer_swigType, the_c_type_pointer_pointer_Pointer);
 
                if unbounded_String'(+the_swig_Type) /= the_c_Type.Name
                then
-                  Self.swig_type_Map_of_c_type.insert ("p.p.p" & the_c_Type.Name, the_c_type_pointer_pointer_Pointer);
+                  enter_swig_Type ("p.p.p" & the_c_Type.Name, the_c_type_pointer_pointer_Pointer);
                end if;
 
-               Self.name_Map_of_c_type.insert (the_c_type_pointer_pointer_Pointer.Name, the_c_type_pointer_pointer_Pointer);
+               enter_Name (the_c_type_pointer_pointer_Pointer.Name, the_c_type_pointer_pointer_Pointer);
             end;
 
             if is_a_new_Type
@@ -3333,9 +3401,17 @@ is
          then
             resolved_array_Dimension := 0;
          else
-            resolved_array_Dimension := Integer (Value (resolved_c_integer_Expression (Self, array_dimension_Expression,
-                                                                                             Self.integer_symbol_value_Map,
-                                                                                             Self.current_class_namespace_Prefix)));
+            begin
+               resolved_array_Dimension := Integer (Value (resolved_c_integer_Expression (Self, array_dimension_Expression,
+                                                                                                Self.integer_symbol_value_Map,
+                                                                                                Self.current_class_namespace_Prefix)));
+            exception
+               when others =>   -- Such as a dimension which depends upon a template parameter, or the size of a string literal.
+                  resolved_array_Dimension := 0;
+
+                  log (  "Warning: unable to evaluate the array dimension '" & array_dimension_Expression & "' of '" & the_Variable.Name
+                       & "', whose length is taken to be unknown.");
+            end;
          end if;
 
          append (the_Variable.array_Bounds, resolved_array_Dimension - 1);
