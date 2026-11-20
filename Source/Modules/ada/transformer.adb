@@ -1,5 +1,6 @@
 with
      ada.Strings.unbounded,
+     ada.Characters.handling,
      ada_Package,
 
      ada_type.a_subtype,
@@ -435,8 +436,27 @@ is
                               while has_Element (Cursor)
                               loop
                                  declare
-                                    the_Literal      : constant enum_Literal     := Element (Cursor);
-                                    the_literal_Name : constant unbounded_String := ada_Utility.to_ada_Identifier (the_Literal.Name);
+                                    use ada.Characters.handling;
+
+                                    the_Literal : constant enum_Literal := Element (Cursor);
+
+                                    function ada_literal_Name return unbounded_String
+                                    --
+                                    --  C is case sensitive, so a literal may differ only in case from the name
+                                    --  of its own enumeration (such as 'enum Hello {hi, hello};'). The literal is then prefixed.
+                                    --
+                                    is
+                                       the_Name : constant unbounded_String := ada_Utility.to_ada_Identifier (the_Literal.Name);
+                                    begin
+                                       if to_Lower (to_String (the_Name)) = to_Lower (to_String (new_ada_Enumeration.Name))
+                                       then
+                                          return "the_" & the_Name;
+                                       else
+                                          return the_Name;
+                                       end if;
+                                    end ada_literal_Name;
+
+                                    the_literal_Name : constant unbounded_String := ada_literal_Name;
                                  begin
                                     if the_literal_value_Map_of_literal_Name.Contains (the_Literal.Value)
                                     then   -- Transform the duplicate valued literal to a constant enumeration variable.
