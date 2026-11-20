@@ -998,10 +998,12 @@ String *SwigType_templatesuffix(const SwigType *t) {
     if ((*c == '<') && (*(c + 1) == '(')) {
       int nest = 1;
       c++;
+      /* The template arguments are held as '<(...)>'. A '<' or '>' which is not part of such a bracket is an
+         operator in an argument which is an expression, as in 'X<((7>=4)?1+1:1)>'. */
       while (*c && nest) {
-	if (*c == '<')
+	if ((*c == '<') && (*(c + 1) == '('))
 	  nest++;
-	if (*c == '>')
+	if ((*c == '>') && (*(c - 1) == ')'))
 	  nest--;
 	c++;
       }
@@ -1077,10 +1079,12 @@ String *SwigType_templateargs(const SwigType *t) {
       int nest = 1;
       start = c;
       c++;
+      /* The template arguments are held as '<(...)>'. A '<' or '>' which is not part of such a bracket is an
+         operator in an argument which is an expression, as in 'X<((7>=4)?1+1:1)>'. */
       while (*c && nest) {
-	if (*c == '<')
+	if ((*c == '<') && (*(c + 1) == '('))
 	  nest++;
-	if (*c == '>')
+	if ((*c == '>') && (*(c - 1) == ')'))
 	  nest--;
 	c++;
       }
