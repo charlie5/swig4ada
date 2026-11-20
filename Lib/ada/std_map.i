@@ -23,7 +23,7 @@
 
 namespace std {
 
-    template<class K, class T> class map {
+    template<class K, class T, class C = std::less<K> > class map {
         // add typemaps here
       public:
 
