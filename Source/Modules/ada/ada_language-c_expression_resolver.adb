@@ -64,18 +64,22 @@ is
 
       declare
          new_expression_Type : Unbounded_String := expression_Type;
+         space_Index         : Integer          := Index (new_expression_Type, " ");
       begin
-         ada.strings.Unbounded.Replace_Element (Source => new_expression_Type,
-                                                Index  => Index (new_expression_Type, " "),
-                                                By     => '_');
+         if space_Index > 0
+         then
+            ada.strings.Unbounded.Replace_Element (Source => new_expression_Type,
+                                                   Index  => space_Index,
+                                                   By     => '_');
+         end if;
 
          if contains (known_Symbols,  "sizeof_" & new_expression_Type)
          then
             return Natural (Value (Element (known_Symbols,  "sizeof_" & new_expression_Type)));
          else
-            dlog (+"Cannot determine size of " & new_expression_Type);
+            log (+"Cannot determine size of " & new_expression_Type);
             log ("Please add the following line to your swig interface file ('.i'), where <n> is the appropriate size");
-            dlog ( "%constant   int   sizeof_" & new_expression_Type & " = <n>;");
+            log ( "%constant   int   sizeof_" & new_expression_Type & " = <n>;");
 
             raise required_sizeof_not_defined;
          end if;
