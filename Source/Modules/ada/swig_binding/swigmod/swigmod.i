@@ -9,7 +9,13 @@
 
 #include "swigtree.h"
 #include "swigopt.h"
+
+// The Ada module binds the protected members of the 'Language' class, so the wrappers need access to them.
+//
+#define protected public
 #include "swigmod.h"
+#undef protected
+
 #include "swigfile.h"
 %}
 
