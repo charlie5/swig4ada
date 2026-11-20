@@ -1968,8 +1968,9 @@ is
       strip_all_Qualifiers (doh_Item (swig_Type));
       Self.current_c_Node := doh_Node (the_Node);
 
-      if Self.is_smart_Pointer = 0
-      then    -- Don't add a new member variable during smart pointer resolution.
+      if         Self.is_smart_Pointer = 0                       -- Don't add a new member variable during smart pointer resolution.
+        and then Attribute (the_Node, "feature:extend") = ""     -- Nor one added by '%extend', which is not a data member of the class.
+      then
          declare
             use c_Variable;
             new_Variable : c_Variable.view;

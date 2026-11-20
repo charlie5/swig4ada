@@ -484,7 +484,7 @@ is
 
             --  std::string
             --
-            the_ada_Type := ada_type.composite.a_record.new_Item (Self.Package_swig_pointers,  +"std_string").all'Access;
+            the_ada_Type := ada_type.composite.a_record.new_Item (Self.Package_swig,  +"std_String").all'Access;     -- Declared in 'swig', not in 'swig.pointers'.
             Self.name_Map_of_ada_type.insert (the_ada_Type.qualified_Name, the_ada_Type);
          end package_Interfaces_C_extensions;
 
@@ -587,7 +587,7 @@ is
 
          begin
             add_associated_swig_package_Types_for (Self.fetch_ada_Type (+"swig.void_ptr"),             c_type_name => "void_ptr");
-            add_associated_swig_package_Types_for (Self.fetch_ada_Type (+"swig.pointers.std_string"),  c_type_name => "std::string");
+            add_associated_swig_package_Types_for (Self.fetch_ada_Type (+"swig.std_String"),           c_type_name => "std::string");
 
             add_associated_swig_package_Types_for (Self.fetch_ada_Type (+"interfaces.c.size_t"),       c_type_name => "size_t");
             add_associated_swig_package_Types_for (Self.fetch_ada_Type (+"interfaces.c.ptrdiff_t"),    c_type_name => "ptrdiff_t");
@@ -696,7 +696,7 @@ is
          -------------------
          --  C 'std::string'
          --
-         Self.associate (Self.fetch_ada_Type (+"swig.pointers.std_string"),                 Self.fetch_c_Type (+"std::string"));
+         Self.associate (Self.fetch_ada_Type (+"swig.std_String"),                          Self.fetch_c_Type (+"std::string"));
 
          Self.associate (Self.fetch_ada_Type (+"swig.std_string_Array"),                    Self.fetch_c_Type (+"std::string[]"));
          Self.associate (Self.fetch_ada_Type (+"swig.pointers.std_string_Pointer"),         Self.fetch_c_Type (+"std::string*" ));
@@ -1003,7 +1003,7 @@ is
          --
          Self.associate (Self.fetch_ada_Type (+"interfaces.c.wchar_t"),                  Self.fetch_c_Type (+"wchar_t"));
 
-         Self.associate (Self.fetch_ada_Type (+"swig.wchar_t_Array"),                    Self.fetch_c_Type (+"wchar_t[]"));
+         Self.associate (Self.fetch_ada_Type (+"interfaces.c.wchar_array"),              Self.fetch_c_Type (+"wchar_t[]"));
          Self.associate (Self.fetch_ada_Type (+"swig.pointers.wchar_t_Pointer"),         Self.fetch_c_Type (+"wchar_t*" ));
 
          Self.associate (Self.fetch_ada_Type (+"swig.pointers.wchar_t_pointer_Array"),   Self.fetch_c_Type (+"wchar_t*[]"));

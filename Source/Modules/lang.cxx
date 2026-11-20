@@ -1264,8 +1264,9 @@ int Language::memberfunctionHandler(Node *n) {
   }
   // Set up the type for the cast to this class for use when wrapping const director (virtual) methods.
   // Note: protected director methods or when allprotected mode turned on.
+  // There is no director class in a language module without director support (such as Ada).
   String *director_type = 0;
-  if (!is_public(n) && (is_member_director(CurrentClass, n) || GetFlag(n, "explicitcall") || isNonVirtualProtectedAccess(n))) {
+  if (DirectorClassName && !is_public(n) && (is_member_director(CurrentClass, n) || GetFlag(n, "explicitcall") || isNonVirtualProtectedAccess(n))) {
     director_type = Copy(DirectorClassName);
     String *qualifier = Getattr(n, "qualifier");
     if (qualifier)
