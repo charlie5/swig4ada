@@ -2,6 +2,7 @@
 --
 with interfaces.C;
 with interfaces.C.Pointers;
+with System;
 
 package DOHs.Pointers is
 
@@ -9,7 +10,7 @@ package DOHs.Pointers is
    --
    package C_DOH_Pointers is new interfaces.c.Pointers
      (Index         => interfaces.c.size_t, Element => DOHs.DOH,
-      element_Array => DOHs.DOH_Array, default_Terminator => 0);
+      element_Array => DOHs.DOH_Array, default_Terminator => system.Null_Address);
 
    subtype DOH_Pointer is C_DOH_Pointers.Pointer;
 
@@ -22,7 +23,7 @@ package DOHs.Pointers is
    --
    package C_DohFuncPtr_t_Pointers is new interfaces.c.Pointers
      (Index         => interfaces.c.size_t, Element => DOHs.DohFuncPtr_t,
-      element_Array => DOHs.DohFuncPtr_t_Array, default_Terminator => 0);
+      element_Array => DOHs.DohFuncPtr_t_Array, default_Terminator => system.Null_Address);
 
    subtype DohFuncPtr_t_Pointer is C_DohFuncPtr_t_Pointers.Pointer;
 

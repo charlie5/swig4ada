@@ -2,6 +2,7 @@
 --
 with interfaces.C;
 with interfaces.C.Pointers;
+with System;
 
 package swigmod.Pointers is
 
@@ -10,7 +11,7 @@ package swigmod.Pointers is
    package C_DoxygenTranslator_Pointers is new interfaces.c.Pointers
      (Index => interfaces.c.size_t, Element => swigmod.DoxygenTranslator,
       element_Array      => swigmod.DoxygenTranslator_Array,
-      default_Terminator => 0);
+      default_Terminator => system.Null_Address);
 
    subtype DoxygenTranslator_Pointer is C_DoxygenTranslator_Pointers.Pointer;
 

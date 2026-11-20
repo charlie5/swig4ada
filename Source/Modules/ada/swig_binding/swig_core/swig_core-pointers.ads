@@ -2,6 +2,7 @@
 --
 with interfaces.C;
 with interfaces.C.Pointers;
+with System;
 
 package swig_Core.Pointers is
 
@@ -9,7 +10,7 @@ package swig_Core.Pointers is
    --
    package C_String_Pointers is new interfaces.c.Pointers
      (Index         => interfaces.c.size_t, Element => swig_Core.String,
-      element_Array => swig_Core.String_Array, default_Terminator => 0);
+      element_Array => swig_Core.String_Array, default_Terminator => system.null_Address);
 
    subtype String_Pointer is C_String_Pointers.Pointer;
 
@@ -24,7 +25,7 @@ package swig_Core.Pointers is
    --
    package C_Hash_Pointers is new interfaces.c.Pointers
      (Index         => interfaces.c.size_t, Element => swig_Core.Hash,
-      element_Array => swig_Core.Hash_Array, default_Terminator => 0);
+      element_Array => swig_Core.Hash_Array, default_Terminator => system.null_Address);
 
    subtype Hash_Pointer is C_Hash_Pointers.Pointer;
 
@@ -39,7 +40,7 @@ package swig_Core.Pointers is
    --
    package C_List_Pointers is new interfaces.c.Pointers
      (Index         => interfaces.c.size_t, Element => swig_Core.List,
-      element_Array => swig_Core.List_Array, default_Terminator => 0);
+      element_Array => swig_Core.List_Array, default_Terminator => system.null_Address);
 
    subtype List_Pointer is C_List_Pointers.Pointer;
 
@@ -55,7 +56,7 @@ package swig_Core.Pointers is
    package C_String_or_char_Pointers is new interfaces.c.Pointers
      (Index => interfaces.c.size_t, Element => swig_Core.String_or_char,
       element_Array      => swig_Core.String_or_char_Array,
-      default_Terminator => 0);
+      default_Terminator => system.null_Address);
 
    subtype String_or_char_Pointer is C_String_or_char_Pointers.Pointer;
 
@@ -70,7 +71,7 @@ package swig_Core.Pointers is
    --
    package C_File_Pointers is new interfaces.c.Pointers
      (Index         => interfaces.c.size_t, Element => swig_Core.File,
-      element_Array => swig_Core.File_Array, default_Terminator => 0);
+      element_Array => swig_Core.File_Array, default_Terminator => system.null_Address);
 
    subtype File_Pointer is C_File_Pointers.Pointer;
 
@@ -85,7 +86,7 @@ package swig_Core.Pointers is
    --
    package C_Parm_Pointers is new interfaces.c.Pointers
      (Index         => interfaces.c.size_t, Element => swig_Core.Parm,
-      element_Array => swig_Core.Parm_Array, default_Terminator => 0);
+      element_Array => swig_Core.Parm_Array, default_Terminator => system.null_Address);
 
    subtype Parm_Pointer is C_Parm_Pointers.Pointer;
 
@@ -100,7 +101,7 @@ package swig_Core.Pointers is
    --
    package C_ParmList_Pointers is new interfaces.c.Pointers
      (Index         => interfaces.c.size_t, Element => swig_Core.ParmList,
-      element_Array => swig_Core.ParmList_Array, default_Terminator => 0);
+      element_Array => swig_Core.ParmList_Array, default_Terminator => system.null_Address);
 
    subtype ParmList_Pointer is C_ParmList_Pointers.Pointer;
 
@@ -115,7 +116,7 @@ package swig_Core.Pointers is
    --
    package C_Node_Pointers is new interfaces.c.Pointers
      (Index         => interfaces.c.size_t, Element => swig_Core.Node,
-      element_Array => swig_Core.Node_Array, default_Terminator => 0);
+      element_Array => swig_Core.Node_Array, default_Terminator => system.null_Address);
 
    subtype Node_Pointer is C_Node_Pointers.Pointer;
 
@@ -130,7 +131,7 @@ package swig_Core.Pointers is
    --
    package C_Symtab_Pointers is new interfaces.c.Pointers
      (Index         => interfaces.c.size_t, Element => swig_Core.Symtab,
-      element_Array => swig_Core.Symtab_Array, default_Terminator => 0);
+      element_Array => swig_Core.Symtab_Array, default_Terminator => system.null_Address);
 
    subtype Symtab_Pointer is C_Symtab_Pointers.Pointer;
 
@@ -145,7 +146,7 @@ package swig_Core.Pointers is
    --
    package C_Typetab_Pointers is new interfaces.c.Pointers
      (Index         => interfaces.c.size_t, Element => swig_Core.Typetab,
-      element_Array => swig_Core.Typetab_Array, default_Terminator => 0);
+      element_Array => swig_Core.Typetab_Array, default_Terminator => system.null_Address);
 
    subtype Typetab_Pointer is C_Typetab_Pointers.Pointer;
 
@@ -160,7 +161,7 @@ package swig_Core.Pointers is
    --
    package C_SwigType_Pointers is new interfaces.c.Pointers
      (Index         => interfaces.c.size_t, Element => swig_Core.SwigType,
-      element_Array => swig_Core.SwigType_Array, default_Terminator => 0);
+      element_Array => swig_Core.SwigType_Array, default_Terminator => system.null_Address);
 
    subtype SwigType_Pointer is C_SwigType_Pointers.Pointer;
 
