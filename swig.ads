@@ -41,10 +41,17 @@ is
 
    subtype bool                is C.plain_char;
 
+   --  A C++ 'std::string', as laid out by GNU libstdc++ since its C++11 ABI (GCC 5): a pointer to the
+   --  characters, the length, and a buffer which holds a short string or else the capacity.
+   --
    type std_String is
       record
-         M_dataplus : swig.void_ptr;    -- Which is a subtype of 'system.Address'.
+         M_dataplus      : swig.void_ptr;    -- Which is a subtype of 'system.Address'.
+         M_string_length : C.size_t;
+         M_local_buf     : C.char_array (0 .. 15);
       end record;
+
+   pragma Convention (C, std_String);
 
 
    ---------------------
