@@ -7,7 +7,6 @@ with
 package body doh_Support
 is
    use DOHs.Binding,
-       swig_Core,
        swig_Core.Binding,
        Interfaces,
        interfaces.C.strings;

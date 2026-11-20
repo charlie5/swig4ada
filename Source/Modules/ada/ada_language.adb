@@ -41,7 +41,6 @@ is
        swigMod.Binding,
        swigMod.Dispatcher,
 
-       DOHs,
        DOHs.Pointers,
        DOHs.Binding,
 

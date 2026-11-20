@@ -219,8 +219,7 @@ is
       end if;
 
       declare
-         use swig_Core,
-             swig_Core.Binding,
+         use swig_Core.Binding,
              swig_Core.Pointers,
              swig_Core.Pointers.C_Node_Pointers;
 

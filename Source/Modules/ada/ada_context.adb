@@ -140,8 +140,7 @@ is
 
 
       declare
-         use ada_Package.Vectors,
-             ada.Containers;
+         use ada_Package.Vectors;
 
          the_Package              : ada_Package.view;
          the_withing_Requirements : a_packages_withing_Requirements;
