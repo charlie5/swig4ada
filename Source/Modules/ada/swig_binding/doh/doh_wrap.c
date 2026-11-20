@@ -1379,7 +1379,7 @@ DllExport DohIterator SWIGSTDCALL Ada_DohFirst (
 
 
 DllExport DohIterator SWIGSTDCALL Ada_DohNext (
-  DohIterator a_arg1
+  DohIterator * a_arg1
   )
 {
   DohIterator jresult ;
@@ -1388,7 +1388,7 @@ DllExport DohIterator SWIGSTDCALL Ada_DohNext (
   DohIterator *argp1 ;
   
   
-  argp1 = (DohIterator *) &a_arg1; 
+  argp1 = (DohIterator *) a_arg1; 
   
   arg1 = *argp1; 
   
@@ -2320,7 +2320,7 @@ DllExport DohIterator SWIGSTDCALL Ada_doh_First (
 
 
 DllExport DohIterator SWIGSTDCALL Ada_doh_Next (
-  DohIterator a_arg1
+  DohIterator * a_arg1
   )
 {
   DohIterator jresult ;
@@ -2329,7 +2329,7 @@ DllExport DohIterator SWIGSTDCALL Ada_doh_Next (
   DohIterator *argp1 ;
   
   
-  argp1 = (DohIterator *) &a_arg1; 
+  argp1 = (DohIterator *) a_arg1; 
   
   arg1 = *argp1; 
   
@@ -2348,7 +2348,7 @@ DllExport DohIterator SWIGSTDCALL Ada_doh_Next (
 
 
 DllExport void* SWIGSTDCALL Ada_get_Item (
-  DohIterator a_arg1
+  DohIterator * a_arg1
   )
 {
   void* jresult ;
@@ -2357,7 +2357,7 @@ DllExport void* SWIGSTDCALL Ada_get_Item (
   DohIterator *argp1 ;
   
   
-  argp1 = (DohIterator *) &a_arg1; 
+  argp1 = (DohIterator *) a_arg1; 
   
   arg1 = *argp1; 
   

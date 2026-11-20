@@ -33,7 +33,7 @@ package swigmod.Dispatcher is
 
    -- Pointer
    --
-   type Pointer is access all swigmod.Dispatcher.Item;
+   type Pointer is access all swigmod.Dispatcher.Item'Class;
 
    -- Pointer_Array
    --

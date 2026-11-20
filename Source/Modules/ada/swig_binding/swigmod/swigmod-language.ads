@@ -55,7 +55,7 @@ package swigmod.Language is
 
    -- Pointer
    --
-   type Pointer is access all swigmod.Language.Item;
+   type Pointer is access all swigmod.Language.Item'Class;
 
    -- Pointer_Array
    --
