@@ -2843,6 +2843,8 @@ is
 
    function to_ada_subProgram (Self : access Item;   the_c_Function : in c_Function.view) return ada_subProgram.View
    is
+      use ada.Exceptions;
+
       the_ada_subProgram : ada_subProgram.view;
    begin
       the_ada_subProgram := new_ada_subProgram (ada_Utility.to_ada_Identifier (the_c_Function.Name),
@@ -2856,12 +2858,27 @@ is
       the_ada_subProgram.is_Destructor      := the_c_Function.is_Destructor;
 
       return the_ada_subProgram;
+
+   exception
+      when E : constraint_Error =>
+         dlog ("");
+         dlog ("********************************************************");
+         dlog ("ada_Language.to_ada_subProgram");
+         dlog (exception_Information (E));
+         dlog ("c_Function name:        '" & the_c_Function.Name             & "'");
+         dlog ("c_Function return type: '" & the_c_Function.return_Type.Name & "'");
+         dlog ("*********************************************************");
+         dlog ("");
+
+         raise;
    end to_ada_subProgram;
 
 
 
    function to_ada_Variable (Self : access Item;   the_c_Variable : in c_Variable.view) return ada_Variable.view
    is
+      use ada.Exceptions;
+
       the_ada_variable : ada_Variable.view;
    begin
       the_ada_variable := new_ada_Variable (ada_Utility.to_ada_Identifier       (the_c_Variable.Name),
@@ -2874,6 +2891,19 @@ is
       end loop;
 
       return the_ada_Variable;
+
+   exception
+      when E : constraint_Error =>
+         dlog ("");
+         dlog ("********************************************************");
+         dlog ("ada_Language.to_ada_Variable");
+         dlog (exception_Information (E));
+         dlog ("c_Variable name: '" & the_c_Variable.Name         & "'");
+         dlog ("c_Variable type: '" & the_c_Variable.my_Type.Name & "'");
+         dlog ("*********************************************************");
+         dlog ("");
+
+         raise;
    end to_ada_Variable;
 
 
@@ -3035,6 +3065,8 @@ is
                dlog ("c_Parameter type: '" & the_c_Parameter.my_Type.Name & "'");
                dlog ("*********************************************************");
                dlog ("");
+
+               raise;
          end;
 
          next (Cursor);
