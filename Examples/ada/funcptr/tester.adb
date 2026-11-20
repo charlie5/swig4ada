@@ -1,5 +1,6 @@
 
-with fun_example.Binding; use fun_example.Binding;
+with function_Example.Binding;
+use  function_Example.Binding;
 
 with interfaces.C;   use interfaces.C;
 with ada.Text_IO;    use ada.Text_IO;

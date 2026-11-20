@@ -1,3 +1,7 @@
+#!/bin/bash
+
+clear
+
 echo
 echo removing prior build
 
@@ -5,31 +9,26 @@ rm -f ./tester
 rm *.o
 rm *.ali
 rm *.a
+rm *.ads
+
 
 
 echo
 echo generating bindings
 
-swig_gnat  -gnat   example.i
-
-
+../../../ada-build/swig4ada  -ada   example.i
 
 
 echo
 echo pretty printing ...
 
-gnatpp  -rnb  -I../../..      *.ads    -cargs -gnatX
-
-
+gnatpp  -rnb  -I../../..  *.ads
 
 
 echo
 echo compiling
 
-gprmake  -P   test_example.gpr 
-
-
-
+gprbuild  -P   test_example.gpr 
 
 
 
@@ -37,3 +36,25 @@ echo
 echo running tester ...
 
 ./tester
+
+
+echo
+echo cleaning up
+
+rm *.a
+rm *.o
+rm *.d
+rm *.ali
+rm *.stderr
+rm *.stdout
+rm *.bexch
+rm *.deps
+rm b__*
+
+
+
+gnatpp  -rnb  -I../../..  *.ads
+
+
+echo
+echo Done.
