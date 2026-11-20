@@ -227,6 +227,11 @@ is
             if in_cpp_Mode
             then   -- The link symbol is the wrapper name, which already carries the 'Ada_' prefix.
                append (the_Source,  ", """     & Self.member_function_link_Symbol_for (in_cpp_Mode) &  """");
+
+            elsif Self.link_Symbol /= ""
+            then   -- Ditto. The Ada name cannot be used, as it may have been renamed or lack its class prefix.
+               append (the_Source,  ", """     & Self.link_Symbol &  """");
+
             else
                append (the_Source,  ", ""Ada_" & Self.member_function_link_Symbol_for (in_cpp_Mode) &  """");
             end if;
