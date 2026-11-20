@@ -36,18 +36,18 @@ cd Examples/ada/class && ./builder
 
 `Examples/ada/current_c_bug` and `current_cpp_bug` are scratch areas for reproducing the problem currently being worked on (edit `example.i`/`example.h`, run `./builder`; `./cleaner` removes generated files).
 
-**Test suite** — `Examples/ada/testsuite` runs the generator over the upstream SWIG `Examples/test-suite/*.i` files. It needs the `lace` Ada library project.
+**Test suite** — `Examples/ada/testsuite` runs the generator over the upstream SWIG `Examples/test-suite/*.i` files. It needs the `lace_environ` project of the `lace` Ada library (which in turn needs `aShell` and `lib_florist`); their project directories must be on `GPR_PROJECT_PATH` (lace: every directory holding a `.gpr` under `/eden/forge/component/lace`; aShell: `/eden/forge/component/aShell/library`).
 
 ```sh
 cd Examples/ada/testsuite
 gprbuild -P testsuite.gpr
-./launch_testsuite        # output lands in ./generated
+./launch_testsuite        # output lands in ./generated; a full run takes a few minutes
 ./do_tidy.sh              # removes *_wrap.c/cxx left in Examples/test-suite
 ```
 
 - The test list is hard coded in `source/launch_testsuite.adb` as `generate ("x.i")` / `generate ("x.i", use_CPP => True)` calls, grouped by the `do_C`, `do_Cxx`, `do_uncompilable_*`, `do_broken_*` flags. Commented out cases carry a note saying why.
-- To run a single test case, put a `generate (...)` call followed by `return;` at the top of the main body (the file is commonly left in this state — check before assuming a full run) and rebuild.
-- A test only checks that generation does not raise an unhandled exception and that `gnatpp` finds no syntax errors; failures are saved as `generated/<module>-generator.log` and `generated/<module>-pretty_print.log`. Nothing is compiled or executed.
+- To run a single test case, put a `generate (...)` call followed by `return;` at the top of the main body (check the file is not already in this state before assuming a full run) and rebuild.
+- A test only checks that generation does not raise an unhandled exception and that `gnatpp` finds no syntax errors; failures are saved as `generated/<module>-generator.log` and `generated/<module>-pretty_print.log`. Nothing is compiled or executed. Baseline (2026-11-20, binary built October 2024): all 197 enabled cases generate without either failure.
 
 ## Architecture
 
