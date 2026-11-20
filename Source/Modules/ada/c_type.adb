@@ -1242,12 +1242,16 @@ is
 
 
    function  is_interface_Type (Self : access Item) return Boolean
+   --
+   --  A C++ class which has only pure virtual functions and no data members is not modelled as an Ada interface.
+   --  An interface is laid out as a secondary base of the classes which derive from it, which matches C++ only
+   --  when the class is used as a second or later base class, and multiple inheritance is not supported.
+   --  Such a class is modelled as an abstract tagged type, like any other abstract class.
+   --
    is
+      pragma Unreferenced (Self);
    begin
-      return     Self.c_type_Kind                   = c_Class
-        and then Self.my.component_Count            = 0
-        and then Self.virtual_member_function_Count > 0
-        and then Self.virtual_member_function_Count = pure_virtual_member_function_Count (Self);
+      return False;
    end is_interface_Type;
 
 

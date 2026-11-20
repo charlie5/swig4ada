@@ -181,8 +181,11 @@ is
       union_variant_type_Name : constant unbounded_String := Self.Name & "_variant";
       base_Classes            : constant ada_type.Vector  := Self.base_Classes;
    begin
-      if Self.is_interface_Type then
-         return "";
+      if Self.is_interface_Type
+      then
+         return to_String (  NL & "type " & Self.Name & " is limited interface;"
+                           & NL
+                           & NL & "   pragma Convention (CPP, " & Self.Name & ");");
       end if;
 
       if Self.requires_Interfaces_C_Int_use
