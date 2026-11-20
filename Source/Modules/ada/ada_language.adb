@@ -2238,7 +2238,7 @@ is
       if Self.swig_type_Map_of_c_type.Contains (+the_swig_Type)
       then
          dlog (+"Attempting to re-register the C type named '" & the_c_Type.Name & "' for swig type '" & to_String (the_swig_Type) & "'    is a new Type: " & Boolean'Image (is_a_new_Type));
-         raise Aborted;
+         raise Aborted with "Attempt to re-register the C type named '" & to_String (the_c_Type.Name) & "'.";
       end if;
 
       --  dlog ("");

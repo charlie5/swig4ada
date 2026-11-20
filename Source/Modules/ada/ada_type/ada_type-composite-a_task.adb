@@ -8,7 +8,7 @@ is
    function required_Types (Self : access Item)  return ada_Type.views
    is
    begin
-      raise Program_Error; -- todo
+      raise Program_Error with "Not yet implemented."; -- todo
       return (1 .. 0 => <>);
    end required_Types;
 
@@ -17,7 +17,7 @@ is
    function context_required_Types (Self : access Item)  return ada_Type.views
    is
    begin
-      raise Program_Error; -- todo
+      raise Program_Error with "Not yet implemented."; -- todo
       return (1 .. 0 => <>);
    end context_required_Types;
 
@@ -27,7 +27,7 @@ is
                                               Depth  : in Natural) return Boolean
    is
    begin
-      raise Program_Error; -- todo
+      raise Program_Error with "Not yet implemented."; -- todo
       return False;
    end depends_on;
 
@@ -37,7 +37,7 @@ is
                                                        Depth  : in Natural) return Boolean
    is
    begin
-      raise Program_Error; -- todo
+      raise Program_Error with "Not yet implemented."; -- todo
       return False;
    end depends_directly_on;
 
@@ -47,7 +47,7 @@ is
                                               Depth     : in     Natural) return Boolean
    is
    begin
-      raise Program_Error; -- todo
+      raise Program_Error with "Not yet implemented."; -- todo
       return False;
    end depends_on;
 

@@ -596,7 +596,7 @@ is
    is
       use type c_Declarable.view;
    begin
-      raise Program_Error;   -- todo: Resolve this.
+      raise Program_Error with "Not yet implemented.";   -- todo: Resolve this.
 
       case Self.my.c_type_Kind is
 

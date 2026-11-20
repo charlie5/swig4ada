@@ -236,7 +236,7 @@ is
          end loop;
       end;
 
-      raise Program_Error;  -- Should never arrive here.
+      raise Program_Error with "No owner module found.";  -- Should never arrive here.
    end owner_module_Name_of;
 
 

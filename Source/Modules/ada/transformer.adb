@@ -541,7 +541,7 @@ is
                                  when Constraint_Error =>
                                     dlog (+"");
                                     dlog ("Unable to add '" & new_ada_Array.qualified_Name & "'into the Ada type map, as it already exists there.");
-                                    raise ada_Language.Aborted;
+                                    raise ada_Language.Aborted with "Unable to add '" & to_String (new_ada_Array.qualified_Name) & "' into the Ada type map, as it already exists there.";
                               end;
                               c_type_Map_of_ada_type.insert (the_c_Type, new_ada_Array.all'Access);
                            end;

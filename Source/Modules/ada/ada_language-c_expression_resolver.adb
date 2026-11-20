@@ -81,7 +81,7 @@ is
             log ("Please add the following line to your swig interface file ('.i'), where <n> is the appropriate size");
             log ( "%constant   int   sizeof_" & new_expression_Type & " = <n>;");
 
-            raise required_sizeof_not_defined;
+            raise required_sizeof_not_defined with "sizeof_" & to_String (new_expression_Type);
          end if;
       end;
    end resolved_sizeof_Expression;
@@ -335,7 +335,7 @@ is
          return Element (First (Pad));
       else
          dlog (+"C expression evaluation failed !");
-         raise Constraint_Error;
+         raise Constraint_Error with "C expression evaluation failed.";
       end if;
    end Result_of;
 
