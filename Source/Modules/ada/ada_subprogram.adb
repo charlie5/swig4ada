@@ -196,7 +196,17 @@ is
 
       elsif Self.is_Destructor
       then
-         link_Symbol := "_ZN" & Image (Length (declaration_Package.Name)) & declaration_Package.Name & "D1Ev";
+         --  A virtual destructor has two entries in the C++ vtable. 'destruct_0' is the complete object destructor (D1),
+         --  and 'destruct' the deleting destructor (D0), which also frees the object. A destructor which is not virtual
+         --  has no deleting variant.
+         --
+         if         Self.is_Virtual
+           and then Self.Name = "destruct"
+         then
+            link_Symbol := "_ZN" & Image (Length (declaration_Package.Name)) & declaration_Package.Name & "D0Ev";
+         else
+            link_Symbol := "_ZN" & Image (Length (declaration_Package.Name)) & declaration_Package.Name & "D1Ev";
+         end if;
 
          append (the_Source,   NL & "   pragma Import (CPP, " & unique_function_Name & ", """ & link_Symbol & """);");
 
