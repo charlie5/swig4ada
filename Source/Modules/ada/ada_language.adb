@@ -1475,6 +1475,21 @@ is
          new_c_Class     := Self.swig_type_Map_of_c_type.Element (+DOH_Pointer (node_Type));      -- Get the 'opaque' c type.
          new_c_Class.all := c_Type.c_Class_construct (Namespace => Self.current_c_Namespace,      -- Morph it to a c class.
                                                       Name      => new_c_Class.Name);
+
+         --  A class may be declared in an imported module and defined in the module which imports it. It remains
+         --  a class of the module which declared it, whose own binding knows it only as an incomplete class, so
+         --  the specification of its package is generated along with those of the module which defines it.
+         --
+         declare
+            use type swig_Module.swig_Module_view;
+         begin
+            if         Self.current_Module = Self.Module_top'Access
+              and then not Self.Module_top.C.new_c_Types.contains (new_c_Class)
+            then
+               Self.imported_Classes_defined_here.append (new_c_Class);
+               new_c_Class.is_defined_in_main_Module;
+            end if;
+         end;
       else
          new_c_Class := c_Type.new_c_Class (Namespace => Self.current_c_Namespace,
                                             Name      => +class_Name);
@@ -1486,6 +1501,24 @@ is
       then
          new_c_Class.is_Union;
       end if;
+
+      --  Note whether the class declares a virtual member, as the member functions
+      --  of a class in an imported module are not collected.
+      --
+      declare
+         the_Child : Node_Pointer := first_Child (the_Node);
+      begin
+         while the_Child /= null
+         loop
+            if check_Attribute (the_Child, "storage", "virtual")
+            then
+               new_c_Class.has_virtual_Members;
+               exit;
+            end if;
+
+            the_Child := next_Sibling (the_Child);
+         end loop;
+      end;
 
       Self.c_class_Stack    .append (new_C_Class);
       Self.c_namespace_Stack.append (new_C_Class.nameSpace.all'Access);
@@ -2881,6 +2914,14 @@ is
          return the_Name;
       end if;
    end get_overloaded_Name;
+
+
+
+   function main_Package (Self : access Item) return ada_Package.view
+   is
+   begin
+      return Self.Module_top.Ada.Package_top;
+   end main_Package;
 
 
 

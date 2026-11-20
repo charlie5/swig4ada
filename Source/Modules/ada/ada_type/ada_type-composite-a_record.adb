@@ -316,6 +316,14 @@ is
 
 
 
+   procedure has_virtual_Members (Self : access Item)
+   is
+   begin
+      Self.has_virtual_Members := True;
+   end has_virtual_Members;
+
+
+
    function virtual_member_function_Count (Self : access Item) return Natural
    is
       use ada_Subprogram.Vectors;
@@ -468,6 +476,12 @@ is
       use ada_Type.Vectors;
       the_Count : Natural := virtual_member_function_Count (Self);
    begin
+      if         the_Count = 0
+        and then Self.has_virtual_Members
+      then
+         the_Count := 1;
+      end if;
+
       for Each in 1 .. Natural (Length (Self.base_Classes))
       loop
          the_Count := the_Count + ada_Type.composite.a_record.view (Self.base_Classes.Element (Each)).total_virtual_member_function_Count;

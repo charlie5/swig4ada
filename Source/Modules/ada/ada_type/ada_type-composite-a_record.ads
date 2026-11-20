@@ -44,6 +44,7 @@ is
 
    function  is_Union       (Self : access Item) return Boolean;
    procedure is_Union       (Self : access Item);
+   procedure has_virtual_Members (Self : access Item);
 
    function  virtual_member_function_Count       (Self : access Item) return Natural;
    function  pure_virtual_member_function_Count  (Self : access Item) return Natural;
@@ -98,6 +99,7 @@ private
          component_Count : Natural := 0;
 
          is_Union                                  : Boolean := False;
+         has_virtual_Members                       : Boolean := False;
          requires_Interfaces_C_Int_use             : Boolean := False;
          requires_Interfaces_C_Unsigned_use        : Boolean := False;
          requires_Interfaces_C_Unsigned_Char_use   : Boolean := False;

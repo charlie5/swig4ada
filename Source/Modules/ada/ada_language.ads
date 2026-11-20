@@ -9,6 +9,7 @@ with
      ada_Variable,
      ada_Parameter,
      ada_Subprogram,
+     ada_Package,
 
      swig.Pointers,
      swig_Core.Pointers,
@@ -26,7 +27,6 @@ with
      c_nameSpace,
 
      ada_Type,
-     ada_Package,
 
      gmp.Discrete,
 
@@ -144,6 +144,8 @@ is
    ---  Utility
    --
 
+   function main_Package      (Self : access Item) return ada_Package.view;     -- The top package of the main module.
+
    function to_ada_subProgram (Self : access Item;   the_c_Function   : in c_Function.view)    return ada_subProgram.view;
    function to_ada_Parameters (Self : access Item;   the_c_Parameters : in c_parameter.Vector) return ada_Parameter .vector;
    function to_ada_Variable   (Self : access Item;   the_c_Variable   : in c_Variable.view)    return ada_Variable  .view;
@@ -228,6 +230,7 @@ private
          --
          name_Map_of_module :         swig_Module.name_Maps_of_module.Map;
          new_Modules        :         swig_Module.module_Vectors.Vector;
+         imported_Classes_defined_here : c_Type.Vector;     -- Classes declared in an imported module, and defined in the main module.
          Module_core        : aliased swig_Module.item;
          Module_top         : aliased swig_Module.item;
 

@@ -43,6 +43,7 @@ is
                                             Name              => Name,
                                             import_Convention => Unknown,
                                             Ignore            => False,
+                                            defined_in_main_Module => False,
                                             pointee_Type      => base_Type,
                                             resolved_Type     => null));
    end virtual_class_Pointer_construct;
@@ -69,6 +70,7 @@ is
                                             Name              => Name,
                                             import_Convention => Unknown,
                                             Ignore            => False,
+                                            defined_in_main_Module => False,
                                             base_Type         => base_Type,
                                             resolved_Type     => null));
    end Typedef_construct;
@@ -337,6 +339,22 @@ is
    begin
       Self.my.Ignore := True;
    end ignore;
+
+
+
+   function is_defined_in_main_Module (Self : access Item) return Boolean
+   is
+   begin
+      return Self.my.defined_in_main_Module;
+   end is_defined_in_main_Module;
+
+
+
+   procedure is_defined_in_main_Module (Self : access Item)
+   is
+   begin
+      Self.my.defined_in_main_Module := True;
+   end is_defined_in_main_Module;
 
 
 
@@ -1143,6 +1161,14 @@ is
 
 
 
+   procedure has_virtual_Members (Self : access Item)
+   is
+   begin
+      Self.my.has_virtual_Members := True;
+   end has_virtual_Members;
+
+
+
    function virtual_member_function_Count (Self : access Item) return Natural
    is
       use c_Function.Vectors;
@@ -1230,6 +1256,13 @@ is
       use c_Type.Vectors;
       the_Count : Natural := virtual_member_function_Count (Self);
    begin
+      if         the_Count = 0
+        and then Self.my.c_type_Kind = c_Class
+        and then Self.my.has_virtual_Members
+      then
+         the_Count := 1;
+      end if;
+
       for Each in 1 .. Natural (Length (Self.my.base_Classes))
       loop
          the_Count := the_Count + total_virtual_member_function_Count (Element (Self.my.base_Classes,

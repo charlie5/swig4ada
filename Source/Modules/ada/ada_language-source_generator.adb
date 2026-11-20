@@ -136,7 +136,7 @@ is
                   append (the_Source,  NL & "                and ");
                end if;
 
-               append (the_Source,  Element (Cursor).declaration_package.ada_Name & ".item");
+               append (the_Source,  Element (Cursor).declaration_package.qualified_Name & ".item");     -- The base class may be in another module.
                next   (Cursor);
             end loop;
          end;
@@ -270,7 +270,7 @@ is
                   append (the_Source,  NL & "                and ");
                end if;
 
-               append (the_Source,  Element (Cursor).declaration_package.ada_Name & ".item");
+               append (the_Source,  Element (Cursor).declaration_package.qualified_Name & ".item");     -- The base class may be in another module.
                next   (Cursor);
             end loop;
          end;
@@ -2086,6 +2086,16 @@ is
             next (Cursor);
          end loop;
       end;
+
+      for Each of Self.imported_Classes_defined_here
+      loop
+         declare
+            the_Package : constant ada_Package.view := Self.c_namespace_Map_of_ada_Package.Element (Each.nameSpace.all'Access);
+         begin
+            emit_Spec       (the_Package,  Self.in_cpp_Mode,  with_IC_Pointers => True, the_ada_Lang => Self);
+            emit_guard_Spec (the_Package);
+         end;
+      end loop;
    end generate;
 
 

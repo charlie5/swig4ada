@@ -221,7 +221,7 @@ is
                         declare
                            new_ada_Type : ada_Type.view;
                         begin
-                           if        the_c_Type.base_Type.c_type_Kind = c_type.c_Class
+                           if        the_c_Type.ultimate_base_Type.c_type_Kind = c_type.c_Class     -- Also a typedef of a typedef of a class.
                              or else (         the_c_Type.base_Type.c_type_Kind = c_type.type_Pointer
                                       and then the_c_Type.base_Type            /= fetch_c_Type (+"void*"))
                            then
@@ -237,7 +237,11 @@ is
 
                                  new_ada_Type.declaration_Package.add (new_ada_Type);
 
-                                 if the_c_Type.base_Type.c_type_Kind = c_type.c_Class
+                                 if         the_c_Type.ultimate_base_Type.c_type_Kind = c_type.c_Class
+                                   and then name_Map_of_c_type.contains (the_c_Type.base_Type.Name & "[]")
+                                   and then name_Map_of_c_type.contains (the_c_Type.base_Type.Name & "*")
+                                   and then c_type_Map_of_ada_type.contains (name_Map_of_c_type.Element (the_c_Type.base_Type.Name & "[]"))
+                                   and then c_type_Map_of_ada_type.contains (name_Map_of_c_type.Element (the_c_Type.base_Type.Name & "*"))
                                  then   -- The array and pointer types of a typedef of a class are subtypes of those of the class, so
                                         -- that the typedef and the class may be used interchangeably, as they may in C++. A function
                                         -- with a parameter of the typedef then overrides one with a parameter of the class.
@@ -413,9 +417,13 @@ is
                         declare
                            use ada_Type.composite.a_record;
 
+                           --  A class which is declared in an imported module, and defined in the main module, has its
+                           --  package in the main module. The imported module declares the name as an incomplete class.
+                           --
                            new_ada_Package  : constant ada_package.view
                              := ada_Package.new_ada_Package (name   => to_String (to_ada_Identifier (the_c_Type.Name)),
-                                                             parent => Result.Package_top);
+                                                             parent => (if the_c_Type.is_defined_in_main_Module then Self.main_Package
+                                                                                                                else Result.Package_top));
 
                            new_ada_Record   : constant ada_Type.composite.a_record.view
                              := ada_Type.composite.a_record.new_Item (new_ada_Package,
@@ -423,6 +431,11 @@ is
                         begin
                            if the_c_Type.is_Union then
                               new_ada_Record.is_Union;
+                           end if;
+
+                           if the_c_Type.is_Virtual
+                           then
+                              new_ada_Record.has_virtual_Members;
                            end if;
 
                            new_ada_Package.add                   (new_ada_Record.all'Access);

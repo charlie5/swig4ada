@@ -165,6 +165,9 @@ is
    function  is_Ignored           (Self : access Item) return Boolean;
    procedure ignore               (Self : access Item);
 
+   function  is_defined_in_main_Module (Self : access Item) return Boolean;     -- True for a class declared in an imported module
+   procedure is_defined_in_main_Module (Self : access Item);                    -- and defined in the module which imports it.
+
    function  ultimate_base_Type     (Self : access Item) return c_Type.view;
    function  is_ultimately_Unsigned (Self : access Item) return Boolean;
 
@@ -254,6 +257,10 @@ is
 
    procedure is_Union                            (Self : access Item);
 
+   procedure has_virtual_Members                 (Self : access Item);
+   --
+   --  The member functions of a class in an imported module are not collected, so that the class is virtual is noted when the class is declared.
+
    function contains_bit_Fields                  (Self : access Item) return Boolean;
 
    function requires_Interfaces_C_Int_use             (Self : access Item) return Boolean;
@@ -298,6 +305,7 @@ private
 
          resolved_Type     :        c_Type.view;                           -- todo: Move this to 'Unknown' variant.
          Ignore            :        Boolean    := False;
+         defined_in_main_Module :   Boolean    := False;
 
          case c_type_Kind is
             when array_Type =>
@@ -312,6 +320,7 @@ private
                component_Count : Natural := 0;
 
                is_Union                                  : Boolean := False;
+               has_virtual_Members                       : Boolean := False;
                requires_Interfaces_C_Int_use             : Boolean := False;
                requires_Interfaces_C_Unsigned_use        : Boolean := False;
                requires_Interfaces_C_Unsigned_Char_use   : Boolean := False;
