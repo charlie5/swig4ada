@@ -333,7 +333,7 @@ begin
       generate ("enum_var.i",                       use_CPP => True);
       generate ("extern_declaration.i");
       generate ("fragments.i");
-      generate ("ignore_parameter.i",   wrapper_Compiles => False);     -- Wrapper: a C++ input; as C++, a constructor with ignored parameters is called with them.
+      generate ("ignore_parameter.i",               use_CPP => True);
       generate ("immutable_values.i");
       generate ("integers.i");
       generate ("keyword_rename.i");
@@ -430,7 +430,7 @@ begin
       generate ("multi_import_b.i",                 use_CPP => True);
       generate ("name_cxx.i",                       use_CPP => True);
       generate ("namespace_enum.i",                 use_CPP => True);
-      generate ("namespace_extend.i",               use_CPP => True,   wrapper_Compiles => False);     -- Wrapper: an '%extend' function of a class in a namespace is called by the wrong name.
+      generate ("namespace_extend.i",               use_CPP => True);
       generate ("namespace_template.i",             use_CPP => True);
       generate ("namespace_typedef_class.i",        use_CPP => True);
       generate ("newobject2.i",                     use_CPP => True);
@@ -454,7 +454,7 @@ begin
       generate ("return_const_value.i",             use_CPP => True);
       generate ("smart_pointer_const2.i",           use_CPP => True);
       generate ("smart_pointer_const.i",            use_CPP => True);
-      generate ("smart_pointer_extend.i",           use_CPP => True,   wrapper_Compiles => False);     -- Wrapper: an '%extend' function reached through a smart pointer is called by the wrong name.
+      generate ("smart_pointer_extend.i",           use_CPP => True);
       generate ("smart_pointer_member.i",           use_CPP => True);
       generate ("smart_pointer_multi.i",            use_CPP => True);
       generate ("smart_pointer_namespace2.i",       use_CPP => True);
@@ -598,8 +598,8 @@ begin
       new_Line;
 
       generate ("anonymous_bitfield.i");
-      generate ("apply_signed_char.i",              use_CPP => True,   wrapper_Compiles => False);     -- Wrapper: a 'signed char*' argument is passed as 'char*'.
-      generate ("apply_strings.i",                  use_CPP => True,   wrapper_Compiles => False);     -- Wrapper: an 'unsigned char*' argument is passed as 'char*'.
+      generate ("apply_signed_char.i",              use_CPP => True);
+      generate ("apply_strings.i",                  use_CPP => True);
       generate ("arrayref.i",                       use_CPP => True);
       generate ("arrays_dimensionless.i",           use_CPP => True);
       generate ("arrays_global.i",                  use_CPP => True);
@@ -625,7 +625,7 @@ begin
       generate ("li_std_wstring.i",                 use_CPP => True);
       --  generate ("list_vector.i");     -- Not applicable: uses a library of Guile typemaps.
       generate ("li_typemaps.i",                    use_CPP => True);
-      generate ("li_windows.i",   wrapper_Compiles => False);     -- Wrapper: a C++ input; as C++, a reference to '__int8' is dereferenced as a value.
+      generate ("li_windows.i",                     use_CPP => True);
       generate ("long_long_apply.i",                use_CPP => True);
       generate ("nested_comment.i");
       --  generate ("pointer_in_out.i");     -- Not applicable: uses a library of Guile typemaps.
@@ -634,7 +634,7 @@ begin
       generate ("sizeof_pointer.i");
       generate ("sizet.i",                          use_CPP => True);
       generate ("sneaky1.i");
-      generate ("special_variables.i",              use_CPP => True,   wrapper_Compiles => False);     -- Wrapper: the '$symname' special variable is not expanded.
+      generate ("special_variables.i",              use_CPP => True);
       generate ("threads.i",                        use_CPP => True);
       generate ("typedef_array_member.i");
       generate ("typedef_funcptr.i",                use_CPP => True);
@@ -671,7 +671,7 @@ begin
       generate ("global_ns_arg.i",                  use_CPP => True);
       generate ("ignore_template_constructor.i",    use_CPP => True);
       generate ("inherit_target_language.i",        use_CPP => True);
-      generate ("intermediary_classname.i",         use_CPP => True,   wrapper_Compiles => False);     -- Wrapper: an array of constant pointers is written as an invalid parameter.
+      generate ("intermediary_classname.i",         use_CPP => True);
       generate ("kind.i",                           use_CPP => True);
       generate ("li_boost_shared_ptr_bits.i",       use_CPP => True);
       generate ("li_boost_shared_ptr.i",            use_CPP => True);
@@ -695,7 +695,7 @@ begin
       generate ("namespace_union.i",                use_CPP => True);
       generate ("overload_complicated.i",           use_CPP => True);
       generate ("primitive_ref.i",                  use_CPP => True);
-      generate ("primitive_types.i",                use_CPP => True,   wrapper_Compiles => False);     -- Wrapper: a 'const char*' result is assigned to a 'char*'.
+      generate ("primitive_types.i",                use_CPP => True);
       generate ("refcount.i",                       use_CPP => True);
       generate ("reference_global_vars.i",          use_CPP => True);
       generate ("rename1.i",                        use_CPP => True);
@@ -706,7 +706,7 @@ begin
       generate ("smart_pointer_inherit.i",          use_CPP => True);
       generate ("smart_pointer_templatemethods.i",  use_CPP => True);
       generate ("smart_pointer_templatevariables.i", use_CPP => True);
-      generate ("std_containers.i",                 use_CPP => True,   wrapper_Compiles => False);     -- Wrapper: a container of a class with no default constructor is constructed with a size.
+      generate ("std_containers.i",                 use_CPP => True,   wrapper_Compiles => False);     -- Wrapper: a container of a class with no default constructor has a constructor which takes a size (the input would '%ignore' it).
       generate ("template_arg_scope.i",             use_CPP => True);
       generate ("template_arg_typename.i",          use_CPP => True);
       generate ("template_classes.i",               use_CPP => True);
@@ -717,7 +717,7 @@ begin
       --  generate ("template_default_pointer.i",        use_CPP => True);     -- Error: Syntax error in input(1).
       generate ("template_enum.i",                  use_CPP => True);
       generate ("template_enum_typedef.i",          use_CPP => True);
-      generate ("template_explicit.i",              use_CPP => True,   wrapper_Compiles => False);     -- Wrapper: an array of constant pointers is written as an invalid parameter.
+      generate ("template_explicit.i",              use_CPP => True);
       generate ("template_extend_overload.i",       use_CPP => True);
       generate ("template_forward.i",               use_CPP => True);
       --  generate ("template.i",                        use_CPP => True);     -- There is no such test file.
