@@ -107,7 +107,7 @@ begin
       generate ("allowexcept.i");
       generate ("argout.i");
       generate ("array_member.i");
-      generate ("bools.i");
+      --  generate ("bools.i");     -- A C++ input, which is run with the C++ tests. As C, SWIG reports a syntax error.
       generate ("char_constant.i");
       generate ("const_const.i");
       generate ("derived_byvalue.i");
@@ -262,7 +262,7 @@ begin
       generate ("template_default_qualify.i",       use_CPP => True);
       generate ("template_default_vw.i",            use_CPP => True);
       generate ("template_enum_ns_inherit.i",       use_CPP => True);
-      --   generate ("template_expr.i",                  use_CPP => True);     -- Hangs.
+      generate ("template_expr.i",                  use_CPP => True);
       generate ("template_extend1.i",               use_CPP => True);
       generate ("template_extend2.i",               use_CPP => True);
       generate ("template_extend_overload_2.i",     use_CPP => True);
