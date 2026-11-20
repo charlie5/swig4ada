@@ -38,6 +38,27 @@ type Item is new Shape.item with
 
 
 
+   -- Pointer
+   -- 
+   type Pointer is access all class_example.Circle.Item;
+
+   -- Pointer_Array
+   -- 
+   type Pointer_Array is array (interfaces.C.Size_t range <>) of aliased class_example.Circle.Pointer;
+
+
+
+   -- Pointer_Pointer
+   -- 
+   package C_Pointer_Pointers is new interfaces.c.Pointers (Index              => interfaces.c.size_t,
+                                                                    Element            => class_example.Circle.Pointer,
+                                                                    element_Array      => class_example.Circle.Pointer_Array,
+                                                                    default_Terminator => null);
+
+subtype Pointer_Pointer is C_Pointer_Pointers.Pointer;
+
+
+
    function  construct  return class_example.Circle.Item'Class;
 
    pragma cpp_Constructor (construct, "ada_new_Circle_Circle__SWIG_0");
@@ -62,27 +83,6 @@ type Item is new Shape.item with
    procedure destruct (Self : in out class_example.Circle.Item);
 
 
-
-
-
-   -- Pointer
-   -- 
-   type Pointer is access all class_example.Circle.Item;
-
-   -- Pointer_Array
-   -- 
-   type Pointer_Array is array (interfaces.C.Size_t range <>) of aliased class_example.Circle.Pointer;
-
-
-
-   -- Pointer_Pointer
-   -- 
-   package C_Pointer_Pointers is new interfaces.c.Pointers (Index              => interfaces.c.size_t,
-                                                                    Element            => class_example.Circle.Pointer,
-                                                                    element_Array      => class_example.Circle.Pointer_Array,
-                                                                    default_Terminator => null);
-
-subtype Pointer_Pointer is C_Pointer_Pointers.Pointer;
 
 
 

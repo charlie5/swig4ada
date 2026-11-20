@@ -38,26 +38,6 @@ type Item is  tagged limited
 
 
 
-   function  construct  return class_example.Shape.Item'Class;
-
-   procedure destruct_0 (Self : in out class_example.Shape.Item);
-
-   procedure destruct (Self : in out class_example.Shape.Item);
-
-   procedure move (Self : in out class_example.Shape.Item'Class;
-dx : in interfaces.c.double;
-dy : in interfaces.c.double);
-
-   function  area0 (Self : access class_example.Shape.Item) return interfaces.c.double;
-
-   function  area (Self : access class_example.Shape.Item) return interfaces.c.double;
-
-   function  perimeter (Self : access class_example.Shape.Item) return interfaces.c.double;
-
-
-
-
-
    -- Pointer
    -- 
    type Pointer is access all class_example.Shape.Item;
@@ -76,6 +56,26 @@ dy : in interfaces.c.double);
                                                                     default_Terminator => null);
 
 subtype Pointer_Pointer is C_Pointer_Pointers.Pointer;
+
+
+
+   function  construct  return class_example.Shape.Item'Class;
+
+   procedure destruct_0 (Self : in out class_example.Shape.Item);
+
+   procedure destruct (Self : in out class_example.Shape.Item);
+
+   procedure move (Self : in out class_example.Shape.Item'Class;
+dx : in interfaces.c.double;
+dy : in interfaces.c.double);
+
+   function  area0 (Self : access class_example.Shape.Item) return interfaces.c.double;
+
+   function  area (Self : access class_example.Shape.Item) return interfaces.c.double;
+
+   function  perimeter (Self : access class_example.Shape.Item) return interfaces.c.double;
+
+
 
 
 
