@@ -114,8 +114,12 @@ derived from the class in Ada:
 C++ then calls 'area' through a 'Shape*'. Such a type, and any Ada function which is given to C or C++ as a
 callback, must be declared at library level, not inside a subprogram.
 
-Only the first base class which has virtual functions becomes the parent. A base class with none becomes a
-record component, and any further virtual base class is left out, with a warning.
+Only the first base class which has virtual functions becomes the parent of the Ada type. Any other base
+class is reached by a function, 'as_<base>', which returns a pointer to the part of the object which is that
+base class:
+
+    Sprite.as_Position (the_Sprite'Access).y := 7;                   -- class Sprite : public Drawable, public Position
+    click_it (Button.as_Clickable (the_Button'Access));              -- class Button : public Drawable, public Clickable
 
 The members which a derived class adds are read and written through functions, not as record components:
 
@@ -185,10 +189,14 @@ Other things to know
 Limitations
 -----------
 
-- Multiple inheritance from more than one class with virtual functions.
+- With more than one base class which has virtual functions, only the first is a parent of the Ada type.
+  The others are reached by 'as_<base>', and a function of the class which overrides one of theirs is not
+  marked as overriding.
+- A structure nested in a class, which has a member of a type declared in that class and is passed or
+  returned by value by a function of the class, gives specifications which do not compile.
 - Static member variables.
-- A class which is derived from a virtual class and is itself a template instance may not link its
-  destructor.
+- The destructor of a class with virtual functions is imported by its C++ symbol, which is made for a
+  class in namespaces and for the simpler template instances only.
 - Directors.
 
 
