@@ -11,7 +11,7 @@ package example.Pointers is
    package C_GtsVector4_Pointers is new Interfaces.C.Pointers
      (Index              => Interfaces.C.size_t, Element => example.GtsVector4,
       Element_Array      => example.GtsVector4_array,
-      Default_Terminator => [others => <>]);
+      Default_Terminator => (others => <>));
 
    subtype GtsVector4_Pointer is C_GtsVector4_Pointers.Pointer;
 
