@@ -5,6 +5,10 @@
  * Do not make changes to this file unless you know what you are doing - modify
  * the SWIG interface file instead.
  * ----------------------------------------------------------------------------- */
+
+
+#define SWIG_VERSION 0x040501
+#define SWIGADA
 /* -----------------------------------------------------------------------------
  *  This section contains generic SWIG labels for method/variable
  *  declarations/attributes, and other compiler dependent labels.

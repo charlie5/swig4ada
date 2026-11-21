@@ -36,6 +36,7 @@ is
    do_uncompilable_Cxx : constant Boolean := True;
    do_broken_C         : constant Boolean := True;
    do_broken_Cxx       : constant Boolean := True;
+   do_Newer            : constant Boolean := True;     -- The cases which were added with SWIG 4.5.1.
 
    check_Wrappers      : constant Boolean := True;     -- Compile each generated wrapper.
    check_Specs         : constant Boolean := True;     -- Compile each generated spec.
@@ -138,7 +139,10 @@ is
    procedure generate (swig_Module      : in String;
                        use_CPP          : in Boolean := False;
                        wrapper_Compiles : in Boolean := True;
-                       check_Layout     : in Boolean := True)
+                       check_Layout     : in Boolean := True;
+                       Options          : in String  := "")
+   --
+   --  'Options' are further options of the generator, which the input of a few cases requires ('-DFOO', '-std=c23').
    --
    --  'wrapper_Compiles' is False for a case whose wrapper is known not to compile. Its wrapper
    --  is still compiled, so that the launcher can say when it has begun to.
@@ -168,6 +172,7 @@ is
 
       if not run (  Root & "/ada-build/swig4ada -ada" & (if check_Layout then "" else " -no-check-layout")
                   & (if use_CPP then " -c++" else "")
+                  & (if Options = "" then "" else " " & Options)
                   & " -outdir . -o ./" & Wrapper
                   & " -I/usr/include "
                   & "../../../test-suite/" & swig_Module,
@@ -780,6 +785,171 @@ begin
       generate ("using_namespace.i",                use_CPP => True);
       generate ("valuewrapper_opaque.i",            use_CPP => True);
       generate ("virtual_poly.i",                   use_CPP => True);
+   end if;
+
+
+   ---------------------------------
+   --- Cases added with SWIG 4.5.1
+   --
+   --  The cases which upstream added between SWIG 4.0.0 and 4.5.1, for C and for C++ up to C++20.
+   --
+   if do_Newer
+   then
+      new_Line;
+      new_Line;
+      put_Line ("Generating the C tests which were added with SWIG 4.5.1.");
+      new_Line;
+
+      generate ("charptr_fragment.i");
+      generate ("command_line_define.i",                      Options => "-DFOO -DBAR=123 -DBAZ -UBAZ -UNOTSET");
+      generate ("constant_expr_c.i");
+      generate ("contract_c.i");
+      generate ("final_c.i");
+      generate ("global_immutable_vars.i");
+      generate ("li_cdata_bytes.i");
+      generate ("multichar_constant.i");
+      generate ("not_c_keywords.i");
+      generate ("preproc_expr.i");
+      generate ("preproc_predefined.i");
+      generate ("preproc_predefined_stdc.i",                  Options => "-std=c23");
+
+      new_Line;
+      new_Line;
+      put_Line ("Generating the C++ tests which were added with SWIG 4.5.1.");
+      new_Line;
+
+      generate ("abstract_basecast.i",                        use_CPP => True);
+      generate ("abstract_inherit_using.i",                   use_CPP => True);
+      generate ("apply_typemap_typedefs.i",                   use_CPP => True);
+      generate ("assign_const.i",                             use_CPP => True);
+      generate ("assign_reference.i",                         use_CPP => True);
+      generate ("begin_code.i",                               use_CPP => True);
+      generate ("catches_strings.i",                          use_CPP => True);
+      generate ("char_binary_rev_len.i",                      use_CPP => True);
+      generate ("class_case.i",                               use_CPP => True);
+      generate ("constructor_copy_non_const.i",               use_CPP => True);
+      generate ("copyctor.i",                                 use_CPP => True);
+      generate ("cpp11_alias_template_inheritance.i",         use_CPP => True);
+      generate ("cpp11_alias_templates.i",                    use_CPP => True);
+      generate ("cpp11_assign_delete.i",                      use_CPP => True);
+      generate ("cpp11_assign_rvalue_reference.i",            use_CPP => True);
+      generate ("cpp11_attribute_specifiers.i",               use_CPP => True);
+      generate ("cpp11_auto_variable.i",                      use_CPP => True);
+      generate ("cpp11_brackets_expression.i",                use_CPP => True);
+      generate ("cpp11_constexpr_friend.i",                   use_CPP => True);
+      generate ("cpp11_copyctor_delete.i",                    use_CPP => True);
+      generate ("cpp11_director_using_constructor.i",         use_CPP => True);
+      generate ("cpp11_final_class.i",                        use_CPP => True);
+      generate ("cpp11_inheriting_constructors_typedef.i",    use_CPP => True);
+      generate ("cpp11_move_only.i",                          use_CPP => True);
+      generate ("cpp11_move_only_valuewrapper.i",             use_CPP => True);
+      generate ("cpp11_move_typemaps.i",                      use_CPP => True);
+      generate ("cpp11_rvalue_reference_move.i",              use_CPP => True);
+      generate ("cpp11_shared_ptr_crtp_upcast.i",             use_CPP => True);
+      generate ("cpp11_shared_ptr_template_upcast.i",         use_CPP => True);
+      generate ("cpp11_std_function.i",                       use_CPP => True);
+      generate ("cpp11_std_unique_ptr.i",                     use_CPP => True);
+      generate ("cpp11_template_pack.i",                      use_CPP => True);
+      generate ("cpp11_template_pack_specialization.i",       use_CPP => True);
+      generate ("cpp11_template_parameters_decltype.i",       use_CPP => True);
+      generate ("cpp11_template_templated_methods.i",         use_CPP => True);
+      generate ("cpp11_template_using_base.i",                use_CPP => True);
+      generate ("cpp11_using_constructor.i",                  use_CPP => True);
+      generate ("cpp11_using_functor.i",                      use_CPP => True);
+      generate ("cpp11_using_member_template.i",              use_CPP => True);
+      generate ("cpp11_using_typedef_struct.i",               use_CPP => True);
+      generate ("cpp11_using_typedef_template_member.i",      use_CPP => True);
+      generate ("cpp11_variadic_function_templates.i",        use_CPP => True);
+      generate ("cpp14_auto_return_type.i",                   use_CPP => True);
+      generate ("cpp14_generic_lambda.i",                     use_CPP => True);
+      generate ("cpp14_variable_templates.i",                 use_CPP => True);
+      generate ("cpp17_class_template_argument_deduction.i",  use_CPP => True);
+      generate ("cpp17_director_string_view.i",               use_CPP => True);
+      generate ("cpp17_enable_if_t.i",                        use_CPP => True);
+      generate ("cpp17_inheriting_constructors_pack.i",       use_CPP => True);
+      generate ("cpp17_map_no_default_ctor.i",                use_CPP => True);
+      generate ("cpp17_string_view.i",                        use_CPP => True);
+      generate ("cpp17_using_pack_alias_template.i",          use_CPP => True);
+      generate ("cpp17_using_pack_expansion.i",               use_CPP => True);
+      generate ("cpp17_using_typename_pack.i",                use_CPP => True);
+      generate ("cpp20_abbreviated_template.i",               use_CPP => True);
+      generate ("cpp20_abbreviated_template_decorated.i",     use_CPP => True);
+      generate ("cpp20_abbreviated_template_mixed.i",         use_CPP => True);
+      generate ("cpp20_alias_template.i",                     use_CPP => True);
+      generate ("cpp20_concepts.i",                           use_CPP => True);
+      generate ("cpp20_concepts_class_methods.i",             use_CPP => True);
+      generate ("cpp20_concepts_classes.i",                   use_CPP => True);
+      generate ("cpp20_concepts_constrained_param.i",         use_CPP => True);
+      generate ("cpp20_concepts_extra.i",                     use_CPP => True);
+      generate ("cpp20_concepts_lambda.i",                    use_CPP => True);
+      generate ("cpp20_concepts_overloads.i",                 use_CPP => True);
+      generate ("cpp20_constexpr_destructor.i",               use_CPP => True);
+      generate ("cpp20_lambda_template.i",                    use_CPP => True);
+      generate ("cpp20_spaceship_operator.i",                 use_CPP => True);
+      generate ("cpp20_variable_templates.i",                 use_CPP => True);
+      generate ("cpp_parameters.i",                           use_CPP => True);
+      generate ("director_binary_string_rev_len.i",           use_CPP => True);
+      generate ("director_comparison_operators.i",            use_CPP => True);
+      generate ("director_conversion_operators.i",            use_CPP => True);
+      generate ("director_langobj.i",                         use_CPP => True);
+      generate ("director_minimal.i",                         use_CPP => True);
+      generate ("director_multiple_inheritance.i",            use_CPP => True);
+      generate ("director_shared_ptr.i",                      use_CPP => True);
+      generate ("director_simple.i",                          use_CPP => True);
+      generate ("director_template.i",                        use_CPP => True);
+      --  generate ("director_unwrap_result.i",              use_CPP => True);     -- A function of a class returns a typedef of a pointer to that class, whose package needs that of the class.
+      generate ("director_using_member_scopes.i",             use_CPP => True);
+      generate ("doxygen_autodoc_docstring.i",                use_CPP => True);
+      generate ("doxygen_basic_translate_style2.i",           use_CPP => True);
+      generate ("doxygen_basic_translate_style3.i",           use_CPP => True);
+      generate ("doxygen_code_blocks.i",                      use_CPP => True);
+      generate ("doxygen_constructors.i",                     use_CPP => True);
+      generate ("doxygen_interface.i",                        use_CPP => True);
+      generate ("doxygen_overloads.i",                        use_CPP => True);
+      generate ("duplicate_class_name_in_ns.i",               use_CPP => True);
+      generate ("duplicate_parm_names.i",                     use_CPP => True);
+      generate ("exception_memory_leak.i",                    use_CPP => True);
+      generate ("friends_nested.i",                           use_CPP => True);
+      generate ("friends_operator_overloading.i",             use_CPP => True);
+      generate ("global_immutable_vars_cpp.i",                use_CPP => True);
+      generate ("injecting_base_class.i",                     use_CPP => True);
+      generate ("inout_typemaps.i",                           use_CPP => True);
+      generate ("li_cdata_bytes_cpp.i",                       use_CPP => True);
+      generate ("li_std_containers_overload.i",               use_CPP => True);
+      generate ("li_std_vector_vector.i",                     use_CPP => True);
+      generate ("multiple_inheritance_overload.i",            use_CPP => True);
+      generate ("namespace_struct.i",                         use_CPP => True);
+      generate ("nested_inheritance_interface.i",             use_CPP => True);
+      generate ("nested_scope_flat.i",                        use_CPP => True);
+      generate ("nspace_interface.i",                         use_CPP => True);
+      generate ("nspacemove.i",                               use_CPP => True);
+      generate ("nspacemove_nested.i",                        use_CPP => True);
+      generate ("nspacemove_stl.i",                           use_CPP => True);
+      generate ("numeric_bounds_checking.i",                  use_CPP => True);
+      generate ("preproc_cpp.i",                              use_CPP => True);
+      generate ("preproc_predefined_stdcpp.i",                use_CPP => True,   Options => "-std=c++23");
+      generate ("template_advanced_rename.i",                 use_CPP => True);
+      generate ("template_duplicate.i",                       use_CPP => True);
+      generate ("template_function_parm.i",                   use_CPP => True);
+      generate ("template_nested_flat.i",                     use_CPP => True);
+      generate ("template_partial_specialization_more.i",     use_CPP => True);
+      generate ("template_specialization_using_declaration.i",use_CPP => True);
+      generate ("template_template_template_parameters.i",    use_CPP => True);
+      generate ("template_type_collapse.i",                   use_CPP => True);
+      generate ("template_using_member_default_arg.i",        use_CPP => True);
+      generate ("typedef_inherit_using.i",                    use_CPP => True);
+      generate ("typemap_isvoid.i",                           use_CPP => True);
+      generate ("typemap_string_alloc.i",                     use_CPP => True);
+      generate ("using_duplicates.i",                         use_CPP => True);
+      generate ("using_extend_flatten.i",                     use_CPP => True);
+      generate ("using_member.i",                             use_CPP => True);
+      generate ("using_member_multiple_inherit.i",            use_CPP => True);
+      generate ("using_member_scopes.i",                      use_CPP => True);
+      generate ("using_member_typedef.i",                     use_CPP => True);
+      generate ("using_member_typedef_overload.i",            use_CPP => True);
+      generate ("using_member_typedef_template.i",            use_CPP => True);
+      generate ("using_method_typedefs.i",                    use_CPP => True);
+      generate ("using_nested_member_typedef.i",              use_CPP => True);
    end if;
 
 

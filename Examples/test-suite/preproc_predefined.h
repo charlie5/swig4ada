@@ -1,5 +1,6 @@
 /* This list will need updating when new target languages are added. */
 #if (0\
+  +defined(SWIGADA)\
   +defined(SWIGC)\
   +defined(SWIGCSHARP)\
   +defined(SWIGD)\
