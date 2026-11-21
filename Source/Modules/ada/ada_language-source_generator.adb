@@ -71,6 +71,8 @@ is
 
    NL : constant String := new_line_Token;
 
+   main_module_Name : unbounded_String;     -- The module whose specs are being written, set by 'generate' and 'layout_Checks'.
+
 
 
    function depends_on (Self         : access ada_Type.Item'Class;
@@ -406,6 +408,23 @@ is
       Alignment := 8;
       data_Size := 0;
       Places    := [others => <>];
+
+      --  The members of a class of an imported module are not collected, so its layout is not known here.
+      --
+      declare
+         the_Name : constant String := to_Lower (to_String (the_Record.declaration_Package.qualified_Name));
+         the_Main : constant String := to_Lower (to_String (main_module_Name));     -- Which may be within a namespace ('-namespace').
+      begin
+         if         the_Main /= ""
+           and then the_Name /= the_Main
+           and then not (         the_Name'Length > the_Main'Length
+                         and then the_Name (the_Name'First .. the_Name'First + the_Main'Length) = the_Main & ".")
+           and then not (the_Name'Length >= 5 and then the_Name (the_Name'First .. the_Name'First + 4) = "swig.")
+           and then the_Name /= "swig"
+         then
+            return False;
+         end if;
+      end;
 
       if not the_Record.base_Classes.is_Empty
       then
@@ -3039,6 +3058,8 @@ is
    procedure generate (Self : access ada_Language.item)
    is
    begin
+      main_module_Name := Self.Module_top.Ada.Package_top.qualified_Name;
+
       emit_Spec (Self.Module_top.Ada.Package_top,              Self.in_cpp_Mode,  with_IC_Pointers => False, the_ada_Lang => Self);
       emit_Spec (Self.Module_top.Ada.Package_binding,          Self.in_cpp_Mode,  with_IC_Pointers => False, the_ada_Lang => Self);
       emit_Spec (Self.Module_top.Ada.Package_pointers,         Self.in_cpp_Mode,  with_IC_Pointers => True,  the_ada_Lang => Self);
