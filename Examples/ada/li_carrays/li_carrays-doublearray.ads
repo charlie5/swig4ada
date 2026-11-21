@@ -11,11 +11,9 @@ package li_carrays.doubleArray is
    -- Item
    --
 
-   type Item is limited record
+   type Item is record
       null;
    end record;
-
-   pragma Import (CPP, Entity => Item);
 
    -- Item_Array
    --
@@ -25,7 +23,12 @@ package li_carrays.doubleArray is
 
    -- Pointer
    --
-   type Pointer is access all li_carrays.doubleArray.Item;
+   package C_Pointers is new Interfaces.C.Pointers
+     (Index => Interfaces.C.size_t, Element => li_carrays.doubleArray.Item,
+      Element_Array      => li_carrays.doubleArray.Item_Array,
+      Default_Terminator => (others => <>));
+
+   subtype Pointer is C_Pointers.Pointer;
 
    -- Pointer_Array
    --

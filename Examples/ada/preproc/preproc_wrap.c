@@ -14,112 +14,112 @@
 
 /* template workaround for compilers that cannot correctly implement the C++ standard */
 #ifndef SWIGTEMPLATEDISAMBIGUATOR
-#if defined(__SUNPRO_CC) && (__SUNPRO_CC <= 0x560)
-#define SWIGTEMPLATEDISAMBIGUATOR template
-#elif defined(__HP_aCC)
+# if defined(__SUNPRO_CC) && (__SUNPRO_CC <= 0x560)
+#  define SWIGTEMPLATEDISAMBIGUATOR template
+# elif defined(__HP_aCC)
 /* Needed even with `aCC -AA' when `aCC -V' reports HP ANSI C++ B3910B A.03.55 */
 /* If we find a maximum version that requires this, the test would be __HP_aCC <= 35500 for A.03.55 */
-#define SWIGTEMPLATEDISAMBIGUATOR template
-#else
-#define SWIGTEMPLATEDISAMBIGUATOR
-#endif
+#  define SWIGTEMPLATEDISAMBIGUATOR template
+# else
+#  define SWIGTEMPLATEDISAMBIGUATOR
+# endif
 #endif
 
 /* inline attribute */
 #ifndef SWIGINLINE
-#if defined(__cplusplus) || (defined(__GNUC__) && !defined(__STRICT_ANSI__))
-#define SWIGINLINE inline
-#else
-#define SWIGINLINE
-#endif
+# if defined(__cplusplus) || (defined(__GNUC__) && !defined(__STRICT_ANSI__))
+#   define SWIGINLINE inline
+# else
+#   define SWIGINLINE
+# endif
 #endif
 
 /* attribute recognised by some compilers to avoid 'unused' warnings */
 #ifndef SWIGUNUSED
-#if defined(__GNUC__)
-#if !(defined(__cplusplus)) || (__GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 4))
-#define SWIGUNUSED __attribute__ ((__unused__))
-#else
-#define SWIGUNUSED
-#endif
-#elif defined(__ICC)
-#define SWIGUNUSED __attribute__ ((__unused__))
-#else
-#define SWIGUNUSED
-#endif
+# if defined(__GNUC__)
+#   if !(defined(__cplusplus)) || (__GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 4))
+#     define SWIGUNUSED __attribute__ ((__unused__))
+#   else
+#     define SWIGUNUSED
+#   endif
+# elif defined(__ICC)
+#   define SWIGUNUSED __attribute__ ((__unused__))
+# else
+#   define SWIGUNUSED
+# endif
 #endif
 
 #ifndef SWIG_MSC_UNSUPPRESS_4505
-#if defined(_MSC_VER)
-#pragma warning(disable : 4505)	/* unreferenced local function has been removed */
-#endif
+# if defined(_MSC_VER)
+#   pragma warning(disable : 4505) /* unreferenced local function has been removed */
+# endif
 #endif
 
 #ifndef SWIGUNUSEDPARM
-#ifdef __cplusplus
-#define SWIGUNUSEDPARM(p)
-#else
-#define SWIGUNUSEDPARM(p) p SWIGUNUSED
-#endif
+# ifdef __cplusplus
+#   define SWIGUNUSEDPARM(p)
+# else
+#   define SWIGUNUSEDPARM(p) p SWIGUNUSED
+# endif
 #endif
 
 /* internal SWIG method */
 #ifndef SWIGINTERN
-#define SWIGINTERN static SWIGUNUSED
+# define SWIGINTERN static SWIGUNUSED
 #endif
 
 /* internal inline SWIG method */
 #ifndef SWIGINTERNINLINE
-#define SWIGINTERNINLINE SWIGINTERN SWIGINLINE
+# define SWIGINTERNINLINE SWIGINTERN SWIGINLINE
 #endif
 
 /* exporting methods */
 #if defined(__GNUC__)
-#if (__GNUC__ >= 4) || (__GNUC__ == 3 && __GNUC_MINOR__ >= 4)
-#ifndef GCC_HASCLASSVISIBILITY
-#define GCC_HASCLASSVISIBILITY
-#endif
-#endif
+#  if (__GNUC__ >= 4) || (__GNUC__ == 3 && __GNUC_MINOR__ >= 4)
+#    ifndef GCC_HASCLASSVISIBILITY
+#      define GCC_HASCLASSVISIBILITY
+#    endif
+#  endif
 #endif
 
 #ifndef SWIGEXPORT
-#if defined(_WIN32) || defined(__WIN32__) || defined(__CYGWIN__)
-#if defined(STATIC_LINKED)
-#define SWIGEXPORT
-#else
-#define SWIGEXPORT __declspec(dllexport)
-#endif
-#else
-#if defined(__GNUC__) && defined(GCC_HASCLASSVISIBILITY)
-#define SWIGEXPORT __attribute__ ((visibility("default")))
-#else
-#define SWIGEXPORT
-#endif
-#endif
+# if defined(_WIN32) || defined(__WIN32__) || defined(__CYGWIN__)
+#   if defined(STATIC_LINKED)
+#     define SWIGEXPORT
+#   else
+#     define SWIGEXPORT __declspec(dllexport)
+#   endif
+# else
+#   if defined(__GNUC__) && defined(GCC_HASCLASSVISIBILITY)
+#     define SWIGEXPORT __attribute__ ((visibility("default")))
+#   else
+#     define SWIGEXPORT
+#   endif
+# endif
 #endif
 
 /* calling conventions for Windows */
 #ifndef SWIGSTDCALL
-#if defined(_WIN32) || defined(__WIN32__) || defined(__CYGWIN__)
-#define SWIGSTDCALL __stdcall
-#else
-#define SWIGSTDCALL
-#endif
+# if defined(_WIN32) || defined(__WIN32__) || defined(__CYGWIN__)
+#   define SWIGSTDCALL __stdcall
+# else
+#   define SWIGSTDCALL
+# endif
 #endif
 
 /* Deal with Microsoft's attempt at deprecating C standard runtime functions */
 #if !defined(SWIG_NO_CRT_SECURE_NO_DEPRECATE) && defined(_MSC_VER) && !defined(_CRT_SECURE_NO_DEPRECATE)
-#define _CRT_SECURE_NO_DEPRECATE
+# define _CRT_SECURE_NO_DEPRECATE
 #endif
 
 /* Deal with Microsoft's attempt at deprecating methods in the standard C++ library */
 #if !defined(SWIG_NO_SCL_SECURE_NO_DEPRECATE) && defined(_MSC_VER) && !defined(_SCL_SECURE_NO_DEPRECATE)
-#define _SCL_SECURE_NO_DEPRECATE
+# define _SCL_SECURE_NO_DEPRECATE
 #endif
 
 /* Deal with Apple's deprecated 'AssertMacros.h' from Carbon-framework */
 #if defined(__APPLE__) && !defined(__ASSERT_MACROS_DEFINE_VERSIONS_WITHOUT_UNDERSCORES)
-#define __ASSERT_MACROS_DEFINE_VERSIONS_WITHOUT_UNDERSCORES 0
+# define __ASSERT_MACROS_DEFINE_VERSIONS_WITHOUT_UNDERSCORES 0
 #endif
 
 /* Intel's compiler complains if a variable which was never initialised is
@@ -128,37 +128,38 @@
  * See: https://github.com/swig/swig/issues/192 for more discussion.
  */
 #ifdef __INTEL_COMPILER
-#pragma warning disable 592
+# pragma warning disable 592
 #endif
+
 
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 
 #if defined(_WIN32) || defined(__CYGWIN32__)
-#define DllExport   __declspec( dllexport )
-#define SWIGSTDCALL __stdcall
+#  define DllExport   __declspec( dllexport )
+#  define SWIGSTDCALL __stdcall
 #else
-#define DllExport
-#define SWIGSTDCALL
-#endif
+#  define DllExport  
+#  define SWIGSTDCALL
+#endif 
 
 #ifdef __cplusplus
-#include <new>
+#  include <new>
 
 /* Replaces an object of the caller by a result which C++ has just made: the object is destructed, and the
    result is moved (or, before C++11, copied) into its place. The assignment of the class is not used. */
-template < typename T > static void
-swig_ada_replace (T *target, T & value)
+template <typename T> static void swig_ada_replace (T* target, T& value)
 {
   target->~T ();
-#if __cplusplus >= 201103L
-  new (target) T (static_cast < T && >(value));
-#else
+#  if __cplusplus >= 201103L
+  new (target) T (static_cast<T &&> (value));
+#  else
   new (target) T (value);
-#endif
+#  endif
 }
 #endif
+
 
 /* Exceptions.
 
@@ -167,8 +168,7 @@ swig_ada_replace (T *target, T & value)
    be examined, and cleared, from Ada by importing the three functions below (Convention => C).
 */
 
-typedef enum
-{
+typedef enum {
   SWIG_AdaNoException = 0,
   SWIG_AdaException,
   SWIG_AdaNullReferenceException,
@@ -183,112 +183,101 @@ typedef enum
 #ifndef SWIG_ADA_PENDING_EXCEPTION
 #define SWIG_ADA_PENDING_EXCEPTION
 
-#if defined(__GNUC__)
-#define SWIG_ADA_SHARED __attribute__ ((weak))	/* One copy is shared by all of the wrapper files of a program. */
-#else
-#define SWIG_ADA_SHARED
-#endif
+#  if defined(__GNUC__)
+#    define SWIG_ADA_SHARED __attribute__ ((weak))     /* One copy is shared by all of the wrapper files of a program. */
+#  else
+#    define SWIG_ADA_SHARED
+#  endif
 
-#ifdef __cplusplus
-extern          "C"
-{
-#endif
+#  ifdef __cplusplus
+extern "C" {
+#  endif
 
-  SWIG_ADA_SHARED int swig_ada_pending_exception_code = SWIG_AdaNoException;
-  SWIG_ADA_SHARED char swig_ada_pending_exception_message[1024] = "";
+SWIG_ADA_SHARED int  swig_ada_pending_exception_code           = SWIG_AdaNoException;
+SWIG_ADA_SHARED char swig_ada_pending_exception_message [1024] = "";
 
-  SWIG_ADA_SHARED int swig_ada_pending_exception (void)
-  {
-    return swig_ada_pending_exception_code;
-  }
-  SWIG_ADA_SHARED const char *swig_ada_pending_exception_text (void)
-  {
-    return swig_ada_pending_exception_message;
-  }
+SWIG_ADA_SHARED int         swig_ada_pending_exception      (void) { return swig_ada_pending_exception_code;    }
+SWIG_ADA_SHARED const char *swig_ada_pending_exception_text (void) { return swig_ada_pending_exception_message; }
 
-  SWIG_ADA_SHARED void swig_ada_clear_pending_exception (void)
-  {
-    swig_ada_pending_exception_code = SWIG_AdaNoException;
-    swig_ada_pending_exception_message[0] = 0;
-  }
-
-#ifdef __cplusplus
+SWIG_ADA_SHARED void swig_ada_clear_pending_exception (void) {
+  swig_ada_pending_exception_code        = SWIG_AdaNoException;
+  swig_ada_pending_exception_message [0] = 0;
 }
-#endif
+
+#  ifdef __cplusplus
+}
+#  endif
 
 #endif
 
-static void
-SWIG_AdaThrowException (SWIG_AdaExceptionCodes code, const char *msg)
-{
+static void SWIG_AdaThrowException (SWIG_AdaExceptionCodes code, const char *msg) {
   swig_ada_pending_exception_code = code;
-  strncpy (swig_ada_pending_exception_message, msg ? msg : "",
-	   sizeof (swig_ada_pending_exception_message) - 1);
-  swig_ada_pending_exception_message[sizeof
-				     (swig_ada_pending_exception_message) -
-				     1] = 0;
+  strncpy (swig_ada_pending_exception_message, msg ? msg : "", sizeof (swig_ada_pending_exception_message) - 1);
+  swig_ada_pending_exception_message [sizeof (swig_ada_pending_exception_message) - 1] = 0;
 }
 
 /* Contracts (%contract): a violated contract is recorded as a pending exception, and the wrapper returns. */
 #define SWIG_contract_assert(nullreturn, expr, msg) if (!(expr)) { SWIG_AdaThrowException (SWIG_AdaArgumentOutOfRangeException, msg); return nullreturn; } else
 
 /* Kept so that a wrapper which uses no exception does not draw an 'unused function' warning. */
-static void     (*swig_ada_throw_exception_reference) (SWIG_AdaExceptionCodes,
-						       const char *) =
-  SWIG_AdaThrowException;
+static void (*swig_ada_throw_exception_reference) (SWIG_AdaExceptionCodes, const char *) = SWIG_AdaThrowException;
+
+
+
+
+
 
 #ifdef __cplusplus
-extern          "C"
+extern "C"
 {
-#endif				/* __cplusplus */
+#endif /* __cplusplus */
   /* C code */
 #ifdef __cplusplus
 }
-#endif				/* __cplusplus */
+#endif /* __cplusplus */
 
-int
-hello0 ()
-{
-  return 0;
-}
 
-int
-hello1 ()
-{
-  return 1;
-}
 
-int
-hello2 ()
-{
-  return 2;
-}
+  int hello0()
+  {
+    return 0;
+  }
 
-int
-f (int min)
-{
-  return min;
-}
+  int hello1()
+  {
+    return 1;
+  }
+
+  int hello2()
+  {
+    return 2;
+  }  
+  int f(int min) { return min; }
+
 
 #define cat(x,y) x ## y
 
-typedef struct EmbeddedDefines
-{
-  int             dummy;
+
+
+typedef struct EmbeddedDefines {
+  int dummy;
 #define  EMBEDDED_DEFINE 44
 #ifdef SWIG
-                 %constant EMBEDDED_SWIG_CONSTANT = 55;
+%constant EMBEDDED_SWIG_CONSTANT = 55;
 #endif
 } EmbeddedDefines;
 
-const int       endif = 1;
-const int       define = 1;
-const int       defined = 1;
-int
-test (int defined)
+
+
+const int endif = 1;
+const int define = 1;
+const int defined = 1; 
+int test(int defined)
 {
   return defined;
 }
+ 
+
 
 #define TEUCHOS_TYPE_NAME_TRAITS_BUILTIN_TYPE_SPECIALIZATION(TYPE) \
 struct TypeNameTraits { \
@@ -296,109 +285,147 @@ struct TypeNameTraits { \
 } \
 
 
-TEUCHOS_TYPE_NAME_TRAITS_BUILTIN_TYPE_SPECIALIZATION (int);
 
-int
-method (struct TypeNameTraits tnt)
-{
+TEUCHOS_TYPE_NAME_TRAITS_BUILTIN_TYPE_SPECIALIZATION(int);
+
+
+int method(struct TypeNameTraits tnt) {
   return tnt.val;
 }
 
-#ifdef __cplusplus
-extern          "C"
-{
+#ifdef __cplusplus 
+extern "C" {
 #endif
-  DllExport int SWIGSTDCALL Ada_hello0 ()
-  {
-    int             jresult;
-    int             result;
+DllExport int SWIGSTDCALL Ada_hello0 (
+  )
+{
+  int jresult ;
+  int result;
+  
+  result = (int)hello0();
+  jresult = result; 
+  
+  
+  
+  return jresult;
+  
+}
 
-                    result = (int) hello0 ();
-                    jresult = result;
 
-                    return jresult;
 
-  }
+DllExport int SWIGSTDCALL Ada_hello1 (
+  )
+{
+  int jresult ;
+  int result;
+  
+  result = (int)hello1();
+  jresult = result; 
+  
+  
+  
+  return jresult;
+  
+}
 
-  DllExport int SWIGSTDCALL Ada_hello1 ()
-  {
-    int             jresult;
-    int             result;
 
-    result = (int) hello1 ();
-    jresult = result;
 
-    return jresult;
+DllExport int SWIGSTDCALL Ada_hello2 (
+  )
+{
+  int jresult ;
+  int result;
+  
+  result = (int)hello2();
+  jresult = result; 
+  
+  
+  
+  return jresult;
+  
+}
 
-  }
 
-  DllExport int SWIGSTDCALL Ada_hello2 ()
-  {
-    int             jresult;
-    int             result;
 
-    result = (int) hello2 ();
-    jresult = result;
+DllExport int SWIGSTDCALL Ada_f (
+  int a_arg1
+  )
+{
+  int jresult ;
+  int arg1 ;
+  int result;
+  
+  
+  arg1 = (int) a_arg1; 
+  
+  
+  result = (int)f(arg1);
+  jresult = result; 
+  
+  
+  
+  return jresult;
+  
+}
 
-    return jresult;
 
-  }
 
-  DllExport int SWIGSTDCALL Ada_f (int a_arg1)
-  {
-    int             jresult;
-    int             arg1;
-    int             result;
+DllExport int SWIGSTDCALL Ada_test (
+  int a_arg1
+  )
+{
+  int jresult ;
+  int arg1 ;
+  int result;
+  
+  
+  arg1 = (int) a_arg1; 
+  
+  
+  result = (int)test(arg1);
+  jresult = result; 
+  
+  
+  
+  return jresult;
+  
+}
 
-    arg1 = (int) a_arg1;
 
-    result = (int) f (arg1);
-    jresult = result;
 
-    return jresult;
+DllExport int SWIGSTDCALL Ada_method (
+  struct TypeNameTraits *a_arg1
+  )
+{
+  int jresult ;
+  struct TypeNameTraits arg1 ;
+  int result;
+  struct TypeNameTraits *argp1 ;
+  
+  
+  argp1 = (struct TypeNameTraits *) a_arg1; 
+  
+  arg1 = *argp1; 
+  
+  
+  result = (int)method(arg1);
+  jresult = result; 
+  
+  
+  
+  return jresult;
+  
+}
 
-  }
 
-  DllExport int SWIGSTDCALL Ada_test (int a_arg1)
-  {
-    int             jresult;
-    int             arg1;
-    int             result;
-
-    arg1 = (int) a_arg1;
-
-    result = (int) test (arg1);
-    jresult = result;
-
-    return jresult;
-
-  }
-
-  DllExport int SWIGSTDCALL Ada_method (struct TypeNameTraits *a_arg1)
-  {
-    int             jresult;
-    struct TypeNameTraits arg1;
-    int             result;
-    struct TypeNameTraits *argp1;
-
-    argp1 = (struct TypeNameTraits *) a_arg1;
-
-    arg1 = *argp1;
-
-    result = (int) method (arg1);
-    jresult = result;
-
-    return jresult;
-
-  }
 
 #ifdef __cplusplus
 }
 #endif
 #ifdef __cplusplus
-extern          "C"
-{
+extern "C" {
 #endif
 #ifdef __cplusplus
 }
 #endif
+

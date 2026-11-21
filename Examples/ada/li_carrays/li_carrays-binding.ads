@@ -3,6 +3,8 @@
 with Interfaces.C;
 with li_carrays.AB;
 with li_carrays.XY;
+with li_carrays.XYArray;
+with li_carrays.doubleArray;
 with swig.pointers;
 with Interfaces.C;
 use Interfaces.C;
@@ -25,6 +27,16 @@ package li_carrays.Binding is
      (ary   : in swig.pointers.int_Pointer; index : in Interfaces.C.int;
       value : in Interfaces.C.int);
 
+   function new_doubleArray
+     (nelements : in Interfaces.C.int) return li_carrays.doubleArray.Pointer;
+
+   procedure delete_doubleArray (Self : in li_carrays.doubleArray.Pointer);
+
+   function new_XYArray
+     (nelements : in Interfaces.C.int) return li_carrays.XYArray.Pointer;
+
+   procedure delete_XYArray (Self : in li_carrays.XYArray.Pointer);
+
    function new_ABArray
      (nelements : in Interfaces.C.int) return li_carrays.AB.Pointer;
 
@@ -46,6 +58,10 @@ private
    pragma Import (C, delete_intArray, "Ada_delete_intArray");
    pragma Import (C, intArray_getitem, "Ada_intArray_getitem");
    pragma Import (C, intArray_setitem, "Ada_intArray_setitem");
+   pragma Import (C, new_doubleArray, "Ada_new_doubleArray");
+   pragma Import (C, delete_doubleArray, "Ada_delete_doubleArray");
+   pragma Import (C, new_XYArray, "Ada_new_XYArray");
+   pragma Import (C, delete_XYArray, "Ada_delete_XYArray");
    pragma Import (C, new_ABArray, "Ada_new_ABArray");
    pragma Import (C, delete_ABArray, "Ada_delete_ABArray");
    pragma Import (C, ABArray_getitem, "Ada_ABArray_getitem");
