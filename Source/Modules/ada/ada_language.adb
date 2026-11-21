@@ -1866,8 +1866,9 @@ is
       --  class by reference, so it cannot be bound as a plain record. (The core notes both on the class, and
       --  later adds a destructor node to every class, declared or not.)
       --
-      if        get_Attribute (the_Node, "allocate:has_destructor")       /= null
-        or else get_Attribute (the_Node, "allocate:has_copy_constructor") /= null
+      if         Self.in_cpp_Mode     -- In C, a destructor can only be one which the interface file adds.
+        and then (        get_Attribute (the_Node, "allocate:has_destructor")       /= null
+                  or else get_Attribute (the_Node, "allocate:has_copy_constructor") /= null)
       then
          new_c_Class.has_nontrivial_Members;
       end if;
@@ -2095,6 +2096,40 @@ is
    begin
       if not Self.in_cpp_Mode
       then
+         --  C has no constructors, but the interface file may add one with '%extend' (as '%array_class' does).
+         --  It is bound as an ordinary function, 'new_<type>', which returns a pointer to a new object.
+         --
+         if         Attribute (the_Node, "feature:extend") /= ""
+           and then not Self.c_class_Stack.is_Empty
+           and then Self.name_Map_of_c_type.contains (Self.current_c_Class.Name & "*")
+         then
+            Self.current_c_Node := doh_Node (the_Node);
+            Status              := swigMod.Language.item (Self.all).constructorHandler (the_Node);
+
+            declare
+               use type C.int;
+
+               the_Name       : constant String       := "new_" & to_String (Self.current_c_Class.Name);
+               parameter_List :          doh_ParmList := doh_parmList (get_Attribute (the_Node, "parms"));
+               the_Function   : constant c_Function.view
+                 := c_Function.new_c_Function (+the_Name,
+                                               Self.name_Map_of_c_type.Element (Self.current_c_Class.Name & "*"));
+            begin
+               if         exists (parameter_List)
+                 and then SwigType_type (SwigType_Pointer (get_Attribute (Node_Pointer (parameter_List), "type"))) = T_VOID
+               then
+                  parameter_List := doh_parmList (next_Sibling (Node_Pointer (parameter_List)));
+               end if;
+
+               the_Function.Parameters.append (Self.to_c_Parameters (parameter_List));
+               the_Function.link_Symbol       := +("Ada_" & the_Name);
+               the_Function.returns_an_Access := True;
+
+               Self.current_Module.C.new_c_Functions   .append (the_Function);
+               Self.current_Module.C.new_c_Declarations.append (the_Function.all'Access);
+            end;
+         end if;
+
          return SWIG_OK;
       end if;
 
@@ -2385,6 +2420,31 @@ is
    begin
       if not Self.in_cpp_Mode
       then
+         --  Likewise a destructor which the interface file adds is the function 'delete_<type>'.
+         --
+         if         Attribute (the_Node, "feature:extend") /= ""
+           and then not Self.c_class_Stack.is_Empty
+           and then Self.name_Map_of_c_type.contains (Self.current_c_Class.Name & "*")
+           and then Self.name_Map_of_c_type.contains (+"void")
+         then
+            Self.current_c_Node := doh_Node (the_Node);
+            Status              := swigMod.Language.item (Self.all).destructorHandler (the_Node);
+
+            declare
+               the_Name     : constant String := "delete_" & to_String (Self.current_c_Class.Name);
+               the_Function : constant c_Function.view
+                 := c_Function.new_c_Function (+the_Name,
+                                               Self.name_Map_of_c_type.Element (+"void"));
+            begin
+               the_Function.Parameters.append (c_Parameter.new_c_Parameter (the_Name => +"Self",
+                                                                            the_Type => Self.name_Map_of_c_type.Element (Self.current_c_Class.Name & "*")));
+               the_Function.link_Symbol := +("Ada_" & the_Name);
+
+               Self.current_Module.C.new_c_Functions   .append (the_Function);
+               Self.current_Module.C.new_c_Declarations.append (the_Function.all'Access);
+            end;
+         end if;
+
          return SWIG_OK;
       end if;
 
