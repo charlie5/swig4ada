@@ -222,6 +222,38 @@ static void SWIG_AdaThrowException (SWIG_AdaExceptionCodes code, const char *msg
 /* Kept so that a wrapper which uses no exception does not draw an 'unused function' warning. */
 static void (*swig_ada_throw_exception_reference) (SWIG_AdaExceptionCodes, const char *) = SWIG_AdaThrowException;
 
+/* The type descriptors of the swig runtime. Ada passes a pointer as it is, and its type is checked when the binding is
+   compiled, so the Ada runtime has no table of types. A typemap written for another language may still name a descriptor
+   ('$descriptor', 'SWIGTYPE_p_Foo') and convert through one: each descriptor which a wrapper names is declared in its
+   header, by the Ada module, and a conversion gives the pointer back as it is. */
+typedef struct swig_type_info {
+  const char *name;
+} swig_type_info;
+
+#define SWIG_ConvertPtr(obj, ptr, type, flags)     ((void) (type), *(ptr) = (void *) (obj), 0)
+#define SWIG_NewPointerObj(ptr, type, flags)       ((void) (type), (void *) (ptr))
+
+/* A container of a given size. Its elements are made by their default constructor, which the element type may not have:
+   the container is then empty, and a pending exception says why. (Without this, the wrapper of a container of such a
+   type would not compile, whether or not the constructor were ever called.) */
+#if defined (__cplusplus) && __cplusplus >= 201103L
+#include <stddef.h>
+#include <type_traits>
+template <typename C> static C* swig_ada_new_sized_as (size_t n, std::true_type)  { return new C (n); }
+template <typename C> static C* swig_ada_new_sized_as (size_t,   std::false_type)
+{
+  SWIG_AdaThrowException (SWIG_AdaException, "a container cannot be given a size, as its element type has no default constructor");
+  return new C ();
+}
+template <typename C> static C* swig_ada_new_sized (size_t n)
+{
+  return swig_ada_new_sized_as< C > (n, std::is_default_constructible< typename C::value_type > ());
+}
+#elif defined (__cplusplus)
+#include <stddef.h>
+template <typename C> static C* swig_ada_new_sized (size_t n) { return new C (n); }
+#endif
+
 
 
 
