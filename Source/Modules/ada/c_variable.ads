@@ -24,6 +24,7 @@ is
          my_Type          : c_Type.view;
          Value            : unbounded_String;
          link_Symbol      : unbounded_String;     -- The C++ symbol of a variable which is declared in a namespace.
+         owner_Class      : c_Type.view;          -- The class of a static member variable.
 
          bit_Field        : Integer := undefined_Bitfield;
 

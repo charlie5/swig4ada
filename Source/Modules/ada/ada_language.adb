@@ -2543,12 +2543,91 @@ is
       the_Node      :          doh_Node    renames  N;
       the_swigType  : constant doh_SwigType     :=  doh_SwigType (get_Attribute (the_Node, "type"));
       variable_Name : constant unbounded_String := +Attribute (the_Node, "sym:name");
+
+      use type swig_Module.swig_Module_view;
    begin
       indent_Log;
       dlog (+"");
       dlog (+"'staticMemberVariableHandler':    Name => " & variable_Name & "   swig_type: " & to_String (the_swigType));
 
       Self.current_c_Node := doh_Node (the_Node);
+
+      --  A static member variable is a variable of the package of its class, imported by its C++ symbol. One which is
+      --  constant and has a value ('static const int Size = 4;') need have no symbol, and is given its value.
+      --
+      if        not Self.in_cpp_Mode
+        or else Self.getCurrentClass = null
+        or else Self.current_Module /= Self.Module_top'Access
+        or else Attribute (the_Node, "access") in "private" | "protected"
+      then
+         unindent_Log;
+         return SWIG_OK;
+      end if;
+
+      declare
+         use swigg.Utility;
+         use type C.int;
+
+         the_swig_Type :          SwigType_Pointer := SwigType_Pointer (doh_Copy (DOH_Pointer (the_swigType)));
+         is_Constant   : constant Boolean          := SwigType_isConst (the_swig_Type) /= 0;
+         value_Text    : constant String           := Attribute (the_Node, "value");
+         class_Name    : constant String           := +DOH_Pointer (get_Attribute (Self.getCurrentClass, "name"));
+         the_Symbol    : constant String           := cpp_Symbol (class_Name & "::" & to_String (variable_Name), Suffix => "E");
+
+         new_Variable  : constant c_Variable.view  := c_Variable.new_c_Variable (Name    => variable_Name,
+                                                                                 of_Type => null);
+      begin
+         new_Variable.is_Static        := True;
+         new_Variable.is_class_Pointer := SwigType_isPointer   (the_swig_Type) /= 0;
+         new_Variable.is_Pointer       := SwigType_isReference (the_swig_Type) /= 0;
+         new_Variable.owner_Class      := Self.current_c_Class;
+
+         strip_all_qualifiers (DOH_Pointer (the_swig_Type));
+
+         if SwigType_isArray (the_swig_Type) /= 0
+         then
+            Self.add_array_Bounds_to (new_Variable,
+                                      DOH_Pointer (the_swig_Type));
+         end if;
+
+         new_Variable.my_Type := Self.demand_c_Type_for (doh_swigType (to_Doh (to_String (strip_array_Bounds (doh_Copy (DOH_Pointer (the_swig_Type)))))));
+
+         if         is_Constant
+           and then value_Text /= ""
+           and then new_Variable.array_Bounds.is_Empty
+         then
+            begin
+               if to_String (new_Variable.my_Type.Name) in "int" | "unsigned int" | "long" | "unsigned long" | "short" | "unsigned short" | "long long" | "unsigned long long"
+               then
+                  new_Variable.Value := +Image (resolved_c_integer_Expression (Self, +value_Text,
+                                                                                     Self.integer_symbol_value_Map,
+                                                                                     Self.current_class_namespace_Prefix));
+
+               elsif to_String (new_Variable.my_Type.Name) in "double" | "float"
+               then
+                  new_Variable.Value := +ada.Strings.fixed.Trim (Long_Float'Image (Long_Float'Value (value_Text)), ada.Strings.Both);
+               end if;
+            exception
+               when others =>
+                  null;     -- The value is not a plain number, so the constant is imported.
+            end;
+         end if;
+
+         if new_Variable.Value = ""
+         then
+            if the_Symbol = ""
+            then
+               log (  "Warning: unable to bind the static member variable '" & variable_Name & "' of class '" & class_Name
+                    & "', as its C++ symbol cannot be made.");
+               unindent_Log;
+               return SWIG_OK;
+            end if;
+
+            new_Variable.link_Symbol := +the_Symbol;
+         end if;
+
+         Self.Module_top.C.new_c_Variables.append (new_Variable);
+      end;
 
       unindent_Log;
       return SWIG_OK;

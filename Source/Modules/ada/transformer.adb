@@ -1087,10 +1087,21 @@ is
                if not c_type_Map_of_ada_type.contains (the_c_Variable.my_Type)
                then
                   log ("Warning: unable to bind the variable '" & the_c_Variable.Name & "', as its type is not known.");
+
+               elsif      the_c_Variable.owner_Class /= null
+                 and then not c_type_Map_of_ada_type.contains (the_c_Variable.owner_Class)
+               then
+                  log (  "Warning: unable to bind the static member variable '" & the_c_Variable.Name
+                       & "', as its class '" & the_c_Variable.owner_Class.Name & "' is not bound.");
                else
                   the_ada_Variable := Self.to_ada_Variable (the_c_Variable);
 
-                  if        the_c_Variable.my_Type.c_type_Kind = C_Class
+                  if         the_c_Variable.owner_Class /= null     -- A static member variable is declared in the package of its class.
+                    and then c_type_Map_of_ada_type.contains (the_c_Variable.owner_Class)
+                  then
+                     ada_Package.view (c_type_Map_of_ada_type.Element (the_c_Variable.owner_Class).declaration_Package).add (the_ada_Variable);
+
+                  elsif     the_c_Variable.my_Type.c_type_Kind = C_Class
                     or else (         ada_Package.view (the_ada_Variable.my_Type.declaration_Package)        /= Result.Package_top     -- The top package cannot see
                              and then ada_Package.view (the_ada_Variable.my_Type.declaration_Package).Parent  = Result.Package_top)    -- its own child packages.
                     or else (         the_ada_Variable.is_Constant                                                              -- A constant pointer to a function
