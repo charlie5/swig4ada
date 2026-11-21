@@ -64,6 +64,14 @@ begin
       int_Vector.clear (V);
       check (int_Vector.size (V) = 0,           "a vector is cleared");
 
+      declare
+         Sized : aliased int_Vector.Item := int_Vector.construct (5);
+      begin
+         check (int_Vector.size (Sized) = 5,           "a vector made with a size has that many elements");
+         check (int_Vector.get  (Sized, 4).all = 0,    "each of which is made by its default constructor");
+         int_Vector.destruct_0 (Sized);
+      end;
+
       int_Vector.destruct (V);
    end vector;
 

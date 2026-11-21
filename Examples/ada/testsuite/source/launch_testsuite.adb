@@ -535,7 +535,7 @@ begin
       generate ("throw_exception.i",                use_CPP => True);
       generate ("typedef_class.i",                  use_CPP => True);
       generate ("typedef_inherit.i",                use_CPP => True);
-      generate ("typemap_self.i",                   use_CPP => True,   wrapper_Compiles => False);     -- Wrapper: uses the swig runtime type system, which the Ada runtime does not have.
+      generate ("typemap_self.i",                   use_CPP => True);
       generate ("typemap_variables.i",              use_CPP => True);
       generate ("types_directive.i",                use_CPP => True);
       generate ("union_scope.i",                    use_CPP => True);
@@ -587,7 +587,7 @@ begin
       generate ("abstract_virtual.i",               use_CPP => True);
       generate ("clientdata_prop_b.i",              use_CPP => True);
       generate ("contract.i",                       use_CPP => True);
-      generate ("dynamic_cast.i",                   use_CPP => True,   wrapper_Compiles => False);     -- Wrapper: uses the swig runtime type system, which the Ada runtime does not have.
+      generate ("dynamic_cast.i",                   use_CPP => True,   wrapper_Compiles => False);     -- Wrapper: the input sets a member of a type descriptor of the swig runtime, at file scope where Ada has no initialisation function.
       generate ("features.i",                       use_CPP => True);
       generate ("fvirtual.i",                       use_CPP => True);
       generate ("import_nomodule.i",                use_CPP => True);
@@ -736,7 +736,7 @@ begin
       generate ("smart_pointer_inherit.i",          use_CPP => True);
       generate ("smart_pointer_templatemethods.i",  use_CPP => True);
       generate ("smart_pointer_templatevariables.i", use_CPP => True);
-      generate ("std_containers.i",                 use_CPP => True,   wrapper_Compiles => False);     -- Wrapper: a container of a class with no default constructor has a constructor which takes a size (the input would '%ignore' it).
+      generate ("std_containers.i",                 use_CPP => True);
       generate ("template_arg_scope.i",             use_CPP => True);
       generate ("template_arg_typename.i",          use_CPP => True);
       generate ("template_classes.i",               use_CPP => True);
