@@ -75,6 +75,21 @@ struct Mixed {
   size_t      size;
 };
 
+/* Members whose types are nested and have no name, and an anonymous union. */
+struct Variant {
+  int kind;
+  union  { long l;  double d;  char c; }  val;
+  struct { short a;  short b; }           pair, pairs [2], *link;
+  union  { int i;  float f; };                    /* Its members are members of the structure, in C++. */
+  struct { int depth;  union { char tag;  int code; } inner; }  deep;
+  int last;
+};
+
+inline void   fill_variant (Variant* v)          { v->kind = 1;  v->val.d = 2.5;  v->pair.a = 3;  v->pair.b = 4;  v->pairs [1].b = 5;  v->link = &v->pair;
+                                                   v->i = 6;  v->deep.depth = 7;  v->deep.inner.code = 8;  v->last = 9; }
+inline double variant_sum  (const Variant& v)    { return v.kind + v.val.d + v.pair.a + v.pair.b + v.pairs [1].b + v.i + v.deep.depth + v.deep.inner.code + v.last; }
+inline int    size_of_variant ()                 { return (int) sizeof (Variant); }
+
 inline int    value_int    (Value v)             { return v.as_int; }
 inline Value  make_value   (int i)               { Value v;  v.as_int = i;  return v; }
 inline void   set_float    (Value* v, float f)   { v->as_float = f; }

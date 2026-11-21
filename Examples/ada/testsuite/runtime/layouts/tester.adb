@@ -8,6 +8,7 @@ with
      layouts.Device,
      layouts.Outer,
      layouts.Mixed,
+     layouts.Variant,
 
      swig,
      interfaces.C,
@@ -132,6 +133,27 @@ begin
       the_Outer.last            := 'y';
       check (outer_sum (the_Outer'unchecked_Access) = 1.5 + 7.0 + 9.0 + 10.0 + 3.5 + 100.0,   "C++ reads what Ada wrote");
    end structures_within_structures;
+
+   nested_types_with_no_name :
+   declare
+      the_Variant : aliased Variant.Item;
+   begin
+      check (bytes (Variant.Item'Object_Size) = size_of_variant,    "a structure with members of nested types which have no name has the size of C++");
+
+      fill_variant (the_Variant'unchecked_Access);
+      check (the_Variant.kind = 1 and the_Variant.last = 9,         "its first and last members");
+      check (the_Variant.val.d = 2.5,                               "a member which is a union with no name");
+      check (the_Variant.pair.a = 3 and the_Variant.pair.b = 4,     "a member which is a structure with no name");
+      check (the_Variant.pairs (1).b = 5,                           "an array of that structure, declared with it");
+      check (the_Variant.link /= null and then the_Variant.link.b = 4,   "and a pointer to it");
+      check (the_Variant.anonymous_3.i = 6,                         "a member of an anonymous union");
+      check (the_Variant.deep.depth = 7 and the_Variant.deep.inner.code = 8,   "a union with no name within a structure with none");
+
+      the_Variant.val.d       := 10.0;
+      the_Variant.anonymous_3.i := 20;
+      the_Variant.deep.inner.code := 30;
+      check (variant_sum (the_Variant'unchecked_Access) = 1.0 + 10.0 + 3.0 + 4.0 + 5.0 + 20.0 + 7.0 + 30.0 + 9.0,   "C++ reads what Ada wrote to each");
+   end nested_types_with_no_name;
 
    mixed_types :
    declare
