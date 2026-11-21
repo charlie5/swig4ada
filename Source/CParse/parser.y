@@ -54,6 +54,10 @@ static String  *Classprefix = 0;
 static String  *Namespaceprefix = 0;
 static int      inclass = 0;
 static Node    *currentOuterClass = 0; /* for nested classes */
+/* swig4ada: a base class which is inherited virtually, or a member whose type is a nested class with no name,
+   changes the layout of its class in a way which a language module cannot see from the parse tree. Each is
+   noted on the node of the class ("has_virtual_base", "has_unnamed_member"). */
+static int      virtual_base_seen = 0;
 static const char *last_cpptype = 0;
 static int      inherit_list = 0;
 static Parm    *template_parameters = 0;
@@ -1222,6 +1226,8 @@ static Node *nested_forward_declaration(const char *storage, const char *kind, S
       }
     } else {
       Swig_warning(WARN_PARSE_UNNAMED_NESTED_CLASS, cparse_file, cparse_line, "Nested %s not currently supported (ignored).\n", kind);
+      if (currentOuterClass)
+	SetFlag(currentOuterClass, "has_unnamed_member");
     }
   }
 
@@ -3677,6 +3683,9 @@ cpp_class_decl  : storage_class cpptype idcolon inherit LBRACE {
 		   Setline($<node>$,cparse_start_line);
 		   Setattr($<node>$,"kind",$2);
 		   if ($4) {
+		     if (virtual_base_seen)
+		       SetFlag($<node>$, "has_virtual_base");
+		     virtual_base_seen = 0;
 		     Setattr($<node>$,"baselist", Getattr($4,"public"));
 		     Setattr($<node>$,"protectedbaselist", Getattr($4,"protected"));
 		     Setattr($<node>$,"privatebaselist", Getattr($4,"private"));
@@ -3925,6 +3934,9 @@ cpp_class_decl  : storage_class cpptype idcolon inherit LBRACE {
 	       Setline($<node>$,cparse_start_line);
 	       Setattr($<node>$,"kind",$2);
 	       if ($3) {
+		 if (virtual_base_seen)
+		   SetFlag($<node>$, "has_virtual_base");
+		 virtual_base_seen = 0;
 		 Setattr($<node>$,"baselist", Getattr($3,"public"));
 		 Setattr($<node>$,"protectedbaselist", Getattr($3,"protected"));
 		 Setattr($<node>$,"privatebaselist", Getattr($3,"private"));
@@ -6910,7 +6922,7 @@ classkeyopt    : classkey {
                }
                ;
 
-opt_virtual    : VIRTUAL
+opt_virtual    : VIRTUAL { virtual_base_seen = 1; }
                | empty
                ;
 

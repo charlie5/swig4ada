@@ -95,6 +95,10 @@ static String  *Classprefix = 0;
 static String  *Namespaceprefix = 0;
 static int      inclass = 0;
 static Node    *currentOuterClass = 0; /* for nested classes */
+/* swig4ada: a base class which is inherited virtually, or a member whose type is a nested class with no name,
+   changes the layout of its class in a way which a language module cannot see from the parse tree. Each is
+   noted on the node of the class ("has_virtual_base", "has_unnamed_member"). */
+static int      virtual_base_seen = 0;
 static const char *last_cpptype = 0;
 static int      inherit_list = 0;
 static Parm    *template_parameters = 0;
@@ -1263,6 +1267,8 @@ static Node *nested_forward_declaration(const char *storage, const char *kind, S
       }
     } else {
       Swig_warning(WARN_PARSE_UNNAMED_NESTED_CLASS, cparse_file, cparse_line, "Nested %s not currently supported (ignored).\n", kind);
+      if (currentOuterClass)
+	SetFlag(currentOuterClass, "has_unnamed_member");
     }
   }
 
@@ -7287,6 +7293,9 @@ yyreduce:
 		   Setline((yyval.node),cparse_start_line);
 		   Setattr((yyval.node),"kind",(yyvsp[-3].id));
 		   if ((yyvsp[-1].bases)) {
+		     if (virtual_base_seen)
+		       SetFlag((yyval.node), "has_virtual_base");
+		     virtual_base_seen = 0;
 		     Setattr((yyval.node),"baselist", Getattr((yyvsp[-1].bases),"public"));
 		     Setattr((yyval.node),"protectedbaselist", Getattr((yyvsp[-1].bases),"protected"));
 		     Setattr((yyval.node),"privatebaselist", Getattr((yyvsp[-1].bases),"private"));
@@ -7543,6 +7552,9 @@ yyreduce:
 	       Setline((yyval.node),cparse_start_line);
 	       Setattr((yyval.node),"kind",(yyvsp[-2].id));
 	       if ((yyvsp[-1].bases)) {
+		 if (virtual_base_seen)
+		   SetFlag((yyval.node), "has_virtual_base");
+		 virtual_base_seen = 0;
 		 Setattr((yyval.node),"baselist", Getattr((yyvsp[-1].bases),"public"));
 		 Setattr((yyval.node),"protectedbaselist", Getattr((yyvsp[-1].bases),"protected"));
 		 Setattr((yyval.node),"privatebaselist", Getattr((yyvsp[-1].bases),"private"));
@@ -12022,6 +12034,10 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		   (yyval.id) = 0;
                }
 #line 12010 "y.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 527:
+    { virtual_base_seen = 1; }
     break;
 
   case 529:
