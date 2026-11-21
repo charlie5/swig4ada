@@ -357,7 +357,23 @@ is
                            base_Package : constant ada_Package.view
                              := ada_Package.view (c_type_Map_of_ada_type.Element (the_c_Type.base_Type).declaration_Package);
                         begin
-                           if         the_c_Type.ultimate_base_Type.c_type_Kind /= c_type.c_Class
+                           if         the_c_Type.ultimate_base_Type.c_type_Kind = c_type.Enum     -- An enumeration of the class which is declared
+                             and then base_Package = Result.Package_top                         -- in the top package (see below).
+                             and then c_namespace_Map_of_ada_Package.contains (c_nameSpace.view (the_c_Type.nameSpace))
+                             and then c_nameSpace."=" (c_nameSpace.view (the_c_Type.ultimate_base_Type.nameSpace), c_nameSpace.view (the_c_Type.nameSpace))
+                           then
+                              declare
+                                 the_class_Package : constant ada_Package.view
+                                   := c_namespace_Map_of_ada_Package.Element (c_nameSpace.view (the_c_Type.nameSpace));
+                              begin
+                                 new_ada_Type := ada_type.a_subtype.new_Subtype (the_class_Package,
+                                                                                 unique_type_Name (the_class_Package,
+                                                                                                   ada_Utility.to_ada_Identifier (the_c_Type.Name)),
+                                                                                 c_type_Map_of_ada_type.Element (the_c_type.base_Type)).all'Access;
+                                 new_ada_Type.declaration_Package.add (new_ada_Type);
+                              end;
+
+                           elsif      the_c_Type.ultimate_base_Type.c_type_Kind /= c_type.c_Class
                              and then the_c_Type.ultimate_base_Type.c_type_Kind /= c_type.type_Pointer
                              and then base_Package /= Result.Package_top
                              and then c_namespace_Map_of_ada_Package.contains (c_nameSpace.view (the_c_Type.nameSpace))
@@ -642,19 +658,107 @@ is
                         declare
                            use c_type.enum_literal_Vectors, GMP.discrete;
 
-                           the_declaration_Package : constant access ada_Package.Item'Class
+                           --  An enumeration of a class is declared in the package of the class. Where the class has a member which
+                           --  is a structure, and that structure has a member of the enumeration (a structure nested in the class,
+                           --  commonly), each of the two packages would need the other, and neither would compile. The enumeration is
+                           --  then declared in the top package, as '<class>_<enumeration>', and the package of the class has a subtype
+                           --  of it under its own name.
+                           --
+                           the_Class               : constant c_Type.view
                              := (if c_namespace_Map_of_ada_Package.contains (c_nameSpace.view (the_c_Type.Namespace))
+                                 then c_nameSpace.view (the_c_Type.Namespace).cpp_class_Type
+                                 else null);
+
+                           function value_Type (the_Member : access c_Variable.item'Class) return c_Type.view
+                           --
+                           --  The type which the member holds, or holds an array of. Null for a pointer.
+                           --
+                           is
+                              the_Type : c_Type.view := the_Member.my_Type;
+                           begin
+                              if the_Member.is_class_Pointer or else the_Type = null
+                              then
+                                 return null;
+                              end if;
+
+                              if the_Type.c_type_Kind = c_Type.array_Type
+                              then
+                                 the_Type := the_Type.element_Type;
+                              end if;
+
+                              while the_Type /= null
+                                and then the_Type.c_type_Kind = c_Type.Typedef
+                              loop
+                                 the_Type := the_Type.base_Type;
+                              end loop;
+
+                              return the_Type;
+                           end value_Type;
+
+                           function is_in_a_Cycle return Boolean
+                           is
+                              the_Member_Type : c_Type.view;
+                           begin
+                              if the_Class = null
+                              then
+                                 return False;
+                              end if;
+
+                              for Each of the_Class.Components
+                              loop
+                                 the_Member_Type := value_Type (Each);
+
+                                 if         the_Member_Type /= null
+                                   and then the_Member_Type /= the_Class
+                                   and then the_Member_Type.c_type_Kind = c_Type.c_Class
+                                 then
+                                    for Inner of the_Member_Type.Components
+                                    loop
+                                       if value_Type (Inner) = the_c_Type
+                                       then
+                                          return True;
+                                       end if;
+                                    end loop;
+                                 end if;
+                              end loop;
+
+                              return False;
+                           end is_in_a_Cycle;
+
+                           is_moved_Out            : constant Boolean := is_in_a_Cycle;
+
+                           the_declaration_Package : constant access ada_Package.Item'Class
+                             := (if         c_namespace_Map_of_ada_Package.contains (c_nameSpace.view (the_c_Type.Namespace))
+                                   and then not is_moved_Out
                                  then c_namespace_Map_of_ada_Package.Element (c_nameSpace.view (the_c_Type.Namespace))
                                  else Result.Package_top);     -- The namespace of the enumeration has no package of its own.
 
                            new_ada_Enumeration     : constant ada_Type.elementary.scalar.discrete.enumeration.view
-                             := ada_Type.elementary.scalar.discrete.enumeration.new_Item (the_declaration_Package,
-                                                                                          to_ada_Identifier (the_c_Type.Name));
+                             := ada_Type.elementary.scalar.discrete.enumeration.new_Item
+                                  (the_declaration_Package,
+                                   (if is_moved_Out then unique_type_Name (Result.Package_top,
+                                                                           to_ada_Identifier (the_Class.Name & "_" & the_c_Type.Name))
+                                                    else to_ada_Identifier (the_c_Type.Name)));
 
                            the_c_Literals          : constant c_type.enum_literal_vectors.Vector := the_c_Type.Literals;
                            Cursor                  :          c_type.enum_literal_Vectors.Cursor := the_c_Literals.First;
                         begin
                            new_ada_Enumeration.object_Size_is (the_c_Type.enum_Size);
+
+                           if is_moved_Out
+                           then
+                              declare
+                                 the_class_Package : constant ada_Package.view
+                                   := c_namespace_Map_of_ada_Package.Element (c_nameSpace.view (the_c_Type.Namespace));
+                                 the_Subtype       : constant ada_Type.a_subType.view
+                                   := ada_Type.a_subType.new_Subtype (the_class_Package,
+                                                                      unique_type_Name (the_class_Package, to_ada_Identifier (the_c_Type.Name)),
+                                                                      new_ada_Enumeration.all'Access);
+                              begin
+                                 the_Subtype.renames_its_Literals;
+                                 the_class_Package.add (the_Subtype.all'Access);
+                              end;
+                           end if;
 
                            declare
                               function Hash (From : in gmp.discrete.Integer) return ada.Containers.Hash_Type

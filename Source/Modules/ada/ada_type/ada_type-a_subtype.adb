@@ -16,7 +16,8 @@ is
    begin
       return Item' (declaration_package => declaration_Package,
                     name                => Name,
-                    base_type           => base_Type);
+                    base_type           => base_Type,
+                    renames_its_Literals => False);
    end Subtype_construct;
 
 
@@ -93,6 +94,22 @@ is
    begin
       return Self.base_Type;
    end base_Type;
+
+
+
+   procedure renames_its_Literals (Self : access Item)
+   is
+   begin
+      Self.renames_its_Literals := True;
+   end renames_its_Literals;
+
+
+
+   function renames_its_Literals (Self : access Item) return Boolean
+   is
+   begin
+      return Self.renames_its_Literals;
+   end renames_its_Literals;
 
 
    overriding

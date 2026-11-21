@@ -1558,6 +1558,35 @@ is
                   end if;
                end;
             else
+               --  A subtype of an enumeration of another package (an enumeration of a class, which had to be declared in the
+               --  top package: see the transformer) is given its literals too, so that they may be named as those of the class.
+               --
+               if         Self.renames_its_Literals
+                 and then Self.base_Type.all in ada_Type.elementary.scalar.discrete.enumeration.item'Class
+               then
+                  declare
+                     use ada_Type.elementary.scalar.discrete.enumeration.enum_literal_Vectors;
+
+                     the_Enumeration : constant ada_Type.elementary.scalar.discrete.enumeration.view
+                       := ada_Type.elementary.scalar.discrete.enumeration.view (Self.base_Type);
+                     the_Literals    : constant ada_Type.elementary.scalar.discrete.enumeration.enum_literal_Vectors.Vector
+                       := the_Enumeration.Literals;
+                     the_Text        : unbounded_String
+                       := "   subtype " & Self.Name & " is " & Self.base_Type.qualified_Name & ";" & NL;
+                  begin
+                     for Each in 1 .. Natural (Length (the_Literals))
+                     loop
+                        if not (for some Prior in 1 .. Each - 1 => Element (the_Literals, Prior).Name = Element (the_Literals, Each).Name)
+                        then
+                           append (the_Text,   NL & "   function " & Element (the_Literals, Each).Name & " return " & Self.Name
+                                             & " renames " & Self.base_Type.declaration_Package.qualified_Name & "." & Element (the_Literals, Each).Name & ";");
+                        end if;
+                     end loop;
+
+                     return to_String (the_Text);
+                  end;
+               end if;
+
                return to_String ("   subtype " & Self.Name & " is " & Self.base_Type.qualified_Name & ";");
             end if;
          end;

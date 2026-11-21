@@ -59,6 +59,11 @@ is
                                                            Depth     : in     Natural) return Boolean;
 
    function  base_Type              (Self : access Item) return ada_Type.view;
+
+   procedure renames_its_Literals   (Self : access Item);
+   function  renames_its_Literals   (Self : access Item) return Boolean;
+   --
+   --  A subtype of an enumeration of another package, which is declared with a renaming of each literal.
    overriding
    function  resolved_Type          (Self : access Item) return ada_Type.view;
 
@@ -76,6 +81,7 @@ private
    type Item is new ada_Type.item with
       record
          base_Type : ada_Type.view;     -- The base type of the typedef (ie, the 'int' in   'typedef  int  Index_Type;').
+         renames_its_Literals : Boolean := False;
       end record;
 
 end ada_Type.a_subType;
