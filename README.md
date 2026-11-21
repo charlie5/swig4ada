@@ -187,8 +187,10 @@ Other things to know
   through a member of the outer type: 'the_Variant.anonymous_3.i'.
 - A structure with bit-fields is laid out as C has it, by a record representation clause, for the machine
   which generates the binding.
-- Where a record is laid out for the generating machine, the wrapper checks, when it is compiled, that the
-  class has that layout, and does not compile if it has not. With '-check-layout' it checks every class.
+- The wrapper checks, when it is compiled, that each class has the size, and each public member the place,
+  which its Ada record takes it to have, and does not compile if it has not: the binding must then be
+  generated again on that machine. '-no-check-layout' keeps the checks to the records which are laid out
+  for the generating machine, and defining 'SWIG_ADA_NO_LAYOUT_CHECKS' when compiling leaves them all out.
 - C++ may place the members of a derived class in the unused end of its base class. The record is then
   laid out to match, and that base is storage alone ('Base_storage'), reached by 'as_Base':
 
