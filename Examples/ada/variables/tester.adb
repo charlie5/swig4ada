@@ -8,11 +8,29 @@ with ada.Text_IO;          use ada.Text_IO;
 
 
 
+with ada.Command_Line;
+
 procedure Tester
 is
    use vars_example;
 
    use type interfaces.c.signed_Char;
+   Failures : Natural := 0;
+
+
+   procedure check (Condition : in Boolean;   What : in String)
+   --
+   --  Notes a result which is not as it should be, so that the tester ends with a failure status.
+   --
+   is
+   begin
+      if not Condition
+      then
+         ada.Text_IO.put_Line ("   FAILED  " & What);
+         Failures := Failures + 1;
+      end if;
+   end check;
+
 begin
 
    ivar := 42;
@@ -47,12 +65,20 @@ begin
    
    dvar := 2.1828;
    put_Line ("dvar => " & double'Image (dvar));
+
+   check (ivar = 42 and svar = -31_000 and lvar = 65_537,               "the signed integer variables hold what Ada gave them");
+   check (uivar = 123_456 and usvar = 61_000 and ulvar = 654_321,       "and the unsigned ones");
+   check (scvar = -13 and ucvar = 251 and cvar = 'S',                   "and those of the character types");
+   check (fvar = 3.14159 and dvar = 2.1828,                             "and the real ones");
    
    strvar := new_String ("hello world");
    put_Line ("strvar => " & Value (strvar));
 
    put_Line ("cstrvar => " & to_Ada (cstrvar));
    put_Line ("done cstrvar");
+
+   check (String'(Value (strvar)) = "hello world",                      "a string variable holds the string which Ada gave it");
+   check (to_Ada (cstrvar) = "Goodbye",                                 "a constant array of characters has the text which C gave it");
    
     
 
@@ -66,6 +92,11 @@ begin
    put_Line ("ptptr => " & Value (Point_print (ptptr)));
    
    put_Line ("pt => " & Value (Point_print (pt'access)));
+
+   check (iptrvar.all = 37,                                             "a pointer variable points to the integer which C made");
+   check (to_Ada (vars_example.name) = "Dave",                          "an array of characters has the text which C gave it");
+   check (String'(Value (Point_print (ptptr)))     = "(37,42)",         "C reads a structure which Ada allocated");
+   check (String'(Value (Point_print (pt'Access))) = "(10,20)",         "and the structure variable which C declares");
    
    new_Line;
    put_Line ("... values printed from 'C' ...");
@@ -77,12 +108,19 @@ begin
    put_Line ("Changed 'pt' => ");
    pt_print;
 
+   check (pt.x = 37 and pt.y = 42,                                      "a structure variable is assigned to");
+   check (String'(Value (Point_print (pt'Access))) = "(37,42)",         "and C sees its new value");
+
 --    example.pt = example.ptptr;
 
 --    Console.WriteLine( "The new value is" );
 --    example.pt_print();
 --    Console.WriteLine( "You should see the value" + example.Point_print(example.ptptr) );
 --  }
+   if Failures /= 0
+   then
+      ada.Command_Line.set_exit_Status (ada.Command_Line.Failure);
+   end if;
       
 end Tester;
 

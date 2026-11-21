@@ -12,8 +12,31 @@ with system;
 
 
 
+with ada.Command_Line;
+
 procedure Tester
 is
+   Failures : Natural := 0;
+
+
+   procedure check (Condition : in Boolean;   What : in String)
+   --
+   --  Notes a result which is not as it should be, so that the tester ends with a failure status.
+   --
+   is
+   begin
+      if not Condition
+      then
+         ada.Text_IO.put_Line ("   FAILED  " & What);
+         Failures := Failures + 1;
+      end if;
+   end check;
+
+
+   function ends_with (Text : in String;   the_End : in String) return Boolean
+   is (         Text'Length >= the_End'Length
+       and then Text (Text'Last - the_End'Length + 1 .. Text'Last) = the_End);
+
    use ref_example;
 
    A : aliased Vector.item := construct ( 3.0,  4.0,  5.0);
@@ -24,6 +47,9 @@ begin
 
    put_Line ("Vector A => " & Value (print (A)));
    put_Line ("Vector B => " & Value (print (B)));
+
+   check (ends_with (Value (print (A)), "(3,4,5)"),      "the first vector is as it was constructed");
+   check (ends_with (Value (print (B)), "(10,11,12)"),   "and the second");
 --   put_Line ("Vector A => " & Value (print (A'access)));
 --   put_Line ("Vector B => " & Value (print (B'access)));
 
@@ -32,6 +58,7 @@ begin
       --C : aliased Vector.item := addv (A, B);
    begin
       put_Line ("Vector A + B => " & Value (print (C)));
+      check (ends_with (Value (print (C)), "(13,15,17)"),   "the sum of two vectors which are passed by reference");
 --      put_Line ("Vector A + B => " & Value (print (C'access)));
    end;
 
@@ -47,6 +74,13 @@ begin
          the_Item : access Vector.item := get (VA, Int (each));
       begin
          put_line ("VA (" & integer'image (Each) & ") => " & Value (print (the_Item.all)));
+
+         case Each
+         is
+            when 0      => check (ends_with (Value (print (the_Item.all)), "(3,4,5)"),      "the first item of the array is a copy of the first vector");
+            when 1      => check (ends_with (Value (print (the_Item.all)), "(10,11,12)"),   "and the second of the second");
+            when others => null;
+         end case;
 --         put_line ("VA (" & integer'image (Each) & ") => " & Value (print (the_Item)));
       end;
    end loop;
@@ -62,6 +96,10 @@ begin
    end loop;
 
 
+   if Failures /= 0
+   then
+      ada.Command_Line.set_exit_Status (ada.Command_Line.Failure);
+   end if;
 end Tester;
 
 

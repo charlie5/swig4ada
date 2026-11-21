@@ -13,8 +13,26 @@ with ada.text_IO;  use  ada.text_IO;
 
 
 
+with ada.Command_Line;
+
 procedure Tester
 is
+   Failures : Natural := 0;
+
+
+   procedure check (Condition : in Boolean;   What : in String)
+   --
+   --  Notes a result which is not as it should be, so that the tester ends with a failure status.
+   --
+   is
+   begin
+      if not Condition
+      then
+         ada.Text_IO.put_Line ("   FAILED  " & What);
+         Failures := Failures + 1;
+      end if;
+   end check;
+
    use class_example;
 begin
    --delay 15.0;
@@ -58,6 +76,10 @@ begin
                                 & ","
                                 & double'image (the_Square.Y) & ")");
 
+      check (Shape.nshapes = 2,                             "C++ has counted both shapes");
+      check (the_Circle.X =  20.0 and the_Circle.Y = 30.0,  "the members of the circle are as they were set");
+      check (the_Square.X = -10.0 and the_Square.Y =  5.0,  "those of the square are as they were set through a view of its base class");
+
 
 --        put_Line ("   circle perimeter (circle view):     " & double'Image (the_Circle.Perimeter));
 --        put_Line ("   circle area      (circle view):     " & double'Image (the_Circle.Area));
@@ -76,6 +98,13 @@ begin
             put_Line ("   area:     " & double'Image (the_Shapes (each).Area));
             put_Line ("   perimeter:" & double'Image (the_Shapes (each).Perimeter));
          end loop;
+
+         --  Each call dispatches to the function of the object's own class.
+         --
+         check (abs (the_Shapes (1).Area      - 0.785_398_163) < 1.0e-6,   "the area of a circle of radius 0.5");
+         check (abs (the_Shapes (1).Perimeter - 3.141_592_654) < 1.0e-6,   "its perimeter");
+         check (the_Shapes (2).Area      = 25.0,                           "the area of a square of width 5");
+         check (the_Shapes (2).Perimeter = 20.0,                           "its perimeter");
       end;
 
 
@@ -90,7 +119,13 @@ begin
 
 --     put_Line (int'Image (shape.nshapes) & " shapes remain.");
 
+   check (Shape.nshapes = 0,   "the guards have destructed both shapes");
+
    put_Line ("Goodbye.");
+   if Failures /= 0
+   then
+      ada.Command_Line.set_exit_Status (ada.Command_Line.Failure);
+   end if;
 end Tester;
 
 

@@ -9,8 +9,26 @@ with ada.text_IO;    use ada.text_IO;
 
 
 
+with ada.Command_Line;
+
 procedure Tester
 is
+   Failures : Natural := 0;
+
+
+   procedure check (Condition : in Boolean;   What : in String)
+   --
+   --  Notes a result which is not as it should be, so that the tester ends with a failure status.
+   --
+   is
+   begin
+      if not Condition
+      then
+         ada.Text_IO.put_Line ("   FAILED  " & What);
+         Failures := Failures + 1;
+      end if;
+   end check;
+
    use template_example;
 
    Vector_integer : aliased vecInt.item    := construct (sz =>  100);
@@ -22,6 +40,9 @@ begin
 
    put_Line ("maxInt    (   3,    7) => " & int'Image    (maxInt    (   3,    7)));
    put_Line ("maxDouble (3.14, 2.18) => " & double'Image (maxDouble (3.14, 2.18)));
+
+   check (maxInt    (   3,    7) = 7,      "the function template, for integers");
+   check (maxDouble (3.14, 2.18) = 3.14,   "and for real numbers");
    
 
    
@@ -35,6 +56,7 @@ begin
    
    new_Line;
    put_line ("Sum_integer => " & int'Image (Sum_integer));
+   check (Sum_integer = 9_900,   "the class template for integers holds what was put into it");
    
 
    declare
@@ -50,8 +72,13 @@ begin
       end loop;
    
       put_line ("Sum_double  => " & double'Image (Sum_double)  & "   should be " & double'Image (check_Result));
+      check (Sum_double = check_Result,   "the class template for real numbers holds what was put into it");
       new_Line;
    end;
+   if Failures /= 0
+   then
+      ada.Command_Line.set_exit_Status (ada.Command_Line.Failure);
+   end if;
    
 end Tester;
 

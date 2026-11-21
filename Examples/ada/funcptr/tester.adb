@@ -9,8 +9,26 @@ with system;
 
 
 
+with ada.Command_Line;
+
 procedure Tester
 is
+   Failures : Natural := 0;
+
+
+   procedure check (Condition : in Boolean;   What : in String)
+   --
+   --  Notes a result which is not as it should be, so that the tester ends with a failure status.
+   --
+   is
+   begin
+      if not Condition
+      then
+         ada.Text_IO.put_Line ("   FAILED  " & What);
+         Failures := Failures + 1;
+      end if;
+   end check;
+
    A : Int := 37;
    B : Int := 42;
 
@@ -24,9 +42,17 @@ begin
    put_Line ("ADD (A, B) = " & Int'image (do_op (A, B, add'access)));
    put_Line ("SUB (A, B) = " & Int'image (do_op (A, B, sub'access)));
    put_Line ("MUL (A, B) = " & Int'image (do_op (A, B, mul'access)));
+
+   check (do_op (A, B, add'Access) =   79,   "C calls the function 'add' which it is given");
+   check (do_op (A, B, sub'Access) =   -5,   "and 'sub'");
+   check (do_op (A, B, mul'Access) = 1554,   "and 'mul'");
 --   put_Line ("ADD (A, B) = " & Int'image (do_op (A, B, add'access)));
 --   put_Line ("SUB (A, B) = " & Int'image (do_op (A, B, sub'access)));
 --   put_Line ("MUL (A, B) = " & Int'image (do_op (A, B, mul'access)));
+   if Failures /= 0
+   then
+      ada.Command_Line.set_exit_Status (ada.Command_Line.Failure);
+   end if;
   
 end Tester;
 
