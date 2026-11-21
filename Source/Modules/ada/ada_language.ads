@@ -301,6 +301,8 @@ private
          f_Init     : swig_Core.Pointers.File_Pointer;
          f_Ada      : swig_Core.Pointers.File_Pointer;           -- Contains Ada specific C++ declarations and code.
 
+         all_layout_Checks : Boolean := False;                      -- Check the layout of every class in the wrapper file ('-check-layout').
+
          current_linkage_Symbol : unbounded_String;
          current_lStr           : unbounded_String;
 

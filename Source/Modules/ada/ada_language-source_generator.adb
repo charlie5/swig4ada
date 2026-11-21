@@ -342,6 +342,13 @@ is
          end if;
       end if;
 
+      if the_Type_Name = "swig.std_strings.std_string"
+      then   -- A string of the C++ standard library, whose record gives its layout in GNU libstdc++.
+         Size      := 4 * address_Size;
+         Alignment := address_Size;
+         return True;
+      end if;
+
       if        the_Resolved.all in ada_Type.elementary.an_access.item'Class
         or else size_by_Name (the_Type_Name) = address_Size + 1     -- (See 'size_by_Name'.)
         or else size_by_Name (the_Name)      = address_Size + 1
@@ -403,6 +410,14 @@ is
       if not the_Record.base_Classes.is_Empty
       then
          return False;     -- A type extension, which GNAT lays out after its parent.
+      end if;
+
+      if        the_Record.has_lost_Layout                               -- A base class or a member could not be bound.
+        or else (         the_Record.component_Count = 0                 -- A class which is declared and never defined
+                 and then the_Record.layout_Name = ""                    -- cannot be told from one with no members.
+                 and then not the_Record.is_Virtual)
+      then
+         return False;
       end if;
 
       if the_Record.is_Virtual
@@ -2837,6 +2852,114 @@ is
       write_Spec (for_Package => the_Package.qualified_Name & ".Guards",
                   Source      => Source);
    end emit_guard_Spec;
+
+
+
+   function layout_Checks (Self : access ada_Language.item) return String
+   --
+   --  Gives, for the wrapper file, a check of the layout which each class is taken to have: its size, and the place
+   --  of each of its public members. The checks are made when the wrapper file is compiled, so a record which does not
+   --  match its class does not build, where it would otherwise read and write the wrong storage.
+   --
+   --  A class is checked where its record has been laid out here (see 'needs_Layout'), as that layout is for the
+   --  machine which generated the binding. With '-check-layout' every class whose layout can be worked out is.
+   --
+   is
+      the_Checks : unbounded_String;
+      Count      : Natural := 0;
+
+
+      procedure check (the_Record : in ada_Type.composite.a_record.view)
+      is
+         the_Name      : constant String := to_String (the_Record.layout_Name);
+         the_Places    :          component_Places (1 .. the_Record.component_Count);
+         the_Size      :          Natural;
+         the_Alignment :          Natural;
+         data_Size     :          Natural;
+      begin
+         if        the_Name = ""
+           or else (the_Record.component_Count = 0 and then not the_Record.is_Virtual)        -- With no members, there is nothing to misplace (and C gives it no size).
+           or else not the_Record.base_Classes.is_Empty                                       -- A type extension, which is left to GNAT.
+           or else not (Self.all_layout_Checks or else needs_Layout (the_Record))
+           or else not laid_Out (the_Record, the_Places, the_Size, the_Alignment, data_Size)
+         then
+            return;
+         end if;
+
+         --  The class is named by a typedef, as its own name may hold a comma, which a macro cannot take.
+         --
+         Count := Count + 1;
+
+         declare
+            the_Type : constant String := "swig_ada_layout_" & ada.Strings.fixed.Trim (Natural'Image (Count), ada.Strings.Left);
+         begin
+            append (the_Checks,   "typedef " & the_Name & " " & the_Type & ";" & NL
+                                & "SWIG_ADA_LAYOUT_CHECK (sizeof (" & the_Type & ") ==" & Natural'Image (the_Size / 8)
+                                & ", ""swig4ada: the Ada record of '" & the_Name & "' has not the size of its class."")" & NL);
+
+            if         not the_Record.is_Union
+              and then ada.Strings.fixed.Index (the_Name, "std::") /= 1     -- A library file gives the members of a standard class names of its own.
+            then
+               for Each in 1 .. the_Record.component_Count
+               loop
+                  declare
+                     the_Component : constant access ada_Variable.item'Class := the_Record.Components (Each);
+                  begin
+                     if         the_Component.member_Name /= ""
+                       and then the_Component.bit_Field < 0
+                       and then not the_Component.is_base_Class
+                     then
+                        append (the_Checks,   "SWIG_ADA_LAYOUT_CHECK (offsetof (" & the_Type & ", " & to_String (the_Component.member_Name) & ") =="
+                                            & Natural'Image (the_Places (Each).First / 8)
+                                            & ", ""swig4ada: the member '" & to_String (the_Component.member_Name) & "' of the Ada record of '" & the_Name
+                                            & "' is not where its class has it."")" & NL);
+                     end if;
+                  end;
+               end loop;
+            end if;
+         end;
+      end check;
+
+   begin
+      for Each of Self.Module_top.Ada.new_Packages
+      loop
+         if Each.cpp_class_Type /= null
+         then
+            check (Each.cpp_class_Type);
+         end if;
+      end loop;
+
+      if the_Checks = ""
+      then
+         return "";
+      end if;
+
+      return (
+                     NL
+                   & "/* The layout which the Ada records take their classes to have. A check which fails means that a record" & NL
+                   & "   does not match its class on this machine, and that the binding must be generated again here. */"      & NL
+                   & NL
+                   & "#include <stddef.h>" & NL
+                   & NL
+                   & "#if defined (__cplusplus) && __cplusplus >= 201103L" & NL
+                   & "#  define SWIG_ADA_LAYOUT_CHECK(Condition, Message)  static_assert (Condition, Message);" & NL
+                   & "#elif !defined (__cplusplus) && defined (__STDC_VERSION__) && __STDC_VERSION__ >= 201112L" & NL
+                   & "#  define SWIG_ADA_LAYOUT_CHECK(Condition, Message)  _Static_assert (Condition, Message);" & NL
+                   & "#else" & NL
+                   & "#  define SWIG_ADA_LAYOUT_CHECK(Condition, Message)" & NL
+                   & "#endif" & NL
+                   & NL
+                   & "#if defined (__GNUC__) && defined (__cplusplus)" & NL
+                   & "#  pragma GCC diagnostic push" & NL
+                   & "#  pragma GCC diagnostic ignored ""-Winvalid-offsetof""" & NL
+                   & "#endif" & NL
+                   & NL
+                   & to_String (the_Checks)
+                   & NL
+                   & "#if defined (__GNUC__) && defined (__cplusplus)" & NL
+                   & "#  pragma GCC diagnostic pop" & NL
+                   & "#endif" & NL);
+   end layout_Checks;
 
 
 

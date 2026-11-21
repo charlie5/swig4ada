@@ -48,6 +48,10 @@ is
 
    procedure has_nontrivial_Members (Self : access Item);
    procedure is_not_layout_Pod      (Self : access Item);
+   procedure lose_Layout            (Self : access Item);
+   function  has_lost_Layout        (Self : access Item) return Boolean;              -- It has lost a base class or a member, and does not match its class.
+   procedure layout_Name_is         (Self : access Item;   Now : in unbounded_String);
+   function  layout_Name            (Self : access Item) return unbounded_String;     -- The name of the class in the wrapper file, or null.
    function  is_layout_Pod          (Self : access Item) return Boolean;
    --
    --  The C++ class declares a destructor or a copy constructor.
@@ -118,6 +122,8 @@ private
          has_virtual_Members                       : Boolean := False;
          has_nontrivial_Members                    : Boolean := False;
          is_not_layout_Pod                         : Boolean := False;
+         layout_Name                               : unbounded_String;
+         has_lost_Layout                           : Boolean := False;
          requires_Interfaces_C_Int_use             : Boolean := False;
          requires_Interfaces_C_Unsigned_use        : Boolean := False;
          requires_Interfaces_C_Unsigned_Char_use   : Boolean := False;

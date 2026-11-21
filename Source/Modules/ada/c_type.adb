@@ -1211,6 +1211,42 @@ is
 
 
 
+   procedure lose_Layout (Self : access Item)
+   is
+   begin
+      if Self.my.c_type_Kind = c_Class
+      then
+         Self.my.has_lost_Layout := True;
+      end if;
+   end lose_Layout;
+
+
+
+   function has_lost_Layout (Self : access Item) return Boolean
+   is
+   begin
+      return         Self.my.c_type_Kind = c_Class
+            and then Self.my.has_lost_Layout;
+   end has_lost_Layout;
+
+
+
+   procedure layout_Name_is (Self : access Item;   Now : in unbounded_String)
+   is
+   begin
+      Self.my.layout_Name := Now;
+   end layout_Name_is;
+
+
+
+   function layout_Name (Self : access Item) return unbounded_String
+   is
+   begin
+      return (if Self.my.c_type_Kind = c_Class then Self.my.layout_Name else null_unbounded_String);
+   end layout_Name;
+
+
+
    function is_layout_Pod (Self : access Item) return Boolean
    is
    begin

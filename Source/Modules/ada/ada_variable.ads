@@ -27,6 +27,7 @@ is
          bit_Field        : Integer                    := undefined_Bitfield;
          is_anonymous_Bits : Boolean                   := False;     -- A bit-field with no name, which only takes part in the layout of its record.
          is_base_Class     : Boolean                   := False;     -- A record component which is a base class of the class.
+         member_Name       : unbounded_String;                        -- The name of the member in the wrapper file, for a check of its place.
          array_Bounds     : array_bounds_vectors.Vector;
          is_Pointer       : Boolean                    := False;
          is_class_Pointer : Boolean                    := False;

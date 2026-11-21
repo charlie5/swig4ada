@@ -28,6 +28,7 @@ is
 
          bit_Field        : Integer := undefined_Bitfield;
          is_anonymous_Bits : Boolean := False;    -- A bit-field with no name, which only takes part in the layout of its class.
+         member_Name       : unbounded_String;    -- The name of a public member variable in the wrapper file, for a check of its place.
          is_ignored_Member : Boolean := False;    -- A member which the interface file ignores, and which only reserves its storage.
 
          is_Static        : Boolean := False;

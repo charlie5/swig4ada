@@ -340,6 +340,38 @@ is
 
 
 
+   procedure lose_Layout (Self : access Item)
+   is
+   begin
+      Self.has_lost_Layout := True;
+   end lose_Layout;
+
+
+
+   function has_lost_Layout (Self : access Item) return Boolean
+   is
+   begin
+      return Self.has_lost_Layout;
+   end has_lost_Layout;
+
+
+
+   procedure layout_Name_is (Self : access Item;   Now : in unbounded_String)
+   is
+   begin
+      Self.layout_Name := Now;
+   end layout_Name_is;
+
+
+
+   function layout_Name (Self : access Item) return unbounded_String
+   is
+   begin
+      return Self.layout_Name;
+   end layout_Name;
+
+
+
    function is_layout_Pod (Self : access Item) return Boolean
    is
    begin

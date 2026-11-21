@@ -22,6 +22,7 @@ is
         := new ada_Language.item' (swigMod.Language.construct with
 
                                    new_Modules           => <>,
+                                   all_layout_Checks     => False,
                                    imported_Classes_defined_here => <>,
                                    name_Map_of_module    => <>,
                                    Module_core           => <>,

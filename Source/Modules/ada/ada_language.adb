@@ -58,9 +58,10 @@ is
    --- Globals
    --
 
-   usage_help_Text : constant array (1 .. 2) of access String
+   usage_help_Text : constant array (1 .. 3) of access String
      := [new String'("Ada Options (available with -ada)"),
-         new String'("       -namespace <ns> - Generate wrappers into Ada namespace <ns>")];
+         new String'("       -namespace <ns> - Generate wrappers into Ada namespace <ns>"),
+         new String'("       -check-layout   - Check the layout of every class when the wrapper is compiled")];
 
    NL : constant String := new_line_Token;
 
@@ -140,6 +141,11 @@ is
             then
                swig_mark_Arg (Each);
 
+            elsif the_Command = "-check-layout"
+            then
+               Self.all_layout_Checks := True;
+               swig_mark_Arg (Each);
+
             elsif the_Command = "-c++"
             then
                Self.in_CPP_mode := True;
@@ -159,6 +165,9 @@ is
 
       declare
          Unused : Hash_Pointer := Preprocessor_define (const_String (-"SWIGAda 1"),  0) with Unreferenced;     -- Add a symbol to the parser for conditional compilation.
+         Unused_3 : Hash_Pointer := (if Standard'Address_Size = 64 and then interfaces.C.long'Size = 64     -- The library's 'stdint.i' takes the sizes
+                                     then Preprocessor_define (const_String (-"SWIGWORDSIZE64 1"),  0)     -- of the integer types from this.
+                                     else null) with Unreferenced;
          Unused_2 : Hash_Pointer := Preprocessor_define (const_String (-"SWIGADA 1"),  0) with Unreferenced;   -- The usual upper case form, as the library files test for.
       begin
          swig_typemap_Lang (new_String   ( "ada"));         -- Add typemap definitions.
@@ -266,6 +275,15 @@ is
       log (+"");
       log (+"Creating source for the main module.");
       ada_Language.source_Generator.generate (Self);
+
+      declare
+         the_Checks : constant String := ada_Language.source_Generator.layout_Checks (Self);
+      begin
+         if the_Checks /= ""
+         then
+            print_to (DOH_Pointer (Self.f_Ada), the_Checks);     -- Which is outside the 'extern "C"' of that section.
+         end if;
+      end;
 
       --  Generate the C runtime.
       --
@@ -479,6 +497,7 @@ is
                   then
                      log (  "Warning: the ignored member '" & Each.Components (i).Name & "' of class '" & Each.Name
                           & "' has a type which is not known, so its storage is left out. The layout of the record does not match that of the class.");
+                     Each.lose_Layout;
                      Each.remove_Component (i);
                      Dropped := True;
                   end if;
@@ -1873,6 +1892,46 @@ is
          new_c_Class.has_nontrivial_Members;
       end if;
 
+      --  A base class which is inherited virtually, or a member whose type is a nested class with no name (which the
+      --  core leaves out), changes the layout of the class in a way which is not followed here. The parser notes both.
+      --
+      if Attribute (the_Node, "has_virtual_base") /= ""
+      then
+         log (  "Warning: the class '" & class_Name & "' inherits a base class virtually, which is not supported."
+              & " The layout of its record does not match that of the class.");
+         new_c_Class.lose_Layout;
+      end if;
+
+      if Attribute (the_Node, "has_unnamed_member") /= ""
+      then
+         log (  "Warning: the class '" & class_Name & "' has a nested class or union with no name, whose members are left out."
+              & " The layout of its record does not match that of the class.");
+         new_c_Class.lose_Layout;
+      end if;
+
+      --  Note the name by which the wrapper file knows the class, for a check of its layout.
+      --
+      declare
+         the_Name : constant String := Attribute (the_Node, "name");
+      begin
+         if        the_Name = ""
+           or else ada.Strings.fixed.Index (the_Name, "$unnamed") /= 0
+           or else Attribute (the_Node, "access") in "private" | "protected"
+         then
+            null;     -- It cannot be named there.
+
+         elsif Self.in_cpp_Mode
+         then
+            new_c_Class.layout_Name_is (+String'(+doh_Item (SwigType_namestr (SwigType_Pointer (get_Attribute (the_Node, "name"))))));
+
+         elsif Attribute (the_Node, "tdname") /= ""
+         then
+            new_c_Class.layout_Name_is (+Attribute (the_Node, "tdname"));
+         else
+            new_c_Class.layout_Name_is (+(Attribute (the_Node, "kind") & " " & the_Name));
+         end if;
+      end;
+
       --  Note whether the class is more than a plain structure, as C++ lays one out. A class derived from one which
       --  is may have members in its unused tail, where one derived from a plain structure begins after the whole of it.
       --  (These are the cases in which GCC does so.)
@@ -1965,11 +2024,20 @@ is
             declare
                base_Name : constant String := Attribute (Node_Pointer (the_Item), "sym:name");
             begin
-               if Self.name_Map_of_c_type.contains (+base_Name)
+               --  The base class is sought by its full name first, as its plain name may be that of a class
+               --  of another namespace ('A::C::Foo', where 'A::B::Foo' is also declared).
+               --
+               if         Self.swig_type_Map_of_c_type.contains (+Attribute (Node_Pointer (the_Item), "name"))
+                 and then Self.swig_type_Map_of_c_type.Element  (+Attribute (Node_Pointer (the_Item), "name")).c_type_Kind in c_Type.c_Class
+               then
+                  Self.current_c_Class.add_Base (Self.swig_type_Map_of_c_type.Element (+Attribute (Node_Pointer (the_Item), "name")));
+
+               elsif Self.name_Map_of_c_type.contains (+base_Name)
                then
                   Self.current_c_Class.add_Base (Self.name_Map_of_c_type.Element (+base_Name));
                else   -- Such as a base class which is ignored, or is a template which has not been instantiated.
                   log ("Warning: the base class '" & base_Name & "' of class '" & class_Name & "' is not known, and is ignored.");
+                  new_c_Class.lose_Layout;
                end if;
             end;
          end loop;
@@ -2665,6 +2733,11 @@ is
                new_Variable.bit_Field := Integer (Value (resolved_c_integer_Expression (Self, +bit_Field,
                                                                                                Self.integer_symbol_value_Map,
                                                                                                Self.current_class_namespace_Prefix)));
+
+            elsif      Attribute (the_Node, "access") not in "private" | "protected"
+              and then SwigType_isReference (swig_Type) = 0
+            then   -- The wrapper file can ask where the member is.
+               new_Variable.member_Name := +Attribute (the_Node, "name");
             end if;
 
             if swig_Type_is_Array
@@ -4452,6 +4525,7 @@ is
       --  The symbol of a variable is its C name, which its Ada name may differ from (a variable 'Abstract' is 'the_Abstract').
       --
       the_ada_Variable.bit_Field         := the_c_Variable.bit_Field;
+      the_ada_Variable.member_Name       := the_c_Variable.member_Name;
       the_ada_Variable.is_anonymous_Bits := the_c_Variable.is_anonymous_Bits;
 
       the_ada_Variable.link_Symbol := (if the_c_Variable.link_Symbol /= "" then the_c_Variable.link_Symbol
@@ -4806,7 +4880,9 @@ is
                new_Function.is_Static   := True;
             else
                new_Function.is_Static   := Self.static_Flag;
-               new_Function.is_Virtual  := check_Attribute (the_Node, "storage",  "virtual");
+               new_Function.is_Virtual  :=          check_Attribute (the_Node, "storage",  "virtual")
+                                           and then C."=" (Self.is_smart_Pointer, 0);     -- A function of the class which a smart pointer points to
+                                                                                          -- is no virtual function of the smart pointer.
                new_Function.is_Abstract := check_Attribute (the_Node, "abstract", "1");
             end if;
 

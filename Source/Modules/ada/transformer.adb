@@ -609,6 +609,13 @@ is
                               new_ada_Record.is_not_layout_Pod;
                            end if;
 
+                           new_ada_Record.layout_Name_is (the_c_Type.layout_Name);
+
+                           if the_c_Type.has_lost_Layout
+                           then
+                              new_ada_Record.lose_Layout;
+                           end if;
+
                            new_ada_Package.add                   (new_ada_Record.all'Access);
                            new_ada_Package.models_cpp_class_Type (new_ada_Record.all'Access);
 
@@ -911,6 +918,7 @@ is
                                  else
                                     log (  "Warning: the base class '" & Element (Cursor).Name & "' of class '" & the_c_Type.Name
                                          & "' has no Ada type, and is left out. The layout of the record does not match that of the class.");
+                                    the_ada_Record.lose_Layout;
                                  end if;
 
                                  next (Cursor);
@@ -930,6 +938,17 @@ is
                                  declare
                                     the_Component : constant ada_Variable.view := Self.to_ada_Variable (the_c_Components (Each).all'Access);
                                  begin
+                                    --  A member which is a class that is declared and never defined has a size which is not known.
+                                    --
+                                    if         the_Component.my_Type.all in ada_Type.a_subType.item'Class
+                                      and then ada.Characters.handling.to_Lower (to_String (ada_Type.a_subType.view (the_Component.my_Type).base_Type.qualified_Name))
+                                               in "swig.incomplete_class" | "swig.opaque_structure"
+                                    then
+                                       log (  "Warning: the member '" & the_c_Components (Each).Name & "' of class '" & the_c_Type.Name
+                                            & "' is of a class which is not defined, so its size is not known. The layout of the record does not match that of the class.");
+                                       the_ada_Record.lose_Layout;
+                                    end if;
+
                                     --  A component of a type extension may not be where C++ has its member (see 'memberVariableHandler'
                                     --  in 'ada_Language'), so it only reserves storage, and is named to say so. The member has functions.
                                     --
@@ -944,6 +963,7 @@ is
                               else
                                  log (  "Warning: the member '" & the_c_Components (Each).Name & "' of class '" & the_c_Type.Name
                                       & "' has a type which is not known, and is left out. The layout of the record does not match that of the class.");
+                                 the_ada_Record.lose_Layout;
                               end if;
                            end loop;
                         end add_Components;

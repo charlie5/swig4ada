@@ -265,6 +265,16 @@ is
 
    procedure has_nontrivial_Members              (Self : access Item);
    procedure is_not_layout_Pod                   (Self : access Item);
+   procedure lose_Layout                         (Self : access Item);
+   function  has_lost_Layout                     (Self : access Item) return Boolean;
+   --
+   --  A class which has lost a base class or a member which could not be bound, so that its record does not match it.
+
+   procedure layout_Name_is                      (Self : access Item;   Now : in unbounded_String);
+   function  layout_Name                         (Self : access Item) return unbounded_String;
+   --
+   --  The name by which the wrapper file knows a class which is defined, for a check of its layout, or null.
+
    function  is_layout_Pod                       (Self : access Item) return Boolean;
    --
    --  A class which is not a plain structure, as C++ lays one out: a class derived from it may have members in its unused tail.
@@ -345,6 +355,8 @@ private
                has_virtual_Members                       : Boolean := False;
                has_nontrivial_Members                    : Boolean := False;
                is_not_layout_Pod                         : Boolean := False;
+               layout_Name                               : unbounded_String;
+               has_lost_Layout                           : Boolean := False;
                requires_Interfaces_C_Int_use             : Boolean := False;
                requires_Interfaces_C_Unsigned_use        : Boolean := False;
                requires_Interfaces_C_Unsigned_Char_use   : Boolean := False;
