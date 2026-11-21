@@ -1203,6 +1203,23 @@ is
 
 
 
+   procedure is_not_layout_Pod (Self : access Item)
+   is
+   begin
+      Self.my.is_not_layout_Pod := True;
+   end is_not_layout_Pod;
+
+
+
+   function is_layout_Pod (Self : access Item) return Boolean
+   is
+   begin
+      return        Self.my.c_type_Kind /= c_Class
+            or else not Self.my.is_not_layout_Pod;
+   end is_layout_Pod;
+
+
+
    function is_constructed_by_Cpp (Self : access Item) return Boolean
    is
    begin

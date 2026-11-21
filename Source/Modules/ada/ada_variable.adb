@@ -22,6 +22,7 @@ is
 
                     bit_Field        => -1,
                     is_anonymous_Bits => False,
+                    is_base_Class     => False,
                     array_Bounds     => <>,
                     is_Pointer       => False,
                     is_class_pointer => False);

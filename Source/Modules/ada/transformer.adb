@@ -604,6 +604,11 @@ is
                               new_ada_Record.has_nontrivial_Members;
                            end if;
 
+                           if not the_c_Type.is_layout_Pod
+                           then
+                              new_ada_Record.is_not_layout_Pod;
+                           end if;
+
                            new_ada_Package.add                   (new_ada_Record.all'Access);
                            new_ada_Package.models_cpp_class_Type (new_ada_Record.all'Access);
 
@@ -895,8 +900,14 @@ is
                               loop
                                  if c_type_Map_of_ada_type.contains (Element (Cursor))
                                  then
-                                    the_ada_Record.add_Component (ada_Variable.new_ada_Variable (to_ada_Identifier (Element (Cursor).Name),
-                                                                                                 c_type_Map_of_ada_type.Element (Element (Cursor))));
+                                    declare
+                                       the_Base : constant ada_Variable.view
+                                         := ada_Variable.new_ada_Variable (to_ada_Identifier (Element (Cursor).Name),
+                                                                           c_type_Map_of_ada_type.Element (Element (Cursor)));
+                                    begin
+                                       the_Base.is_base_Class := True;
+                                       the_ada_Record.add_Component (the_Base);
+                                    end;
                                  else
                                     log (  "Warning: the base class '" & Element (Cursor).Name & "' of class '" & the_c_Type.Name
                                          & "' has no Ada type, and is left out. The layout of the record does not match that of the class.");
@@ -922,7 +933,8 @@ is
                                     --  A component of a type extension may not be where C++ has its member (see 'memberVariableHandler'
                                     --  in 'ada_Language'), so it only reserves storage, and is named to say so. The member has functions.
                                     --
-                                    if not the_ada_Record.base_Classes.is_Empty
+                                    if         not the_ada_Record.base_Classes.is_Empty
+                                      and then not the_c_Components (Each).is_ignored_Member     -- Which is named so already.
                                     then
                                        the_Component.Name := the_Component.Name & "_storage";
                                     end if;

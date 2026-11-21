@@ -332,6 +332,22 @@ is
 
 
 
+   procedure is_not_layout_Pod (Self : access Item)
+   is
+   begin
+      Self.is_not_layout_Pod := True;
+   end is_not_layout_Pod;
+
+
+
+   function is_layout_Pod (Self : access Item) return Boolean
+   is
+   begin
+      return not Self.is_not_layout_Pod;
+   end is_layout_Pod;
+
+
+
    function is_Nontrivial (Self : access Item) return Boolean
    is
    begin

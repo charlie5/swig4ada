@@ -1873,6 +1873,68 @@ is
          new_c_Class.has_nontrivial_Members;
       end if;
 
+      --  Note whether the class is more than a plain structure, as C++ lays one out. A class derived from one which
+      --  is may have members in its unused tail, where one derived from a plain structure begins after the whole of it.
+      --  (These are the cases in which GCC does so.)
+      --
+      if Self.in_cpp_Mode
+      then
+         declare
+            the_Child : Node_Pointer := first_Child (the_Node);
+         begin
+            if         get_Attribute (the_Node, "allbases") /= null
+              and then DohLen (doh_List (get_Attribute (the_Node, "allbases"))) > 0
+            then
+               new_c_Class.is_not_layout_Pod;     -- It has a base class.
+            end if;
+
+            if get_Attribute (the_Node, "allocate:has_copy_constructor") /= null
+            then
+               new_c_Class.is_not_layout_Pod;     -- It declares a copy constructor.
+            end if;
+
+            while the_Child /= null
+            loop
+               declare
+                  the_Kind    : constant String  := Attribute (the_Child, "nodeType");
+                  is_Extended : constant Boolean := Attribute (the_Child, "feature:extend") /= "";
+                  is_Given    : constant Boolean := Attribute (the_Child, "value") not in "default" | "delete";     -- Not left to the compiler.
+               begin
+                  if    (         the_Kind = "constructor"                                -- One which the class declares: the core
+                         and then is_Given                                                -- adds those which the compiler provides.
+                         and then not is_Extended
+                         and then Attribute (the_Child, "default_constructor") = ""
+                         and then Attribute (the_Child, "copy_constructor")    = "")
+
+                     or (         the_Kind = "destructor"                                 -- Likewise.
+                         and then is_Given
+                         and then not is_Extended
+                         and then get_Attribute (the_Node, "allocate:has_destructor") /= null)
+
+                     or (         the_Kind = "cdecl"                                      -- An assignment operator.
+                         and then Attribute (the_Child, "name") = "operator ="
+                         and then is_Given
+                         and then not is_Extended)
+
+                     or (         the_Kind = "cdecl"                                      -- A member variable which is not public,
+                         and then Attribute (the_Child, "kind") = "variable"              -- or has an initial value.
+                         and then Attribute (the_Child, "storage") not in "static" | "typedef" | "friend" | "extern"
+                         and then not is_Extended
+                         and then (        Attribute (the_Child, "access") in "private" | "protected"
+                                   or else Attribute (the_Child, "hasvalue") /= ""))
+
+                     or (         the_Kind = "cdecl"                                      -- A virtual function.
+                         and then Attribute (the_Child, "storage") = "virtual")
+                  then
+                     new_c_Class.is_not_layout_Pod;
+                  end if;
+               end;
+
+               the_Child := next_Sibling (the_Child);
+            end loop;
+         end;
+      end if;
+
       Self.c_class_Stack    .append (new_C_Class);
       Self.c_namespace_Stack.append (new_C_Class.nameSpace.all'Access);
 
@@ -3194,8 +3256,8 @@ is
    procedure bind_other_base_Classes (Self : access Item;   the_Class : in Node_Pointer)
    --
    --  The first base class of a class which has virtual functions becomes the parent of its Ada type. Any
-   --  other base class is only storage in the Ada record: a component which may not be where C++ has that
-   --  base class, or, for a second base class with virtual functions, storage alone.
+   --  other base class is a component of the Ada record, which may be storage alone: where the Ada type has a
+   --  parent, or where C++ places members in the unused tail of the base class.
    --
    --  Each such base class is given a function, 'as_<base>', which returns a pointer to the part of the object
    --  which is that base class, so that its members can be reached and it can be given to C++.
@@ -3205,11 +3267,9 @@ is
       use type swig_Module.swig_Module_view;
 
       the_Bases    : constant c_Type.Vector := Self.current_c_Class.base_Classes;
-      has_Parent   : constant Boolean       := (for some Each of the_Bases => Each.is_Virtual);
       parent_Found :          Boolean       := False;
    begin
       if        not Self.in_cpp_Mode
-        or else not has_Parent
         or else Self.current_Module /= Self.Module_top'Access
         or else get_Attribute (the_Class, "bases") = null
       then
