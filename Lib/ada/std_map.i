@@ -51,7 +51,8 @@ namespace std {
                     throw std::out_of_range("key not found");
             }
             void set(const K& key, const T& x) {
-                (*self)[key] = x;
+                self->erase (key);                           // Not '(*self)[key] = x', which needs a default constructor of the value.
+                self->insert (std::make_pair (key, x));
             }
             void del(const K& key) throw (std::out_of_range) {
                 typename std::map<K,T,Compare >::iterator i = self->find(key);
@@ -90,7 +91,8 @@ namespace std {
                     throw std::out_of_range("key not found");
             }
             void set(K key, const T& x) {
-                (*self)[key] = x;
+                self->erase (key);                           // Not '(*self)[key] = x', which needs a default constructor of the value.
+                self->insert (std::make_pair (key, x));
             }
             void del(K key) throw (std::out_of_range) {
                 std::map<K,T >::iterator i = self->find(key);
@@ -126,7 +128,8 @@ namespace std {
                     throw std::out_of_range("key not found");
             }
             void set(const K& key, T x) {
-                (*self)[key] = x;
+                self->erase (key);                           // Not '(*self)[key] = x', which needs a default constructor of the value.
+                self->insert (std::make_pair (key, x));
             }
             void del(const K& key) throw (std::out_of_range) {
                 std::map<K,T >::iterator i = self->find(key);
@@ -163,7 +166,8 @@ namespace std {
                     throw std::out_of_range("key not found");
             }
             void set(K key, T x) {
-                (*self)[key] = x;
+                self->erase (key);                           // Not '(*self)[key] = x', which needs a default constructor of the value.
+                self->insert (std::make_pair (key, x));
             }
             void del(K key) throw (std::out_of_range) {
                 std::map<K,T >::iterator i = self->find(key);

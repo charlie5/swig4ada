@@ -657,6 +657,7 @@
 //%typemap (adatype)             SWIGTYPE *                 "$adaclassname"
 
 %typemap (ctype)               SWIGTYPE &                 "void *"
+%typemap (ctype)               SWIGTYPE &&                "void *"     // An rvalue reference is bound as a reference is.
 //%typemap (adatype)             SWIGTYPE &                 "$adaclassname"
 
 
@@ -876,7 +877,7 @@
 %typemap (out)                                  SWIGTYPE 
 #ifdef __cplusplus
 %{
-  $result = *(&$1);      // Both may be held in a 'SwigValueWrapper', which cannot be assigned to another, and whose address is that of its value.
+  $result = SWIG_STD_MOVE (*(&$1));      // Both may be held in a 'SwigValueWrapper', which cannot be assigned to another, and whose address is that of its value. Moved, as the type may not be one which can be copied.
 %}
 #else
 {
@@ -913,6 +914,11 @@
 %typemap (in)                                   SWIGTYPE (CLASS::*)        %{ $1 = *($&1_ltype)&$input; %}
 
 %typemap (in)                                   SWIGTYPE & 
+%{ 
+  $1 = ($1_ltype)$input;
+%}
+
+%typemap (in)                                   SWIGTYPE && 
 %{ 
   $1 = ($1_ltype)$input;
 %}
@@ -1002,7 +1008,7 @@
 
 
 
-%typemap (out)               SWIGTYPE *,  SWIGTYPE &      %{ $result = (void *) $1;      %} 
+%typemap (out)               SWIGTYPE *,  SWIGTYPE &,  SWIGTYPE &&      %{ $result = (void *) $1;      %} 
 %typemap (out)               SWIGTYPE (CLASS::*)          %{ *($&1_ltype) &$result = $1; %} 
 
 
@@ -1090,6 +1096,7 @@
 %typecheck (SWIG_TYPECHECK_POINTER)     SWIGTYPE, 
                                         SWIGTYPE *, 
                                         SWIGTYPE &, 
+                                        SWIGTYPE &&, 
                                         SWIGTYPE [],
                                         SWIGTYPE (CLASS::*)           ""
 
@@ -1113,7 +1120,7 @@
 
 
 
-%typemap (throws)                       SWIGTYPE,  SWIGTYPE &,  SWIGTYPE *,  SWIGTYPE [ANY] 
+%typemap (throws)                       SWIGTYPE,  SWIGTYPE &,  SWIGTYPE &&,  SWIGTYPE *,  SWIGTYPE [ANY] 
 %{
   (void) $1;
   SWIG_AdaThrowException (SWIG_AdaException, "C++ $1_type exception thrown");
