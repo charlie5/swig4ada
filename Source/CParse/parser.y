@@ -3985,7 +3985,36 @@ cpp_class_decl  : storage_class cpptype idcolon inherit LBRACE {
                /* Check for pure-abstract class */
 	       Setattr($$,"abstracts", pure_abstracts($6));
 	       n = $8;
+	       if (cparse_cplusplus && currentOuterClass && GetFlag($$, "feature:flatnested"))
+		 SetFlag(currentOuterClass, "has_unnamed_member");   /* swig4ada: its members are not kept as those of a nested class. */
 	       if (cparse_cplusplus && currentOuterClass && ignore_nested_classes && !GetFlag($$, "feature:flatnested")) {
+		 /* swig4ada: the class is kept on the node of the outer class, with its members and the names of the members
+		    which are declared with it, for a language module which lays the outer class out itself. */
+		 {
+		   List *kept = Getattr(currentOuterClass, "unnamed_nested");
+		   List *declared = NewList();
+		   String *line = NewStringf("%d", cparse_line);
+		   Node *d = n;
+		   if (!kept) {
+		     kept = NewList();
+		     Setattr(currentOuterClass, "unnamed_nested", kept);
+		     Delete(kept);
+		     kept = Getattr(currentOuterClass, "unnamed_nested");
+		   }
+		   while (d) {
+		     String *decl = Getattr(d, "decl");
+		     String *member = decl ? NewStringf("%s|%s", Getattr(d, "name"), decl) : NewStringf("%s|", Getattr(d, "name"));
+		     Append(declared, member);
+		     Delete(member);
+		     d = nextSibling(d);
+		   }
+		   Setattr($$, "unnamed_nested:members", declared);
+		   Setattr($$, "unnamed_nested:line", line);
+		   Delete(declared);
+		   Delete(line);
+		   appendChild($$, $6);
+		   Append(kept, $$);
+		 }
 		 String *name = n ? Copy(Getattr(n, "name")) : 0;
 		 $$ = nested_forward_declaration($1, $2, 0, name, n);
 		 Swig_symbol_popscope();

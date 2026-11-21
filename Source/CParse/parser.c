@@ -7609,7 +7609,36 @@ yyreduce:
                /* Check for pure-abstract class */
 	       Setattr((yyval.node),"abstracts", pure_abstracts((yyvsp[-2].node)));
 	       n = (yyvsp[0].node);
+	       if (cparse_cplusplus && currentOuterClass && GetFlag((yyval.node), "feature:flatnested"))
+		 SetFlag(currentOuterClass, "has_unnamed_member");   /* swig4ada: its members are not kept as those of a nested class. */
 	       if (cparse_cplusplus && currentOuterClass && ignore_nested_classes && !GetFlag((yyval.node), "feature:flatnested")) {
+		 /* swig4ada: the class is kept on the node of the outer class, with its members and the names of the members
+		    which are declared with it, for a language module which lays the outer class out itself. */
+		 {
+		   List *kept = Getattr(currentOuterClass, "unnamed_nested");
+		   List *declared = NewList();
+		   String *line = NewStringf("%d", cparse_line);
+		   Node *d = n;
+		   if (!kept) {
+		     kept = NewList();
+		     Setattr(currentOuterClass, "unnamed_nested", kept);
+		     Delete(kept);
+		     kept = Getattr(currentOuterClass, "unnamed_nested");
+		   }
+		   while (d) {
+		     String *decl = Getattr(d, "decl");
+		     String *member = decl ? NewStringf("%s|%s", Getattr(d, "name"), decl) : NewStringf("%s|", Getattr(d, "name"));
+		     Append(declared, member);
+		     Delete(member);
+		     d = nextSibling(d);
+		   }
+		   Setattr((yyval.node), "unnamed_nested:members", declared);
+		   Setattr((yyval.node), "unnamed_nested:line", line);
+		   Delete(declared);
+		   Delete(line);
+		   appendChild((yyval.node), (yyvsp[-2].node));
+		   Append(kept, (yyval.node));
+		 }
 		 String *name = n ? Copy(Getattr(n, "name")) : 0;
 		 (yyval.node) = nested_forward_declaration((yyvsp[-7].id), (yyvsp[-6].id), 0, name, n);
 		 Swig_symbol_popscope();
