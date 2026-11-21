@@ -37,6 +37,7 @@ type Item is  tagged limited
 
 
 
+   nshapes : aliased interfaces.c.int;
 
    -- Pointer
    -- 
@@ -87,6 +88,7 @@ private
 
 
 
+   pragma import (CPP, nshapes, "_ZN5Shape7nshapesE");
 
    pragma cpp_Constructor (construct, "ada_new_Shape_Shape");
    pragma Import (CPP, destruct_0, "_ZN5ShapeD1Ev");
