@@ -7,19 +7,19 @@ use Interfaces.C;
 package function_example.Binding is
 
    function do_op
-     (arg_2_1 : in Interfaces.C.int; arg_2_2 : in Interfaces.C.int;
-      op : in function_example.p_f_int_int_ret_int) return Interfaces.C.int;
+     (arg_1 : in Interfaces.C.int; arg_2 : in Interfaces.C.int;
+      op    : in function_example.p_f_int_int_ret_int) return Interfaces.C.int;
 
    function add
-     (arg_2_1 : in Interfaces.C.int; arg_2_2 : in Interfaces.C.int)
+     (arg_1 : in Interfaces.C.int; arg_2 : in Interfaces.C.int)
       return Interfaces.C.int;
 
    function sub
-     (arg_2_1 : in Interfaces.C.int; arg_2_2 : in Interfaces.C.int)
+     (arg_1 : in Interfaces.C.int; arg_2 : in Interfaces.C.int)
       return Interfaces.C.int;
 
    function mul
-     (arg_2_1 : in Interfaces.C.int; arg_2_2 : in Interfaces.C.int)
+     (arg_1 : in Interfaces.C.int; arg_2 : in Interfaces.C.int)
       return Interfaces.C.int;
 
 private

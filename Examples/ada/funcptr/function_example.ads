@@ -11,7 +11,7 @@ package function_example is
    type p_f_int_int_ret_int is
      access
 function
-       (arg_2_1 : in Interfaces.C.int; arg_2_2 : in Interfaces.C.int)
+       (arg_1 : in Interfaces.C.int; arg_2 : in Interfaces.C.int)
         return Interfaces.C.int;
    pragma Convention (C, p_f_int_int_ret_int);
 

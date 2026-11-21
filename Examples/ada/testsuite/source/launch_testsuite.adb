@@ -980,7 +980,7 @@ begin
       generate ("keyword_rename_c.i");
       generate ("memberin_extend_c.i");
       generate ("nested_extend_c.i");
-      --  generate ("nested_structs.i");                                            -- Wrapper: a member of a record is not where its structure has it.
+      generate ("nested_structs.i");
       generate ("overload_extend2.i");
       generate ("overload_extend_c.i");
       generate ("preproc_constants_c.i");
@@ -1000,7 +1000,7 @@ begin
       new_Line;
 
       generate ("allprotected_not.i",                         use_CPP => True);
-      --  generate ("argcargvtest.i",                         use_CPP => True);     -- Needs the library file 'argcargv.i', which Lib/ada lacks.
+      generate ("argcargvtest.i",                             use_CPP => True);
       generate ("autodoc.i",                                  use_CPP => True);
       generate ("catches.i",                                  use_CPP => True);
       generate ("char_binary.i",                              use_CPP => True);
@@ -1019,13 +1019,13 @@ begin
       generate ("cpp11_default_delete.i",                     use_CPP => True);
       generate ("cpp11_delegating_constructors.i",            use_CPP => True);
       generate ("cpp11_director_enums.i",                     use_CPP => True);
-      --  generate ("cpp11_directors.i",                      use_CPP => True);     -- Wrapper: a pure virtual function with a trailing result type is defined wrongly in the concrete class.
+      generate ("cpp11_directors.i",                          use_CPP => True);
       generate ("cpp11_explicit_conversion_operators.i",      use_CPP => True);
       generate ("cpp11_final_directors.i",                    use_CPP => True);
-      --  generate ("cpp11_final_override.i",                 use_CPP => True);     -- Wrapper: the concrete class of an abstract class defines a function which is final.
+      generate ("cpp11_final_override.i",                     use_CPP => True);
       generate ("cpp11_function_objects.i",                   use_CPP => True);
       generate ("cpp11_inheriting_constructors.i",            use_CPP => True);
-      --  generate ("cpp11_initializer_list.i",               use_CPP => True);     -- Wrapper: a parameter of an initializer list is declared twice.
+      generate ("cpp11_initializer_list.i",                   use_CPP => True);
       generate ("cpp11_initializer_list_extend.i",            use_CPP => True);
       generate ("cpp11_lambda_functions.i",                   use_CPP => True);
       generate ("cpp11_noexcept.i",                           use_CPP => True);
@@ -1042,7 +1042,7 @@ begin
       generate ("cpp11_shared_ptr_nullptr_in_containers.i",   use_CPP => True);
       generate ("cpp11_shared_ptr_overload.i",                use_CPP => True);
       generate ("cpp11_shared_ptr_upcast.i",                  use_CPP => True);
-      --  generate ("cpp11_sizeof_object.i",                  use_CPP => True);     -- Spec: a class has the name of a variable of the top package, but for its case.
+      generate ("cpp11_sizeof_object.i",                      use_CPP => True);
       generate ("cpp11_static_assert.i",                      use_CPP => True);
       generate ("cpp11_std_array.i",                          use_CPP => True);
       generate ("cpp11_strongly_typed_enumerations.i",        use_CPP => True);
@@ -1065,7 +1065,7 @@ begin
       generate ("default_arg_expressions.i",                  use_CPP => True);
       generate ("default_arg_values.i",                       use_CPP => True);
       generate ("destructor_methodmodifiers.i",               use_CPP => True);
-      --  generate ("director_abstract.i",                    use_CPP => True);     -- Wrapper: two construction functions of an abstract class are given one name.
+      generate ("director_abstract.i",                        use_CPP => True);
       generate ("director_alternating.i",                     use_CPP => True);
       generate ("director_basic.i",                           use_CPP => True);
       generate ("director_binary_string.i",                   use_CPP => True);
@@ -1091,7 +1091,7 @@ begin
       generate ("director_ownership.i",                       use_CPP => True);
       generate ("director_pass_by_value.i",                   use_CPP => True);
       generate ("director_primitives.i",                      use_CPP => True);
-      --  generate ("director_property.i",                    use_CPP => True);     -- Wrapper: the record of a class has not the size of the class.
+      generate ("director_property.i",                        use_CPP => True,   check_Layout => False);     -- A class hides a member from SWIG.
       --  generate ("director_protected.i",                   use_CPP => True);     -- Generator: a name is defined twice ('Foo_s').
       generate ("director_protected_overloaded.i",            use_CPP => True);
       --  generate ("director_redefined.i",                   use_CPP => True);     -- Spec: a function is marked as overriding, and does not.
@@ -1139,7 +1139,7 @@ begin
       generate ("li_carrays_cpp.i",                           use_CPP => True);
       generate ("li_cdata_cpp.i",                             use_CPP => True);
       generate ("li_cpointer_cpp.i",                          use_CPP => True);
-      --  generate ("li_std_auto_ptr.i",                      use_CPP => True);     -- Needs the library file 'std_auto_ptr.i', which Lib/ada lacks.
+      --  generate ("li_std_auto_ptr.i",                      use_CPP => True);     -- 'std::auto_ptr', which C++17 removed, is not bound: it has neither a move constructor nor a copy constructor of a constant.
       generate ("li_std_combinations.i",                      use_CPP => True);
       generate ("li_std_except_as_class.i",                   use_CPP => True);
       --  generate ("li_std_pair_using.i",                    use_CPP => True);     -- Generator: the template 'pair' is not found through a using declaration.
@@ -1199,15 +1199,15 @@ begin
       generate ("stl_no_default_constructor.i",               use_CPP => True);
       generate ("string_constants.i",                         use_CPP => True);
       generate ("struct_initialization_cpp.i",                use_CPP => True);
-      --  generate ("swig_exception.i",                       use_CPP => True);     -- Wrapper: 'SWIG_exception' returns 0 from a function whose result is a class.
+      generate ("swig_exception.i",                           use_CPP => True);
       generate ("symbol_clash.i",                             use_CPP => True);
       generate ("template_basic.i",                           use_CPP => True);
       generate ("template_class_reuse_name.i",                use_CPP => True);
       generate ("template_default_arg_overloaded.i",          use_CPP => True);
       generate ("template_default_arg_overloaded_extend.i",   use_CPP => True);
-      --  generate ("template_default_arg_virtual_destructor.i",use_CPP => True);     -- Wrapper: a parameter is declared twice.
+      generate ("template_default_arg_virtual_destructor.i",  use_CPP => True);
       --  generate ("template_default_cache.i",               use_CPP => True);     -- Generator: a name is added twice to the map of Ada types.
-      --  generate ("template_default_class_parms_typedef.i", use_CPP => True);     -- Wrapper: a parameter is declared twice.
+      generate ("template_default_class_parms_typedef.i",     use_CPP => True);
       generate ("template_empty_inherit.i",                   use_CPP => True);
       generate ("template_keyword_in_type.i",                 use_CPP => True);
       generate ("template_namespace_forward_declaration.i",   use_CPP => True);
@@ -1217,7 +1217,7 @@ begin
       generate ("template_partial_specialization.i",          use_CPP => True);
       --  generate ("template_partial_specialization_typedef.i",use_CPP => True);     -- Spec: a pointer to a pointer to 'unsigned' is not declared.
       generate ("template_private_assignment.i",              use_CPP => True);
-      --  generate ("template_templated_constructors.i",      use_CPP => True);     -- Wrapper: a class in a namespace is named without it.
+      generate ("template_templated_constructors.i",          use_CPP => True);
       generate ("template_typedef_class_template.i",          use_CPP => True);
       generate ("template_typedef_inherit.i",                 use_CPP => True);
       generate ("template_typedef_typedef.i",                 use_CPP => True);
@@ -1226,7 +1226,7 @@ begin
       generate ("template_using_directive_and_declaration_forward.i",use_CPP => True);
       generate ("template_using_directive_typedef.i",         use_CPP => True);
       generate ("threads_exception.i",                        use_CPP => True);
-      --  generate ("typedef_struct_cpp.i",                   use_CPP => True);     -- Wrapper: the record of a class has not the size of the class.
+      generate ("typedef_struct_cpp.i",                       use_CPP => True,   check_Layout => False);     -- A structure hides a member from SWIG ('#ifndef SWIG').
       generate ("typedef_typedef.i",                          use_CPP => True);
       --  generate ("typemap_array_qualifiers.i",             use_CPP => True);     -- Generator: a type is sought which is not in the map of C types.
       generate ("typemap_arrays.i",                           use_CPP => True);
