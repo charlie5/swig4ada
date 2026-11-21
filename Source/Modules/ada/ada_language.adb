@@ -83,6 +83,7 @@ is
    function  returns_a_cpp_constructed_Type (Self : access Item;   the_Node : in doh_Node) return Boolean;
    function  cpp_Symbol (qualified_Name : in String;   Suffix : in String) return String;
    procedure bind_constructors_of_abstract_Class (Self : access Item;   the_Class : in Node_Pointer);
+   procedure bind_other_base_Classes             (Self : access Item;   the_Class : in Node_Pointer);
 
    procedure register_Mirror (Self : access Item;   proxy_Name              : in unbounded_String;
                                                     the_c_Type              : in c_Type.view;
@@ -773,6 +774,7 @@ is
             returns_a_Class : constant Boolean := (c_return_Type = "$c_classname") and not result_by_Parameter;     -- A class, returned by value.
             has_Parameters  :          Boolean := False;
             built_in_Place  :          Boolean := False;     -- The result is constructed from the call itself, with no result variable.
+            has_exception_Code : constant Boolean := get_Attribute (the_Node, "feature:except") /= null;
 
             Num_arguments   : Natural          := 0;
             Num_required    : Natural with Unreferenced;
@@ -816,8 +818,7 @@ is
             --  of the caller. Its assignment is not used: one which the compiler generates is wrong for a class which
             --  manages a resource through its copy constructor and destructor alone.
             --
-            if         result_by_Parameter
-              and then get_Attribute (the_Node, "feature:except") = null     -- The code of an '%exception' may use the 'result' variable.
+            if result_by_Parameter
             then
                declare
                   the_Action : constant String  := Attribute (the_Node, "wrap:action");
@@ -835,13 +836,25 @@ is
                      set_Attribute (the_Node, "wrap:action",
                                     String'(  "{ typedef " & to_String (c_return_Type) & " swig_ada_result_type;"
                                             & "  swig_ada_result_type swig_ada_result = " & the_Action (First + Prefix'Length .. Last - 1) & ";"
-                                            & "  swig_ada_replace (a_result, swig_ada_result); }"));
+                                            & "  swig_ada_replace (a_result, swig_ada_result);"
+                                            & (if has_exception_Code then "  swig_ada_built = true; }" else " }")));
                      built_in_Place := True;
+
+                     --  The code of an '%exception' need not hold the action, and may assign to the 'result' variable
+                     --  itself. The wrapper therefore notes whether the action has run, and uses 'result' if it has not.
+                     --
+                     if has_exception_Code
+                     then
+                        Wrapper_add_local_2 (the_function_Wrapper,  String_or_char_Pointer (-"swig_ada_built"),
+                                                                    new_String ("bool"),
+                                                                    new_String ("swig_ada_built = false"));
+                     end if;
                   end if;
                end;
             end if;
 
-            if not built_in_Place
+            if        not built_in_Place
+              or else has_exception_Code
             then
                emit_return_variable  (the_Node,
                                       SwigType_Pointer (swig_Type),
@@ -1065,7 +1078,15 @@ is
                                                                                     const_String (-"result"),
                                                                                     null));
                begin
-                  if built_in_Place
+                  if         built_in_Place
+                    and then has_exception_Code
+                  then
+                     print_to (wrapper_Code,   "  if (!swig_ada_built)"                                                                 & NL
+                                             & "  {"                                                                                   & NL
+                                             & "    typedef " & to_String (c_return_Type) & " swig_ada_result_type;"                   & NL
+                                             & "    swig_ada_replace (a_result, (swig_ada_result_type &) result);"                     & NL
+                                             & "  }"                                                                                   & NL);
+                  elsif built_in_Place
                   then
                      null;     -- The action has done so.
 
@@ -1827,6 +1848,7 @@ is
       Status := swigMod.Language.item (Self.all).classHandler (the_Node);     -- Process all class members.
 
       bind_constructors_of_abstract_Class (Self, the_Node);
+      bind_other_base_Classes             (Self, the_Node);
 
       --  new ...
       --
@@ -2000,6 +2022,7 @@ is
       Status   : C.int with Unreferenced;
 
       for_abstract_Class : constant Boolean := Self.abstract_shim_Name /= "";
+      extend_Function    : unbounded_String;     -- The function of the wrapper which is a constructor added by '%extend'.
    begin
       if not Self.in_cpp_Mode
       then
@@ -2025,6 +2048,30 @@ is
          Self.doing_constructorDeclaration := True;
          Status := swigMod.Language.item (Self.all).constructorHandler (the_Node);
          Self.doing_constructorDeclaration := False;
+
+         --  A constructor which was added by '%extend' is a function of the wrapper, which returns a new object.
+         --  Its name is taken from the call which the core has made of it ('result = (Vec *)new_Vec(arg1,arg2);').
+         --
+         if Attribute (the_Node, "feature:extend") /= ""
+         then
+            declare
+               the_Action : constant String  := Attribute (the_Node, "wrap:action");
+               Last       : constant Natural := ada.Strings.fixed.Index (the_Action, "(", going => ada.Strings.Backward);
+               First      :          Natural := Last;
+            begin
+               while      First > the_Action'First
+                 and then the_Action (First - 1) in 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_'
+               loop
+                  First := First - 1;
+               end loop;
+
+               if         Last /= 0
+                 and then First < Last
+               then
+                  extend_Function := +the_Action (First .. Last - 1);
+               end if;
+            end;
+         end if;
       end if;
 
       if get_Attribute (the_Node, "overload:ignore") /= null
@@ -2202,7 +2249,16 @@ is
          else
             append (construct_Call,  ")" & NL & "{" & NL);
             append (construct_Call,  ignored_Code);
-            append (construct_Call,  "  return "  &  Self.current_lStr  &  "("  &  construct_call_Args  &  ");"  & NL);
+
+            if extend_Function /= ""
+            then   -- The function makes its object with 'new'. The object is copied, and then deleted.
+               append (construct_Call,    "  " & Self.current_lStr & " * made = " & extend_Function & " (" & construct_call_Args & ");" & NL
+                                        & "  " & Self.current_lStr & "   the_object (*made);"                                           & NL
+                                        & "  delete made;"                                                                             & NL
+                                        & "  return the_object;"                                                                       & NL);
+            else
+               append (construct_Call,  "  return "  &  Self.current_lStr  &  "("  &  construct_call_Args  &  ");"  & NL);
+            end if;
             append (construct_Call,  "}" & NL);
          end if;
 
@@ -2231,7 +2287,8 @@ is
          elsif not (    check_Attribute (the_Node, "access", "protected")
                     or  check_Attribute (the_Node, "access", "private")
                     or  has_hidden_Destructor
-                    or  Attribute (the_Node, "feature:extend") /= "")     -- A constructor added by '%extend' is not one which C++ can call.
+                    or  (         Attribute (the_Node, "feature:extend") /= ""     -- A constructor added by '%extend' is not one which
+                         and then extend_Function = ""))                           -- C++ can call, so the function of the wrapper is.
          then
             print_to (DOH_Pointer (Self.f_Ada), construct_Call & NL);
          end if;
@@ -2758,6 +2815,89 @@ is
    --- Utility
    --
 
+   procedure bind_other_base_Classes (Self : access Item;   the_Class : in Node_Pointer)
+   --
+   --  The first base class of a class which has virtual functions becomes the parent of its Ada type. Any
+   --  other base class is only storage in the Ada record: a component which may not be where C++ has that
+   --  base class, or, for a second base class with virtual functions, storage alone.
+   --
+   --  Each such base class is given a function, 'as_<base>', which returns a pointer to the part of the object
+   --  which is that base class, so that its members can be reached and it can be given to C++.
+   --
+   is
+      use type C.int;
+      use type swig_Module.swig_Module_view;
+
+      the_Bases    : constant c_Type.Vector := Self.current_c_Class.base_Classes;
+      has_Parent   : constant Boolean       := (for some Each of the_Bases => Each.is_Virtual);
+      parent_Found :          Boolean       := False;
+   begin
+      if        not Self.in_cpp_Mode
+        or else not has_Parent
+        or else Self.current_Module /= Self.Module_top'Access
+        or else get_Attribute (the_Class, "bases") = null
+      then
+         return;
+      end if;
+
+      declare
+         the_cpp_Class : constant String   := +doh_Item (SwigType_namestr (SwigType_Pointer (get_Attribute (the_Class, "name"))));
+         base_List     : constant doh_List := doh_List (get_Attribute (the_Class, "bases"));     -- Those which are public: a wrapper cannot reach the others.
+      begin
+         for i in 1 .. DohLen (base_List)
+         loop
+            declare
+               the_Base  : constant Node_Pointer := Node_Pointer (DohGetitem (base_List, i - 1));
+               base_Name : constant String       := Attribute (the_Base, "sym:name");
+            begin
+               if         Self.name_Map_of_c_type.contains (+base_Name)
+                 and then the_Bases.contains (Self.name_Map_of_c_type.Element (+base_Name))
+                 and then Self.name_Map_of_c_type.contains (+base_Name & "*")
+               then
+                  if         Self.name_Map_of_c_type.Element (+base_Name).is_Virtual
+                    and then not parent_Found
+                  then
+                     parent_Found := True;     -- The parent, which Ada reaches by a view conversion.
+                  else
+                     declare
+                        the_cpp_Base : constant String  := +doh_Item (SwigType_namestr (SwigType_Pointer (get_Attribute (the_Base, "name"))));
+                        the_Symbol   : unbounded_String := +("ada_base_" & the_cpp_Class & "_" & the_cpp_Base);
+
+                        the_Function : constant c_Function.view
+                          := c_Function.new_c_Function (+("as_" & base_Name),
+                                                        Self.name_Map_of_c_type.Element (+base_Name & "*"));
+                     begin
+                        for Each in 1 .. Length (the_Symbol)
+                        loop
+                           if Element (the_Symbol, Each) not in 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_'
+                           then
+                              replace_Element (the_Symbol, Each, '_');
+                           end if;
+                        end loop;
+
+                        print_to (DOH_Pointer (Self.f_Ada),   "extern ""C"" " & the_cpp_Base & " * " & to_String (the_Symbol)
+                                                            & " (" & the_cpp_Class & " * self)"                             & NL
+                                                            & "{"                                                           & NL
+                                                            & "  return self;"                                              & NL
+                                                            & "}"                                                           & NL & NL);
+
+                        the_Function.Parameters.append (c_Parameter.new_c_Parameter (the_Name => +"Self",
+                                                                                     the_Type => Self.current_c_Class.all'Access));
+                        the_Function.link_Symbol       := the_Symbol;
+                        the_Function.access_Mode       := c_Function.public_Access;
+                        the_Function.returns_an_Access := True;
+
+                        Self.current_c_Class.nameSpace.add (the_Function.all'Access);
+                     end;
+                  end if;
+               end if;
+            end;
+         end loop;
+      end;
+   end bind_other_base_Classes;
+
+
+
    procedure bind_constructors_of_abstract_Class (Self : access Item;   the_Class : in Node_Pointer)
    --
    --  An abstract class cannot be constructed, and the core gives it no constructor. A class which is derived
@@ -2895,41 +3035,173 @@ is
 
    function cpp_Symbol (qualified_Name : in String;   Suffix : in String) return String
    --
-   --  The C++ symbol of an entity with the given name ('geometry::solid::Box') and the suffix of its kind ('E' for
-   --  a variable, 'D1Ev' for a destructor). Returns "" where the name is not a plain one, such as that of a
-   --  template instance, whose symbol cannot be made from its name alone.
+   --  The C++ symbol of an entity with the given name, as swig holds it ('geometry::solid::Box', 'Source<(int)>'),
+   --  and the suffix of its kind ('E' for a variable, 'D1Ev' for a destructor). Returns "" where the symbol
+   --  cannot be made: the mangling done here covers namespaces and the simpler template arguments only (a
+   --  standard type, a class, a pointer or reference to either, and an integer), and no substitutions.
    --
    is
-      the_Symbol : unbounded_String := +"_ZN";
-      First      : Positive         := qualified_Name'First;
-      Last       : Natural;
+      Unsupported : exception;
+
+
+      function Image (Count : in Natural) return String
+      is (ada.Strings.fixed.Trim (Count'Image, Left));
+
+
+      function split (Text : in String;   Separator : in String) return String_Vectors.Vector
+      --
+      --  Splits the text at each separator which is not within the arguments of a template.
+      --
+      is
+         the_Parts : String_Vectors.Vector;
+         Depth     : Natural  := 0;
+         First     : Positive := Text'First;
+         Index     : Positive := Text'First;
+      begin
+         while Index <= Text'Last
+         loop
+            if         Index < Text'Last
+              and then Text (Index .. Index + 1) = "<("
+            then
+               Depth := Depth + 1;
+               Index := Index + 2;
+
+            elsif      Index < Text'Last
+              and then Text (Index .. Index + 1) = ")>"
+            then
+               Depth := Depth - 1;
+               Index := Index + 2;
+
+            elsif      Depth = 0
+              and then Index + Separator'Length - 1 <= Text'Last
+              and then Text (Index .. Index + Separator'Length - 1) = Separator
+            then
+               the_Parts.append (Text (First .. Index - 1));
+               Index := Index + Separator'Length;
+               First := Index;
+            else
+               Index := Index + 1;
+            end if;
+         end loop;
+
+         the_Parts.append (Text (First .. Text'Last));
+         return the_Parts;
+      end split;
+
+
+      function mangled_Name (Name : in String;   is_Nested : in Boolean) return String;
+
+
+      function mangled_Type (the_Type : in String) return String
+      --
+      --  'the_Type' is a swig type, such as 'int', 'p.q(const).char' or 'ns::Thing'.
+      --
+      is
+      begin
+         if the_Type'Length > 2 and then the_Type (the_Type'First .. the_Type'First + 1) = "p."
+         then
+            return "P" & mangled_Type (the_Type (the_Type'First + 2 .. the_Type'Last));
+
+         elsif the_Type'Length > 2 and then the_Type (the_Type'First .. the_Type'First + 1) = "r."
+         then
+            return "R" & mangled_Type (the_Type (the_Type'First + 2 .. the_Type'Last));
+
+         elsif the_Type'Length > 9 and then the_Type (the_Type'First .. the_Type'First + 8) = "q(const)."
+         then
+            return "K" & mangled_Type (the_Type (the_Type'First + 9 .. the_Type'Last));
+
+         elsif the_Type = "void"                then   return "v";
+         elsif the_Type = "bool"                then   return "b";
+         elsif the_Type = "char"                then   return "c";
+         elsif the_Type = "signed char"         then   return "a";
+         elsif the_Type = "unsigned char"       then   return "h";
+         elsif the_Type = "short"               then   return "s";
+         elsif the_Type = "unsigned short"      then   return "t";
+         elsif the_Type = "int"                 then   return "i";
+         elsif the_Type = "unsigned int"        then   return "j";
+         elsif the_Type = "long"                then   return "l";
+         elsif the_Type = "unsigned long"       then   return "m";
+         elsif the_Type = "long long"           then   return "x";
+         elsif the_Type = "unsigned long long"  then   return "y";
+         elsif the_Type = "float"               then   return "f";
+         elsif the_Type = "double"              then   return "d";
+         elsif the_Type = "long double"         then   return "e";
+
+         elsif (for all Each of the_Type => Each in '0' .. '9')
+         then   -- An integer, which is taken to be an argument of type 'int'.
+            return "Li" & the_Type & "E";
+
+         elsif (for some Each of the_Type => Each in ' ' | '.' | '-')
+         then
+            raise Unsupported;
+         else
+            return mangled_Name (the_Type, is_Nested => False);
+         end if;
+      end mangled_Type;
+
+
+      function mangled_Name (Name : in String;   is_Nested : in Boolean) return String
+      --
+      --  'is_Nested' is True where the name is already within 'N' and 'E'.
+      --
+      is
+         the_Components : constant String_Vectors.Vector := split (Name, "::");
+         the_Result     : unbounded_String;
+      begin
+         for Each of the_Components
+         loop
+            declare
+               Open     : constant Natural := ada.Strings.fixed.Index (Each, "<(");
+               the_Base : constant String  := (if Open = 0 then Each else Each (Each'First .. Open - 1));
+            begin
+               if        the_Base = ""
+                 or else the_Base = "std"
+                 or else (for some Char of the_Base => Char not in 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_')
+               then
+                  raise Unsupported;
+               end if;
+
+               append (the_Result, Image (the_Base'Length) & the_Base);
+
+               if Open /= 0
+               then
+                  if Each (Each'Last - 1 .. Each'Last) /= ")>"
+                  then
+                     raise Unsupported;
+                  end if;
+
+                  append (the_Result, "I");
+
+                  for each_Argument of split (Each (Open + 2 .. Each'Last - 2), ",")
+                  loop
+                     append (the_Result, mangled_Type (each_Argument));
+                  end loop;
+
+                  append (the_Result, "E");
+               end if;
+            end;
+         end loop;
+
+         if        is_Nested
+           or else Natural (the_Components.Length) = 1
+         then
+            return to_String (the_Result);
+         else
+            return "N" & to_String (the_Result) & "E";
+         end if;
+      end mangled_Name;
+
    begin
-      if        qualified_Name = ""
-        or else (for some Each of qualified_Name => Each not in 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' | ':')
-        or else Index (qualified_Name, "std::") = qualified_Name'First
+      if qualified_Name = ""
       then
          return "";
       end if;
 
-      loop
-         Last := Index (qualified_Name, "::", from => First);
+      return "_ZN" & mangled_Name (qualified_Name, is_Nested => True) & Suffix;
 
-         declare
-            Component : constant String := qualified_Name (First .. (if Last = 0 then qualified_Name'Last else Last - 1));
-         begin
-            if Component = ""
-            then
-               return "";
-            end if;
-
-            append (the_Symbol, Trim (Component'Length'Image, ada.Strings.Left) & Component);
-         end;
-
-         exit when Last = 0;
-         First := Last + 2;
-      end loop;
-
-      return to_String (the_Symbol) & Suffix;
+   exception
+      when Unsupported | constraint_Error =>
+         return "";
    end cpp_Symbol;
 
 

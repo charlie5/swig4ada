@@ -373,6 +373,13 @@ is
                         type_Name := the_Component.my_type.qualified_Name;
                      end if;
 
+                     if the_Component.is_raw_Storage
+                     then   -- Bytes of the size of the type, as the type itself may be abstract, and would be constructed.
+                        type_Modifier := to_unbounded_String ("aliased");
+                        type_Name     :=   "interfaces.C.char_array (1 .. Standard." & the_Component.my_type.qualified_Name     -- From 'Standard', as a component which the
+                                         & "'Object_Size / interfaces.C.char'Size)";                                           -- record inherits may have the name of the module.
+                     end if;
+
                      append (the_Source,  NL & "         " & the_Component.Name  & " : " & type_Modifier & " " & type_Name);
 
 

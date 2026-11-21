@@ -22,6 +22,7 @@ is
          my_Type   : ada_Type.view;
          Value     : unbounded_String;
          link_Symbol : unbounded_String;     -- The C++ symbol of a variable which is declared in a namespace.
+         is_raw_Storage : Boolean := False;  -- A record component which only reserves the storage of its type.
 
          bit_Field        : Integer                    := undefined_Bitfield;
          array_Bounds     : array_bounds_vectors.Vector;

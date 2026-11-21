@@ -841,6 +841,7 @@ is
                            declare
                               the_c_Bases : constant c_Type.Vector := the_c_Type.base_Classes;
                               Cursor      :          c_Type.Cursor := the_c_Bases.First;
+                              has_Parent  : constant Boolean       := (for some Each of the_c_Bases => Each.is_Virtual);
                            begin
                               --  A tagged type has a single parent, which must itself be tagged. The first base class which
                               --  is virtual becomes the parent, as C++ places it first in the object. A base class which is not
@@ -851,7 +852,11 @@ is
                               loop
                                  if not Element (Cursor).is_Virtual
                                  then
-                                    the_ada_Record.add_Component (ada_Variable.new_ada_Variable (to_ada_Identifier (Element (Cursor).Name),
+                                    --  In a type extension the component may not be where C++ has the base class (see the members
+                                    --  which a derived class adds), so it only reserves storage, and 'as_<base>' reaches the base.
+                                    --
+                                    the_ada_Record.add_Component (ada_Variable.new_ada_Variable (  to_ada_Identifier (Element (Cursor).Name)
+                                                                                                 & (if has_Parent then "_storage" else ""),
                                                                                                  c_type_Map_of_ada_type.Element (Element (Cursor))));
                                  elsif the_ada_Record.base_Classes.is_Empty
                                  then
@@ -859,6 +864,19 @@ is
                                  else
                                     log (  "Warning: the base class '" & Element (Cursor).Name & "' of class '" & the_c_Type.Name
                                          & "' is ignored, as multiple inheritance is not supported.");
+
+                                    --  The part of the object which is that base class still needs its storage: without it an
+                                    --  object which is declared in Ada is smaller than C++ takes it to be, and its constructor
+                                    --  writes beyond it. The component reserves the storage, and is not otherwise of use.
+                                    --
+                                    declare
+                                       the_Storage : constant ada_Variable.view
+                                         := ada_Variable.new_ada_Variable (to_ada_Identifier (Element (Cursor).Name) & "_storage",
+                                                                           c_type_Map_of_ada_type.Element (Element (Cursor)));
+                                    begin
+                                       the_Storage.is_raw_Storage := True;
+                                       the_ada_Record.add_Component (the_Storage);
+                                    end;
                                  end if;
 
                                  next (Cursor);
@@ -934,6 +952,16 @@ is
                                     is_Overridable     :          Boolean             := True;
                                  begin
                                     the_ada_subProgram.Parameters := Self.to_ada_Parameters (the_c_function.Parameters);
+
+                                    --  C is case sensitive, so a member function may differ only in case from a type which is
+                                    --  declared in the class (a function 'mode' and a typedef 'Mode'). The function is prefixed.
+                                    --
+                                    if (for some Each of the_ada_Record.declaration_Package.Types
+                                        =>   ada.Characters.handling.to_Lower (to_String (Each.Name))
+                                           = ada.Characters.handling.to_Lower (to_String (the_ada_subProgram.Name)))
+                                    then
+                                       the_ada_subProgram.Name := "the_" & the_ada_subProgram.Name;
+                                    end if;
 
                                     if the_c_Function.is_Overriding
                                     then

@@ -18,6 +18,7 @@ is
                     my_Type   => the_Type,
                     Value     => Value,
                     link_Symbol => <>,
+                    is_raw_Storage => False,
 
                     bit_Field        => -1,
                     array_Bounds     => <>,
