@@ -818,6 +818,7 @@ begin
       run ("layouts");             -- Unions, bit-fields and structures within structures.
       run ("strings");             -- Strings of the C++ standard library.
       run ("directives");          -- Directives which change a binding.
+      run ("derived_layouts");     -- Classes whose members lie in the unused tail of a base class.
    end if;
 
 
