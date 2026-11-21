@@ -789,6 +789,9 @@ begin
       run ("arrays");              -- Arrays and pointers, the other standard types, and variables.
       run ("constants");           -- Constants and enumerations of every kind.
       run ("static_members");      -- Static member variables of classes.
+      run ("layouts");             -- Unions, bit-fields and structures within structures.
+      run ("strings");             -- Strings of the C++ standard library.
+      run ("directives");          -- Directives which change a binding.
    end if;
 
 
