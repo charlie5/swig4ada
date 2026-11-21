@@ -182,6 +182,10 @@ Other things to know
 - A static member function is a function of the package of its class.
 - A static member variable is a variable of the package of its class ('Counter.total'), or a constant
   where it has a value in the class.
+- A structure with bit-fields is laid out as C has it, by a record representation clause, for the machine
+  which generates the binding.
+- A member variable which is ignored ('%ignore Sensor::state;') still has a component, 'state_storage',
+  so that the members after it stay where C++ has them.
 - 'operator->' is the function 'dereference', and the functions of the class which a smart pointer points
   to are also functions of the smart pointer.
 - A class of a namespace has its package directly under the module, as namespaces are not kept.
