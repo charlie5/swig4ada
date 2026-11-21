@@ -137,10 +137,14 @@ is
 
    procedure generate (swig_Module      : in String;
                        use_CPP          : in Boolean := False;
-                       wrapper_Compiles : in Boolean := True)
+                       wrapper_Compiles : in Boolean := True;
+                       check_Layout     : in Boolean := True)
    --
    --  'wrapper_Compiles' is False for a case whose wrapper is known not to compile. Its wrapper
    --  is still compiled, so that the launcher can say when it has begun to.
+   --
+   --  The wrapper checks the layout of every class ('-check-layout'), so that a record which does not match
+   --  its class fails to compile. 'check_Layout' is False for a case whose input is made so that one cannot.
    --
    is
       use lace.Environ.Paths;
@@ -162,7 +166,7 @@ is
          raise Program_Error with "Unable to write into the 'generated' folder.";
       end if;
 
-      if not run (  Root & "/ada-build/swig4ada -ada"
+      if not run (  Root & "/ada-build/swig4ada -ada" & (if check_Layout then " -check-layout" else "")
                   & (if use_CPP then " -c++" else "")
                   & " -outdir . -o ./" & Wrapper
                   & " -I/usr/include "
@@ -251,7 +255,7 @@ is
    --  generated first.
    --
    is
-      Generator : constant String := "../../../../../ada-build/swig4ada -ada" & (if use_CPP then " -c++" else "") & " -outdir .";
+      Generator : constant String := "../../../../../ada-build/swig4ada -ada -check-layout" & (if use_CPP then " -c++" else "") & " -outdir .";
       Extension : constant String := (if use_CPP then "cxx" else "c");
 
       Build : constant String := "runtime-build/" & the_Case;
@@ -664,7 +668,7 @@ begin
       generate ("threads.i",                        use_CPP => True);
       generate ("typedef_array_member.i");
       generate ("typedef_funcptr.i",                use_CPP => True);
-      generate ("typedef_struct.i");
+      generate ("typedef_struct.i",                 check_Layout => False);     -- A structure hides a member from SWIG ('#ifndef SWIG').
    end if;
 
 
