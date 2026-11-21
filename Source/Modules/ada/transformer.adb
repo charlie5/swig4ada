@@ -769,8 +769,13 @@ is
                                                                                               element_type                     => the_element_Type);
                                     end;
                                  else
+                                    --  The array of an array type which has a package of its own ('typedef T mpz_t [1];') is the 'Item_Array'
+                                    --  of that package, which its pointer type takes. A class has its 'Item_Array' already.
+                                    --
                                     new_ada_Array := ada_Type.composite.an_array.new_Item (the_element_Type.declaration_Package,
-                                                                                           +"Items",
+                                                                                           (if the_element_Type.all in ada_Type.composite.an_array.item'Class
+                                                                                            then +"Item_Array"
+                                                                                            else +"Items"),
                                                                                            the_array_dimension_upper_Bounds => the_ada_array_Bounds,
                                                                                            element_type                     => the_element_Type);
                                  end if;

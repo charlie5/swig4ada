@@ -2909,7 +2909,7 @@ is
                        and then the_Component.bit_Field < 0
                        and then not the_Component.is_base_Class
                      then
-                        append (the_Checks,   "SWIG_ADA_LAYOUT_CHECK (offsetof (" & the_Type & ", " & to_String (the_Component.member_Name) & ") =="
+                        append (the_Checks,   "SWIG_ADA_LAYOUT_CHECK (SWIG_ADA_OFFSET_OF (" & the_Type & ", " & to_String (the_Component.member_Name) & ") =="
                                             & Natural'Image (the_Places (Each).First / 8)
                                             & ", ""swig4ada: the member '" & to_String (the_Component.member_Name) & "' of the Ada record of '" & the_Name
                                             & "' is not where its class has it."")" & NL);
@@ -2947,6 +2947,12 @@ is
                    & "#  define SWIG_ADA_LAYOUT_CHECK(Condition, Message)  _Static_assert (Condition, Message);" & NL
                    & "#else" & NL
                    & "#  define SWIG_ADA_LAYOUT_CHECK(Condition, Message)" & NL
+                   & "#endif" & NL
+                   & NL
+                   & "#if defined (__GNUC__)" & NL
+                   & "#  define SWIG_ADA_OFFSET_OF(Type, Member)  __builtin_offsetof (Type, Member)" & NL
+                   & "#else" & NL
+                   & "#  define SWIG_ADA_OFFSET_OF(Type, Member)  offsetof (Type, Member)" & NL
                    & "#endif" & NL
                    & NL
                    & "#if defined (__GNUC__) && defined (__cplusplus)" & NL
