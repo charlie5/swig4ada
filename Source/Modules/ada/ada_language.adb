@@ -233,6 +233,15 @@ is
       --
       swig_Banner (Self.f_Runtime);
 
+      --  The version of swig and the symbol of the target language ('SWIGADA'), which the wrapper of each language defines.
+      --
+      declare
+         the_Language : interfaces.C.Strings.chars_ptr := interfaces.C.Strings.new_String ("ADA");
+      begin
+         Swig_obligatory_macros (swig_Core.Pointers.String_Pointer (Self.f_Runtime), the_Language);
+         interfaces.C.Strings.free (the_Language);
+      end;
+
       --   Convert 'protected' and 'private' member access to public access, within the generated C runtime.
       --   This is to allow access to protected or private copy constructor and is subject to review (TODO).
       --
@@ -1330,6 +1339,7 @@ is
 
             print_to        (wrapper_Code, "}" & NL);
             doh_replace_All (wrapper_Code, -"$cleanup",               -cleanup_Code);                      -- Substitute the cleanup code.
+            doh_replace_All (wrapper_Code, -"$isvoid",                -(if is_Void_return then "1" else "0"));     -- Whether the function returns nothing.
             doh_replace_All (wrapper_Code, -"$symname",               -sym_Name);                          -- And the name which the function is bound by.
             doh_replace_All (wrapper_Code, -"SWIG_contract_assert(",  -"SWIG_contract_assert($null, ");    -- Contract macro modification.
 
@@ -1429,7 +1439,8 @@ is
       begin
          new_Variable.is_Static        := True;
          new_Variable.is_class_Pointer := is_Pointer;                                         -- TODO: Simplify these 'is_pointer' variables.
-         new_Variable.is_Pointer       := SwigType_isReference (the_swig_Type) /= 0;
+         new_Variable.is_Pointer       :=        SwigType_isReference        (the_swig_Type) /= 0
+                                          or else SwigType_isrvalue_reference (the_swig_Type) /= 0;     -- An rvalue reference ('T&&') is bound as a reference is.
 
          if swigtype_isArray (the_swig_Type) /= 0
          then
@@ -1724,7 +1735,11 @@ is
             First     :          Natural := the_Value'First;
             Last      :          Natural := the_Value'Last;
          begin
-            if get_Attribute (the_Node, "stringval") = null     -- Which the core gives to a literal alone.
+            if         get_Attribute (the_Node, "stringval") = null     -- Which the core gives to a literal alone,
+              and then not (         the_Value'Length in 4 .. 6         -- but not to one of several characters ('ab').
+                            and then the_Value (First) = '''
+                            and then the_Value (Last)  = '''
+                            and then (for all Each of the_Value (First + 1 .. Last - 1) => Each not in ''' | '\'))
             then
                return the_Value;
             end if;
@@ -1744,7 +1759,30 @@ is
                loop
                   if the_Value (Each) = the_Value (Last)
                   then
-                     return the_Value (Each + 1 .. Last - 1);
+                     declare
+                        the_Text : constant String := the_Value (Each + 1 .. Last - 1);
+                     begin
+                        --  A character literal of several characters ('ab') is an 'int' in C, in which GCC and
+                        --  swig place the first character highest.
+                        --
+                        if         the_Value (Last) = '''
+                          and then the_Text'Length in 2 .. 4
+                          and then (for all Each of the_Text => Each /= '\')
+                        then
+                           declare
+                              Packed : Long_Long_Integer := 0;
+                           begin
+                              for Each of the_Text
+                              loop
+                                 Packed := Packed * 256 + Character'Pos (Each);
+                              end loop;
+
+                              return ada.Strings.fixed.Trim (Packed'Image, ada.Strings.Left);
+                           end;
+                        end if;
+
+                        return the_Text;
+                     end;
                   end if;
                end loop;
             end if;
@@ -1814,9 +1852,25 @@ is
                   begin
                      strip_c_integer_literal_qualifiers_in (value_Text);
 
+                     if Index (value_Text, "<=>") /= 0
+                     then   -- A three way comparison, whose result is no number.
+                        log ("Warning: unable to bind the constant '" & the_Name & "', as its value is a three way comparison.");
+                        unindent_Log;
+
+                        return SWIG_OK;
+                     end if;
+
                      if        the_Type.Name = "float"
                        or else the_Type.Name = "double"
                      then
+                        if         Length (value_Text) >= 2                                              -- A suffix which says
+                          and then Element (value_Text, Length (value_Text))     in 'f' | 'F' | 'l' | 'L'   -- that a literal is a
+                          and then Element (value_Text, Length (value_Text) - 1) in '0' .. '9' | '.'        -- 'float' ('4.0f').
+                          and then Index (value_Text, "0x") = 0
+                        then
+                           delete (value_Text, Length (value_Text), Length (value_Text));
+                        end if;
+
                         replace_Integer_with_Float (value_Text);
 
                         --  A number which the type cannot hold ('#define HUGE_VAL 1.0e10000', which C takes
@@ -2501,6 +2555,11 @@ is
          is
             the_Child : Node_Pointer := first_Child (Self.getCurrentClass);
          begin
+            if get_Attribute (Self.getCurrentClass, "allocate:deleted_default_destructor") /= null
+            then
+               return True;     -- The class, or a base class, has a destructor which is deleted ('~T () = delete;').
+            end if;
+
             while the_Child /= null
             loop
                if         Attribute (the_Child, "nodeType") = "destructor"
@@ -2603,7 +2662,13 @@ is
                   then   -- A class or structure passed by value, which Ada passes by reference.
                      append (construct_Call,      String' (+doh_Item (SwigType_lstr (SwigType_add_Pointer (SwigType_Pointer (doh_Copy (doh_Item (swig_Type)))),
                                                                                     const_String (-Arg)))));
-                     append (construct_call_Args, "*" & Arg);
+
+                     if ada.Strings.fixed.Index (Attribute (the_Parameter, "tmap:in"), "SWIG_STD_MOVE") /= 0
+                     then   -- The interface file asks that the object be moved from, not copied (the 'MOVE' typemap of 'swigmove.i').
+                        append (construct_call_Args, "SWIG_STD_MOVE (*" & Arg & ")");
+                     else
+                        append (construct_call_Args, "*" & Arg);
+                     end if;
 
                   elsif the_c_Type /= ""
                   then
@@ -2888,7 +2953,8 @@ is
                                                                                                Self.current_class_namespace_Prefix)));
 
             elsif      Attribute (the_Node, "access") not in "private" | "protected"
-              and then SwigType_isReference (swig_Type) = 0
+              and then SwigType_isReference        (swig_Type) = 0
+              and then SwigType_isrvalue_reference (swig_Type) = 0
             then   -- The wrapper file can ask where the member is.
                new_Variable.member_Name := +Attribute (the_Node, "name");
             end if;
@@ -2973,7 +3039,8 @@ is
       begin
          new_Variable.is_Static        := True;
          new_Variable.is_class_Pointer := SwigType_isPointer   (the_swig_Type) /= 0;
-         new_Variable.is_Pointer       := SwigType_isReference (the_swig_Type) /= 0;
+         new_Variable.is_Pointer       :=        SwigType_isReference        (the_swig_Type) /= 0
+                                          or else SwigType_isrvalue_reference (the_swig_Type) /= 0;     -- An rvalue reference ('T&&') is bound as a reference is.
          new_Variable.owner_Class      := Self.current_c_Class;
 
          strip_all_qualifiers (DOH_Pointer (the_swig_Type));
@@ -3873,8 +3940,17 @@ is
 
                SwigType_push (the_Type, to_Doh (to_String (the_Decl)));
 
-               append (the_Functions,   "  virtual " & String'(+doh_Item (SwigType_str (the_Type, const_String (-to_String (Name)))))
-                                      & Qualifier & " { abort (); }" & NL);
+               if         Index (Name, "operator ") = 1
+                 and then Length (Name) > 9
+                 and then (   Element (Name, 10) in 'a' .. 'z' | 'A' .. 'Z' | '_' | ':')
+                 and then Slice (Name, 10, Length (Name)) not in "new" | "delete" | "new[]" | "delete[]"
+               then   -- A conversion operator ('operator Other ()'), which is declared with no result type.
+                  append (the_Functions,   "  virtual " & Name & " ()"
+                                         & Qualifier & " { abort (); }" & NL);
+               else
+                  append (the_Functions,   "  virtual " & String'(+doh_Item (SwigType_str (the_Type, const_String (-to_String (Name)))))
+                                         & Qualifier & " { abort (); }" & NL);
+               end if;
             end;
          end;
       end loop;
@@ -4128,7 +4204,8 @@ is
       end;
 
       if        SwigType_isPointer   (the_swig_Type) /= 0
-        or else SwigType_isReference (the_swig_Type) /= 0
+        or else SwigType_isReference        (the_swig_Type) /= 0
+        or else SwigType_isrvalue_reference (the_swig_Type) /= 0
         or else SwigType_isArray     (the_swig_Type) /= 0
         or else not Self.swig_type_Map_of_c_type.contains (+doh_Item (the_swig_Type))
       then
@@ -4322,6 +4399,11 @@ is
             then
                enter_swig_Type ("r." & the_c_Type.Name, the_c_Type_Pointer);
             end if;
+
+            --  An rvalue reference ('T&&', which swig writes 'z.T') is a pointer too.
+            --
+            enter_swig_Type ("z."          & unbounded_String'(+the_swig_Type), the_c_type_Pointer);
+            enter_swig_Type ("z.q(const)." & unbounded_String'(+the_swig_Type), the_c_type_Pointer);
 
             enter_Name (the_c_type.Name & "&", the_c_type_Pointer);
 
@@ -5044,7 +5126,8 @@ is
                                                              Self.demand_c_Type_for (doh_Item (param_swigType)));
 
                            new_Parameter.link_symbol_Code := +Attribute (the_Parameter, "tmap:link_symbol_code");
-                           new_Parameter.is_Pointer       :=         SwigType_isreference (param_swigType) /= 0
+                           new_Parameter.is_Pointer       :=         SwigType_isreference        (param_swigType) /= 0
+                                                             or else SwigType_isrvalue_reference (param_swigType) /= 0
                                                              or else SwigType_ispointer   (param_swigType) /= 0;
 
                            dlog (  "adding new parameter => " & new_Parameter.Name
@@ -5125,7 +5208,8 @@ is
       the_return_Type : c_Type.view;
 
       use type C.int;
-      return_by_Reference : constant Boolean := SwigType_isReference (the_swigType) /= 0;
+      return_by_Reference : constant Boolean :=        SwigType_isReference        (the_swigType) /= 0
+                                                or else SwigType_isrvalue_reference (the_swigType) /= 0;
       return_by_Pointer   : constant Boolean := SwigType_isPointer   (the_swigType) /= 0;
 
    begin

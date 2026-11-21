@@ -303,6 +303,38 @@ is
 
                   cull_value_Elements_and_restart_Cursor;
 
+               elsif for_Operation = "%"
+               then   -- The remainder of a division which rounds towards zero, as '/' does.
+                  declare
+                     Left  : constant gmp.discrete.Integer := Element (Previous (Cursor)).Value;
+                     Right : constant gmp.discrete.Integer := Element (Next     (Cursor)).Value;
+                  begin
+                     replace_Element (the_Vector, Cursor, (Kind           => Value,
+                                                           Value          => Left - (Left / Right) * Right,
+                                                           type_Qualifier => Element (Next (Cursor)).type_Qualifier));
+                  end;
+
+                  cull_value_Elements_and_restart_Cursor;
+
+               elsif for_Operation in "<" | ">" | "<=" | ">=" | "==" | "!="
+               then   -- A comparison is 1 where it holds, and 0 where it does not.
+                  declare
+                     Left  : constant gmp.discrete.Integer := Element (Previous (Cursor)).Value;
+                     Right : constant gmp.discrete.Integer := Element (Next     (Cursor)).Value;
+                     Holds : constant Boolean              := (if    for_Operation = "<"  then Left < Right
+                                                               elsif for_Operation = ">"  then Right < Left
+                                                               elsif for_Operation = "<=" then not (Right < Left)
+                                                               elsif for_Operation = ">=" then not (Left < Right)
+                                                               elsif for_Operation = "==" then Left = Right
+                                                               else                            not (Left = Right));
+                  begin
+                     replace_Element (the_Vector, Cursor, (Kind           => Value,
+                                                           Value          => to_Integer (if Holds then 1 else 0),
+                                                           type_Qualifier => null_unbounded_String));
+                  end;
+
+                  cull_value_Elements_and_restart_Cursor;
+
                elsif for_Operation = "<<"
                then
                   replace_Element (the_Vector, Cursor, (Kind           => Value,
@@ -358,8 +390,16 @@ is
 
       reduce       (Pad, for_operation => "*");
       reduce       (Pad, for_operation => "/");
+      reduce       (Pad, for_operation => "%");
       reduce       (Pad, for_operation => "+");
       reduce       (Pad, for_operation => "-");
+
+      reduce       (Pad, for_operation => "<");     -- The comparisons bind less tightly than the arithmetic.
+      reduce       (Pad, for_operation => ">");
+      reduce       (Pad, for_operation => "<=");
+      reduce       (Pad, for_operation => ">=");
+      reduce       (Pad, for_operation => "==");
+      reduce       (Pad, for_operation => "!=");
 
       if Length (Pad) = 1
       then
@@ -477,6 +517,26 @@ is
                                                      type_Qualifier => expression_Type));
                end;
 
+            elsif      Length (Expression_pad.all) >= 3
+              and then Slice  (Expression_pad.all, 1, 3) = "<=>"
+            then
+               raise Constraint_Error with "A three way comparison has no value which is an integer.";
+
+            elsif      Length (Expression_pad.all) >= 2
+              and then Slice  (Expression_pad.all, 1, 2) in "<=" | ">=" | "==" | "!="
+            then   -- A comparison, which is 1 or 0.
+               append (the_Elements,  an_Element'(kind  => Operator,
+                                                  code  => unbounded_Slice (Expression_pad.all, 1, 2)));
+               delete (Expression_pad.all,  1, 2);
+
+            elsif      Element (Expression_pad.all, 1) in '<' | '>'
+              and then not (         Length (Expression_pad.all) >= 2
+                            and then Element (Expression_pad.all, 2) = Element (Expression_pad.all, 1))     -- Not a shift.
+            then
+               append (the_Elements,  an_Element'(kind  => Operator,
+                                                  code  => unbounded_Slice (Expression_pad.all, 1, 1)));
+               delete (Expression_pad.all,  1, 1);
+
             elsif Element (Expression_pad.all, 1) = '!'
             then
                delete (Expression_pad.all,  1, 1);
@@ -514,6 +574,12 @@ is
                delete (Expression_pad.all,  1, 1);
                append (the_Elements,  an_Element'(kind  => Operator,
                                                   code  => +"/"));
+
+            elsif Element (Expression_pad.all, 1) = '%'
+            then
+               delete (Expression_pad.all,  1, 1);
+               append (the_Elements,  an_Element'(kind  => Operator,
+                                                  code  => +"%"));
 
             elsif Length (Expression_pad.all) >= 2 and then Slice (Expression_pad.all, 1, 2) = "||"
             then

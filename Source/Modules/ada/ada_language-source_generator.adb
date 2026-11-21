@@ -758,6 +758,21 @@ is
                   multi_dimensional : Boolean := False;
                   flat_Length       : Natural := 0;
 
+                  function is_a_later_Type_of_this_Package (the_Name : in unbounded_String) return Boolean
+                  --
+                  --  The record is 'Item' of its package, and the other types of the package (its array and pointer types) follow it.
+                  --
+                  is
+                     my_Name : constant String  := to_String (Self.qualified_Name);
+                     Dot     : constant Natural := ada.Strings.fixed.Index (my_Name, ".", going => ada.Strings.Backward);
+                  begin
+                     return     Dot /= 0
+                       and then Length (the_Name) > Dot
+                       and then Slice (the_Name, 1, Dot) = my_Name (my_Name'First .. Dot)
+                       and then ada.Strings.fixed.Index (Slice (the_Name, Dot + 1, Length (the_Name)), ".") = 0
+                       and then to_String (the_Name) /= my_Name;
+                  end is_a_later_Type_of_this_Package;
+
                   the_Places        : component_Places (1 .. Self.component_Count);
                   the_Size          : Natural;
                   the_Alignment     : Natural;
@@ -822,6 +837,13 @@ is
                         end if;
 
                         type_Name := the_Component.my_type.qualified_Name;
+                     end if;
+
+                     if         type_Modifier = "access"
+                       and then is_a_later_Type_of_this_Package (type_Name)
+                     then   -- A pointer to a type which this package declares after the record (a pointer to a pointer to the class itself).
+                        type_Modifier := null_unbounded_String;
+                        type_Name     := to_unbounded_String ("system.Address");
                      end if;
 
                      if the_Component.is_raw_Storage
