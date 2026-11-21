@@ -1,4 +1,6 @@
 with
+     Logger,
+
      ada.Strings.unbounded,
      ada.Containers.Vectors;
 
@@ -49,12 +51,27 @@ is
    function depends_directly_on (Self : access Item;   a_Declarable : in c_Declarable.view) return Boolean is abstract;
 
 
+   --------------
+   --  Operations
+   --
+
+   procedure warn (Self : access Item'Class;   Kind    : in Logger.warning_Kind;
+                                               Message : in String);
+   procedure warn (Self : access Item'Class;   Kind    : in Logger.warning_Kind;
+                                               Message : in ada.Strings.unbounded.unbounded_String);
+   --
+   --  Gives a warning about the declaration, at the file and the line which were being read when it was made.
+
+
 
 private
 
    type Item is abstract tagged
       record
-         null;
+         File : ada.Strings.unbounded.unbounded_String := ada.Strings.unbounded.to_unbounded_String (Logger.current_File);
+         Line : Natural                                := Logger.current_Line;
+
+         warning_Filter : ada.Strings.unbounded.unbounded_String := ada.Strings.unbounded.to_unbounded_String (Logger.current_Filter);
       end record;
 
 end c_Declarable;

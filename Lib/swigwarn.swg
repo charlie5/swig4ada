@@ -305,6 +305,14 @@
 
 /* 850-860 were used by Modula 3 (removed in SWIG 4.1.0) - avoid reusing for now */
 
+/* swig4ada: the warnings of the Ada module. */
+%define SWIGWARN_ADA_NOT_BOUND                           861 %enddef
+%define SWIGWARN_ADA_LAYOUT                              862 %enddef
+%define SWIGWARN_ADA_VALUE                               863 %enddef
+%define SWIGWARN_ADA_UNSUPPORTED                         864 %enddef
+
+/* please leave 861-869 free for Ada */
+
 %define SWIGWARN_PHP_MULTIPLE_INHERITANCE                870 %enddef
 %define SWIGWARN_PHP_UNKNOWN_PRAGMA                      871 %enddef
 /* Unused since 4.1.0: define WARN_PHP_PUBLIC_BASE                  872 */

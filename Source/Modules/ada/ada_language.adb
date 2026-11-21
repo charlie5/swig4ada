@@ -77,6 +77,68 @@ is
    end swig_ada;
 
 
+   ------------
+   --- Warnings
+   --
+
+   procedure locate (the_Node : in doh_Node)
+   --
+   --  Notes where the declaration which is now being read is, for a warning about it.
+   --
+   is
+      use type DOH_Pointer;
+
+      the_File : constant DOH_Pointer := DohGetfile (DOH_Pointer (the_Node));
+   begin
+      if the_File /= null
+      then
+         Logger.locate (File   => +the_File,
+                        Line   => Natural (DohGetline (DOH_Pointer (the_Node))),
+                        Filter => Attribute (Node_Pointer (the_Node), "feature:warnfilter"));
+      end if;
+   end locate;
+
+
+
+   procedure report (Number : in Positive;   File    : in String;
+                                             Line    : in Natural;
+                                             Message : in String;
+                                             Filter  : in String)
+   --
+   --  Gives a warning to the swig core, which prints it unless it has been turned off.
+   --
+   is
+      use interfaces.C.Strings;
+
+      the_Text   : unbounded_String;
+      the_Format : chars_ptr;
+   begin
+      for Each of Message
+      loop
+         append (the_Text, (if Each = '%' then "%%" else [Each]));     -- The text is taken as a format.
+      end loop;
+
+      the_Format := new_String (to_String (the_Text) & ASCII.LF);
+
+      if Filter /= ""
+      then
+         Swig_warnfilter (const_String (-Filter), 1);     -- Those which the interface file has turned off for the declaration.
+      end if;
+
+      Swig_warning (C.int (Number),
+                    const_String (-File),
+                    C.int (Line),
+                    the_Format);
+      if Filter /= ""
+      then
+         Swig_warnfilter (const_String (-Filter), 0);
+      end if;
+
+      free (the_Format);
+   end report;
+
+
+
    -----------
    --- Utility
    --
@@ -179,6 +241,7 @@ is
          Unused_2 : Hash_Pointer := Preprocessor_define (const_String (-"SWIGADA 1"),  0) with Unreferenced;   -- The usual upper case form, as the library files test for.
       begin
          swig_config_File (const_String (-"ada.swg"));
+         Logger.Reporter_is (report'Access);
       end;
 
       Self.allow_Overloading;
@@ -275,6 +338,9 @@ is
       --   specialised operation in our 'ada_Language' package.
       --
       do_base_Top (swigMod.Language.Pointer (Self), the_Node);
+
+      Logger.locate (File => Attribute (the_Node, "inputfile"),     -- A warning of the steps which follow, which is
+                     Line => 1);                                    -- about no declaration, names the interface file.
 
       print_to (Doh_Pointer (Self.f_Wrappers), "#ifdef __cplusplus");
       print_to (Doh_Pointer (Self.f_Wrappers), "}");
@@ -551,8 +617,8 @@ is
                   if         Each.Components (i).is_ignored_Member
                     and then not_fully_known_Types.contains (Each.Components (i).my_Type)
                   then
-                     log (  "Warning: the ignored member '" & Each.Components (i).Name & "' of class '" & Each.Name
-                          & "' has a type which is not known, so its storage is left out. The layout of the record does not match that of the class.");
+                     c_Declarable.warn (Each, Layout, "The ignored member '" & Each.Components (i).Name & "' of class '" & Each.Name
+                                                    & "' has a type which is not known, so its storage is left out. The layout of the record does not match that of the class.");
                      Each.lose_Layout;
                      Each.remove_Component (i);
                      Dropped := True;
@@ -581,7 +647,13 @@ is
          begin
             if i /= no_Index
             then
-               log ("Unable to bind unknown C type: " & Each.Name);
+               if (for all Letter of to_String (Each.Name) => Letter not in '*' | '[' | '&')     -- Not a pointer to, or an array of, such a type,
+               then                                                                          -- which would say the same again.
+                  c_Declarable.warn (Each, not_Bound, "Unable to bind the type '" & to_String (Each.Name) & "', which is not known.");
+               else
+                  dlog ("Unable to bind unknown C type: " & Each.Name);
+               end if;
+
                Self.Module_top.C.new_c_Types.delete (i);
             end if;
          end;
@@ -600,7 +672,7 @@ is
          begin
             if not_fully_known_Types.contains (variable_Type)
             then
-               log ("Unable to bind variable '" & Variable.Name & "' due to unknown C type: " & variable_Type.Name);
+               c_Declarable.warn (Variable, not_Bound, "Unable to bind the variable '" & to_String (Variable.Name) & "', as its type '" & to_String (variable_Type.Name) & "' is not known.");
                Self.Module_top.C.new_c_Variables.delete (i);
             end if;
          end;
@@ -619,18 +691,21 @@ is
          begin
             if not_fully_known_Types.contains (return_Type)
             then
-               log ("Unable to bind function '" & the_Function.Name & "' due to unknown C return type: " & return_Type.Name);
+               c_Declarable.warn (the_Function, not_Bound,   "Unable to bind the function '" & to_String (the_Function.Name) & "', as its result type '"
+                                                           & to_String (return_Type.Name) & "' is not known.");
                Self.Module_top.C.new_c_Functions.delete (i);
+            else
+               for Each of the_Function.Parameters
+               loop
+                  if not_fully_known_Types.contains (Each.my_Type)
+                  then
+                     c_Declarable.warn (the_Function, not_Bound,   "Unable to bind the function '" & to_String (the_Function.Name) & "', as the type '"
+                                                                 & to_String (Each.my_Type.Name) & "' of its parameter '" & to_String (Each.Name) & "' is not known.");
+                     Self.Module_top.C.new_c_Functions.delete (i);
+                     exit;     -- The function is gone: a second such parameter would take the function which is now in its place.
+                  end if;
+               end loop;
             end if;
-
-            for Each of the_Function.Parameters
-            loop
-               if not_fully_known_Types.contains (Each.my_Type)
-               then
-                  log ("Unable to bind function '" & the_Function.Name & "' due to parameter '" & Each.Name & "' of unknown C type: " & Each.my_Type.Name);
-                  Self.Module_top.C.new_c_Functions.delete (i);
-               end if;
-            end loop;
          end;
       end loop;
    end prune_unknown_C_Types;
@@ -786,6 +861,7 @@ is
       dlog (+"'ClassforwardDeclaration'   node_Type: '" & String'(+node_Type) & "'");
 
       Self.current_c_Node := doh_Node (the_Node);
+      locate (doh_Node (the_Node));
 
       if Self.swig_type_Map_of_c_type.contains (+node_Type)
       then
@@ -863,6 +939,7 @@ is
       dlog (+"functionWrapper:  '" & Attribute (the_Node, "sym:name") & "'");
 
       Self.current_c_Node := doh_Node (the_Node);
+      locate (doh_Node (the_Node));
 
       freshen_current_module_Package (Self, the_Node);
 
@@ -1431,6 +1508,7 @@ is
       dlog (+"'globalvariableHandler'");
 
       Self.current_c_Node := doh_Node (the_Node);
+      locate (doh_Node (the_Node));
       freshen_current_module_Package (Self, the_Node);
 
       strip_Namespaces     (the_Name);
@@ -1533,6 +1611,7 @@ is
       end if;
 
       Self.current_c_Node := doh_Node (the_Node);
+      locate (doh_Node (the_Node));
 
       declare
          the_Name          : unbounded_String := +Attribute (the_Node, "sym:name");        -- Will be null string for an anonymous enum.
@@ -1662,8 +1741,8 @@ is
                   --
                   Self.last_c_enum_rep_Value := Self.last_c_enum_rep_Value + 1;
 
-                  log (  "Warning: unable to evaluate the value '" & enum_value_Text & "' of the enumeration literal '" & symName
-                       & "', which is given the value" & Self.last_c_enum_rep_Value'Image & ".");
+                  warn (Value, "Unable to evaluate the value '" & enum_value_Text & "' of the enumeration literal '" & symName
+                             & "', which is given the value" & Self.last_c_enum_rep_Value'Image & ".");
             end;
          end if;
 
@@ -1723,6 +1802,7 @@ is
            & "'");
 
       Self.current_c_Node := doh_Node (the_Node);
+      locate (doh_Node (the_Node));
       the_Type            := Self.demand_c_Type_for (doh_swigType (the_swigType));     -- An unknown type is pruned later.
       new_c_Constant      := c_variable.new_c_Variable (Name    => the_Name,
                                                         of_Type => the_Type);
@@ -1831,7 +1911,7 @@ is
                     and then Index (value_Text, "::") > 0)
            or else Index (String'(+DOH_Pointer (the_swigType)), "m(") = 1
          then   -- A pointer to a member of a class, for which Ada has no counterpart.
-            log ("Warning: unable to bind the constant '" & the_Name & "', as its value is a pointer to a class member.");
+            warn (not_Bound, "Unable to bind the constant '" & the_Name & "', as its value is a pointer to a class member.");
             unindent_Log;
 
             return SWIG_OK;
@@ -1840,7 +1920,7 @@ is
          if         Index (value_Text, "&") = 1
            and then Index (String'(+DOH_Pointer (the_swigType)), "p.f(") /= 1
          then   -- The address of an object ('%constant Type1* T = &an_Object;'), which is no static value in Ada.
-            log ("Warning: unable to bind the constant '" & the_Name & "', as its value is the address of an object.");
+            warn (not_Bound, "Unable to bind the constant '" & the_Name & "', as its value is the address of an object.");
             unindent_Log;
 
             return SWIG_OK;
@@ -1849,7 +1929,7 @@ is
          if        the_Type.is_constructed_by_Cpp
            or else the_Type.Name = "std::string"
          then   -- An object which C++ constructs: it has no value which Ada can give, and a constant made by a directive has no symbol.
-            log ("Warning: unable to bind the constant '" & the_Name & "', as its type is one which C++ constructs.");
+            warn (not_Bound, "Unable to bind the constant '" & the_Name & "', as its type is one which C++ constructs.");
             unindent_Log;
 
             return SWIG_OK;
@@ -1857,7 +1937,7 @@ is
 
          if the_Type.c_type_Kind in c_Type.c_Class
          then   -- A structure or a class, whose value is an object of C ('%constant Type1 T = an_Object;').
-            log ("Warning: unable to bind the constant '" & the_Name & "', as its value is an object.");
+            warn (not_Bound, "Unable to bind the constant '" & the_Name & "', as its value is an object.");
             unindent_Log;
 
             return SWIG_OK;
@@ -1967,7 +2047,7 @@ is
 
                      if Index (value_Text, "<=>") /= 0
                      then   -- A three way comparison, whose result is no number.
-                        log ("Warning: unable to bind the constant '" & the_Name & "', as its value is a three way comparison.");
+                        warn (not_Bound, "Unable to bind the constant '" & the_Name & "', as its value is a three way comparison.");
                         unindent_Log;
 
                         return SWIG_OK;
@@ -2027,8 +2107,8 @@ is
 
                            if Too_Big
                            then
-                              log (  "Warning: unable to bind the constant '" & the_Name & "', as its value (" & the_Text
-                                   & ") is beyond the range of its type.");
+                              warn (not_Bound, "Unable to bind the constant '" & the_Name & "', as its value (" & the_Text
+                                             & ") is beyond the range of its type.");
                               unindent_Log;
                               return SWIG_OK;
                            end if;
@@ -2073,8 +2153,8 @@ is
                        and then Index (value_Text, "interfaces.c.") = 0
                        and then not is_plain_Expression (to_String (value_Text))
                      then
-                        log (  "Warning: unable to bind the constant '" & the_Name & "', as its value (" & value_Text
-                             & ") is not one which Ada can state.");
+                        warn (not_Bound, "Unable to bind the constant '" & the_Name & "', as its value (" & value_Text
+                                       & ") is not one which Ada can state.");
                         unindent_Log;
                         return SWIG_OK;
                      end if;
@@ -2146,6 +2226,7 @@ is
            & "'");
 
       Self.current_c_Node := doh_Node (the_Node);
+      locate (doh_Node (the_Node));
 
       if Self.swig_type_Map_of_c_type.contains (+DOH_Pointer (node_Type))
       then   -- The class has been 'forward' declared.
@@ -2246,8 +2327,8 @@ is
       --
       if Attribute (the_Node, "has_virtual_base") /= ""
       then
-         log (  "Warning: the class '" & class_Name & "' inherits a base class virtually, which is not supported."
-              & " The layout of its record does not match that of the class.");
+         warn (Unsupported, "The class '" & class_Name & "' inherits a base class virtually, which is not supported."
+                          & " The layout of its record does not match that of the class.");
          new_c_Class.lose_Layout;
       end if;
 
@@ -2255,8 +2336,8 @@ is
         and then (        get_Attribute (the_Node, "unnamed_nested") = null
                   or else not Self.in_cpp_Mode)
       then
-         log (  "Warning: the class '" & class_Name & "' has a nested class or union with no name, whose members are left out."
-              & " The layout of its record does not match that of the class.");
+         warn (Layout, "The class '" & class_Name & "' has a nested class or union with no name, whose members are left out."
+                     & " The layout of its record does not match that of the class.");
          new_c_Class.lose_Layout;
       end if;
 
@@ -2395,7 +2476,7 @@ is
                then
                   Self.current_c_Class.add_Base (Self.name_Map_of_c_type.Element (+base_Name));
                else   -- Such as a base class which is ignored, or is a template which has not been instantiated.
-                  log ("Warning: the base class '" & base_Name & "' of class '" & class_Name & "' is not known, and is ignored.");
+                  warn (Layout, "The base class '" & base_Name & "' of class '" & class_Name & "' is not known, and is ignored.");
                   new_c_Class.lose_Layout;
                end if;
             end;
@@ -2502,6 +2583,7 @@ is
       dlog (+"memberFunctionHandler");
 
       Self.current_c_Node := doh_Node (the_Node);
+      locate (doh_Node (the_Node));
 
       set_Attribute (the_Node, "name", Namespace & function_Name);
 
@@ -2541,6 +2623,7 @@ is
       dlog (+"'staticMemberFunctionHandler'");
 
       Self.current_c_Node := doh_Node (the_Node);
+      locate (doh_Node (the_Node));
 
       Self.static_Flag := True;
       Status := swigMod.Language.item (Self.all).staticMemberFunctionHandler (the_Node);
@@ -2594,6 +2677,7 @@ is
            and then Self.name_Map_of_c_type.contains (Self.current_c_Class.Name & "*")
          then
             Self.current_c_Node := doh_Node (the_Node);
+            locate (doh_Node (the_Node));
             Status              := swigMod.Language.item (Self.all).constructorHandler (the_Node);
 
             declare
@@ -2634,6 +2718,7 @@ is
       end if;
 
       Self.current_c_Node := doh_Node (the_Node);
+      locate (doh_Node (the_Node));
 
       if not (   check_Attribute (the_Node, "access", "protected")
               or check_Attribute (the_Node, "access", "private")
@@ -2938,6 +3023,7 @@ is
            and then Self.name_Map_of_c_type.contains (+"void")
          then
             Self.current_c_Node := doh_Node (the_Node);
+            locate (doh_Node (the_Node));
             Status              := swigMod.Language.item (Self.all).destructorHandler (the_Node);
 
             declare
@@ -2981,6 +3067,7 @@ is
       end;
 
       Self.current_c_Node := doh_Node (the_Node);
+      locate (doh_Node (the_Node));
 
       if not (   check_Attribute (the_Node, "access", "protected")
               or check_Attribute (the_Node, "access", "private"))
@@ -3073,6 +3160,7 @@ is
 
       strip_all_Qualifiers (doh_Item (swig_Type));
       Self.current_c_Node := doh_Node (the_Node);
+      locate (doh_Node (the_Node));
 
       if         Self.is_smart_Pointer = 0                       -- Don't add a new member variable during smart pointer resolution.
         and then Attribute (the_Node, "feature:extend") = ""     -- Nor one added by '%extend', which is not a data member of the class.
@@ -3171,6 +3259,7 @@ is
       dlog (+"'staticMemberVariableHandler':    Name => " & variable_Name & "   swig_type: " & to_String (the_swigType));
 
       Self.current_c_Node := doh_Node (the_Node);
+      locate (doh_Node (the_Node));
 
       --  A static member variable is a variable of the package of its class, imported by its C++ symbol. One which is
       --  constant and has a value ('static const int Size = 4;') need have no symbol, and is given its value.
@@ -3238,8 +3327,8 @@ is
          then
             if the_Symbol = ""
             then
-               log (  "Warning: unable to bind the static member variable '" & variable_Name & "' of class '" & class_Name
-                    & "', as its C++ symbol cannot be made.");
+               warn (not_Bound, "Unable to bind the static member variable '" & variable_Name & "' of class '" & class_Name
+                              & "', as its C++ symbol cannot be made.");
                unindent_Log;
                return SWIG_OK;
             end if;
@@ -3268,6 +3357,7 @@ is
       dlog (+"'memberConstantHandler'");
 
       Self.current_c_Node := doh_Node (the_Node);
+      locate (doh_Node (the_Node));
 
       Self.wrapping_member_Flag := True;
       Status := swigMod.Language.item (Self.all).memberConstantHandler (the_node);
@@ -3324,6 +3414,7 @@ is
       dlog (+"'typedefHandler'   the_doh_type_Name: '" & String'(+the_doh_type_Name) & "'");
 
       Self.current_c_Node := doh_Node (the_Node);
+      locate (doh_Node (the_Node));
 
       if        (         Self.prior_c_Declaration     /= null
                  and then Self.prior_c_Declaration.Name = String'(+the_doh_type_Name))
@@ -3374,8 +3465,8 @@ is
                                                                                               Self.current_class_namespace_Prefix)));
                            exception
                               when others =>
-                                 log (  "Warning: unable to evaluate the array dimension '" & array_dimension_Text & "' of '" & the_type_Name
-                                      & "', whose length is taken to be unknown.");
+                                 warn (Value, "Unable to evaluate the array dimension '" & array_dimension_Text & "' of '" & the_type_Name
+                                            & "', whose length is taken to be unknown.");
                            end;
                         end if;
 
@@ -3937,8 +4028,8 @@ is
                               new_Variable.member_Name := +the_Name;
                               Self.current_c_Class.add_Component (new_Variable);
                            else
-                              log (  "Warning: unable to bind the member '" & the_Name & "' of class '" & Self.current_c_Class.Name
-                                   & "', whose type is a nested class with no name. The layout of the record does not match that of the class.");
+                              warn (Layout, "Unable to bind the member '" & the_Name & "' of class '" & Self.current_c_Class.Name
+                                          & "', whose type is a nested class with no name. The layout of the record does not match that of the class.");
                               Self.current_c_Class.lose_Layout;
                            end if;
                         end;
@@ -5395,6 +5486,7 @@ is
 
    begin
       Self.current_c_Node := the_Node;
+      locate (doh_Node (the_Node));
 
       freshen_current_module_Package (Self, the_Node);
 
@@ -5583,8 +5675,8 @@ is
                when others =>   -- Such as a dimension which depends upon a template parameter, or the size of a string literal.
                   resolved_array_Dimension := 0;
 
-                  log (  "Warning: unable to evaluate the array dimension '" & array_dimension_Expression & "' of '" & the_Variable.Name
-                       & "', whose length is taken to be unknown.");
+                  warn (Value, "Unable to evaluate the array dimension '" & array_dimension_Expression & "' of '" & the_Variable.Name
+                             & "', whose length is taken to be unknown.");
             end;
          end if;
 

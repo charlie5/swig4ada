@@ -1099,8 +1099,8 @@ is
                begin
                   if not laid_Out (the_Record, the_Places, the_Size, the_Alignment, data_Size)
                   then
-                     log (  "Warning: unable to lay out '" & the_Record.declaration_Package.qualified_Name
-                          & "' as C++ does, as the size of one of its members is not known. Its record may not match the layout of its class.");
+                     warn (Layout, "Unable to lay out '" & the_Record.declaration_Package.qualified_Name
+                                 & "' as C++ does, as the size of one of its members is not known. Its record may not match the layout of its class.");
                   else
                      append (the_Source,
                                NL & NL
@@ -2466,8 +2466,8 @@ is
               and then the_Variable.my_Type.resolved_Type.all in ada_Type.elementary.an_access.to_subProgram.item'Class
               and then not is_a_Subprogram_of_the_Package (to_String (the_Variable.Value))
             then   -- The constant is completed by the access of a function of this package, so there must be one.
-               log (  "Warning: unable to bind the constant '" & the_Variable.Name & "', whose value '" & the_Variable.Value
-                    & "' does not name a function of its package.");
+               warn (not_Bound, "Unable to bind the constant '" & the_Variable.Name & "', whose value '" & the_Variable.Value
+                              & "' does not name a function of its package.");
                goto next_Variable;
             end if;
 

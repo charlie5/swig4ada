@@ -341,6 +341,10 @@ package swig_Core is
    WARN_CSHARP_CANTHROW                         : constant := 845;
    WARN_CSHARP_NO_DIRECTORCONNECT_ATTR          : constant := 846;
    WARN_CSHARP_TYPEMAP_INTERFACEMODIFIERS_UNDEF : constant := 847;
+   WARN_ADA_NOT_BOUND                           : constant := 861;
+   WARN_ADA_LAYOUT                              : constant := 862;
+   WARN_ADA_VALUE                               : constant := 863;
+   WARN_ADA_UNSUPPORTED                         : constant := 864;
    WARN_PHP_MULTIPLE_INHERITANCE                : constant := 870;
    WARN_PHP_UNKNOWN_PRAGMA                      : constant := 871;
    WARN_GO_NAME_CONFLICT                        : constant := 890;

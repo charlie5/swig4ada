@@ -1,5 +1,6 @@
 with
      ada.Text_IO,
+     ada.Strings.fixed,
      ada.Finalization;
 
 package body Logger
@@ -42,6 +43,104 @@ is
       log (to_String (Message));
       return True;
    end log;
+
+
+
+   -------------
+   --- Warnings.
+   --
+
+   the_File     : unbounded_String;
+   the_Line     : Natural := 0;
+   the_Filter   : unbounded_String;
+   the_Reporter : Reporter;
+
+
+   function Number (Kind : in warning_Kind) return Positive
+   is
+   begin
+      return (case Kind is
+                 when not_Bound   => 861,
+                 when Layout      => 862,
+                 when Value       => 863,
+                 when Unsupported => 864);
+   end Number;
+
+
+
+   procedure locate (File : in String;   Line : in Natural;   Filter : in String := "")
+   is
+   begin
+      the_File   := to_unbounded_String (File);
+      the_Line   := Line;
+      the_Filter := to_unbounded_String (Filter);
+   end locate;
+
+
+
+   function current_File return String
+   is
+   begin
+      return to_String (the_File);
+   end current_File;
+
+
+
+   function current_Line return Natural
+   is
+   begin
+      return the_Line;
+   end current_Line;
+
+
+
+   function current_Filter return String
+   is
+   begin
+      return to_String (the_Filter);
+   end current_Filter;
+
+
+
+   procedure warn (Kind : in warning_Kind;   Message : in String;
+                                             File    : in String;
+                                             Line    : in Natural;
+                                             Filter  : in String := "")
+   is
+   begin
+      dlog ("Warning" & Positive'Image (Number (Kind)) & ": " & Message);
+
+      if the_Reporter = null
+      then
+         put_Line (File & ":" & ada.Strings.fixed.Trim (Line'Image, ada.Strings.Left) & ": Warning" & Positive'Image (Number (Kind)) & ": " & Message);
+      else
+         the_Reporter (Number (Kind), File, Line, Message, Filter);
+      end if;
+   end warn;
+
+
+
+   procedure warn (Kind : in warning_Kind;   Message : in String)
+   is
+   begin
+      warn (Kind, Message, current_File, current_Line, current_Filter);
+   end warn;
+
+
+
+   procedure warn (Kind : in warning_Kind;   Message : in unbounded_String)
+   is
+   begin
+      warn (Kind, to_String (Message));
+   end warn;
+
+
+
+   procedure Reporter_is (Now : in Reporter)
+   is
+   begin
+      the_Reporter := Now;
+   end Reporter_is;
 
 
 

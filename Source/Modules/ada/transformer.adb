@@ -347,8 +347,8 @@ is
 
                         if not c_type_Map_of_ada_type.contains (the_c_Type.base_Type)
                         then   -- Such as a pointer to a class whose own type could not be made.
-                           log (  "Warning: unable to bind the typedef '" & the_c_Type.Name & "', as the type which it names ('"
-                                & the_c_Type.base_Type.Name & "') has no Ada type.");
+                           c_Declarable.warn (the_c_Type, not_Bound, "Unable to bind the typedef '" & the_c_Type.Name & "', as the type which it names ('"
+                                                                   & the_c_Type.base_Type.Name & "') has no Ada type.");
                         else
                         declare
                            use type ada_Package.view;
@@ -518,7 +518,7 @@ is
 
                         elsif not c_type_Map_of_ada_type.contains (the_c_Type.accessed_Type)
                         then
-                           log ("Warning: unable to bind the pointer type '" & the_c_Type.Name & "', as the type it points to is not known.");
+                           c_Declarable.warn (the_c_Type, not_Bound, "Unable to bind the pointer type '" & the_c_Type.Name & "', as the type it points to is not known.");
 
                         else
                            dlog ("the_c_Type.accessed_Type:   " & the_c_Type.accessed_Type.Name);
@@ -534,7 +534,7 @@ is
 
                         if not is_Bindable (the_c_Type.accessed_Function.all'Access)
                         then   -- Such as a type which is declared after the first use of the function pointer.
-                           log ("Warning: unable to bind the function pointer type '" & the_c_Type.Name & "', as one of its types has no Ada type.");
+                           c_Declarable.warn (the_c_Type, not_Bound, "Unable to bind the function pointer type '" & the_c_Type.Name & "', as one of its types has no Ada type.");
                         else
                            declare
                               use DOHs.Pointers;
@@ -833,7 +833,7 @@ is
 
                         if not c_type_Map_of_ada_type.contains (the_c_Type.element_Type)
                         then
-                           log ("Warning: unable to bind the array type '" & the_c_Type.Name & "', as its element type is not known.");
+                           c_Declarable.warn (the_c_Type, not_Bound, "Unable to bind the array type '" & the_c_Type.Name & "', as its element type is not known.");
 
                         elsif      the_c_Type.element_Type.c_type_Kind = c_type.c_Class   -- Array of a class is already created when the class is
                           and then c_type_Map_of_ada_type.contains (the_c_Type)           -- created, to allow for Self-referential class members (see below).
@@ -990,8 +990,8 @@ is
                                  then
                                     the_ada_Record.add_Base (c_type_Map_of_ada_type.Element (Element (Cursor)));
                                  else
-                                    log (  "Warning: the base class '" & Element (Cursor).Name & "' of class '" & the_c_Type.Name
-                                         & "' is ignored, as multiple inheritance is not supported.");
+                                    c_Declarable.warn (the_c_Type, Layout, "The base class '" & Element (Cursor).Name & "' of class '" & the_c_Type.Name
+                                                                         & "' is ignored, as multiple inheritance is not supported.");
 
                                     --  The part of the object which is that base class still needs its storage: without it an
                                     --  object which is declared in Ada is smaller than C++ takes it to be, and its constructor
@@ -1030,8 +1030,8 @@ is
                                        the_ada_Record.add_Component (the_Base);
                                     end;
                                  else
-                                    log (  "Warning: the base class '" & Element (Cursor).Name & "' of class '" & the_c_Type.Name
-                                         & "' has no Ada type, and is left out. The layout of the record does not match that of the class.");
+                                    c_Declarable.warn (the_c_Type, Layout, "The base class '" & Element (Cursor).Name & "' of class '" & the_c_Type.Name
+                                                                         & "' has no Ada type, and is left out. The layout of the record does not match that of the class.");
                                     the_ada_Record.lose_Layout;
                                  end if;
 
@@ -1058,8 +1058,8 @@ is
                                       and then ada.Characters.handling.to_Lower (to_String (ada_Type.a_subType.view (the_Component.my_Type).base_Type.qualified_Name))
                                                in "swig.incomplete_class" | "swig.opaque_structure"
                                     then
-                                       log (  "Warning: the member '" & the_c_Components (Each).Name & "' of class '" & the_c_Type.Name
-                                            & "' is of a class which is not defined, so its size is not known. The layout of the record does not match that of the class.");
+                                       c_Declarable.warn (the_c_Type, Layout, "The member '" & the_c_Components (Each).Name & "' of class '" & the_c_Type.Name
+                                                                            & "' is of a class which is not defined, so its size is not known. The layout of the record does not match that of the class.");
                                        the_ada_Record.lose_Layout;
                                     end if;
 
@@ -1075,8 +1075,8 @@ is
                                     the_ada_Record.add_Component (the_Component);
                                  end;
                               else
-                                 log (  "Warning: the member '" & the_c_Components (Each).Name & "' of class '" & the_c_Type.Name
-                                      & "' has a type which is not known, and is left out. The layout of the record does not match that of the class.");
+                                 c_Declarable.warn (the_c_Type, Layout, "The member '" & the_c_Components (Each).Name & "' of class '" & the_c_Type.Name
+                                                                      & "' has a type which is not known, and is left out. The layout of the record does not match that of the class.");
                                  the_ada_Record.lose_Layout;
                               end if;
                            end loop;
@@ -1158,8 +1158,8 @@ is
                                        --  The function which is overridden could not be bound, so there is nothing to override.
                                        --  Declared as a new function, it would take a further slot in the vtable.
                                        --
-                                       log (  "Warning: unable to bind the function '" & the_c_Function.Name & "' of class '" & the_c_Type.Name
-                                            & "', as the function which it overrides is not bound.");
+                                       c_Declarable.warn (the_c_Function, not_Bound, "Unable to bind the function '" & the_c_Function.Name & "' of class '" & the_c_Type.Name
+                                                                                   & "', as the function which it overrides is not bound.");
                                     end if;
                                  end;
 
@@ -1192,13 +1192,13 @@ is
 
                                     the_ada_Record.declaration_Package.add (the_ada_subProgram);
 
-                                    log (  "Warning: unable to bind the virtual function '" & the_c_Function.Name & "' of class '" & the_c_Type.Name
-                                         & "', as one of its types is not known. '" & the_ada_subProgram.Name & "' holds its place.");
+                                    c_Declarable.warn (the_c_Function, not_Bound, "Unable to bind the virtual function '" & the_c_Function.Name & "' of class '" & the_c_Type.Name
+                                                                                & "', as one of its types is not known. '" & the_ada_subProgram.Name & "' holds its place.");
                                  end;
 
                               else
-                                 log (  "Warning: unable to bind the function '" & Element (Cursor).Name & "' of class '" & the_c_Type.Name
-                                      & "', as one of its types is not known.");
+                                 c_Declarable.warn (Element (Cursor), not_Bound, "Unable to bind the function '" & Element (Cursor).Name & "' of class '" & the_c_Type.Name
+                                                                               & "', as one of its types is not known.");
                               end if;
 
                               next (Cursor);
@@ -1232,13 +1232,13 @@ is
             begin
                if not c_type_Map_of_ada_type.contains (the_c_Variable.my_Type)
                then
-                  log ("Warning: unable to bind the variable '" & the_c_Variable.Name & "', as its type is not known.");
+                  c_Declarable.warn (the_c_Variable, not_Bound, "Unable to bind the variable '" & the_c_Variable.Name & "', as its type is not known.");
 
                elsif      the_c_Variable.owner_Class /= null
                  and then not c_type_Map_of_ada_type.contains (the_c_Variable.owner_Class)
                then
-                  log (  "Warning: unable to bind the static member variable '" & the_c_Variable.Name
-                       & "', as its class '" & the_c_Variable.owner_Class.Name & "' is not bound.");
+                  c_Declarable.warn (the_c_Variable, not_Bound, "Unable to bind the static member variable '" & the_c_Variable.Name
+                                                              & "', as its class '" & the_c_Variable.owner_Class.Name & "' is not bound.");
                else
                   the_ada_Variable := Self.to_ada_Variable (the_c_Variable);
 
@@ -1283,7 +1283,7 @@ is
                   Result.Package_binding.add (the_ada_subProgram);
                end;
             else
-               log ("Warning: unable to bind the function '" & Element (Cursor).Name & "', as one of its types is not known.");
+               c_Declarable.warn (Element (Cursor), not_Bound, "Unable to bind the function '" & Element (Cursor).Name & "', as one of its types is not known.");
             end if;
 
             next (Cursor);
