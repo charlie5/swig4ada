@@ -2909,7 +2909,8 @@ is
                      if         the_Component.member_Name /= ""
                        and then the_Component.bit_Field < 0
                        and then not the_Component.is_base_Class
-                     then
+                       and then Index (the_Component.member_Name, "__") /= 1     -- A name which belongs to the implementation may differ where
+                     then                                                           -- the wrapper is compiled ('__int_p_cs_precedes' of 'struct lconv').
                         append (the_Checks,   "SWIG_ADA_LAYOUT_CHECK (SWIG_ADA_OFFSET_OF (" & the_Type & ", " & to_String (the_Component.member_Name) & ") =="
                                             & Natural'Image (the_Places (Each).First / 8)
                                             & ", ""swig4ada: the member '" & to_String (the_Component.member_Name) & "' of the Ada record of '" & the_Name
