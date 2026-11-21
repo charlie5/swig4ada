@@ -52,6 +52,14 @@ begin
    the_Engine.last.state := Engine.Idle;
    check (as_number (the_Engine.last.state) = 3,           "which C++ reads after Ada has set it");
 
+   --  Members whose types are nested and have no name. (The interface file asks for nested classes to be flattened.)
+   --
+   check (the_Engine.sensor.raw = 77,                      "a member which is a union with no name");
+   check (the_Engine.range_of.low = -5 and the_Engine.range_of.high = 5,   "and one which is a structure with no name");
+
+   the_Engine.range_of.high := 10;
+   check (Engine.span (the_Engine) = 10 + 5 + 77,          "which C++ reads after Ada has set it");
+
    declare
       the_Gauge : constant Gauge.Pointer := Engine.get_gauge (the_Engine);
    begin

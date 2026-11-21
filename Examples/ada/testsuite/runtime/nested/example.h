@@ -26,8 +26,12 @@ public:
   Speed   speed;
   Gauge   gauge;
   Reading last;                   /* The class holds the structure, which holds an enumeration of the class. */
+  union { int raw;  float scaled; }  sensor;      /* A member whose type has no name, where nested classes are flattened. */
+  struct { short low;  short high; } range_of;
 
-  Engine () : state (Off), speed (0)   {}
+  Engine () : state (Off), speed (0)   { sensor.raw = 77;  range_of.low = -5;  range_of.high = 5; }
+
+  int     span ()                 { return range_of.high - range_of.low + sensor.raw; }
 
   void    start ()                { state = Idle; }
   void    run (Speed s)           { state = Running;  speed = s; }
