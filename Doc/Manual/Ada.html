@@ -1,0 +1,856 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>SWIG and Ada</title>
+<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body bgcolor="#FFFFFF">
+<H1><a name="Ada">41 SWIG and Ada</a></H1>
+<!-- INDEX -->
+<div class="sectiontoc">
+<ul>
+<li><a href="#Ada_overview">Overview</a>
+<ul>
+<li><a href="#Ada_shortcomings">Known shortcomings</a>
+</ul>
+<li><a href="#Ada_preliminaries">Preliminaries</a>
+<ul>
+<li><a href="#Ada_running_swig">Running SWIG</a>
+<li><a href="#Ada_commandline">Command line options</a>
+<li><a href="#Ada_compiling">Compiling and linking</a>
+</ul>
+<li><a href="#Ada_shape">The shape of a binding</a>
+<li><a href="#Ada_basic_c_wrapping">Basic C wrapping</a>
+<ul>
+<li><a href="#Ada_functions">Functions</a>
+<li><a href="#Ada_variables">Variables and constants</a>
+<li><a href="#Ada_enums">Enumerations</a>
+<li><a href="#Ada_structures">Structures and unions</a>
+<li><a href="#Ada_pointers">Pointers, arrays and strings</a>
+<li><a href="#Ada_callbacks">Pointers to functions</a>
+</ul>
+<li><a href="#Ada_basic_cpp_wrapping">Basic C++ wrapping</a>
+<ul>
+<li><a href="#Ada_classes">Classes</a>
+<li><a href="#Ada_constructors">Constructors and destructors</a>
+<li><a href="#Ada_results">Functions which return a class</a>
+<li><a href="#Ada_inheritance">Inheritance</a>
+<li><a href="#Ada_deriving">Deriving from a C++ class in Ada</a>
+<li><a href="#Ada_overloading">Overloaded functions, templates and namespaces</a>
+<li><a href="#Ada_references">References</a>
+</ul>
+<li><a href="#Ada_stl">The C++ standard library</a>
+<li><a href="#Ada_exceptions">Exceptions</a>
+<li><a href="#Ada_layout">Layout</a>
+<li><a href="#Ada_modules">Modules</a>
+<li><a href="#Ada_warnings">Warnings</a>
+</ul>
+</div>
+<!-- INDEX -->
+
+
+
+<p>
+This chapter describes the Ada module of swig4ada, a fork of SWIG which generates
+Ada bindings to C and C++ libraries.
+The module is not part of the SWIG distribution.
+</p>
+
+<H2><a name="Ada_overview">41.1 Overview</a></H2>
+
+
+<p>
+The Ada module makes a <em>thin</em> binding: each declaration of the library has a
+counterpart in Ada of the same name, and a record has the layout of the structure
+or class which it stands for.
+An Ada program can therefore declare an object of a C++ class as a variable of its own,
+pass it to the library, and read its public members directly.
+A binding which is more comfortable to use from Ada (a <em>thick</em> binding) is something
+which is written by hand, on top of the thin one.
+</p>
+
+<p>
+Two files of each kind are generated:
+</p>
+
+<ul>
+<li>A set of Ada package specifications (<tt>.ads</tt> files). There are no package bodies.
+<li>A wrapper file in C or C++ (<tt>example_wrap.c</tt> or <tt>example_wrap.cxx</tt>),
+which holds a small function for each function of the library, and is compiled and
+linked with the Ada program.
+</ul>
+
+<p>
+The module needs the GNAT compiler.
+C is bound with the facilities of the Ada standard alone (<tt>Interfaces.C</tt> and convention
+<tt>C</tt>), but C++ classes are bound with GNAT's convention <tt>CPP</tt>, which no other
+Ada compiler provides.
+The layout of records and the mangled names which are imported are those of GCC on the
+machine which generates the binding (the Itanium C++ ABI and, for the classes of the C++
+standard library, GNU libstdc++).
+</p>
+
+<H3><a name="Ada_shortcomings">41.1.1 Known shortcomings</a></H3>
+
+
+<ul>
+<li>A class which inherits a base class <em>virtually</em> is bound with a warning, and its
+record does not have the layout of the class.
+<li>Of several base classes which have virtual functions, the first is the parent of
+the Ada type. The others are reached through a function (see
+<a href="#Ada_inheritance">Inheritance</a>), and a function which overrides one of theirs
+cannot be overridden again in Ada.
+<li>Directors are not needed and not supported: a C++ class with virtual functions is
+derived from directly in Ada.
+<li>A declaration which uses a type that SWIG has not been shown is left out of the
+binding, with a warning.
+<li><tt>std::auto_ptr</tt> is not bound, and <tt>std::unique_ptr</tt> only where an
+instance of it is named with <tt>%template</tt>.
+<li>A binding is generated for one machine. The wrapper file checks the layout of
+every record when it is compiled (see <a href="#Ada_layout">Layout</a>), so a binding which
+is taken to a machine where a structure differs fails to build there, and must be
+generated again.
+</ul>
+
+<H2><a name="Ada_preliminaries">41.2 Preliminaries</a></H2>
+
+
+<H3><a name="Ada_running_swig">41.2.1 Running SWIG</a></H3>
+
+
+<p>
+Suppose that a library is described by this interface file:
+</p>
+
+<div class="code">
+<pre>
+/* File: shapes.i */
+%module shapes
+
+%include &lt;std_string.i&gt;
+
+%{
+#include "shapes.h"
+%}
+
+%include "shapes.h"
+</pre>
+</div>
+
+<p>
+The binding is generated with the <tt>-ada</tt> option, and <tt>-c++</tt> where the
+library is in C++:
+</p>
+
+<div class="shell"><pre>
+$ swig4ada -ada -c++ shapes.i
+</pre></div>
+
+<p>
+This writes the wrapper file <tt>shapes_wrap.cxx</tt> and the specifications
+<tt>shapes.ads</tt>, <tt>shapes-binding.ads</tt> and one for each class, into the
+current directory (or the one named by <tt>-outdir</tt>).
+The specifications are written with little regard for their appearance, and are
+usually tidied with a pretty printer:
+</p>
+
+<div class="shell"><pre>
+$ gnatpp -rnb *.ads
+</pre></div>
+
+<H3><a name="Ada_commandline">41.2.2 Command line options</a></H3>
+
+
+<p>
+The options which are particular to Ada are:
+</p>
+
+<table summary="Ada specific options">
+<tr>
+<th>Ada specific options</th>
+</tr>
+
+<tr>
+<td>-namespace &lt;ns&gt;</td>
+<td>Generate the packages as children of the package &lt;ns&gt;.</td>
+</tr>
+
+<tr>
+<td>-no-check-layout</td>
+<td>Check the layout of a class, when the wrapper file is compiled, only where its
+record has a representation clause. By default every class whose layout can be worked
+out is checked.</td>
+</tr>
+
+</table>
+
+<p>
+The general options of SWIG apply as usual, among them <tt>-I</tt>, <tt>-D</tt>,
+<tt>-outdir</tt>, <tt>-o</tt> and <tt>-w</tt>.
+The symbols <tt>SWIGADA</tt> and <tt>SWIGAda</tt> are defined when an interface file
+is read, for conditional compilation.
+</p>
+
+<H3><a name="Ada_compiling">41.2.3 Compiling and linking</a></H3>
+
+
+<p>
+The specifications need four support packages, which come with swig4ada and must be
+on the source path of the program:
+</p>
+
+<ul>
+<li><tt>swig</tt> and <tt>swig.Pointers</tt>, which declare the types that the bindings
+share (<tt>swig.void_ptr</tt>, <tt>swig.bool</tt>, pointer and array types of the
+standard C types).
+<li><tt>swig.Guards</tt>, a generic which destructs an object of a C++ class when it
+leaves its scope.
+<li><tt>swig.std_Strings</tt>, the binding of <tt>std::string</tt>, needed where the
+interface file includes <tt>std_string.i</tt>.
+</ul>
+
+<p>
+A program may also use <tt>swig.Exceptions</tt> (see
+<a href="#Ada_exceptions">Exceptions</a>).
+The wrapper file is compiled as C or C++ and linked with the program, most simply by a
+GNAT project which names both languages:
+</p>
+
+<div class="code">
+<pre>
+project Shapes is
+   for Languages   use ("Ada", "C++");
+   for Source_Dirs use (".", "path/to/the/support/packages");
+   for Main        use ("demo.adb");
+
+   package Linker is
+      for Default_Switches ("Ada") use ("-lshapes", "-lstdc++");
+   end Linker;
+end Shapes;
+</pre>
+</div>
+
+<H2><a name="Ada_shape">41.3 The shape of a binding</a></H2>
+
+
+<p>
+For a module <tt>shapes</tt>, these packages are generated:
+</p>
+
+<table summary="The packages of a binding">
+<tr>
+<th>Package</th>
+<th>Holds</th>
+</tr>
+
+<tr>
+<td><tt>shapes</tt></td>
+<td>The simple types (enumerations, typedefs of numbers), the constants and the
+variables.</td>
+</tr>
+
+<tr>
+<td><tt>shapes.Binding</tt></td>
+<td>The functions which are not members of a class. A variable or constant whose type
+is declared in a child package is here too, as the top package cannot see its children.</td>
+</tr>
+
+<tr>
+<td><tt>shapes.Pointers</tt>, <tt>shapes.pointer_Pointers</tt></td>
+<td>Pointer types, and pointers to pointers, of the simple types.</td>
+</tr>
+
+<tr>
+<td><tt>shapes.&lt;class&gt;</tt></td>
+<td>One package for each structure, union and class, and for each type of pointer to a
+function. The type itself is <tt>Item</tt>, with <tt>Item_Array</tt>, <tt>Pointer</tt>,
+<tt>Pointer_Array</tt> and <tt>Pointer_Pointer</tt>, and the member functions follow.</td>
+</tr>
+
+<tr>
+<td><tt>shapes.&lt;class&gt;.Guards</tt></td>
+<td>For a class with a virtual destructor: an instance of <tt>swig.Guards</tt>.</td>
+</tr>
+
+</table>
+
+<p>
+C and C++ tell names apart by their case, and Ada does not.
+Where two names of a package would be the same in Ada, the later of two types or packages
+is given a numeric suffix (<tt>Hi0_2</tt>), and a variable, constant or function is
+prefixed with <tt>the_</tt>.
+A name which is a reserved word of Ada is prefixed in the same way.
+</p>
+
+<H2><a name="Ada_basic_c_wrapping">41.4 Basic C wrapping</a></H2>
+
+
+<H3><a name="Ada_functions">41.4.1 Functions</a></H3>
+
+
+<p>
+A function is imported in <tt>shapes.Binding</tt>, by way of its function in the
+wrapper file:
+</p>
+
+<div class="code"><pre>
+double distance (Point a, Point b);
+</pre></div>
+
+<div class="targetlang"><pre>
+function distance (a : in shapes.Point.Item;
+                   b : in shapes.Point.Item) return Interfaces.C.double;
+</pre></div>
+
+<p>
+A structure which is passed by value is passed as C passes it; nothing is copied to the heap.
+A parameter which has no name in the header is called <tt>arg_1</tt>, or
+<tt>arg_&lt;n&gt;</tt> by its place where there are several.
+</p>
+
+<H3><a name="Ada_variables">41.4.2 Variables and constants</a></H3>
+
+
+<p>
+A global variable is an Ada variable which is imported, so it is read and assigned to
+directly.
+A constant made by <tt>#define</tt>, <tt>%constant</tt> or <tt>const</tt> with a value
+is an Ada constant with that value, which SWIG works out from the C expression:
+</p>
+
+<div class="code"><pre>
+#define MAX_SIDES 12
+#define MASK      (0xF0 | (1 &lt;&lt; 2))
+#define NAME      "shapes"
+extern int shape_count;
+</pre></div>
+
+<div class="targetlang"><pre>
+MAX_SIDES   : constant := 12;
+MASK        : constant := 244;
+NAME        : aliased constant Interfaces.C.Strings.chars_ptr
+            := Interfaces.C.Strings.New_String ("shapes");
+shape_count : aliased Interfaces.C.int;
+</pre></div>
+
+<p>
+A constant whose value cannot be worked out, and cannot be written as an Ada
+expression (one which uses <tt>?:</tt>, say), is left out with a warning.
+</p>
+
+<H3><a name="Ada_enums">41.4.3 Enumerations</a></H3>
+
+
+<p>
+An enumeration is an Ada enumeration type with a representation clause, so its literals
+have the values which C gives them.
+Ada requires those values to rise, so the literals are declared in the order of their
+values, and a literal which repeats the value of another is a constant of the type.
+</p>
+
+<div class="code"><pre>
+enum Colour { Red, Green = 5, Blue };
+</pre></div>
+
+<div class="targetlang"><pre>
+type Colour is (Red, Green, Blue);
+for  Colour use (Red =&gt; 0, Green =&gt; 5, Blue =&gt; 6);
+pragma Convention (C, Colour);
+</pre></div>
+
+<p>
+An enumeration with no name gives constants.
+An enumeration which names its underlying type (<tt>enum Small : unsigned char</tt>) is
+given the size of that type.
+</p>
+
+<H3><a name="Ada_structures">41.4.4 Structures and unions</a></H3>
+
+
+<p>
+A structure is a record of convention <tt>C</tt> in a package of its own, whose
+components are those of the structure, in their order and with their names:
+</p>
+
+<div class="code"><pre>
+struct Point { double x; double y; };
+</pre></div>
+
+<div class="targetlang"><pre>
+package shapes.Point is
+
+   type Item is record
+      x : aliased Interfaces.C.double;
+      y : aliased Interfaces.C.double;
+   end record;
+
+   type Item_Array is array (Interfaces.C.size_t range &lt;&gt;) of aliased Item;
+   ...
+   subtype Pointer is C_Pointers.Pointer;
+</pre></div>
+
+<p>
+A union is an unchecked union.
+A structure with bit-fields is given a full record representation clause, as GNAT does
+not place bit-fields as C does.
+A structure or union with no name which is declared within another is given a type of
+its own, named <tt>&lt;outer&gt;_&lt;member&gt;</tt>.
+A structure which is declared and never defined is an opaque type, used through its
+pointer.
+</p>
+
+<H3><a name="Ada_pointers">41.4.5 Pointers, arrays and strings</a></H3>
+
+
+<p>
+A pointer to a structure is <tt>Pointer</tt> of its package, an instance of
+<tt>Interfaces.C.Pointers</tt>, so pointer arithmetic is available.
+A pointer to a standard C type is in <tt>swig.Pointers</tt>
+(<tt>swig.Pointers.int_Pointer</tt>), and <tt>void*</tt> is <tt>swig.void_ptr</tt>.
+An array member or variable is an Ada array with the bounds of the C array, indexed from 0.
+</p>
+
+<p>
+A <tt>char*</tt> is <tt>Interfaces.C.Strings.chars_ptr</tt>.
+The binding does not convert strings: the caller makes one with <tt>New_String</tt> and
+frees it, and reads one with <tt>Value</tt>.
+</p>
+
+<H3><a name="Ada_callbacks">41.4.6 Pointers to functions</a></H3>
+
+
+<p>
+A pointer to a function is an access to subprogram type of convention <tt>C</tt>, in a
+package named after its typedef.
+An Ada function which is to be called by the library must be declared at library
+level, with <tt>pragma Convention (C, ...)</tt>.
+</p>
+
+<div class="code"><pre>
+typedef int (*Visitor) (Shape* s);
+int visit_all (Visitor v);
+</pre></div>
+
+<div class="targetlang"><pre>
+package shapes.Visitor is
+   type Item is access function (arg_1 : in shapes.Shape.Pointer)
+                                 return Interfaces.C.int;
+   pragma Convention (C, Item);
+</pre></div>
+
+<H2><a name="Ada_basic_cpp_wrapping">41.5 Basic C++ wrapping</a></H2>
+
+
+<H3><a name="Ada_classes">41.5.1 Classes</a></H3>
+
+
+<p>
+A class has a package of its own, and is bound in one of three ways, according to how
+C++ treats its objects:
+</p>
+
+<ul>
+<li>A class with no virtual function, which declares neither a destructor nor a copy
+constructor (and has no base class or member which does), is a plain record, as a
+structure is. Ada may copy and assign it.
+<li>A class which declares a destructor or a copy constructor is passed and returned by
+C++ through a hidden pointer. It is a <em>limited</em> record of convention <tt>CPP</tt>:
+Ada can neither copy nor assign it.
+<li>A class with a virtual function is a <em>tagged</em> limited record of convention
+<tt>CPP</tt>, whose tag is the pointer to the table of virtual functions of C++.
+Its <tt>Pointer</tt> is class-wide, and a call through it dispatches.
+</ul>
+
+<div class="code"><pre>
+class Shape {
+public:
+  Shape ();
+  virtual ~Shape ();
+  virtual double area () const = 0;
+  void   move (double dx, double dy);
+  Point  centre;
+  static int total ();
+};
+</pre></div>
+
+<div class="targetlang"><pre>
+package shapes.Shape is
+
+   type Item is abstract tagged limited record
+      centre : aliased shapes.Point.Item;
+   end record;
+   pragma Import (CPP, Entity =&gt; Item);
+
+   type Pointer is access all shapes.Shape.Item'Class;
+
+   function  construct return shapes.Shape.Item'Class;
+
+   procedure destruct_0 (Self : in out shapes.Shape.Item);
+   procedure destruct   (Self : in out shapes.Shape.Item);
+
+   function  area  (Self : access shapes.Shape.Item)
+                    return Interfaces.C.double is abstract;
+   procedure move  (Self : in out shapes.Shape.Item'Class;
+                    dx   : in     Interfaces.C.double;
+                    dy   : in     Interfaces.C.double);
+   function  total return Interfaces.C.int;
+</pre></div>
+
+<p>
+Public data members are components of the record.
+Protected members are bound too, and private data members are present as components so
+that the record has its right size.
+A static member function is a function of the package with no <tt>Self</tt>, and a
+static member variable is a variable of the package.
+</p>
+
+<H3><a name="Ada_constructors">41.5.2 Constructors and destructors</a></H3>
+
+
+<p>
+Each constructor is a function <tt>construct</tt> of the package, which is used to give
+an object its initial value:
+</p>
+
+<div class="targetlang"><pre>
+declare
+   the_Circle : aliased Circle.Item := Circle.construct (radius =&gt; 2.0);
+begin
+   put_Line (the_Circle.area'Image);
+   Circle.destruct_0 (the_Circle);
+end;
+</pre></div>
+
+<p>
+<b>GNAT does not call a C++ destructor by itself.</b>
+An object which is declared in Ada must be destructed by a call of <tt>destruct_0</tt>
+before it goes out of scope, or it leaks whatever it owns.
+For a class with a virtual destructor there is a guard which does so:
+</p>
+
+<div class="targetlang"><pre>
+declare
+   the_Circle : aliased Circle.Item := Circle.construct (2.0);
+   the_Guard  : Circle.Guards.Guard (the_Circle'Access);
+begin
+   ...
+end;     -- The guard destructs the circle here.
+</pre></div>
+
+<p>
+There are two destructors:
+</p>
+
+<ul>
+<li><tt>destruct_0</tt> destructs the object and leaves its storage. It is the one for an
+object which Ada declared or allocated.
+<li><tt>destruct</tt> destructs the object and then frees it with <tt>operator
+delete</tt>. It is only for an object which C++ allocated with <tt>new</tt>.
+For a class whose destructor is not virtual the two are the same.
+</ul>
+
+<p>
+An object of a class which C++ constructs, and which is declared with no initial value,
+is given its default constructor by GNAT.
+</p>
+
+<H3><a name="Ada_results">41.5.3 Functions which return a class</a></H3>
+
+
+<p>
+A function which returns, by value, a class which C++ constructs cannot be an Ada
+function.
+It is bound as a procedure with a last parameter <tt>Result</tt>, which points to an
+object of the caller; the result replaces that object.
+</p>
+
+<div class="code"><pre>
+Label       make_label (const char* text);
+std::string describe   (const Shape&amp; s);
+</pre></div>
+
+<div class="targetlang"><pre>
+procedure make_label (text   : in Interfaces.C.Strings.chars_ptr;
+                      Result : in shapes.Label.Pointer);
+
+procedure describe   (s      : in shapes.Shape.Pointer;
+                      Result : in swig.std_Strings.std_string_Pointer);
+</pre></div>
+
+<div class="targetlang"><pre>
+declare
+   the_Label : aliased Label.Item := Label.construct (New_String (""));
+begin
+   make_label (New_String ("north"), the_Label'unchecked_Access);
+   ...
+   Label.destruct_0 (the_Label);
+end;
+</pre></div>
+
+<p>
+A class which is a plain record is returned as an ordinary function result.
+</p>
+
+<H3><a name="Ada_inheritance">41.5.4 Inheritance</a></H3>
+
+
+<p>
+A class which is derived from a class with virtual functions is a type extension of it,
+and its functions which override are marked <tt>overriding</tt>:
+</p>
+
+<div class="code"><pre>
+class Circle : public Shape {
+public:
+  Circle (double radius);
+  virtual double area () const;
+  double radius;
+};
+</pre></div>
+
+<div class="targetlang"><pre>
+package shapes.Circle is
+
+   type Item is new shapes.Shape.Item with record
+      radius_storage : aliased Interfaces.C.double;
+   end record;
+   pragma Import (CPP, Entity =&gt; Item);
+
+   function  construct (radius : in Interfaces.C.double)
+                        return shapes.Circle.Item'Class;
+
+   overriding
+   function  area       (Self : access shapes.Circle.Item)
+                         return Interfaces.C.double;
+
+   function  radius     (Self : access shapes.Circle.Item'Class)
+                         return Interfaces.C.double;
+   procedure set_radius (Self   : in out shapes.Circle.Item'Class;
+                         radius : in     Interfaces.C.double);
+</pre></div>
+
+<p>
+C++ may place the members which a derived class adds within the unused end of its base
+class, where GNAT cannot place the components of a type extension.
+So a member which such a class adds is read and written through a pair of functions
+(<tt>radius</tt> and <tt>set_radius</tt>), and its component, renamed
+<tt>radius_storage</tt>, only reserves the storage: it must not be used.
+</p>
+
+<p>
+A base class which is not the parent of the Ada type (a base with no virtual function,
+or a second base with them) is reached through a function <tt>as_&lt;base&gt;</tt>,
+which returns a pointer to that part of the object.
+A class with no virtual function has each base class as a component, named after it.
+</p>
+
+<H3><a name="Ada_deriving">41.5.5 Deriving from a C++ class in Ada</a></H3>
+
+
+<p>
+An Ada type may extend the record of a C++ class with virtual functions, and override
+them.
+C++ then calls the Ada functions, as the object has a table of virtual functions which
+GNAT has made.
+No director class is involved.
+</p>
+
+<div class="targetlang"><pre>
+with shapes.Shape, Interfaces.C;
+
+package Squares is
+
+   type Item is new shapes.Shape.Item with record
+      Side : aliased Interfaces.C.double := 1.0;
+   end record;
+
+   overriding
+   function area (Self : access Item) return Interfaces.C.double;
+   pragma Convention (CPP, area);
+
+end Squares;
+</pre></div>
+
+<div class="targetlang"><pre>
+declare
+   the_Square : aliased Squares.Item;     -- The part which is a 'Shape' is made by C++.
+begin
+   the_Square.Side := 3.0;
+   ...                                    -- Given to the library, C++ calls 'Squares.area'.
+   shapes.Shape.destruct_0 (shapes.Shape.Item (the_Square));
+end;
+</pre></div>
+
+<p>
+Each function which overrides is given convention <tt>CPP</tt>, and the package must be
+at library level, as C++ calls its functions.
+The part of the object which is the C++ class is made by a constructor of that class:
+its default constructor, as above, or another, by an extension aggregate
+(<tt>(Circle.construct (1.0) with Side =&gt; 3.0)</tt>).
+An abstract C++ class cannot be constructed by itself, so for one the wrapper file holds
+a concrete class which is derived from it, and it is that which <tt>construct</tt>
+makes; the Ada type then puts its own table of virtual functions in its place.
+</p>
+
+<H3><a name="Ada_overloading">41.5.6 Overloaded functions, templates and namespaces</a></H3>
+
+
+<p>
+Overloaded functions keep their one name in Ada, which overloads too.
+Of two functions which Ada cannot tell apart (which differ only in a <tt>const</tt>, say),
+SWIG warns as it does for other languages, and the later one is left out.
+Default arguments give one function for each number of arguments.
+An operator is a function with a name (<tt>operator-&gt;</tt> is <tt>dereference</tt>).
+</p>
+
+<p>
+A template is bound once an instance of it is named with <tt>%template</tt>; the
+instance is then a class like any other.
+Namespaces are not reflected in the package names: a class <tt>geometry::Box</tt> is
+the package <tt>shapes.Box</tt>.
+The names which are imported from C++ take account of them.
+</p>
+
+<H3><a name="Ada_references">41.5.7 References</a></H3>
+
+
+<p>
+A reference, constant or not, and an rvalue reference (<tt>T&amp;&amp;</tt>) are bound
+as a pointer.
+Where a function moves from an rvalue reference, the object of the caller is left as
+its class leaves an object which has been moved from, and must still be destructed.
+</p>
+
+<H2><a name="Ada_stl">41.6 The C++ standard library</a></H2>
+
+
+<p>
+<tt>std::string</tt> is the type <tt>swig.std_Strings.std_String</tt>, a limited record
+with the layout of the GNU libstdc++ string, with functions to make one from a
+<tt>char_array</tt> and to read it (<tt>to_std_String</tt>, <tt>to_Ada</tt>,
+<tt>c_str</tt>, <tt>Length</tt>, <tt>assign</tt>, <tt>destruct</tt>).
+</p>
+
+<p>
+The containers (<tt>std_vector.i</tt>, <tt>std_list.i</tt>, <tt>std_deque.i</tt>,
+<tt>std_set.i</tt>, <tt>std_map.i</tt>, <tt>std_pair.i</tt> and others) are bound like
+any other class template, so an instance must be named:
+</p>
+
+<div class="code"><pre>
+%include &lt;std_vector.i&gt;
+%template (int_Vector) std::vector&lt;int&gt;;
+</pre></div>
+
+<p>
+<tt>swigmove.i</tt> and <tt>std_unique_ptr.i</tt> are provided for objects which can be
+moved and not copied.
+</p>
+
+<H2><a name="Ada_exceptions">41.7 Exceptions</a></H2>
+
+
+<p>
+A C++ exception must not pass through Ada code.
+Where the interface file catches one (a <tt>throws</tt> typemap, <tt>%exception</tt>,
+<tt>%catches</tt>, or the <tt>SWIG_exception</tt> macro of <tt>exception.i</tt>), or a
+<tt>%contract</tt> fails, the wrapper function does not raise an Ada exception.
+It records a <em>pending</em> exception and returns, and the caller asks for it:
+</p>
+
+<div class="targetlang"><pre>
+with swig.Exceptions;
+...
+   the_Result := risky_function (the_Argument);
+   swig.Exceptions.check;     -- Raises 'swig.Exceptions.Error' if one is pending.
+</pre></div>
+
+<p>
+<tt>swig.Exceptions</tt> also has <tt>is_Pending</tt>, <tt>pending_Kind</tt>,
+<tt>pending_Message</tt> and <tt>clear</tt>.
+Generated code never calls <tt>check</tt> itself.
+</p>
+
+<H2><a name="Ada_layout">41.8 Layout</a></H2>
+
+
+<p>
+As Ada reads and writes the members of an object directly, the record of a class must
+have exactly the layout which the C++ compiler gives the class.
+The module works that layout out, and the wrapper file then holds a static assertion of
+the size of each class, and of the place of each of its public members, which fails when
+the wrapper file is compiled if the record does not match.
+</p>
+
+<p>
+The checks are left out for a class whose layout cannot be worked out (the reason is
+given in a warning), and altogether where the wrapper file is compiled with
+<tt>SWIG_ADA_NO_LAYOUT_CHECKS</tt> defined.
+</p>
+
+<p>
+The usual reason for a record not to match is that the interface file does not show SWIG
+the whole class: a member is hidden by <tt>#ifndef SWIG</tt>, or a base class is never
+declared.
+An ignored member (<tt>%ignore</tt>) is not such a case, as its storage is still
+reserved.
+</p>
+
+<H2><a name="Ada_modules">41.9 Modules</a></H2>
+
+
+<p>
+A module which uses the types of another imports it with <tt>%import</tt>.
+Only the specifications of the importing module are written; those of the imported
+module come from its own run of SWIG, and are named in <tt>with</tt> clauses.
+A class of one module may be derived from a class of another.
+</p>
+
+<H2><a name="Ada_warnings">41.10 Warnings</a></H2>
+
+
+<p>
+The Ada module has four warnings, which name the file and the line of the declaration
+they are about, and may be turned off like any other (<tt>-w861</tt>,
+<tt>%warnfilter (SWIGWARN_ADA_NOT_BOUND) name;</tt>):
+</p>
+
+<table summary="The warnings of the Ada module">
+<tr>
+<th>Number</th>
+<th>Name</th>
+<th>Meaning</th>
+</tr>
+
+<tr>
+<td>861</td>
+<td><tt>SWIGWARN_ADA_NOT_BOUND</tt></td>
+<td>A declaration is left out of the binding: a type is not known, a value cannot be
+stated in Ada, or an overload cannot be told apart.</td>
+</tr>
+
+<tr>
+<td>862</td>
+<td><tt>SWIGWARN_ADA_LAYOUT</tt></td>
+<td>A record may not have the layout of its class: a base class or a member could not
+be bound, or its size is not known.</td>
+</tr>
+
+<tr>
+<td>863</td>
+<td><tt>SWIGWARN_ADA_VALUE</tt></td>
+<td>A value could not be worked out, and another is used in its place (an enumeration
+value, the length of an array).</td>
+</tr>
+
+<tr>
+<td>864</td>
+<td><tt>SWIGWARN_ADA_UNSUPPORTED</tt></td>
+<td>A construct of C++ for which the module has no counterpart is bound only in part
+(virtual inheritance).</td>
+</tr>
+
+</table>
+
+</body>
+</html>
