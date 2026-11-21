@@ -345,6 +345,11 @@ is
                         dlog (+"");
                         dlog ("adding typedef: '" & the_c_Type.Name & "'      base_Type: '" & the_c_type.base_Type.Name & "'");
 
+                        if not c_type_Map_of_ada_type.contains (the_c_Type.base_Type)
+                        then   -- Such as a pointer to a class whose own type could not be made.
+                           log (  "Warning: unable to bind the typedef '" & the_c_Type.Name & "', as the type which it names ('"
+                                & the_c_Type.base_Type.Name & "') has no Ada type.");
+                        else
                         declare
                            use type ada_Package.view;
                            new_ada_Type : ada_Type.view;
@@ -436,7 +441,7 @@ is
 
                            c_type_Map_of_ada_type.insert (the_c_Type, new_ada_Type);
                         end;
-
+                        end if;
 
                      when c_type.opaque_Struct =>
                         declare
