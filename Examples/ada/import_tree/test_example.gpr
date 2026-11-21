@@ -1,0 +1,24 @@
+project Test_Example is
+
+   for Languages   use ("Ada", "C++");
+   for Main        use ("tester.adb");
+
+   for Source_Dirs use (".", "../../..");     -- The support packages ('swig', 'swig.pointers', 'swig.guards') are at the repository root.
+   for Exec_Dir    use ".";
+   for Object_Dir  use "build";
+
+   package Naming is
+      for Specification_Suffix  ("c++") use ".h";
+      for Implementation_Suffix ("c++") use ".cxx";
+   end Naming;
+
+   package Builder is
+      for Executable ("tester.adb") use "tester";
+   end Builder;
+
+   package Compiler is
+      for Default_Switches ("ada") use ("-g", "-gnat2022");
+      for Default_Switches ("c++") use ("-g");
+   end Compiler;
+
+end Test_Example;
