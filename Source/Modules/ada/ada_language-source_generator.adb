@@ -2861,8 +2861,9 @@ is
    --  of each of its public members. The checks are made when the wrapper file is compiled, so a record which does not
    --  match its class does not build, where it would otherwise read and write the wrong storage.
    --
-   --  A class is checked where its record has been laid out here (see 'needs_Layout'), as that layout is for the
-   --  machine which generated the binding. With '-check-layout' every class whose layout can be worked out is.
+   --  Every class whose layout can be worked out is checked. With '-no-check-layout' only a class whose record has
+   --  been laid out here is (see 'needs_Layout'), as that layout is for the machine which generated the binding.
+   --  The checks are left out of a compilation which defines 'SWIG_ADA_NO_LAYOUT_CHECKS'.
    --
    is
       the_Checks : unbounded_String;
@@ -2937,10 +2938,12 @@ is
       return (
                      NL
                    & "/* The layout which the Ada records take their classes to have. A check which fails means that a record" & NL
-                   & "   does not match its class on this machine, and that the binding must be generated again here. */"      & NL
+                   & "   does not match its class on this machine, and that the binding must be generated again here." & NL
+                   & "   Defining SWIG_ADA_NO_LAYOUT_CHECKS leaves the checks out. */" & NL
                    & NL
-                   & "#if    (defined (__cplusplus) && __cplusplus >= 201103L) \" & NL
-                   & "    || (!defined (__cplusplus) && defined (__STDC_VERSION__) && __STDC_VERSION__ >= 201112L)" & NL
+                   & "#if    !defined (SWIG_ADA_NO_LAYOUT_CHECKS) \" & NL
+                   & "    && (   (defined (__cplusplus) && __cplusplus >= 201103L) \" & NL
+                   & "        || (!defined (__cplusplus) && defined (__STDC_VERSION__) && __STDC_VERSION__ >= 201112L))" & NL
                    & NL
                    & "#include <stddef.h>" & NL
                    & NL

@@ -61,7 +61,7 @@ is
    usage_help_Text : constant array (1 .. 3) of access String
      := [new String'("Ada Options (available with -ada)"),
          new String'("       -namespace <ns> - Generate wrappers into Ada namespace <ns>"),
-         new String'("       -check-layout   - Check the layout of every class when the wrapper is compiled")];
+         new String'("       -no-check-layout - Check the layout of a class, when the wrapper is compiled, only where its record is laid out here")];
 
    NL : constant String := new_line_Token;
 
@@ -143,9 +143,14 @@ is
             then
                swig_mark_Arg (Each);
 
-            elsif the_Command = "-check-layout"
+            elsif the_Command = "-check-layout"     -- The default.
             then
                Self.all_layout_Checks := True;
+               swig_mark_Arg (Each);
+
+            elsif the_Command = "-no-check-layout"
+            then
+               Self.all_layout_Checks := False;
                swig_mark_Arg (Each);
 
             elsif the_Command = "-c++"
