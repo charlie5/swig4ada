@@ -781,6 +781,10 @@ begin
       run ("c_library",   use_CPP => False);     -- A binding to C: structures, a union, arrays, strings, callbacks and variables.
       run ("smart_pointers");      -- A class which is used through a smart pointer.
       run ("imports",     Imported => "base");   -- A module which imports another, and derives from one of its classes.
+      run ("extensions");          -- Members added with '%extend', and a function with an '%exception'.
+      run ("templates");           -- Templates which a library defines, one of them with virtual functions.
+      run ("multiple_inheritance");   -- Classes with more than one base class.
+      run ("nested");              -- Declarations which are nested in a class.
    end if;
 
 
