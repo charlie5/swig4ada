@@ -23,7 +23,11 @@ namespace std {
         vector();
         vector(const vector& other);
         ~vector();
-        vector(size_t n);
+        %extend {
+            vector(size_t n) {                                  // Made by a function, as the element type may have no default constructor.
+                return swig_ada_new_sized< std::vector< T > > (n);
+            }
+        }
         size_t size() const;
         size_t capacity() const;
         void reserve(size_t n);

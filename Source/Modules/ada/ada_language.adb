@@ -87,6 +87,7 @@ is
    procedure bind_constructors_of_abstract_Class (Self : access Item;   the_Class : in Node_Pointer);
    procedure bind_other_base_Classes             (Self : access Item;   the_Class : in Node_Pointer);
    procedure add_hidden_Members                  (Self : access Item;   Before    : in Node_Pointer;   of_Class : in Node_Pointer := null);
+   function  wrapper_Symbol                      (Self : access Item;   From      : in String) return unbounded_String;
    procedure bind_unnamed_nested_Classes         (Self : access Item;   the_Class : in Node_Pointer;   outer_Name : in String;   cpp_Name : in String);
    function  member_Variable                     (Self : access Item;   the_Node  : in Node_Pointer;   the_Name   : in String) return c_Variable.view;
 
@@ -290,6 +291,46 @@ is
          then
             print_to (DOH_Pointer (Self.f_Ada), the_Checks);     -- Which is outside the 'extern "C"' of that section.
          end if;
+      end;
+
+      --  Declare each type descriptor of the swig runtime which the wrapper names (see 'adahead.swg').
+      --
+      declare
+         the_Text  : constant String := String'(+DOH_Pointer (Self.f_Wrappers)) & String'(+DOH_Pointer (Self.f_Ada));
+         the_Mark  : constant String := "SWIGTYPE_";
+         Declared  : namespace_Sets.Set;
+         First     : Natural := the_Text'First;
+         Last      : Natural;
+      begin
+         loop
+            First := ada.Strings.fixed.Index (the_Text, the_Mark, from => First);
+            exit when First = 0;
+
+            Last := First + the_Mark'Length - 1;
+
+            while      Last < the_Text'Last
+              and then the_Text (Last + 1) in 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_'
+            loop
+               Last := Last + 1;
+            end loop;
+
+            if         Last > First + the_Mark'Length - 1
+              and then (First = the_Text'First or else the_Text (First - 1) not in 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_')
+              and then not Declared.contains (+the_Text (First .. Last))
+            then
+               Declared.insert (+the_Text (First .. Last));
+
+               declare
+                  the_Name : constant String := the_Text (First + the_Mark'Length .. Last);
+               begin
+                  print_to (DOH_Pointer (Self.f_Header),   "static swig_type_info _swigt__" & the_Name & " = { """ & the_Name & """ };" & NL
+                                                         & "#define SWIGTYPE_" & the_Name & " (&_swigt__" & the_Name & ")"            & NL);
+               end;
+            end if;
+
+            First := Last + 1;
+            exit when First > the_Text'Last;
+         end loop;
       end;
 
       --  Generate the C runtime.
@@ -2665,15 +2706,7 @@ is
          declare
             the_Class : constant String := +doh_Item (SwigType_namestr (SwigType_Pointer (get_Attribute (Self.getCurrentClass, "name"))));
          begin
-            destruct_Symbol := +("ada_destruct_" & String'(+DOH_Pointer (get_Attribute (Self.getCurrentClass, "name"))));
-
-            for Each in 1 .. Length (destruct_Symbol)
-            loop
-               if Element (destruct_Symbol, Each) not in 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_'
-               then
-                  replace_Element (destruct_Symbol, Each, '_');
-               end if;
-            end loop;
+            destruct_Symbol := wrapper_Symbol (Self, "ada_destruct_" & String'(+DOH_Pointer (get_Attribute (Self.getCurrentClass, "name"))));
 
             print_to (DOH_Pointer (Self.f_Ada),   "extern ""C"" void " & to_String (destruct_Symbol) & " (" & the_Class & " * self)" & NL
                                                 & "{"                                                                              & NL
@@ -3204,6 +3237,40 @@ is
    --- Utility
    --
 
+   function wrapper_Symbol (Self : access Item;   From : in String) return unbounded_String
+   --
+   --  Makes the name of a function which the module adds to the wrapper file, from text which holds the name of a class.
+   --  Whatever cannot be part of an identifier becomes an underscore, so two names may come out alike (those of the
+   --  template instances 'X<(7 >= 4)>' and 'X<(7 <= 4)>', say): a name which is taken is given a number.
+   --
+   is
+      the_Symbol : unbounded_String := +From;
+      Count      : Positive         := 1;
+   begin
+      for Each in 1 .. Length (the_Symbol)
+      loop
+         if Element (the_Symbol, Each) not in 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_'
+         then
+            replace_Element (the_Symbol, Each, '_');
+         end if;
+      end loop;
+
+      declare
+         Base : constant unbounded_String := the_Symbol;
+      begin
+         while Self.wrapper_Symbols.contains (the_Symbol)
+         loop
+            Count      := Count + 1;
+            the_Symbol := Base & "_" & ada.Strings.fixed.Trim (Positive'Image (Count), ada.Strings.Left);
+         end loop;
+      end;
+
+      Self.wrapper_Symbols.insert (the_Symbol);
+      return the_Symbol;
+   end wrapper_Symbol;
+
+
+
    function member_Variable (Self : access Item;   the_Node : in Node_Pointer;   the_Name : in String) return c_Variable.view
    --
    --  Makes a member variable from the node of its declaration, for a member which the core does not hand on.
@@ -3625,19 +3692,12 @@ is
                   else
                      declare
                         the_cpp_Base : constant String  := +doh_Item (SwigType_namestr (SwigType_Pointer (get_Attribute (the_Base, "name"))));
-                        the_Symbol   : unbounded_String := +("ada_base_" & the_cpp_Class & "_" & the_cpp_Base);
+                        the_Symbol   : constant unbounded_String := wrapper_Symbol (Self, "ada_base_" & the_cpp_Class & "_" & the_cpp_Base);
 
                         the_Function : constant c_Function.view
                           := c_Function.new_c_Function (+("as_" & base_Name),
                                                         Self.name_Map_of_c_type.Element (+base_Name & "*"));
                      begin
-                        for Each in 1 .. Length (the_Symbol)
-                        loop
-                           if Element (the_Symbol, Each) not in 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_'
-                           then
-                              replace_Element (the_Symbol, Each, '_');
-                           end if;
-                        end loop;
 
                         print_to (DOH_Pointer (Self.f_Ada),   "extern ""C"" " & the_cpp_Base & " * " & to_String (the_Symbol)
                                                             & " (" & the_cpp_Class & " * self)"                             & NL

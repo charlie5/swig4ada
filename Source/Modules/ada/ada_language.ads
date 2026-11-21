@@ -245,6 +245,8 @@ private
          template_full_Forms  : String_Vectors.Vector;
          template_plain_Forms : String_Vectors.Vector;
 
+         wrapper_Symbols      : namespace_Sets.Set;         -- The names of the functions which the module itself adds to the wrapper file.
+
          a_Namespaces      : namespace_sets.Set;                 -- TODO: Make a hashed set, as length ordering is no longer important.
 
          --  'Standard' Ada Packages

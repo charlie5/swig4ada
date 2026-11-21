@@ -27,7 +27,11 @@ namespace std {
         void*        impl_M_finish__M_node;
 
         deque();
-        deque(size_t n);
+        %extend {
+            deque(size_t n) {                                  // Made by a function, as the element type may have no default constructor.
+                return swig_ada_new_sized< std::deque< T > > (n);
+            }
+        }
         deque(const deque& other);
         ~deque();
 
