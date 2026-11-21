@@ -13,7 +13,7 @@
  * moved from, as it cannot be copied.
  * ----------------------------------------------------------------------------- */
 
-%include <unique_ptr.swg>
+// The generic 'unique_ptr.swg' is not included: it declares the class with no members, and this file must declare it.
 
 %define %unique_ptr(TYPE)
 %typemap (in) std::unique_ptr< TYPE >
