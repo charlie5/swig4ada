@@ -48,7 +48,7 @@
 %typemap(adatype) enum SWIGTYPE "interfaces.c.Int"
 
 %typemap(in) enum SWIGTYPE %{ $1 = ($1_ltype)$input; %}
-%typemap(out) enum SWIGTYPE %{ $result = $1; %}
+%typemap(out) enum SWIGTYPE %{ $result = (int) $1; %}
 
 %typecheck(SWIG_TYPECHECK_INT32) enum SWIGTYPE ""
 

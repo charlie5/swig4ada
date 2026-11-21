@@ -637,6 +637,8 @@ is
                            the_c_Literals          : constant c_type.enum_literal_vectors.Vector := the_c_Type.Literals;
                            Cursor                  :          c_type.enum_literal_Vectors.Cursor := the_c_Literals.First;
                         begin
+                           new_ada_Enumeration.object_Size_is (the_c_Type.enum_Size);
+
                            declare
                               function Hash (From : in gmp.discrete.Integer) return ada.Containers.Hash_Type
                               is

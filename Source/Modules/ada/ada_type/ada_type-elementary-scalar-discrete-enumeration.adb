@@ -80,6 +80,22 @@ is
    end Literals;
 
 
+
+   procedure object_Size_is (Self : access Item;   Bits : in Natural)
+   is
+   begin
+      Self.object_Size := Bits;
+   end object_Size_is;
+
+
+
+   function object_Size (Self : access Item) return Natural
+   is
+   begin
+      return Self.object_Size;
+   end object_Size;
+
+
    overriding
    function context_required_Types (Self : access Item)  return ada_Type.views
    is

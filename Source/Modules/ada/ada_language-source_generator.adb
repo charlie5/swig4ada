@@ -184,6 +184,7 @@ is
           ada.Containers;
 
       the_Source              :          unbounded_String;
+      record_Start            :          Positive         := 1;     -- Where the declaration of the record begins.
       union_variant_type_Name : constant unbounded_String := Self.Name & "_variant";
       base_Classes            : constant ada_type.Vector  := Self.base_Classes;
 
@@ -244,6 +245,7 @@ is
       end if;
 
 
+      record_Start := Length (the_Source) + 1;
       append (the_Source,  NL  &  "type "  &  Self.Name);
 
       if is_a_Union
@@ -335,6 +337,9 @@ is
                   the_Component : access ada_Variable.item'Class;
                   type_Modifier :        unbounded_String;
                   type_Name     :        unbounded_String;
+
+                  multi_dimensional : Boolean := False;
+                  flat_Length       : Natural := 0;
                begin
                   for Each in 1 .. Self.component_Count
                   loop
@@ -380,10 +385,53 @@ is
                                          & "'Object_Size / interfaces.C.char'Size)";                                           -- record inherits may have the name of the module.
                      end if;
 
+                     if Natural (Length (the_Component.array_Bounds)) > 1
+                     then   -- An array of more than one dimension has a type of its own, declared ahead of the record.
+                        if         the_Component.my_Type.all in ada_Type.composite.an_array.item'Class
+                          and then (for all Bound of the_Component.array_Bounds => Bound >= 0)
+                        then
+                           declare
+                              the_Bounds : unbounded_String;
+                           begin
+                              for Bound of the_Component.array_Bounds
+                              loop
+                                 append (the_Bounds,   (if the_Bounds = "" then "" else ", ")
+                                                     & "interfaces.C.size_t range 0 .." & Natural'Image (Bound));
+                              end loop;
+
+                              type_Name := the_Component.Name & "_Array";
+
+                              insert (the_Source,
+                                      record_Start,
+                                        NL & "   type " & to_String (type_Name) & " is array (" & to_String (the_Bounds) & ") of aliased "
+                                      & to_String (ada_Type.composite.an_array.view (the_Component.my_Type).element_Type.qualified_Name) & ";"
+                                      & NL & "   pragma Convention (C, " & to_String (type_Name) & ");" & NL);
+                           end;
+
+                           multi_dimensional := True;
+                        else
+                           flat_Length := 1;     -- Laid out as C has it, in an array of one dimension.
+
+                           for Bound of the_Component.array_Bounds
+                           loop
+                              flat_Length := flat_Length * (Bound + 1);
+                           end loop;
+                        end if;
+                     end if;
+
                      append (the_Source,  NL & "         " & the_Component.Name  & " : " & type_Modifier & " " & type_Name);
 
 
-                     if not is_Empty (the_component.array_Bounds)
+                     if multi_dimensional
+                     then
+                        multi_dimensional := False;
+
+                     elsif flat_Length > 0
+                     then
+                        append (the_Source, " (0 .." & Natural'Image (flat_Length - 1) & ")");
+                        flat_Length := 0;
+
+                     elsif not is_Empty (the_component.array_Bounds)
                      then
                         append (the_Source, " (");
 
@@ -519,6 +567,11 @@ is
 
       append (the_Source,   ");");
       append (the_Source,   NL & NL & "   pragma Convention (C, " & Self.Name &  ");" & NL);
+
+      if Self.object_Size /= 0
+      then   -- The C++ enumeration names its underlying type, so it is not of the size of an 'int'.
+         append (the_Source,   "   for " & Self.Name & "'Size use" & Natural'Image (Self.object_Size) & ";" & NL);
+      end if;
 
       return to_String (the_Source);
    end Enum_declaration_Text;
@@ -1334,7 +1387,7 @@ is
 
       function ada_Name_of (the_Variable : in ada_Variable.view) return String
       --
-      --  C is case sensitive, so a variable may differ only in case from an enumeration literal or a function
+      --  C is case sensitive, so a variable may differ only in case from a type, an enumeration literal or a function
       --  declared in the same package (such as 'enum E {slap} Slap;'). The variable is then prefixed.
       --
       is
@@ -1350,6 +1403,11 @@ is
 
          for each_Type of all_Types
          loop
+            if to_Lower (to_String (each_Type.Name)) = to_Lower (the_Name)     -- A constant 'FLAGS' and a type 'Flags'.
+            then
+               return "the_" & the_Name;
+            end if;
+
             if each_Type.all in ada_Type.elementary.scalar.discrete.enumeration.item'Class
             then
                for each_Literal of ada_Type.elementary.scalar.discrete.enumeration.view (each_Type).Literals
@@ -1932,7 +1990,22 @@ is
                end if;
 
 
-               if         the_Variable.my_Type.all in ada_type.elementary.an_access.to_type.item'Class
+               if         Natural (Length (the_Variable.array_Bounds)) > 1
+                 and then the_Variable.my_Type.all in ada_Type.composite.an_array.item'Class
+                 and then (for all Bound of the_Variable.array_Bounds => Bound >= 0)
+               then   -- An array of more than one dimension.
+                  append (spec_Source, "array (");
+
+                  for Each in 1 .. Integer (Length (the_Variable.array_Bounds))
+                  loop
+                     append (spec_Source,   (if Each > 1 then ", " else "")
+                                          & "interfaces.C.size_t range 0 .." & Natural'Image (Element (the_Variable.array_Bounds, Each)));
+                  end loop;
+
+                  append (spec_Source,   ") of aliased "
+                                       & ada_Type.composite.an_array.view (the_Variable.my_Type).element_Type.qualified_Name);
+
+               elsif      the_Variable.my_Type.all in ada_type.elementary.an_access.to_type.item'Class
                  and then to_Lower (the_Variable.my_Type.qualified_Name) /= "interfaces.c.strings.chars_ptr"
                then
                   append (spec_Source,  ada_Type.elementary.an_access.to_type.view (the_Variable.my_Type).accessed_Type.resolved_Type.qualified_Name);
@@ -1941,7 +2014,13 @@ is
                end if;
 
 
-               if not is_Empty (the_variable.array_Bounds)
+               if         Natural (Length (the_Variable.array_Bounds)) > 1
+                 and then the_Variable.my_Type.all in ada_Type.composite.an_array.item'Class
+                 and then (for all Bound of the_Variable.array_Bounds => Bound >= 0)
+               then
+                  null;     -- Its bounds are in its type.
+
+               elsif not is_Empty (the_variable.array_Bounds)
                then
                   append (spec_Source, " (");
 
@@ -2059,13 +2138,7 @@ is
 
                      elsif in_cpp_Mode
                      then                               -- todo: Need to use proper storage class ?
-                        if the_Package.is_Module
-                        then
-                           return the_Variable.Name;
-                        else
-                           return "_ZN" & Image (Length (the_Package.Name))  & the_Package.Name
-                             & Image (Length (the_Variable.Name)) & to_String (the_Variable.Name) & "E";
-                        end if;
+                        return the_Variable.Name;     -- A variable which is in no namespace has its own name as its symbol.
 
                      else
                         return the_Variable.Name;

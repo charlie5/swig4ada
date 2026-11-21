@@ -115,6 +115,28 @@ is
                                      bounds_End);
       end loop;
 
+      --  An array of more than one dimension ('a.a.int') is known by the type of an array of one, and by its bounds.
+      --
+      loop
+         declare
+            the_Type : constant String := to_String (stripped_swig_Type);
+            Found    :          Natural := 0;
+         begin
+            for i in the_Type'First .. the_Type'Last - 3
+            loop
+               if         the_Type (i .. i + 3) = "a.a."
+                 and then (i = the_Type'First or else the_Type (i - 1) = '.')
+               then
+                  Found := i;
+                  exit;
+               end if;
+            end loop;
+
+            exit when Found = 0;
+            delete (stripped_swig_Type, Found, Found + 1);
+         end;
+      end loop;
+
       return stripped_swig_Type;
    end strip_array_Bounds;
 

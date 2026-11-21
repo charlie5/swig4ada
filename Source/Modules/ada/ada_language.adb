@@ -1322,7 +1322,6 @@ is
             if         is_Constant
               and then value_Text /= ""
               and then new_Variable.array_Bounds.is_Empty
-              and then ada.Strings.fixed.Index (full_Name, "::") /= 0     -- Outside a namespace a constant is imported, as it has been.
               and then to_String (new_Variable.my_Type.Name) in "int" | "unsigned int" | "long" | "unsigned long" | "short" | "unsigned short" | "long long" | "unsigned long long"
             then
                begin
@@ -1332,6 +1331,18 @@ is
                exception
                   when others =>
                      null;     -- The value is not an integer expression, so the constant is imported.
+               end;
+
+            elsif      is_Constant
+              and then value_Text /= ""
+              and then new_Variable.array_Bounds.is_Empty
+              and then to_String (new_Variable.my_Type.Name) in "double" | "float"
+            then
+               begin
+                  new_Variable.Value := +ada.Strings.fixed.Trim (Long_Float'Image (Long_Float'Value (value_Text)), ada.Strings.Both);
+               exception
+                  when others =>
+                     null;     -- The value is not a plain number.
                end;
             end if;
 
@@ -1404,6 +1415,20 @@ is
                                         Name      => the_Name);
          Self.register (new_c_Enum,
                         doh_SwigType (the_doh_swig_Type));
+
+         --  An enumeration which names its underlying type is of the size of that type.
+         --
+         if get_Attribute (the_Node, "inherit") /= null
+         then
+            declare
+               the_Base : constant String := +doh_Item (SwigType_typedef_resolve_all (SwigType_Pointer (get_Attribute (the_Node, "inherit"))));
+            begin
+               new_c_Enum.enum_Size_is (if    the_Base in "char"  | "signed char" | "unsigned char"  | "bool"               then  8
+                                        elsif the_Base in "short" | "unsigned short"                                        then 16
+                                        elsif the_Base in "long"  | "unsigned long" | "long long" | "unsigned long long"    then 64
+                                        else  0);
+            end;
+         end if;
 
          Self.current_c_Enum        := new_c_Enum;
          Self.last_c_enum_rep_Value := -1;
@@ -3486,6 +3511,8 @@ is
                enter_swig_Type ("p.p." & the_c_Type.Name, the_c_type_pointer_Pointer);
             end if;
 
+            enter_swig_Type ("r.p." & the_c_Type.Name, the_c_type_pointer_Pointer);     -- A reference to a pointer is passed as a pointer to it.
+
             enter_Name (the_c_type_pointer_Pointer.Name, the_c_type_pointer_Pointer);
          end;
 
@@ -4011,7 +4038,10 @@ is
          the_ada_Variable.array_Bounds.append (the_c_Variable.array_Bounds.Element (i));
       end loop;
 
-      the_ada_Variable.link_Symbol := the_c_Variable.link_Symbol;
+      --  The symbol of a variable is its C name, which its Ada name may differ from (a variable 'Abstract' is 'the_Abstract').
+      --
+      the_ada_Variable.link_Symbol := (if the_c_Variable.link_Symbol /= "" then the_c_Variable.link_Symbol
+                                                                           else the_c_Variable.Name);
 
       return the_ada_Variable;
 

@@ -52,6 +52,11 @@ is
 
    function  Literals                     (Self : access Item) return enum_literal_vectors.Vector;
 
+   procedure object_Size_is               (Self : access Item;   Bits : in Natural);
+   function  object_Size                  (Self : access Item) return Natural;
+   --
+   --  The size of an enumeration whose C++ type names its underlying type, or 0.
+
    overriding
    function context_required_Types        (Self : access Item) return ada_Type.views;
 
@@ -70,6 +75,7 @@ private
       record
          Literals                   : enum_literal_vectors.Vector;
          transformed_literals_Names : unbounded_string_vectors.Vector;
+         object_Size                : Natural := 0;
       end record;
 
 end ada_Type.elementary.scalar.discrete.enumeration;

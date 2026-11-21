@@ -1053,6 +1053,22 @@ is
    end Literals;
 
 
+
+   procedure enum_Size_is (Self : access Item;   Bits : in Natural)
+   is
+   begin
+      Self.my.enum_Size := Bits;
+   end enum_Size_is;
+
+
+
+   function enum_Size (Self : access Item) return Natural
+   is
+   begin
+      return Self.my.enum_Size;
+   end enum_Size;
+
+
    -------------------------
    --  'c_Class' Subprograms
    --

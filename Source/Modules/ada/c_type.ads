@@ -213,6 +213,11 @@ is
 
    function  Literals                     (Self : access Item) return enum_literal_vectors.Vector;
 
+   procedure enum_Size_is                 (Self : access Item;   Bits : in Natural);
+   function  enum_Size                    (Self : access Item) return Natural;
+   --
+   --  The size of an enumeration which names its underlying type ('enum Small : unsigned char'), or 0.
+
 
    --  'array_Type' Attributes
    --
@@ -342,6 +347,7 @@ private
             when Enum =>
                Literals                   : enum_literal_vectors.Vector;
                transformed_literals_Names : unbounded_string_vectors.Vector;
+               enum_Size                  : Natural := 0;
 
             when function_Pointer =>
                accessed_Function          : access c_Function.item'Class;     -- Subprogram definition of an 'access subprogram' type declaration.
