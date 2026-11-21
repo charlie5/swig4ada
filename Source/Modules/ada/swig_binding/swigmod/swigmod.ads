@@ -51,17 +51,17 @@ package swigmod is
 
 private
 
-   pragma Import (CPP, input_file, "_ZN7swigmod10input_fileE");
-   pragma Import (CPP, line_number, "_ZN7swigmod11line_numberE");
-   pragma Import (CPP, start_line, "_ZN7swigmod10start_lineE");
-   pragma Import (CPP, CPlusPlus, "_ZN7swigmod9CPlusPlusE");
-   pragma Import (CPP, Extend, "_ZN7swigmod6ExtendE");
-   pragma Import (CPP, Verbose, "_ZN7swigmod7VerboseE");
-   pragma Import (CPP, IsVirtual, "_ZN7swigmod9IsVirtualE");
-   pragma Import (CPP, ImportMode, "_ZN7swigmod10ImportModeE");
-   pragma Import (CPP, NoExcept, "_ZN7swigmod8NoExceptE");
-   pragma Import (CPP, the_Abstract, "_ZN7swigmod12the_AbstractE");
-   pragma Import (CPP, SmartPointer, "_ZN7swigmod12SmartPointerE");
-   pragma Import (CPP, SwigRuntime, "_ZN7swigmod11SwigRuntimeE");
+   pragma Import (CPP, input_file, "input_file");
+   pragma Import (CPP, line_number, "line_number");
+   pragma Import (CPP, start_line, "start_line");
+   pragma Import (CPP, CPlusPlus, "CPlusPlus");
+   pragma Import (CPP, Extend, "Extend");
+   pragma Import (CPP, Verbose, "Verbose");
+   pragma Import (CPP, IsVirtual, "IsVirtual");
+   pragma Import (CPP, ImportMode, "ImportMode");
+   pragma Import (CPP, NoExcept, "NoExcept");
+   pragma Import (CPP, the_Abstract, "Abstract");
+   pragma Import (CPP, SmartPointer, "SmartPointer");
+   pragma Import (CPP, SwigRuntime, "SwigRuntime");
 
 end swigmod;

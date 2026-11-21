@@ -4145,7 +4145,7 @@ DllExport int SWIGSTDCALL Ada_Language_nestedClassesSupport (
   arg1 = (Language *)a_arg1; 
   
   result = (Language::NestedClassSupport)((Language const *)arg1)->Language::nestedClassesSupport();
-  jresult = result; 
+  jresult = (int) result; 
   
   
   
