@@ -785,6 +785,9 @@ begin
       run ("templates");           -- Templates which a library defines, one of them with virtual functions.
       run ("multiple_inheritance");   -- Classes with more than one base class.
       run ("nested");              -- Declarations which are nested in a class.
+      run ("callbacks");           -- Functions of Ada which C++ calls.
+      run ("arrays");              -- Arrays and pointers, the other standard types, and variables.
+      run ("constants");           -- Constants and enumerations of every kind.
    end if;
 
 

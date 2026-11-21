@@ -1,0 +1,92 @@
+with
+     constants.Binding,
+     constants.Limits,
+     constants.Packet,
+
+     swig,
+     interfaces.C.Strings,
+
+     Checks;
+
+
+procedure Tester
+--
+--  Constants made by '#define' and by 'const', and enumerations:
+--  plain, anonymous, used as flags, scoped, of one byte and nested in a class.
+--
+is
+   use constants,
+       constants.Binding,
+       interfaces.C,
+       Checks;
+
+   use type swig.bool,
+            Limits.Kind;
+
+   True : constant swig.bool := swig.bool'Val (1);
+
+begin
+   defined_constants :
+   begin
+      check (COUNT = 12,                                            "an integer");
+      check (SCALE = 2.5,                                           "a real number");
+      check (String'(Strings.Value (NAME)) = "constants",           "a string");
+      check (LETTER = 'x',                                          "a character");
+      check (the_FLAGS = 19 and SHIFTED = 64,                       "expressions of bits");
+      check (NEGATIVE = -7,                                         "a negative number");
+      check (DERIVED = 25,                                          "an expression of another constant");
+      check (limit = 100,                                           "a 'const int', which has no symbol in C++");
+      check (epsilon = 0.25,                                        "a 'const double'");
+   end defined_constants;
+
+   plain_enumerations :
+   declare
+      the_Level : aliased Level := Low;
+   begin
+      check (level_number (Low) = -1 and level_number (Top) = 11,   "literals with a negative value, and one which follows a value");
+      check (raise_level (Middle) = High,                           "an enumeration is passed and returned");
+
+      set_level (the_Level'unchecked_Access, High);
+      check (the_Level = High,                                      "and set through a pointer");
+
+      top_level (the_Level'unchecked_Access);
+      check (the_Level = Top,                                       "and through a reference");
+
+      check (anonymous_five'Enum_Rep = 5,                           "an enumeration with no name");
+   end plain_enumerations;
+
+   flags :
+   begin
+      check (can (the_All, Write) = True,                           "a literal whose value is an expression of the others");
+      check (can (Read,    Write) /= True,                          "literals used as flags");
+   end flags;
+
+   scoped_enumerations :
+   begin
+      check (mode_number (Automatic) = 7,                           "a literal of an 'enum class' is passed");
+      check (next_mode (Off) = On,                                  "and returned");
+   end scoped_enumerations;
+
+   small_enumerations :
+   declare
+      the_Packet : aliased Packet.Item;
+   begin
+      check (small_number (Huge) = 200,                             "an enumeration of one byte is passed");
+
+      packet_fill (the_Packet'unchecked_Access);
+      check (the_Packet.first = Huge and the_Packet.second = Tiny,  "members of an enumeration of one byte");
+      check (the_Packet.length = 5,                                 "and the member which follows them");
+
+      the_Packet.second := Huge;
+      check (packet_sum (the_Packet'unchecked_Access) = 405,        "C++ reads what Ada wrote to one");
+   end small_enumerations;
+
+   nested :
+   begin
+      check (Limits.clamp (100) = 64,                               "a static function of a class");
+      check (Limits.kind_of (100) = Limits.Hard,                    "which returns an enumeration of the class");
+      check (kind_number (Limits.Hard) = 3,                         "whose literal has a value of its own");
+   end nested;
+
+   finish;
+end Tester;
