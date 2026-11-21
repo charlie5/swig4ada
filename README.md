@@ -184,6 +184,10 @@ Other things to know
   where it has a value in the class.
 - A structure with bit-fields is laid out as C has it, by a record representation clause, for the machine
   which generates the binding.
+- C++ may place the members of a derived class in the unused end of its base class. The record is then
+  laid out to match, and that base is storage alone ('Base_storage'), reached by 'as_Base':
+
+      Derived.as_Base (the_Derived).i := 5;                            -- class Derived : public Base
 - A member variable which is ignored ('%ignore Sensor::state;') still has a component, 'state_storage',
   so that the members after it stay where C++ has them.
 - 'operator->' is the function 'dereference', and the functions of the class which a smart pointer points
