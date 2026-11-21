@@ -41,6 +41,7 @@ is
 
    check_Wrappers      : constant Boolean := True;     -- Compile each generated wrapper.
    check_Specs         : constant Boolean := True;     -- Compile each generated spec.
+   check_Baseline      : constant Boolean := True;     -- Say which of the generated specs differ from those of the baseline.
    do_Runtime          : constant Boolean := True;     -- Build and run the run-time cases.
    do_Examples         : constant Boolean := True;     -- Build each example of 'Examples/ada' and run its tester.
 
@@ -68,6 +69,8 @@ is
    example_Count      : Natural := 0;
    example_Failures   : Natural := 0;
    unexpected_Passes  : Natural := 0;
+   baseline_Changes   : Natural := 0;
+   has_Baseline       : Boolean := False;
 
 
 
@@ -97,6 +100,87 @@ is
 
       return Success and then Status = 0;
    end run;
+
+
+
+   procedure check_against_Baseline
+   --
+   --  A spec may change and still compile, so the specs are compared with those which were last accepted as right.
+   --
+   --  'baseline.sha' holds a checksum of each spec of the baseline, and is kept with the sources. The specs themselves
+   --  are kept in the 'baseline' folder, which is not: where it is present, 'generated/baseline-changes.log' shows how
+   --  each changed spec differs. Both are made anew by './launch_testsuite accept', once the changes have been looked
+   --  at and are as they should be. (The specs are pretty printed, so another version of 'gnatpp' may change them all.)
+   --
+   is
+      Step_Log : constant String := "generated/baseline-step.log";
+   begin
+      if not run ("cd generated && sha256sum *.ads > specs.sha", Step_Log)
+      then
+         raise Program_Error with "Unable to take the checksums of the generated specs.";
+      end if;
+
+      if ada.Command_Line.Argument_Count = 1 and then ada.Command_Line.Argument (1) = "accept"
+      then
+         if not run (  "cp generated/specs.sha baseline.sha"
+                     & " && rm -rf baseline && mkdir baseline && cp generated/*.ads baseline/",
+                     Step_Log)
+         then
+            raise Program_Error with "Unable to keep the generated specs as the baseline.";
+         end if;
+
+         new_Line;
+         put_Line ("The generated specs are now the baseline.");
+         return;
+      end if;
+
+      if not ada.Directories.exists ("baseline.sha")
+      then
+         new_Line;
+         put_Line ("There is no baseline of the specs to compare with ('./launch_testsuite accept' makes one).");
+         return;
+      end if;
+
+      has_Baseline := True;
+
+      --  The names of the specs which are changed, added or gone.
+      --
+      if not run (  "diff baseline.sha generated/specs.sha | grep '^[<>]' | awk '{print $3}' | sort -u > generated/baseline-changes.lst;"
+                  & " : > generated/baseline-changes.log;"
+                  & " for Each in $(cat generated/baseline-changes.lst); do"
+                  & "   if   [ ! -f generated/$Each ];  then echo ""=== $Each is no longer generated."";"
+                  & "   elif ! grep -q ""  $Each$"" baseline.sha;  then echo ""=== $Each is new."";"
+                  & "   elif [ -f baseline/$Each ];  then echo ""=== $Each differs:"";  diff baseline/$Each generated/$Each;"
+                  & "   else echo ""=== $Each differs (there is no 'baseline' folder to show how)."";"
+                  & "   fi;"
+                  & " done >> generated/baseline-changes.log;"
+                  & " true",
+                  Step_Log)
+      then
+         raise Program_Error with "Unable to compare the generated specs with the baseline.";
+      end if;
+
+      declare
+         the_Changes : File_Type;
+      begin
+         open (the_Changes, in_File, "generated/baseline-changes.lst");
+
+         while not end_of_File (the_Changes)
+         loop
+            skip_Line (the_Changes);
+            baseline_Changes := baseline_Changes + 1;
+         end loop;
+
+         close (the_Changes);
+      end;
+
+      if baseline_Changes > 0
+      then
+         new_Line;
+         put_Line (baseline_Changes'Image & " specs differ from the baseline: see 'generated/baseline-changes.log'.");
+         put_Line ("If they are as they should be, './launch_testsuite accept' makes them the baseline.");
+      end if;
+   end check_against_Baseline;
 
 
 
@@ -1272,6 +1356,15 @@ begin
    end if;
 
 
+   ------------
+   --- Baseline
+   --
+   if check_Baseline
+   then
+      check_against_Baseline;
+   end if;
+
+
    -----------------
    --- Run-time cases
    --
@@ -1351,6 +1444,11 @@ begin
       put_Line ("Wrappers which now compile:   " & unexpected_Passes'Image);
    end if;
 
+   if has_Baseline
+   then
+      put_Line ("Specs which differ from the baseline:" & baseline_Changes'Image);
+   end if;
+
    put_Line ("Run-time cases:               " & runtime_Cases   'Image);
    put_Line ("Run-time cases which fail:    " & runtime_Failures'Image);
    put_Line ("Examples:                     " & example_Count   'Image);
@@ -1358,7 +1456,7 @@ begin
 
    new_Line;
 
-   if generator_Failures + syntax_Failures + wrapper_Failures + compile_Failures + runtime_Failures + example_Failures = 0
+   if generator_Failures + syntax_Failures + wrapper_Failures + compile_Failures + runtime_Failures + example_Failures + baseline_Changes = 0
    then
       put_Line ("Complete.");
    else
