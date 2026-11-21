@@ -40,6 +40,7 @@ is
    check_Wrappers      : constant Boolean := True;     -- Compile each generated wrapper.
    check_Specs         : constant Boolean := True;     -- Compile each generated spec.
    do_Runtime          : constant Boolean := True;     -- Build and run the run-time cases.
+   do_Examples         : constant Boolean := True;     -- Build each example of 'Examples/ada' and run its tester.
 
    Root                : constant String  := "../../../..";     -- The repository root, as seen from the 'generated' folder.
 
@@ -62,6 +63,8 @@ is
    compile_Failures   : Natural := 0;
    runtime_Cases      : Natural := 0;
    runtime_Failures   : Natural := 0;
+   example_Count      : Natural := 0;
+   example_Failures   : Natural := 0;
    unexpected_Passes  : Natural := 0;
 
 
@@ -280,6 +283,29 @@ is
          put_Line ("   The run-time case failed !");
       end if;
    end run;
+
+
+
+   procedure run_Example (the_Example : in String)
+   --
+   --  Runs the builder of an example of 'Examples/ada', which regenerates its binding, builds its tester and runs it.
+   --
+   is
+      Log : constant String := "runtime-build/" & the_Example & "-example.log";
+   begin
+      put_Line ("Running the example '" & the_Example & "'.");
+      example_Count := example_Count + 1;
+
+      ada.Directories.create_Path ("runtime-build");     -- The log is written there.
+
+      if not run ("cd ../" & the_Example & " && ./builder", Log)
+      then
+         ada.Directories.create_Path ("generated");
+         keep (Log, as_Log => "generated/" & the_Example & "-example.log");
+         example_Failures := example_Failures + 1;
+         put_Line ("   The example failed !");
+      end if;
+   end run_Example;
 
 
 
@@ -795,6 +821,34 @@ begin
    end if;
 
 
+   -------------
+   --- Examples
+   --
+   if do_Examples
+   then
+      new_Line;
+      put_Line ("Running the examples.");
+      new_Line;
+
+      run_Example ("addlink");
+      run_Example ("anonymous_bitfield");
+      run_Example ("char_constants");
+      run_Example ("class");
+      run_Example ("enum");
+      run_Example ("funcptr");
+      run_Example ("import_tree");
+      run_Example ("li_carrays");
+      run_Example ("preproc");
+      run_Example ("reference");
+      run_Example ("simple");
+      run_Example ("std_string");
+      run_Example ("std_vector");
+      run_Example ("template");
+      run_Example ("typedef");
+      run_Example ("variables");
+   end if;
+
+
    --------
    --- Done
    --
@@ -812,10 +866,12 @@ begin
 
    put_Line ("Run-time cases:               " & runtime_Cases   'Image);
    put_Line ("Run-time cases which fail:    " & runtime_Failures'Image);
+   put_Line ("Examples:                     " & example_Count   'Image);
+   put_Line ("Examples which fail:          " & example_Failures'Image);
 
    new_Line;
 
-   if generator_Failures + syntax_Failures + wrapper_Failures + compile_Failures + runtime_Failures = 0
+   if generator_Failures + syntax_Failures + wrapper_Failures + compile_Failures + runtime_Failures + example_Failures = 0
    then
       put_Line ("Complete.");
    else
