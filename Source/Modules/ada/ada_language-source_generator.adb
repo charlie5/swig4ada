@@ -2939,14 +2939,15 @@ is
                    & "/* The layout which the Ada records take their classes to have. A check which fails means that a record" & NL
                    & "   does not match its class on this machine, and that the binding must be generated again here. */"      & NL
                    & NL
+                   & "#if    (defined (__cplusplus) && __cplusplus >= 201103L) \" & NL
+                   & "    || (!defined (__cplusplus) && defined (__STDC_VERSION__) && __STDC_VERSION__ >= 201112L)" & NL
+                   & NL
                    & "#include <stddef.h>" & NL
                    & NL
-                   & "#if defined (__cplusplus) && __cplusplus >= 201103L" & NL
+                   & "#if defined (__cplusplus)" & NL
                    & "#  define SWIG_ADA_LAYOUT_CHECK(Condition, Message)  static_assert (Condition, Message);" & NL
-                   & "#elif !defined (__cplusplus) && defined (__STDC_VERSION__) && __STDC_VERSION__ >= 201112L" & NL
-                   & "#  define SWIG_ADA_LAYOUT_CHECK(Condition, Message)  _Static_assert (Condition, Message);" & NL
                    & "#else" & NL
-                   & "#  define SWIG_ADA_LAYOUT_CHECK(Condition, Message)" & NL
+                   & "#  define SWIG_ADA_LAYOUT_CHECK(Condition, Message)  _Static_assert (Condition, Message);" & NL
                    & "#endif" & NL
                    & NL
                    & "#if defined (__GNUC__)" & NL
@@ -2964,6 +2965,8 @@ is
                    & NL
                    & "#if defined (__GNUC__) && defined (__cplusplus)" & NL
                    & "#  pragma GCC diagnostic pop" & NL
+                   & "#endif" & NL
+                   & NL
                    & "#endif" & NL);
    end layout_Checks;
 

@@ -8,6 +8,9 @@
 
 %include "adahead.swg"
 
+/* A nested class or union with no name is bound by the Ada module, where the core says that it is ignored. */
+#pragma SWIG nowarn=312
+
 /*
 %typemap (ctype_new)        void                                                          "void"
 %typemap (adatype_new)      void                                                          "interfaces.c.extensions.void"

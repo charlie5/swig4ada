@@ -86,7 +86,9 @@ is
    function  cpp_Symbol (qualified_Name : in String;   Suffix : in String) return String;
    procedure bind_constructors_of_abstract_Class (Self : access Item;   the_Class : in Node_Pointer);
    procedure bind_other_base_Classes             (Self : access Item;   the_Class : in Node_Pointer);
-   procedure add_hidden_Members                  (Self : access Item;   Before    : in Node_Pointer);
+   procedure add_hidden_Members                  (Self : access Item;   Before    : in Node_Pointer;   of_Class : in Node_Pointer := null);
+   procedure bind_unnamed_nested_Classes         (Self : access Item;   the_Class : in Node_Pointer;   outer_Name : in String;   cpp_Name : in String);
+   function  member_Variable                     (Self : access Item;   the_Node  : in Node_Pointer;   the_Name   : in String) return c_Variable.view;
 
    procedure register_Mirror (Self : access Item;   proxy_Name              : in unbounded_String;
                                                     the_c_Type              : in c_Type.view;
@@ -1902,7 +1904,9 @@ is
          new_c_Class.lose_Layout;
       end if;
 
-      if Attribute (the_Node, "has_unnamed_member") /= ""
+      if         Attribute (the_Node, "has_unnamed_member") /= ""
+        and then (        get_Attribute (the_Node, "unnamed_nested") = null
+                  or else not Self.in_cpp_Mode)
       then
          log (  "Warning: the class '" & class_Name & "' has a nested class or union with no name, whose members are left out."
               & " The layout of its record does not match that of the class.");
@@ -1992,6 +1996,13 @@ is
                the_Child := next_Sibling (the_Child);
             end loop;
          end;
+      end if;
+
+      if Self.in_cpp_Mode
+      then
+         bind_unnamed_nested_Classes (Self, the_Node,
+                                      outer_Name => class_Name,
+                                      cpp_Name   => +doh_Item (SwigType_namestr (SwigType_Pointer (get_Attribute (the_Node, "name")))));
       end if;
 
       Self.c_class_Stack    .append (new_C_Class);
@@ -3160,9 +3171,153 @@ is
    --- Utility
    --
 
-   procedure add_hidden_Members (Self : access Item;   Before : in Node_Pointer)
+   function member_Variable (Self : access Item;   the_Node : in Node_Pointer;   the_Name : in String) return c_Variable.view
    --
-   --  Two kinds of member take part in the layout of a class, but are not handed on by the core:
+   --  Makes a member variable from the node of its declaration, for a member which the core does not hand on.
+   --
+   is
+      use swigg.Utility;
+      use type C.int;
+
+      the_swig_Type :          SwigType_Pointer := SwigType_Pointer (doh_Copy (DOH_Pointer (get_Attribute (the_Node, "type"))));
+      bit_Field     : constant String           := Attribute (the_Node, "bitfield");
+      new_Variable  :          c_Variable.view;
+   begin
+      if         get_Attribute (the_Node, "decl") /= null
+        and then Attribute (the_Node, "decl") /= ""
+      then
+         SwigType_push (the_swig_Type, String_Pointer (get_Attribute (the_Node, "decl")));
+      end if;
+
+      strip_all_qualifiers (DOH_Pointer (the_swig_Type));
+
+      if SwigType_isArray (the_swig_Type) /= 0
+      then
+         new_Variable := c_Variable.new_c_Variable (+the_Name,
+                                                    Self.demand_c_Type_for (doh_swigType (to_Doh (to_String (strip_array_Bounds (doh_Copy (DOH_Pointer (the_swig_Type))))))));
+         Self.add_array_Bounds_to (new_Variable, doh_SwigType (the_swig_Type));
+      else
+         new_Variable := c_Variable.new_c_Variable (+the_Name,
+                                                    Self.demand_c_Type_for (doh_SwigType (the_swig_Type)));
+      end if;
+
+      new_Variable.is_class_Pointer := SwigType_isPointer (the_swig_Type) /= 0;
+
+      if bit_Field /= ""
+      then
+         new_Variable.bit_Field := Integer (Value (resolved_c_integer_Expression (Self, +bit_Field,
+                                                                                        Self.integer_symbol_value_Map,
+                                                                                        Self.current_class_namespace_Prefix)));
+      end if;
+
+      return new_Variable;
+   end member_Variable;
+
+
+
+   procedure bind_unnamed_nested_Classes (Self : access Item;   the_Class : in Node_Pointer;   outer_Name : in String;   cpp_Name : in String)
+   --
+   --  A nested class or union with no name ('union { long l; double d; } val;') is left out by the core, in C++, and its
+   --  members with it. The parser keeps each on the node of the outer class, with the names of the members which are
+   --  declared with it. Each is given a class of its own, named '<outer>_<member>' as the core names one in C (or
+   --  '<outer>_anonymous_<n>', where no member is declared with it, as for an anonymous union), whose name is noted
+   --  on its node for 'add_hidden_Members', which gives the outer class its members.
+   --
+   --  This is called before the outer class is made the current class, so that the new class is declared beside it.
+   --
+   is
+      use type C.int;
+   begin
+      if get_Attribute (the_Class, "unnamed_nested") = null
+      then
+         return;
+      end if;
+
+      declare
+         the_Nested : constant doh_List := doh_List (get_Attribute (the_Class, "unnamed_nested"));
+      begin
+         for i in 1 .. DohLen (the_Nested)
+         loop
+            declare
+               the_Node     : constant Node_Pointer := Node_Pointer (DohGetitem (the_Nested, i - 1));
+               the_Declared : constant doh_List     := doh_List (get_Attribute (the_Node, "unnamed_nested:members"));
+               first_Member : constant String       := (if DohLen (the_Declared) > 0 then +DohGetitem (the_Declared, 0) else "");
+               member_Name  : constant String       := (if first_Member = "" then ""
+                                                        else first_Member (first_Member'First .. ada.Strings.fixed.Index (first_Member, "|") - 1));
+               the_Name     : constant String       := (if member_Name = "" then outer_Name & "_anonymous_" & ada.Strings.fixed.Trim (C.int'Image (i), ada.Strings.Left)
+                                                                            else outer_Name & "_" & member_Name);
+               the_cpp_Name : constant String       := (if member_Name = "" or else cpp_Name = "" then ""
+                                                        else "decltype (" & cpp_Name & "::" & member_Name & ")");
+               new_c_Class  :          c_Type.view;
+               the_Child    :          Node_Pointer := first_Child (the_Node);
+            begin
+               if not Self.name_Map_of_c_type.contains (+the_Name)
+               then
+                  bind_unnamed_nested_Classes (Self, the_Node, the_Name, the_cpp_Name);     -- Those within it.
+
+                  new_c_Class := c_Type.new_c_Class (Namespace => Self.current_c_Namespace,
+                                                     Name      => +the_Name);
+                  Self.register (new_c_Class,
+                                 doh_SwigType (to_Doh (the_Name)));
+
+                  if Attribute (the_Node, "kind") = "union"
+                  then
+                     new_c_Class.is_Union;
+                  end if;
+
+                  new_c_Class.nameSpace.models_cpp_class_Type (new_c_Class);
+
+                  if         Self.in_cpp_Mode
+                    and then the_cpp_Name /= ""
+                    and then Attribute (the_Node, "access") not in "private" | "protected"
+                    and then first_Member (first_Member'Last) = '|'     -- The member is of the class itself, not a pointer to it or an array of it.
+                  then
+                     new_c_Class.layout_Name_is (+the_cpp_Name);
+                  end if;
+
+                  --  Its members, with those of the classes with no name which are nested in it. (They are added in the order
+                  --  of their declarations, with any of the latter after the member variables: a union is unaffected by this.)
+                  --
+                  Self.c_class_Stack.append (new_c_Class);
+
+                  while the_Child /= null
+                  loop
+                     if         Attribute (the_Child, "nodeType") = "cdecl"
+                       and then Attribute (the_Child, "name")    /= ""
+                       and then Attribute (the_Child, "storage") not in "static" | "typedef" | "friend" | "extern"
+                       and then (        get_Attribute (the_Child, "decl") = null
+                                 or else SwigType_isfunction (SwigType_Pointer (get_Attribute (the_Child, "decl"))) = 0)
+                     then
+                        declare
+                           the_Member : constant c_Variable.view := member_Variable (Self, the_Child, Attribute (the_Child, "name"));
+                        begin
+                           if Attribute (the_Child, "bitfield") = ""
+                           then
+                              the_Member.member_Name := +Attribute (the_Child, "name");
+                           end if;
+
+                           new_c_Class.add_Component (the_Member);
+                        end;
+                     end if;
+
+                     the_Child := next_Sibling (the_Child);
+                  end loop;
+
+                  add_hidden_Members (Self, before => null, of_Class => the_Node);
+                  Self.c_class_Stack.delete_Last;
+
+                  set_Attribute (doh_Node (the_Node), "ada:type_name", the_Name);
+               end if;
+            end;
+         end loop;
+      end;
+   end bind_unnamed_nested_Classes;
+
+
+
+   procedure add_hidden_Members (Self : access Item;   Before : in Node_Pointer;   of_Class : in Node_Pointer := null)
+   --
+   --  Three kinds of member take part in the layout of a class, but are not handed on by the core:
    --
    --    - A bit-field with no name ('unsigned : 2;'). The parser notes each one on the node of the class, by its line,
    --      width and type. It becomes a component with no name of its own, which is given no declaration.
@@ -3170,18 +3325,26 @@ is
    --    - A member variable which the interface file ignores ('%ignore Sensor::state;'). It becomes a component
    --      named '<member>_storage', as without it every member which follows would be out of place.
    --
-   --  Those of the current class which come before the given member (or all of them, when it is null), and are
-   --  not yet components, are added.
+   --    - A member whose type is a nested class or union with no name, and the members of an anonymous union,
+   --      in C++ (see 'bind_unnamed_nested_Classes'). It becomes a component of the class made for that type.
+   --
+   --  Those of the class which come before the given member (or all of them, when it is null), and are not yet
+   --  components, are added to the current class. 'of_Class' is the node of that class, where the core does not
+   --  yet know of it.
    --
    is
       use type C.int;
 
+      type a_Kind is (Ignored, Bits, Nested);
+
       type hidden_Member is
          record
+            Kind     : a_Kind;
             Line     : Integer;
-            the_Node : Node_Pointer;         -- Null for a bit-field with no name.
+            the_Node : Node_Pointer;         -- The declaration of an ignored member, or the nested class.
             Width    : unbounded_String;
             the_Type : unbounded_String;
+            Index    : Natural := 0;
          end record;
 
       package hidden_Vectors is new ada.Containers.Vectors (Positive, hidden_Member);
@@ -3191,10 +3354,10 @@ is
 
       package Sorting is new hidden_Vectors.generic_Sorting;
 
-      the_Class   : constant Node_Pointer := Self.getCurrentClass;
+      the_Class   : constant Node_Pointer := (if of_Class /= null then of_Class else Self.getCurrentClass);
       before_Line : constant Integer      := (if Before = null then Integer'Last else Integer (DohGetline (DOH_Pointer (Before))));
       the_Hidden  :          hidden_Vectors.Vector;
-      Used        :          Natural      := 0;
+      bits_Used   :          Natural      := 0;
       the_Child   :          Node_Pointer;
    begin
       if the_Class = null
@@ -3212,15 +3375,16 @@ is
          if         Attribute (the_Child, "nodeType") = "cdecl"
            and then Attribute (the_Child, "feature:ignore") /= ""
            and then Attribute (the_Child, "feature:extend")  = ""
+           and then Attribute (the_Child, "ada:placed")      = ""
            and then Attribute (the_Child, "name")           /= ""
            and then Attribute (the_Child, "storage") not in "static" | "typedef" | "friend" | "extern"
            and then (        get_Attribute (the_Child, "decl") = null
                      or else SwigType_isfunction (SwigType_Pointer (get_Attribute (the_Child, "decl"))) = 0)
          then
-            the_Hidden.append (hidden_Member'(Line     => Integer (DohGetline (DOH_Pointer (the_Child))),
+            the_Hidden.append (hidden_Member'(Kind     => Ignored,
+                                              Line     => Integer (DohGetline (DOH_Pointer (the_Child))),
                                               the_Node => the_Child,
-                                              Width    => <>,
-                                              the_Type => <>));
+                                              others   => <>));
          end if;
 
          the_Child := next_Sibling (the_Child);
@@ -3230,10 +3394,18 @@ is
       --
       if get_Attribute (the_Class, "anonymous_bitfields") /= null
       then
+         for Each of Self.current_c_Class.Components
+         loop
+            if Each.is_anonymous_Bits
+            then
+               bits_Used := bits_Used + 1;
+            end if;
+         end loop;
+
          declare
             the_Fields : constant doh_List := doh_List (get_Attribute (the_Class, "anonymous_bitfields"));
          begin
-            for i in 1 .. DohLen (the_Fields)
+            for i in C.int (bits_Used) + 1 .. DohLen (the_Fields)
             loop
                declare
                   the_Field : constant String  := +DohGetitem (the_Fields, i - 1);     -- '<line>|<width>|<type>'
@@ -3243,84 +3415,134 @@ is
                begin
                   if the_Line < before_Line
                   then
-                     the_Hidden.append (hidden_Member'(Line     => the_Line,
+                     the_Hidden.append (hidden_Member'(Kind     => Bits,
+                                                       Line     => the_Line,
                                                        the_Node => null,
                                                        Width    => +the_Field (Bar_1 + 1 .. Bar_2 - 1),
-                                                       the_Type => +the_Field (Bar_2 + 1 .. the_Field'Last)));
+                                                       the_Type => +the_Field (Bar_2 + 1 .. the_Field'Last),
+                                                       Index    => Natural (i)));
                   end if;
                end;
             end loop;
          end;
       end if;
 
-      if the_Hidden.is_Empty
+      --  The nested classes with no name.
+      --
+      if get_Attribute (the_Class, "unnamed_nested") /= null
       then
-         return;
+         declare
+            the_Nested : constant doh_List := doh_List (get_Attribute (the_Class, "unnamed_nested"));
+         begin
+            for i in 1 .. DohLen (the_Nested)
+            loop
+               declare
+                  the_Node : constant Node_Pointer := Node_Pointer (DohGetitem (the_Nested, i - 1));
+                  the_Line : constant Integer      := Integer'Value (Attribute (the_Node, "unnamed_nested:line"));
+               begin
+                  if         the_Line < before_Line
+                    and then Attribute (the_Node, "ada:placed") = ""
+                  then
+                     the_Hidden.append (hidden_Member'(Kind     => Nested,
+                                                       Line     => the_Line,
+                                                       the_Node => the_Node,
+                                                       Index    => Natural (i),
+                                                       others   => <>));
+                  end if;
+               end;
+            end loop;
+         end;
       end if;
 
       Sorting.sort (the_Hidden);
 
-      for Each of Self.current_c_Class.Components
+      for the_Member of the_Hidden
       loop
-         if Each.is_anonymous_Bits or else Each.is_ignored_Member
-         then
-            Used := Used + 1;
-         end if;
-      end loop;
-
-      for i in Used + 1 .. Natural (the_Hidden.Length)
-      loop
-         declare
-            use swigg.Utility;
-
-            the_Member   : constant hidden_Member := the_Hidden.Element (i);
-            new_Variable :          c_Variable.view;
-         begin
-            if the_Member.the_Node = null
-            then
-               new_Variable := c_Variable.new_c_Variable (+("anonymous_bits_" & ada.Strings.fixed.Trim (Natural'Image (i), ada.Strings.Left)),
-                                                          Self.demand_c_Type_for (doh_swigType (to_Doh (to_String (the_Member.the_Type)))));
-               new_Variable.is_anonymous_Bits := True;
-               new_Variable.bit_Field         := Integer (Value (resolved_c_integer_Expression (Self, the_Member.Width,
-                                                                                                      Self.integer_symbol_value_Map,
-                                                                                                      Self.current_class_namespace_Prefix)));
-            else
+         case the_Member.Kind
+         is
+            when Bits =>
                declare
-                  the_swig_Type :          SwigType_Pointer := SwigType_Pointer (doh_Copy (DOH_Pointer (get_Attribute (the_Member.the_Node, "type"))));
-                  the_Name      : constant String           := Attribute (the_Member.the_Node, "name") & "_storage";
-                  bit_Field     : constant String           := Attribute (the_Member.the_Node, "bitfield");
+                  new_Variable : constant c_Variable.view
+                    := c_Variable.new_c_Variable (+("anonymous_bits_" & ada.Strings.fixed.Trim (Natural'Image (the_Member.Index), ada.Strings.Left)),
+                                                  Self.demand_c_Type_for (doh_swigType (to_Doh (to_String (the_Member.the_Type)))));
                begin
-                  if get_Attribute (the_Member.the_Node, "decl") /= null
-                  then
-                     SwigType_push (the_swig_Type, String_Pointer (get_Attribute (the_Member.the_Node, "decl")));
-                  end if;
+                  new_Variable.is_anonymous_Bits := True;
+                  new_Variable.bit_Field         := Integer (Value (resolved_c_integer_Expression (Self, the_Member.Width,
+                                                                                                         Self.integer_symbol_value_Map,
+                                                                                                         Self.current_class_namespace_Prefix)));
+                  Self.current_c_Class.add_Component (new_Variable);
+               end;
 
-                  strip_all_qualifiers (DOH_Pointer (the_swig_Type));
-
-                  if SwigType_isArray (the_swig_Type) /= 0
-                  then
-                     new_Variable := c_Variable.new_c_Variable (+the_Name,
-                                                                Self.demand_c_Type_for (doh_swigType (to_Doh (to_String (strip_array_Bounds (doh_Copy (DOH_Pointer (the_swig_Type))))))));
-                     Self.add_array_Bounds_to (new_Variable, doh_SwigType (the_swig_Type));
-                  else
-                     new_Variable := c_Variable.new_c_Variable (+the_Name,
-                                                                Self.demand_c_Type_for (doh_SwigType (the_swig_Type)));
-                  end if;
-
+            when Ignored =>
+               declare
+                  new_Variable : constant c_Variable.view
+                    := member_Variable (Self, the_Member.the_Node, Attribute (the_Member.the_Node, "name") & "_storage");
+               begin
                   new_Variable.is_ignored_Member := True;
-                  new_Variable.is_class_Pointer  := SwigType_isPointer (the_swig_Type) /= 0;
+                  set_Attribute (doh_Node (the_Member.the_Node), "ada:placed", "1");
+                  Self.current_c_Class.add_Component (new_Variable);
+               end;
 
-                  if bit_Field /= ""
+            when Nested =>
+               declare
+                  the_type_Name : constant String   := Attribute (the_Member.the_Node, "ada:type_name");
+                  the_Declared  : constant doh_List := doh_List (get_Attribute (the_Member.the_Node, "unnamed_nested:members"));
+                  new_Variable  :          c_Variable.view;
+               begin
+                  set_Attribute (doh_Node (the_Member.the_Node), "ada:placed", "1");
+
+                  if        the_type_Name = ""
+                    or else not Self.name_Map_of_c_type.contains (+the_type_Name)
                   then
-                     new_Variable.bit_Field := Integer (Value (resolved_c_integer_Expression (Self, +bit_Field,
-                                                                                                    Self.integer_symbol_value_Map,
-                                                                                                    Self.current_class_namespace_Prefix)));
+                     Self.current_c_Class.lose_Layout;     -- The class for it could not be made.
+
+                  elsif DohLen (the_Declared) = 0
+                  then   -- An anonymous union or structure, whose members C++ takes as members of the outer class.
+                     new_Variable := c_Variable.new_c_Variable (+("anonymous_" & ada.Strings.fixed.Trim (Natural'Image (the_Member.Index), ada.Strings.Left)),
+                                                                Self.name_Map_of_c_type.Element (+the_type_Name));
+                     Self.current_c_Class.add_Component (new_Variable);
+                  else
+                     for i in 1 .. DohLen (the_Declared)
+                     loop
+                        declare
+                           the_Entry : constant String  := +DohGetitem (the_Declared, i - 1);     -- '<name>|<declarator>'
+                           the_Bar   : constant Natural := ada.Strings.fixed.Index (the_Entry, "|");
+                           the_Name  : constant String  := the_Entry (the_Entry'First .. the_Bar - 1);
+                           the_Decl  : constant String  := the_Entry (the_Bar + 1 .. the_Entry'Last);
+                        begin
+                           if the_Decl = ""
+                           then
+                              new_Variable := c_Variable.new_c_Variable (+the_Name, Self.name_Map_of_c_type.Element (+the_type_Name));
+                              new_Variable.member_Name := +the_Name;
+                              Self.current_c_Class.add_Component (new_Variable);
+
+                           elsif      the_Decl = "p."
+                             and then Self.name_Map_of_c_type.contains (+(the_type_Name & "*"))
+                           then
+                              new_Variable := c_Variable.new_c_Variable (+the_Name, Self.name_Map_of_c_type.Element (+(the_type_Name & "*")));
+                              new_Variable.is_class_Pointer := True;
+                              new_Variable.member_Name      := +the_Name;
+                              Self.current_c_Class.add_Component (new_Variable);
+
+                           elsif      the_Decl'Length > 2
+                             and then the_Decl (the_Decl'First .. the_Decl'First + 1) = "a("
+                             and then ada.Strings.fixed.Index (the_Decl, "p.") = 0
+                             and then Self.name_Map_of_c_type.contains (+(the_type_Name & "[]"))
+                           then
+                              new_Variable := c_Variable.new_c_Variable (+the_Name, Self.name_Map_of_c_type.Element (+(the_type_Name & "[]")));
+                              Self.add_array_Bounds_to (new_Variable, doh_SwigType (to_Doh (the_Decl & the_type_Name)));
+                              new_Variable.member_Name := +the_Name;
+                              Self.current_c_Class.add_Component (new_Variable);
+                           else
+                              log (  "Warning: unable to bind the member '" & the_Name & "' of class '" & Self.current_c_Class.Name
+                                   & "', whose type is a nested class with no name. The layout of the record does not match that of the class.");
+                              Self.current_c_Class.lose_Layout;
+                           end if;
+                        end;
+                     end loop;
                   end if;
                end;
-            end if;
-
-            Self.current_c_Class.add_Component (new_Variable);
-         end;
+         end case;
       end loop;
    end add_hidden_Members;
 
