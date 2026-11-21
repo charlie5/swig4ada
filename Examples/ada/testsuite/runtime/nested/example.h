@@ -25,13 +25,14 @@ public:
   State   state;
   Speed   speed;
   Gauge   gauge;
+  Reading last;                   /* The class holds the structure, which holds an enumeration of the class. */
 
   Engine () : state (Off), speed (0)   {}
 
   void    start ()                { state = Idle; }
   void    run (Speed s)           { state = Running;  speed = s; }
   Mode    mode ()                 { return state; }
-  Reading read ()                 { Reading r;  r.speed = speed;  r.state = state;  return r; }
+  Reading read ()                 { Reading r;  r.speed = speed;  r.state = state;  last = r;  return r; }
   Gauge*  get_gauge ()            { return &gauge; }
 };
 

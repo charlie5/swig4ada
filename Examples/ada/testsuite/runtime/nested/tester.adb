@@ -43,6 +43,15 @@ begin
       check (reading_total (the_Reading) = 124,            "and the nested structure is passed by value");
    end;
 
+   --  The class holds the structure which it returns, and the structure holds an enumeration of the class.
+   --  (The two packages would need each other, so the enumeration is declared in the top package.)
+   --
+   check (the_Engine.last.speed = 120,                     "a member which is the nested structure");
+   check (the_Engine.last.state = Engine.Running,          "whose member is an enumeration of the class");
+
+   the_Engine.last.state := Engine.Idle;
+   check (as_number (the_Engine.last.state) = 3,           "which C++ reads after Ada has set it");
+
    declare
       the_Gauge : constant Gauge.Pointer := Engine.get_gauge (the_Engine);
    begin
