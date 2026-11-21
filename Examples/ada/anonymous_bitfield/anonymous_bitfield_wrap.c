@@ -330,14 +330,15 @@ extern "C" {
 /* The layout which the Ada records take their classes to have. A check which fails means that a record
    does not match its class on this machine, and that the binding must be generated again here. */
 
+#if    (defined (__cplusplus) && __cplusplus >= 201103L) \
+    || (!defined (__cplusplus) && defined (__STDC_VERSION__) && __STDC_VERSION__ >= 201112L)
+
 #include <stddef.h>
 
-#if defined (__cplusplus) && __cplusplus >= 201103L
+#if defined (__cplusplus)
 #  define SWIG_ADA_LAYOUT_CHECK(Condition, Message)  static_assert (Condition, Message);
-#elif !defined (__cplusplus) && defined (__STDC_VERSION__) && __STDC_VERSION__ >= 201112L
-#  define SWIG_ADA_LAYOUT_CHECK(Condition, Message)  _Static_assert (Condition, Message);
 #else
-#  define SWIG_ADA_LAYOUT_CHECK(Condition, Message)
+#  define SWIG_ADA_LAYOUT_CHECK(Condition, Message)  _Static_assert (Condition, Message);
 #endif
 
 #if defined (__GNUC__)
@@ -356,6 +357,8 @@ SWIG_ADA_LAYOUT_CHECK (sizeof (swig_ada_layout_1) == 12, "swig4ada: the Ada reco
 
 #if defined (__GNUC__) && defined (__cplusplus)
 #  pragma GCC diagnostic pop
+#endif
+
 #endif
 
 
