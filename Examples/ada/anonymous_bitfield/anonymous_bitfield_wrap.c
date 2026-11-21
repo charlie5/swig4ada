@@ -328,10 +328,12 @@ extern "C" {
 #endif
 
 /* The layout which the Ada records take their classes to have. A check which fails means that a record
-   does not match its class on this machine, and that the binding must be generated again here. */
+   does not match its class on this machine, and that the binding must be generated again here.
+   Defining SWIG_ADA_NO_LAYOUT_CHECKS leaves the checks out. */
 
-#if    (defined (__cplusplus) && __cplusplus >= 201103L) \
-    || (!defined (__cplusplus) && defined (__STDC_VERSION__) && __STDC_VERSION__ >= 201112L)
+#if    !defined (SWIG_ADA_NO_LAYOUT_CHECKS) \
+    && (   (defined (__cplusplus) && __cplusplus >= 201103L) \
+        || (!defined (__cplusplus) && defined (__STDC_VERSION__) && __STDC_VERSION__ >= 201112L))
 
 #include <stddef.h>
 

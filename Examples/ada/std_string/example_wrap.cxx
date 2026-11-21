@@ -391,3 +391,43 @@ extern "C" void ada_destruct_aaa (aaa * self)
 }
 #endif
 
+/* The layout which the Ada records take their classes to have. A check which fails means that a record
+   does not match its class on this machine, and that the binding must be generated again here.
+   Defining SWIG_ADA_NO_LAYOUT_CHECKS leaves the checks out. */
+
+#if    !defined (SWIG_ADA_NO_LAYOUT_CHECKS) \
+    && (   (defined (__cplusplus) && __cplusplus >= 201103L) \
+        || (!defined (__cplusplus) && defined (__STDC_VERSION__) && __STDC_VERSION__ >= 201112L))
+
+#include <stddef.h>
+
+#if defined (__cplusplus)
+#  define SWIG_ADA_LAYOUT_CHECK(Condition, Message)  static_assert (Condition, Message);
+#else
+#  define SWIG_ADA_LAYOUT_CHECK(Condition, Message)  _Static_assert (Condition, Message);
+#endif
+
+#if defined (__GNUC__)
+#  define SWIG_ADA_OFFSET_OF(Type, Member)  __builtin_offsetof (Type, Member)
+#else
+#  define SWIG_ADA_OFFSET_OF(Type, Member)  offsetof (Type, Member)
+#endif
+
+#if defined (__GNUC__) && defined (__cplusplus)
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Winvalid-offsetof"
+#endif
+
+typedef aaa swig_ada_layout_1;
+SWIG_ADA_LAYOUT_CHECK (sizeof (swig_ada_layout_1) == 48, "swig4ada: the Ada record of 'aaa' has not the size of its class.")
+SWIG_ADA_LAYOUT_CHECK (SWIG_ADA_OFFSET_OF (swig_ada_layout_1, Rank) == 0, "swig4ada: the member 'Rank' of the Ada record of 'aaa' is not where its class has it.")
+SWIG_ADA_LAYOUT_CHECK (SWIG_ADA_OFFSET_OF (swig_ada_layout_1, Name) == 8, "swig4ada: the member 'Name' of the Ada record of 'aaa' is not where its class has it.")
+SWIG_ADA_LAYOUT_CHECK (SWIG_ADA_OFFSET_OF (swig_ada_layout_1, Age) == 40, "swig4ada: the member 'Age' of the Ada record of 'aaa' is not where its class has it.")
+
+#if defined (__GNUC__) && defined (__cplusplus)
+#  pragma GCC diagnostic pop
+#endif
+
+#endif
+
+
