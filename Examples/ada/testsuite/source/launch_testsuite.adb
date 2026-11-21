@@ -788,6 +788,7 @@ begin
       run ("callbacks");           -- Functions of Ada which C++ calls.
       run ("arrays");              -- Arrays and pointers, the other standard types, and variables.
       run ("constants");           -- Constants and enumerations of every kind.
+      run ("static_members");      -- Static member variables of classes.
    end if;
 
 
