@@ -8979,7 +8979,22 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 
   case 251:
 #line 5015 "parser.y" /* yacc.c:1646  */
-    { }
+    {
+                   /* swig4ada: A bit-field with no name takes part in the layout of its class, so its line, width
+                      and type are noted on the class, for a language module which lays the class out itself. */
+                   if (currentOuterClass) {
+                     List *fields = Getattr(currentOuterClass, "anonymous_bitfields");
+                     String *field = NewStringf("%d|%s|%s", cparse_line, (yyvsp[-1].dtype).val, (yyvsp[-3].type));
+                     if (!fields) {
+                       fields = NewList();
+                       Setattr(currentOuterClass, "anonymous_bitfields", fields);
+                       Delete(fields);
+                       fields = Getattr(currentOuterClass, "anonymous_bitfields");
+                     }
+                     Append(fields, field);
+                     Delete(field);
+                   }
+                 }
 #line 8984 "y.tab.c" /* yacc.c:1646  */
     break;
 

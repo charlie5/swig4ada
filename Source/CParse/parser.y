@@ -5012,7 +5012,22 @@ cpp_vend       : cpp_const SEMI {
                ;
 
 
-anonymous_bitfield :  storage_class anon_bitfield_type COLON expr SEMI { };
+anonymous_bitfield :  storage_class anon_bitfield_type COLON expr SEMI {
+                   /* swig4ada: A bit-field with no name takes part in the layout of its class, so its line, width
+                      and type are noted on the class, for a language module which lays the class out itself. */
+                   if (currentOuterClass) {
+                     List *fields = Getattr(currentOuterClass, "anonymous_bitfields");
+                     String *field = NewStringf("%d|%s|%s", cparse_line, $4.val, $2);
+                     if (!fields) {
+                       fields = NewList();
+                       Setattr(currentOuterClass, "anonymous_bitfields", fields);
+                       Delete(fields);
+                       fields = Getattr(currentOuterClass, "anonymous_bitfields");
+                     }
+                     Append(fields, field);
+                     Delete(field);
+                   }
+                 };
 
 /* Equals type_right without the ENUM keyword and cpptype (templates etc.): */
 anon_bitfield_type : primitive_type { $$ = $1;
