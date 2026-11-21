@@ -201,17 +201,17 @@ package DOHs.Binding is
    procedure DohChop (src : in DOHs.Pointers.DOH_Pointer);
 
    function DohGetmeta
-     (arg_2_1 : in DOHs.Pointers.DOH_Pointer;
-      arg_2_2 : in DOHs.Pointers.DOH_Pointer) return DOHs.Pointers.DOH_Pointer;
+     (arg_1 : in DOHs.Pointers.DOH_Pointer;
+      arg_2 : in DOHs.Pointers.DOH_Pointer) return DOHs.Pointers.DOH_Pointer;
 
    function DohSetmeta
-     (arg_2_1 : in DOHs.Pointers.DOH_Pointer;
-      arg_2_2 : in DOHs.Pointers.DOH_Pointer;
-      value   : in DOHs.Pointers.DOH_Pointer) return Interfaces.C.int;
+     (arg_1 : in DOHs.Pointers.DOH_Pointer;
+      arg_2 : in DOHs.Pointers.DOH_Pointer;
+      value : in DOHs.Pointers.DOH_Pointer) return Interfaces.C.int;
 
    function DohDelmeta
-     (arg_2_1 : in DOHs.Pointers.DOH_Pointer;
-      arg_2_2 : in DOHs.Pointers.DOH_Pointer) return Interfaces.C.int;
+     (arg_1 : in DOHs.Pointers.DOH_Pointer;
+      arg_2 : in DOHs.Pointers.DOH_Pointer) return Interfaces.C.int;
 
    function DohPrintf
      (obj    : in DOHs.Pointers.DOH_Pointer;

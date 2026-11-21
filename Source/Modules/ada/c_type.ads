@@ -257,6 +257,10 @@ is
    procedure add_Base                            (Self : access Item;   base_Class    : in     c_Type.view);
 
    procedure add_Component                       (Self : access Item;   new_Component : access c_Variable.item'Class);
+   procedure add_Component_in_Order              (Self : access Item;   new_Component : access c_Variable.item'Class);
+   --
+   --  Places the component ahead of those at the end which are declared on a later line. In C the core gives the members which
+   --  are declared with a structure that has no name ('struct { int val; } inner1, inner2;') after all of the others.
    procedure remove_Component                    (Self : access Item;   Index         : in     Positive);
    function  component_Count                     (Self : access Item) return Natural;
    function  Components                          (Self : access Item) return record_Components;

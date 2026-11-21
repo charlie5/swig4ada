@@ -13,8 +13,8 @@ package DOHs.p_f_p_DOH_p_DOH_ret_int is
    type Item is
      access
 function
-       (arg_2_1 : in DOHs.Pointers.DOH_Pointer;
-        arg_2_2 : in DOHs.Pointers.DOH_Pointer) return Interfaces.C.int;
+       (arg_1 : in DOHs.Pointers.DOH_Pointer;
+        arg_2 : in DOHs.Pointers.DOH_Pointer) return Interfaces.C.int;
    pragma Convention (C, Item);
 
    -- Item_Array

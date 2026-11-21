@@ -1343,7 +1343,11 @@ is
             doh_replace_All (wrapper_Code, -"$symname",               -sym_Name);                          -- And the name which the function is bound by.
             doh_replace_All (wrapper_Code, -"SWIG_contract_assert(",  -"SWIG_contract_assert($null, ");    -- Contract macro modification.
 
-            if not is_Void_return
+            if returns_a_Class
+            then   -- A class or structure is returned: bytes of zero, as a value of the class may not be one which can be made.
+               doh_replace_All (wrapper_Code, -"$null", -(if Self.in_cpp_Mode then "swig_ada_no_result< " & to_String (c_return_Type) & " > ()"
+                                                                              else "(" & to_String (c_return_Type) & ") {0}"));
+            elsif not is_Void_return
             then   doh_replace_All (wrapper_Code, -"$null", -"0");
             else   doh_replace_All (wrapper_Code, -"$null", -"");
             end if;
@@ -2578,6 +2582,7 @@ is
 
       for_abstract_Class : constant Boolean := Self.abstract_shim_Name /= "";
       extend_Function    : unbounded_String;     -- The function of the wrapper which is a constructor added by '%extend'.
+      is_template_Instance : Boolean := False;     -- A constructor template which '%extend' names an instance of: a constructor of the class itself.
    begin
       if not Self.in_cpp_Mode
       then
@@ -2661,6 +2666,13 @@ is
                then
                   extend_Function := +the_Action (First .. Last - 1);
                end if;
+
+               if         Named = 0                                    -- The action makes the object itself ('new TConstructor1 (arg1)'):
+                 and then ada.Strings.fixed.Index (the_Action, "new ") /= 0     -- '%extend Class { %template (Class) Class<int>; }'.
+               then
+                  extend_Function      := null_unbounded_String;
+                  is_template_Instance := True;
+               end if;
             end;
          end if;
       end if;
@@ -2677,6 +2689,7 @@ is
          constructor_Symbol  : unbounded_String;     -- We need to build our own 'c' construction call   (TODO: Move all this to functionWrapper.)
          construct_Call      : unbounded_String;     -- since the default swig constructor returns a pointer to class
          construct_call_Args : unbounded_String;     -- instead of an actual solid class object.
+         plain_call_Args     : unbounded_String;     -- The parameters as they are named, for a call which takes them as this function does.
 
          parameter_List : constant ParmList_Pointer := ParmList_Pointer (get_Attribute (the_Node, "parms"));
 
@@ -2721,14 +2734,10 @@ is
          append (constructor_Symbol, String'("ada_" & (+doh_Item (Swig_name_construct (const_String (-Self.current_c_Namespace.qualified_Name),
                                                                                        const_String (-overloaded_name))))));
          --  The name of a class in a namespace, or of a template instance, holds characters which a C identifier may not.
+         --  Two constructors may also come out alike: those which are protected are in no overload chain, so the core
+         --  gives them no suffix. A name which is taken is given a number.
          --
-         for Each in 1 .. Length (constructor_Symbol)
-         loop
-            if Element (constructor_Symbol, Each) not in 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_'
-            then
-               replace_Element (constructor_Symbol, Each, '_');
-            end if;
-         end loop;
+         constructor_Symbol := wrapper_Symbol (Self, to_String (constructor_Symbol));
 
          append (construct_Call, "extern "  & Self.current_lStr & "    " & constructor_Symbol & "(");
          parameters_First := Length (construct_Call) + 1;
@@ -2776,6 +2785,7 @@ is
                   end if;
 
                   append (construct_call_Args, the_Local);
+                  append (plain_call_Args,     (if plain_call_Args = "" then "" else ",   ") & the_Local);
                   any_Argument  := True;
                   the_Parameter := get_Attribute (the_Parameter, "tmap:in:next");
                end;
@@ -2784,7 +2794,7 @@ is
                declare
                   swig_Type  : constant SwigType_Pointer :=  SwigType_Pointer  (get_Attribute (the_Parameter, "type"));   -- TODO: Rename.
                   the_c_Type :          unbounded_String := +Attribute         (the_Parameter, "tmap:ctype");
-                  Arg        : constant String           :=  makeParameterName (doh_parmList (the_Node),
+                  Arg        : constant String           :=  makeParameterName (doh_parmList (parameter_List),
                                                                                 doh_Parm (the_Parameter),
                                                                                 Index);
                begin
@@ -2799,6 +2809,7 @@ is
                   end if;
 
                   any_Argument := True;
+                  append (plain_call_Args, (if plain_call_Args = "" then "" else ",   ") & Arg);
 
                   if the_c_Type = "$c_classname"
                   then   -- A class or structure passed by value, which Ada passes by reference.
@@ -2845,7 +2856,7 @@ is
                                    & (if the_Parameters = "" then "" else ",   " & the_Parameters) & ")"                   & NL
                                    & "{"                                                                                   & NL
                                    & to_String (ignored_Code)
-                                   & "  new (self) " & to_String (Self.abstract_shim_Name) & " (" & to_String (construct_call_Args) & ");" & NL
+                                   & "  new (self) " & to_String (Self.abstract_shim_Name) & " (" & to_String (plain_call_Args) & ");" & NL     -- Its constructor takes what this function does.
                                    & "}"                                                                                   & NL);
             end;
          else
@@ -2890,7 +2901,8 @@ is
                     or  check_Attribute (the_Node, "access", "private")
                     or  has_hidden_Destructor
                     or  (         Attribute (the_Node, "feature:extend") /= ""     -- A constructor added by '%extend' is not one which
-                         and then extend_Function = ""))                           -- C++ can call, so the function of the wrapper is.
+                         and then extend_Function = ""                             -- C++ can call, so the function of the wrapper is.
+                         and then not is_template_Instance))
          then
             print_to (DOH_Pointer (Self.f_Ada), construct_Call & NL);
          end if;
@@ -3106,7 +3118,13 @@ is
                Self.add_array_Bounds_to (new_Variable, doh_SwigType (swig_Type));
             end if;
 
-            Self.current_c_Class.add_Component (new_Variable);
+            if Self.in_cpp_Mode
+            then
+               Self.current_c_Class.add_Component (new_Variable);
+            else   -- In C the core gives the members out of their order, where some are declared with a structure which has no name.
+               new_Variable.Line := Natural (DohGetline (DOH_Pointer (the_Node)));
+               Self.current_c_Class.add_Component_in_Order (new_Variable);
+            end if;
          end;
 
          --  A class which is derived from a virtual class is a type extension in Ada, whose components begin after the
@@ -4062,13 +4080,31 @@ is
                return;     -- A pure virtual destructor cannot be defined within a class.
             end if;
 
+            if get_Attribute (the_Function, "final") /= null
+            then
+               return;     -- A pure virtual function which is final can be defined by no class, so there is no concrete one.
+            end if;
+
             declare
                the_Type  : constant SwigType_Pointer := SwigType_Pointer (doh_Copy (doh_Item (get_Attribute (the_Function, "type"))));
                Name      :          unbounded_String := +Attribute (the_Function, "name");
                the_Decl  :          unbounded_String := +Attribute (the_Function, "decl");
                Qualifier :          unbounded_String;     -- That of the function itself, as in 'int f () const'.
+               Reference :          unbounded_String;     -- Its reference qualifier, if any.
+               Promise   : constant String           := (if Attribute (the_Function, "noexcept") = "true" then " noexcept" else "");     -- Which an override must keep.
             begin
                strip_Namespaces (Name);
+
+               if Index (the_Decl, "r.") = 1          -- A function which is declared for an lvalue or for an rvalue alone
+               then                                   -- ('int f () const &').
+                  Reference := +" &";
+                  the_Decl  := unbounded_Slice (the_Decl, 3, Length (the_Decl));
+
+               elsif Index (the_Decl, "z.") = 1
+               then
+                  Reference := +" &&";
+                  the_Decl  := unbounded_Slice (the_Decl, 3, Length (the_Decl));
+               end if;
 
                if Index (the_Decl, "q(") = 1
                then
@@ -4088,10 +4124,10 @@ is
                  and then Slice (Name, 10, Length (Name)) not in "new" | "delete" | "new[]" | "delete[]"
                then   -- A conversion operator ('operator Other ()'), which is declared with no result type.
                   append (the_Functions,   "  virtual " & Name & " ()"
-                                         & Qualifier & " { abort (); }" & NL);
+                                         & Qualifier & Reference & Promise & " { abort (); }" & NL);
                else
                   append (the_Functions,   "  virtual " & String'(+doh_Item (SwigType_str (the_Type, const_String (-to_String (Name)))))
-                                         & Qualifier & " { abort (); }" & NL);
+                                         & Qualifier & Reference & Promise & " { abort (); }" & NL);
                end if;
             end;
          end;
@@ -5168,8 +5204,6 @@ is
                                the_Parameter  : in doh_Parm;
                                arg_num        : in Integer) return String
    is
-      pragma Unreferenced (arg_num);
-
       the_Name  : constant String       := Attribute (Node_Pointer (the_Parameter), "name");
       Count     :          Natural      := 0;
       Parameter :          doh_parmList := parameter_List;
@@ -5188,7 +5222,12 @@ is
 
       if the_Name = ""  or  Count > 1
       then
-         return the_Name & "arg_" & Trim (Count'Image, ada.strings.Left);
+         if Count = 1
+         then
+            return the_Name & "arg_1";     -- The only parameter with no name, which has always been named so.
+         else
+            return the_Name & "arg_" & Trim (Integer'Image (arg_num + 1), ada.strings.Left);     -- By its place, so that two such names differ.
+         end if;
       else
          return the_Name;
       end if;

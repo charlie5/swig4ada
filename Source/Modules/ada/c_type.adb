@@ -1154,6 +1154,27 @@ is
    end add_Component;
 
 
+   procedure add_Component_in_Order (Self          : access Item;
+                                     new_Component : access c_Variable.item'Class)
+   is
+      Place : Positive := Self.my.component_Count + 1;
+   begin
+      if new_Component.Line > 0
+      then
+         while      Place > 1
+           and then Self.my.Components (Place - 1).Line > new_Component.Line
+         loop
+            Place := Place - 1;
+         end loop;
+      end if;
+
+      Self.my.Components (Place + 1 .. Self.my.component_Count + 1) := Self.my.Components (Place .. Self.my.component_Count);
+      Self.my.Components (Place)                                    := new_Component;
+      Self.my.component_Count                                       := Self.my.component_Count + 1;
+   end add_Component_in_Order;
+
+
+
    procedure remove_Component (Self  : access Item;
                                Index : in     Positive)
    is

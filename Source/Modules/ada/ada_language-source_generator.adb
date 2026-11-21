@@ -1918,6 +1918,15 @@ is
             end if;
          end loop;
 
+         for each_Package of the_ada_Lang.Module_top.Ada.new_Packages     -- A variable 'a' and a class 'A', which has a child package.
+         loop
+            if         each_Package.Parent.qualified_Name = the_Package.qualified_Name
+              and then to_Lower (to_String (each_Package.ada_Name)) = to_Lower (the_Name)
+            then
+               return "the_" & the_Name;
+            end if;
+         end loop;
+
          return the_Name;
       end ada_Name_of;
 
