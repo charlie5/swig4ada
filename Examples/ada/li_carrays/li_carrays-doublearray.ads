@@ -47,11 +47,11 @@ package li_carrays.doubleArray is
    subtype Pointer_Pointer is C_Pointer_Pointers.Pointer;
 
    function getitem
-     (Self : in li_carrays.doubleArray.Item; index : in Interfaces.C.int)
+     (Self : in li_carrays.doubleArray.Item; index : in Interfaces.C.size_t)
       return Interfaces.C.double;
 
    procedure setitem
-     (Self  : in li_carrays.doubleArray.Item; index : in Interfaces.C.int;
+     (Self  : in li_carrays.doubleArray.Item; index : in Interfaces.C.size_t;
       value : in Interfaces.C.double);
 
    function cast

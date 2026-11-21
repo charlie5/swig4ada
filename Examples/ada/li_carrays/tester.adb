@@ -51,9 +51,9 @@ begin
    begin
       check (the_Ints /= null,                          "an array of int is made");
 
-      for i in int range 0 .. 3
+      for i in size_t range 0 .. 3     -- An index is a 'size_t', as of SWIG 4.2.
       loop
-         intArray_setitem (the_Ints, i, i * 10);
+         intArray_setitem (the_Ints, i, int (i) * 10);
       end loop;
 
       check (intArray_getitem (the_Ints, 3) = 30,       "its items are set and read back");

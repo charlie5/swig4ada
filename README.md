@@ -12,7 +12,7 @@ Dependencies
 
 - GNAT and gprbuild.
 - GMP library.
-- PCRE library (the original 'libpcre', not 'pcre2').
+- PCRE2 library ('libpcre2-8').  SWIG has used PCRE2, not the original 'libpcre', since version 4.1.
 - GMP Ada Binding ~ Available at https://github.com/charlie5/cBound
 
 The test suite (optional) also requires:
@@ -26,7 +26,7 @@ The test suite (optional) also requires:
 Install
 =======
 
-- Install the GMP and PCRE libraries for your OS.
+- Install the GMP and PCRE2 libraries for your OS.
 - Install cBound to provide the GMP library Ada binding.
 - Add the cBound 'tier-1/gmp/library' folder to your GPR_PROJECT_PATH
   (cBound's 'cbound-gpr_paths.sh' script sets up the paths for all of its bindings).

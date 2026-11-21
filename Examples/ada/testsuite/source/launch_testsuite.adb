@@ -458,6 +458,7 @@ begin
       generate ("minherit.i",                       use_CPP => True);
       generate ("mod_a.i",                          use_CPP => True);
       generate ("multi_import_b.i",                 use_CPP => True);
+      generate ("multi_import_d.i",                 use_CPP => True);
       generate ("name_cxx.i",                       use_CPP => True);
       generate ("namespace_enum.i",                 use_CPP => True);
       generate ("namespace_extend.i",               use_CPP => True);
@@ -508,7 +509,7 @@ begin
       generate ("template_default_qualify.i",       use_CPP => True);
       generate ("template_default_vw.i",            use_CPP => True);
       generate ("template_enum_ns_inherit.i",       use_CPP => True);
-      generate ("template_expr.i",                  use_CPP => True,   wrapper_Compiles => False);     -- Wrapper: the input holds C++ which does not compile.
+      generate ("template_expr.i",                  use_CPP => True);
       generate ("template_extend1.i",               use_CPP => True);
       generate ("template_extend2.i",               use_CPP => True);
       generate ("template_extend_overload_2.i",     use_CPP => True);

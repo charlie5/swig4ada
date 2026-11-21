@@ -15,39 +15,40 @@ package li_carrays.Binding is
    globalABArray : aliased li_carrays.AB.Item_Array (0 .. 2);
 
    function new_intArray
-     (nelements : in Interfaces.C.int) return swig.pointers.int_Pointer;
+     (nelements : in Interfaces.C.size_t) return swig.pointers.int_Pointer;
 
    procedure delete_intArray (ary : in swig.pointers.int_Pointer);
 
    function intArray_getitem
-     (ary : in swig.pointers.int_Pointer; index : in Interfaces.C.int)
+     (ary : in swig.pointers.int_Pointer; index : in Interfaces.C.size_t)
       return Interfaces.C.int;
 
    procedure intArray_setitem
-     (ary   : in swig.pointers.int_Pointer; index : in Interfaces.C.int;
+     (ary   : in swig.pointers.int_Pointer; index : in Interfaces.C.size_t;
       value : in Interfaces.C.int);
 
    function new_doubleArray
-     (nelements : in Interfaces.C.int) return li_carrays.doubleArray.Pointer;
+     (nelements : in Interfaces.C.size_t)
+      return li_carrays.doubleArray.Pointer;
 
    procedure delete_doubleArray (Self : in li_carrays.doubleArray.Pointer);
 
    function new_XYArray
-     (nelements : in Interfaces.C.int) return li_carrays.XYArray.Pointer;
+     (nelements : in Interfaces.C.size_t) return li_carrays.XYArray.Pointer;
 
    procedure delete_XYArray (Self : in li_carrays.XYArray.Pointer);
 
    function new_ABArray
-     (nelements : in Interfaces.C.int) return li_carrays.AB.Pointer;
+     (nelements : in Interfaces.C.size_t) return li_carrays.AB.Pointer;
 
    procedure delete_ABArray (ary : in li_carrays.AB.Pointer);
 
    function ABArray_getitem
-     (ary : in li_carrays.AB.Pointer; index : in Interfaces.C.int)
+     (ary : in li_carrays.AB.Pointer; index : in Interfaces.C.size_t)
       return li_carrays.AB.Item;
 
    procedure ABArray_setitem
-     (ary   : in li_carrays.AB.Pointer; index : in Interfaces.C.int;
+     (ary   : in li_carrays.AB.Pointer; index : in Interfaces.C.size_t;
       value : in li_carrays.AB.Item);
 
 private

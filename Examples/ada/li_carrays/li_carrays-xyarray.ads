@@ -45,11 +45,11 @@ package li_carrays.XYArray is
    subtype Pointer_Pointer is C_Pointer_Pointers.Pointer;
 
    function getitem
-     (Self : in li_carrays.XYArray.Item; index : in Interfaces.C.int)
+     (Self : in li_carrays.XYArray.Item; index : in Interfaces.C.size_t)
       return li_carrays.XY.Item;
 
    procedure setitem
-     (Self  : in li_carrays.XYArray.Item; index : in Interfaces.C.int;
+     (Self  : in li_carrays.XYArray.Item; index : in Interfaces.C.size_t;
       value : in li_carrays.XY.Item);
 
    function cast
