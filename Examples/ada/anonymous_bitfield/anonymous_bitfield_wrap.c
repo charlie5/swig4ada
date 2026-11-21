@@ -340,6 +340,12 @@ extern "C" {
 #  define SWIG_ADA_LAYOUT_CHECK(Condition, Message)
 #endif
 
+#if defined (__GNUC__)
+#  define SWIG_ADA_OFFSET_OF(Type, Member)  __builtin_offsetof (Type, Member)
+#else
+#  define SWIG_ADA_OFFSET_OF(Type, Member)  offsetof (Type, Member)
+#endif
+
 #if defined (__GNUC__) && defined (__cplusplus)
 #  pragma GCC diagnostic push
 #  pragma GCC diagnostic ignored "-Winvalid-offsetof"
