@@ -184,6 +184,8 @@ Other things to know
   where it has a value in the class.
 - A structure with bit-fields is laid out as C has it, by a record representation clause, for the machine
   which generates the binding.
+- Where a record is laid out for the generating machine, the wrapper checks, when it is compiled, that the
+  class has that layout, and does not compile if it has not. With '-check-layout' it checks every class.
 - C++ may place the members of a derived class in the unused end of its base class. The record is then
   laid out to match, and that base is storage alone ('Base_storage'), reached by 'as_Base':
 
@@ -199,6 +201,8 @@ Other things to know
 Limitations
 -----------
 
+- A class with a virtual base class, or with a nested class or union which has no name, has a record which
+  does not match it. A warning says so.
 - With more than one base class which has virtual functions, only the first is a parent of the Ada type.
   The others are reached by 'as_<base>', and a function of the class which overrides one of theirs is not
   marked as overriding.
