@@ -6,7 +6,7 @@
 
 set -e
 
-mkdir -p ./usr/local/bin ./usr/local/include ./usr/local/share/swig/4.0.0/ada
+mkdir -p ./usr/local/bin ./usr/local/include ./usr/local/share/swig/4.5.1/ada
 
 
 # Copy build to install location.
@@ -22,6 +22,6 @@ cp ./swig-guards.adb             ./usr/local/include
 #cp ./interfaces_cpp_pointers.adb ./usr/local/include
 
 
-#mkdir -p /usr/local/share/swig/4.0.0/ada
-#cp     ./Lib/ada/* ./usr/local/share/swig/4.0.0/ada
-cp -fr ./Lib/*     ./usr/local/share/swig/4.0.0 
+#mkdir -p /usr/local/share/swig/4.5.1/ada
+#cp     ./Lib/ada/* ./usr/local/share/swig/4.5.1/ada
+cp -fr ./Lib/*     ./usr/local/share/swig/4.5.1 

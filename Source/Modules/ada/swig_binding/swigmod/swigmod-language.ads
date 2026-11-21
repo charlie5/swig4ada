@@ -24,14 +24,12 @@ package swigmod.Language is
       director_ctor_code_storage                    : access swig_Core.String;
       director_prot_ctor_code_storage               : access swig_Core.String;
       director_multiple_inheritance_storage         : aliased Interfaces.C.int;
-      director_language_storage                     : aliased Interfaces.C.int;
       doxygenTranslator_storage : access swigmod.DoxygenTranslator;
       symtabs_storage                               : access swig_Core.Hash;
       overloading_storage                           : aliased Interfaces.C.int;
       protected_and_private_Members_allowed_storage : aliased swig.bool;
       multiinput_storage                            : aliased Interfaces.C.int;
       cplus_runtime_storage                         : aliased Interfaces.C.int;
-      directors_storage                             : aliased Interfaces.C.int;
    end record;
 
    pragma Import (CPP, Entity => Item);
@@ -320,7 +318,6 @@ package swigmod.Language is
       n                  : in swig_Core.Pointers.Node_Pointer;
       parent             : in swig_Core.Pointers.Node_Pointer;
       vm                 : in swig_Core.Pointers.List_Pointer;
-      default_director   : in Interfaces.C.int;
       virtual_destructor : in swig.pointers.int_Pointer;
       protectedbase      : in Interfaces.C.int) return Interfaces.C.int with
      Import, Convention => CPP,
@@ -331,7 +328,6 @@ package swigmod.Language is
       n                  : in swig_Core.Pointers.Node_Pointer;
       parent             : in swig_Core.Pointers.Node_Pointer;
       vm                 : in swig_Core.Pointers.List_Pointer;
-      default_director   : in Interfaces.C.int;
       virtual_destructor : in swig.pointers.int_Pointer)
       return Interfaces.C.int with
      Import, Convention => CPP,
@@ -443,11 +439,7 @@ package swigmod.Language is
      (s : in swig_Core.Pointers.SwigType_Pointer)
       return swig_Core.Pointers.Node_Pointer;
 
-   function abstractClassTest
-     (Self :    access swigmod.Language.Item;
-      n    : in swig_Core.Pointers.Node_Pointer) return Interfaces.C.int;
-
-   function is_assignable
+   function is_immutable
      (Self :    access swigmod.Language.Item;
       n    : in swig_Core.Pointers.Node_Pointer) return Interfaces.C.int;
 
@@ -471,6 +463,16 @@ package swigmod.Language is
    function cplus_runtime_mode
      (Self : access swigmod.Language.Item'Class) return Interfaces.C.int;
 
+   procedure directorLanguage
+     (Self : in out swigmod.Language.Item'Class;
+      val  : in     Interfaces.C.int) with
+     Import, Convention => CPP,
+     External_Name      => "Ada_Language_directorLanguage__SWIG_0";
+
+   procedure directorLanguage (Self : in out swigmod.Language.Item'Class) with
+     Import, Convention => CPP,
+     External_Name      => "Ada_Language_directorLanguage__SWIG_1";
+
    procedure allow_protected_and_private_Members
      (Self : in out swigmod.Language.Item'Class);
 
@@ -483,9 +485,6 @@ package swigmod.Language is
    procedure allow_directors (Self : in out swigmod.Language.Item'Class) with
      Import, Convention => CPP,
      External_Name      => "Ada_Language_allow_directors__SWIG_1";
-
-   function directorsEnabled
-     (Self : access swigmod.Language.Item'Class) return Interfaces.C.int;
 
    procedure allow_dirprot
      (Self : in out swigmod.Language.Item'Class;
@@ -650,13 +649,6 @@ package swigmod.Language is
    function director_multiple_inheritance
      (Self : access swigmod.Language.Item'Class) return Interfaces.C.int;
 
-   procedure set_director_language
-     (Self              : in out swigmod.Language.Item'Class;
-      director_language : in     Interfaces.C.int);
-
-   function director_language
-     (Self : access swigmod.Language.Item'Class) return Interfaces.C.int;
-
    procedure set_doxygenTranslator
      (Self              : in out swigmod.Language.Item'Class;
       doxygenTranslator : in     swigmod.Pointers.DoxygenTranslator_Pointer);
@@ -664,6 +656,15 @@ package swigmod.Language is
    function doxygenTranslator
      (Self : access swigmod.Language.Item'Class)
       return swigmod.Pointers.DoxygenTranslator_Pointer;
+
+   procedure unrollOneVirtualMethod
+     (Self               : in out swigmod.Language.Item'Class;
+      classname          : in     swig_Core.Pointers.String_Pointer;
+      n                  : in     swig_Core.Pointers.Node_Pointer;
+      parent             : in     swig_Core.Pointers.Node_Pointer;
+      vm                 : in     swig_Core.Pointers.List_Pointer;
+      virtual_destructor : in     swig.pointers.int_Pointer;
+      protectedbase      : in     Interfaces.C.int);
 
 private
 
@@ -765,8 +766,7 @@ private
       "Ada_Language_symbolScopePseudoSymbolLookup");
    pragma Import (CPP, classLookup, "Ada_Language_classLookup");
    pragma Import (CPP, enumLookup, "Ada_Language_enumLookup");
-   pragma Import (CPP, abstractClassTest, "Ada_Language_abstractClassTest");
-   pragma Import (CPP, is_assignable, "Ada_Language_is_assignable");
+   pragma Import (CPP, is_immutable, "Ada_Language_is_immutable");
    pragma Import (CPP, runtimeCode, "Ada_Language_runtimeCode");
    pragma Import
      (CPP, defaultExternalRuntimeFilename,
@@ -780,7 +780,6 @@ private
    pragma Import
      (CPP, allow_protected_and_private_Members,
       "Ada_Language_allow_protected_and_private_Members");
-   pragma Import (CPP, directorsEnabled, "Ada_Language_directorsEnabled");
    pragma Import (CPP, dirprot_mode, "Ada_Language_dirprot_mode");
    pragma Import
      (CPP, need_nonpublic_ctor, "Ada_Language_need_nonpublic_ctor");
@@ -832,13 +831,11 @@ private
      (CPP, director_multiple_inheritance,
       "Ada_get_Language_director_multiple_inheritance");
    pragma Import
-     (CPP, set_director_language, "Ada_set_Language_director_language");
-   pragma Import
-     (CPP, director_language, "Ada_get_Language_director_language");
-   pragma Import
      (CPP, set_doxygenTranslator, "Ada_set_Language_doxygenTranslator");
    pragma Import
      (CPP, doxygenTranslator, "Ada_get_Language_doxygenTranslator");
+   pragma Import
+     (CPP, unrollOneVirtualMethod, "Ada_get_Language_doxygenTranslator");
 
    package conversions is new System.Address_To_Access_Conversions (Item);
 

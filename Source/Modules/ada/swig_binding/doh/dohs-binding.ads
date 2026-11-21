@@ -2,6 +2,7 @@
 --
 with DOHs.DohIterator;
 with DOHs.Pointers;
+with DOHs.p_f_p_DOH_p_DOH_ret_int;
 with Interfaces.C;
 with Interfaces.C.Strings;
 with swig;
@@ -9,6 +10,16 @@ with Interfaces.C;
 use Interfaces.C;
 
 package DOHs.Binding is
+
+   function DohMalloc (size : in Interfaces.C.size_t) return swig.void_ptr;
+
+   function DohRealloc
+     (ptr : in swig.void_ptr; size : in Interfaces.C.size_t)
+      return swig.void_ptr;
+
+   function DohCalloc
+     (n : in Interfaces.C.size_t; size : in Interfaces.C.size_t)
+      return swig.void_ptr;
 
    function DohCheck
      (ptr : in DOHs.Pointers.DOH_Pointer) return Interfaces.C.int;
@@ -65,6 +76,11 @@ package DOHs.Binding is
 
    function DohKeys
      (obj : in DOHs.Pointers.DOH_Pointer) return DOHs.Pointers.DOH_Pointer;
+
+   function DohSortedKeys
+     (obj : in DOHs.Pointers.DOH_Pointer;
+      cmp : in DOHs.p_f_p_DOH_p_DOH_ret_int.Item)
+      return DOHs.Pointers.DOH_Pointer;
 
    function DohGetInt
      (obj : in DOHs.Pointers.DOH_Pointer; name : in DOHs.Pointers.DOH_Pointer)
@@ -229,6 +245,10 @@ package DOHs.Binding is
    function DohGetmark
      (obj : in DOHs.Pointers.DOH_Pointer) return Interfaces.C.int;
 
+   procedure DohSetExitHandler (new_handler : in DOHs.p_f_int_ret_void);
+
+   procedure DohExit (status : in Interfaces.C.int);
+
    function DohNewStringEmpty return DOHs.Pointers.DOH_Pointer;
 
    function DohNewString
@@ -272,6 +292,8 @@ package DOHs.Binding is
      (input  : in DOHs.Pointers.DOH_Pointer;
       output : in DOHs.Pointers.DOH_Pointer) return Interfaces.C.int;
 
+   procedure DohCloseAllOpenFiles;
+
    function DohNewList return DOHs.Pointers.DOH_Pointer;
 
    function DohNewHash return DOHs.Pointers.DOH_Pointer;
@@ -299,6 +321,9 @@ package DOHs.Binding is
 
 private
 
+   pragma Import (C, DohMalloc, "Ada_DohMalloc");
+   pragma Import (C, DohRealloc, "Ada_DohRealloc");
+   pragma Import (C, DohCalloc, "Ada_DohCalloc");
    pragma Import (C, DohCheck, "Ada_DohCheck");
    pragma Import (C, DohIntern, "Ada_DohIntern");
    pragma Import (C, DohDelete, "Ada_DohDelete");
@@ -317,6 +342,7 @@ private
    pragma Import (C, DohDelattr, "Ada_DohDelattr");
    pragma Import (C, DohCheckattr, "Ada_DohCheckattr");
    pragma Import (C, DohKeys, "Ada_DohKeys");
+   pragma Import (C, DohSortedKeys, "Ada_DohSortedKeys");
    pragma Import (C, DohGetInt, "Ada_DohGetInt");
    pragma Import (C, DohSetInt, "Ada_DohSetInt");
    pragma Import (C, DohGetDouble, "Ada_DohGetDouble");
@@ -363,6 +389,8 @@ private
    pragma Import (C, DohGetMaxHashExpand, "Ada_DohGetMaxHashExpand");
    pragma Import (C, DohSetmark, "Ada_DohSetmark");
    pragma Import (C, DohGetmark, "Ada_DohGetmark");
+   pragma Import (C, DohSetExitHandler, "Ada_DohSetExitHandler");
+   pragma Import (C, DohExit, "Ada_DohExit");
    pragma Import (C, DohNewStringEmpty, "Ada_DohNewStringEmpty");
    pragma Import (C, DohNewString, "Ada_DohNewString");
    pragma Import (C, DohNewStringWithSize, "Ada_DohNewStringWithSize");
@@ -375,6 +403,7 @@ private
    pragma Import (C, DohNewFileFromFd, "Ada_DohNewFileFromFd");
    pragma Import (C, DohFileErrorDisplay, "Ada_DohFileErrorDisplay");
    pragma Import (C, DohCopyto, "Ada_DohCopyto");
+   pragma Import (C, DohCloseAllOpenFiles, "Ada_DohCloseAllOpenFiles");
    pragma Import (C, DohNewList, "Ada_DohNewList");
    pragma Import (C, DohNewHash, "Ada_DohNewHash");
    pragma Import (C, DohSplit, "Ada_DohSplit");

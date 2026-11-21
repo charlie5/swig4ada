@@ -50,7 +50,7 @@ is
 
    package Linker
    is
-      for Default_Switches ("C++") use ("-g", "-lgmp", "-lm", "-lpcre");
+      for Default_Switches ("C++") use ("-g", "-lgmp", "-lm", "-lpcre2-8");
    end Linker;
 
 end swig_Applet;

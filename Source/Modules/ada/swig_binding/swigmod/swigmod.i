@@ -51,7 +51,7 @@ class DoxygenTranslator;
   void
   exit_with_Fail()
   {
-    SWIG_exit (EXIT_FAILURE);
+    Exit (EXIT_FAILURE);
   }
 
 

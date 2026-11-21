@@ -68,6 +68,14 @@ package swig_Core.Binding is
      (t : in swig_Core.Pointers.SwigType_Pointer)
       return swig_Core.Pointers.SwigType_Pointer;
 
+   function SwigType_add_variadic
+     (t : in swig_Core.Pointers.SwigType_Pointer)
+      return swig_Core.Pointers.SwigType_Pointer;
+
+   function SwigType_del_variadic
+     (t : in swig_Core.Pointers.SwigType_Pointer)
+      return swig_Core.Pointers.SwigType_Pointer;
+
    function SwigType_add_qualifier
      (t    : in swig_Core.Pointers.SwigType_Pointer;
       qual : in DOHs.const_String_or_char_ptr.Item)
@@ -95,6 +103,10 @@ package swig_Core.Binding is
      (t : in swig_Core.Pointers.SwigType_Pointer)
       return swig_Core.Pointers.SwigType_Pointer;
 
+   function SwigType_function_parms_only
+     (parms : in swig_Core.Pointers.ParmList_Pointer)
+      return swig_Core.Pointers.SwigType_Pointer;
+
    function SwigType_function_parms
      (t              : in swig_Core.Pointers.SwigType_Pointer;
       file_line_node : in swig_Core.Pointers.Node_Pointer)
@@ -111,6 +123,10 @@ package swig_Core.Binding is
    procedure SwigType_push
      (t : in swig_Core.Pointers.SwigType_Pointer;
       s : in swig_Core.Pointers.String_Pointer);
+
+   function SwigType_last
+     (t : in swig_Core.Pointers.SwigType_Pointer)
+      return swig_Core.Pointers.SwigType_Pointer;
 
    function SwigType_parmlist
      (p : in swig_Core.Pointers.SwigType_Pointer)
@@ -169,6 +185,9 @@ package swig_Core.Binding is
    function SwigType_isrvalue_reference
      (t : in swig_Core.Pointers.SwigType_Pointer) return Interfaces.C.int;
 
+   function SwigType_isvariadic
+     (t : in swig_Core.Pointers.SwigType_Pointer) return Interfaces.C.int;
+
    function SwigType_isarray
      (t : in swig_Core.Pointers.SwigType_Pointer) return Interfaces.C.int;
 
@@ -198,6 +217,21 @@ package swig_Core.Binding is
 
    function SwigType_isenum
      (t : in swig_Core.Pointers.SwigType_Pointer) return Interfaces.C.int;
+
+   function SwigType_isauto
+     (t : in swig_Core.Pointers.SwigType_Pointer) return Interfaces.C.int;
+
+   function SwigType_isconcept
+     (t : in swig_Core.Pointers.SwigType_Pointer) return Interfaces.C.int;
+
+   function SwigType_concept_name
+     (t : in swig_Core.Pointers.SwigType_Pointer)
+      return swig_Core.Pointers.String_Pointer;
+
+   function SwigType_replace_auto_base
+     (t        : in swig_Core.Pointers.SwigType_Pointer;
+      new_base : in swig_Core.Pointers.String_Pointer)
+      return swig_Core.Pointers.SwigType_Pointer;
 
    function SwigType_check_decl
      (t    : in swig_Core.Pointers.SwigType_Pointer;
@@ -243,6 +277,10 @@ package swig_Core.Binding is
      (t : in swig_Core.Pointers.SwigType_Pointer)
       return swig_Core.Pointers.String_Pointer;
 
+   function SwigType_templateargslist
+     (t : in swig_Core.Pointers.SwigType_Pointer)
+      return swig_Core.Pointers.List_Pointer;
+
    function SwigType_prefix
      (t : in swig_Core.Pointers.SwigType_Pointer)
       return swig_Core.Pointers.String_Pointer;
@@ -274,6 +312,11 @@ package swig_Core.Binding is
      (t   : in swig_Core.Pointers.SwigType_Pointer;
       pat : in swig_Core.Pointers.String_Pointer;
       rep : in swig_Core.Pointers.String_Pointer);
+
+   procedure SwigType_variadic_replace
+     (t                        : in swig_Core.Pointers.SwigType_Pointer;
+      unexpanded_variadic_parm : in swig_Core.Pointers.Parm_Pointer;
+      expanded_variadic_parms  : in swig_Core.Pointers.ParmList_Pointer);
 
    function SwigType_remove_global_scope_prefix
      (t : in swig_Core.Pointers.SwigType_Pointer)
@@ -405,14 +448,25 @@ package swig_Core.Binding is
 
    function Swig_symbol_add
      (symname : in DOHs.const_String_or_char_ptr.Item;
-      node    : in swig_Core.Pointers.Node_Pointer)
+      n       : in swig_Core.Pointers.Node_Pointer)
       return swig_Core.Pointers.Node_Pointer;
+
+   procedure Swig_symbol_conflict_warn
+     (n       : in swig_Core.Pointers.Node_Pointer;
+      c       : in swig_Core.Pointers.Node_Pointer;
+      symname : in swig_Core.Pointers.String_Pointer;
+      inclass : in Interfaces.C.int);
 
    procedure Swig_symbol_cadd
      (symname : in DOHs.const_String_or_char_ptr.Item;
-      node    : in swig_Core.Pointers.Node_Pointer);
+      n       : in swig_Core.Pointers.Node_Pointer);
 
    function Swig_symbol_clookup
+     (symname : in DOHs.const_String_or_char_ptr.Item;
+      tab     : in swig_Core.Pointers.Symtab_Pointer)
+      return swig_Core.Pointers.Node_Pointer;
+
+   function Swig_symbol_clookup_resolve_typedef
      (symname : in DOHs.const_String_or_char_ptr.Item;
       tab     : in swig_Core.Pointers.Symtab_Pointer)
       return swig_Core.Pointers.Node_Pointer;
@@ -433,14 +487,16 @@ package swig_Core.Binding is
       return swig_Core.Pointers.Node_Pointer;
 
    function Swig_symbol_qualified
-     (node : in swig_Core.Pointers.Node_Pointer)
+     (n : in swig_Core.Pointers.Node_Pointer)
       return swig_Core.Pointers.String_Pointer;
 
    function Swig_symbol_isoverloaded
-     (node : in swig_Core.Pointers.Node_Pointer)
+     (n : in swig_Core.Pointers.Node_Pointer)
       return swig_Core.Pointers.Node_Pointer;
 
-   procedure Swig_symbol_remove (node : in swig_Core.Pointers.Node_Pointer);
+   procedure Swig_symbol_remove (n : in swig_Core.Pointers.Node_Pointer);
+
+   procedure Swig_symbol_fix_overname (n : in swig_Core.Pointers.Node_Pointer);
 
    procedure Swig_symbol_alias
      (aliasname : in DOHs.const_String_or_char_ptr.Item;
@@ -480,6 +536,9 @@ package swig_Core.Binding is
       symtab : in swig_Core.Pointers.Symtab_Pointer)
       return swig_Core.Pointers.SwigType_Pointer;
 
+   function Swig_symbol_isvalid
+     (s : in swig_Core.Pointers.String_Pointer) return Interfaces.C.int;
+
    function ParmList_errorstr
      (arg_1 : in swig_Core.Pointers.ParmList_Pointer)
       return swig_Core.Pointers.String_Pointer;
@@ -494,8 +553,16 @@ package swig_Core.Binding is
    procedure Swig_name_unregister
      (method : in DOHs.const_String_or_char_ptr.Item);
 
-   function Swig_name_mangle
-     (s : in DOHs.const_String_or_char_ptr.Item)
+   function Swig_name_type
+     (tname : in DOHs.const_String_or_char_ptr.Item)
+      return swig_Core.Pointers.String_Pointer;
+
+   function Swig_name_mangle_string
+     (s : in swig_Core.Pointers.String_Pointer)
+      return swig_Core.Pointers.String_Pointer;
+
+   function Swig_name_mangle_type
+     (s : in swig_Core.Pointers.SwigType_Pointer)
       return swig_Core.Pointers.String_Pointer;
 
    function Swig_name_wrapper
@@ -641,6 +708,12 @@ package swig_Core.Binding is
 
    function Swig_package_version return Interfaces.C.Strings.chars_ptr;
 
+   function Swig_package_version_hex return swig_Core.Pointers.String_Pointer;
+
+   procedure Swig_obligatory_macros
+     (f_runtime : in swig_Core.Pointers.String_Pointer;
+      language  : in Interfaces.C.Strings.chars_ptr);
+
    procedure Swig_banner (f : in swig_Core.Pointers.File_Pointer);
 
    procedure Swig_banner_target_lang
@@ -663,6 +736,10 @@ package swig_Core.Binding is
      (filename : in swig_Core.Pointers.String_Pointer)
       return swig_Core.Pointers.String_Pointer;
 
+   function Swig_filename_escape_space
+     (filename : in swig_Core.Pointers.String_Pointer)
+      return swig_Core.Pointers.String_Pointer;
+
    procedure Swig_filename_unescape
      (filename : in swig_Core.Pointers.String_Pointer);
 
@@ -680,10 +757,6 @@ package swig_Core.Binding is
      (n : in swig_Core.Pointers.Node_Pointer) return Interfaces.C.int;
 
    function Swig_string_escape
-     (s : in swig_Core.Pointers.String_Pointer)
-      return swig_Core.Pointers.String_Pointer;
-
-   function Swig_string_mangle
      (s : in swig_Core.Pointers.String_Pointer)
       return swig_Core.Pointers.String_Pointer;
 
@@ -715,6 +788,9 @@ package swig_Core.Binding is
    function Swig_scopename_check
      (s : in swig_Core.Pointers.String_Pointer) return Interfaces.C.int;
 
+   function Swig_scopename_isvalid
+     (s : in swig_Core.Pointers.String_Pointer) return Interfaces.C.int;
+
    function Swig_string_lower
      (s : in swig_Core.Pointers.String_Pointer)
       return swig_Core.Pointers.String_Pointer;
@@ -739,6 +815,11 @@ package swig_Core.Binding is
 
    function Swig_is_generated_overload
      (n : in swig_Core.Pointers.Node_Pointer) return Interfaces.C.int;
+
+   function Swig_item_in_list
+     (list : in swig_Core.Pointers.List_Pointer;
+      item : in DOHs.Pointers.DOH_Pointer)
+      return swig_Core.Pointers.Node_Pointer;
 
    procedure Swig_warning
      (num      : in Interfaces.C.int;
@@ -982,6 +1063,31 @@ package swig_Core.Binding is
 
    procedure Swig_extend_unused_check;
 
+   function Constraint_new_atom
+     (kind : in DOHs.const_String_or_char_ptr.Item)
+      return swig_Core.Pointers.Node_Pointer;
+
+   function Constraint_new_op
+     (op : in DOHs.const_String_or_char_ptr.Item)
+      return swig_Core.Pointers.Node_Pointer;
+
+   function Constraint_new_requires_expression
+      return swig_Core.Pointers.Node_Pointer;
+
+   function Constraint_new_requirement
+     (kind : in DOHs.const_String_or_char_ptr.Item)
+      return swig_Core.Pointers.Node_Pointer;
+
+   function Constraint_combine
+     (op  : in DOHs.const_String_or_char_ptr.Item;
+      lhs : in swig_Core.Pointers.Node_Pointer;
+      rhs : in swig_Core.Pointers.Node_Pointer)
+      return swig_Core.Pointers.Node_Pointer;
+
+   function Constraint_str
+     (n : in swig_Core.Pointers.Node_Pointer)
+      return swig_Core.Pointers.String_Pointer;
+
    function Swig_director_mode return Interfaces.C.int;
 
    function Swig_director_protected_mode return Interfaces.C.int;
@@ -1061,6 +1167,9 @@ package swig_Core.Binding is
 
    procedure Preprocessor_undef (name : in DOHs.const_String_or_char_ptr.Item);
 
+   function Preprocessor_defined
+     (str : in DOHs.const_String_or_char_ptr.Item) return Interfaces.C.int;
+
    procedure Preprocessor_init;
 
    procedure Preprocessor_delete;
@@ -1123,6 +1232,9 @@ package swig_Core.Binding is
    procedure Swig_print_tree (obj : in swig_Core.Pointers.Node_Pointer);
 
    procedure Swig_print_node (obj : in swig_Core.Pointers.Node_Pointer);
+
+   function Swig_print_quiet
+     (quiet : in Interfaces.C.int) return Interfaces.C.int;
 
    function Swig_add_directory
      (dirname : in DOHs.const_String_or_char_ptr.Item)
@@ -1284,6 +1396,8 @@ private
      (C, SwigType_add_rvalue_reference, "Ada_SwigType_add_rvalue_reference");
    pragma Import
      (C, SwigType_del_rvalue_reference, "Ada_SwigType_del_rvalue_reference");
+   pragma Import (C, SwigType_add_variadic, "Ada_SwigType_add_variadic");
+   pragma Import (C, SwigType_del_variadic, "Ada_SwigType_del_variadic");
    pragma Import (C, SwigType_add_qualifier, "Ada_SwigType_add_qualifier");
    pragma Import (C, SwigType_del_qualifier, "Ada_SwigType_del_qualifier");
    pragma Import (C, SwigType_add_function, "Ada_SwigType_add_function");
@@ -1292,10 +1406,13 @@ private
    pragma Import
      (C, SwigType_pop_function_qualifiers,
       "Ada_SwigType_pop_function_qualifiers");
+   pragma Import
+     (C, SwigType_function_parms_only, "Ada_SwigType_function_parms_only");
    pragma Import (C, SwigType_function_parms, "Ada_SwigType_function_parms");
    pragma Import (C, SwigType_split, "Ada_SwigType_split");
    pragma Import (C, SwigType_pop, "Ada_SwigType_pop");
    pragma Import (C, SwigType_push, "Ada_SwigType_push");
+   pragma Import (C, SwigType_last, "Ada_SwigType_last");
    pragma Import (C, SwigType_parmlist, "Ada_SwigType_parmlist");
    pragma Import (C, SwigType_parm, "Ada_SwigType_parm");
    pragma Import (C, SwigType_str, "Ada_SwigType_str");
@@ -1315,6 +1432,7 @@ private
      (C, SwigType_isreference_return, "Ada_SwigType_isreference_return");
    pragma Import
      (C, SwigType_isrvalue_reference, "Ada_SwigType_isrvalue_reference");
+   pragma Import (C, SwigType_isvariadic, "Ada_SwigType_isvariadic");
    pragma Import (C, SwigType_isarray, "Ada_SwigType_isarray");
    pragma Import
      (C, SwigType_prefix_is_simple_1D_array,
@@ -1327,6 +1445,11 @@ private
    pragma Import (C, SwigType_isvarargs, "Ada_SwigType_isvarargs");
    pragma Import (C, SwigType_istemplate, "Ada_SwigType_istemplate");
    pragma Import (C, SwigType_isenum, "Ada_SwigType_isenum");
+   pragma Import (C, SwigType_isauto, "Ada_SwigType_isauto");
+   pragma Import (C, SwigType_isconcept, "Ada_SwigType_isconcept");
+   pragma Import (C, SwigType_concept_name, "Ada_SwigType_concept_name");
+   pragma Import
+     (C, SwigType_replace_auto_base, "Ada_SwigType_replace_auto_base");
    pragma Import (C, SwigType_check_decl, "Ada_SwigType_check_decl");
    pragma Import
      (C, SwigType_strip_qualifiers, "Ada_SwigType_strip_qualifiers");
@@ -1347,6 +1470,8 @@ private
      (C, SwigType_istemplate_only_templateprefix,
       "Ada_SwigType_istemplate_only_templateprefix");
    pragma Import (C, SwigType_templateargs, "Ada_SwigType_templateargs");
+   pragma Import
+     (C, SwigType_templateargslist, "Ada_SwigType_templateargslist");
    pragma Import (C, SwigType_prefix, "Ada_SwigType_prefix");
    pragma Import (C, SwigType_array_ndim, "Ada_SwigType_array_ndim");
    pragma Import (C, SwigType_array_getdim, "Ada_SwigType_array_getdim");
@@ -1356,6 +1481,8 @@ private
    pragma Import (C, SwigType_default_deduce, "Ada_SwigType_default_deduce");
    pragma Import
      (C, SwigType_typename_replace, "Ada_SwigType_typename_replace");
+   pragma Import
+     (C, SwigType_variadic_replace, "Ada_SwigType_variadic_replace");
    pragma Import
      (C, SwigType_remove_global_scope_prefix,
       "Ada_SwigType_remove_global_scope_prefix");
@@ -1411,8 +1538,13 @@ private
    pragma Import (C, Swig_symbol_current, "Ada_Swig_symbol_current");
    pragma Import (C, Swig_symbol_popscope, "Ada_Swig_symbol_popscope");
    pragma Import (C, Swig_symbol_add, "Ada_Swig_symbol_add");
+   pragma Import
+     (C, Swig_symbol_conflict_warn, "Ada_Swig_symbol_conflict_warn");
    pragma Import (C, Swig_symbol_cadd, "Ada_Swig_symbol_cadd");
    pragma Import (C, Swig_symbol_clookup, "Ada_Swig_symbol_clookup");
+   pragma Import
+     (C, Swig_symbol_clookup_resolve_typedef,
+      "Ada_Swig_symbol_clookup_resolve_typedef");
    pragma Import
      (C, Swig_symbol_clookup_no_inherit, "Ada_Swig_symbol_clookup_no_inherit");
    pragma Import (C, Swig_symbol_cscope, "Ada_Swig_symbol_cscope");
@@ -1421,6 +1553,7 @@ private
    pragma Import (C, Swig_symbol_qualified, "Ada_Swig_symbol_qualified");
    pragma Import (C, Swig_symbol_isoverloaded, "Ada_Swig_symbol_isoverloaded");
    pragma Import (C, Swig_symbol_remove, "Ada_Swig_symbol_remove");
+   pragma Import (C, Swig_symbol_fix_overname, "Ada_Swig_symbol_fix_overname");
    pragma Import (C, Swig_symbol_alias, "Ada_Swig_symbol_alias");
    pragma Import (C, Swig_symbol_inherit, "Ada_Swig_symbol_inherit");
    pragma Import (C, Swig_symbol_type_qualify, "Ada_Swig_symbol_type_qualify");
@@ -1435,12 +1568,15 @@ private
    pragma Import
      (C, Swig_symbol_template_param_eval,
       "Ada_Swig_symbol_template_param_eval");
+   pragma Import (C, Swig_symbol_isvalid, "Ada_Swig_symbol_isvalid");
    pragma Import (C, ParmList_errorstr, "Ada_ParmList_errorstr");
    pragma Import
      (C, ParmList_is_compactdefargs, "Ada_ParmList_is_compactdefargs");
    pragma Import (C, Swig_name_register, "Ada_Swig_name_register");
    pragma Import (C, Swig_name_unregister, "Ada_Swig_name_unregister");
-   pragma Import (C, Swig_name_mangle, "Ada_Swig_name_mangle");
+   pragma Import (C, Swig_name_type, "Ada_Swig_name_type");
+   pragma Import (C, Swig_name_mangle_string, "Ada_Swig_name_mangle_string");
+   pragma Import (C, Swig_name_mangle_type, "Ada_Swig_name_mangle_type");
    pragma Import (C, Swig_name_wrapper, "Ada_Swig_name_wrapper");
    pragma Import (C, Swig_name_member, "Ada_Swig_name_member");
    pragma Import (C, Swig_name_get, "Ada_Swig_name_get");
@@ -1471,12 +1607,16 @@ private
    pragma Import (C, Swig_copy_string, "Ada_Swig_copy_string");
    pragma Import (C, Swig_set_fakeversion, "Ada_Swig_set_fakeversion");
    pragma Import (C, Swig_package_version, "Ada_Swig_package_version");
+   pragma Import (C, Swig_package_version_hex, "Ada_Swig_package_version_hex");
+   pragma Import (C, Swig_obligatory_macros, "Ada_Swig_obligatory_macros");
    pragma Import (C, Swig_banner, "Ada_Swig_banner");
    pragma Import (C, Swig_banner_target_lang, "Ada_Swig_banner_target_lang");
    pragma Import (C, Swig_strip_c_comments, "Ada_Swig_strip_c_comments");
    pragma Import (C, Swig_new_subdirectory, "Ada_Swig_new_subdirectory");
    pragma Import (C, Swig_filename_correct, "Ada_Swig_filename_correct");
    pragma Import (C, Swig_filename_escape, "Ada_Swig_filename_escape");
+   pragma Import
+     (C, Swig_filename_escape_space, "Ada_Swig_filename_escape_space");
    pragma Import (C, Swig_filename_unescape, "Ada_Swig_filename_unescape");
    pragma Import (C, Swig_storage_isextern, "Ada_Swig_storage_isextern");
    pragma Import (C, Swig_storage_isexternc, "Ada_Swig_storage_isexternc");
@@ -1484,7 +1624,6 @@ private
      (C, Swig_storage_isstatic_custom, "Ada_Swig_storage_isstatic_custom");
    pragma Import (C, Swig_storage_isstatic, "Ada_Swig_storage_isstatic");
    pragma Import (C, Swig_string_escape, "Ada_Swig_string_escape");
-   pragma Import (C, Swig_string_mangle, "Ada_Swig_string_mangle");
    pragma Import (C, Swig_scopename_split, "Ada_Swig_scopename_split");
    pragma Import (C, Swig_scopename_prefix, "Ada_Swig_scopename_prefix");
    pragma Import (C, Swig_scopename_last, "Ada_Swig_scopename_last");
@@ -1492,6 +1631,7 @@ private
    pragma Import (C, Swig_scopename_suffix, "Ada_Swig_scopename_suffix");
    pragma Import (C, Swig_scopename_tolist, "Ada_Swig_scopename_tolist");
    pragma Import (C, Swig_scopename_check, "Ada_Swig_scopename_check");
+   pragma Import (C, Swig_scopename_isvalid, "Ada_Swig_scopename_isvalid");
    pragma Import (C, Swig_string_lower, "Ada_Swig_string_lower");
    pragma Import (C, Swig_string_upper, "Ada_Swig_string_upper");
    pragma Import (C, Swig_string_title, "Ada_Swig_string_title");
@@ -1501,6 +1641,7 @@ private
    pragma Import (C, Swig_value_wrapper_mode, "Ada_Swig_value_wrapper_mode");
    pragma Import
      (C, Swig_is_generated_overload, "Ada_Swig_is_generated_overload");
+   pragma Import (C, Swig_item_in_list, "Ada_Swig_item_in_list");
    pragma Import (C, Swig_warning, "Ada_Swig_warning");
    pragma Import (C, Swig_error_file, "Ada_Swig_error_file");
    pragma Import (C, Swig_error_count, "Ada_Swig_error_count");
@@ -1570,6 +1711,15 @@ private
    pragma Import
      (C, Swig_extend_append_previous, "Ada_Swig_extend_append_previous");
    pragma Import (C, Swig_extend_unused_check, "Ada_Swig_extend_unused_check");
+   pragma Import (C, Constraint_new_atom, "Ada_Constraint_new_atom");
+   pragma Import (C, Constraint_new_op, "Ada_Constraint_new_op");
+   pragma Import
+     (C, Constraint_new_requires_expression,
+      "Ada_Constraint_new_requires_expression");
+   pragma Import
+     (C, Constraint_new_requirement, "Ada_Constraint_new_requirement");
+   pragma Import (C, Constraint_combine, "Ada_Constraint_combine");
+   pragma Import (C, Constraint_str, "Ada_Constraint_str");
    pragma Import (C, Swig_director_mode, "Ada_Swig_director_mode");
    pragma Import
      (C, Swig_director_protected_mode, "Ada_Swig_director_protected_mode");
@@ -1603,6 +1753,7 @@ private
    pragma Import (C, Preprocessor_expr_error, "Ada_Preprocessor_expr_error");
    pragma Import (C, Preprocessor_define, "Ada_Preprocessor_define");
    pragma Import (C, Preprocessor_undef, "Ada_Preprocessor_undef");
+   pragma Import (C, Preprocessor_defined, "Ada_Preprocessor_defined");
    pragma Import (C, Preprocessor_init, "Ada_Preprocessor_init");
    pragma Import (C, Preprocessor_delete, "Ada_Preprocessor_delete");
    pragma Import (C, Preprocessor_parse, "Ada_Preprocessor_parse");
@@ -1627,6 +1778,7 @@ private
    pragma Import (C, Swig_print_tags, "Ada_Swig_print_tags");
    pragma Import (C, Swig_print_tree, "Ada_Swig_print_tree");
    pragma Import (C, Swig_print_node, "Ada_Swig_print_node");
+   pragma Import (C, Swig_print_quiet, "Ada_Swig_print_quiet");
    pragma Import (C, Swig_add_directory, "Ada_Swig_add_directory");
    pragma Import (C, Swig_push_directory, "Ada_Swig_push_directory");
    pragma Import (C, Swig_pop_directory, "Ada_Swig_pop_directory");

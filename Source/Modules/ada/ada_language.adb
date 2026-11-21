@@ -178,8 +178,7 @@ is
                                      else null) with Unreferenced;
          Unused_2 : Hash_Pointer := Preprocessor_define (const_String (-"SWIGADA 1"),  0) with Unreferenced;   -- The usual upper case form, as the library files test for.
       begin
-         swig_typemap_Lang (new_String   ( "ada"));         -- Add typemap definitions.
-         swig_config_File  (const_String (-"ada.swg"));
+         swig_config_File (const_String (-"ada.swg"));
       end;
 
       Self.allow_Overloading;
@@ -1219,7 +1218,7 @@ is
                      print_to (wrapper_Code,   "  if (!swig_ada_built)"                                                                 & NL
                                              & "  {"                                                                                   & NL
                                              & "    typedef " & to_String (c_return_Type) & " swig_ada_result_type;"                   & NL
-                                             & "    swig_ada_replace (a_result, (swig_ada_result_type &) result);"                     & NL
+                                             & "    swig_ada_replace (a_result, *(&result));"                                          & NL
                                              & "  }"                                                                                   & NL);
                   elsif built_in_Place
                   then
@@ -1230,7 +1229,7 @@ is
                      print_to (wrapper_Code,   "  {"                                                                                     & NL
                                              & "    typedef " & to_String (c_return_Type) & " swig_ada_result_type;"                    & NL
                                              & "    a_result->~swig_ada_result_type ();"                                                 & NL
-                                             & "    new (a_result) swig_ada_result_type ((swig_ada_result_type &) result);"              & NL
+                                             & "    new (a_result) swig_ada_result_type (*(&result));"                                   & NL
                                              & "  }"                                                                                     & NL);
                   elsif the_typeMap /= ""
                   then
@@ -1553,10 +1552,10 @@ is
 
          --  An enumeration which names its underlying type is of the size of that type.
          --
-         if get_Attribute (the_Node, "inherit") /= null
+         if get_Attribute (the_Node, "enumbase") /= null
          then
             declare
-               the_Base : constant String := +doh_Item (SwigType_typedef_resolve_all (SwigType_Pointer (get_Attribute (the_Node, "inherit"))));
+               the_Base : constant String := +doh_Item (SwigType_typedef_resolve_all (SwigType_Pointer (get_Attribute (the_Node, "enumbase"))));
             begin
                new_c_Enum.enum_Size_is (if    the_Base in "char"  | "signed char" | "unsigned char"  | "bool"               then  8
                                         elsif the_Base in "short" | "unsigned short"                                        then 16
@@ -1715,7 +1714,45 @@ is
       dlog ("the_Type.Name => '" & the_Type.Name & "'");
 
       declare
-         value_Text : unbounded_String := +Attribute (the_Node, "value");
+         function literal_Text return String
+         --
+         --  The value of a character or a string literal is held as C source, with its quotes ('x', "xyzzy", L"wide").
+         --  What is wanted here is the text between the quotes, with its escapes as they are written.
+         --
+         is
+            the_Value : constant String := Attribute (the_Node, "value");
+            First     :          Natural := the_Value'First;
+            Last      :          Natural := the_Value'Last;
+         begin
+            if get_Attribute (the_Node, "stringval") = null     -- Which the core gives to a literal alone.
+            then
+               return the_Value;
+            end if;
+
+            while      Last - First >= 3                         -- A literal may be within brackets: (';').
+              and then the_Value (First) = '('
+              and then the_Value (Last)  = ')'
+            loop
+               First := First + 1;
+               Last  := Last  - 1;
+            end loop;
+
+            if         Last > First
+              and then the_Value (Last) in ''' | '"'
+            then
+               for Each in First .. Last - 1
+               loop
+                  if the_Value (Each) = the_Value (Last)
+                  then
+                     return the_Value (Each + 1 .. Last - 1);
+                  end if;
+               end loop;
+            end if;
+
+            return the_Value;
+         end literal_Text;
+
+         value_Text : unbounded_String := +literal_Text;
       begin
          dlog ("value_Text => '" & value_Text & "'");
 
@@ -1724,6 +1761,15 @@ is
            or else Index (String'(+DOH_Pointer (the_swigType)), "m(") = 1
          then   -- A pointer to a member of a class, for which Ada has no counterpart.
             log ("Warning: unable to bind the constant '" & the_Name & "', as its value is a pointer to a class member.");
+            unindent_Log;
+
+            return SWIG_OK;
+         end if;
+
+         if        the_Type.is_constructed_by_Cpp
+           or else the_Type.Name = "std::string"
+         then   -- An object which C++ constructs: it has no value which Ada can give, and a constant made by a directive has no symbol.
+            log ("Warning: unable to bind the constant '" & the_Name & "', as its type is one which C++ constructs.");
             unindent_Log;
 
             return SWIG_OK;
@@ -1984,11 +2030,12 @@ is
       end;
 
       --  Note whether the class declares a destructor or a copy constructor. C++ passes and returns such a
-      --  class by reference, so it cannot be bound as a plain record. (The core notes both on the class, and
-      --  later adds a destructor node to every class, declared or not.)
+      --  class by reference, so it cannot be bound as a plain record. (The core notes both on the class. It adds
+      --  a destructor to a class which declares none, and then notes that too, as 'allocate:implicit_destructor'.)
       --
       if         Self.in_cpp_Mode     -- In C, a destructor can only be one which the interface file adds.
-        and then (        get_Attribute (the_Node, "allocate:has_destructor")       /= null
+        and then (        (         get_Attribute (the_Node, "allocate:has_destructor")      /= null
+                           and then get_Attribute (the_Node, "allocate:implicit_destructor")  = null)
                   or else get_Attribute (the_Node, "allocate:has_copy_constructor") /= null)
       then
          new_c_Class.has_nontrivial_Members;
@@ -2072,7 +2119,8 @@ is
                      or (         the_Kind = "destructor"                                 -- Likewise.
                          and then is_Given
                          and then not is_Extended
-                         and then get_Attribute (the_Node, "allocate:has_destructor") /= null)
+                         and then get_Attribute (the_Node, "allocate:has_destructor")      /= null
+                         and then get_Attribute (the_Node, "allocate:implicit_destructor")  = null)
 
                      or (         the_Kind = "cdecl"                                      -- An assignment operator.
                          and then Attribute (the_Child, "name") = "operator ="
@@ -2401,7 +2449,9 @@ is
          then
             declare
                the_Action : constant String  := Attribute (the_Node, "wrap:action");
-               Last       : constant Natural := ada.Strings.fixed.Index (the_Action, "(", going => ada.Strings.Backward);
+               Named      : constant Natural := ada.Strings.fixed.Index (the_Action, ")new_");     -- The function follows a cast of its result.
+               Last       : constant Natural := (if Named /= 0 then ada.Strings.fixed.Index (the_Action, "(", from => Named + 1)     -- An argument may
+                                                               else ada.Strings.fixed.Index (the_Action, "(", going => ada.Strings.Backward));   -- have brackets of its own.
                First      :          Natural := Last;
             begin
                while      First > the_Action'First

@@ -14,6 +14,6 @@ cp ./ada-build/swig4ada /usr/local/bin
 #cp ./interfaces_cpp_pointers.adb /usr/local/include
 
 
-mkdir -p /usr/local/share/swig/4.0.0/ada
-#cp     ./Lib/ada/* /usr/local/share/swig/4.0.0/ada/
-cp -fr ./Lib/*     /usr/local/share/swig/4.0.0 
+mkdir -p /usr/local/share/swig/4.5.1/ada
+#cp     ./Lib/ada/* /usr/local/share/swig/4.5.1/ada/
+cp -fr ./Lib/*     /usr/local/share/swig/4.5.1 

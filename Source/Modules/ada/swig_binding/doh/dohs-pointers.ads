@@ -21,6 +21,22 @@ package DOHs.Pointers is
    type DOH_Pointer_Array is
      array (Interfaces.C.size_t range <>) of aliased DOHs.Pointers.DOH_Pointer;
 
+   -- p_f_int_ret_void_Pointer
+   --
+   package C_p_f_int_ret_void_Pointers is new Interfaces.C.Pointers
+     (Index => Interfaces.C.size_t, Element => DOHs.p_f_int_ret_void,
+      Element_Array      => DOHs.p_f_int_ret_void_Array,
+      Default_Terminator => null);
+
+   subtype p_f_int_ret_void_Pointer is C_p_f_int_ret_void_Pointers.Pointer;
+
+   -- p_f_int_ret_void_Pointer_Array
+   --
+   type p_f_int_ret_void_Pointer_Array is
+     array
+       (Interfaces.C.size_t range <>) of aliased DOHs.Pointers
+       .p_f_int_ret_void_Pointer;
+
    -- DohFuncPtr_t_Pointer
    --
    package C_DohFuncPtr_t_Pointers is new interfaces.c.Pointers

@@ -876,7 +876,7 @@
 %typemap (out)                                  SWIGTYPE 
 #ifdef __cplusplus
 %{
-  $result = ($1_ltype &) $1;      // Both may be held in a 'SwigValueWrapper', which cannot be assigned to another.
+  $result = *(&$1);      // Both may be held in a 'SwigValueWrapper', which cannot be assigned to another, and whose address is that of its value.
 %}
 #else
 {
@@ -1220,3 +1220,9 @@
 //%include "typemaps.i"
 
 
+
+
+/* Says that a type has no default constructor, for which other languages leave out the members of a container
+   which need one. Ada keeps them: a container which is given a size is then empty, and an exception is pending. */
+%define %std_nodefconst_type(Type...)
+%enddef

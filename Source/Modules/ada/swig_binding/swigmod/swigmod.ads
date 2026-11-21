@@ -18,9 +18,10 @@ package swigmod is
 
    -- Status
    --
-   type Status is (Disabled, Experimental, Supported);
+   type Status is (Disabled, Deprecated, Experimental, Supported);
 
-   for Status use (Disabled => 0, Experimental => 1, Supported => 2);
+   for Status use
+     (Disabled => 0, Deprecated => 1, Experimental => 2, Supported => 3);
 
    pragma Convention (C, Status);
 
@@ -41,7 +42,6 @@ package swigmod is
    NoExcept      : aliased Interfaces.C.int;
    the_Abstract  : aliased Interfaces.C.int;
    SmartPointer  : aliased Interfaces.C.int;
-   SwigRuntime   : aliased Interfaces.C.int;
    tab2          : aliased constant Interfaces.C.Strings.chars_ptr :=
      Interfaces.C.Strings.New_String ("  ");
    tab4          : aliased constant Interfaces.C.Strings.chars_ptr :=
@@ -62,6 +62,5 @@ private
    pragma Import (CPP, NoExcept, "NoExcept");
    pragma Import (CPP, the_Abstract, "Abstract");
    pragma Import (CPP, SmartPointer, "SmartPointer");
-   pragma Import (CPP, SwigRuntime, "SwigRuntime");
 
 end swigmod;

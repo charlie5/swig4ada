@@ -213,6 +213,15 @@ package swigmod.Dispatcher is
      (Self :    access swigmod.Dispatcher.Item;
       n    : in swig_Core.Pointers.Node_Pointer) return Interfaces.C.int;
 
+   function accessModeFromString
+     (Self       :    access swigmod.Dispatcher.Item'Class;
+      the_access : in swig_Core.Pointers.String_Pointer)
+      return swigmod.Dispatcher.AccessMode;
+
+   function abstractClassTest
+     (Self :    access swigmod.Dispatcher.Item'Class;
+      n    : in swig_Core.Pointers.Node_Pointer) return Interfaces.C.int;
+
    function construct return swigmod.Dispatcher.Item'Class;
 
 private
@@ -260,6 +269,9 @@ private
    pragma Import
      (CPP, templateDeclaration, "Ada_Dispatcher_templateDeclaration");
    pragma Import (CPP, lambdaDeclaration, "Ada_Dispatcher_lambdaDeclaration");
+   pragma Import
+     (CPP, accessModeFromString, "Ada_Dispatcher_accessModeFromString");
+   pragma Import (CPP, abstractClassTest, "Ada_Dispatcher_abstractClassTest");
 
    pragma CPP_Constructor (construct, "ada_new_Dispatcher_Dispatcher");
 

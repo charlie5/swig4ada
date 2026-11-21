@@ -16,6 +16,17 @@ package DOHs.pointer_Pointers is
 
    subtype DOH_Pointer_Pointer is C_DOH_Pointer_Pointers.Pointer;
 
+   -- p_f_int_ret_void_Pointer_Pointer
+   --
+   package C_p_f_int_ret_void_Pointer_Pointers is new Interfaces.C.Pointers
+     (Index              => Interfaces.C.size_t,
+      Element            => DOHs.Pointers.p_f_int_ret_void_Pointer,
+      Element_Array      => DOHs.Pointers.p_f_int_ret_void_Pointer_Array,
+      Default_Terminator => null);
+
+   subtype p_f_int_ret_void_Pointer_Pointer is
+     C_p_f_int_ret_void_Pointer_Pointers.Pointer;
+
    -- DohFuncPtr_t_Pointer_Pointer
    --
    package C_DohFuncPtr_t_Pointer_Pointers is new Interfaces.C.Pointers

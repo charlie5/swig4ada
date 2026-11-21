@@ -14,8 +14,6 @@ use Interfaces.C;
 
 package swigmod.Binding is
 
-   procedure SWIG_typemap_lang (arg_1 : in Interfaces.C.Strings.chars_ptr);
-
    procedure emit_parameter_variables
      (l : in swig_Core.Pointers.ParmList_Pointer;
       f : in swig_Core.Wrapper.Pointer);
@@ -24,8 +22,6 @@ package swigmod.Binding is
      (n  : in swig_Core.Pointers.Node_Pointer;
       rt : in swig_Core.Pointers.SwigType_Pointer;
       f  : in swig_Core.Wrapper.Pointer);
-
-   procedure SWIG_exit (arg_1 : in Interfaces.C.int);
 
    procedure SWIG_config_file (arg_1 : in DOHs.const_String_or_char_ptr.Item);
 
@@ -74,20 +70,23 @@ package swigmod.Binding is
    function Swig_overload_dispatch
      (n                : in swig_Core.Pointers.Node_Pointer;
       fmt              : in DOHs.const_String_or_char_ptr.Item;
-      arg_1            : in swig.pointers.int_Pointer;
+      maxargs          : in swig.pointers.int_Pointer;
+      check_emitted    : in swig.pointers.bool_Pointer;
       fmt_fastdispatch : in DOHs.const_String_or_char_ptr.Item)
       return swig_Core.Pointers.String_Pointer;
 
    function Swig_overload_dispatch
-     (n     : in swig_Core.Pointers.Node_Pointer;
-      fmt   : in DOHs.const_String_or_char_ptr.Item;
-      arg_1 : in swig.pointers.int_Pointer)
+     (n             : in swig_Core.Pointers.Node_Pointer;
+      fmt           : in DOHs.const_String_or_char_ptr.Item;
+      maxargs       : in swig.pointers.int_Pointer;
+      check_emitted : in swig.pointers.bool_Pointer)
       return swig_Core.Pointers.String_Pointer;
 
    function Swig_overload_dispatch_cast
-     (n     : in swig_Core.Pointers.Node_Pointer;
-      fmt   : in DOHs.const_String_or_char_ptr.Item;
-      arg_1 : in swig.pointers.int_Pointer)
+     (n             : in swig_Core.Pointers.Node_Pointer;
+      fmt           : in DOHs.const_String_or_char_ptr.Item;
+      maxargs       : in swig.pointers.int_Pointer;
+      check_emitted : in swig.pointers.bool_Pointer)
       return swig_Core.Pointers.String_Pointer;
 
    function Swig_overload_rank
@@ -98,6 +97,8 @@ package swigmod.Binding is
    function cplus_value_type
      (t : in swig_Core.Pointers.SwigType_Pointer)
       return swig_Core.Pointers.SwigType_Pointer;
+
+   function Swig_directors_enabled return Interfaces.C.int;
 
    function Swig_csuperclass_call
      (base   : in swig_Core.Pointers.String_Pointer;
@@ -131,12 +132,15 @@ package swigmod.Binding is
      (n : in swig_Core.Pointers.Node_Pointer)
       return swig_Core.Pointers.String_Pointer;
 
-   procedure Swig_director_emit_dynamic_cast
-     (n : in swig_Core.Pointers.Node_Pointer;
-      f : in swig_Core.Wrapper.Pointer);
+   function Swig_director_emit_dynamic_cast
+     (n : in swig_Core.Pointers.Node_Pointer; f : in swig_Core.Wrapper.Pointer)
+      return swig.bool;
 
    procedure Swig_director_parms_fixup
      (parms : in swig_Core.Pointers.ParmList_Pointer);
+
+   function Swig_director_can_unwrap
+     (n : in swig_Core.Pointers.Node_Pointer) return swig.bool;
 
    function is_public
      (n : in swig_Core.Pointers.Node_Pointer) return Interfaces.C.int;
@@ -178,18 +182,15 @@ package swigmod.Binding is
      (object : in DOHs.Pointers.DOH_Pointer; count : in Interfaces.C.int)
       return Interfaces.C.Strings.chars_ptr;
 
+   procedure Swig_default_allocators (n : in swig_Core.Pointers.Node_Pointer);
+
+   procedure Swig_process_types (n : in swig_Core.Pointers.Node_Pointer);
+
    procedure Swig_contracts (n : in swig_Core.Pointers.Node_Pointer);
 
    procedure Swig_contract_mode_set (flag : in Interfaces.C.int);
 
    function Swig_contract_mode_get return Interfaces.C.int;
-
-   procedure Swig_browser
-     (n : in swig_Core.Pointers.Node_Pointer; arg_1 : in Interfaces.C.int);
-
-   procedure Swig_default_allocators (n : in swig_Core.Pointers.Node_Pointer);
-
-   procedure Swig_process_types (n : in swig_Core.Pointers.Node_Pointer);
 
    procedure Swig_nested_process_classes
      (n : in swig_Core.Pointers.Node_Pointer);
@@ -210,10 +211,8 @@ package swigmod.Binding is
 
 private
 
-   pragma Import (C, SWIG_typemap_lang, "Ada_SWIG_typemap_lang");
    pragma Import (C, emit_parameter_variables, "Ada_emit_parameter_variables");
    pragma Import (C, emit_return_variable, "Ada_emit_return_variable");
-   pragma Import (C, SWIG_exit, "Ada_SWIG_exit");
    pragma Import (C, SWIG_config_file, "Ada_SWIG_config_file");
    pragma Import (C, SWIG_output_directory, "Ada_SWIG_output_directory");
    pragma Import (C, SWIG_config_cppext, "Ada_SWIG_config_cppext");
@@ -233,7 +232,8 @@ private
    function Swig_overload_dispatch_v1
      (n                : in swig_Core.Pointers.Node_Pointer;
       fmt              : in DOHs.const_String_or_char_ptr.Item;
-      arg_1            : in swig.pointers.int_Pointer;
+      maxargs          : in swig.pointers.int_Pointer;
+      check_emitted    : in swig.pointers.bool_Pointer;
       fmt_fastdispatch : in DOHs.const_String_or_char_ptr.Item)
       return swig_Core.Pointers.String_Pointer;
 
@@ -243,24 +243,27 @@ private
    function Swig_overload_dispatch
      (n                : in swig_Core.Pointers.Node_Pointer;
       fmt              : in DOHs.const_String_or_char_ptr.Item;
-      arg_1            : in swig.pointers.int_Pointer;
+      maxargs          : in swig.pointers.int_Pointer;
+      check_emitted    : in swig.pointers.bool_Pointer;
       fmt_fastdispatch : in DOHs.const_String_or_char_ptr.Item)
       return swig_Core.Pointers.String_Pointer renames
      Swig_overload_dispatch_v1;
 
    function Swig_overload_dispatch_v2
-     (n     : in swig_Core.Pointers.Node_Pointer;
-      fmt   : in DOHs.const_String_or_char_ptr.Item;
-      arg_1 : in swig.pointers.int_Pointer)
+     (n             : in swig_Core.Pointers.Node_Pointer;
+      fmt           : in DOHs.const_String_or_char_ptr.Item;
+      maxargs       : in swig.pointers.int_Pointer;
+      check_emitted : in swig.pointers.bool_Pointer)
       return swig_Core.Pointers.String_Pointer;
 
    pragma Import
      (C, Swig_overload_dispatch_v2, "Ada_Swig_overload_dispatch__SWIG_1");
 
    function Swig_overload_dispatch
-     (n     : in swig_Core.Pointers.Node_Pointer;
-      fmt   : in DOHs.const_String_or_char_ptr.Item;
-      arg_1 : in swig.pointers.int_Pointer)
+     (n             : in swig_Core.Pointers.Node_Pointer;
+      fmt           : in DOHs.const_String_or_char_ptr.Item;
+      maxargs       : in swig.pointers.int_Pointer;
+      check_emitted : in swig.pointers.bool_Pointer)
       return swig_Core.Pointers.String_Pointer renames
      Swig_overload_dispatch_v2;
 
@@ -268,6 +271,7 @@ private
      (C, Swig_overload_dispatch_cast, "Ada_Swig_overload_dispatch_cast");
    pragma Import (C, Swig_overload_rank, "Ada_Swig_overload_rank");
    pragma Import (C, cplus_value_type, "Ada_cplus_value_type");
+   pragma Import (C, Swig_directors_enabled, "Ada_Swig_directors_enabled");
    pragma Import (C, Swig_csuperclass_call, "Ada_Swig_csuperclass_call");
    pragma Import (C, Swig_class_declaration, "Ada_Swig_class_declaration");
    pragma Import (C, Swig_class_name, "Ada_Swig_class_name");
@@ -280,6 +284,7 @@ private
       "Ada_Swig_director_emit_dynamic_cast");
    pragma Import
      (C, Swig_director_parms_fixup, "Ada_Swig_director_parms_fixup");
+   pragma Import (C, Swig_director_can_unwrap, "Ada_Swig_director_can_unwrap");
    pragma Import (C, is_public, "Ada_is_public");
    pragma Import (C, is_private, "Ada_is_private");
    pragma Import (C, is_protected, "Ada_is_protected");
@@ -325,12 +330,11 @@ private
    pragma Import (C, Swig_to_string, "Ada_Swig_to_string");
    pragma Import
      (C, Swig_to_string_with_location, "Ada_Swig_to_string_with_location");
+   pragma Import (C, Swig_default_allocators, "Ada_Swig_default_allocators");
+   pragma Import (C, Swig_process_types, "Ada_Swig_process_types");
    pragma Import (C, Swig_contracts, "Ada_Swig_contracts");
    pragma Import (C, Swig_contract_mode_set, "Ada_Swig_contract_mode_set");
    pragma Import (C, Swig_contract_mode_get, "Ada_Swig_contract_mode_get");
-   pragma Import (C, Swig_browser, "Ada_Swig_browser");
-   pragma Import (C, Swig_default_allocators, "Ada_Swig_default_allocators");
-   pragma Import (C, Swig_process_types, "Ada_Swig_process_types");
    pragma Import
      (C, Swig_nested_process_classes, "Ada_Swig_nested_process_classes");
    pragma Import
