@@ -3985,9 +3985,11 @@ cpp_class_decl  : storage_class cpptype idcolon inherit LBRACE {
                /* Check for pure-abstract class */
 	       Setattr($$,"abstracts", pure_abstracts($6));
 	       n = $8;
-	       if (cparse_cplusplus && currentOuterClass && GetFlag($$, "feature:flatnested"))
-		 SetFlag(currentOuterClass, "has_unnamed_member");   /* swig4ada: its members are not kept as those of a nested class. */
-	       if (cparse_cplusplus && currentOuterClass && ignore_nested_classes && !GetFlag($$, "feature:flatnested")) {
+	       /* swig4ada: a class with no name is dealt with here whether or not nested classes are flattened, as flattening
+		  loses the members which are declared with it, and takes the members of an anonymous union for members of the
+		  outer class. A typedef of such a class gives it a name, and is still flattened. */
+	       if (cparse_cplusplus && currentOuterClass && ignore_nested_classes
+		   && (!GetFlag($$, "feature:flatnested") || !($1 && (strcmp($1, "typedef") == 0)))) {
 		 /* swig4ada: the class is kept on the node of the outer class, with its members and the names of the members
 		    which are declared with it, for a language module which lays the outer class out itself. */
 		 {
