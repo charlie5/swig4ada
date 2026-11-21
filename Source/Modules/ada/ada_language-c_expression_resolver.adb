@@ -648,6 +648,93 @@ is
                delete (Expression_pad.all,  1, 1);
                exit;                                                  -- nb: Exit loop to allow recursion to end.
 
+            elsif        (         Length (Expression_pad.all) >= 3                  -- A character ('A', '\n', L'\0'),
+                            and then Element (Expression_pad.all, 1) = ''')            -- which is the number of its position.
+                 or else (         Length (Expression_pad.all) >= 4
+                          and then Element (Expression_pad.all, 1) = 'L'
+                          and then Element (Expression_pad.all, 2) = ''')
+            then
+               declare
+                  First    : constant Positive := (if Element (Expression_pad.all, 1) = 'L' then 3 else 2);     -- Follows the opening quote.
+                  Last     : Natural  := First;
+                  Position : Long_Long_Integer;
+               begin
+                  if Element (Expression_pad.all, First) = '\'
+                  then   -- An escape.
+                     Last := First + 1;
+
+                     case Element (Expression_pad.all, Last)
+                     is
+                        when 'a'    => Position := 7;
+                        when 'b'    => Position := 8;
+                        when 't'    => Position := 9;
+                        when 'n'    => Position := 10;
+                        when 'v'    => Position := 11;
+                        when 'f'    => Position := 12;
+                        when 'r'    => Position := 13;
+                        when 'e'    => Position := 27;
+
+                        when '0' .. '7' =>     -- Octal digits.
+                           Position := 0;
+                           Last     := Last - 1;
+
+                           while Element (Expression_pad.all, Last + 1) in '0' .. '7'
+                           loop
+                              Last     := Last + 1;
+                              Position := Position * 8 + Character'Pos (Element (Expression_pad.all, Last)) - Character'Pos ('0');
+                           end loop;
+
+                        when 'x' =>            -- Hexadecimal digits.
+                           Position := 0;
+
+                           while Element (Expression_pad.all, Last + 1) in '0' .. '9' | 'a' .. 'f' | 'A' .. 'F'
+                           loop
+                              Last     := Last + 1;
+                              Position := Position * 16 + Long_Long_Integer'Value ("16#" & Element (Expression_pad.all, Last) & "#");
+                           end loop;
+
+                        when others => Position := Character'Pos (Element (Expression_pad.all, Last));     -- A quote, or the like.
+                     end case;
+                  else
+                     Position := Character'Pos (Element (Expression_pad.all, First));
+                  end if;
+
+                  if Element (Expression_pad.all, Last + 1) /= '''
+                  then
+                     raise Constraint_Error with "A character of several characters is not worked out within an expression.";
+                  end if;
+
+                  append (the_Elements,  an_Element'(Kind   => Value,
+                                                     Value  => to_Integer (Position),
+                                                     others => <>));
+                  delete (Expression_pad.all,  1, Last + 1);
+               end;
+
+            elsif      Length (Expression_pad.all)       >= 3         -- A binary number ('0b110', of C++14).
+              and then Slice  (Expression_pad.all, 1, 2) in "0b" | "0B"
+              and then Element (Expression_pad.all, 3)   in '0' | '1'
+            then
+               declare
+                  Last  : Natural           := 2;
+                  Total : Long_Long_Integer := 0;
+               begin
+                  while      Last < Length (Expression_pad.all)
+                    and then Element (Expression_pad.all, Last + 1) in '0' | '1' | '''     -- A quote may separate the digits.
+                  loop
+                     Last := Last + 1;
+
+                     if Element (Expression_pad.all, Last) /= '''
+                     then
+                        Total := Total * 2 + (if Element (Expression_pad.all, Last) = '1' then 1 else 0);
+                     end if;
+                  end loop;
+
+                  append (the_Elements,  an_Element'(Kind  => Value,
+                                                     Value => to_Integer (Total),
+                                                     others => <>));
+                  delete (Expression_pad.all,  1, Last);
+               end;
+
             elsif      Length (Expression_pad.all)       >= 2         -- Handle hex numbers.
               and then Slice  (Expression_pad.all, 1, 2)  = "0x"      --
             then

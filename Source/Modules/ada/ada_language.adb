@@ -1762,6 +1762,35 @@ is
                      declare
                         the_Text : constant String := the_Value (Each + 1 .. Last - 1);
                      begin
+                        --  A string is given as the text which it stands for, as its source may hold escapes, or be a raw
+                        --  string literal. It is written so as to stand between the quotes of an Ada string literal: a
+                        --  quote is doubled, and a control character is joined in by its position.
+                        --
+                        if         the_Value (Last) = '"'
+                          and then get_Attribute (the_Node, "stringval") /= null
+                          and then Each = First     -- Not a wide string (L"..."), which is left as it is written.
+                        then
+                           declare
+                              the_String : constant String := Attribute (the_Node, "stringval");
+                              Result     : unbounded_String;
+                           begin
+                              for Each of the_String
+                              loop
+                                 if Each = '"'
+                                 then
+                                    append (Result, """""");
+                                 elsif Each < ' ' or else Each >= Character'Val (127)
+                                 then
+                                    append (Result, """ & Character'Val (" & ada.Strings.fixed.Trim (Natural'Image (Character'Pos (Each)), ada.Strings.Left) & ") & """);
+                                 else
+                                    append (Result, Each);
+                                 end if;
+                              end loop;
+
+                              return to_String (Result);
+                           end;
+                        end if;
+
                         --  A character literal of several characters ('ab') is an 'int' in C, in which GCC and
                         --  swig place the first character highest.
                         --
@@ -1804,10 +1833,27 @@ is
             return SWIG_OK;
          end if;
 
+         if         Index (value_Text, "&") = 1
+           and then Index (String'(+DOH_Pointer (the_swigType)), "p.f(") /= 1
+         then   -- The address of an object ('%constant Type1* T = &an_Object;'), which is no static value in Ada.
+            log ("Warning: unable to bind the constant '" & the_Name & "', as its value is the address of an object.");
+            unindent_Log;
+
+            return SWIG_OK;
+         end if;
+
          if        the_Type.is_constructed_by_Cpp
            or else the_Type.Name = "std::string"
          then   -- An object which C++ constructs: it has no value which Ada can give, and a constant made by a directive has no symbol.
             log ("Warning: unable to bind the constant '" & the_Name & "', as its type is one which C++ constructs.");
+            unindent_Log;
+
+            return SWIG_OK;
+         end if;
+
+         if the_Type.c_type_Kind in c_Type.c_Class
+         then   -- A structure or a class, whose value is an object of C ('%constant Type1 T = an_Object;').
+            log ("Warning: unable to bind the constant '" & the_Name & "', as its value is an object.");
             unindent_Log;
 
             return SWIG_OK;
@@ -1849,6 +1895,69 @@ is
                when others =>
                   declare
                      use swigg.Utility;
+
+                     function is_plain_Expression (the_Text : in String) return Boolean
+                     --
+                     --  A number whose value could not be worked out is given as it is written, which serves where it is made of
+                     --  numbers and of the constants of the module alone. Anything else is not an expression of Ada.
+                     --
+                     is
+                        Cursor : Natural := the_Text'First;
+                     begin
+                        if the_Text = ""
+                        then
+                           return False;
+                        end if;
+
+                        while Cursor <= the_Text'Last
+                        loop
+                           if the_Text (Cursor) in 'a' .. 'z' | 'A' .. 'Z' | '_'
+                           then   -- A name, which must be that of a constant with a value.
+                              declare
+                                 Last : Natural := Cursor;
+                              begin
+                                 while      Last < the_Text'Last
+                                   and then the_Text (Last + 1) in 'a' .. 'z' | 'A' .. 'Z' | '_' | '0' .. '9'
+                                 loop
+                                    Last := Last + 1;
+                                 end loop;
+
+                                 if not (for some Each of Self.current_Module.C.new_c_Variables =>          Each.Name   = the_Text (Cursor .. Last)
+                                                                                                    and then Each.Value /= "")
+                                 then
+                                    return False;
+                                 end if;
+
+                                 Cursor := Last + 1;
+                              end;
+
+                           elsif the_Text (Cursor) in '0' .. '9'
+                           then   -- A number, with whatever letters it holds.
+                              if         Cursor < the_Text'Last
+                                and then the_Text (Cursor) = '0'
+                                and then the_Text (Cursor + 1) in 'x' | 'X' | 'b' | 'B'
+                              then
+                                 return False;     -- A hexadecimal or binary number is not written so in Ada.
+                              end if;
+
+                              while      Cursor <= the_Text'Last
+                                and then the_Text (Cursor) in 'a' .. 'z' | 'A' .. 'Z' | '_' | '0' .. '9' | '.' | '#'
+                              loop
+                                 Cursor := Cursor + 1;
+                              end loop;
+
+                           elsif the_Text (Cursor) in '+' | '-' | '*' | '/' | '(' | ')' | ' ' | '.'
+                           then
+                              Cursor := Cursor + 1;
+
+                           else
+                              return False;
+                           end if;
+                        end loop;
+
+                        return True;
+                     end is_plain_Expression;
+
                   begin
                      strip_c_integer_literal_qualifiers_in (value_Text);
 
@@ -1872,6 +1981,26 @@ is
                         end if;
 
                         replace_Integer_with_Float (value_Text);
+
+                        if         Length (value_Text) >= 2
+                          and then Element (value_Text, Length (value_Text)) = '.'                  -- A real literal of C may end with
+                          and then Element (value_Text, Length (value_Text) - 1) in '0' .. '9'      -- its point ('12.'), and one of Ada
+                        then                                                                         -- may not.
+                           append (value_Text, "0");
+                        end if;
+
+                        declare     -- A real number with an exponent and no point ('10E1') is an integer in Ada.
+                           the_Text : constant String  := to_String (value_Text);
+                           Exponent : constant Natural := ada.Strings.fixed.Index (the_Text, ada.Strings.Maps.to_Set ("eE"));
+                        begin
+                           if         Exponent > the_Text'First
+                             and then ada.Strings.fixed.Index (the_Text, ".") = 0
+                             and then (for all Each of the_Text (the_Text'First .. Exponent - 1) => Each in '0' .. '9')
+                             and then (for all Each of the_Text (Exponent + 1 .. the_Text'Last)  => Each in '0' .. '9' | '+' | '-')
+                           then
+                              value_Text := +(the_Text (the_Text'First .. Exponent - 1) & ".0" & the_Text (Exponent .. the_Text'Last));
+                           end if;
+                        end;
 
                         --  A number which the type cannot hold ('#define HUGE_VAL 1.0e10000', which C takes
                         --  as infinity) is no static value in Ada, and the constant is left out.
@@ -1931,6 +2060,19 @@ is
                               value_Text := +"interfaces.c.char'Val (8#" & Slice (value_Text, 2, Length (value_Text)) & "#)";
                            end if;
                         end if;
+
+                     end if;
+
+                     if         (   the_Type.Name in +"float" | +"double" | +"long double" | +"bool"
+                                 or to_String (the_Type.Name) in   "int" | "unsigned int" | "long" | "unsigned long" | "short" | "unsigned short"
+                                                                 | "long long" | "unsigned long long" | "signed char" | "unsigned char" | "size_t")
+                       and then Index (value_Text, "interfaces.c.") = 0
+                       and then not is_plain_Expression (to_String (value_Text))
+                     then
+                        log (  "Warning: unable to bind the constant '" & the_Name & "', as its value (" & value_Text
+                             & ") is not one which Ada can state.");
+                        unindent_Log;
+                        return SWIG_OK;
                      end if;
 
                      new_c_Constant.Value := value_Text;

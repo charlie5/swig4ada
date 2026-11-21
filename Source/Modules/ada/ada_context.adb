@@ -123,6 +123,9 @@ is
 
                   if        not the_type_Info.is_accessed
                     or else not the_type_Info.my_Type.declaration_Package.depends_on (own_Package, depth => 0)
+                    or else (for some Each of own_Package.Types =>                                   -- A subtype of the type is declared here
+                                        Each.all in ada_type.a_subType.item'Class                   -- ('typedef Element* element_ptr_t;'),
+                               and then subType_view (Each).base_Type = the_type_Info.my_Type)      -- which a limited view does not allow.
                   then
                      the_withing_Requirements.normal_With_is_required := True;
                   end if;
