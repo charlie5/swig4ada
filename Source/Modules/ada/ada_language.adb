@@ -1701,6 +1701,34 @@ is
                      then
                         replace_Integer_with_Float (value_Text);
 
+                        --  A number which the type cannot hold ('#define HUGE_VAL 1.0e10000', which C takes
+                        --  as infinity) is no static value in Ada, and the constant is left out.
+                        --
+                        declare
+                           the_Text : constant String := to_String (value_Text);
+                           Too_Big  :          Boolean := False;
+                        begin
+                           if         the_Text /= ""
+                             and then (for all Each of the_Text => Each in '0' .. '9' | '.' | 'e' | 'E' | '+' | '-')
+                           then
+                              begin
+                                 Too_Big := abs Long_Long_Float'Value (the_Text) > (if the_Type.Name = "float" then Long_Long_Float (interfaces.C.C_float'Last)
+                                                                                                               else Long_Long_Float (interfaces.C.double 'Last));
+                              exception
+                                 when Constraint_Error =>
+                                    Too_Big := True;
+                              end;
+                           end if;
+
+                           if Too_Big
+                           then
+                              log (  "Warning: unable to bind the constant '" & the_Name & "', as its value (" & the_Text
+                                   & ") is beyond the range of its type.");
+                              unindent_Log;
+                              return SWIG_OK;
+                           end if;
+                        end;
+
                      elsif the_Type.Name = "char"
                      then
                         if    value_Text = "\a"  then value_Text := +"interfaces.c.char'Val (07)";

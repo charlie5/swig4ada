@@ -1532,7 +1532,7 @@ is
                      default_Terminator := +"system.null_Address";
                   elsif resolved_Type.all in ada_Type.composite.an_array.item'Class
                   then
-                     default_Terminator := +"[others => <>]";
+                     default_Terminator := +"(others => <>)";     -- With parentheses, as a binding may be compiled as Ada 2012 or earlier.
                   elsif resolved_Type.all in ada_Type.elementary.scalar.real.item'Class
                   then
                      default_Terminator := +"0.0";
