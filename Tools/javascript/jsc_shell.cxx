@@ -18,7 +18,7 @@ typedef int (*JSCIntializer)(JSGlobalContextRef context, JSObjectRef *module);
 
 public:
 
-  JSCShell() {};
+  JSCShell() { context = 0; }
 
   virtual ~JSCShell();
 
@@ -225,7 +225,7 @@ void JSCShell::PrintError(JSContextRef ctx, JSValueRef err) {
   int line = (int) JSValueToNumber(ctx, jsLine, 0);
   JSStringRelease(lineKey);
 
-  std::cerr << sourceURL << ":" << line << ":" << errMsg << std::endl;
+  std::cerr << sourceURL << ':' << line << ':' << errMsg << std::endl;
 }
 
 JSShell* JSCShell_Create() {

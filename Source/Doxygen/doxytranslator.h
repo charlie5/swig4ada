@@ -4,7 +4,7 @@
  * terms also apply to certain portions of SWIG. The full details of the SWIG
  * license and copyrights can be found in the LICENSE and COPYRIGHT files
  * included with the SWIG source code as distributed by the SWIG developers
- * and at http://www.swig.org/legal.html.
+ * and at https://www.swig.org/legal.html.
  *
  * doxytranslator.h
  *
@@ -12,15 +12,14 @@
  * systems.
  * ----------------------------------------------------------------------------- */
 
-#ifndef DOXYGENTRANSLATOR_H_
-#define DOXYGENTRANSLATOR_H_
+#ifndef SWIG_DOXYTRANSLATOR_H
+#define SWIG_DOXYTRANSLATOR_H
 
 #include "swig.h"
 #include "doxyentity.h"
 #include "doxyparser.h"
 #include <list>
 #include <string>
-
 
 /*
  * This is a base class for translator classes. It defines the basic interface
@@ -53,13 +52,13 @@ public:
   virtual ~DoxygenTranslator();
 
   /*
-   * Return the documentation for a given node formated for the correct 
+   * Return the documentation for a given node formatted for the correct
    * documentation system.
    */
   String *getDocumentation(Node *node, const_String_or_char_ptr indentationString);
 
   /*
-   * Returns truem is the specified node has comment attached.
+   * Returns true if the specified node has comment attached.
    */
   bool hasDocumentation(Node *node);
 

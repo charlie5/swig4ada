@@ -1,10 +1,10 @@
 /* -----------------------------------------------------------------------------
- * This file is part of SWIG, which is licensed as a whole under version 3 
+ * This file is part of SWIG, which is licensed as a whole under version 3
  * (or any later version) of the GNU General Public License. Some additional
  * terms also apply to certain portions of SWIG. The full details of the SWIG
  * license and copyrights can be found in the LICENSE and COPYRIGHT files
  * included with the SWIG source code as distributed by the SWIG developers
- * and at http://www.swig.org/legal.html.
+ * and at https://www.swig.org/legal.html.
  *
  * tree.c
  *
@@ -15,6 +15,20 @@
 #include "swig.h"
 #include <stdarg.h>
 #include <assert.h>
+
+static int debug_quiet = 0;
+
+/* -----------------------------------------------------------------------------
+ * Swig_print_quiet()
+ *
+ * Set quiet mode when printing a parse tree node
+ * ----------------------------------------------------------------------------- */
+
+int Swig_print_quiet(int quiet) {
+  int previous_quiet = debug_quiet;
+  debug_quiet = quiet;
+  return previous_quiet;
+}
 
 /* -----------------------------------------------------------------------------
  * Swig_print_tags()
@@ -58,7 +72,6 @@ static void print_indent(int l) {
   }
 }
 
-
 /* -----------------------------------------------------------------------------
  * Swig_print_node(Node *n)
  * ----------------------------------------------------------------------------- */
@@ -66,33 +79,54 @@ static void print_indent(int l) {
 void Swig_print_node(Node *obj) {
   Iterator ki;
   Node *cobj;
+  List *keys = Keys(obj);
 
   print_indent(0);
-  Printf(stdout, "+++ %s - %p ----------------------------------------\n", nodeType(obj), obj);
-  ki = First(obj);
-  while (ki.key) {
-    String *k = ki.key;
-    if ((Cmp(k, "nodeType") == 0) || (Cmp(k, "firstChild") == 0) || (Cmp(k, "lastChild") == 0) ||
-	(Cmp(k, "parentNode") == 0) || (Cmp(k, "nextSibling") == 0) || (Cmp(k, "previousSibling") == 0) || (*(Char(k)) == '$')) {
+  if (debug_quiet)
+    Printf(stdout, "+++ %s ----------------------------------------\n", nodeType(obj));
+  else
+    Printf(stdout, "+++ %s - %p ----------------------------------------\n", nodeType(obj), obj);
+
+  SortList(keys, 0);
+  ki = First(keys);
+  while (ki.item) {
+    String *k = ki.item;
+    DOH *value = Getattr(obj, k);
+    if (Equal(k, "nodeType") || (*(Char(k)) == '$')) {
       /* Do nothing */
-    } else if (Cmp(k, "kwargs") == 0 || Cmp(k, "parms") == 0 || Cmp(k, "wrap:parms") == 0 ||
-	       Cmp(k, "pattern") == 0 || Cmp(k, "templateparms") == 0 || Cmp(k, "throws") == 0) {
+    } else if (debug_quiet &&
+               (Equal(k, "firstChild") || Equal(k, "lastChild") || Equal(k, "parentNode") || Equal(k, "nextSibling") || Equal(k, "previousSibling") ||
+                Equal(k, "symtab") || Equal(k, "csymtab") || Equal(k, "sym:symtab") || Equal(k, "sym:nextSibling") || Equal(k, "sym:previousSibling") ||
+                Equal(k, "csym:nextSibling") || Equal(k, "csym:previousSibling"))) {
+      /* Do nothing */
+    } else if (Equal(k, "kwargs") || Equal(k, "parms") || Equal(k, "wrap:parms") || Equal(k, "pattern") || Equal(k, "templateparms") ||
+               Equal(k, "templateparmsraw") || Equal(k, "template_parameters") || Equal(k, "throws")) {
       print_indent(2);
       /* Differentiate parameter lists by displaying within single quotes */
-      Printf(stdout, "%-12s - \'%s\'\n", k, ParmList_str_defaultargs(Getattr(obj, k)));
+      Printf(stdout, "%-12s - \'%s\'\n", k, ParmList_str_defaultargs(value));
+    } else if (Equal(k, "constraint")) {
+      /* C++20 constraint subtree: render as the C++ source text it represents, like a parameter list. */
+      String *cs = Constraint_str(value);
+      print_indent(2);
+      Printf(stdout, "%-12s - \'%s\'\n", k, cs);
+      Delete(cs);
     } else {
       DOH *o;
       const char *trunc = "";
       print_indent(2);
-      if (DohIsString(Getattr(obj, k))) {
-	o = Str(Getattr(obj, k));
-	if (Len(o) > 80) {
-	  trunc = "...";
-	}
-	Printf(stdout, "%-12s - \"%(escape)-0.80s%s\"\n", k, o, trunc);
-	Delete(o);
+      if (DohIsString(value)) {
+        o = Str(value);
+        if (Len(o) > 80) {
+          trunc = "...";
+        }
+        Printf(stdout, "%-12s - \"%(escape)-0.80s%s\"\n", k, o, trunc);
+        Delete(o);
+        /*
+              } else if (DohIsSequence(value)) {
+                Printf(stdout, "%-12s - %s\n", k, value);
+        */
       } else {
-	Printf(stdout, "%-12s - %p\n", k, Getattr(obj, k));
+        Printf(stdout, "%-12s - %p\n", k, value);
       }
     }
     ki = Next(ki);
@@ -107,6 +141,7 @@ void Swig_print_node(Node *obj) {
     print_indent(1);
     Printf(stdout, "\n");
   }
+  Delete(keys);
 }
 
 /* -----------------------------------------------------------------------------
@@ -203,7 +238,8 @@ void removeNode(Node *n) {
   Node *next;
 
   parent = parentNode(n);
-  if (!parent) return;
+  if (!parent)
+    return;
 
   prev = previousSibling(n);
   next = nextSibling(n);
@@ -223,9 +259,9 @@ void removeNode(Node *n) {
   }
 
   /* Delete attributes */
-  Delattr(n,"parentNode");
-  Delattr(n,"nextSibling");
-  Delattr(n,"prevSibling");
+  Delattr(n, "parentNode");
+  Delattr(n, "nextSibling");
+  Delattr(n, "previousSibling");
 }
 
 /* -----------------------------------------------------------------------------
@@ -261,12 +297,16 @@ int checkAttribute(Node *n, const_String_or_char_ptr name, const_String_or_char_
  * ns   - namespace for the view name for saving any attributes under
  * n    - node
  * ...  - list of attribute names of type char*
- * This method checks that the attribute names exist in the node n and asserts if
- * not. Assert will only occur unless the attribute is optional. An attribute is
- * optional if it is prefixed by ?, eg "?value". If the attribute name is prefixed
- * by * or ?, eg "*value" then a copy of the attribute is saved. The saved
- * attributes will be restored on a subsequent call to Swig_restore(). All the
- * saved attributes are saved in the view namespace (prefixed by ns).
+ *
+ * An attribute is optional if it is prefixed by ?, eg "?value".  All
+ * non-optional attributes are checked for on node n and if any do not exist
+ * SWIG exits with a fatal error.
+ *
+ * If the attribute name is prefixed by * or ?, eg "*value" then a copy of the
+ * attribute is saved. The saved attributes will be restored on a subsequent
+ * call to Swig_restore(). All the saved attributes are saved in the view
+ * namespace (prefixed by ns).
+ *
  * This function can be called more than once with different namespaces.
  * ----------------------------------------------------------------------------- */
 
@@ -290,11 +330,11 @@ void Swig_require(const char *ns, Node *n, ...) {
     }
     obj = Getattr(n, name);
     if (!opt && !obj) {
-      Swig_error(Getfile(n), Getline(n), "Fatal error (Swig_require).  Missing attribute '%s' in node '%s'.\n", name, nodeType(n));
-      assert(obj);
+      Swig_error(Getfile(n), Getline(n), "Internal error (Swig_require).  Missing attribute '%s' in node '%s'.\n", name, nodeType(n));
+      Exit(EXIT_FAILURE);
     }
     if (!obj)
-      obj = DohNone;
+      obj = None;
     if (newref) {
       /* Save a copy of the attribute */
       Setattr(n, NewStringf("%s:%s", ns, name), obj);
@@ -308,15 +348,14 @@ void Swig_require(const char *ns, Node *n, ...) {
     String *view = Getattr(n, "view");
     if (view) {
       if (Strcmp(view, ns) != 0) {
-	Setattr(n, NewStringf("%s:view", ns), view);
-	Setattr(n, "view", NewString(ns));
+        Setattr(n, NewStringf("%s:view", ns), view);
+        Setattr(n, "view", NewString(ns));
       }
     } else {
       Setattr(n, "view", NewString(ns));
     }
   }
 }
-
 
 /* -----------------------------------------------------------------------------
  * Swig_save()
@@ -339,7 +378,7 @@ void Swig_save(const char *ns, Node *n, ...) {
     }
     obj = Getattr(n, name);
     if (!obj)
-      obj = DohNone;
+      obj = None;
 
     /* Save a copy of the attribute */
     if (Setattr(n, NewStringf("%s:%s", ns, name), obj)) {
@@ -354,8 +393,8 @@ void Swig_save(const char *ns, Node *n, ...) {
     String *view = Getattr(n, "view");
     if (view) {
       if (Strcmp(view, ns) != 0) {
-	Setattr(n, NewStringf("%s:view", ns), view);
-	Setattr(n, "view", NewString(ns));
+        Setattr(n, NewStringf("%s:view", ns), view);
+        Setattr(n, "view", NewString(ns));
       }
     } else {
       Setattr(n, "view", NewString(ns));

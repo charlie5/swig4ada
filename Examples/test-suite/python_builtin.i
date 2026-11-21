@@ -42,11 +42,7 @@ struct SimpleValue {
 %}
 
 %{
-#if PY_VERSION_HEX >= 0x03020000
 Py_hash_t SimpleValueHashFunction(PyObject *v)
-#else
-long SimpleValueHashFunction(PyObject *v)
-#endif
 {
   SwigPyObject *sobj = (SwigPyObject *) v;
   SimpleValue *p = (SimpleValue *)sobj->ptr;
@@ -96,9 +92,6 @@ struct BadHashFunctionReturnType {
 %catches(const char *) exception_hash_function;
 
 %inline %{
-#if PY_VERSION_HEX < 0x03020000
-  #define Py_hash_t long
-#endif
 struct ExceptionHashFunction {
     static Py_hash_t exception_hash_function() {
       throw "oops";
@@ -204,11 +197,7 @@ void Dealloc2Destroyer(PyObject *v) {
       if (!PySlice_Check(slice))
         throw std::invalid_argument("Slice object expected");
       Py_ssize_t i, j, step;
-#if PY_VERSION_HEX >= 0x03020000
       PySlice_GetIndices((PyObject *)slice, size, &i, &j, &step);
-#else
-      PySlice_GetIndices((PySliceObject *)slice, size, &i, &j, &step);
-#endif
       if (step != 1)
         throw std::invalid_argument("Only a step size of 1 is implemented");
 
@@ -245,3 +234,34 @@ public:
 };
 %}
 
+// Test 8 https://github.com/swig/swig/pull/2771 __setitem__ for deleting item, uses C NULL
+%feature("python:slot", "sq_item", functype="ssizeargfunc") GetSetItem::__getitem__;
+%feature("python:slot", "sq_ass_item", functype="ssizeobjargproc") GetSetItem::__setitem__;
+%feature("python:slot", "tp_call", functype="ternaryfunc") GetSetItem::__call__;
+%typemap(default) PyObject* value {$1 = NULL;}
+
+%inline %{
+class GetSetItem {
+public:
+  int idx, value, args_count, kw_count;
+  GetSetItem() : idx(), value(), args_count(), kw_count() { reset(); }
+  int __getitem__(int idx) {
+    this->idx = idx;
+    return 123;
+  }
+  void __setitem__(int idx, PyObject* value) {
+    this->idx = idx;
+    this->value = value ? (int)PyLong_AsLong(value) : -11;
+  }
+  void __call__(PyObject* args, PyObject* kw) {
+    this->args_count = args ? (int)PyTuple_Size(args) : -11;
+    this->kw_count = kw ? (int)PyDict_Size(kw) : -11;
+  }
+  void reset() {
+    idx = -100;
+    value = -100;
+    args_count = -100;
+    kw_count = -100;
+  }
+};
+%}

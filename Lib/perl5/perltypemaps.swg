@@ -32,7 +32,7 @@
 
 
 /* ------------------------------------------------------------
- *  Unified typemap section
+ *  Unified Typemap Library section
  * ------------------------------------------------------------ */
 
 /* director support in Perl is experimental */
@@ -56,7 +56,9 @@
 %define %set_output(obj) $result = obj; argvi++ %enddef
 
 /* append output */
-%define %append_output(obj) if (argvi >= items) EXTEND(sp, argvi+1); %set_output(obj) %enddef
+%define %append_output(obj)
+if (argvi >= items) EXTEND(sp, argvi+1);
+%set_output(obj) %enddef
 
 /* variable output */
 %define %set_varoutput(obj) sv_setsv($result,obj)  %enddef
@@ -75,7 +77,7 @@
 %typemap(throws) Swig::DirectorException
 %{ sv_setsv(ERRSV, $1.getNative()); SWIG_fail; %}
 
-/* Include the unified typemap library */
+/* Include the Unified Typemap Library */
 %include <typemaps/swigtypemaps.swg>
 
 /*  ------------------------------------------------------------
@@ -95,7 +97,7 @@
     "sv_setiv(SvRV($result), PTR2IV(&$1));";
 
 %typemap(varout,type="$1_descriptor") SWIGTYPE (CLASS::*) {
-  SWIG_MakePackedObj($result, (void *) &$1, sizeof($1_type), $1_descriptor);
+  SWIG_MakePackedObj($result, (void *) &$1, sizeof($1), $1_descriptor);
 }
 
 %typemap(varout) SWIGTYPE *const = SWIGTYPE *;

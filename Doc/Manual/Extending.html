@@ -7,7 +7,7 @@
 </head>
 
 <body bgcolor="#ffffff">
-<H1><a name="Extending">39 Extending SWIG to support new languages</a></H1>
+<H1><a name="Extending">40 Extending SWIG to support new languages</a></H1>
 <!-- INDEX -->
 <div class="sectiontoc">
 <ul>
@@ -69,6 +69,7 @@
 <ul>
 <li><a href="#Extending_supported_status">Supported status</a>
 <li><a href="#Extending_experimental_status">Experimental status</a>
+<li><a href="#Extending_deprecated_status">Deprecated status</a>
 </ul>
 <li><a href="#Extending_prerequisites">Prerequisites for adding a new language module to the SWIG distribution</a>
 </ul>
@@ -81,23 +82,26 @@
 
 
 
-<H2><a name="Extending_nn2">39.1 Introduction</a></H2>
+<H2><a name="Extending_nn2">40.1 Introduction</a></H2>
 
 
 <p>
-This chapter describes SWIG's internal organization and the process by which
-new target languages can be developed.    First, a brief word of warning---SWIG
-is continually evolving.
-The information in this chapter is mostly up to
-date, but changes are ongoing.   Expect a few inconsistencies.
+This chapter primarily describes SWIG's internal organization and the process by which
+new target languages can be developed.
+It also provides details for debugging and extending existing target languages and functionality.
 </p>
 
 <p>
+First, a brief word of warning---SWIG
+is continually evolving.
+The information in this chapter is mostly up to
+date, but changes are ongoing.   Expect a few inconsistencies.
+
 Also, this chapter is not meant to be a hand-holding tutorial.  As a starting point,
 you should probably look at one of SWIG's existing modules.
 </p>
 
-<H2><a name="Extending_nn3">39.2 Prerequisites</a></H2>
+<H2><a name="Extending_nn3">40.2 Prerequisites</a></H2>
 
 
 <p>
@@ -127,7 +131,7 @@ obvious, but almost all SWIG directives as well as the low-level generation of
 wrapper code are driven by C++ datatypes.
 </p>
 
-<H2><a name="Extending_nn4">39.3 The Big Picture</a></H2>
+<H2><a name="Extending_nn4">40.3 The Big Picture</a></H2>
 
 
 <p>
@@ -164,7 +168,7 @@ role in making the system work.  For example, both typemaps and declaration anno
 based on pattern matching and interact heavily with the underlying type system.
 </p>
 
-<H2><a name="Extending_nn5">39.4 Execution Model</a></H2>
+<H2><a name="Extending_nn5">40.4 Execution Model</a></H2>
 
 
 <p>
@@ -209,7 +213,7 @@ latter stage of compilation.
 The next few sections briefly describe some of these stages.
 </p>
 
-<H3><a name="Extending_nn6">39.4.1 Preprocessing</a></H3>
+<H3><a name="Extending_nn6">40.4.1 Preprocessing</a></H3>
 
 
 <p>
@@ -284,13 +288,17 @@ or <tt>perl5.swg</tt>.
 
 <p>
 As a debugging aid, the text that SWIG feeds to its C++ parser can be
-obtained by running <tt>swig -E interface.i</tt>.  This output
-probably isn't too useful in general, but it will show how macros have
+obtained by running <tt>swig -E interface.i</tt>.
+This option, like the same option that regular C/C++ compilers support, generates the preprocessed output
+and is useful for looking at how macros have
 been expanded as well as everything else that goes into the low-level
 construction of the wrapper code.
+Also, like a regular C/C++ compiler, the preprocessed output can be generated in one invocation and
+then fed back in with a second invocation.
+This is the approach that the <a href="CCache.html#CCache">CCache</a> tool uses as part of its strategy to speed up repeated builds with the same inputs.
 </p>
 
-<H3><a name="Extending_nn7">39.4.2 Parsing</a></H3>
+<H3><a name="Extending_nn7">40.4.2 Parsing</a></H3>
 
 
 <p>
@@ -391,7 +399,7 @@ returning a <tt>foo</tt> and taking types <tt>a</tt> and <tt>b</tt> as
 arguments).
 </p>
 
-<H3><a name="Extending_nn8">39.4.3 Parse Trees</a></H3>
+<H3><a name="Extending_nn8">40.4.3 Parse Trees</a></H3>
 
 
 <p>
@@ -462,191 +470,225 @@ the stage being processed.
 There are a number of other parse tree display options, for example, <tt>swig -debug-module &lt;n&gt;</tt> will
 avoid displaying system parse information and only display the parse tree pertaining to the user's module at
 stage <tt>n</tt> of processing.
+Adding the <tt>-debug-quiet</tt> option is recommended as it removes some noise which is not usually needed,
+that is, the display of many linked list pointers and symbol table pointers.
+See <a href="Extending.html#Extending_debugging_options">Debugging Options</a> for a full list.
 </p>
 
 <div class="shell">
 <pre>
-$ swig -c++ -python -debug-module 4 example.i
-      +++ include ----------------------------------------
-      | name         - "example.i"
+$ swig -c++ -python -debug-module 1 -debug-quiet example.i
+debug-module stage 1
++++ module ----------------------------------------
+| name         - "example"
+| 
++++ insert ----------------------------------------
+| code         - "\n#include \"example.h\"\n"
+| 
++++ include ----------------------------------------
+| name         - "example.h"
 
-            +++ module ----------------------------------------
-            | name         - "example"
-            |
-            +++ insert ----------------------------------------
-            | code         - "\n#include \"example.h\"\n"
-            |
-            +++ include ----------------------------------------
-            | name         - "example.h"
+      +++ class ----------------------------------------
+      | abstracts    - 0x7f4f15182930
+      | allows_typedef - "1"
+      | kind         - "class"
+      | name         - "Shape"
+      | sym:name     - "Shape"
 
-                  +++ class ----------------------------------------
-                  | abstract     - "1"
-                  | sym:name     - "Shape"
-                  | name         - "Shape"
-                  | kind         - "class"
-                  | symtab       - 0x40194140
-                  | sym:symtab   - 0x40191078
+            +++ access ----------------------------------------
+            | kind         - "public"
+            | 
+            +++ constructor ----------------------------------------
+            | access       - "public"
+            | code         - "{\n    nshapes++;\n  }"
+            | decl         - "f()."
+            | feature:new  - "1"
+            | ismember     - "1"
+            | name         - "Shape"
+            | sym:name     - "Shape"
+            | 
+            +++ destructor ----------------------------------------
+            | access       - "public"
+            | code         - "{\n    nshapes--;\n  }"
+            | decl         - "f()."
+            | ismember     - "1"
+            | name         - "~Shape"
+            | storage      - "virtual"
+            | sym:name     - "~Shape"
+            | 
+            +++ cdecl ----------------------------------------
+            | access       - "public"
+            | decl         - ""
+            | ismember     - "1"
+            | kind         - "variable"
+            | name         - "x"
+            | sym:name     - "x"
+            | type         - "double"
+            | 
+            +++ cdecl ----------------------------------------
+            | access       - "public"
+            | decl         - ""
+            | ismember     - "1"
+            | kind         - "variable"
+            | name         - "y"
+            | sym:name     - "y"
+            | type         - "double"
+            | 
+            +++ cdecl ----------------------------------------
+            | access       - "public"
+            | decl         - "f(double,double)."
+            | ismember     - "1"
+            | kind         - "function"
+            | name         - "move"
+            | parms        - 'double dx,double dy'
+            | sym:name     - "move"
+            | type         - "void"
+            | 
+            +++ cdecl ----------------------------------------
+            | abstract     - "1"
+            | access       - "public"
+            | decl         - "f()."
+            | ismember     - "1"
+            | kind         - "function"
+            | name         - "area"
+            | storage      - "virtual"
+            | sym:name     - "area"
+            | type         - "double"
+            | value        - "0"
+            | valuetype    - "int"
+            | 
+            +++ cdecl ----------------------------------------
+            | abstract     - "1"
+            | access       - "public"
+            | decl         - "f()."
+            | ismember     - "1"
+            | kind         - "function"
+            | name         - "perimeter"
+            | storage      - "virtual"
+            | sym:name     - "perimeter"
+            | type         - "double"
+            | value        - "0"
+            | valuetype    - "int"
+            | 
+            +++ cdecl ----------------------------------------
+            | access       - "public"
+            | decl         - ""
+            | ismember     - "1"
+            | kind         - "variable"
+            | name         - "nshapes"
+            | storage      - "static"
+            | sym:name     - "nshapes"
+            | type         - "int"
+            | 
+      +++ class ----------------------------------------
+      | allows_typedef - "1"
+      | baselist     - 0x7f4f15182ad0
+      | kind         - "class"
+      | name         - "Circle"
+      | privatebaselist - 0x7f4f15182b10
+      | protectedbaselist - 0x7f4f15182af0
+      | sym:name     - "Circle"
 
-                        +++ access ----------------------------------------
-                        | kind         - "public"
-                        |
-                        +++ constructor ----------------------------------------
-                        | sym:name     - "Shape"
-                        | name         - "Shape"
-                        | decl         - "f()."
-                        | code         - "{\n    nshapes++;\n  }"
-                        | sym:symtab   - 0x40194140
-                        |
-                        +++ destructor ----------------------------------------
-                        | sym:name     - "~Shape"
-                        | name         - "~Shape"
-                        | storage      - "virtual"
-                        | code         - "{\n    nshapes--;\n  }"
-                        | sym:symtab   - 0x40194140
-                        |
-                        +++ cdecl ----------------------------------------
-                        | sym:name     - "x"
-                        | name         - "x"
-                        | decl         - ""
-                        | type         - "double"
-                        | sym:symtab   - 0x40194140
-                        |
-                        +++ cdecl ----------------------------------------
-                        | sym:name     - "y"
-                        | name         - "y"
-                        | decl         - ""
-                        | type         - "double"
-                        | sym:symtab   - 0x40194140
-                        |
-                        +++ cdecl ----------------------------------------
-                        | sym:name     - "move"
-                        | name         - "move"
-                        | decl         - "f(double, double)."
-                        | parms        - double, double
-                        | type         - "void"
-                        | sym:symtab   - 0x40194140
-                        |
-                        +++ cdecl ----------------------------------------
-                        | sym:name     - "area"
-                        | name         - "area"
-                        | decl         - "f(void)."
-                        | parms        - void
-                        | storage      - "virtual"
-                        | value        - "0"
-                        | type         - "double"
-                        | sym:symtab   - 0x40194140
-                        |
-                        +++ cdecl ----------------------------------------
-                        | sym:name     - "perimeter"
-                        | name         - "perimeter"
-                        | decl         - "f(void)."
-                        | parms        - void
-                        | storage      - "virtual"
-                        | value        - "0"
-                        | type         - "double"
-                        | sym:symtab   - 0x40194140
-                        |
-                        +++ cdecl ----------------------------------------
-                        | sym:name     - "nshapes"
-                        | name         - "nshapes"
-                        | decl         - ""
-                        | storage      - "static"
-                        | type         - "int"
-                        | sym:symtab   - 0x40194140
-                        |
-                  +++ class ----------------------------------------
-                  | sym:name     - "Circle"
-                  | name         - "Circle"
-                  | kind         - "class"
-                  | bases        - 0x40194510
-                  | symtab       - 0x40194538
-                  | sym:symtab   - 0x40191078
+            +++ access ----------------------------------------
+            | kind         - "private"
+            | 
+            +++ cdecl ----------------------------------------
+            | access       - "private"
+            | decl         - ""
+            | ismember     - "1"
+            | kind         - "variable"
+            | name         - "radius"
+            | type         - "double"
+            | 
+            +++ access ----------------------------------------
+            | kind         - "public"
+            | 
+            +++ constructor ----------------------------------------
+            | access       - "public"
+            | code         - "{ }"
+            | decl         - "f(double)."
+            | feature:new  - "1"
+            | ismember     - "1"
+            | name         - "Circle"
+            | parms        - 'double r'
+            | sym:name     - "Circle"
+            | 
+            +++ cdecl ----------------------------------------
+            | access       - "public"
+            | decl         - "f()."
+            | ismember     - "1"
+            | kind         - "function"
+            | name         - "area"
+            | storage      - "virtual"
+            | sym:name     - "area"
+            | type         - "double"
+            | 
+            +++ cdecl ----------------------------------------
+            | access       - "public"
+            | decl         - "f()."
+            | ismember     - "1"
+            | kind         - "function"
+            | name         - "perimeter"
+            | storage      - "virtual"
+            | sym:name     - "perimeter"
+            | type         - "double"
+            | 
+      +++ class ----------------------------------------
+      | allows_typedef - "1"
+      | baselist     - 0x7f4f15183830
+      | kind         - "class"
+      | name         - "Square"
+      | privatebaselist - 0x7f4f15183870
+      | protectedbaselist - 0x7f4f15183850
+      | sym:name     - "Square"
 
-                        +++ access ----------------------------------------
-                        | kind         - "private"
-                        |
-                        +++ cdecl ----------------------------------------
-                        | name         - "radius"
-                        | decl         - ""
-                        | type         - "double"
-                        |
-                        +++ access ----------------------------------------
-                        | kind         - "public"
-                        |
-                        +++ constructor ----------------------------------------
-                        | sym:name     - "Circle"
-                        | name         - "Circle"
-                        | parms        - double
-                        | decl         - "f(double)."
-                        | code         - "{ }"
-                        | sym:symtab   - 0x40194538
-                        |
-                        +++ cdecl ----------------------------------------
-                        | sym:name     - "area"
-                        | name         - "area"
-                        | decl         - "f(void)."
-                        | parms        - void
-                        | storage      - "virtual"
-                        | type         - "double"
-                        | sym:symtab   - 0x40194538
-                        |
-                        +++ cdecl ----------------------------------------
-                        | sym:name     - "perimeter"
-                        | name         - "perimeter"
-                        | decl         - "f(void)."
-                        | parms        - void
-                        | storage      - "virtual"
-                        | type         - "double"
-                        | sym:symtab   - 0x40194538
-                        |
-                  +++ class ----------------------------------------
-                  | sym:name     - "Square"
-                  | name         - "Square"
-                  | kind         - "class"
-                  | bases        - 0x40194760
-                  | symtab       - 0x40194788
-                  | sym:symtab   - 0x40191078
-
-                        +++ access ----------------------------------------
-                        | kind         - "private"
-                        |
-                        +++ cdecl ----------------------------------------
-                        | name         - "width"
-                        | decl         - ""
-                        | type         - "double"
-                        |
-                        +++ access ----------------------------------------
-                        | kind         - "public"
-                        |
-                        +++ constructor ----------------------------------------
-                        | sym:name     - "Square"
-                        | name         - "Square"
-                        | parms        - double
-                        | decl         - "f(double)."
-                        | code         - "{ }"
-                        | sym:symtab   - 0x40194788
-                        |
-                        +++ cdecl ----------------------------------------
-                        | sym:name     - "area"
-                        | name         - "area"
-                        | decl         - "f(void)."
-                        | parms        - void
-                        | storage      - "virtual"
-                        | type         - "double"
-                        | sym:symtab   - 0x40194788
-                        |
-                        +++ cdecl ----------------------------------------
-                        | sym:name     - "perimeter"
-                        | name         - "perimeter"
-                        | decl         - "f(void)."
-                        | parms        - void
-                        | storage      - "virtual"
-                        | type         - "double"
-                        | sym:symtab   - 0x40194788
+            +++ access ----------------------------------------
+            | kind         - "private"
+            | 
+            +++ cdecl ----------------------------------------
+            | access       - "private"
+            | decl         - ""
+            | ismember     - "1"
+            | kind         - "variable"
+            | name         - "width"
+            | type         - "double"
+            | 
+            +++ access ----------------------------------------
+            | kind         - "public"
+            | 
+            +++ constructor ----------------------------------------
+            | access       - "public"
+            | code         - "{ }"
+            | decl         - "f(double)."
+            | feature:new  - "1"
+            | ismember     - "1"
+            | name         - "Square"
+            | parms        - 'double w'
+            | sym:name     - "Square"
+            | 
+            +++ cdecl ----------------------------------------
+            | access       - "public"
+            | decl         - "f()."
+            | ismember     - "1"
+            | kind         - "function"
+            | name         - "area"
+            | storage      - "virtual"
+            | sym:name     - "area"
+            | type         - "double"
+            | 
+            +++ cdecl ----------------------------------------
+            | access       - "public"
+            | decl         - "f()."
+            | ismember     - "1"
+            | kind         - "function"
+            | name         - "perimeter"
+            | storage      - "virtual"
+            | sym:name     - "perimeter"
+            | type         - "double"
 </pre>
 </div>
 
-<H3><a name="Extending_nn9">39.4.4 Attribute namespaces</a></H3>
+<H3><a name="Extending_nn9">40.4.4 Attribute namespaces</a></H3>
 
 
 <p>
@@ -665,7 +707,7 @@ that matches the name of the target language.  For example, <tt>python:foo</tt> 
 <tt>perl:foo</tt>.
 </p>
 
-<H3><a name="Extending_nn10">39.4.5 Symbol Tables</a></H3>
+<H3><a name="Extending_nn10">40.4.5 Symbol Tables</a></H3>
 
 
 <p>
@@ -698,31 +740,28 @@ The parse tree can be viewed after the final stage of processing by running SWIG
 
 <div class="shell">
 <pre>
-$ swig -debug-top 4 example.i
+$ swig -debug-top 1 -debug-quiet example.i
 ...
             +++ cdecl ----------------------------------------
-            | sym:name     - "foo_i"
-            | name         - "foo"
             | decl         - "f(int)."
+            | name         - "foo"
             | parms        - int
+            | sym:name     - "foo_i"
             | type         - "void"
-            | sym:symtab   - 0x40165078
             |
             +++ cdecl ----------------------------------------
-            | sym:name     - "foo_d"
-            | name         - "foo"
             | decl         - "f(double)."
+            | name         - "foo"
             | parms        - double
+            | sym:name     - "foo_d"
             | type         - "void"
-            | sym:symtab   - 0x40165078
             |
             +++ cdecl ----------------------------------------
-            | sym:name     - "foo"
-            | name         - "foo"
             | decl         - "f(p.Bar)."
+            | name         - "foo"
             | parms        - Bar *
+            | sym:name     - "foo"
             | type         - "void"
-            | sym:symtab   - 0x40165078
 </pre>
 </div>
 
@@ -756,7 +795,7 @@ example.i:5. Previous declaration is foo_i(int )
 </pre>
 </div>
 
-<H3><a name="Extending_nn11">39.4.6 The %feature directive</a></H3>
+<H3><a name="Extending_nn11">40.4.6 The %feature directive</a></H3>
 
 
 <p>
@@ -787,19 +826,18 @@ public:
 The behavior of <tt>%feature</tt> is very easy to describe--it simply
 attaches a new attribute to any parse tree node that matches the
 given prototype.   When a feature is added, it shows up as an attribute in the <tt>feature:</tt> namespace.
-You can see this when running with the <tt>-debug-top 4</tt> option.   For example:
+You can see this when running with the <tt>-debug-top 4 -debug-quiet</tt> option.   For example:
 </p>
 
 <div class="shell">
 <pre>
  +++ cdecl ----------------------------------------
- | sym:name     - "getitem"
- | name         - "getitem"
  | decl         - "f(int).p."
- | parms        - int
- | type         - "Object"
  | feature:except - "{\n    try {\n       $action\n    } catc..."
- | sym:symtab   - 0x40168ac8
+ | name         - "getitem"
+ | parms        - int
+ | sym:name     - "getitem"
+ | type         - "Object"
  |
 </pre>
 </div>
@@ -812,7 +850,7 @@ For example, the exception code above is simply
 stored without any modifications.
 </p>
 
-<H3><a name="Extending_nn12">39.4.7 Code Generation</a></H3>
+<H3><a name="Extending_nn12">40.4.7 Code Generation</a></H3>
 
 
 <p>
@@ -934,7 +972,7 @@ public :
 The role of these functions is described shortly.
 </p>
 
-<H3><a name="Extending_nn13">39.4.8 SWIG and XML</a></H3>
+<H3><a name="Extending_nn13">40.4.8 SWIG and XML</a></H3>
 
 
 <p>
@@ -947,7 +985,58 @@ internal data structures, it may be useful to keep XML in the back of
 your mind as a model.
 </p>
 
-<H2><a name="Extending_nn14">39.5 Primitive Data Structures</a></H2>
+<p>
+In addition to the options beginning <tt>-debug-</tt> for dumping out SWIG's parse tree in a simple text format,
+the parse tree can also be dumped as XML.
+There are three options below, where <tt>file</tt> specifies the name of a file for generating the resulting XML into:
+</p>
+
+<ol>
+<li>
+<p>
+<tt>-xmlout &lt;file&gt;</tt>
+</p>
+<p>
+Use this XML option in addition to any target language options.
+The parse tree is dumped after the final stage of processing, that is, after the target language has finished processing.
+It is useful for seeing the parse tree at stage 4 after any target language processing.
+The parse tree dumped is very similar in content to that generated by <tt>-debug-top 4</tt>.
+</p>
+</li>
+
+<li>
+<p>
+<tt>-xml -o &lt;file&gt;</tt>
+</p>
+<p>
+Use this XML option without specifying a target language.
+The parse tree that is dumped is the same as if there was a no target language option.
+It is useful for seeing the parse tree at stage 3, which is the same as stage 4, as there is no target language processing.
+The parse tree dumped is very similar in content to that generated by <tt>-debug-top 3</tt>.
+</p>
+</li>
+
+<li>
+<p>
+<tt>-xml -xmllite -o &lt;file&gt;</tt>
+</p>
+<p>
+Same as above, except the addition of <tt>-xmllite</tt> reduces the output by skipping some type information, that is, the typescope and typetab nodes.
+</p>
+</li>
+</ol>
+
+<p>
+The parse tree generated using <tt>-xmlout</tt> is much bigger than that using <tt>-xml</tt> as the target languages
+process numerous extra SWIG system files and also add to the parse tree quite considerably in stage 4.
+</p>
+
+<p>
+The XML is a dump of SWIG's internal parse tree and as such it is subject to change at any
+time as and when SWIG's implementation changes.
+</p>
+
+<H2><a name="Extending_nn14">40.5 Primitive Data Structures</a></H2>
 
 
 <p>
@@ -993,7 +1082,7 @@ typedef Hash   Typetab;
 </pre>
 </div>
 
-<H3><a name="Extending_nn15">39.5.1 Strings</a></H3>
+<H3><a name="Extending_nn15">40.5.1 Strings</a></H3>
 
 
 <p>
@@ -1132,9 +1221,14 @@ DOH_REPLACE_FIRST     - Replace first occurrence only.
 Returns the number of replacements made (if any).
 </p>
 
+<p>
+At most one of <tt>DOH_REPLACE_ANY</tt> and <tt>DOH_REPLACE_FIRST</tt> should be specified.
+<tt>DOH_REPLACE_ANY</tt> is the default if neither is specified.
+</p>
+
 </div>
 
-<H3><a name="Extending_nn16">39.5.2 Hashes</a></H3>
+<H3><a name="Extending_nn16">40.5.2 Hashes</a></H3>
 
 
 <p>
@@ -1210,8 +1304,16 @@ if an object was removed, 0 otherwise.
 Returns the list of hash table keys.
 </div>
 
+<p>
+<b><tt>List *SortedKeys(Hash *h, int (*cmp) (const DOH *, const DOH *))</tt></b>
+</p>
 
-<H3><a name="Extending_nn17">39.5.3 Lists</a></H3>
+<div class="indent">
+Returns the list of sorted hash table keys.
+</div>
+
+
+<H3><a name="Extending_nn17">40.5.3 Lists</a></H3>
 
 
 <p>
@@ -1300,7 +1402,7 @@ If <tt>t</tt> is not a standard object, it is assumed to be a <tt>char *</tt>
 and is used to create a String object.
 </div>
 
-<H3><a name="Extending_nn18">39.5.4 Common operations</a></H3>
+<H3><a name="Extending_nn18">40.5.4 Common operations</a></H3>
 
 
 The following operations are applicable to all datatypes.
@@ -1355,7 +1457,7 @@ objects and report errors.
 Gets the line number associated with <tt>x</tt>.
 </div>
 
-<H3><a name="Extending_nn19">39.5.5 Iterating over Lists and Hashes</a></H3>
+<H3><a name="Extending_nn19">40.5.5 Iterating over Lists and Hashes</a></H3>
 
 
 To iterate over the elements of a list or a hash table, the following functions are used:
@@ -1400,7 +1502,7 @@ for (j = First(j); j.item; j= Next(j)) {
 
 </div>
 
-<H3><a name="Extending_nn20">39.5.6 I/O</a></H3>
+<H3><a name="Extending_nn20">40.5.6 I/O</a></H3>
 
 
 Special I/O functions are used for all internal I/O.  These operations
@@ -1534,7 +1636,7 @@ Printf(f, "%s\n", s);
 Similarly, the preprocessor and parser all operate on string-files.
 </p>
 
-<H2><a name="Extending_nn21">39.6 Navigating and manipulating parse trees</a></H2>
+<H2><a name="Extending_nn21">40.6 Navigating and manipulating parse trees</a></H2>
 
 
 Parse trees are built as collections of hash tables.   Each node is a hash table in which
@@ -1668,7 +1770,7 @@ Deletes a node from the parse tree.  Deletion reconnects siblings and properly u
 the parent so that sibling nodes are unaffected.
 </div>
 
-<H2><a name="Extending_nn22">39.7 Working with attributes</a></H2>
+<H2><a name="Extending_nn22">40.7 Working with attributes</a></H2>
 
 
 <p>
@@ -1785,7 +1887,7 @@ the attribute is optional.   <tt>Swig_restore()</tt> must always be called after
 function.
 </div>
 
-<H2><a name="Extending_nn23">39.8 Type system</a></H2>
+<H2><a name="Extending_nn23">40.8 Type system</a></H2>
 
 
 <p>
@@ -1794,7 +1896,7 @@ pointers, references, and pointers to members.   A detailed discussion of
 type theory is impossible here.   However, let's cover the highlights.
 </p>
 
-<H3><a name="Extending_nn24">39.8.1 String encoding of types</a></H3>
+<H3><a name="Extending_nn24">40.8.1 String encoding of types</a></H3>
 
 
 <p>
@@ -1840,6 +1942,8 @@ r.                    C++ reference
 m(class).             Member pointer to class
 f(args).              Function.
 q(qlist).             Qualifiers
+auto.                 C++20 constrained placeholder marker (paired with c(...))
+c(id)                 Base carrying the concept-id of a C++20 'Concept auto'
 </pre>
 </div>
 
@@ -1851,35 +1955,10 @@ special base type of <tt>v(...)</tt>.
 </p>
 
 <p>
-If you want to experiment with type encodings, the raw type strings can
-be inserted into an interface file using backticks `` wherever a type
-is expected.  For instance, here is
-an extremely perverted example:
-</p>
-
-<div class="diagram">
-<pre>
-`p.a(10).p.f(int, p.f(int).int)` foo(int, int (*x)(int));
-</pre>
-</div>
-
-<p>
-This corresponds to the immediately obvious C declaration:
-</p>
-
-<div class="diagram">
-<pre>
-(*(*foo(int, int (*)(int)))[10])(int, int (*)(int));
-</pre>
-</div>
-
-<p>
-Aside from the potential use of this declaration on a C programming quiz,
-it motivates the use of the special SWIG encoding of types.   The SWIG
-encoding is much easier to work with because types can be easily examined,
-modified, and constructed using simple string operations (comparison,
-substrings, concatenation, etc.).   For example, in the parser, a declaration
-like this
+SWIG's encoding as it is much easier to work with than the C/C++ type syntax -
+types can be easily examined, modified, and constructed using simple string
+operations (comparison, substrings, concatenation, etc.).   For
+example, in the parser, a declaration like this
 </p>
 
 <div class="code">
@@ -1895,7 +1974,7 @@ make the final type, the two parts are just joined together using
 string concatenation.
 </p>
 
-<H3><a name="Extending_nn25">39.8.2 Type construction</a></H3>
+<H3><a name="Extending_nn25">40.8.2 Type construction</a></H3>
 
 
 <p>
@@ -2064,7 +2143,7 @@ Returns the prefix of a type. For example, if <tt>ty</tt> is
 <tt>ty</tt> is unmodified.
 </div>
 
-<H3><a name="Extending_nn26">39.8.3 Type tests</a></H3>
+<H3><a name="Extending_nn26">40.8.3 Type tests</a></H3>
 
 
 <p>
@@ -2151,7 +2230,7 @@ Checks if <tt>ty</tt> is a varargs type.
 Checks if <tt>ty</tt> is a templatized type.
 </div>
 
-<H3><a name="Extending_nn27">39.8.4 Typedef and inheritance</a></H3>
+<H3><a name="Extending_nn27">40.8.4 Typedef and inheritance</a></H3>
 
 
 <p>
@@ -2253,7 +2332,7 @@ Fully reduces <tt>ty</tt> according to typedef rules.  Resulting datatype
 will consist only of primitive typenames.
 </div>
 
-<H3><a name="Extending_nn28">39.8.5 Lvalues</a></H3>
+<H3><a name="Extending_nn28">40.8.5 Lvalues</a></H3>
 
 
 <p>
@@ -2290,7 +2369,7 @@ Literal y;    // type = 'Literal', ltype='p.char'
 </pre>
 </div>
 
-<H3><a name="Extending_nn29">39.8.6 Output functions</a></H3>
+<H3><a name="Extending_nn29">40.8.6 Output functions</a></H3>
 
 
 <p>
@@ -2352,7 +2431,7 @@ SWIG, but is most commonly associated with type-descriptor objects
 that appear in wrappers (e.g., <tt>SWIGTYPE_p_double</tt>).
 </div>
 
-<H2><a name="Extending_nn30">39.9 Parameters</a></H2>
+<H2><a name="Extending_nn30">40.9 Parameters</a></H2>
 
 
 <p>
@@ -2451,7 +2530,7 @@ included.  Used to emit prototypes.
 Returns the number of required (non-optional) arguments in <tt>p</tt>.
 </div>
 
-<H2><a name="Extending_nn31">39.10 Writing a Language Module</a></H2>
+<H2><a name="Extending_nn31">40.10 Writing a Language Module</a></H2>
 
 
 <p>
@@ -2466,7 +2545,7 @@ describes the creation of a minimal Python module.   You should be able to extra
 this to other languages.
 </p>
 
-<H3><a name="Extending_nn32">39.10.1 Execution model</a></H3>
+<H3><a name="Extending_nn32">40.10.1 Execution model</a></H3>
 
 
 <p>
@@ -2476,7 +2555,7 @@ the parsing of command line options, all aspects of code generation are controll
 different methods of the <tt>Language</tt> that must be defined by your module.
 </p>
 
-<H3><a name="Extending_starting_out">39.10.2 Starting out</a></H3>
+<H3><a name="Extending_starting_out">40.10.2 Starting out</a></H3>
 
 
 <p>
@@ -2584,7 +2663,7 @@ that activates your module. For example, <tt>swig -python foo.i</tt>. The
 messages from your new module should appear.
 </p>
 
-<H3><a name="Extending_nn34">39.10.3 Command line options</a></H3>
+<H3><a name="Extending_nn34">40.10.3 Command line options</a></H3>
 
 
 <p>
@@ -2643,7 +2722,7 @@ to mark the option as valid.   If you forget to do this, SWIG will terminate wit
 unrecognized command line option error.
 </p>
 
-<H3><a name="Extending_nn35">39.10.4 Configuration and preprocessing</a></H3>
+<H3><a name="Extending_nn35">40.10.4 Configuration and preprocessing</a></H3>
 
 
 <p>
@@ -2665,9 +2744,6 @@ void main(int argc, char *argv[]) {
 
   /* Set language-specific configuration file */
   SWIG_config_file("python.swg");
-
-  /* Set typemap language (historical) */
-  SWIG_typemap_lang("python");
 }
 </pre>
 </div>
@@ -2692,7 +2768,7 @@ an implementation file <tt>python.cxx</tt> and a configuration file
 <tt>python.swg</tt>.
 </p>
 
-<H3><a name="Extending_nn36">39.10.5 Entry point to code generation</a></H3>
+<H3><a name="Extending_nn36">40.10.5 Entry point to code generation</a></H3>
 
 
 <p>
@@ -2750,7 +2826,7 @@ int Python::top(Node *n) {
 </pre>
 </div>
 
-<H3><a name="Extending_nn37">39.10.6 Module I/O and wrapper skeleton</a></H3>
+<H3><a name="Extending_nn37">40.10.6 Module I/O and wrapper skeleton</a></H3>
 
 
 <!-- please report bugs in this section to mgossage -->
@@ -2802,7 +2878,7 @@ int Python::top(Node *n) {
   f_begin = NewFile(outfile, "w", SWIG_output_files());
   if (!f_begin) {
     FileErrorDisplay(outfile);
-    SWIG_exit(EXIT_FAILURE);
+    Exit(EXIT_FAILURE);
   }
   f_runtime = NewString("");
   f_init = NewString("");
@@ -2898,7 +2974,7 @@ functionWrapper   : void Shape_y_set(Shape *self, double y)
 </pre>
 </div>
 
-<H3><a name="Extending_nn38">39.10.7 Low-level code generators</a></H3>
+<H3><a name="Extending_nn38">40.10.7 Low-level code generators</a></H3>
 
 
 <!-- please report bugs in this section to mgossage -->
@@ -2986,7 +3062,7 @@ virtual int functionWrapper(Node *n) {
   /* create the wrapper object */
   Wrapper *wrapper = NewWrapper();
 
-  /* create the functions wrappered name */
+  /* create the wrapper function's name */
   String *wname = Swig_name_wrapper(iname);
 
   /* deal with overloading */
@@ -2995,7 +3071,7 @@ virtual int functionWrapper(Node *n) {
   /* write the wrapper function definition */
   Printv(wrapper-&gt;def, "RETURN_TYPE ", wname, "(ARGS) {", NIL);
 
-  /* if any additional local variable needed, add them now */
+  /* if any additional local variables are needed, add them now */
   ...
 
   /* write the list of locals/arguments required */
@@ -3031,7 +3107,7 @@ virtual int functionWrapper(Node *n) {
   /* Close the function(error) */
   Printv(wrapper-&gt;code, "return ERROR;\n", "}\n", NIL);
 
-  /* final substititions if applicable */
+  /* final substitutions if applicable */
   ...
 
   /* Dump the function out */
@@ -3052,7 +3128,7 @@ but without the typemaps, there is still work to do.
 </p>
 
 
-<H3><a name="Extending_configuration_files">39.10.8 Configuration files</a></H3>
+<H3><a name="Extending_configuration_files">40.10.8 Configuration files</a></H3>
 
 
 <!-- please report bugs in this section to ttn -->
@@ -3107,7 +3183,7 @@ As you can see, most usages are direct.
 <dd> This file is processed by
 
 <p>
-<A HREF="http://www.gnu.org/software/autoconf/">autoconf</A>
+<A HREF="https://www.gnu.org/software/autoconf/">autoconf</A>
 to generate the <TT>configure</TT> script.  This is where you
 need to add shell script fragments and autoconf macros to detect the
 presence of whatever development support your language module requires,
@@ -3196,7 +3272,7 @@ politely displays the ignoring language message.
 </dl>
 
 
-<H3><a name="Extending_nn40">39.10.9 Runtime support</a></H3>
+<H3><a name="Extending_nn40">40.10.9 Runtime support</a></H3>
 
 
 <p>
@@ -3205,7 +3281,7 @@ Discuss the kinds of functions typically needed for SWIG runtime support (e.g.
 the SWIG files that implement those functions.
 </p>
 
-<H3><a name="Extending_nn41">39.10.10 Standard library files</a></H3>
+<H3><a name="Extending_nn41">40.10.10 Standard library files</a></H3>
 
 
 <p>
@@ -3224,7 +3300,7 @@ The following are the minimum that are usually supported:
 Please copy these and modify for any new language.
 </p>
 
-<H3><a name="Extending_nn42">39.10.11 User examples</a></H3>
+<H3><a name="Extending_nn42">40.10.11 User examples</a></H3>
 
 
 <p>
@@ -3253,7 +3329,7 @@ during this process, see the section on <a href="#Extending_configuration_files"
 files</a>.
 </p>
 
-<H3><a name="Extending_test_suite">39.10.12 Test driven development and the test-suite</a></H3>
+<H3><a name="Extending_test_suite">40.10.12 Test driven development and the test-suite</a></H3>
 
 
 <p>
@@ -3312,7 +3388,7 @@ It is therefore essential that the runtime tests are written in a manner that di
 but error/exception out with an error message on stderr on failure.
 </p>
 
-<H4><a name="Extending_running_test_suite">39.10.12.1 Running the test-suite</a></H4>
+<H4><a name="Extending_running_test_suite">40.10.12.1 Running the test-suite</a></H4>
 
 
 <p>
@@ -3455,7 +3531,7 @@ Advanced usage of the test-suite facilitates running tools on some of the five s
 The make variables <tt>SWIGTOOL</tt> and <tt>RUNTOOL</tt> are used to specify a tool to respectively, invoke SWIG 
 and the execution of the runtime test.
 You are advised to view the <tt>Examples/test-suite/common.mk</tt> file for details but for a short summary,
-the classic usage is to use <a href="http://valgrind.org/">Valgrind</a> for memory checking.
+the classic usage is to use <a href="https://valgrind.org/">Valgrind</a> for memory checking.
 For example, checking for memory leaks when running the runtime test in the target language interpreter:
 </p>
 
@@ -3465,7 +3541,9 @@ make ret_by_value.ctest RUNTOOL="valgrind --leak-check=full"
 
 <p>
 This will probably make more sense if you look at the output of the above as it will show the exact commands being executed.
-SWIG can be analyzed for bad memory accesses using:
+SWIG can be analyzed for bad memory by first rebuilding swig with just the <tt>-g</tt> option.
+Also define DOH_DEBUG_MEMORY_POOLS, see <a href="#Extending_further_info"></a> section.
+SWIG can then be invoked via valgrind using:
 </p>
 
 <div class="shell"><pre>
@@ -3504,7 +3582,7 @@ It can be run in the same way as the other language test-suites, replacing [lang
 The test cases used and the way it works is described in <tt>Examples/test-suite/errors/Makefile.in</tt>.
 </p>
 
-<H3><a name="Extending_nn43">39.10.13 Documentation</a></H3>
+<H3><a name="Extending_nn43">40.10.13 Documentation</a></H3>
 
 
 <p>
@@ -3536,41 +3614,150 @@ Some topics that you'll want to be sure to address include:
      if available.
 </ul>
 
-<H3><a name="Extending_coding_style_guidelines">39.10.14 Coding style guidelines</a></H3>
+<H3><a name="Extending_coding_style_guidelines">40.10.14 Coding style guidelines</a></H3>
 
 
 <p>
-The coding guidelines for the C/C++ source code are pretty much K&amp;R C style.
-The style can be inferred from the existing code base and is
-largely dictated by the <tt>indent</tt> code beautifier tool set to K&amp;R style.
-The code can formatted using the make targets in the Source directory.
-Below is an example of how to format the emit.cxx file:
+The coding guidelines for the C/C++ source code are defined and implemented by the clang-format tool using
+the <tt>Source/.clang-format</tt> config file.
+Interested readers should take a look at the <a href="https://clang.llvm.org/docs/ClangFormat.html">ClangFormat documentation</a> for more details.
+SWIG developers are encouraged to use this ClangFormat documentation for setting up their chosen editor for integrating clang-format during editing and development.
 </p>
 
-<blockquote>
-<pre>
-$ cd Source
-$ make beautify-file INDENTFILE=Modules/emit.cxx
-</pre>
-</blockquote>
+<p>
+The clang-format tool is searched for during the configuration of SWIG and if found
+it will automatically be used to warn about code formatting discrepancies during the build.
+The tool can be invoked during compilation and linking of the SWIG executable.
+There are various make target which allow a developer to invoke clang-format
+to check the code format as well as reformat the code.
+These coding style guidelines are just for the SWIG C and C++ source code including header files.
+</p>
 
 <p>
-Of particular note is indentation is set to 2 spaces and a tab is used instead of 8 spaces.
-The generated C/C++ code should also follow this style as close as possible. However, tabs
-should be avoided as unlike the SWIG developers, users will never have consistent tab settings.
+How the tool is used during the development/building of SWIG depends on configure time options as follows:
+</p>
+
+<table BORDER summary="clang-format configure options">
+<tr>
+  <td><b>Configure options</b></td> <td><b>Description</b></td> <td><b>Recommended for</b></td>
+</tr>
+<tr>
+  <td>./configure</td> <td>Look for clang-format and only use if found (default)</td> <td>SWIG developers if clang-format is installed, everyone else if not installed</td>
+</tr>
+<tr>
+  <td>./configure --with-clang-format</td> <td>Look for clang-format and only use if found</td> <td>SWIG developers with a standard clang-format installation</td>
+</tr>
+<tr>
+<td>./configure --with-clang-format=&lt;path&gt;</td> <td>Use explicit/renamed clang-format binary</td> <td>SWIG developers with a non-standard clang-format installation</td>
+</tr>
+<tr>
+  <td>./configure --without-clang-format</td> <td>Don't use clang-format even if installed on system</td> <td>SWIG users, system builders and other non-developers</td>
+</tr>
+</table>
+
+<p>
+The version of clang-format is inspected at configure time.
+If the <tt>--with-clang-format</tt> option is not passed to configure then named versions,
+such as clang-format-18, are searched for first before clang-format.
+It is only enabled if the version is recent enough and this is clearly shown in the output of configure.
+Version 18 is the minimum supported version and was carefully chosen when clang-format was first used for SWIG as this is the first version to support the
+<tt>Source/.clang-format-ignore</tt> file that SWIG requires.
+The ignore file helps the clang-format tooling format just the files in the source tree that should be formatted.
+</p>
+
+<p>
+If clang-format is found during configure time, the make targets listed below can be used:
+</p>
+
+<table BORDER summary="make targets for formatting">
+<tr>
+  <td><b>Make target</b></td> <td><b>Example usage</b></td> <td><b>Description</b></td>
+</tr>
+<tr>
+  <td>format-review</td> <td>make format-review</td> <td>For invoking clang-format to warn about source formatting discrepancies</td>
+</tr>
+<tr>
+  <td>format-check</td> <td>make format-check</td> <td>For invoking clang-format to error out when there are source formatting discrepancies</td>
+</tr>
+<tr>
+  <td>format-inplace</td> <td>make format-inplace</td> <td>For invoking clang-format to correct source formatting - overwrites source files in-place</td>
+</tr>
+<tr>
+  <td>format</td> <td>make format</td> <td>Identical to format-inplace target</td>
+</tr>
+<tr>
+  <td></td> <td>make</td> <td>Default make target for building the swig executable and invoking the format-review target</td>
+</tr>
+</table>
+
+<p>
+The targets are available in both the root directory and the Source subdirectory.
+The <tt>CLANG_FORMAT_OPTIONS</tt> variable can be used to add options to the clang-format invocation (the variable is empty by default).
+For example, clang-format has a <tt>--verbose</tt> option to output the name of the file it is currently working on:
+</p>
+
+<div class="shell"><pre>
+$ make format CLANG_FORMAT_OPTIONS=--verbose
+</pre></div>
+
+<p>
+As mentioned, if clang-format is configured to be used during configure time, the <tt>format-review</tt> target is always invoked after the SWIG executable has been built.
+This can be temporarily avoided without rerunning configure.
+Instead set the <tt>CLANG_FORMAT</tt> variable set to nothing (it normally holds the name of the clang-format executable):
+</p>
+
+<div class="shell"><pre>
+$ make format CLANG_FORMAT=
+</pre></div>
+
+<p>
+Developers are also urged to use the SWIG pre-commit git hook script which is available in <tt>Tools/pre-commit</tt>.
+This is useful for preventing accidental commits with incorrectly formatted code.
+It invokes clang-format to validate the formatting is correct on all modified (both git staged and unstaged) files in the Source directory.
+Find the .git/hooks directory for the SWIG repository (usually in your git working directory) and copy it there, such as:
+</p>
+
+<div class="shell"><pre>
+$ cp Tools/pre-commit .git/hooks/
+</pre></div>
+
+<p>
+Modify the <tt>clang_format</tt> variable in the script if clang-format is not the name of the clang-format executable that is version 18 or later.
+Then when committing code, you'll see something like the following if the code is not formatted correctly:
+</p>
+
+<div class="shell"><pre>
+$ git commit .
+Running clang-format in git pre-commit hook to validate modified files...
+Source/Modules/java.cxx:26:30: error: code should be clang-formatted [-Wclang-format-violations]
+  const String *empty_string;
+                             ^
+Error: Fix formatting before committing, see Doc/Manual/Extending.html#Extending_coding_style_guidelines.
+</pre></div>
+
+<p>
+Of particular note regarding the code style is only spaces are used and indentation is 2 spaces.
+The generated C/C++ code should also follow this whitespace style as close as possible.
+</p>
+
+<p>
+<b>Compatibility Note:</b> The clang-formatting was introduced during the development of SWIG-4.5.0.
+Prior to that the GNU <tt>indent</tt> tool was recommended for formatting.
+The switch to clang-format was made in order to gain automated, consistent and working reformatting for C++ source code.
+The SWIG code base had to undergo some subtle formatting changes as a result.
 </p>
 
 
-<H3><a name="Extending_language_status">39.10.15 Target language status</a></H3>
+<H3><a name="Extending_language_status">40.10.15 Target language status</a></H3>
 
 
 <p>
-Target languages are given a status of either 'Supported' or 'Experimental' depending on their maturity as broadly outlined in
+Target languages are given a status of either 'Supported', 'Experimental' or 'Deprecated' depending on their maturity as broadly outlined in
 the <a href="Introduction.html#Introduction_target_languages">Target language introduction</a>.
 This section provides more details on how this status is given.
 </p>
 
-<H4><a name="Extending_supported_status">39.10.15.1 Supported status</a></H4>
+<H4><a name="Extending_supported_status">40.10.15.1 Supported status</a></H4>
 
 
 <p>
@@ -3588,7 +3775,7 @@ A target language is given the 'Supported' status when
 <li>
   It passes all of the main SWIG test-suite.
   The main test-suite is defined by the tests in the C_TEST_CASES, CPP_TEST_CASES and MULTI_CPP_TEST_CASES lists in Examples/test-suite/common.mk.
-  The tests in CPP11_TEST_CASES will also be required in the near future.
+  All the newer C++ standard tests need to work and are grouped together, such as CPP11_TEST_CASES for C++11. These more 'modern' C++ standards are only tested though if the compiler is detected as supporting the given standard.
 </li>
 <li>
   The test-suite must also include at least twenty wide-ranging runtime tests.
@@ -3607,17 +3794,17 @@ A target language is given the 'Supported' status when
   A major or minor version is the first or second digit in the three digit version.
 </li>
 <li>
-  Fixing unintended regressions in the Supported languages will be given higher priority over experimental languages by the core SWIG developers.
+  Fixing unintended regressions in the Supported languages will be given higher priority over the Experimental languages by the core SWIG developers.
 </li>
 <li>
   Examples must be available and run successfully.
 </li>
 <li>
-  The examples and test-suite must be fully functioning on the Travis Continuous Integration platform.
+  The examples and test-suite must be fully functioning on the Github Actions Continuous Integration platform.
 </li>
 </ul>
 
-<H4><a name="Extending_experimental_status">39.10.15.2 Experimental status</a></H4>
+<H4><a name="Extending_experimental_status">40.10.15.2 Experimental status</a></H4>
 
 
 <p>
@@ -3660,9 +3847,9 @@ Some minimum requirements and notes about languages with the 'Experimental' stat
   The number of tests in these lists should be no greater than half of the number of tests in the full test-suite.
 </li>
 <li>
-  The examples and test-suite must also be fully functioning on the Travis Continuous Integration platform.
-  However, experimental languages will be set as 'allow_failures'.
-  This means that pull requests and normal development commits will not break the entire Travis build should an experimental language fail.
+  The examples and test-suite must also be fully functioning on the Github Actions Continuous Integration platform.
+  However, experimental languages will be flagged as 'continue-on-error'.
+  This means that pull requests and normal development commits will not break the entire Github Actions build should an experimental language fail.
 </li>
 <li>
   Any new failed tests will be fixed on a 'best effort' basis by core developers with no promises made.
@@ -3682,7 +3869,32 @@ Some minimum requirements and notes about languages with the 'Experimental' stat
 </li>
 </ul>
 
-<H3><a name="Extending_prerequisites">39.10.16 Prerequisites for adding a new language module to the SWIG distribution</a></H3>
+<H4><a name="Extending_deprecated_status">40.10.15.3 Deprecated status</a></H4>
+
+
+<p>
+Unfortunately target languages that once met 'Experimental' or 'Supported' status can become non-functional and simply bit rot
+due to neglect or due to the language's C/C++ API evolving and changing over time.
+If there is no language maintainer and the maintenance burden becomes too much for the core
+SWIG developers to keep the test-suite working with easily available versions of the target language,
+the language is put into the 'Deprecated' status.
+</p>
+
+<p>
+Changing the status to 'Deprecated' is an unfortunate step not done lightly and only if recent versions cannot successfully
+run the test-suite and examples on the Github Actions Continuous Integration platform.
+As the target language would once have had a working set of examples and test-suite, this usually only occurs
+when the more modern operating system distributions available on Github can no longer run any distribution supplied version of the target language.
+</p>
+
+<p>
+Changing status to 'Deprecated' flags it for removal from SWIG in a subsequent release (usually one SWIG release).
+This step becomes the final plea for help from the community who use the target language.
+The language will need updating by an interested community member to meet the requirements of at least 'Experimental' status in order to prevent removal.
+If you are a user of a 'Deprecated' target language and would like to keep it available in future releases, please contact the SWIG developers for details of how you can help.
+</p>
+
+<H3><a name="Extending_prerequisites">40.10.16 Prerequisites for adding a new language module to the SWIG distribution</a></H3>
 
 
 <p>
@@ -3746,7 +3958,7 @@ the existing tests.
 </p>
 
 
-<H2><a name="Extending_debugging_options">39.11 Debugging Options</a></H2>
+<H2><a name="Extending_debugging_options">40.11 Debugging Options</a></H2>
 
 
 <p>
@@ -3760,6 +3972,7 @@ There are various command line options which can aid debugging a SWIG interface 
 -debug-symbols    - Display target language symbols in the symbol tables
 -debug-csymbols   - Display C symbols in the symbol tables
 -debug-lsymbols   - Display target language layer symbols
+-debug-quiet      - Display less parse tree node debug info when using other -debug options
 -debug-tags       - Display information about the tags found in the interface
 -debug-template   - Display information for debugging templates
 -debug-top &lt;n&gt;    - Display entire parse tree at stages 1-4, &lt;n&gt; is a csv list of stages
@@ -3773,7 +3986,7 @@ There are various command line options which can aid debugging a SWIG interface 
 The complete list of command line options for SWIG are available by running <tt>swig -help</tt>.
 </p>
 
-<H2><a name="Extending_nn46">39.12 Guide to parse tree nodes</a></H2>
+<H2><a name="Extending_nn46">40.12 Guide to parse tree nodes</a></H2>
 
 
 <p>
@@ -3799,6 +4012,7 @@ and D is a declarator.
 "parms"         - Function parameters (if a function)
 "code"          - Function body code (if supplied)
 "value"         - Default value (if supplied)
+"constraint"    - C++20 trailing requires-clause subtree (if any)
 </pre>
 
 </div>
@@ -3818,6 +4032,7 @@ C++ constructor declaration.
 "decl"          - Declarator (function with parameters)
 "code"          - Function body code (if any)
 "feature:new"   - Set to indicate return of new object.
+"constraint"    - C++20 trailing requires-clause subtree (if any)
 </pre>
 </div>
 
@@ -3891,6 +4106,7 @@ C++ class definition or C structure definition.
 "baselist"      - List of base class names.
 "storage"       - Storage class (if any)
 "unnamed"       - Set if class is unnamed.
+"constraint"    - C++20 prefix requires-clause subtree (class templates)
 </pre>
 </div>
 
@@ -3978,6 +4194,68 @@ A forward C++ class declaration.
 <pre>
 "name"          - Name of the class.
 "kind"          - Class kind ("union", "struct", "class")
+</pre>
+</div>
+
+
+<p>
+<b>constraint</b>
+</p>
+
+<p>
+C++20 constraint-expression node, held on the host's "constraint" attribute (cdecl, class,
+template, concept, constructor).  A single nodeType covers the constraint-logical-or grammar;
+the operator structure is in the "op" attribute, not in the type tag.
+</p>
+
+<div class="diagram">
+<pre>
+"op"            - "or" / "and" / "atom"
+"kind"          - For atom only: "concept-id" / "parens" / "requires-expression" / "fold" / "expression"
+"type"          - For atom kind="concept-id": SwigType encoded concept-id (e.g. Numeric&lt;(T)&gt;)
+"value"         - For atom kind="expression": opaque source text
+"valuetype"     - For atom kind="expression": typically T_BOOL
+"fold_op"       - For atom kind="fold": "&amp;&amp;" or "||"
+"fold_kind"     - For atom kind="fold": "unary-left" / "unary-right" / "binary"
+"firstChild"    - For op "and"/"or": chain of operand constraints (n-ary, flattened);
+                  for atom kind="parens" / "requires-expression" / "fold": the inner subtree
+</pre>
+</div>
+
+
+<p>
+<b>requires-expression</b>
+</p>
+
+<p>
+C++20 'requires (parms) { requirements }' primary, appearing as the firstChild of an atomic
+constraint with kind="requires-expression".
+</p>
+
+<div class="diagram">
+<pre>
+"parms"         - Requirement-parameter-list as a ParmList (NULL if absent)
+"firstChild"    - Chain of requirement nodes
+</pre>
+</div>
+
+
+<p>
+<b>requirement</b>
+</p>
+
+<p>
+A single requirement inside a requires-expression body.
+</p>
+
+<div class="diagram">
+<pre>
+"kind"          - "simple" / "type" / "compound" / "nested"
+"type"          - For kind="type": the named type (SwigType)
+"value"         - For kind="simple"/"compound"/"nested": opaque expression text
+"noexcept"      - For kind="compound": "1" if 'noexcept' was present
+"firstChild"    - For kind="compound": atomic concept-id constraint for the optional
+                  return-type-requirement (-&gt; Concept)
 </pre>
 </div>
 
@@ -4181,7 +4459,7 @@ extern "X" { ... } declaration.
 </pre>
 </div>
 
-<H2><a name="Extending_further_info">39.13 Further Development Information</a></H2>
+<H2><a name="Extending_further_info">40.13 Further Development Information</a></H2>
 
 
 <p>

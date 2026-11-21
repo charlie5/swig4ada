@@ -18,19 +18,19 @@
 %typemap(in, canthrow=1) CONST TYPE ($&1_type argp = 0) %{
   argp = ((SWIG_SHARED_PTR_QNAMESPACE::shared_ptr< CONST TYPE > *)$input) ? ((SWIG_SHARED_PTR_QNAMESPACE::shared_ptr< CONST TYPE > *)$input)->get() : 0;
   if (!argp) {
-    SWIG_DSetPendingException(SWIG_DIllegalArgumentException, "Attempt to dereference null $1_type");
+    SWIG_DSetPendingException(SWIG_DNullReferenceException, "Attempt to dereference null $1_type");
     return $null;
   }
   $1 = *argp; %}
 %typemap(out) CONST TYPE
-%{ $result = new SWIG_SHARED_PTR_QNAMESPACE::shared_ptr< CONST TYPE >(new $1_ltype(($1_ltype &)$1)); %}
+%{ $result = new SWIG_SHARED_PTR_QNAMESPACE::shared_ptr< CONST TYPE >(new $1_ltype($1)); %}
 
 %typemap(directorin) CONST TYPE
-%{ $input = new SWIG_SHARED_PTR_QNAMESPACE::shared_ptr< CONST TYPE > (new $1_ltype((const $1_ltype &)$1)); %}
+%{ $input = new SWIG_SHARED_PTR_QNAMESPACE::shared_ptr< CONST TYPE > (new $1_ltype(SWIG_STD_MOVE($1))); %}
 
 %typemap(directorout) CONST TYPE
 %{ if (!$input) {
-    SWIG_DSetPendingException(SWIG_DIllegalArgumentException, "Attempt to dereference null $1_type");
+    SWIG_DSetPendingException(SWIG_DNullReferenceException, "Attempt to dereference null $1_type");
     return $null;
   }
   SWIG_SHARED_PTR_QNAMESPACE::shared_ptr< CONST TYPE > *smartarg = (SWIG_SHARED_PTR_QNAMESPACE::shared_ptr< CONST TYPE > *)$input;
@@ -56,7 +56,7 @@
 %typemap(in, canthrow=1) CONST TYPE & %{
   $1 = ($1_ltype)(((SWIG_SHARED_PTR_QNAMESPACE::shared_ptr< CONST TYPE > *)$input) ? ((SWIG_SHARED_PTR_QNAMESPACE::shared_ptr< CONST TYPE > *)$input)->get() : 0);
   if (!$1) {
-    SWIG_DSetPendingException(SWIG_DIllegalArgumentException, "$1_type reference is null");
+    SWIG_DSetPendingException(SWIG_DNullReferenceException, "$1_type reference is null");
     return $null;
   } %}
 %typemap(out, fragment="SWIG_null_deleter") CONST TYPE &
@@ -116,7 +116,7 @@
 %typemap(in) SWIG_SHARED_PTR_QNAMESPACE::shared_ptr< CONST TYPE > * ($*1_ltype tempnull)
 %{ $1 = $input ? ($1_ltype)$input : &tempnull; %}
 %typemap(out, fragment="SWIG_null_deleter") SWIG_SHARED_PTR_QNAMESPACE::shared_ptr< CONST TYPE > *
-%{ $result = ($1 && *$1) ? new $*1_ltype(*($1_ltype)$1) : 0;
+%{ $result = ($1 && *$1) ? new $*1_ltype(*$1) : 0;
    if ($owner) delete $1; %}
 
 %typemap(directorin) SWIG_SHARED_PTR_QNAMESPACE::shared_ptr< CONST TYPE > *

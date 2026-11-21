@@ -9,6 +9,11 @@ public class cpp11_strongly_typed_enumerations_runme {
     return expected + 1;
   }
 
+  public static void enumTypeCheck(Type actual, Type expected) {
+    if (actual != expected)
+      throw new ApplicationException("Enum type incorrect. Expected " + expected + " Actual: " + actual);
+  }
+
   public static void Main() {
     int val = 0;
     val = enumCheck((int)Enum1.Val1, val);
@@ -156,6 +161,10 @@ public class cpp11_strongly_typed_enumerations_runme {
     val = enumCheck((int)Class2.Struct1.Enum14.Val5m, 4141);
     val = enumCheck((int)Class2.Struct1.Enum14.Val6m, val);
 
+    // Enum class and enumerator renamed with %rename (QEnum18 -> Enum18, QVal1 -> Val1)
+    enumCheck((int)Enum18.Val1, 1181);
+    enumCheck((int)Enum18.Val2, 1182);
+
     Class1 class1 = new Class1();
     enumCheck((int)class1.class1Test1(Enum1.Val5a), 13);
     enumCheck((int)class1.class1Test2(Class1.Enum12.Val5c), 1121);
@@ -164,6 +173,18 @@ public class cpp11_strongly_typed_enumerations_runme {
     enumCheck((int)cpp11_strongly_typed_enumerations.globalTest1(Enum1.Val5a), 13);
     enumCheck((int)cpp11_strongly_typed_enumerations.globalTest2(Class1.Enum12.Val5c), 1121);
     enumCheck((int)cpp11_strongly_typed_enumerations.globalTest3(Class1.Struct1.Enum12.Val5f), 3121);
+
+    // Check underlying enum type
+    enumTypeCheck(Enum.GetUnderlyingType(Enum2.Val1.GetType()), ((short)0).GetType());
+    enumTypeCheck(Enum.GetUnderlyingType(Enum4.Val1.GetType()), ((uint)0).GetType());
+    enumTypeCheck(Enum.GetUnderlyingType(Enum5.Val1.GetType()), ((int)0).GetType());
+    enumTypeCheck(Enum.GetUnderlyingType(Enum9.Val1.GetType()), ((ushort)0).GetType());
+    enumTypeCheck(Enum.GetUnderlyingType(Enum7td.Val1.GetType()), ((uint)0).GetType());
+    enumTypeCheck(Enum.GetUnderlyingType(Enum10.Val1.GetType()), ((byte)0).GetType());
+
+    enumTypeCheck(Enum.GetUnderlyingType(Enum15.Val1.GetType()), ((short)0).GetType());
+    enumTypeCheck(Enum.GetUnderlyingType(Enum16.Val1.GetType()), ((long)0).GetType());
+    enumTypeCheck(Enum.GetUnderlyingType(Enum17.Val1.GetType()), ((ulong)0).GetType());
   }
 }
 

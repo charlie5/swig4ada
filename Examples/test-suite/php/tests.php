@@ -1,86 +1,31 @@
 <?php
 
-function die_on_error($errno, $errstr, $file, $line) {
-    if ($file !== Null) {
-        print $file;
-        if ($line !== Null) print ":$line";
-        print ": ";
-    }
-    print "$errstr\n";
-    exit(1);
-}
-set_error_handler("die_on_error", -1);
-
-$_original_functions=get_defined_functions();
-$_original_globals=1;
-$_original_classes=get_declared_classes();
-$_original_globals=array_keys($GLOBALS);
-
 class check {
   // do we have true global vars or just GETSET functions?
   // Used to filter out get/set global functions to fake vars...
   const GETSET = 1;
 
-  static function get_extra_classes($ref=FALSE) {
-    static $extra;
-    global $_original_classes;
-    if ($ref===FALSE) $f=$_original_classes;
-    if (! is_array($extra)) {
-      $df=array_flip(get_declared_classes());
-      foreach($_original_classes as $class) unset($df[$class]);
-      $extra=array_keys($df);
-    }
-    return $extra;
-  }
+  private static $_extension = null;
 
-  static function get_extra_functions($ref=FALSE,$gs=false) {
-    static $extra;
-    static $extrags; // for get/setters
-    global $_original_functions;
-    if ($ref===FALSE) $f=$_original_functions;
-    if (! is_array($extra) || $gs) {
-      $extra=array();
-      $extrags=array();
-      $df=get_defined_functions();
-      $df=array_flip($df['internal']);
-      foreach($_original_functions['internal'] as $func) unset($df[$func]);
-      // Now chop out any get/set accessors
-      foreach(array_keys($df) as $func)
-        if ((self::GETSET && preg_match('/_[gs]et$/', $func)) ||
-            preg_match('/^new_/', $func) ||
-            preg_match('/_(alter|get)_newobject$/', $func))
-          $extrags[]=$func;
-        else $extra[]=$func;
-//      $extra=array_keys($df);
-    }
-    if ($gs) return $extrags;
-    return $extra;
-  }
+  private static $_werror = false;
 
-  static function get_extra_globals($ref=FALSE) {
-    static $extra;
-    global $_original_globals;
-    if (! is_array($extra)) {
-      if (self::GETSET) {
-        $_extra=array();
-        foreach(check::get_extra_functions(false,1) as $global) {
-          if (preg_match('/^(.*)_[sg]et$/', $global, $match))
-            $_extra[$match[1]] = 1;
-        }
-        $extra=array_keys($_extra);
-      } else {
-        if ($ref===FALSE) $ref=$_original_globals;
-        if (! is_array($extra)) {
-          $df=array_flip(array_keys($GLOBALS));
-          foreach($_original_globals as $func) unset($df[$func]);
-          // MASK xxxx_LOADED__ variables
-          foreach(array_keys($df) as $func)
-            if (preg_match('/_LOADED__$/', $func)) unset($df[$func]);
-          $extra=array_keys($df);
-        }
+  static function get_extension() {
+    if (self::$_extension === null) {
+      foreach(get_included_files() as $f) {
+	$module_name = preg_filter('/.*\/([^\/]+)_runme\.php$/', '\1', $f);
+	if ($module_name !== null) break;
       }
+      if ($module_name === null) {
+	print("Failed to determine module name from get_included_files()\n");
+	exit(1);
+      }
+      self::$_extension = new ReflectionExtension($module_name);
     }
-    return $extra;
+    return self::$_extension;
+  }
+
+  static function werror($v) {
+    self::$_werror = $v;
   }
 
   static function classname($string,$object) {
@@ -148,7 +93,8 @@ class check {
     if (! is_array($classes)) $classes=array($classes);
     $message=array();
     $missing=array();
-    $extra=array_flip(check::get_extra_classes());
+    $extra = array_flip(array_filter(self::get_extension()->getClassNames(),
+				     function ($e) { return !preg_match('/^SWIG\\\\/', $e); }));
     foreach($classes as $class) {
       if (! class_exists($class)) $missing[]=$class;
       else unset($extra[$class]);
@@ -164,15 +110,16 @@ class check {
     if (! is_array($functions)) $functions=array($functions);
     $message=array();
     $missing=array();
-    $extra=array_flip(check::get_extra_functions());
-
+    $extra = self::get_extension()->getFunctions();
     foreach ($functions as $func) {
       if (! function_exists($func)) $missing[]=$func;
       else unset($extra[$func]);
     }
+    $extra = array_filter(array_keys($extra),
+			  function ($e) { return !preg_match('/_[gs]et$|^is_python_/', $e); });
     if ($missing) $message[]=sprintf("Functions missing: %s",join(",",$missing));
     if ($message) return check::fail(join("\n  ",$message));
-    if ($extra) $message[]=sprintf("These extra functions are defined: %s",join(",",array_keys($extra)));
+    if ($extra) $message[]=sprintf("These extra functions are defined: %s",join(",",$extra));
     if ($message) return check::warn(join("\n  ",$message));
     return TRUE;    
   }
@@ -181,22 +128,39 @@ class check {
     if (! is_array($globals)) $globals=array($globals);
     $message=array();
     $missing=array();
-    $extra=array_flip(check::get_extra_globals());
+    $extra = self::get_extension()->getFunctions();
     foreach ($globals as $glob) {
-      if (self::GETSET) {
-        if (! isset($extra[$glob])) $missing[]=$glob;
-        else unset($extra[$glob]);
-      } else {
-        if (! isset($GLOBALS[$glob])) $missing[]=$glob;
-        else unset($extra[$glob]);
+      if (! function_exists($glob . "_get") && ! function_exists($glob . "_set")) $missing[]=$glob;
+      else {
+        unset($extra[$glob . "_get"]);
+        unset($extra[$glob . "_set"]);
       }
     }
+    $extra = array_filter(array_keys($extra),
+			  function ($e) { return preg_match('/_[gs]et$/', $e); });
     if ($missing) $message[]=sprintf("Globals missing: %s",join(",",$missing));
     if ($message) return check::fail(join("\n  ",$message));
-    if ($extra) $message[]=sprintf("These extra globals are defined: %s",join(",",array_keys($extra)));
+    if ($extra) $message[]=sprintf("These extra globals are defined: %s",join(",",$extra));
     if ($message) return check::warn(join("\n  ",$message));
     return TRUE;    
 
+  }
+
+  static function constants($constants) {
+    if (! is_array($constants)) $constants=array($constants);
+    $message=array();
+    $missing=array();
+    $extra = self::get_extension()->getConstants();
+    unset($extra['swig_runtime_data_type_pointer']);
+    foreach($constants as $constant) {
+      if (! defined($constant)) $missing[]=$constant;
+      else unset($extra[$constant]);
+    }
+    if ($missing) $message[]=sprintf("Constants missing: %s",join(",",$missing));
+    if ($message) return check::fail(join("\n  ",$message));
+    if ($extra) $message[]=sprintf("These extra constants are defined: %s",join(",",array_keys($extra)));
+    if ($message) return check::warn(join("\n  ",$message));
+    return TRUE;
   }
 
   static function functionref($a,$type,$message) {
@@ -205,40 +169,41 @@ class check {
     return TRUE;
   }
 
-  static function equal($a,$b,$message) {
-    if (! ($a===$b)) return check::fail($message . ": '$a'!=='$b'");
+  static function equal($a,$b,$message=null) {
+    if (! ($a===$b)) return check::fail_($message, "'$a'!=='$b'");
     return TRUE;
   }
 
-  static function resource($a,$b,$message) {
-    $resource=trim(check::var_dump($a));
-    if (! preg_match("/^resource\([0-9]+\) of type \($b\)/i", $resource))
-      return check::fail($message);
+  static function equivalent($a,$b,$message=null) {
+    if (! ($a==$b)) return check::fail_($message, "'$a'!='$b'");
     return TRUE;
   }
 
-  static function isnull($a,$message) {
-    $value=trim(check::var_dump($a));
-    return check::equal($value,"NULL",$message);
+  static function str_contains($a,$b,$message=null) {
+    # Use strpos as PHP function str_contains requires PHP 8
+    return check::equal(strpos($a,$b)!==false,true,$message);
   }
 
-  static function var_dump($arg) {
-    ob_start();
-    var_dump($arg);
-    $result=ob_get_contents();
-    ob_end_clean();
-    return $result;
+  static function isnull($a,$message=null) {
+    return check::equal($a,NULL,$message);
   }
 
-  static function fail($pattern) {
-    $args=func_get_args();
-    print("Failed on: ".call_user_func_array("sprintf",$args)."\n");
+  private static function fail_($message, $pattern, ...$args) {
+    $bt = debug_backtrace(0);
+    $bt = $bt[array_key_last($bt)-1];
+    print("{$bt['file']}:{$bt['line']}: Failed on: ");
+    if ($message !== NULL) print("$message: ");
+    print(sprintf($pattern, ...$args) . "\n");
     exit(1);
   }
 
-  static function warn($pattern) {
-    $args=func_get_args();
-    print("Warning on: ".call_user_func_array("sprintf",$args)."\n");
+  static function fail(...$args) {
+    check::fail_(null, ...$args);
+  }
+
+  static function warn($pattern, ...$args) {
+    if (self::$_werror) self::fail($pattern, ...$args);
+    print("Warning on: " . sprintf($pattern, ...$args) . "\n");
     return FALSE;
   }
 
@@ -246,4 +211,3 @@ class check {
 #    print $_SERVER[argv][0]." ok\n";
   }
 }
-?>

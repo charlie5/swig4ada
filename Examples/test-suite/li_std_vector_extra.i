@@ -37,7 +37,7 @@ namespace std {
     operator T() const { return val; }
   };
 %}
-specialize_std_vector(Param<int>,PyInt_Check,PyInt_AsLong,PyInt_FromLong);
+specialize_std_vector(Param<int>,PyLong_Check,PyLong_AsLong,PyLong_FromLong);
 %template(PIntVector) std::vector<Param<int> >;
 
 %inline %{
@@ -62,8 +62,8 @@ std::vector<Real> half(const std::vector<Real>& v) {
 }
 
 void halve_in_place(std::vector<double>& v) {
-    std::transform(v.begin(),v.end(),v.begin(),
-                   std::bind2nd(std::divides<double>(),2.0));
+    for (std::vector<double>::iterator it = v.begin(); it != v.end(); ++it)
+        *it /= 2.0;
 }
 
 %}

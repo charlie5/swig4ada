@@ -1,9 +1,10 @@
 %module li_std_string
 %include <std_string.i>
 
-#if defined(SWIGUTL)
+#if defined(SWIGLUA) || defined(SWIGPHP) || defined(SWIGUTL)
 %apply std::string& INPUT { std::string &input }
 %apply std::string& INOUT { std::string &inout }
+%apply std::string& OUTPUT { std::string &output }
 #endif
 
 // throw is invalid in C++17 and later, only SWIG to use it
@@ -53,12 +54,27 @@ std::string& test_reference_out() {
 }
 
 std::string test_reference_input(std::string &input) {
-  return input;
+  // For PHP to allow checking that we haven't used the default string&
+  // typemap which wraps as a PHP pass-by-reference string parameter.
+  std::string copy = input;
+  input = "MODIFIED";
+  return copy;
 }
 
 void test_reference_inout(std::string &inout) {
   inout += inout;
 }
+
+void test_reference_output(std::string &output) {
+  output = "output";
+}
+
+#ifdef SWIGPHP
+// Test PHP-specific default wrapping string& as pass-by-ref PHP string.
+void test_reference_php(std::string &s) {
+  s += ".php";
+}
+#endif
 
 void test_throw() TESTCASE_THROW1(std::string){
   static std::string x = "test_throw message";
@@ -158,3 +174,16 @@ public:
   }
 %}
 
+#if defined(SWIGJAVA)
+%javaconst(1);
+#elif SWIGCSHARP
+%csconst(1);
+#elif SWIGD
+%dmanifestconst;
+#endif
+
+%inline %{
+const std::string aString = "something";
+%}
+%constant std::string MY_STRING = "";
+%constant std::string MY_STRING_2 = "OK";

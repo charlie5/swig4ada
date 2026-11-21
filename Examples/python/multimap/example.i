@@ -15,7 +15,7 @@ extern int squareCubed (int n, int *OUTPUT);
 
 extern int    gcd(int x, int y);
 
-%typemap(in,fragment="t_output_helper") (int argc, char *argv[]) {
+%typemap(in) (int argc, char *argv[]) {
   int i;
   if (!PyList_Check($input)) {
     SWIG_exception(SWIG_ValueError, "Expecting a list");
@@ -24,50 +24,41 @@ extern int    gcd(int x, int y);
   if ($1 == 0) {
     SWIG_exception(SWIG_ValueError, "List must contain at least 1 element");
   }
-  $2 = (char **) malloc(($1+1)*sizeof(char *));
+  $2 = (char **) malloc((size_t)($1+1)*sizeof(char *));
   for (i = 0; i < $1; i++) {
     PyObject *s = PyList_GetItem($input,i);
-%#if PY_VERSION_HEX >= 0x03000000
     if (!PyUnicode_Check(s)) 
-%#else
-    if (!PyString_Check(s)) 
-%#endif
     {
       free($2);
       SWIG_exception(SWIG_ValueError, "List items must be strings");
     }
-%#if PY_VERSION_HEX >= 0x03000000
     {
       PyObject *utf8str = PyUnicode_AsUTF8String(s);
-      const char *cstr;
+      const char *strtmp = 0;
       if (!utf8str) {
         SWIG_fail;
       }
-      cstr = PyBytes_AsString(utf8str);
-      $2[i] = strdup(cstr);
-      Py_DECREF(utf8str);
+      strtmp = PyBytes_AsString(utf8str);
+      $2[i] = (char *)malloc(strlen(strtmp) + 1);
+      if ($2[i])
+        strcpy($2[i], strtmp);
+      Py_DecRef(utf8str);
     }
-%#else
-    $2[i] = PyString_AsString(s);
-%#endif
   }
   $2[i] = 0;
 }
 
 %typemap(freearg) (int argc, char *argv[]) {
-%#if PY_VERSION_HEX >= 0x03000000
   int i;
   for (i = 0; i < $1; i++) {
     free($2[i]);
   }
-%#endif
 }
 
 extern int gcdmain(int argc, char *argv[]);
 
 %typemap(in) (char *bytes, int len) {
 
-%#if PY_VERSION_HEX >= 0x03000000
   char *cstr;
   Py_ssize_t len;
   PyObject *utf8str;
@@ -80,23 +71,13 @@ extern int gcdmain(int argc, char *argv[]);
     SWIG_fail;
   }
   PyBytes_AsStringAndSize(utf8str, &cstr, &len);
-  $1 = strncpy((char *)malloc(len+1), cstr, (size_t)len);
+  $1 = strncpy((char *)malloc((size_t)(len+1)), cstr, (size_t)len);
   $2 = (int)len;
-  Py_DECREF(utf8str);
-%#else
-  if (!PyString_Check($input)) {
-    PyErr_SetString(PyExc_ValueError,"Expected a string");
-    SWIG_fail;
-  }
-  $1 = PyString_AsString($input);
-  $2 = (int)PyString_Size($input);
-%#endif
+  Py_DecRef(utf8str);
 }
 
 %typemap(freearg) (char *bytes, int len) {
-%#if PY_VERSION_HEX >= 0x03000000
   free($1);
-%#endif
 }
 
 extern int count(char *bytes, int len, char c);
@@ -108,7 +89,6 @@ extern int count(char *bytes, int len, char c);
    so that we don't violate its mutability */
 
 %typemap(in) (char *str, int len) {
-%#if PY_VERSION_HEX >= 0x03000000
   char *cstr;
   Py_ssize_t len;
   PyObject *utf8str = PyUnicode_AsUTF8String($input);
@@ -116,28 +96,19 @@ extern int count(char *bytes, int len, char c);
     SWIG_fail;
   }
   PyBytes_AsStringAndSize(utf8str, &cstr, &len);
-  $1 = strncpy((char *)malloc(len+1), cstr, (size_t)len);
+  $1 = strncpy((char *)malloc((size_t)(len+1)), cstr, (size_t)len);
   $2 = (int)len;
-  Py_DECREF(utf8str);
-%#else
-  $2 = (int)PyString_Size($input);
-  $1 = (char *) malloc($2+1);
-  memmove($1,PyString_AsString($input),$2);
-%#endif
+  Py_DecRef(utf8str);
 }
 
-/* Return the mutated string as a new object.  The t_output_helper
+/* Return the mutated string as a new object.  The SWIG_AppendOutput
    function takes an object and appends it to the output object
    to create a tuple */
 
 %typemap(argout) (char *str, int len) {
    PyObject *o;
-%#if PY_VERSION_HEX >= 0x03000000
    o = PyUnicode_FromStringAndSize($1,$2);
-%#else
-   o = PyString_FromStringAndSize($1,$2);
-%#endif
-   $result = t_output_helper($result,o);
+   $result = SWIG_AppendOutput($result, o);
    free($1);
 }   
 

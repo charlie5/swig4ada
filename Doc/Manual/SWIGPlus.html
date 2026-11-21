@@ -34,6 +34,12 @@
 <li><a href="#SWIGPlus_nn15">Protection</a>
 <li><a href="#SWIGPlus_nn16">Enums and constants</a>
 <li><a href="#SWIGPlus_nn17">Friends</a>
+<ul>
+<li><a href="#SWIGPlus_friend_classes">Friend classes</a>
+<li><a href="#SWIGPlus_friend_function_definitions">Friend function definitions</a>
+<li><a href="#SWIGPlus_friend_function_declarations">Friend function declarations</a>
+<li><a href="#SWIGPlus_friends_unqualified">Unqualified friend functions</a>
+</ul>
 <li><a href="#SWIGPlus_nn18">References and pointers</a>
 <li><a href="#SWIGPlus_nn19">Pass and return by value</a>
 <li><a href="#SWIGPlus_nn20">Inheritance</a>
@@ -48,20 +54,30 @@
 </ul>
 <li><a href="#SWIGPlus_nn28">Overloaded operators</a>
 <li><a href="#SWIGPlus_class_extension">Class extension</a>
+<ul>
+<li><a href="#SWIGPlus_replacing_methods">Replacing class methods</a>
+</ul>
 <li><a href="#SWIGPlus_nn30">Templates</a>
 <ul>
 <li><a href="#SWIGPlus_template_directive">The %template directive</a>
 <li><a href="#SWIGPlus_template_functions">Function templates</a>
 <li><a href="#SWIGPlus_template_classes">Default template arguments</a>
 <li><a href="#SWIGPlus_template_class_inheritance">Template base classes</a>
+<li><a href="#SWIGPlus_template_empty">Empty template instantiation</a>
 <li><a href="#SWIGPlus_template_specialization">Template specialization</a>
 <li><a href="#SWIGPlus_template_member">Member templates</a>
 <li><a href="#SWIGPlus_template_scoping">Scoping and templates</a>
+<li><a href="#SWIGPlus_template_renaming">Template renaming</a>
 <li><a href="#SWIGPlus_template_more">More on templates</a>
 </ul>
 <li><a href="#SWIGPlus_namespaces">Namespaces</a>
 <ul>
 <li><a href="#SWIGPlus_nspace">The nspace feature for namespaces</a>
+<ul>
+<li><a href="#SWIGPlus_nspace_feature_flag">%nspace for mirroring namespace hierarchies</a>
+<li><a href="#SWIGPlus_nspacemove">%nspacemove for modifying namespace hierarchies</a>
+<li><a href="#SWIGPlus_nspace_more">More about the nspace feature</a>
+</ul>
 </ul>
 <li><a href="#SWIGPlus_renaming_templated_types_namespaces">Renaming templated types in namespaces</a>
 <li><a href="#SWIGPlus_exception_specifications">Exception specifications</a>
@@ -89,8 +105,9 @@ This chapter describes SWIG's support for wrapping C++.
 It is mostly concerned about C++ as defined by the C++ 98 and 03 standards.
 For additions to the original C++ standard, please read the
 <a href="CPlusPlus11.html#CPlusPlus11">SWIG and C++11</a>,
-<a href="CPlusPlus14.html#CPlusPlus14">SWIG and C++14</a> and
-<a href="CPlusPlus17.html#CPlusPlus17">SWIG and C++17</a> chapters.
+<a href="CPlusPlus14.html#CPlusPlus14">SWIG and C++14</a>,
+<a href="CPlusPlus17.html#CPlusPlus17">SWIG and C++17</a> and
+<a href="CPlusPlus20.html#CPlusPlus20">SWIG and C++20</a> chapters.
 As a prerequisite,
 you should first read the chapter <a href="SWIG.html#SWIG">SWIG Basics</a> to see
 how SWIG wraps ISO C.  Support for C++ builds upon ISO C
@@ -173,6 +190,20 @@ with C++, it is safe, simple, portable, and debuggable.
 </p>
 
 <p>
+This approach results in generated code that uses just the most basic of C and C++ features,
+no matter how complex the input C++ is.
+SWIG will not force a newer standard of C++ to be required as the generated code complies
+with ISO standard C++98.
+However, there are a few features in later C++ standards that can be advantageous to use.
+For example, C++11 move semantics are available to provide performance improvements.
+So in some instances, SWIG will use features from newer C++ standards provided they are available.
+This is made possible via the <tt>__cplusplus</tt> macro,
+which is set by the C++ compiler to an appropriate standards defined value.
+This means that if your compiler is configured to support say the C++11 standard, then there
+may be some C++11 benefits available in the generated code, such as C++11 move semantics.
+</p>
+
+<p>
 Some of this chapter focuses on the low-level procedural interface to
 C++ that is used as the foundation for all language modules.  Keep in
 mind that the target languages also provide the high-level OO interface via
@@ -250,7 +281,7 @@ details.  The SWIG Wiki also has further details.
 </p>
 
 <b>Compatibility Note:</b> Early versions of SWIG generated just a flattened low-level C style API to C++ classes by default.
-The <tt>-noproxy</tt> commandline option is recognised by many target languages and will generate just this
+The <tt>-noproxy</tt> commandline option is recognised by some target languages and will generate just this
 interface as in earlier versions.
 
 <H2><a name="SWIGPlus_nn38">6.5 Proxy classes</a></H2>
@@ -580,7 +611,7 @@ automatically generate a wrapper for one.
 
 <li>
 If a C++ class does not declare an explicit copy constructor, SWIG will
-automatically generate a wrapper for one if the <tt>%copyctor</tt> is used.
+automatically generate a wrapper for one if <tt>%copyctor</tt> is used.
 </li>
 
 <li>
@@ -687,8 +718,7 @@ class Foo {           // No destructor is generated, unless one is declared
 <b>Compatibility Note:</b> The generation of default
 constructors/implicit destructors was made the default behavior in SWIG
 1.3.7. This may break certain older modules, but the old behavior can
-be easily restored using <tt>%nodefault</tt> or the
-<tt>-nodefault</tt> command line option.  Furthermore, in order for
+be easily restored using <tt>%nodefault</tt>.  Furthermore, in order for
 SWIG to properly generate (or not generate) default constructors, it
 must be able to gather information from both the <tt>private</tt> and
 <tt>protected</tt> sections (specifically, it needs to know if a private or
@@ -702,9 +732,9 @@ those sections in the interface or using <tt>%nodefault</tt> to fix the problem.
 
 <p>
 <b>Note:</b> The <tt>%nodefault</tt>
-directive/<tt>-nodefault</tt> options described above, which disable both the default
+directive described above, which disables both the default
 constructor and the implicit destructors, could lead to memory
-leaks, and so it is strongly recommended to not use them.
+leaks, and so it is strongly recommended to not use it.
 </p>
 
 
@@ -870,10 +900,12 @@ could be wrapped, but they had to be renamed.  For example:
 
 <div class="code">
 <pre>
+%rename(CopyFoo) Foo::Foo(const Foo &amp;);
+
 class Foo {
 public:
   Foo();
-  %name(CopyFoo) Foo(const Foo &amp;);
+  Foo(const Foo &amp;);
   ...
 };
 </pre>
@@ -1012,8 +1044,34 @@ void Foo_items_set(Foo *self, List *value) {
 </div>
 
 <p>
-More information about this can be found in the SWIG Basics chapter,
-<a href="SWIG.html#SWIG_structure_data_members">Structure data members</a> section. 
+More information about this can be found in the SWIG Basics chapter in the
+<a href="SWIG.html#SWIG_structure_data_members">Structure data members</a> and
+<a href="SWIG.html#SWIG_readonly_variables">Creating read-only variables</a> sections.
+</p>
+
+<p>
+Additionally, any C++ type that is not assignable is also wrapped as a read-only member.
+Consider the class below which is non-assignable due to the private assignment operator:
+</p>
+
+<div class="code">
+<pre>
+class NonAssignable {
+private:
+  NonAssignable &amp; operator=(const NonAssignable &amp;);
+public:
+  NonAssignable();
+};
+
+struct ImmutableVars {
+  NonAssignable non_assignable;
+};
+</pre>
+</div>
+
+<p>
+The <tt>non_assignable</tt> member variable is immutable by default as SWIG detects that <tt>NonAssignable</tt> is not assignable.
+SWIG must of course see the full type information in order to get this correct, otherwise you may have to use <tt>%immutable</tt> to make the variable read-only.
 </p>
 
 <p>
@@ -1084,13 +1142,6 @@ typemaps, eg <tt>%apply const std::string &amp; { std::string * }</tt>, but this
 </p>
 
 <p>
-<b>Compatibility note:</b> Read-only access used to be controlled by a pair of directives
-<tt>%readonly</tt> and <tt>%readwrite</tt>.   Although these directives still work, they
-generate a warning message.   Simply change the directives to <tt>%immutable;</tt> and
-<tt>%mutable;</tt> to silence the warning.  Don't forget the extra semicolon!
-</p>
-
-<p>
 <b>Compatibility note:</b> Prior to SWIG-1.3.12, all members of unknown type were
 wrapped into accessor functions using pointers.  For example, if you had a structure
 like this
@@ -1121,7 +1172,7 @@ customization features.
 <p>
  SWIG wraps class members that are public following the C++
  conventions, i.e., by explicit public declaration or by the use of
- the <tt>using</tt> directive. In general, anything specified in a
+ <tt>using</tt> declarations. In general, anything specified in a
  private or protected section will be ignored, although the internal
  code generator sometimes looks at the contents of the private and
  protected sections so that it can properly generate code for default
@@ -1168,54 +1219,87 @@ Members declared as <tt>const</tt> are wrapped as read-only members and do not c
 <H2><a name="SWIGPlus_nn17">6.9 Friends</a></H2>
 
 
+<H3><a name="SWIGPlus_friend_classes">6.9.1 Friend classes</a></H3>
+
+
 <p>
-Friend declarations are recognised by SWIG. For example, if
-you have this code:
+Friend classes are a C++ feature that do not affect SWIG wrappers.
+SWIG simply parses the friend class declarations, but they are effectively ignored
+as they have no meaningful effect for wrappers.
+An example of friend classes:
 </p>
 
 <div class="code">
 <pre>
-class Foo {
-public:
+class X;
+class Y;
+class C {
+  // Friend classes have no effect on generated wrappers
+  friend class X;
+  friend Y;
   ...
-  friend void blah(Foo *f);
+};
+</pre>
+</div>
+
+<H3><a name="SWIGPlus_friend_function_definitions">6.9.2 Friend function definitions</a></H3>
+
+
+<p>
+A friend function definition in a C++ class defines a non-member function of the class
+and simultaneously makes it a friend of the class.
+For example, if you have this code:
+</p>
+
+<div class="code">
+<pre>
+class Buddy {
+  int val;
+  friend int blah(Buddy *b) { return b-&gt;val; }
+public:
   ...
 };
 </pre>
 </div>
 
 <p>
-then the <tt>friend</tt> declaration does result in a wrapper code
-equivalent to one generated for the following declaration
+then the <tt>friend</tt> function definition results in wrapper code
+equivalent to one generated for the following:
 </p>
 
 <div class="code">
 <pre>
-class Foo {
+class Buddy {
+  int val;
+  friend int blah(Buddy *b);
 public:
   ...
 };
 
-void blah(Foo *f);    
+int blah(Buddy *b) { return b-&gt;val; }
 </pre>
 </div>
 
 <p>
-A friend declaration, as in C++, is understood to be in the same scope
-where the class is declared, hence, you can have
+Access from target languages is thus as if <tt>blah</tt> was wrapped as a non-member function.
+The function is available and wrapped even if the friend is defined with private or protected access.
+</p>
+
+<p>
+A friend definition, as in C++, is understood to be in the same scope
+that the class is defined in, hence the scoping required for SWIG directives, such as <tt>%ignore</tt>, is as follows:
 </p>
 
 <div class="code">
 <pre>
-
-%ignore bar::blah(Foo *f);
+%ignore bar::blah(Buddy *b);
+// Not: %ignore bar::Buddy::blah(Buddy *b);
 
 namespace bar {
-
-  class Foo {
+  class Buddy {
+    int val;
+    friend int blah(Buddy *b) { return b-&gt;val; }
   public:
-    ...
-    friend void blah(Foo *f);
     ...
   };
 }
@@ -1223,8 +1307,129 @@ namespace bar {
 </div>
 
 <p>
-and a wrapper for the method 'blah' will not be generated.
+and a wrapper for <tt>blah</tt> will not be generated.
 </p>
+
+<H3><a name="SWIGPlus_friend_function_declarations">6.9.3 Friend function declarations</a></H3>
+
+
+<p>
+A C++ class can specify friends via friend function declarations.
+These functions are allowed access to the private and protected members of a class.
+This is pure C++ functionality and these friend function declarations are hence quietly ignored by SWIG and do not result in any wrappers.
+Well, not always! The C++ rules for friends that SWIG needs to follow are not that simple.
+Technically, only qualified function declarations are silently ignored by SWIG.
+Below are some examples of qualified friend declarations in <tt>A</tt> that are quietly ignored:
+</p>
+
+<div class="code">
+<pre>
+struct B {
+  int f();
+  B();
+  ~B();
+  ...
+};
+
+int g();
+
+class A {
+public:
+  // The following friend function-declarations are silently ignored (including constructor and destructor friends)
+  friend B::B();
+  friend B::~B();
+  friend int B::f();
+  friend int ::g();
+  ...
+};
+</pre>
+</div>
+
+<p>
+In the example above, if SWIG parses the struct <tt>B</tt> and global function <tt>g()</tt>,
+then they are of course wrapped as normal.
+</p>
+
+
+<H3><a name="SWIGPlus_friends_unqualified">6.9.4 Unqualified friend functions</a></H3>
+
+
+<p>
+Further clarification is required regarding both friend function definitions and declarations.
+In C++, friend function definitions can only be unqualified, whereas, friend function declarations can be either unqualified or qualified. Qualified friend function declarations are silently ignored by SWIG as covered in the previous section. SWIG does generate wrappers for any unqualified friend functions that it parses. This section goes through some of the complexities of wrapping unqualified friend functions.
+</p>
+
+<p>
+Consider an unqualified friend function definition:
+</p>
+
+<div class="code">
+<pre>
+class Chum {
+  int val;
+  friend int blah() { Chum c; c.private_function(); return c.val; }
+  void private_function();
+public:
+  ...
+};
+</pre>
+</div>
+
+<p>
+The <tt>Chum::blah()</tt> friend is very similar to the <tt>Buddy::blah(Buddy *)</tt> friend presented earlier.
+However, the generated code to call <tt>blah()</tt> may not compile unlike the code to call <tt>blah(Buddy *)</tt>.
+The compiler error will be something like:
+
+<div class="shell">
+<pre>
+error: 'blah' was not declared in this scope
+</pre>
+</div>
+
+<p>
+The reason one works and the other doesn't is due to the rules around unqualified friend definitions/declarations. Broadly, friends are not visible for lookup except via argument dependent lookup that considers the class that the friend is defined/declared in, unless there is a <i>matching declaration</i> at namespace scope.
+This will probably only make sense if you are conversant with this C++ concept, which is covered quite well at <a href="https://en.cppreference.com/w/cpp/language/adl">Argument-dependent lookup</a>.
+In our examples, <tt>blah(Buddy *)</tt> is visible via argument dependent lookup, but <tt>blah()</tt> is not. The solution is thus to provide a <i>matching declaration</i> in order to make the function visible to the compiler. Simply add:
+</p>
+
+<div class="code">
+<pre>
+int blah();
+</pre>
+</div>
+
+<p>
+SWIG does <b>not</b> have to parse it. In all likelihood, your code already has the <i>matching declaration</i> as it is required in order for the friend function definition to be usable from pure C++ code.
+</p>
+
+<p>
+The same potential problem applies to unqualified friend function declarations, such as:
+</p>
+
+<div class="code">
+<pre>
+class Mate {
+  int val;
+  friend int blah(); // Unqualified friend function declaration
+  void private_function();
+public:
+  ...
+};
+</pre>
+</div>
+
+<p>
+Again, the actual function declaration needs to be visible to the compiler.
+Or just the actual function definition as shown below.
+This must be defined in the same scope as <tt>Mate</tt>.
+Of course the function definition is necessary in order to avoid linking issues too.
+</p>
+
+<div class="code">
+<pre>
+int blah() { Mate m; m.private_function(); return m.val; }
+</pre>
+</div>
 
 <H2><a name="SWIGPlus_nn18">6.10 References and pointers</a></H2>
 
@@ -1348,21 +1553,24 @@ following:
 <div class="code">
 <pre>
 Vector *wrap_cross_product(Vector *a, Vector *b) {
-  Vector x = *a;
-  Vector y = *b;
-  Vector r = cross_product(x, y);
+  Vector x;
+  Vector y;
+  Vector r;
+  x = *a;
+  y = *b;
+  r = cross_product(x, y);
   return new Vector(r);
 }</pre>
 </div>
 
 <p>
-In order for the wrapper code to compile, <tt>Vector</tt> must define a copy constructor and a 
-default constructor.
+In order for the wrapper code to compile, <tt>Vector</tt> must define a default constructor and a copy assignment operator (and/or a move assignment operator for C++11 and later).
+The <a href="CPlusPlus11.html#CPlusPlus11_move_only">Movable and move-only types</a> section should be read regarding C++11 move semantics and return by value.
 </p>
 
 <p>
 If <tt>Vector</tt> is defined as a class in the interface, but it does not
-support a default constructor, SWIG changes the wrapper code by encapsulating
+support a default constructor and an assignment operator, SWIG changes the wrapper code by encapsulating
 the arguments inside a special C++ template wrapper class, through a process
 called the "Fulton Transform".  This produces a wrapper that looks like this:
 </p>
@@ -1370,9 +1578,12 @@ called the "Fulton Transform".  This produces a wrapper that looks like this:
 <div class="code">
 <pre>
 Vector cross_product(Vector *a, Vector *b) {
-  SwigValueWrapper&lt;Vector&gt; x = *a;
-  SwigValueWrapper&lt;Vector&gt; y = *b;
-  SwigValueWrapper&lt;Vector&gt; r = cross_product(x, y);
+  SwigValueWrapper&lt;Vector&gt; x;
+  SwigValueWrapper&lt;Vector&gt; y;
+  SwigValueWrapper&lt;Vector&gt; r;
+  x = *a;
+  y = *b;
+  r = cross_product(x, y);
   return new Vector(r);
 }
 </pre>
@@ -1380,7 +1591,7 @@ Vector cross_product(Vector *a, Vector *b) {
 
 <p>
 This transformation is a little sneaky, but it provides support for
-pass-by-value even when a class does not provide a default constructor
+pass-by-value even when a class is not default constructible nor assignable
 and it makes it possible to properly support a number of SWIG's
 customization options.  The definition of <tt>SwigValueWrapper</tt>
 can be found by reading the SWIG wrapper code. This class is really nothing more than a thin
@@ -1495,14 +1706,14 @@ $ python
 &gt;&gt;&gt; import shapes
 &gt;&gt;&gt; circle = shapes.new_Circle(7)
 &gt;&gt;&gt; square = shapes.new_Square(10)
-&gt;&gt;&gt; print shapes.Circle_area(circle)
+&gt;&gt;&gt; print(shapes.Circle_area(circle))
 153.93804004599999757
-&gt;&gt;&gt; print shapes.Shape_area(circle)
+&gt;&gt;&gt; print(shapes.Shape_area(circle))
 153.93804004599999757
-&gt;&gt;&gt; print shapes.Shape_area(square)
+&gt;&gt;&gt; print(shapes.Shape_area(square))
 100.00000000000000000
 &gt;&gt;&gt; shapes.Shape_set_location(square, 2, -3)
-&gt;&gt;&gt; print shapes.Shape_perimeter(square)
+&gt;&gt;&gt; print(shapes.Shape_perimeter(square))
 40.00000000000000000
 &gt;&gt;&gt;
 </pre></div>
@@ -1799,6 +2010,11 @@ use the <tt>compactdefaultargs</tt> feature flag as mentioned below.
 </p>
 
 <p>
+For C# please see the <a href="CSharp.html#CSharp_named_arguments">C# named and optional arguments</a> section for information on special
+handling of default arguments available specifically for C#.
+</p>
+
+<p>
 <b>Compatibility note:</b> Versions of SWIG prior to SWIG-1.3.23 wrapped default arguments slightly differently.
 Instead a single wrapper method was generated and the default values were copied into the C++ wrappers
 so that the method being wrapped was then called with all the arguments specified.
@@ -1824,6 +2040,7 @@ such as C# and Java,
 which don't have optional arguments in the language, 
 Another restriction of this feature is that it cannot handle default arguments that are not public.
 The following example illustrates this:
+
 </p>
 
 <div class="code">
@@ -2079,7 +2296,6 @@ or for statically typed languages like Java:
 <pre>
 example.i:4: Warning 516: Overloaded method foo(long) ignored,
 example.i:3: Warning 516: using foo(int) instead.
-at example.i:3 used.
 </pre>
 </div>
 
@@ -2138,7 +2354,7 @@ This error means that the target language module supports overloading,
 but for some reason there is no type-checking rule that can be used to
 generate a working dispatch function.  The resulting behavior is then
 undefined.  You should report this as a bug to the
-<a href="http://www.swig.org/bugs.html">SWIG bug tracking database</a>
+<a href="https://www.swig.org/bugs.html">SWIG bug tracking database</a>
 if this is due to one of the typemaps supplied with SWIG.
 </p>
 
@@ -2236,8 +2452,8 @@ For example:
 </div>
 
 <p>
-When a renaming operator is applied to a class as in <tt>Spam::foo(int)</tt>, it is applied to
-that class and all derived classes.   This can be used to apply a consistent renaming across
+When a renaming operator is applied to a method in a class as in <tt>Spam::foo(int)</tt>, it is applied to
+the matching method in that class and all derived classes.   This can be used to apply a consistent renaming across
 an entire class hierarchy with only a few declarations.  For example:
 </p>
 
@@ -2315,7 +2531,7 @@ members (of all classes):
 Note: the <tt>*::</tt> syntax is non-standard C++, but the '*' is meant to be a
 wildcard that matches any class name (we couldn't think of a better
 alternative so if you have a better idea, send email to
-the <a href="http://www.swig.org/mail.html">swig-devel mailing list</a>.
+the <a href="https://www.swig.org/mail.html">swig-devel mailing list</a>.
 </p>
 
 <p>
@@ -2326,8 +2542,8 @@ also apply to <tt>%ignore</tt>.  For example:
 <div class="code">
 <pre>
 %ignore foo(double);          // Ignore all foo(double)
-%ignore Spam::foo;            // Ignore foo in class Spam
-%ignore Spam::foo(double);    // Ignore foo(double) in class Spam
+%ignore Spam::foo;            // Ignore foo in class Spam (and foo in any derived classes)
+%ignore Spam::foo(double);    // Ignore foo(double) in class Spam (and foo in any derived classes)
 %ignore *::foo(double);       // Ignore foo(double) in all classes
 </pre>
 </div>
@@ -2381,6 +2597,53 @@ scope qualifier has higher precedence than a parameterized name in
 global scope (e.g., a renaming of <tt>Spam::foo</tt> takes precedence
 over a renaming of <tt>foo(int)</tt>).</p>
 </li>
+
+<li><p>
+Renaming a class member, using an unparameterized but qualified name, such as <tt>Spam::foo</tt>, also applies to members in all derived classes
+that have members with the same name.
+This can be used to simply rename a method, across an entire class hierarchy for all overloaded and non-overloaded methods.
+This also applies to methods introduced via <tt>using</tt> declarations, see
+<a href="#SWIGPlus_nn35">Using declarations and inheritance</a>.
+For example:
+</p>
+
+<div class="code">
+<pre>
+%rename(foo_new) Spam::foo;
+
+class Spam {
+public:
+  virtual void foo(int);      // Renamed to foo_new
+};
+
+class Bar : public Spam {
+public:
+  virtual void foo(int);      // Renamed to foo_new
+  void foo(bool, short, int); // Renamed to foo_new
+};
+
+class Grok : public Bar {
+public:
+  virtual void foo(int);      // Renamed to foo_new
+  void foo(bool, int);        // Renamed to foo_new
+  void foo(const char *);     // Renamed to foo_new
+  void foo(Bar *);            // Renamed to foo_new
+};
+
+class Spok : public Grok {
+public:
+  void foo();                 // Renamed to foo_new
+};
+
+class Knock : public Spok {
+public:
+  using Grok::foo;            // Introduced methods renamed to foo_new
+};
+</pre>
+</div>
+
+</li>
+
 
 <li><p>
 The order in which <tt>%rename</tt> directives are defined does not matter
@@ -2538,6 +2801,26 @@ public:
 class Ham {
 public:
   void foo(int);      // Renamed to foo_i
+};
+</pre>
+</div>
+
+<p>
+An empty parameter list and <tt>(void)</tt> are not interchangeable either, even though they declare the same function in C++.
+The parameter list must be written exactly as it appears in the declaration:
+</p>
+
+<div class="code">
+<pre>
+%rename(refresh_void) refresh(void);
+
+class Display {
+public:
+  void refresh();       // Stays 'refresh' (not renamed)
+};
+class Monitor {
+public:
+  void refresh(void);   // Renamed to refresh_void
 };
 </pre>
 </div>
@@ -2936,12 +3219,58 @@ as its use with C structures. Please refer to the <a href="SWIG.html#SWIG_adding
 section for further details.
 </p>
 
+<H3><a name="SWIGPlus_replacing_methods">6.17.1 Replacing class methods</a></H3>
+
+
 <p>
-<b>Compatibility note:</b>  The <tt>%extend</tt> directive is a new
-name for the <tt>%addmethods</tt> directive in SWIG1.1.  Since <tt>%addmethods</tt> could
-be used to extend a structure with more than just methods, a more suitable
-directive name has been chosen.
+Suppose there is a method in a class that you need to replace and keep the method name the same.
+This can be achieved combining the <tt>%extend</tt> and <tt>%ignore</tt> directives covered earlier.
+Here is an example to replace the <tt>MyClass::mymethod()</tt>:
+
+<div class="code">
+<pre>
+%extend MyClass {
+  void mymethod() {
+    std::cout &lt;&lt; "swig mymethod" &lt;&lt; std::endl;
+  }
+}
+
+%ignore MyClass::mymethod;
+
+%inline %{
+class MyClass {
+public:
+  void mymethod() {
+    std::cout &lt;&lt; "class mymethod" &lt;&lt; std::endl;
+  }
+};
+%}
+</pre>
+</div>
+
+<p>
+Or if your code organization makes more sense to put
+the <tt>%extend</tt> after the class definition, you would need the following:
 </p>
+
+<div class="code">
+<pre>
+%rename("") MyClass::mymethod; // unignores the method
+</pre>
+</div>
+
+<p>
+before the <tt>%extend</tt> or SWIG will continue to ignore
+<tt>mymethod()</tt>, even in an <tt>%extend</tt>.
+</p>
+
+<p>
+Note that you can call the class method from the method
+in <tt>%extend</tt>, just use <tt>self-&gt;mymethod()</tt> and it will call
+the class method, not the one in <tt>%extend</tt>.
+</p>
+
+
 
 <H2><a name="SWIGPlus_nn30">6.18 Templates</a></H2>
 
@@ -2954,22 +3283,24 @@ is expected in an interface file.  For example:
 <div class="code">
 <pre>
 void foo(vector&lt;int&gt; *a, int n);
-void bar(list&lt;int, 100&gt; *x);
+void bar(std::array&lt;int, 100&gt; *x);
 </pre>
 </div>
 
 <p>
 There are some restrictions on the use of non-type arguments.  Simple literals
-are supported, and so are some constant expressions.  However, use of '&lt;'
-and '&gt;' within a constant expressions currently is not supported by SWIG
-('&lt;=' and '&gt;=' are though).  For example:
+are supported, and so are most constant expressions.  However, there are some
+limitations on the use of '&lt;' and '&gt;' in constant expressions (but note
+that '&lt;=' and '&gt;=' are fully supported).  For example:
 </p>
 
 <div class="code">
 <pre>
-void bar(list&lt;int, 100&gt; *x);                // OK
-void bar(list&lt;int, 2*50&gt; *x);               // OK
-void bar(list&lt;int, (2&gt;1 ? 100 : 50)&gt; *x)    // Not supported
+void bar(std::array&lt;int, 100&gt; *x);                // OK
+void bar(std::array&lt;int, 2*50&gt; *x);               // OK
+void bar(std::array&lt;int, (1&lt;2 ? 100 : 50)&gt; *x)    // OK
+void bar(std::array&lt;int, 1&lt;2 ? 100 : 50&gt; *x)      // Not supported
+void bar(std::array&lt;int, (2&gt;1 ? 100 : 50)&gt; *x)    // Not supported
 </pre>
 </div>
 
@@ -3150,9 +3481,27 @@ void foo(List&lt;Integer&gt; *x);
 In this case, <tt>List&lt;Integer&gt;</tt> is exactly the same type as
 <tt>List&lt;int&gt;</tt>.  Any use of <tt>List&lt;Integer&gt;</tt> is mapped back to the 
 instantiation of <tt>List&lt;int&gt;</tt> created earlier.  Therefore, it is
-not necessary to instantiate a new class for the type <tt>Integer</tt> (doing so is
-redundant and will simply result in code bloat).
+not correct to instantiate a new class for the type <tt>Integer</tt>.
+An attempt to do so such as:
 </p>
+
+<div class="code">
+<pre>
+%template(intList) List&lt;int&gt;;
+%template(IntegerList) List&lt;Integer&gt;;   // Ignored
+</pre>
+</div>
+
+<p>
+will result in the duplicate instantiation being ignored with a warning:
+</p>
+
+<div class="shell">
+<pre>
+example.i:48: Warning 404: Duplicate template instantiation of 'List&lt; Integer &gt;' with name 'IntegerList' ignored,
+example.i:47: Warning 404: previous instantiation of 'List&lt; int &gt;' with name 'intList'.
+</pre>
+</div>
 
 <p>
 The template provided to <tt>%template</tt> for instantiation must be the actual template and not a typedef to a template.
@@ -3222,36 +3571,49 @@ original template definition.  Template default arguments are supported.  For ex
 
 <div class="code">
 <pre>
-template vector&lt;typename T, int max=100&gt; class vector {
+template &lt;typename T, int max=100&gt; class vector {
 ...
 };
 
-%template(intvec) vector&lt;int&gt;;           // OK
+%template(intvec) vector&lt;int&gt;;            // OK
 %template(vec1000) vector&lt;int, 1000&gt;;     // OK
 </pre>
 </div>
 
 <p>
 The <tt>%template</tt> directive should not be used to wrap the same
-template instantiation more than once in the same scope.  This will
-generate an error.  For example:
+template instantiation more than once. This also applies to default parameters
+where a template parameter specified in the instantiation is the same as the default parameter.
+For example:
 </p>
 
 <div class="code">
 <pre>
-%template(intList) List&lt;int&gt;;
-%template(Listint) List&lt;int&gt;;    // Error.   Template already wrapped.
+%template(vec) vector&lt;double&gt;;            // OK
+%template(vec100) vector&lt;double, 100&gt;;    // Ignored
 </pre>
 </div>
 
 <p>
-This error is caused because the template expansion results in two
-identical classes with the same name.  This generates a symbol table
-conflict.  Besides, it probably more efficient to only wrap a specific
-instantiation only once in order to reduce the potential for code
-bloat.
+will warn:
 </p>
 
+<div class="shell">
+<pre>
+example.i:59: Warning 404: Duplicate template instantiation of 'vector&lt; double,100 &gt;' with name 'vec100' ignored,
+example.i:58: Warning 404: previous instantiation of 'vector&lt; double &gt;' with name 'vec'.
+</pre>
+</div>
+
+<p>
+If this was not ignored, the template expansion would result in two identical classes.
+An identical instantiation is only wrapped once in order to reduce code bloat.
+</p>
+
+<p>
+<b>Compatibility Note</b>:  Versions prior to SWIG-4.2.0 would sometimes not detect and prevent duplicate
+instantiations, such as when the wrapped name was different.
+</p>
 <H3><a name="SWIGPlus_template_class_inheritance">6.18.4 Template base classes</a></H3>
 
 
@@ -3319,20 +3681,6 @@ Don't worry--if you get the order wrong, SWIG should generate a warning message.
 </p>
 
 <p>
-Occasionally, you may need to tell SWIG about base classes that are defined by templates,
-but which aren't supposed to be wrapped.  Since SWIG is not able to automatically
-instantiate templates for this purpose, you must do it manually.  To do this, simply
-use the empty template instantiation, that is, <tt>%template</tt> with no name.  For example:
-</p>
-
-<div class="code">
-<pre>
-// Instantiate traits&lt;double, double&gt;, but don't wrap it.
-%template() traits&lt;double, double&gt;;
-</pre>
-</div>
-
-<p>
 If you have to instantiate a lot of different classes for many different types,
 you might consider writing a SWIG macro.  For example:
 </p>
@@ -3357,7 +3705,66 @@ TEMPLATE_WRAP(PairStringInt, std::pair&lt;string, int&gt;)
 Note the use of a vararg macro for the type T. If this wasn't used, the comma in the templated type in the last example would not be possible.
 </p>
 
-<H3><a name="SWIGPlus_template_specialization">6.18.5 Template specialization</a></H3>
+<H3><a name="SWIGPlus_template_empty">6.18.5 Empty template instantiation</a></H3>
+
+
+<p>
+Occasionally, you may need to tell SWIG about classes that are defined by templates,
+but which aren't supposed to be wrapped.  Since SWIG is not able to automatically
+instantiate templates for this purpose, you must do it manually.  To do this, simply
+use <tt>%template()</tt>, that is the empty template instantiation that omits providing a name.  For example:
+</p>
+
+<div class="code">
+<pre>
+template&lt;typename T&gt; struct Traits {
+  typedef T type;
+};
+%}
+
+%template() Traits&lt;int&gt;; // instantiate Traits&lt;int&gt;, but don't wrap it
+
+void traitor(Traits&lt;int&gt;::type val);
+</pre>
+</div>
+
+<p>
+Without a template instantiation, SWIG does not know that the first parameter to the <tt>traitor</tt>
+function is type int and passing an integer to this function from any target language won't work.
+The empty template instantiation adds the appropriate type information into SWIG's type system, without
+forcing one to wrap the <tt>Traits</tt> class.
+</p>
+
+<p>
+Duplicate template instantiation are not allowed, as described in the
+<a href="#SWIGPlus_template_classes">Default template arguments</a> section above.
+There is one exception where a named template instantiation can be followed by an empty template instantiation.
+Duplicate empty template instantiations are silently ignored, unlike duplicate named template instantiations.
+</p>
+
+<p>
+Unlike template class instantiations, template function instantiations must have a name.
+Consider the following:
+</p>
+
+<div class="code">
+<pre>
+template&lt;class T&gt; T tfunc(T x) { };
+%template() tfunc&lt;double&gt;;
+</pre>
+</div>
+
+<p>
+The empty template instantiation will be ignored with:
+</p>
+
+<div class="shell">
+<pre>
+example.i:9: Warning 519: %template() contains no name. Template method ignored: tfunc&lt; double &gt;(double)
+</pre>
+</div>
+
+<H3><a name="SWIGPlus_template_specialization">6.18.6 Template specialization</a></H3>
 
 
 <p>
@@ -3447,7 +3854,7 @@ SWIG implements template argument deduction so that the following partial specia
 </pre>
 </div>
 
-<H3><a name="SWIGPlus_template_member">6.18.6 Member templates</a></H3>
+<H3><a name="SWIGPlus_template_member">6.18.7 Member templates</a></H3>
 
 
 <p>
@@ -3631,7 +4038,7 @@ Alternatively, you could expand the constructor template in selected instantiati
 
 // Create default and conversion constructors 
 %extend pair&lt;double, double&gt; {
-  %template(paird) pair&lt;double, dobule&gt;;   // Default constructor
+  %template(paird) pair&lt;double, double&gt;;   // Default constructor
   %template(pairc) pair&lt;int, int&gt;;         // Conversion constructor
 };
 </pre>
@@ -3646,7 +4053,7 @@ instead:
 <pre>
 // Create default and conversion constructors 
 %extend pair&lt;double, double&gt; {
-  %template(pair) pair&lt;double, dobule&gt;;   // Default constructor
+  %template(pair) pair&lt;double, double&gt;;   // Default constructor
   %template(pair) pair&lt;int, int&gt;;         // Conversion constructor
 };
 </pre>
@@ -3659,7 +4066,7 @@ constructor, that will dispatch the proper call depending on the argument
 type.
 </p>
 
-<H3><a name="SWIGPlus_template_scoping">6.18.7 Scoping and templates</a></H3>
+<H3><a name="SWIGPlus_template_scoping">6.18.8 Scoping and templates</a></H3>
 
 
 <p>
@@ -3760,7 +4167,71 @@ template class C&lt;int&gt;;
 </p>
 
  
-<H3><a name="SWIGPlus_template_more">6.18.8 More on templates</a></H3>
+<H3><a name="SWIGPlus_template_renaming">6.18.9 Template renaming</a></H3>
+
+
+<p>
+The primary purpose of the <tt>%template</tt> directive is to instantiate a template and make it available in the target language.
+The identifier name for use from the target language is determined by the name provided to <tt>%template</tt>.
+However, if <tt>%rename</tt> is used, it will override the name given to <tt>%template</tt>.
+This is somewhat unusual but there are a couple of corner case uses.
+</p>
+
+<p>
+In the case of overloaded template functions, the <tt>%template</tt> directive instantiates all the overloaded template functions
+and all the instantiations will have the same name.
+Consider the example below which uses <tt>%rename</tt> to rename just one of the overloaded templates:
+</p>
+
+<div class="code"><pre>
+namespace Quirky {
+  template&lt;typename T&gt; T funky(T a, T b) { return a+b; }
+  template&lt;typename T&gt; T funky(T a) { return a; }
+  template&lt;typename T&gt; void funky() {}
+}
+%}
+
+%rename(funky_void) Quirky::funky&lt;int&gt;(); // matches just the parameterless function
+%template(funky_int) Quirky::funky&lt;int&gt;;
+</pre></div>
+
+<p>
+Note that <tt>%rename</tt> is placed before <tt>%template</tt> in order to have any effect.
+The wrapped functions in Java are then:
+</p>
+
+<div class="targetlang"><pre>
+public static int funky_int(int a, int b) { ... }
+public static int funky_int(int a) { ... }
+public static void funky_void() { ... }
+</pre></div>
+
+<p>
+<a href="SWIG.html#SWIG_advanced_renaming">Advanced renaming support</a> can be used to modify the C++ symbol for the target language by using format specifiers and special functions/regular expression with <tt>%rename</tt>.
+This type of advanced renaming is not possible solely with the name given to <tt>%template</tt>.
+However, <tt>%rename</tt> can be used to get the same effect.
+Using the same example above using the <tt>uppercase</tt> function:
+</p>
+
+<div class="code"><pre>
+%rename("%(uppercase)s") Quirky::funky&lt;bool&gt;; // matches all 3 template methods
+%template() Quirky::funky&lt;bool&gt;;
+</pre></div>
+
+<p>
+Note that the empty template instantiation can be used - there is little point providing a name to <tt>%template</tt> if renaming all the instantiated templates with <tt>%rename</tt>.
+Normally empty template instantiations result in no wrapper, but providing a name via <tt>%rename</tt> will enable a wrapped function.
+The wrapped functions in Java are then:
+</p>
+
+<div class="targetlang"><pre>
+public static boolean FUNKY(boolean a, boolean b) { ... }
+public static boolean FUNKY(boolean a) { ... }
+public static void FUNKY() { ... }
+</pre></div>
+
+
+<H3><a name="SWIGPlus_template_more">6.18.10 More on templates</a></H3>
 
 
 <p>
@@ -4016,23 +4487,23 @@ math::Complex c;
 <p>
 At this level, namespaces are relatively easy to manage.  However, things start to get 
 very ugly when you throw in the other ways a namespace can be used.  For example,
-selective symbols can be exported from a namespace with <tt>using</tt>.
+selective symbols can be exported from a namespace with a <tt>using</tt> declaration:
 </p>
 
 <div class="code">
 <pre>
-using math::Complex;
+using math::Complex;                // Using declaration
 double magnitude(Complex *c);       // Namespace prefix stripped
 </pre>
 </div>
 
 <p>
-Similarly, the contents of an entire namespace can be made available like this:
+Similarly, the contents of an entire namespace can be made available via a <tt>using</tt> directive:
 </p>
 
 <div class="code">
 <pre>
-using namespace math;
+using namespace math;               // Using directive
 double x = sin(1.0);
 double magnitude(Complex *c);
 </pre>
@@ -4162,8 +4633,8 @@ When this conflict occurs, you will get an error message that resembles this:
 
 <div class="shell">
 <pre>
-example.i:26. Error. 'foo' is multiply defined in the generated target language module.
-example.i:23. Previous declaration of 'foo'
+example.i:26: Error: 'foo' is multiply defined in the generated target language module.
+example.i:23: Error: Previous declaration of 'foo'
 </pre>
 </div>
 
@@ -4189,9 +4660,11 @@ Similarly, <tt>%ignore</tt> can be used to ignore declarations.
 </p>
 
 <p>
-<tt>using</tt> declarations do not have any effect on the generated wrapper
-code. They are ignored by SWIG language modules and they do not result in any
-code.  However, these declarations <em>are</em> used by the internal type
+C++ <tt>using</tt> directives and <tt>using</tt> declarations
+do not add any code to the generated wrapper code.
+However, there is an exception in one context, see <a href="#SWIGPlus_nn35">Using declarations and inheritance</a>
+for introducing members of a base class into a derived class definition.
+C++ <tt>using</tt> declarations and directives <em>are</em> used by the internal type
 system to track type-names. Therefore, if you have code like this:
 </p>
 
@@ -4420,15 +4893,31 @@ More advanced handling of namespaces is discussed next.
 
 
 <p>
-Some target languages provide support for the <tt>nspace</tt> <a href="Customization.html#Customization_features">feature</a>.
-The feature can be applied to any class, struct, union or enum declared within a named namespace.
-The feature wraps the type within the target language specific concept of a namespace,
-for example, a Java package or C# namespace.
-Please see the language specific sections to see if the target language you are interested in supports the nspace feature.
+The <tt>nspace</tt> feature operates in two modes.
+Firstly, in a simple enable/disable mode to mirror the C++ namespaces into the target language specific concept of a C++ namespace.
+Secondly, a complex mode for modifying, renaming or moving the hierarchies of the language specific concept of a C++ namespace.
 </p>
 
 <p>
-The feature is demonstrated below for C# using the following example:
+The types of symbols that the feature can be applied to are any class, struct, union or enum declared within a named namespace.
+This also includes templates of the aforementioned types.
+The feature wraps the type within the target language specific concept of a namespace,
+such as a Java package or C# namespace.
+Only some target languages provide support for the <tt>nspace</tt> feature.
+Please see the target language specific sections to see if the language you are interested in supports the nspace feature.
+</p>
+
+<H4><a name="SWIGPlus_nspace_feature_flag">6.19.1.1 %nspace for mirroring namespace hierarchies</a></H4>
+
+
+<p>
+In this simple mode the <tt>nspace</tt> feature works as a <a href="Customization.html#Customization_feature_flags">feature flag</a> to enable or disable the feature for a given C++ symbol.
+As described earlier, all namespace are flattened by default, hence the <tt>nspace</tt> feature is disabled by default.
+When the feature is enabled, the C++ namespace hierarchies are mirrored into the target language concept of a namespace.
+</p>
+
+<p>
+The feature flag is demonstrated below using the following example:
 </p>
 
 <div class="code">
@@ -4452,7 +4941,7 @@ namespace MyWorld {
 </div>
 
 <p>
-Without the <tt>nspace</tt> feature directives above or <tt>%rename</tt>, you would get the following warning resulting in just one of the <tt>Color</tt> classes being available for use from the target language:
+By default, without the above <tt>nspace</tt> feature flags (or an appropriate <tt>%rename</tt>), SWIG outputs the following warning resulting in just one of the <tt>Color</tt> classes being available for use from the target language:
 </p>
 
 <div class="shell">
@@ -4463,14 +4952,24 @@ example.i:5: Error: Previous declaration of 'Color'
 </div>
 
 <p>
-With the <tt>nspace</tt> feature the two <tt>Color</tt> classes are wrapped into the equivalent C# namespaces.
+Let's consider C# as the target language.
+With the two <tt>nspace</tt> feature flags, the two C# <tt>Color</tt> proxy classes are generated into the equivalent C# namespaces that mirror the C++ namespace hierarchies.
 A fully qualified constructor call of each these two types in C# is then:
 </p>
 
 <div class="targetlang">
 <pre>
-MyWorld.Material.Color materialColor = new MyWorld.Material.Color();
-MyWorld.Wrapping.Color wrappingColor = new MyWorld.Wrapping.Color();
+var materialColor = new MyWorld.Material.Color();
+var wrappingColor = new MyWorld.Wrapping.Color();
+</pre>
+</div>
+
+<p>
+Without the <tt>nspace</tt> feature flag, no namespaces are available in C# and the fully qualified constructor call of the type in C# would simply be:
+</p>
+<div class="targetlang">
+<pre>
+var materialColor = new Color();
 </pre>
 </div>
 
@@ -4494,8 +4993,185 @@ namespace MyWorld {
 </div>
 
 <p>
-<b>Compatibility Note:</b> The nspace feature was first introduced in SWIG-2.0.0.
+<b>Compatibility Note:</b> The simple <tt>%nspace</tt> feature flag was first introduced in SWIG-2.0.0.
 </p>
+
+<H4><a name="SWIGPlus_nspacemove">6.19.1.2 %nspacemove for modifying namespace hierarchies</a></H4>
+
+
+<p>
+The more complex mode for <tt>nspace</tt> provides the ability to move a type into a differently named target language equivalent of a namespace.
+This allows a fully flexible approach to mapping C++ namespaces into a target language equivalent of a namespace, such as:
+</p>
+
+<ul>
+  <li> Renaming a namespace.</li>
+  <li> Renaming any number of sub-namespaces of a namespace.</li>
+  <li> Moving a type to a completely different namespace.</li>
+  <li> Splitting many types in one namespace into multiple different namespaces.</li>
+  <li> Adding nested sub-namespaces to a namespace.</li>
+  <li> Removing nested sub-namespaces of namespace.</li>
+  <li> Combinations of the above.</li>
+</ul>
+
+<p>
+The <tt>nspace</tt> feature attaches to a C++ symbol and provides a target language namespace for that symbol to move to.
+The <tt>%nspacemove</tt> directive is a macro for the <tt>nspace</tt> feature as follows:
+</p>
+
+<div class="code">
+<pre>
+#define %nspacemove(NAMESPACE) %feature("nspace", #NAMESPACE)
+</pre>
+</div>
+
+<p>
+where the target namespace is provided in <tt>NAMESPACE</tt> and is specified in valid C++ syntax, such as <tt>A::B::C</tt>.
+Internally, SWIG converts the C++ namespace into a target language equivalent,
+so this might for example, result in a C# namespace called <tt>A.B.C</tt> or a Java package named <tt>A.B.C</tt>.
+Note that the target namespace does not have to actually exist in any of the C++ code that SWIG parses; it could be entirely made-up.
+</p>
+
+<p>
+Either the <tt>%nspacemove</tt> macro or the more verbose <tt>%feature</tt> syntax can be used. Please see the <a href="Customization.html#Customization_features">Features and the %feature directive</a> section for more details of SWIG features.
+</p>
+
+<p>
+An example follows:
+</p>
+
+<div class="code">
+<pre>
+// Enable the nspace feature flag for all symbols
+%nspace;
+
+// Override the nspace feature for a subset of symbols by moving them into different namespaces
+%nspacemove(A) A::B::C::Struct1;
+%feature("nspace", "A::B::X") A::B::C::Struct2;
+%nspacemove(A::B::C::D) A::B::C::Struct4;
+%nspacemove(Somewhere::Else) A::B::C::Struct5;
+
+%inline %{
+namespace A {
+  namespace B {
+    namespace C {
+      struct Struct1 {
+        // ...
+      };
+      struct Struct2 {
+        // ...
+      };
+      struct Struct3 {
+        // ...
+      };
+      struct Struct4 {
+        // ...
+      };
+      struct Struct5 {
+        // ...
+      };
+    }
+  }
+}
+%}
+</pre>
+</div>
+
+<p>
+The C# code below constructs each of the above classes.
+It shows the namespaces that the C# proxy classes have been moved into,
+noting though that <tt>Struct4</tt> merely exactly mirrors the C++ namespace hierarchy as it has the <tt>nspace</tt> feature flag attached to it.
+</p>
+
+<div class="targetlang">
+<pre>
+var s1 = new A.Struct1();
+var s2 = new A.B.X.Struct2();
+var s3 = new A.B.C.Struct3();
+var s4 = new A.B.C.D.Struct4();
+var s5 = new Somewhere.Else.Struct5();
+</pre>
+</div>
+
+<H4><a name="SWIGPlus_nspace_more">6.19.1.3 More about the nspace feature</a></H4>
+
+
+<p>
+When the <tt>nspace</tt> feature is attached to a class or enum, all contained symbols (members) are also automatically moved into the target language namespace.
+Contained symbols include all enum values, static and non-static class members as well as nested classes.
+There is no need for additional <tt>nspace</tt> features to be specified for all the contained symbols.
+Below is an example showing this.
+It also shows the nspace feature working for templates.
+</p>
+
+<div class="code">
+<pre>
+// Easy way to move all the Structure template instantiations into a different namespace
+%nspacemove(A::Different::Space) Space::Structure;
+
+%inline %{
+namespace Space {
+  template&lt;typename T&gt;
+  struct Structure {
+    static int Count;
+    static void StaticMethod(T t) {
+      // ...
+    }
+    struct NestedStruct {
+      // ...
+    };
+  };
+  template&lt;typename T&gt;
+  int Structure&lt;T&gt;::Count = 0;
+}
+%}
+%template(StructureInt) Space::Structure&lt;int&gt;;
+%template(StructureString) Space::Structure&lt;const char *&gt;;
+</pre>
+</div>
+
+<p>
+The C# code below shows the full C# namespace <tt>A.Different.Space</tt> being used as one would expect for all the contained symbols within a C# class.
+</p>
+
+<div class="targetlang">
+<pre>
+var s = new A.Different.Space.StructureInt();
+int count = A.Different.Space.StructureInt.Count;
+var n = new A.Different.Space.StructureInt.NestedStruct();
+A.Different.Space.StructureInt.StaticMethod(99);
+A.Different.Space.StructureString.StaticMethod("hi");
+</pre>
+</div>
+
+<p>
+Any attempt to give a different namespace value to a nested class or enum will issue a warning.
+For example, adding the following to the above in an attempt to move one of the instantiated nested classes into another namespace like this:
+</p>
+
+<div class="code">
+<pre>
+%nspacemove(Bad::Space) Space::Structure&lt;int&gt;::NestedStruct;
+... rest of example above ...
+</pre>
+</div>
+
+<p>
+will result in the following warning:
+</p>
+
+<div class="shell">
+<pre>
+Warning 406: Ignoring nspace setting (Bad::Space) for 'Space::Structure&lt; int &gt;::NestedStruct',
+Warning 406: as it conflicts with the nspace setting (A::Different::Space) for outer class 'Space::Structure&lt; int &gt;'.
+</pre>
+</div>
+
+<p>
+<b>Compatibility Note:</b> Modifying namespace hierarchies via <tt>%nspacemove</tt> was first introduced in SWIG-4.3.0.
+</p>
+
+
 
 <H2><a name="SWIGPlus_renaming_templated_types_namespaces">6.20 Renaming templated types in namespaces</a></H2>
 
@@ -4707,7 +5383,7 @@ string like this:
 
 <div class="targetlang">
 <pre>
-&gt;&gt;&gt; print example.FOO
+&gt;&gt;&gt; print(example.FOO)
 _ff0d54a800000000_m_Object__f_double_double__double
 &gt;&gt;&gt;
 </pre>
@@ -4841,7 +5517,7 @@ example, you could do this in Python:
 <div class="targetlang">
 <pre>
 &gt;&gt;&gt; f = make_Foo()
-&gt;&gt;&gt; print f.x
+&gt;&gt;&gt; print(f.x)
 0
 &gt;&gt;&gt; f.bar()
 &gt;&gt;&gt;
@@ -5115,7 +5791,7 @@ exit              # 'a' is released, SWIG unref 'a' called in the destructor wra
 
 
 <p>
-<tt>using</tt> declarations are sometimes used to adjust access to members of
+C++ <tt>using</tt> declarations are sometimes used to introduce members of
 base classes.  For example:
 </p>
 
@@ -5123,7 +5799,7 @@ base classes.  For example:
 <pre>
 class Foo {
 public:
-  int  blah(int x);
+  int blah(int x);
 };
 
 class Bar {
@@ -5171,7 +5847,13 @@ you wrap this code in Python, the module works just like you would expect:
 </div>
 
 <p>
-<tt>using</tt> declarations can also be used to change access when applicable.  For example:
+The C++11 standard supports using declarations for inheriting constructors and this is covered in
+<a href="CPlusPlus11_object_construction_improvement">Object construction improvement</a>.
+</p>
+
+<p>
+C++ <tt>using</tt> declarations can also be used to change access when applicable.
+For example, protected methods in a base class can be made public in a derived class:
 </p>
 
 <div class="code">
@@ -5204,15 +5886,15 @@ ignored in a base class, it will also be ignored by a <tt>using</tt> declaration
 
 <p>
 Because a <tt>using</tt> declaration does not provide fine-grained
-control over the declarations that get imported, it may be difficult
+control over the declarations that get imported, because a single <tt>using</tt> declaration
+may introduce multiple methods, it may be difficult
 to manage such declarations in applications that make heavy use of
 SWIG customization features.  If you can't get <tt>using</tt> to work
-correctly, you can always change the interface to the following:
+correctly, you can always modify the C++ code to handle SWIG differently such as:
 </p>
 
 <div class="code">
 <pre>
-
 class FooBar : public Foo, public Bar {
 public:
 #ifndef SWIG
@@ -5229,12 +5911,35 @@ public:
 </div>
 
 <p>
+If the C++ code being wrapped cannot be changed, make judicious usage of <tt>%extend</tt> and <tt>%rename</tt>
+to ignore and unignore declarations. The example below is effectively the same as above:
+</p>
+
+<div class="code">
+<pre>
+%extend FooBar {
+  int blah(int x) { return $self-&gt;Foo::blah(x); }
+  double blah(double x) { return $self-&gt;Bar::blah(x); }
+}
+%ignore FooBar::blah; // ignore all FooBar::blah below
+%rename("") FooBar::blah(const char *x); // parameterized unignore
+
+class FooBar : public Foo, public Bar {
+public:
+  using Foo::blah;
+  using Bar::blah;
+  char *blah(const char *x);
+};
+</pre>
+</div>
+
+<p>
 <b>Notes:</b>
 </p>
 
 <ul>
-<li><p>If a derived class redefines a method defined in a base class, then a <tt>using</tt> declaration
-won't cause a conflict.  For example:</p>
+<li><p>If a derived class introduces a method defined in a base class via a <tt>using</tt> declaration,
+there won't be a conflict due to incorrect additional methods.  For example:</p>
 
 <div class="code">
 <pre>
@@ -5246,14 +5951,14 @@ public:
 
 class Bar : public Foo {
 public:
-  using Foo::blah;    // Only imports blah(double);
+  using Foo::blah;    // Only introduces blah(double);
   int blah(int);
 };
 </pre>
 </div>
 
-<li><p>Resolving ambiguity in overloading may prevent declarations from being
-imported by <tt>using</tt>.  For example:
+<li><p>Renaming methods may prevent methods from being
+introduced into the derived class via <tt>using</tt> declarations.  For example:
 </p>
 
 <div class="code">
@@ -5267,11 +5972,38 @@ public:
 
 class Bar : public Foo {
 public:
-  using Foo::blah;     // Only imports blah(int)
+  using Foo::blah;     // Only introduces blah(int)
   double blah(double x);
 };
 </pre>
 </div>
+
+<p>
+The problem here is <tt>Foo::blah</tt> is renamed to <tt>blah_long</tt> in the target language, but
+the <tt>using</tt> declaration in Bar is not renamed in the target language and thinks all introduced methods should simply
+be called <tt>blah</tt>.
+It is not clear what target language names should be used in Bar and so the conflicting names are effectively ignored
+as they are not introduced into the derived class for the target language wrappers.
+In such situations SWIG will emit a warning:
+</p>
+
+<div class="shell">
+<pre>
+example.i:15: Warning 526: Using declaration Foo::blah, with name 'blah', is not actually using
+example.i:10: Warning 526: the method from Foo::blah(long), with name 'blah_long', as the names are different.
+</pre>
+</div>
+
+<p>
+<b>Compatibility Note:</b>
+This warning message was introduced in SWIG-4.1.0.
+Prior versions also effectively ignored the using declaration for the same reasons, but were silent about it.
+</p>
+
+<p>
+If methods really need different names, please use of combinations of <tt>%rename</tt>, <tt>%ignore</tt> and <tt>%extend</tt> to achieve the desired outcome.
+</p>
+
 </ul>
 
 <H2><a name="SWIGPlus_nested_classes">6.27 Nested classes</a></H2>
@@ -5316,12 +6048,12 @@ However, there was a workaround for nested class support in these older versions
 the nested class in the global scope, adding in a typedef for the nested class in the global scope and
 using the "nestedworkaround" feature on the nested class. This resulted in approximately the
 same behaviour as the "flatnested" feature. With proper nested class support now available in SWIG-3.0.0, this
-feature has been deprecated and no longer works requiring code changes. If you see the following warning:
+feature was deprecated and has now been removed. If you see the following error:
 </p>
 
 <div class="shell">
 <pre>
-example.i:8: Warning 126: The nestedworkaround feature is deprecated
+example.i:8: Error: Unknown directive '%nestedworkaround'
 </pre>
 </div>
 
@@ -5400,10 +6132,20 @@ of your project.
 
 
 <p>
-C/C++ function pointers are often used for callbacks and this is discussed in the 
+C/C++ function pointers are often used for callbacks and this is discussed in the
 <a href="SWIG.html#SWIG_nn30">Pointers to functions and callbacks</a> section.
 The callback techniques described therein provide a way to control callbacks to a C/C++ function but not callbacks into the target language.
 The techniques described below show how the director feature can be used to support callbacks from C/C++ to the target language.
+</p>
+
+<p>
+Directors enable cross-language polymorphism: a target-language class derives
+from a wrapped C++ class, and overridden virtual methods are dispatched back
+into the target language whenever C++ invokes them. <tt>std::function</tt>
+solves a related but different problem - it lets C++ pass a C++ callable
+<i>out</i> to the target language to be invoked there - see
+<a href="Library.html#Library_std_function">std::function</a>
+in the SWIG library chapter.
 </p>
 
 <H3><a name="SWIGPlus_director_classes_introduction">6.29.1 Introduction to director classes</a></H3>
@@ -5529,7 +6271,7 @@ the virtual <tt>handle</tt> method, that is, the Python method <tt>handle</tt> i
 <pre>
 handler = PythonBinaryOp()
 result = example.binary_op_wrapper(10, 20, handler)
-print result
+print(result)
 </pre>
 </div>
 

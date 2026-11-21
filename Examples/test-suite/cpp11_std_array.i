@@ -1,6 +1,6 @@
 %module cpp11_std_array
 
-#if defined(SWIGPYTHON) || defined(SWIGRUBY) || defined(SWIGJAVA) || defined(SWIGCSHARP)
+#if defined(SWIGPYTHON) || defined(SWIGRUBY) || defined(SWIGJAVA) || defined(SWIGCSHARP) || defined(SWIGGO) || defined(SWIGLUA)
 
 %{
 #include <array>
@@ -56,6 +56,16 @@ void arrayInPtr(std::array<int, 6> * myarray) {
   for (auto& val : *myarray) {
     val *= 10;
   }
+}
+
+std::array<int, 6> overloadFunc(std::array<int, 6> myarray) {
+  std::array<int, 6> newarray(myarray);
+  for (auto& val : newarray) {
+    val *= 100;
+  }
+  return newarray;
+}
+void overloadFunc(int i, int j) {
 }
 %}
 

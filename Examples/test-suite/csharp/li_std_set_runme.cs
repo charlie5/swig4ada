@@ -17,6 +17,7 @@ public class runme
         // Check the interface methods first.
         ISet<string> s = ss;
 
+        checkThat(((StringSet)s).IsEmpty, "is empty");
         checkThat(s.Count == 0, "is initially empty");
         checkThat(!s.Contains("key"), "doesn't contain inexistent element");
         checkThat(!s.Remove("key"), "returns false when removing inexistent element");
@@ -85,5 +86,21 @@ public class runme
         ss = new StringSet{"foo", "bar", "baz"};
         ss.UnionWith(new[] {"baz", "quux"});
         checkThat(ss.SetEquals(new[] {"foo", "bar", "baz", "quux"}), "UnionWith works");
+
+        // Check a set of another type.
+        FooSet fooSet = new FooSet();
+        ISet<Foo> fooISet = fooSet;
+        checkThat(fooISet.Count == 0, "is initially empty");
+        checkThat(fooISet.Add(new Foo(17)), "added successfully");
+        checkThat(fooISet.Count == 1, "is not empty any more");
+
+        // And a set of primitive type.
+        IntSet intSet = new IntSet();
+        checkThat(intSet.Count == 0, "is initially empty");
+        checkThat(intSet.Add(17), "17 added successfully");
+        checkThat(!intSet.Add(17), "17 not added again");
+        checkThat(intSet.Count == 1, "not empty any more");
+        checkThat(intSet.Add(289), "289 added successfully");
+        checkThat(intSet.Count == 2, "even less empty now");
     }
 }

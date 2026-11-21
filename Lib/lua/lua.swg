@@ -13,13 +13,19 @@
 %include <luaruntime.swg>          /* The runtime stuff */
 %include <luakw.swg>               /* Warnings for Lua keywords */
 
+/* -----------------------------------------------------------------------------
+ *                          director support
+ * ----------------------------------------------------------------------------- */
+/* Director support is handled in lua.cxx via Swig_insert_file() */
+
 //%include <typemaps/swigmacros.swg>
 /* -----------------------------------------------------------------------------
  *                          constants typemaps
  * ----------------------------------------------------------------------------- */
 // this basically adds to a table of constants
+/* Extra `(`...`)` here are to handle $value being e.g. `SizeOf< int,int >::size`. */
 %typemap(consttab) int, unsigned int, short, unsigned short, long, unsigned long, unsigned char, signed char, bool, enum SWIGTYPE
-       {SWIG_LUA_CONSTTAB_INT("$symname", $value)}
+       {SWIG_LUA_CONSTTAB_INT("$symname", ($value))}
 
 %typemap(consttab) float, double
        {SWIG_LUA_CONSTTAB_FLOAT("$symname", $value)}
@@ -51,6 +57,35 @@
 %typemap(consttab) SWIGTYPE (CLASS::*)
        { SWIG_LUA_CONSTTAB_BINARY("$symname", sizeof($type),&$value, $1_descriptor) }
 
+/* String & length typemap */
+
+%typemap(in,checkfn="lua_isstring") (const char *STRING, size_t LENGTH) {
+  size_t len;
+  $1 = ($1_ltype)lua_tolstring(L, $input, &len);
+  SWIG_contract_assert($1, "non null string");
+  $2 = ($2_ltype)len;
+}
+%typemap(typecheck, precedence=SWIG_TYPECHECK_STRING) (const char *STRING, size_t LENGTH) {
+    $1 = lua_isstring(L, $input);
+}
+%apply (const char *STRING, size_t LENGTH) { (char *STRING, size_t LENGTH) }
+%apply (const char *STRING, size_t LENGTH) { (const char *STRING, int LENGTH) }
+%apply (char *STRING, size_t LENGTH) { (char *STRING, int LENGTH) }
+
+/* Length & string reverse order typemap */
+
+%typemap(in,checkfn="lua_isstring") (size_t LENGTH, const char *STRING) {
+  size_t len;
+  $2 = ($2_ltype)lua_tolstring(L, $input, &len);
+  SWIG_contract_assert($2, "non null string");
+  $1 = ($1_ltype)len;
+}
+%typemap(typecheck, precedence=SWIG_TYPECHECK_STRING) (size_t LENGTH, const char *STRING) {
+    $1 = lua_isstring(L, $input);
+}
+%apply (size_t LENGTH, const char *STRING) { (size_t LENGTH, char *STRING) }
+%apply (size_t LENGTH, const char *STRING) { (int LENGTH, const char *STRING) }
+%apply (size_t LENGTH, char *STRING) { (int LENGTH, char *STRING) }
 
 /* -----------------------------------------------------------------------------
  *                          Overloaded operator support
@@ -144,6 +179,166 @@
 
 
 /* ------------------------------------------------------------
+ *                          Director typemaps
+ * ------------------------------------------------------------ */
+#ifdef __cplusplus
+
+/* directorin typemaps: convert C++ -> Lua for director method calls */
+
+/* void - do nothing */
+%typemap(directorin) void ""
+
+/* primitive types */
+%typemap(directorin) int, short, long, signed char, unsigned int, unsigned short, 
+                     unsigned long, unsigned char, float, double
+  "lua_pushnumber(L, (lua_Number)$1);"
+
+%typemap(directorin) long long, unsigned long long, signed long long
+  "lua_pushnumber(L, (lua_Number)$1);"
+
+%typemap(directorin) bool
+  "lua_pushboolean(L, (int)$1);"
+
+%typemap(directorin) char
+  "lua_pushlstring(L, &$1, 1);"
+
+%typemap(directorin) const char *, char *
+  "if ($1) lua_pushstring(L, (const char *)$1); else lua_pushnil(L);"
+
+/* const references to primitive types */
+%typemap(directorin) const int &, const short &, const long &, const signed char &,
+                     const unsigned int &, const unsigned short &, const unsigned long &,
+                     const unsigned char &, const float &, const double &
+  "lua_pushnumber(L, (lua_Number)$1);"
+
+%typemap(directorin) const long long &, const unsigned long long &, const signed long long &
+  "lua_pushnumber(L, (lua_Number)$1);"
+
+%typemap(directorin) const bool &
+  "lua_pushboolean(L, (int)$1);"
+
+%typemap(directorin) const char &
+  "lua_pushlstring(L, &$1, 1);"
+
+%typemap(directorin) enum SWIGTYPE
+  "lua_pushnumber(L, (lua_Number)(int)$1);"
+
+/* pointers and references */
+%typemap(directorin) SWIGTYPE *
+  "SWIG_NewPointerObj(L, (void *)$1, $1_descriptor, 0);"
+
+%typemap(directorin) SWIGTYPE &
+  "SWIG_NewPointerObj(L, (void *)&$1, $1_descriptor, 0);"
+
+%typemap(directorin) SWIGTYPE &&
+  "SWIG_NewPointerObj(L, (void *)&$1, $1_descriptor, 0);"
+
+/* pass by value - use a temporary to avoid macro comma issues with templates */
+%typemap(directorin) SWIGTYPE %{
+  $1_ltype *SWIG_temp_$1 = new $1_ltype(SWIG_STD_MOVE($1));
+  SWIG_NewPointerObj(L, (void *)SWIG_temp_$1, $&1_descriptor, 1);
+%}
+
+/* directorout typemaps: convert Lua -> C++ for director method return values */
+/* Note: $input is a Lua stack index (typically from lua_gettop(L) after pcall) */
+
+/* primitive types */
+%typemap(directorout) int, short, long, signed char
+  "$result = ($1_ltype)lua_tonumber(L, $input);"
+
+%typemap(directorout) unsigned int, unsigned short, unsigned long, unsigned char
+  "$result = ($1_ltype)lua_tonumber(L, $input);"
+
+%typemap(directorout) float, double
+  "$result = ($1_ltype)lua_tonumber(L, $input);"
+
+%typemap(directorout) long long, unsigned long long, signed long long
+  "$result = ($1_ltype)lua_tonumber(L, $input);"
+
+%typemap(directorout) bool
+  "$result = (lua_toboolean(L, $input) != 0);"
+
+%typemap(directorout) char
+  "$result = (lua_tostring(L, $input))[0];"
+
+%typemap(directorout) const char *, char *
+  "$result = ($1_ltype)lua_tostring(L, $input);"
+
+%typemap(directorout) enum SWIGTYPE
+  "$result = ($1_ltype)(int)lua_tonumber(L, $input);"
+
+/* pointers and references */
+%typemap(directorout) SWIGTYPE * {
+  void *argp = 0;
+  int res = SWIG_ConvertPtr(L, $input, &argp, $1_descriptor, 0);
+  if (!SWIG_IsOK(res)) {
+    Swig::DirectorTypeMismatchException::raise(L, "Failed to convert return value to $1_type");
+  }
+  $result = ($1_ltype)argp;
+}
+
+%typemap(directorout) SWIGTYPE & {
+  void *argp = 0;
+  int res = SWIG_ConvertPtr(L, $input, &argp, $1_descriptor, 0);
+  if (!SWIG_IsOK(res)) {
+    Swig::DirectorTypeMismatchException::raise(L, "Failed to convert return value to $1_type");
+  }
+  if (!argp) {
+    Swig::DirectorTypeMismatchException::raise(L, "Unexpected null reference for $1_type");
+  }
+  $result = *($1_ltype *)argp;
+}
+
+%typemap(directorout) SWIGTYPE && {
+  void *argp = 0;
+  int res = SWIG_ConvertPtr(L, $input, &argp, $1_descriptor, 0);
+  if (!SWIG_IsOK(res)) {
+    Swig::DirectorTypeMismatchException::raise(L, "Failed to convert return value to $1_type");
+  }
+  if (!argp) {
+    Swig::DirectorTypeMismatchException::raise(L, "Unexpected null reference for $1_type");
+  }
+  $result = *($1_ltype *)argp;
+}
+
+/* pass by value */
+%typemap(directorout) SWIGTYPE {
+  void *argp = 0;
+  int res = SWIG_ConvertPtr(L, $input, &argp, $&1_descriptor, 0);
+  if (!SWIG_IsOK(res)) {
+    Swig::DirectorTypeMismatchException::raise(L, "Failed to convert return value to $1_type");
+  }
+  if (!argp) {
+    Swig::DirectorTypeMismatchException::raise(L, "Unexpected null pointer for $1_type");
+  }
+  $result = *($&1_ltype)argp;
+}
+
+/* void type - nothing to return */
+%typemap(directorout) void ""
+
+/* const references to primitive types - these use static vars (thread unsafe!) */
+%typemap(directorout,warning=SWIGWARN_TYPEMAP_THREAD_UNSAFE_MSG) const bool &
+%{ static $*1_ltype SWIG_temp_result;
+   SWIG_temp_result = lua_toboolean(L, $input) ? true : false; 
+   $result = &SWIG_temp_result; %}
+
+%typemap(directorout,warning=SWIGWARN_TYPEMAP_THREAD_UNSAFE_MSG) const int &, const short &, const long &,
+             const signed char &, const unsigned int &, const unsigned short &,
+             const unsigned long &, const unsigned char &, const float &, const double &,
+             const long long &, const unsigned long long &
+%{ static $*1_ltype SWIG_temp_result;
+   SWIG_temp_result = ($*1_ltype)lua_tonumber(L, $input);
+   $result = &SWIG_temp_result; %}
+
+%typemap(directorout,warning=SWIGWARN_TYPEMAP_THREAD_UNSAFE_MSG) const char &
+%{ static $*1_ltype SWIG_temp_result;
+   SWIG_temp_result = (lua_tostring(L, $input))[0];
+   $result = &SWIG_temp_result; %}
+
+#endif
+
+/* ------------------------------------------------------------
  *                              Exceptions
  * ------------------------------------------------------------ */
 /* Confession: I don't really like C++ exceptions
@@ -151,7 +346,7 @@ The python/lua ones are great, but C++ ones I don't like
 (mainly because I cannot get the stack trace out of it)
 Therefore I have not bothered to try doing much in this
 
-Therefore currently its just enough to get a few test cases running ok
+Therefore currently it's just enough to get a few test cases running ok
 
 note: if you wish to throw anything related to std::exception
 use %include <std_except.i> instead
@@ -191,7 +386,7 @@ use %include <std_except.i> instead
 Throwing object is a serious problem:
 Assuming some code throws a 'FooBar'
 There are a few options:
-- return a pointer to it: but its unclear how long this will last for.
+- return a pointer to it: but it's unclear how long this will last for.
 - return a copy of it: but not all objects are copyable
 	(see exception_partial_info in the test suite for a case where you cannot do this)
 - convert to a string & throw that
@@ -213,7 +408,7 @@ SWIG_fail;%}
 //	%apply SWIGTYPE EXCEPTION_BY_VAL {FooBar};
 //	%apply SWIGTYPE& EXCEPTION_BY_VAL {FooBar&}; // note: need & twice
 %typemap(throws) SWIGTYPE EXCEPTION_BY_VAL
-%{SWIG_NewPointerObj(L,(void *)new $1_ltype(($1_ltype &) $1),$&1_descriptor,1);
+%{SWIG_NewPointerObj(L,(void *)new $1_ltype($1),$&1_descriptor,1);
 SWIG_fail;%}
 
 // similar for object reference
@@ -224,7 +419,7 @@ SWIG_fail;%}
 
 
 // note: no support for object pointers
-// its not clear how long the pointer is valid for, therefore not supporting it
+// it's not clear how long the pointer is valid for, therefore not supporting it
 
 /* -----------------------------------------------------------------------------
  *                          extras

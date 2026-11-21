@@ -1,10 +1,10 @@
-/* ----------------------------------------------------------------------------- 
- * This file is part of SWIG, which is licensed as a whole under version 3 
+/* -----------------------------------------------------------------------------
+ * This file is part of SWIG, which is licensed as a whole under version 3
  * (or any later version) of the GNU General Public License. Some additional
  * terms also apply to certain portions of SWIG. The full details of the SWIG
  * license and copyrights can be found in the LICENSE and COPYRIGHT files
  * included with the SWIG source code as distributed by the SWIG developers
- * and at http://www.swig.org/legal.html.
+ * and at https://www.swig.org/legal.html.
  *
  * getopt.c
  *
@@ -14,9 +14,8 @@
  * there are no unrecognized options, each module is required to "mark"
  * the options that it uses.  Afterwards, we can make a quick scan to make
  * sure there are no unmarked options.
- * 
- * TODO: 
- *     - This module needs to be modified so that it doesn't call exit().
+ *
+ * TODO:
  *       Should have cleaner error handling in general.
  * ----------------------------------------------------------------------------- */
 
@@ -28,27 +27,23 @@ static int *marked;
 
 /* -----------------------------------------------------------------------------
  * Swig_init_args()
- * 
+ *
  * Initialize the argument list handler.
  * ----------------------------------------------------------------------------- */
 
 void Swig_init_args(int argc, char **argv) {
-  int i;
   assert(argc > 0);
   assert(argv);
 
   numargs = argc;
   args = argv;
-  marked = (int *) malloc(numargs * sizeof(int));
-  for (i = 0; i < argc; i++) {
-    marked[i] = 0;
-  }
+  marked = (int *)Calloc(numargs, sizeof(int));
   marked[0] = 1;
 }
 
 /* -----------------------------------------------------------------------------
  * Swig_mark_arg()
- * 
+ *
  * Marks an argument as being parsed.
  * ----------------------------------------------------------------------------- */
 
@@ -71,7 +66,7 @@ int Swig_check_marked(int n) {
 
 /* -----------------------------------------------------------------------------
  * Swig_check_options()
- * 
+ *
  * Checkers for unprocessed command line options and errors.
  * ----------------------------------------------------------------------------- */
 
@@ -88,22 +83,22 @@ void Swig_check_options(int check_input) {
   }
   if (error) {
     Printf(stderr, "Use 'swig -help' for available options.\n");
-    exit(1);
+    Exit(EXIT_FAILURE);
   }
   if (check_input && marked[numargs - 1]) {
     Printf(stderr, "Must specify an input file. Use -help for available options.\n");
-    exit(1);
+    Exit(EXIT_FAILURE);
   }
 }
 
 /* -----------------------------------------------------------------------------
  * Swig_arg_error()
- * 
+ *
  * Generates a generic error message and exits.
  * ----------------------------------------------------------------------------- */
 
 void Swig_arg_error(void) {
   Printf(stderr, "SWIG : Unable to parse command line options.\n");
   Printf(stderr, "Use 'swig -help' for available options.\n");
-  exit(1);
+  Exit(EXIT_FAILURE);
 }

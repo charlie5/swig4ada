@@ -27,13 +27,13 @@ class string;
 
 %typemap(in, canthrow=1) string, const string &
 %{ if (!$input) {
-    SWIG_DSetPendingException(SWIG_DIllegalArgumentException, "null string");
+    SWIG_DSetPendingException(SWIG_DNullReferenceException, "null string");
     return $null;
   }
   $1.assign($input); %}
 %typemap(in, canthrow=1) const string &
 %{ if (!$input) {
-    SWIG_DSetPendingException(SWIG_DIllegalArgumentException, "null string");
+    SWIG_DSetPendingException(SWIG_DNullReferenceException, "null string");
     return $null;
    }
    $*1_ltype $1_str($input);
@@ -52,14 +52,14 @@ class string;
 
 %typemap(directorout, canthrow=1) string
 %{ if (!$input) {
-    SWIG_DSetPendingException(SWIG_DIllegalArgumentException, "null string");
+    SWIG_DSetPendingException(SWIG_DNullReferenceException, "null string");
     return $null;
   }
   $result.assign($input); %}
 
 %typemap(directorout, canthrow=1, warning=SWIGWARN_TYPEMAP_THREAD_UNSAFE_MSG) const string &
 %{ if (!$input) {
-    SWIG_DSetPendingException(SWIG_DIllegalArgumentException, "null string");
+    SWIG_DSetPendingException(SWIG_DNullReferenceException, "null string");
     return $null;
   }
   /* possible thread/reentrant code problem */
@@ -79,19 +79,12 @@ class string;
 
 // We need to have the \0-terminated string conversion functions available in
 // the D proxy modules.
-#if (SWIG_D_VERSION == 1)
-// Could be easily extended to support Phobos as well.
-SWIGD_STD_STRING_TYPEMAPS(char*, char[], tango.stdc.stringz.fromStringz, tango.stdc.stringz.toStringz)
-
-%pragma(d) globalproxyimports = "static import tango.stdc.stringz;";
-#else
 SWIGD_STD_STRING_TYPEMAPS(const(char)*, string, std.conv.to!string, std.string.toStringz)
 
 %pragma(d) globalproxyimports = %{
 static import std.conv;
 static import std.string;
 %}
-#endif
 
 #undef SWIGD_STD_STRING_TYPEMAPS
 

@@ -1,7 +1,6 @@
 <?php
 
 require "tests.php";
-require "char_strings.php";
 
 $CPLUSPLUS_MSG = "A message from the deep dark world of C++, where anything is possible.";
 $OTHERLAND_MSG_10 = "Little message from the safe world.10";
@@ -18,8 +17,13 @@ check::equal(SetCharArrayStaticString($OTHERLAND_MSG_10, 10), true, "failed SetC
 check::equal(SetConstCharHeapString($OTHERLAND_MSG_10, 10), true, "failed SetConstCharHeapString");
 check::equal(SetConstCharStaticString($OTHERLAND_MSG_10, 10), true, "failed SetConstCharStaticString");
 check::equal(SetConstCharArrayStaticString($OTHERLAND_MSG_10, 10), true, "failed SetConstCharArrayStaticString");
+check::equal(SetCharConstStaticString($OTHERLAND_MSG_10, 10), true, "failed SetCharConstStaticString");
+check::equal(SetConstCharConstStaticString($OTHERLAND_MSG_10, 10), true, "failed SetConstCharConstStaticString");
+check::equal(SetConstCharTypedefString($OTHERLAND_MSG_10, 10), true, "failed SetConstCharTypedefString");
 
 check::equal(CharPingPong($OTHERLAND_MSG_10), $OTHERLAND_MSG_10, "failed CharPingPong");
+check::equal(CharArrayPingPong($OTHERLAND_MSG_10), $OTHERLAND_MSG_10, "failed CharArrayPingPong");
+check::equal(CharArrayDimsPingPong($OTHERLAND_MSG_10), $OTHERLAND_MSG_10, "failed CharArrayDimsPingPong");
 
 Global_char_set($OTHERLAND_MSG_10);
 check::equal(Global_char_get(), $OTHERLAND_MSG_10, "failed Global_char_get");
@@ -40,4 +44,3 @@ check::equal(GetConstCharPointerRef(), $CPLUSPLUS_MSG, "failed GetConstCharPoint
 check::equal(SetConstCharPointerRef($OTHERLAND_MSG_10, 10), true, "failed SetConstCharPointerRef");
 
 check::done();
-?>

@@ -8,11 +8,8 @@ check: build
 	$(MAKE) -f $(TOP)/Makefile SRCDIR='$(SRCDIR)' python_run
 
 build:
-	cd pkg1 && $(MAKE) build
-
-static:
-	cd pkg1 && $(MAKE) static
+	$(MAKE) -C pkg1 build
 
 clean:
 	$(MAKE) -f $(TOP)/Makefile SRCDIR='$(SRCDIR)' TARGET='foo' python_clean
-	cd pkg1 && $(MAKE) -f $(TOP)/../Makefile SRCDIR='$(SRCDIR)' TARGET='foo' python_clean
+	$(MAKE) -C pkg1 -f $(TOP)/../Makefile SRCDIR='$(SRCDIR)' TARGET='foo' python_clean

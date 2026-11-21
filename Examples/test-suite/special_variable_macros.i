@@ -9,6 +9,8 @@
 #if defined(_MSC_VER)
   #pragma warning(disable: 4996) // 'strdup': The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name: _strdup. See online help for details.
 #endif
+#include <stdlib.h>
+#include <string.h>
 %}
 
 %ignore Name::operator=;
@@ -26,21 +28,24 @@ struct Name {
     return *this;
   }
   ~Name () { free(this->name); }
-  const char *getName() const { return name; };
-  Name *getNamePtr() { return this; };
+  const char *getName() const { return name; }
+  Name *getNamePtr() { return this; }
 private:
   char *name;
 };
 struct NameWrap {
   NameWrap(const char *n="casternone") : name(n) {}
-  Name *getNamePtr() { return &name; };
+  Name *getNamePtr() { return &name; }
 private:
   Name name;
 };
+
+// Global variable for testing whether examplekw was touched
+int accessed_examplekw = 0;
 %}
 
 // check $1 and $input get expanded properly when used from $typemap()
-%typemap(in) Name *GENERIC ($*1_type temp)
+%typemap(in, examplekw="accessed_examplekw=1;") Name *GENERIC ($*1_type temp)
 %{
   /*%typemap(in) Name *GENERIC start */
   temp = Name("$specialname");
@@ -78,6 +83,7 @@ static const char *nameDescriptor = "$descriptor(Name)";
 %typemap(in) Name *jack {
 // %typemap(in) Name *jack start
 $typemap(in, Name *GENERIC)
+$typemap(in:examplekw, Name *GENERIC)
 // %typemap(in) Name *jack end
 }
 
@@ -184,7 +190,7 @@ namespace Space {
 %template(PairIntBool) Space::Pair<int, bool>;
 
 //////////////////////////////////////////////////////////////////////////////////////
-// A real use case for $typemap
+// A real use case for $typemap()
 
 #if defined(SWIGCSHARP)
 %typemap(cscode) Space::RenameMe %{
@@ -203,19 +209,11 @@ namespace Space {
   }
 %}
 #elif defined(SWIGD)
-#if (SWIG_D_VERSION == 1)
-%typemap(dcode) Space::RenameMe %{
-  public static NewName factory(char[] s) {
-    return new $typemap(dtype, Space::RenameMe)( new $typemap(dtype, Name)(s) );
-  }
-%}
-#else
 %typemap(dcode) Space::RenameMe %{
   public static NewName factory(string s) {
     return new $typemap(dtype, Space::RenameMe)( new $typemap(dtype, Name)(s) );
   }
 %}
-#endif
 #endif
 
 %rename(NewName) Space::RenameMe;
@@ -230,3 +228,107 @@ namespace Space {
 }
 %}
 
+//////////////////////////////////////////////////////////////////////////////////////
+// Part 1: $typemap() and the 'out' typemap $1 variable override
+// These typemaps for Pair use the std::string typemaps via $typemap() to morph the Pair return into returning just the (first) string value of the Pair.
+// The 1=result_first variable override is needed in all the different target languages for returning a string instead of Pair.
+// $typemap() does the target language specific std::string output handling
+
+%include <std_string.i>
+%typemap(out) Space::Pair<std::string, int> {
+  /* start of out Pair<std::string, int> */
+  const std::string& result_first = $1.first;
+  $typemap(out, std::string, 1=result_first);
+  /* end of out Pair<std::string, int> */
+}
+// Additional target language specific typemaps for the strongly typed languages to return a string instead of a Pair proxy
+#if defined(SWIGCSHARP)
+%typemap(ctype) Space::Pair<std::string, int> = std::string;
+%typemap(imtype) Space::Pair<std::string, int> = std::string;
+%typemap(cstype) Space::Pair<std::string, int> = std::string;
+%typemap(csout) Space::Pair<std::string, int> = std::string;
+#elif defined(SWIGD)
+%typemap(ctype) Space::Pair<std::string, int> = std::string;
+%typemap(imtype) Space::Pair<std::string, int> = std::string;
+%typemap(dtype) Space::Pair<std::string, int> = std::string;
+%typemap(dout) Space::Pair<std::string, int> = std::string;
+#elif defined(SWIGGO)
+%typemap(gotype) Space::Pair<std::string, int> = std::string;
+%typemap(goout) Space::Pair<std::string, int> = std::string;
+#elif defined(SWIGJAVA)
+%typemap(jni) Space::Pair<std::string, int> = std::string;
+%typemap(jtype) Space::Pair<std::string, int> = std::string;
+%typemap(jstype) Space::Pair<std::string, int> = std::string;
+%typemap(javaout) Space::Pair<std::string, int> = std::string;
+#endif
+%template() Space::Pair<std::string, int>;
+%inline %{
+Space::Pair<std::string, int> makeStringInt(const std::string& s, int i) {
+  return Space::Pair<std::string, int>(s, i);
+}
+%}
+
+// Part 2: $typemap() and the 'in' typemap $1 variable override
+// Target language just passes in an int and the typemaps morph this into a Pair containing the stringified int and the input int
+// $typemap() does the target language specific int as an input handling
+%fragment("my_sstream", "header") %{#include <sstream>%}
+%typemap(in, fragment="my_sstream") Space::Pair<std::string, int> {
+  // start of in Pair<std::string, int>
+  int& input_value_second = $1.second;
+  $typemap(in, int, 1=input_value_second);
+
+  // create string from int value plus one
+  std::stringstream ss;
+  ss << $1.second + 1;
+  $1.first = ss.str();
+  // end of in Pair<std::string, int>
+}
+#if defined(SWIGCSHARP)
+%typemap(ctype) Space::Pair<std::string, int> = int;
+%typemap(imtype) Space::Pair<std::string, int> = int;
+%typemap(cstype) Space::Pair<std::string, int> = int;
+%typemap(csin) Space::Pair<std::string, int> = int;
+#elif defined(SWIGD)
+%typemap(ctype) Space::Pair<std::string, int> = int;
+%typemap(imtype) Space::Pair<std::string, int> = int;
+%typemap(dtype) Space::Pair<std::string, int> = int;
+%typemap(din) Space::Pair<std::string, int> = int;
+#elif defined(SWIGGO)
+%typemap(gotype) Space::Pair<std::string, int> = int;
+#elif defined(SWIGJAVA)
+%typemap(jni) Space::Pair<std::string, int> = int;
+%typemap(jtype) Space::Pair<std::string, int> = int;
+%typemap(jstype) Space::Pair<std::string, int> = int;
+%typemap(javain) Space::Pair<std::string, int> = int;
+#endif
+%inline %{
+std::string provideStringInt(Space::Pair<std::string, int> p) {
+  return p.first;
+}
+%}
+
+// Part 3: $typemap() and the 'in' typemap $1 variable substitution in the typemap temporary names list
+%typemap(in) short MYSHORT ($1_type $1_temp_name = 200) %{
+  $1 = $1_temp_name;
+%}
+%typemap(in) short MYSHORT_OUTER {
+  // MYSHORT_OUTER 'in' start
+  int $1_outer = 0;
+  $typemap(in, short MYSHORT, 1=$1_outer)
+  $1 = $1_outer;
+  // MYSHORT_OUTER 'in' end
+}
+%apply short MYSHORT_OUTER { short x, short y }
+%inline %{
+short shortFunction(short x, short y) {
+  return x*2 + y*3;
+}
+%}
+
+%typemap(arginit) int MYINT "$1 = 0;"
+%typemap(in) int MYINT (int $1_temp_name = 300) "" // $1 only appears in temporary list variable name, check this is expanded
+%typemap(argout) int MYINT %{ $1_temp_name *= 2; %} // check that $1_temp_name is available
+%apply int MYINT { int myint1, int myint2 }
+%inline %{
+void intFunction(int myint1, int myint2) {}
+%}

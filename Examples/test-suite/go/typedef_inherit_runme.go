@@ -1,6 +1,6 @@
 package main
 
-import "typedef_inherit"
+import "swigtests/typedef_inherit"
 
 func main() {
 	a := typedef_inherit.NewFoo()
@@ -26,6 +26,11 @@ func main() {
 
 	x = typedef_inherit.Do_blah2(d)
 	if x != "Grok::blah" {
+		panic(x)
+	}
+
+	x = d.Far1()
+	if x != "Spam::far1" {
 		panic(x)
 	}
 }

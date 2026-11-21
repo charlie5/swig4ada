@@ -18,6 +18,10 @@
 %header %{
 #define OUT_NULL_VALUE SWIGV8_NULL()
 %}
+#elif defined(SWIG_JAVASCRIPT_NAPI)
+%header %{
+#define OUT_NULL_VALUE env.Null()
+%}
 #else
 %header %{
 #define OUT_NULL_VALUE 0
@@ -68,12 +72,12 @@
 %clear int Space::nspace;
 %clear int Space::Struct::smember;
 %ignore Space::Struct::member;
-%typemap(varin) int globul "TYPEMAP_VARIABLES_FAIL";
-%typemap(varout, noblock=1, fragment=SWIG_From_frag(int)) int globul "if (!SWIG_IsOK(SWIG_Scilab_SetOutput(pvApiCtx, SWIG_From_int($result)))) return SWIG_ERROR;";
-%typemap(varin) int Space::nspace "TYPEMAP_VARIABLES_FAIL";
-%typemap(varout, noblock=1, fragment=SWIG_From_frag(int)) int Space::nspace "if (!SWIG_IsOK(SWIG_Scilab_SetOutput(pvApiCtx, SWIG_From_int($result)))) return SWIG_ERROR;";
-%typemap(varin) int Space::Struct::smember "TYPEMAP_VARIABLES_FAIL";
-%typemap(varout, noblock=1, fragment=SWIG_From_frag(int)) int Space::Struct::smember "if (!SWIG_IsOK(SWIG_Scilab_SetOutput(pvApiCtx, SWIG_From_int($result)))) return SWIG_ERROR;";
+%typemap(varin) int globul "TYPEMAP_VARIABLES_FAIL"
+%typemap(varout, noblock=1, fragment=SWIG_From_frag(int)) int globul "if (!SWIG_IsOK(SWIG_Scilab_SetOutput(pvApiCtx, SWIG_From_int($result)))) return SWIG_ERROR;"
+%typemap(varin) int Space::nspace "TYPEMAP_VARIABLES_FAIL"
+%typemap(varout, noblock=1, fragment=SWIG_From_frag(int)) int Space::nspace "if (!SWIG_IsOK(SWIG_Scilab_SetOutput(pvApiCtx, SWIG_From_int($result)))) return SWIG_ERROR;"
+%typemap(varin) int Space::Struct::smember "TYPEMAP_VARIABLES_FAIL"
+%typemap(varout, noblock=1, fragment=SWIG_From_frag(int)) int Space::Struct::smember "if (!SWIG_IsOK(SWIG_Scilab_SetOutput(pvApiCtx, SWIG_From_int($result)))) return SWIG_ERROR;"
 #endif
 
 %inline %{

@@ -1,104 +1,52 @@
 /* -----------------------------------------------------------------------------
  * cdata.i
  *
- * SWIG library file containing macros for manipulating raw C data as strings.
+ * SWIG library file containing macros for manipulating raw C data.
  * ----------------------------------------------------------------------------- */
 
-%{
-typedef struct SWIGCDATA {
-    char *data;
-    int   len;
-} SWIGCDATA;
-%}
-
-/* -----------------------------------------------------------------------------
- * Typemaps for returning binary data
- * ----------------------------------------------------------------------------- */
-
-#if SWIGGUILE
-%typemap(out) SWIGCDATA {
-   $result = scm_from_locale_stringn($1.data,$1.len);
-}
-%typemap(in) (const void *indata, int inlen) = (char *STRING, int LENGTH);
-
-#elif SWIGPHP7
-
-%typemap(out) SWIGCDATA {
-  ZVAL_STRINGL($result, $1.data, $1.len);
-}
-%typemap(in) (const void *indata, int inlen) = (char *STRING, int LENGTH);
-
-#elif SWIGJAVA
-
-%apply (char *STRING, int LENGTH) { (const void *indata, int inlen) }
-%typemap(jni) SWIGCDATA "jbyteArray"
-%typemap(jtype) SWIGCDATA "byte[]"
-%typemap(jstype) SWIGCDATA "byte[]"
-%fragment("SWIG_JavaArrayOutCDATA", "header") {
-static jbyteArray SWIG_JavaArrayOutCDATA(JNIEnv *jenv, char *result, jsize sz) {
-  jbyte *arr;
-  int i;
-  jbyteArray jresult = JCALL1(NewByteArray, jenv, sz);
-  if (!jresult)
-    return NULL;
-  arr = JCALL2(GetByteArrayElements, jenv, jresult, 0);
-  if (!arr)
-    return NULL;
-  for (i=0; i<sz; i++)
-    arr[i] = (jbyte)result[i];
-  JCALL3(ReleaseByteArrayElements, jenv, jresult, arr, 0);
-  return jresult;
-}
-}
-%typemap(out, fragment="SWIG_JavaArrayOutCDATA") SWIGCDATA
-%{$result = SWIG_JavaArrayOutCDATA(jenv, (char *)$1.data, $1.len); %}
-%typemap(javaout) SWIGCDATA {
-    return $jnicall;
+/* 'alloc' is seeded with 'SWIG_BINARYSTR' so 'SWIG_AsCharPtrAndSize' treats the input as
+   raw bytes (no Unicode translation, exact length); it overwrites 'alloc' on return. */
+%typemap(in,noblock=0,fragment="SWIG_AsCharPtrAndSize") (const void *BYTES, size_t LENGTH) (int res, void *buf = 0, size_t len = 0, int alloc = SWIG_BINARYSTR) {
+  res = SWIG_AsCharPtrAndSize($input, (char **)&buf, &len, &alloc);
+  if (!SWIG_IsOK(res)) {
+    %argument_fail(res,"$type",$symname, $argnum);
   }
-
-#endif
-
-
-/* -----------------------------------------------------------------------------
- * %cdata(TYPE [, NAME]) 
- *
- * Convert raw C data to a binary string.
- * ----------------------------------------------------------------------------- */
-
-%define %cdata(TYPE,NAME...)
-
-%insert("header") {
-#if #NAME == ""
-static SWIGCDATA cdata_##TYPE(TYPE *ptr, int nelements) {
-#else
-static SWIGCDATA cdata_##NAME(TYPE *ptr, int nelements) {
-#endif
-   SWIGCDATA d;
-   d.data = (char *) ptr;
-#if #TYPE != "void"
-   d.len  = nelements*sizeof(TYPE);
-#else
-   d.len  = nelements;
-#endif
-   return d;
-}
+  $1 = %reinterpret_cast(buf, $1_ltype);
+  $2 = %numeric_cast(len, $2_ltype);
 }
 
-%typemap(default) int nelements "$1 = 1;"
+%typemap(freearg,noblock=1,match="in") (const void *BYTES, size_t LENGTH) {
+  if (alloc$argnum == SWIG_NEWOBJ) {
+    %delete_array((char*)(buf$argnum));
+  }
+}
 
-#if #NAME == ""
-SWIGCDATA cdata_##TYPE(TYPE *ptr, int nelements);
-#else
-SWIGCDATA cdata_##NAME(TYPE *ptr, int nelements);
-#endif
-%enddef
+%typemap(directorin,noblock=1,fragment="SWIG_FromCharPtrAndSize") (const void *BYTES, size_t LENGTH) {
+  if ($1 && $2 > 0) {
+    $input = SWIG_FromBinaryCharPtrAndSize((const char*)$1, (size_t)$2, SWIG_BINARYSTR);
+  } else {
+    $input = SWIG_FromBinaryCharPtrAndSize("", 0, SWIG_BINARYSTR);
+  }
+}
 
-%typemap(default) int nelements;
+%typemap(in) (void *BYTES, size_t LENGTH) = (const void *BYTES, size_t LENGTH);
+%typemap(freearg) (void *BYTES, size_t LENGTH) = (const void *BYTES, size_t LENGTH);
+%typemap(directorin) (void *BYTES, size_t LENGTH) = (const void *BYTES, size_t LENGTH);
+%typemap(in) (const void *BYTES, int LENGTH) = (const void *BYTES, size_t LENGTH);
+%typemap(freearg) (const void *BYTES, int LENGTH) = (const void *BYTES, size_t LENGTH);
+%typemap(directorin) (const void *BYTES, int LENGTH) = (const void *BYTES, size_t LENGTH);
+%typemap(in) (void *BYTES, int LENGTH) = (const void *BYTES, int LENGTH);
+%typemap(freearg) (void *BYTES, int LENGTH) = (const void *BYTES, int LENGTH);
+%typemap(directorin) (void *BYTES, int LENGTH) = (const void *BYTES, int LENGTH);
+%typemap(in) (const void *indata, size_t inlen) = (const void *BYTES, size_t LENGTH);
+%typemap(freearg) (const void *indata, size_t inlen) = (const void *BYTES, size_t LENGTH);
+%typemap(directorin) (const void *indata, size_t inlen) = (const void *BYTES, size_t LENGTH);
+#define SWIG_CDATA_APPLIED
 
-%rename(cdata) ::cdata_void(void *ptr, int nelements);
+%include <typemaps/cdata_begin.swg>
 
-%cdata(void);
+%typemap(out,noblock=1,fragment="SWIG_FromCharPtrAndSize") SWIGCDATA {
+  %set_output(SWIG_FromBinaryCharPtrAndSize($1.data,(size_t)($1.len), SWIG_BINARYSTR));
+}
 
-/* Memory move function. Due to multi-argument typemaps this appears to be wrapped as
-void memmove(void *data, const char *s); */
-void memmove(void *data, const void *indata, int inlen);
+%include <typemaps/cdata_end.swg>

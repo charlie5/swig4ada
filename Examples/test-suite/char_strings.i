@@ -7,10 +7,10 @@ below.
 %module char_strings
 
 %warnfilter(SWIGWARN_TYPEMAP_VARIN_UNDEF) global_char_array1;  // Unable to set variable of type char[]
-%warnfilter(SWIGWARN_TYPEMAP_CHARLEAK_MSG) global_const_char;  // Setting a const char * variable may leak memory.
 
 %{
 #include <stdio.h>
+#include <string.h>
 
 #define OTHERLAND_MSG "Little message from the safe world."
 #define CPLUSPLUS_MSG "A message from the deep dark world of C++, where anything is possible."
@@ -113,6 +113,14 @@ bool SetConstCharConstStaticString(const char *const str, unsigned int number) {
   return check(static_str, number);
 }
 
+typedef const char *ConstCharStar; // typedef hiding the const, reproduces GitHub issue #3290
+
+bool SetConstCharTypedefString(ConstCharStar str, unsigned int number) {
+  static char static_str[] = CPLUSPLUS_MSG;
+  strcpy(static_str, str);
+  return check(static_str, number);
+}
+
 // get set function
 char *CharPingPong(char *str) {
   return str;
@@ -150,11 +158,11 @@ const char global_const_char_array2[sizeof(CPLUSPLUS_MSG)+1] = CPLUSPLUS_MSG;
 %inline {
   struct Formatpos;
   struct OBFormat;
-  
+
   static int GetNextFormat(Formatpos& itr, const  char*& str,OBFormat*& pFormat) {
     return 0;
   }
-  
+
 
 
 }

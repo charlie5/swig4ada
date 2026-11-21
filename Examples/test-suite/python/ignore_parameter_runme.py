@@ -2,7 +2,7 @@ from ignore_parameter import *
 
 def check(a, b):
     if a != b:
-        raise RuntimeError('"%s" != "%s"' % (a, b))
+        raise RuntimeError("'%s' != '%s'" % (a, b))
 
 check(jaguar(200, 0), "hello")
 check(lotus("foo", 1), 101)
@@ -16,6 +16,7 @@ check(car.astonmartin("foo", 1), 101)
 check(car.bugatti("bar", 2), 8.8)
 check(car.lamborghini(), 101)
 check(car.maseratti(289), 289)
+check(car.audi(), 8.8)  # Typemap overrides default argument
 
 MiniCooper(200, 0)
 MorrisMinor("baz", 0)

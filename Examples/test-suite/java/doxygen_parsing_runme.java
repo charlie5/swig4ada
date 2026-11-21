@@ -1,6 +1,5 @@
 
 import doxygen_parsing.*;
-import com.sun.javadoc.*;
 import java.util.HashMap;
 
 public class doxygen_parsing_runme {
@@ -15,14 +14,7 @@ public class doxygen_parsing_runme {
 
   public static void main(String argv[]) 
   {
-    /*
-      Here we are using internal javadoc tool, it accepts the name of the class as paramterer,
-      and calls the start() method of that class with parsed information.
-    */
-    CommentParser parser = new CommentParser();
-    com.sun.tools.javadoc.Main.execute("doxygen_parsing runtime test",
-                                       "CommentParser",
-                                       new String[]{"-quiet", "doxygen_parsing"});
+    CommentParser.parse("doxygen_parsing");
 
     HashMap<String, String> wantedComments = new HashMap<String, String>();
     
@@ -39,8 +31,16 @@ public class doxygen_parsing_runme {
     wantedComments.put("doxygen_parsing.SomeAnotherClass.setClassAttr3(int)",
     		"The class attribute post-comment with details \n" +
     		"");
+    wantedComments.put("doxygen_parsing.SomeAnotherClass.setClassAttr4(int)",
+	        " The class attribute comment with \n" + 
+	        " two lines of comments \n" + 
+    		"");
     wantedComments.put("doxygen_parsing.SomeAnotherStruct.setStructAttr3(int)",
     		"The struct attribute post-comment with details \n" +
+    		"");
+    wantedComments.put("doxygen_parsing.SomeAnotherStruct.setStructAttr4(int)",
+	        " The struct attribute comment with \n" + 
+	        " two lines of comments \n" + 
     		"");
     wantedComments.put("doxygen_parsing.SomeAnotherClass.classMethodExtended2(int, int)",
     		" The class method with parameter \n" +
@@ -52,6 +52,12 @@ public class doxygen_parsing_runme {
     wantedComments.put("doxygen_parsing.SomeStruct",
     		" The struct comment \n" +
     		" \n" +
+    		"");
+    wantedComments.put("doxygen_parsing.SomeStruct.setWidth(int)",
+    		"**immutable** image width in pixels \n" +
+    		"");
+    wantedComments.put("doxygen_parsing.SomeStruct.getWidth()",
+    		"**immutable** image width in pixels \n" +
     		"");
     wantedComments.put("doxygen_parsing.doxygen_parsing.setSomeVar(int)",
     		" The var comment \n" +
@@ -92,6 +98,10 @@ public class doxygen_parsing_runme {
     wantedComments.put("doxygen_parsing.SomeAnotherStruct.getStructAttr3()",
     		"The struct attribute post-comment with details \n" +
     		"");
+    wantedComments.put("doxygen_parsing.SomeAnotherStruct.getStructAttr4()",
+	        " The struct attribute comment with \n" + 
+	        " two lines of comments \n" + 
+    		"");
     wantedComments.put("doxygen_parsing.doxygen_parsing.getSomeVar()",
     		" The var comment \n" +
     		" \n" +
@@ -116,6 +126,10 @@ public class doxygen_parsing_runme {
     wantedComments.put("doxygen_parsing.SomeAnotherClass.getClassAttr3()",
     		"The class attribute post-comment with details \n" +
     		"");
+    wantedComments.put("doxygen_parsing.SomeAnotherClass.getClassAttr4()",
+	        " The class attribute comment with \n" + 
+	        " two lines of comments \n" + 
+    		"");
     wantedComments.put("doxygen_parsing.SomeAnotherClass.classMethod()",
     		" The class method comment.<br>\n" +
                 " <br>\n" +
@@ -128,14 +142,46 @@ public class doxygen_parsing_runme {
     		" @param b Parameter b \n" +
     		" \n" +
     		"");
+    wantedComments.put("doxygen_parsing.SomeAnotherStruct.structStaticMethod(int, int)",
+	        " The struct static method one line comment \n" + 
+    		" \n" +
+    		"");
+    wantedComments.put("doxygen_parsing.SomeAnotherStruct.structStaticMethod2(int, int)",
+	        " The struct static method with parameters \n" +
+	        " Two lines of comments \n" +
+    		" \n" +
+    		" @param aaa Parameter aaa \n" +
+    		" @param bbb Parameter bbb \n" +
+    		" \n" +
+    		"");
     wantedComments.put("doxygen_parsing.SomeAnotherClass.setClassAttr2(int)",
     		"The class attribute post-comment \n" +
     		"");
     wantedComments.put("doxygen_parsing.doxygen_parsingConstants.CONSTANT_VALUE",
     		"The constant comment \n" +
     		"");
+    wantedComments.put("doxygen_parsing.doxygen_parsingConstants.CONSTANT_VALUE_TWO_LINE",
+                " A two line \n" +
+                " constant comment \n" +
+    		"");
+    wantedComments.put("doxygen_parsing.Foo1636.getGroupmember1()",
+	        "groupmember1 description");
+    wantedComments.put("doxygen_parsing.Foo1636.setGroupmember1(int)",
+	        "groupmember1 description");
+    wantedComments.put("doxygen_parsing.Foo1636.getGroupmember2()",
+	        "groupmember2 description");
+    wantedComments.put("doxygen_parsing.Foo1636.setGroupmember2(int)",
+	        "groupmember2 description");
+    wantedComments.put("doxygen_parsing.Foo1750.getA()",
+	        "");
+    wantedComments.put("doxygen_parsing.Foo1750.getB()",
+	        "");
+    wantedComments.put("doxygen_parsing.Foo1750.setA(int)",
+	        "");
+    wantedComments.put("doxygen_parsing.Foo1750.setB(int)",
+	        "");
     
     // and ask the parser to check comments for us
-    System.exit(parser.check(wantedComments));
+    System.exit(CommentParser.check(wantedComments));
   }
 }

@@ -17,7 +17,7 @@ b.added = 123
 if b.added != 123:
     raise RuntimeError("Wrong attribute value")
 
-if not b.__dict__.has_key("added"):
+if "added" not in b.__dict__:
     raise RuntimeError("Missing added attribute in __dict__")
 
 
@@ -28,7 +28,19 @@ class PyBar(struct_value.Bar):
         struct_value.Bar.__init__(self)
 
 pybar = PyBar()
-if not pybar.__dict__.has_key("extra"):
+if "extra" not in pybar.__dict__:
     raise RuntimeError("Missing extra attribute in __dict__")
 if pybar.extra != "hi":
     raise RuntimeError("Incorrect attribute value for extra")
+
+foo = struct_value.Foo()
+foo.x = 10
+error_message = ""
+try:
+    del foo.x
+except AttributeError as e:
+    error_message = str(e)
+
+# Check for different error messages builtin vs non-builtin wrappers (error message changed in python-3.11)
+if not ("Illegal member variable deletion" in error_message or "object has no deleter" in error_message or "can't delete attribute" in error_message):
+    raise RuntimeError("Unexpected error message: {}".format(error_message))

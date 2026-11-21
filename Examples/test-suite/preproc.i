@@ -11,13 +11,29 @@
 #pragma SWIG nowarn=890                                      /* lots of Go name conflicts */
 #pragma SWIG nowarn=206                                      /* Unexpected tokens after #endif directive. */
 
+/* Regression test: in SWIG < 4.1.0 this triggered the two #error cases.
+ * Github issue #1384
+ */
+#if "" != ""
+#endif
+#if 1 && (!0)
+// Should go here
+#else
+# error BUG
+#endif
+#if ((("" == ""))) || (1 && (!1))
+// Should go here
+#else
+# error BUG
+#endif
+
 %{
 #if defined(__clang__)
-//Suppress: warning: use of logical '&&' with constant operand [-Wconstant-logical-operand]
+/*Suppress: warning: use of logical '&&' with constant operand [-Wconstant-logical-operand]*/
 #pragma clang diagnostic ignored "-Wconstant-logical-operand"
 #endif
 #if defined(_MSC_VER)
-  #pragma warning(disable: 4003) // not enough actual parameters for macro 'FOO2'
+  #pragma warning(disable: 4003) /* not enough actual parameters for macro 'FOO2' */
 #endif
 %}
 
@@ -72,14 +88,14 @@ extern "C"
 
 TYPEMAP_LIST_VECTOR_INPUT_OUTPUT(boolean)
 
-// preproc_3
+/* preproc_3 */
 
 #define Sum( A, B, \
              C)    \
         A + B + C 
 
 
-// preproc_4
+/* preproc_4 */
 %{
   int hello0()
   {
@@ -102,33 +118,30 @@ TYPEMAP_LIST_VECTOR_INPUT_OUTPUT(boolean)
 
 #define HELLO_TYPE(A, B) ARITH_RTYPE(A, ARITH_RTYPE(A,B))
 
-//
-// These two work fine
-//
 int hello0();
 ARITH_RTYPE(double,int) hello1();
 
 
-//
-// This doesn't work with 1.3.17+ ( but it was ok in 1.3.16 )
-// it gets expanded as (using -E)
-// 
-//   ARITH_RTYPE(double,int) hello2();
-//
+/*
+   This doesn't work with 1.3.17+ ( but it was ok in 1.3.16 )
+   it gets expanded as (using -E)
+
+     ARITH_RTYPE(double,int) hello2();
+*/
 HELLO_TYPE(double,int) hello2();
 
 #define min(x,y) ((x) < (y)) ? (x) : (y) 
 int f(int min);
 
-// preproc_5
+/* preproc_5 */
 
-%warnfilter(SWIGWARN_PARSE_REDEFINED) A5;	// Ruby, wrong constant name
-%warnfilter(SWIGWARN_RUBY_WRONG_NAME) a5;	// Ruby, wrong constant name
-%warnfilter(SWIGWARN_RUBY_WRONG_NAME) b5;	// Ruby, wrong constant name
-%warnfilter(SWIGWARN_RUBY_WRONG_NAME) c5;	// Ruby, wrong constant name
-%warnfilter(SWIGWARN_RUBY_WRONG_NAME) d5;	// Ruby, wrong constant name
+%warnfilter(SWIGWARN_PARSE_REDEFINED) A5;	/* Ruby, wrong constant name */
+%warnfilter(SWIGWARN_RUBY_WRONG_NAME) a5;	/* Ruby, wrong constant name */
+%warnfilter(SWIGWARN_RUBY_WRONG_NAME) b5;	/* Ruby, wrong constant name */
+%warnfilter(SWIGWARN_RUBY_WRONG_NAME) c5;	/* Ruby, wrong constant name */
+%warnfilter(SWIGWARN_RUBY_WRONG_NAME) d5;	/* Ruby, wrong constant name */
 
-// Various preprocessor bits of nastiness.
+/* Various preprocessor bits of nastiness. */
 
 
 /* Test argument name substitution */
@@ -138,7 +151,7 @@ int f(int min);
 %constant char *a5 = foo(hello,world);
 %constant int   b5 = bar(3,4);
 
-// Wrap your brain around this one ;-)
+/* Wrap your brain around this one ;-) */
 
 %{
 #define cat(x,y) x ## y
@@ -168,7 +181,7 @@ NAME 42
 
 #define C4"Hello"
 
-// preproc_6
+/* preproc_6 */
 
 %warnfilter(SWIGWARN_PARSE_REDEFINED) A6; /* Ruby, wrong constant name */
 %warnfilter(SWIGWARN_RUBY_WRONG_NAME) a6; /* Ruby, wrong constant name */
@@ -206,7 +219,7 @@ NAME 42
 
 MACRO2(int)
 
-// cpp_macro_noarg.  Tests to make sure macros with no arguments work right.
+/* cpp_macro_noarg.  Tests to make sure macros with no arguments work right. */
 #define MACROWITHARG(x) something(x) 
 
 typedef int MACROWITHARG; 
@@ -302,11 +315,6 @@ inline const char* mangle_macro ## #@__VA_ARGS__ () {
 /* chiao */
 #endif;
 
-#ifdef SWIGCHICKEN
-/* define is a scheme keyword (and thus an invalid variable name), so SWIG warns about it */
-%warnfilter(SWIGWARN_PARSE_KEYWORD) define; 
-#endif
-
 #ifdef SWIGRUBY
 %rename(ddefined) defined;
 #endif
@@ -382,8 +390,12 @@ int methodX(int x);
 int methodX(int x) { return x+100; }
 %}
 
-// Comma in macro - https://github.com/swig/swig/issues/974 (for /* */)
-// and https://github.com/swig/swig/pull/1166 (for //)
+/*
+   Regression tests for bugs handling a comma in a comment in a macro:
+   - https://github.com/swig/swig/issues/974 (for traditional C comments)
+   - https://github.com/swig/swig/pull/1166 (for //)
+   Also see preproc_cpp.i
+*/
 %inline %{
 #define swig__attribute__(x)
 #define TCX_PACKED(d) d swig__attribute__ ((__packed__))
@@ -401,21 +413,9 @@ TCX_PACKED (typedef struct tcxMessageBugImpl
 }) tcxMessageBug;
 
 
-TCX_PACKED (typedef struct tcxMessageTestImpl2
-{
-    int mHeader; ///< comment
-}) tcxMessageTest2;
-
-
-TCX_PACKED (typedef struct tcxMessageBugImpl2
-{
-    int mBid; ///< Bid price and size, check PresentMap if available in message
-}) tcxMessageBug2;
-
-
 %}
 
-// Regression tests for https://github.com/swig/swig/pull/1111
+/* Regression tests for https://github.com/swig/swig/pull/1111 */
 %{
 static int foo_func(int x) { return x; }
 static int foo_func2() { return 0; }
@@ -431,26 +431,86 @@ static int baz_func(int a, int b, int c) { return a + b - c; }
 #define FOOVAR(...) foo_func(__VA_ARGS__)
 #define BARVAR(...) bar_func(__VA_ARGS__)
 #define BAZVAR(...) baz_func(__VA_ARGS__)
-// This has probably always worked, but make sure that the fix to accept
-// an empty X doesn't cause this case to be incorrectly expanded:
+/* This has probably always worked, but make sure that the fix to accept
+   an empty X doesn't cause this case to be incorrectly expanded:*/
 const int FOO = 7;
-// BAR was incorrectly expanded here, causing:
-// Error: Syntax error in input(1).
+/* BAR was incorrectly expanded here, causing:
+   Error: Syntax error in input(1). */
 const int BAR = 6;
-// This has probably always worked, but make sure that the fix to accept
-// an empty X doesn't stop a non-empty X from working:
+/* This has probably always worked, but make sure that the fix to accept
+   an empty X doesn't stop a non-empty X from working: */
 FOO(int x)
-// FOO() didn't used to get expanded here, causing:
-// Syntax error in input(1).
+/* FOO2() didn't used to get expanded here, causing:
+   Syntax error in input(1). */
 FOO2()
-// Check BAR2() still gets expanded here.
+/* Check BAR2() still gets expanded here. */
 BAR2() {
-    // Regression test - this used to fail with:
-    // Error: Macro 'BAZ' expects 3 arguments
+    /* Regression test - this used to fail with:
+       Error: Macro 'BAZ' expects 3 arguments */
     BAZ(,2,3);
     BARVAR();
     FOOVAR(1);
     BAZVAR(1,2,3);
     return 0;
 }
+%}
+
+/* Regression test for bug fixed in SWIG 4.3.0 with handling a comment with
+ * double * before the /
+ */
+#define STARSTARSLASH(X,...)
+STARSTARSLASH(A,/** Test **/,B) /**/
+
+/* Regression test for handling elision of comma before ##__VA_ARGS__
+ * https://github.com/swig/swig/issues/2848
+ */
+#define DECLARE_GLOBAL_VAR(...) int global_var, ##__VA_ARGS__;
+#define DECLARE_GLOBAL_VAR2(NAMED...) int global_var2, ##NAMED;
+DECLARE_GLOBAL_VAR()
+DECLARE_GLOBAL_VAR2()
+
+/* Show the C compiler simple definitions as ##__VA_ARGS__ is a GCC extension
+ * so we can't rely on the compiler supporting it.
+ */
+%{
+int global_var = 42;
+int global_var2 = 345;
+%}
+
+/* Feature test for __VA_OPT__ support.  This was standardised in C++20 but
+ * we're only testing SWIG's support for it here so this doesn't require a
+ * C++20 compiler.
+ */
+#define DECLARE_GLOBAL_VA(N,...) int global_var##N __VA_OPT__(=)__VA_ARGS__;
+/* Named varargs is a GCC extension.  Both GCC and clang support __VA_OPT__
+ * with named varargs (albeit with a warning) and SWIG supports it too for
+ * compatibility.
+ */
+#define DECLARE_GLOBAL_NAMED(N,NAMED...) int global_var##N __VA_OPT__(=)NAMED;
+DECLARE_GLOBAL_VA(3)
+DECLARE_GLOBAL_VA(4,)
+DECLARE_GLOBAL_VA(5, )
+DECLARE_GLOBAL_VA(6, /**Hello,World)**/ )
+
+DECLARE_GLOBAL_NAMED(7)
+DECLARE_GLOBAL_NAMED(8,)
+DECLARE_GLOBAL_NAMED(9, )
+DECLARE_GLOBAL_NAMED(10, /**Hello,World)**/ )
+
+DECLARE_GLOBAL_VA(11,111)
+
+DECLARE_GLOBAL_NAMED(12,121)
+
+// Show the compiler simple definitions so we don't need __VA_OPT__ support.
+%{
+int global_var3 = 3;
+int global_var4 = 4;
+int global_var5 = 5;
+int global_var6 = 6;
+int global_var7 = 7;
+int global_var8 = 8;
+int global_var9 = 9;
+int global_var10 = 10;
+int global_var11 = 111;
+int global_var12 = 121;
 %}

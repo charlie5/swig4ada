@@ -12,7 +12,11 @@
 %fragment(SWIG_From_frag(Type),"header")
 {
 SWIGINTERNINLINE PyObject*
-SWIG_From(Type)(%ifcplusplus(const Type&, Type) c)
+#if defined(__cplusplus)
+SWIG_From_dec(Type)(const Type& c)
+#else
+SWIG_From_dec(Type)(Type c)
+#endif
 {
   return PyComplex_FromDoubles(Real(c), Imag(c));
 }
@@ -65,7 +69,7 @@ SWIG_AsVal(Type)(PyObject *o, Type *val)
     float re;
     int res = SWIG_AddCast(SWIG_AsVal(float)(o, &re));
     if (SWIG_IsOK(res)) {
-      if (val) *val = Constructor(re, 0.0);
+      if (val) *val = Constructor(re, 0.0f);
       return res;
     }
   }

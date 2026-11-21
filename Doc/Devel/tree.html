@@ -183,8 +183,8 @@ this function merely records that those attributes did not exist in the original
 <b><tt>void Swig_require(const char *namespace, Node *n, ...)</tt></b>
 
 <blockquote>
-This function is similar to <tt>Swig_save()</tt> except that adds additional attribute checking. There are different interpretations
-of the attribute names.  A name of "attr" merely requests that the function check for the presence of an attribute.  If the attribute is missing, SWIG will exit with a failed assertion.   An attribute name of "?attr" specifies that the attribute "attr" is optional and
+This function is similar to <tt>Swig_save()</tt> except that it performs additional attribute checking. There are different interpretations
+of the attribute names.  A name of "attr" merely requests that the function check for the presence of an attribute.  If the attribute is missing, SWIG will exit with a fatal error.   An attribute name of "?attr" specifies that the attribute "attr" is optional and
 that its old value must be saved (if any).   An attribute name of "*attr" specifies that the attribute is required and that
 its value must be saved.   The saving of attributes is performed in the same manner as with <tt>Swig_save()</tt>. Here is an example:
 
@@ -241,17 +241,17 @@ This function is called by the <tt>-debug-tags</tt> option to SWIG.
 
 <pre>
 % swig -debug-tags -python example.i
- . top (:1)
- . top . include (/Users/beazley/Projects/share/swig/1.3.31/swig.swg:0)
- . top . include . include (/Users/beazley/Projects/share/swig/1.3.31/swigwarnings.swg:0)
- . top . include . include . include (/Users/beazley/Projects/share/swig/1.3.31/swigwarn.swg:0)
+:1:  . top
+:1:  . top . include
+/usr/share/swig/swig.swg:320:  . top . include . include
+/usr/share/swig/swigwarnings.swg:39:  . top . include . include . include
 ...
 ...
- . top . include (example.i:0)
- . top . include . module (example.i:2)
- . top . include . insert (example.i:7)
- . top . include . cdecl (example.i:5)
- . top . include . cdecl (example.i:6)
+:4:  . top . include
+example.i:2:  . top . include . module
+example.i:7:  . top . include . insert
+example.i:5:  . top . include . cdecl
+example.i:6:  . top . include . cdecl
 </pre>
 
 Since many language modules include hundreds of typemaps and other information, the output of this can be significantly more complicated than you might expect.

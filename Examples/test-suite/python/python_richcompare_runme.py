@@ -1,5 +1,4 @@
 import python_richcompare
-import sys
 
 def check_unorderable_types(exception):
 #    if str(exception).find("unorderable types") == -1:
@@ -83,6 +82,9 @@ if (a1 == 42) :
 if not (a1 != 42) :
     raise RuntimeError("Comparing class (with overloaded operator ==) to incompatible type, != returned False")
 
+if a1.__eq__(None) is not NotImplemented:
+    raise RuntimeError("Comparing to incompatible type should return NotImplemented")
+
 # Check inequalities
 #-------------------------------------------------------------------------
 
@@ -100,37 +102,27 @@ if not (a2 <= b2):
 
 # Check inequalities to other objects
 #-------------------------------------------------------------------------------
-if sys.version_info[0:2] < (3, 0):
-    if (base1 < 42):
-        raise RuntimeError("Comparing class to incompatible type, < returned True")
-    if (base1 <= 42):
-        raise RuntimeError("Comparing class to incompatible type, <= returned True")
-    if not (base1 > 42):
-        raise RuntimeError("Comparing class to incompatible type, > returned False")
-    if not (base1 >= 42):
-        raise RuntimeError("Comparing class to incompatible type, >= returned False")
-else:
-    # Python 3 throws: TypeError: unorderable types
-    try:
-        res = base1 < 42
-        raise RuntimeError("Failed to throw")
-    except TypeError,e:
-        check_unorderable_types(e)
-    try:
-        res = base1 <= 42
-        raise RuntimeError("Failed to throw")
-    except TypeError,e:
-        check_unorderable_types(e)
-    try:
-        res = base1 > 42
-        raise RuntimeError("Failed to throw")
-    except TypeError,e:
-        check_unorderable_types(e)
-    try:
-        res = base1 >= 42
-        raise RuntimeError("Failed to throw")
-    except TypeError,e:
-        check_unorderable_types(e)
+# Python 3 throws: TypeError: unorderable types
+try:
+    res = base1 < 42
+    raise RuntimeError("Failed to throw")
+except TypeError as e:
+    check_unorderable_types(e)
+try:
+    res = base1 <= 42
+    raise RuntimeError("Failed to throw")
+except TypeError as e:
+    check_unorderable_types(e)
+try:
+    res = base1 > 42
+    raise RuntimeError("Failed to throw")
+except TypeError as e:
+    check_unorderable_types(e)
+try:
+    res = base1 >= 42
+    raise RuntimeError("Failed to throw")
+except TypeError as e:
+    check_unorderable_types(e)
 
 # Check inequalities used for ordering
 #-------------------------------------------------------------------------
@@ -156,3 +148,82 @@ if not (x[1] is base2):
 
 if not (x[2] is a3):
     raise RuntimeError("Ordering failed")
+
+
+# Test custom exceptions can still be thrown in operators which use %pythonmaybecall
+et0 = python_richcompare.ExceptionThrower(0)
+et1 = python_richcompare.ExceptionThrower(1)
+et2 = python_richcompare.ExceptionThrower(2)
+
+if not(et1 < et2):
+    raise RuntimeError("ExceptionThrower (a) failed")
+
+if et2 < et1:
+    raise RuntimeError("ExceptionThrower (b) failed")
+
+try:
+    x = et2 < et0
+    raise RuntimeError("ExceptionThrower failed to throw ValueError (A)")
+except ValueError:
+    pass
+
+try:
+    x = et0 < et2
+    raise RuntimeError("ExceptionThrower failed to throw ValueError (B)")
+except ValueError:
+    pass
+
+try:
+    x = et2 < 99
+    raise RuntimeError("ExceptionThrower (d) failed")
+except TypeError:
+    pass
+
+try:
+    x = 99 < et2
+    raise RuntimeError("ExceptionThrower (e) failed")
+except TypeError:
+    pass
+
+try:
+    x = et0 < 99
+    raise RuntimeError("ExceptionThrower (f) failed")
+except TypeError:
+    pass
+
+try:
+    x = 99 < et0
+    raise RuntimeError("ExceptionThrower (g) failed")
+except TypeError:
+    pass
+
+
+# Overloaded operators and custom exceptions
+c0 = python_richcompare.SubClassCThrower(0)
+c1 = python_richcompare.SubClassCThrower(1)
+c1b = python_richcompare.SubClassCThrower(1)
+c2 = python_richcompare.SubClassCThrower(2)
+
+if c1 == c2:
+    raise RuntimeError("SubClassCThrower failed (a)")
+
+if not(c1 == c1b):
+    raise RuntimeError("SubClassCThrower failed (b)")
+
+if c0 == 99:
+    raise RuntimeError("SubClassCThrower failed (c)")
+
+if 99 == c0:
+    raise RuntimeError("SubClassCThrower failed (d)")
+
+try:
+    x = c0 == c1
+    raise RuntimeError("SubClassCThrower failed to throw (A)")
+except ValueError:
+    pass
+
+try:
+    x = c1 == c0
+    raise RuntimeError("SubClassCThrower failed to throw (B)")
+except ValueError:
+    pass

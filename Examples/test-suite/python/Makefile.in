@@ -2,42 +2,37 @@
 # Makefile for python test-suite
 #######################################################################
 
-ifeq (,$(PY3))
-  PYBIN = @PYTHON@
-else
-  PYBIN = @PYTHON3@
-endif
+PYTHON = @PYTHON3@
 
 LANGUAGE     = python
-PYTHON       = $(PYBIN)
+PYFLAGS      = -Werror
+SCRIPTSUFFIX = _runme.py
+PY_VER_3_DIGIT    = @PY_VER_3_DIGIT@
 PYCODESTYLE       = @PYCODESTYLE@
-PYCODESTYLE_FLAGS = --ignore=E252,E30,E402,E501,E731,W291,W391
+PYCODESTYLE_FLAGS = --ignore=E252,E30,E402,E501,E731,E741,W291,W391
+PYREFLY           = @PYREFLY@
+PYREFLY_FLAGS     = --summary=none --python-interpreter-path=$(PYTHON) --search-path=. --ignore=missing-import
 
-#*_runme.py for Python 2.x, *_runme3.py for Python 3.x
-PY2SCRIPTSUFFIX = _runme.py
-PY3SCRIPTSUFFIX = _runme3.py
-PY2TO3       = @PY2TO3@ -x import
-
-ifeq (,$(PY3))
-  SCRIPTSUFFIX = $(PY2SCRIPTSUFFIX)
-else
-  SCRIPTSUFFIX = $(PY3SCRIPTSUFFIX)
-endif
-
+HAVE_CXX11   = @HAVE_CXX11@
+HAVE_CXX14   = @HAVE_CXX14@
+HAVE_CXX17   = @HAVE_CXX17@
+HAVE_CXX20   = @HAVE_CXX20@
 srcdir       = @srcdir@
 top_srcdir   = @top_srcdir@
 top_builddir = @top_builddir@
 
+FAILING_CPP_TESTS = \
+	cpp17_map_no_default_ctor \
+
 CPP_TEST_CASES += \
-	argcargvtest \
 	callback \
 	complextest \
+	director_guard \
 	director_stl \
 	director_wstring \
 	file_test \
 	iadd \
 	implicittest \
-	inout \
 	inplaceadd \
 	input \
 	li_cstring \
@@ -55,96 +50,140 @@ CPP_TEST_CASES += \
 	li_std_vectora \
 	li_std_vector_extra \
 	li_std_wstream \
-	li_std_wstring \
+	li_std_wstring_inherit \
 	primitive_types \
 	python_abstractbase \
+	python_annotations_c \
+	python_annotations_typing \
+	python_annotations_variable_c \
+	python_annotations_variable_typing \
 	python_append \
 	python_builtin \
 	python_destructor_exception \
 	python_director \
+	python_director_pyobject \
 	python_docstring \
 	python_extranative \
+	python_flatstaticmethod \
 	python_moduleimport \
+	python_nokwargs_feature \
+	python_nokwargs_keyword \
 	python_overload_simple_cast \
 	python_pickle \
-	python_pybuffer \
+	python_pyi \
 	python_pythoncode \
 	python_richcompare \
 	python_strict_unicode \
 	python_threads \
+	python_typehints \
+	python_typemap_macro \
+	python_various \
 	simutry \
 	std_containers \
 	swigobject \
 	template_matrix \
 
-#	li_std_carray
 #	director_profile
+
+ifeq (,$(PY_ABI_VER))
+PY_ABI_311:=1
+else
+PY_ABI_VER_INTEGER:=$(shell printf "%d%02d" $(subst ., ,$(PY_ABI_VER)))
+PY_ABI_311:=$(shell test $(PY_ABI_VER_INTEGER) -ge 311 && echo "1")
+endif
+
+# Test requiring python-3.11 minimum if using Py_LIMITED_API
+ifeq (1,$(PY_ABI_311))
+CPP_TEST_CASES += pyabi311_bufferinterface
+endif
+
+# Test requiring python-3.11 minimum if using Py_LIMITED_API if and only if python>=3.13
+ifeq (1,$(PY_ABI_311))
+CPP_TEST_CASES += python_pybuffer
+else
+PY_313:=$(shell test $(PY_VER_3_DIGIT) -ge 313 && echo "1")
+ifeq (,$(PY_313))
+CPP_TEST_CASES += python_pybuffer
+endif
+endif
 
 CPP11_TEST_CASES = \
 	cpp11_hash_tables \
-	cpp11_shared_ptr_const \
-	cpp11_shared_ptr_nullptr_in_containers \
-	cpp11_shared_ptr_overload \
-	cpp11_shared_ptr_upcast \
 	cpp11_std_unordered_map \
 	cpp11_std_unordered_multimap \
 	cpp11_std_unordered_multiset \
 	cpp11_std_unordered_set \
 
+CPP17_TEST_CASES = \
+	cpp17_std_filesystem
+
 C_TEST_CASES += \
+	ccomplextest \
 	file_test \
 	li_cstring \
 	li_cwstring \
 	python_nondynamic \
 	python_varargs_typemap \
+	python_weakref \
 
-#
-# This test only works with modern C compilers
-#
-#C_TEST_CASES += \
-#	complextest
+MULTI_CPP_TEST_CASES += \
+	import_callback \
+	python_annotations_import \
+	python_crossmod \
+	python_pyiterator_rename \
+	python_runtime_data \
 
 include $(srcdir)/../common.mk
 
 # Overridden variables here
-SCRIPTDIR    = .
 LIBS         = -L.
 VALGRIND_OPT += --suppressions=pythonswig.supp
 
+# Ensure testsuite remains free from SWIG warnings.
+SWIGOPT += -Werror
+
 # Custom tests - tests with additional commandline options
-# none!
+python_flatstaticmethod.cpptest: SWIGOPT += -flatstaticmethod
+python_nokwargs_keyword.cpptest: SWIGOPT += -keyword
+python_typehints.cpptest: SWIGOPT += -typehints
+python_pyi.cpptest: SWIGOPT += -pyi
+
+# C/C++ annotations are not PEP 484 type hints, so -typehints and Pyrefly do not apply to these tests.
+python_annotations_c.cpptest: override SWIG_FEATURES := $(filter-out -typehints,$(SWIG_FEATURES))
+python_annotations_variable_c.cpptest: override SWIG_FEATURES := $(filter-out -typehints,$(SWIG_FEATURES))
+
+# Make sure just python_runtime_data_builtin.i uses the -builtin option. Note: does not use python_runtime_data.list for all steps.
+# PY_ABI_VER is unset for python_runtime_data_builtin because stable ABI is not supported by builtin
+python_runtime_data.multicpptest: override SWIG_FEATURES := $(filter-out -builtin,$(SWIG_FEATURES))
+python_runtime_data.multicpptest: override SWIGOPT := $(filter-out -builtin,$(SWIGOPT))
+python_runtime_data.multicpptest: swig_and_compile_multi_cpp = \
+	$(call swig_and_compile_cpp_helper,python_runtime_data_builtin,'$(SWIGOPT) -builtin' PY_ABI_VER=) && \
+	$(call swig_and_compile_cpp_helper,python_runtime_data_nobuiltin,'$(SWIGOPT)')
 
 # Rules for the different types of tests
 %.cpptest:
-	+$(convert_testcase)
 	$(setup)
 	+$(swig_and_compile_cpp)
 	$(check_pep8)
+	$(check_typehints)
 	$(run_testcase)
 
 %.ctest:
-	+$(convert_testcase)
 	$(setup)
 	+$(swig_and_compile_c)
 	$(check_pep8)
+	$(check_typehints)
 	$(run_testcase)
 
 %.multicpptest:
-	+$(convert_testcase)
 	$(setup)
 	+$(swig_and_compile_multi_cpp)
 	$(check_pep8_multi_cpp)
+	$(check_typehints_multi_cpp)
 	$(run_testcase)
 
 
-
-# Runs the testcase. A testcase is only run if
-# a file is found which has _runme.py (or _runme3.py for Python 3) appended after the testcase name.
-
-py_runme  = $(SCRIPTPREFIX)$*$(SCRIPTSUFFIX)
-py2_runme = $(SCRIPTPREFIX)$*$(PY2SCRIPTSUFFIX)
-py3_runme = $(SCRIPTPREFIX)$*$(PY3SCRIPTSUFFIX)
-
+# Python code style checking
 ifneq (,$(PYCODESTYLE))
 check_pep8 = $(COMPILETOOL) $(PYCODESTYLE) $(PYCODESTYLE_FLAGS) $(SCRIPTPREFIX)$*.py
 
@@ -154,83 +193,53 @@ check_pep8_multi_cpp = \
 	done
 endif
 
-run_python = env LD_LIBRARY_PATH=.:$$LD_LIBRARY_PATH PYTHONPATH=.:$(srcdir):$$PYTHONPATH $(RUNTOOL) $(PYTHON) $(py_runme)
+# Type checking of the PEP 484 type hints in the generated wrapper when -typehints is used. Also tests .pyi file if generated.
+# Enable it for every test case with:
+#   env SWIG_FEATURES=-typehints make check-python-test-suite
+ifneq (,$(PYREFLY))
+check_typehints = $(if $(filter -typehints,$(SWIG_FEATURES)), \
+	$(COMPILETOOL) $(PYREFLY) check $(PYREFLY_FLAGS) $(PYREFLY_EXTRA_FLAGS) $(SCRIPTPREFIX)$*.py $(if $(filter -pyi,$(SWIG_FEATURES)),$(SCRIPTPREFIX)$*.pyi))
 
-run_testcase = \
-	if [ -f $(SCRIPTDIR)/$(py_runme) ]; then \
-	  $(run_python);\
-	fi
-
-# Grab runme file ready for running: copied for out of source tree builds, and/or run 2to3
-# Note terminal (double colon) rules creating runme files to fix possible infinite recursion,
-# see https://github.com/swig/swig/pull/688
-ifeq ($(SCRIPTDIR),$(srcdir))
-  # in source tree build
-  ifeq (,$(PY3))
-    convert_testcase =
-  else
-    convert_testcase = \
-	if [ -f $(srcdir)/$(py2_runme) ]; then \
-	  $(MAKE) $(SCRIPTDIR)/$(py_runme); \
-	fi
-
-# For converting python 2 tests into Python 3 tests
-$(SCRIPTDIR)/$(SCRIPTPREFIX)%$(SCRIPTSUFFIX):: $(srcdir)/$(SCRIPTPREFIX)%$(PY2SCRIPTSUFFIX)
-	cp $< $@
-	$(PY2TO3) -w $@ >/dev/null 2>&1
-
-  endif
-else
-  # out of source tree build
-  ifeq (,$(PY3))
-    convert_testcase = \
-	if [ -f $(srcdir)/$(py2_runme) ]; then \
-	  $(MAKE) $(SCRIPTDIR)/$(py_runme); \
-	fi
-
-$(SCRIPTDIR)/$(SCRIPTPREFIX)%$(SCRIPTSUFFIX):: $(srcdir)/$(SCRIPTPREFIX)%$(PY2SCRIPTSUFFIX)
-	cp $< $@
-
-  else
-    convert_testcase = \
-	if [ -f $(srcdir)/$(py2_runme) ]; then \
-	  $(MAKE) $(SCRIPTDIR)/$(py_runme); \
-	elif [ -f $(srcdir)/$(py3_runme) ]; then \
-	  $(MAKE) $(SCRIPTDIR)/$(py3_runme); \
-	fi
-
-# For when there is a _runme3.py instead of a _runme.py, ie a Python 3 only run test
-$(SCRIPTDIR)/$(SCRIPTPREFIX)%$(SCRIPTSUFFIX):: $(srcdir)/$(SCRIPTPREFIX)%$(PY3SCRIPTSUFFIX)
-	cp $< $@
-
-# For converting python 2 tests into Python 3 tests
-$(SCRIPTDIR)/$(SCRIPTPREFIX)%$(SCRIPTSUFFIX):: $(srcdir)/$(SCRIPTPREFIX)%$(PY2SCRIPTSUFFIX)
-	cp $< $@
-	$(PY2TO3) -w $@ >/dev/null 2>&1
-
-  endif
-
+check_typehints_multi_cpp = \
+	$(if $(filter -typehints,$(SWIG_FEATURES)), \
+	  for f in `cat $(top_srcdir)/$(EXAMPLES)/$(TEST_SUITE)/$*.list` ; do \
+	    $(COMPILETOOL) $(PYREFLY) check $(PYREFLY_FLAGS) $(PYREFLY_EXTRA_FLAGS) $$f.py $(if $(filter -pyi,$(SWIG_FEATURES)),$$f.pyi) || exit 1; \
+	  done)
 endif
 
-# Clean: remove the generated .py file
-# We only remove the _runme3.py if it is generated by 2to3 from a _runme.py.
+# Runs the testcase. A testcase is only run if
+# a file is found which has _runme.py appended after the testcase name.
+run_testcase = \
+	if [ -f $(SCRIPTDIR)/$(SCRIPTPREFIX)$*$(SCRIPTSUFFIX) ]; then \
+	  env LD_LIBRARY_PATH=.:$$LD_LIBRARY_PATH PYTHONPATH=.:$(srcdir):$$PYTHONPATH $(RUNTOOL) $(PYTHON) $(PYFLAGS) $(SCRIPTDIR)/$(SCRIPTPREFIX)$*$(SCRIPTSUFFIX); \
+	fi
+
+# Clean: remove the generated Python files
 %.clean:
-	@rm -f $*.py
-	@if test -f $(srcdir)/$(py2_runme); then rm -f $(SCRIPTDIR)/$(py3_runme) $(SCRIPTDIR)/$(py3_runme).bak; fi
-	@if test "x$(SCRIPTDIR)" != "x$(srcdir)"; then rm -f $(SCRIPTDIR)/$(py_runme); fi
+	@rm -f $*.py*
 
 clean:
 	$(MAKE) -f $(top_builddir)/$(EXAMPLES)/Makefile SRCDIR='$(SRCDIR)' python_clean
-	rm -f hugemod.h hugemod_a.i hugemod_b.i hugemod_a.py hugemod_b.py hugemod_runme.py
-	rm -f clientdata_prop_a.py clientdata_prop_b.py import_stl_a.py import_stl_b.py
-	rm -f imports_a.py imports_b.py mod_a.py mod_b.py multi_import_a.py
-	rm -f multi_import_b.py packageoption_a.py packageoption_b.py packageoption_c.py
+	rm -f ../hugemod.h ../hugemod_a.i ../hugemod_b.i hugemod_a.py* hugemod_b.py* $(hugemod_runme)
+	rm -f clientdata_prop_a.py* clientdata_prop_b.py*
+	rm -f import_callback_x.py* import_callback_y.py*
+	rm -f python_crossmod_a.py* python_crossmod_b.py*
+	rm -f python_annotations_import_a.py* python_annotations_import_b.py*
+	rm -f import_share_a.py* import_share_b.py* import_share_c.py*
+	rm -f import_stl_a.py* import_stl_b.py* import_stl_c.py*
+	rm -f imports_a.py* imports_b.py* mod_a.py* mod_b.py*
+	rm -f multi_import_a.py* multi_import_b.py* multi_import_d.py*
+	rm -f packageoption_a.py* packageoption_b.py* packageoption_c.py*
+	rm -f python_pyiterator_rename_a.py* python_pyiterator_rename_b.py*
+	rm -f python_runtime_data_builtin.py* python_runtime_data_nobuiltin.py*
+	rm -f template_typedef_cplx2.py*
 
-hugemod_runme = hugemod$(SCRIPTPREFIX)
+hugemod_runme = $(SCRIPTPREFIX)hugemod$(SCRIPTSUFFIX)
 
+# Note: hugemod not run by default
 hugemod:
 	perl hugemod.pl $(hugemod_runme)
 	$(MAKE) hugemod_a.cpptest
 	$(MAKE) hugemod_b.cpptest
-	sh -c "time $(PYTHON) $(hugemod_runme)"
-	sh -c "time $(PYTHON) $(hugemod_runme)"
+	time $(PYTHON) $(PYFLAGS) $(hugemod_runme)
+	time $(PYTHON) $(PYFLAGS) $(hugemod_runme)

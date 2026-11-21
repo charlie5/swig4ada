@@ -12,11 +12,11 @@ public class multiple_inheritance_interfaces_runme {
     }
   }
 
-  private static void checkBaseAndInterfaces(Class cls, boolean interfaceExpected, String base, String[] interfaces) {
+  private static void checkBaseAndInterfaces(Class<?> cls, boolean interfaceExpected, String base, String[] interfaces) {
     String[] expectedInterfaces = new String[interfaces.length];
     for (int i=0; i<interfaces.length; ++i)
       expectedInterfaces[i] = "interface multiple_inheritance_interfaces." + interfaces[i];
-    Class[] actualInterfaces = cls.getInterfaces();
+    Class<?>[] actualInterfaces = cls.getInterfaces();
     String expectedInterfacesString = Arrays.toString(expectedInterfaces);
     String actualInterfacesString = Arrays.toString(actualInterfaces);
     if (!expectedInterfacesString.equals(actualInterfacesString))
@@ -46,17 +46,17 @@ public class multiple_inheritance_interfaces_runme {
     checkBaseAndInterfaces(IC.class, true, "", new String[] {"IA", "IB"});
     checkBaseAndInterfaces(A.class, false, "", new String[] {"IA"});
     checkBaseAndInterfaces(B.class, false, "", new String[] {"IB"});
-    checkBaseAndInterfaces(C.class, false, "", new String[] {"IA", "IB", "IC"});
-    checkBaseAndInterfaces(D.class, false, "", new String[] {"IA", "IB", "IC"});
+    checkBaseAndInterfaces(C.class, false, "", new String[] {"IC", "IA", "IB"});
+    checkBaseAndInterfaces(D.class, false, "", new String[] {"IC", "IA", "IB"});
     checkBaseAndInterfaces(E.class, false, "D", new String[] {});
 
     checkBaseAndInterfaces(IJ.class, true, "", new String[] {});
     checkBaseAndInterfaces(IK.class, true, "", new String[] {"IJ"});
     checkBaseAndInterfaces(IL.class, true, "", new String[] {"IK"});
     checkBaseAndInterfaces(J.class, false, "", new String[] {"IJ"});
-    checkBaseAndInterfaces(K.class, false, "", new String[] {"IJ", "IK"});
-    checkBaseAndInterfaces(L.class, false, "", new String[] {"IJ", "IK", "IL"});
-    checkBaseAndInterfaces(M.class, false, "", new String[] {"IJ", "IK", "IL"});
+    checkBaseAndInterfaces(K.class, false, "", new String[] {"IK", "IJ"});
+    checkBaseAndInterfaces(L.class, false, "", new String[] {"IL", "IK", "IJ"});
+    checkBaseAndInterfaces(M.class, false, "", new String[] {"IL", "IK", "IJ"});
 
     checkBaseAndInterfaces(P.class, false, "", new String[] {});
     checkBaseAndInterfaces(IQ.class, true, "", new String[] {});
@@ -68,11 +68,28 @@ public class multiple_inheritance_interfaces_runme {
     checkBaseAndInterfaces(V.class, false, "S", new String[] {});
     checkBaseAndInterfaces(W.class, false, "T", new String[] {});
 
+    checkBaseAndInterfaces(IV1SwigInterface.class, true, "", new String[] {"IA"});
+    checkBaseAndInterfaces(IV2SwigInterface.class, true, "", new String[] {"IA"});
+    checkBaseAndInterfaces(IV1.class, false, "", new String[] {"IV1SwigInterface", "IA"});
+    checkBaseAndInterfaces(IV2.class, false, "", new String[] {"IV2SwigInterface", "IA"});
+    checkBaseAndInterfaces(V3.class, false, "", new String[] {"V3SwigInterface", "IV1SwigInterface", "IA", "IV2SwigInterface"});
+    checkBaseAndInterfaces(V3SwigInterface.class, true, "", new String[] {"IV1SwigInterface", "IV2SwigInterface"});
+
     // overloaded methods check
     D d = new D();
     d.ia();
     d.ia(10);
     d.ia("bye");
     d.ia("bye", false);
+
+    UndesirablesSwigImpl.UndesiredStaticMethod(UndesirablesSwigImpl.UndesiredEnum.UndesiredEnum1);
+
+    // %interface_impl on an instantiated class template must still generate the interface
+    checkBaseAndInterfaces(TemplateBase.class, true, "", new String[] {});
+    checkBaseAndInterfaces(TemplateBaseSwigImpl.class, false, "", new String[] {"TemplateBase"});
+    checkBaseAndInterfaces(TemplateDerived.class, false, "", new String[] {"TemplateBase"});
+
+    if (new TemplateDerived().tb(10) != 10)
+      throw new RuntimeException("Incorrect value from TemplateDerived.tb()");
   }
 }

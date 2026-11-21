@@ -1,10 +1,12 @@
 %module template_nested
 
-#if !defined(SWIGCSHARP) && !defined(SWIGJAVA)
-%feature ("flatnested");
-#endif
-
 // Test nested templates - that is template classes and template methods within a class.
+
+#if !defined(SWIGCSHARP) && !defined(SWIGJAVA)
+#pragma SWIG nowarn=SWIGWARN_PARSE_NAMED_NESTED_CLASS
+%warnfilter(SWIGWARN_PARSE_TEMPLATE_NESTED) ns::OuterClass::Inner1;
+%warnfilter(SWIGWARN_PARSE_TEMPLATE_NESTED) ns::OuterClass::Inner2;
+#endif
 
 namespace ns {
 template <class T> struct ForwardTemplate;

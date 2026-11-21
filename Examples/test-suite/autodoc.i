@@ -5,8 +5,8 @@
 %feature("autodoc");
 
 // special typemap and its docs
-%typemap(in) (int c, int d) "$1 = 0; $2 = 0;";
-%typemap(doc,name="hello",type="Tuple") (int c, int d) "hello: int tuple[2]";
+%typemap(in) (int c, int d) "$1 = 0; $2 = 0;"
+%typemap(doc,name="hello",type="Tuple") (int c, int d) "hello: int tuple[2]"
 
 // testing for different documentation levels
 %feature("autodoc","0") A::func0; // names
@@ -69,8 +69,8 @@
 %typemap(doc) (int c, int d);
 
 // docs for some parameters
-%typemap(doc) int a "a: special comment for parameter a";
-%typemap(doc) int b "b: another special comment for parameter b";
+%typemap(doc) int a "a: special comment for parameter a"
+%typemap(doc) int b "b: another special comment for parameter b"
 
 %feature("autodoc","0") C::C(int a, int b, Hola h); // names
 %feature("autodoc","1") D::D(int a, int b, Hola h); // names + types
@@ -182,4 +182,13 @@ int process4(int from = 0, int _in = 1, int var = 2) { return from; }
 const int PROCESS_DEFAULT_VALUE = 17;
 typedef long int some_type;
 int process_complex_defval(int val = PROCESS_DEFAULT_VALUE, int factor = some_type(-1)) { return val*factor; }
+%}
+
+// Test for empty docstring, which should be ignored.
+%feature("docstring") ""
+
+%inline %{
+struct a_structure{
+  char my_array[1];
+};
 %}

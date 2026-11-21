@@ -5,7 +5,197 @@ and CHANGES files.
 Release Notes
 =============
 Detailed release notes are available with the release and are also
-published on the SWIG web site at http://swig.org/release.html.
+published on the SWIG web site at https://swig.org/release.html.
+
+SWIG-4.5.1 summary:
+- Regression fix for %rename using a format string, such as Ruby's
+  -autorename, dropping a class template's partial specializations.
+- Regression fix restoring the %typemaps_string_alloc macro for string
+  classes using custom allocators.
+- Python fix for compile errors in a module that %imports another
+  module already using the STL containers.
+- MinGW configure and CMake PCRE2 version build fixes.
+
+SWIG-4.5.0 summary:
+- New C++20 support: concepts, requires-clauses and
+  requires-expressions, type-constrained template parameters,
+  constrained alias templates and abbreviated function templates
+  (auto parameters).
+- New C++17 support: class template argument deduction (CTAD)
+  handling, user-defined deduction guides and pack expansion in
+  using-declarations.
+- C++14 generic lambdas and variable templates.
+- Add support for wrapping std::function via the new
+  std_function.i library.
+- Template partial specialization fixes for function types and
+  parameter packs.
+- Numerous using-declaration, inherited-constructor and
+  typedef-scope name resolution fixes.
+- User-defined literal operators emitted without deprecated
+  whitespace and multicharacter constants corrected to use int type.
+- More powerful %rename for instantiated templates.
+- cdata.i now uses a binary data type (e.g. Python bytes,
+  JavaScript Uint8Array) so all byte values round-trip correctly.
+- char *& string typemaps added to all remaining target languages.
+- Runtime type system fixes, including cross-module type casts and
+  a strict weak ordering fix in the type lookup.
+- Memory allocation failure protection added to several typemaps.
+- %typedef is deprecated; embed.i and the %new_copy_array macro
+  are removed.
+- Fewer compiler warnings in generated code.
+- Python 2 is no longer supported; SWIG now targets Python 3.5 and
+  later. Python 2 code paths and compatibility macros are removed
+  from the generated wrappers and the SWIG library and the
+  keyword/built-in warning list now tracks Python 3.
+- Python: PEP 484 type annotations support added, new -typehints and
+ .pyi stub generation, -builtin docstring parity, metaclass and
+  director reference counting fixes and %nokwargs fixes.
+- Lua: director support added; std::array, std::set,
+  std::unordered_set, std::unordered_map, shared_ptr and nested
+  class support added. Minimum Lua version is now 5.1.
+- Ruby: generated wrappers migrated to the TypedData API (the
+  deprecated Data API is removed in Ruby 4.1) and use embedded
+  TypedData storage on Ruby 3.3 and later; GC compaction crash fix
+  for STL containers of Ruby objects.
+- Go: %rename of enums honoured, new -unique-id/-no-unique-id
+  flags, Windows build and test support and various
+  rvalue-reference and director fixes.
+- R: %rename of enums and enum items honoured, scoped enum fixes
+  and R 4.6.0 compatibility.
+- JavaScript: v8 and node engines support v8 13.x and 14.x, as used by
+  Node.js 24 and 26, with improved node-addon-api detection.
+- Tcl 9 support.
+- Minor fixes and improvements specific to: C#, D, Guile, Java,
+  Octave, OCaml, Perl, PHP, Scilab.
+
+SWIG-4.4.1 summary:
+- Fix errors with some combinations of Py_LIMITED_API and recent Python
+  versions.
+- A couple of other minor fixes/improvements.
+
+SWIG-4.4.0 summary:
+- Python-3.14 and early Python-3.15 support including modernisations:
+  - Remove some DeprecationWarnings.
+  - Added support for free-threading Python.
+  - Multi-phase module initialization.
+  - Use heap types instead of static types.
+- Go minimum version is now 1.20.
+- Removed support for MzScheme/Racket.
+- Minor typemap improvements.
+- compactdefaultarg feature improvements and fixes.
+- Fewer C, C++ and Java compiler warnings in generated code.
+- c++-14 auto return type parsing fixes.
+- Various improvements related to parsing expressions.
+- Runtime type system thread safety fixes.
+- Minor fixes and improvements specific to:
+  C#, D, Guile, Java, Javascript, Lua, Perl, PHP, Python, Tcl.
+
+SWIG-4.3.1 summary:
+- Small number of regression fixes for Python and Java.
+- Corner case operator precedence bug fix affecting type deduction.
+- Octave 10 compilation errors fix.
+
+SWIG-4.3.0 summary:
+- Add experimental support for C as a target language.
+- MzScheme/Racket is deprecated and planned for removal in SWIG-4.4.
+- The distributed Windows binary is now a 64-bit executable.
+- Add some missing use of move semantics for performance improvements.
+- Enhanced handling of namespaces when using the nspace feature.
+- STL wrapper enhancements for std::unique_ptr, std::string_view,
+  std::filesystem.
+- Various enum and enum class wrapping improvements.
+- Other C++ handling improvements around templates, friends, C++11
+  trailing return types and C++17 fold expressions.
+- Many parser improvements for both C and C++, especially expressions.
+- Improvements to handling of string and character literals.
+- Minor preprocessor fixes.
+- Python: Stricter stable ABI conformance, add support for python-3.13.
+- C#: Add support for converting Doxygen comments into XML C# comments.
+- Various other target language specific enhancements and updates for
+  Java, Javascript, Lua, MzScheme, Ocaml, Octave, Perl, Python, R, Ruby.
+
+SWIG-4.2.1 summary:
+- Tcl 9.0 support.
+- Octave 9.0 support.
+- Improvements wrapping friend functions.
+- Variadic templated functions within a template support.
+- Type deduction enhancements.
+- Stability and regression fixes.
+
+SWIG-4.2.0 summary:
+- Various template wrapping improvements: template template parameters,
+  variadic templates, partially specialized templates, const template
+  parameters and improved error checking instantiating templates.
+- Improved decltype() support for expressions.
+- C++14 auto without trailing return type and C++11 auto variables.
+- Numerous C++ using declarations improvements.
+- Numerous fixes for constructors, destructors and assignment operators:
+  implicit, default and deleted and related non-assignable variable
+  wrappers.
+- STL: std::array and std::map improvements, std::string_view support
+  added.
+- Various C preprocessor improvements.
+- Various issues fixed to do with architecture specific long type.
+- Various Doxygen improvements.
+- D1/Tango support removed.  D2/Phobos is now the supported D version
+  and SWIG now generates code which works with recent D2 releases.
+- New Javascript generator targeting Node.js binary stable ABI Node-API.
+- Octave 8.1 support added.
+- PHP7 support removed, PHP8 is now the supported PHP version.
+- Python STL container wrappers now use the Python Iterator Protocol.
+- Python stable ABI support added.
+- Python 3.12 support added.
+- Ruby 3.2 and 3.3 support.
+- Scilab 2023.* support added.
+- Various minor enhancements for C#, Go, Guile, Javascript, Lua, Ocaml,
+  Perl, PHP, R, Racket, Ruby, Scilab and Tcl.
+- A number of deprecated features have been removed.
+
+SWIG-4.1.1 summary:
+- Couple of stability fixes.
+- Stability fix in ccache-swig when calculating hashes of inputs.
+- Some template handling improvements.
+- R - minor fixes plus deprecation for rtypecheck typemaps being optional.
+
+SWIG-4.1.0 summary:
+- Add Javascript Node v12-v18 support, remove support prior to v6.
+- Octave 6.0 to 6.4 support added.
+- Add PHP 8 support.
+- PHP wrapping is now done entirely via PHP's C API - no more .php wrapper.
+- Perl 5.8.0 is now the oldest version SWIG supports.
+- Python 3.3 is now the oldest Python 3 version SWIG supports.
+- Python 3.9-3.11 support added.
+- Various memory leak fixes in Python generated code.
+- Scilab 5.5-6.1 support improved.
+- Many improvements for each and every target language.
+- Various preprocessor expression handling improvements.
+- Improved C99, C++11, C++14, C++17 support. Start adding C++20 standard.
+- Make SWIG much more move semantics friendly.
+- Add C++ std::unique_ptr support.
+- Few minor C++ template handling improvements.
+- Various C++ using declaration fixes.
+- Few fixes for handling Doxygen comments.
+- GitHub Actions is now used instead of Travis CI for continuous integration.
+- Add building SWIG using CMake as a secondary build system.
+- Update optional SWIG build dependency for regex support from PCRE to PCRE2.
+
+SWIG-4.0.2 summary:
+- A few fixes around doxygen comment handling.
+- Ruby 2.7 support added.
+- Various minor improvements to C#, D, Java, OCaml, Octave, Python,
+  R, Ruby.
+- Considerable performance improvement running SWIG on large
+  interface files.
+
+SWIG-4.0.1 summary:
+- SWIG now cleans up on error by removing all generated files.
+- Add Python 3.8 support.
+- Python Sphinx compatibility added for Doxygen comments.
+- Some minor regressions introduced in 4.0.0 were fixed.
+- Fix some C++17 compatibility problems in Python and Ruby generated
+  code.
+- Minor improvements/fixes for C#, Java, Javascript, Lua, MzScheme,
+  Ocaml, Octave and Python.
 
 SWIG-4.0.0 summary:
 - Support for Doxygen documentation comments which are parsed and
@@ -103,7 +293,7 @@ SWIG-3.0.1 summary:
 SWIG-3.0.0 summary:
 - This is a major new release focusing primarily on C++ improvements.
 - C++11 support added. Please see documentation for details of supported
-  features: http://www.swig.org/Doc3.0/CPlusPlus11.html
+  features: https://www.swig.org/Doc3.0/CPlusPlus11.html
 - Nested class support added. This has been taken full advantage of in
   Java and C#. Other languages can use the nested classes, but require
   further work for a more natural integration into the target language.
@@ -210,7 +400,7 @@ SWIG-2.0.1 summary:
   and Python language modules.
 
 SWIG-2.0.0 summary:
-- License changes, see LICENSE file and http://www.swig.org/legal.html.
+- License changes, see LICENSE file and https://www.swig.org/legal.html.
 - Much better nested class/struct support.
 - Much improved template partial specialization and explicit
   specialization handling.
@@ -444,5 +634,3 @@ SWIG-1.3.22 summary:
 - RPM fixes.
 - Various minor improvements and bug fixes for C#, Chicken, Guile, Java, 
   MzScheme, Perl, Php, Python, Ruby and XML.
-
-

@@ -101,7 +101,7 @@ namespace swig {
   inline Sequence*
   getslice(const Sequence* self, Difference i, Difference j) {
     typename Sequence::size_type size = self->size();
-    typename Sequence::size_type ii = swig::check_index(i, size, (i == size && j == size));
+    typename Sequence::size_type ii = swig::check_index(i, size, (i == (Difference)size && j == (Difference)size));
     typename Sequence::size_type jj = swig::slice_index(j, size);
 
     if (jj > ii) {
@@ -117,25 +117,29 @@ namespace swig {
 
   template <class Sequence, class Difference, class InputSeq>
   inline void
-  setslice(Sequence* self, Difference i, Difference j, const InputSeq& v) {
+  setslice(Sequence* self, Difference i, Difference j, const InputSeq& is) {
     typename Sequence::size_type size = self->size();
     typename Sequence::size_type ii = swig::check_index(i, size, true);
     typename Sequence::size_type jj = swig::slice_index(j, size);
     if (jj < ii) jj = ii;
     size_t ssize = jj - ii;
-    if (ssize <= v.size()) {
+    if (ssize <= is.size()) {
+      // expanding/staying the same size
       typename Sequence::iterator sb = self->begin();
-      typename InputSeq::const_iterator vmid = v.begin();
+      typename InputSeq::const_iterator vmid = is.begin();
       std::advance(sb,ii);
       std::advance(vmid, jj - ii);
-      self->insert(std::copy(v.begin(), vmid, sb), vmid, v.end());
+      self->insert(std::copy(is.begin(), vmid, sb), vmid, is.end());
     } else {
+      // shrinking
       typename Sequence::iterator sb = self->begin();
       typename Sequence::iterator se = self->begin();
       std::advance(sb,ii);
       std::advance(se,jj);
       self->erase(sb,se);
-      self->insert(sb, v.begin(), v.end());
+      sb = self->begin();
+      std::advance(sb,ii);
+      self->insert(sb, is.begin(), is.end());
     }
   }
 
@@ -165,7 +169,7 @@ namespace swig {
 namespace swig
 {
 
-  /**
+  /*
    * This class is a proxy class for references, used to return and set values
    * of an element of a Ruby Array of stuff.
    * It can be used by RubySequence_InputIterator to make it work with STL
@@ -186,7 +190,7 @@ namespace swig
 	return swig::as<T>(item);
       } catch (const std::invalid_argument& e) {
 	char msg[1024];
-	sprintf(msg, "in sequence element %d ", _index);
+	SWIG_snprintf(msg, sizeof(msg), "in sequence element %d ", _index);
 	VALUE lastErr = rb_gv_get("$!");
 	if ( lastErr == Qnil ) {
 	  %type_error(swig::type_name<T>());
@@ -210,7 +214,7 @@ namespace swig
   };
 
 
-  /**
+  /*
    * This class is a proxy to return a pointer to a class, usually
    * RubySequence_Ref. 
    * It can be used by RubySequence_InputIterator to make it work with STL
@@ -226,7 +230,7 @@ namespace swig
   };
 
 
-  /**
+  /*
    * Input Iterator.  This adapator class is a random access iterator that 
    * allows you to use STL algorithms with a Ruby class (a Ruby Array by default).
    */
@@ -326,7 +330,7 @@ namespace swig
   };
 
 
-  /**
+  /*
    * This adaptor class allows you to use a Ruby Array as if it was an STL
    * container, giving it begin(), end(), and iterators.
    */
@@ -338,7 +342,7 @@ namespace swig
     typedef T value_type;
     typedef T* pointer;
     typedef int difference_type;
-    typedef int size_type;
+    typedef std::size_t size_type;
     typedef const pointer const_pointer;
     typedef RubySequence_InputIterator<T, reference> iterator;
     typedef RubySequence_InputIterator<T, const_reference> const_iterator;
@@ -395,19 +399,13 @@ namespace swig
       return const_reference(_seq, n);
     }
 
-    bool check(bool set_err = false) const
+    bool check() const
     {
       int s = (int) size();
       for (int i = 0; i < s; ++i) {
 	VALUE item = rb_ary_entry(_seq, i );
-	if (!swig::check<value_type>(item)) {
-	  if (set_err) {
-	    char msg[1024];
-	    sprintf(msg, "in sequence element %d", i);
-	    SWIG_Error(SWIG_RuntimeError, msg);
-	  }
+	if (!swig::check<value_type>(item))
 	  return false;
-	}
       }
       return true;
     }
@@ -419,7 +417,7 @@ namespace swig
 }
 }
 
-/** 
+/* 
  * Macros used to typemap an STL iterator -> SWIGIterator conversion.
  */
 %define %swig_sequence_iterator(Sequence...)
@@ -545,7 +543,7 @@ namespace swig
 %enddef
 
 
-/**
+/*
  * Macro used to define common Ruby printing methods for STL container
  */
 %define %swig_sequence_printing_methods(Sequence...)
@@ -604,7 +602,7 @@ namespace swig
 %enddef
 
 
-/**
+/*
  * Macro used to add common methods to all STL sequence-type containers 
  */
 %define %swig_sequence_methods_non_resizable_common(Sequence...)
@@ -634,7 +632,7 @@ namespace swig
       try {
 	r = swig::from< const Sequence* >( swig::getslice(self, i, j) );
       }
-      catch( std::out_of_range ) {
+      catch( const std::out_of_range& ) {
       }
       return r;
     }
@@ -680,7 +678,7 @@ namespace swig
 	{
 	  VALUE v = swig::from< Sequence::value_type >(*i);
 	  if ( RTEST( rb_yield(v) ) )
-	    $self->insert( r->end(), *i);
+	    r->insert( r->end(), *i);
 	}
 	
       return r;
@@ -693,9 +691,8 @@ namespace swig
 	r = swig::from< Sequence::value_type >( *(at) );
 	$self->erase(at); 
       }
-      catch (std::out_of_range)
-	{
-	}
+      catch (const std::out_of_range&) {
+      }
       return r;
     }
   }
@@ -706,7 +703,7 @@ namespace swig
   %swig_sequence_methods_resizable_common(%arg(Sequence))
 %enddef
 
-/**
+/*
  * Macro used to add functions for back insertion of values in
  * STL sequence containers
  */
@@ -763,7 +760,7 @@ namespace swig
       try {
 	r = swig::from< Sequence::value_type >( *(swig::cgetpos(self, i)) );
       }
-      catch( std::out_of_range ) {
+      catch( const std::out_of_range& ) {
       }
       return r;
     }
@@ -786,7 +783,7 @@ namespace swig
       try {
 	r = swig::from< const Sequence* >( swig::getslice(self, i, j) );
       }
-      catch( std::out_of_range ) {
+      catch( const std::out_of_range& ) {
       }
       return r;
     }
@@ -796,7 +793,7 @@ namespace swig
       try {
 	r = swig::from< Sequence::value_type >( *(swig::cgetpos(self, i)) );
       }
-      catch( std::out_of_range ) {
+      catch( const std::out_of_range& ) {
       }
       return r;
     }
@@ -810,9 +807,9 @@ namespace swig
       static ID id_start = rb_intern("begin");
       static ID id_noend = rb_intern("exclude_end?");
 
-      VALUE start = rb_funcall( i, id_start, 0 );
-      VALUE end   = rb_funcall( i, id_end, 0 );
-      bool  noend = ( rb_funcall( i, id_noend, 0 ) == Qtrue );
+      VALUE start = rb_funcall2( i, id_start, 0, 0 );
+      VALUE end   = rb_funcall2( i, id_end, 0, 0 );
+      bool  noend = ( rb_funcall2( i, id_noend, 0, 0 ) == Qtrue );
 
       int len = $self->size();
 
@@ -844,7 +841,7 @@ namespace swig
 	return swig::from< Sequence::value_type >( x );
       }
 
-    VALUE __setitem__(difference_type i, difference_type length, const Sequence& v) throw (std::invalid_argument) {
+    VALUE __setitem__(difference_type i, difference_type length, const Sequence& is) throw (std::invalid_argument) {
 
       if ( length < 0 )
         return Qnil;
@@ -856,19 +853,19 @@ namespace swig
           i = len + i;
       }
       Sequence::difference_type j = length + i;
-      if ( j > static_cast<Sequence::difference_type>(len) ) {
-        swig::resize( $self, j, *(v.begin()) );
+      if ( j > static_cast<Sequence::difference_type>(len) && is.size() > 0 ) {
+        swig::resize( $self, j, *(is.begin()) );
       }
 
       VALUE r = Qnil;
-      swig::setslice($self, i, j, v);
-      r = swig::from< const Sequence* >( &v );
+      swig::setslice($self, i, j, is);
+      r = swig::from< const Sequence* >( &is );
       return r;
     }
  }
 %enddef
 
-/**
+/*
  * Macro used to add functions for non resizable sequences
  */
 %define %swig_sequence_methods_non_resizable(Sequence...)
@@ -877,7 +874,7 @@ namespace swig
 %enddef
 
 
-/**
+/*
  * Macro used to add functions for sequences
  */
 %define %swig_sequence_methods(Sequence...)
@@ -897,7 +894,7 @@ namespace swig
 %enddef
 
 
-/**
+/*
  * Macro used to add functions for front insertion of
  * elements in STL sequence containers that support it.
  */
@@ -1023,7 +1020,7 @@ namespace swig {
 	  } else {
 	    return rubyseq.check() ? SWIG_OK : SWIG_ERROR;
 	  }
-	} catch (std::exception& e) {
+	} catch (const std::exception& e) {
 	  if (seq) {
 	    VALUE lastErr = rb_gv_get("$!");
 	    if (lastErr == Qnil) {
@@ -1063,7 +1060,7 @@ namespace swig {
 	  } else {
 	    return true;
 	  }
-	} catch (std::exception& e) {
+	} catch (const std::exception& e) {
 	  if (seq) {
 	    VALUE lastErr = rb_gv_get("$!");
 	    if (lastErr == Qnil) {

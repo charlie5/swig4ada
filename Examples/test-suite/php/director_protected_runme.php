@@ -1,11 +1,12 @@
 <?php
 
 require "tests.php";
-require "director_protected.php";
 
-check::functions(array('foo_pong','foo_s','foo_q','foo_ping','foo_pang','foo_used','foo_cheer','bar_create','bar_callping','bar_callcheer','bar_cheer','bar_pong','bar_used','bar_ping','bar_pang','a_draw','b_draw'));
-check::classes(array('Foo','Bar','PrivateFoo','A','B','AA','BB'));
-check::globals(array('bar_a'));
+// No new functions
+check::functions(array());
+check::classes(array('Foo','Bar','PrivateFoo','A','B','AA','BB','NestedBase','NestedOuter'));
+// No new vars
+check::globals(array());
 
 class FooBar extends Bar {
   protected function ping() {
@@ -66,5 +67,9 @@ check::equal($fb2->callcheer(), "FooBar2::pang();Bar::pong();Foo::pong();FooBar2
 check::equal($fb3->callping(), "Bar::ping();", "bad fb3::callping");
 check::equal($fb3->callcheer(), "FooBar3::cheer();", "bad fb3::callcheer");
 
+// NestedDerived is never wrapped (protected nested class); check identify() still dispatches to it.
+$outer = new NestedOuter();
+$base = $outer->makeDerived();
+check::equal($base->identify(), 1, "bad NestedOuter::makeDerived()->identify()");
+
 check::done();
-?>

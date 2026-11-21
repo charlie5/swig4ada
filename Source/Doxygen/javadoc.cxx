@@ -4,7 +4,7 @@
  * terms also apply to certain portions of SWIG. The full details of the SWIG
  * license and copyrights can be found in the LICENSE and COPYRIGHT files
  * included with the SWIG source code as distributed by the SWIG developers
- * and at http://www.swig.org/legal.html.
+ * and at https://www.swig.org/legal.html.
  *
  * javadoc.cxx
  * ----------------------------------------------------------------------------- */
@@ -15,19 +15,19 @@
 #include <vector>
 #include <list>
 #include "swigmod.h"
-#define APPROX_LINE_LENGTH 64   // characters per line allowed
-#define TAB_SIZE 8              // current tab size in spaces
-//TODO {@link} {@linkplain} {@docRoot}, and other useful doxy commands that are not a javadoc tag
+#define APPROX_LINE_LENGTH 64  // characters per line allowed
+#define TAB_SIZE           8   // current tab size in spaces
+// TODO {@link} {@linkplain} {@docRoot}, and other useful doxy commands that are not a javadoc tag
 
 // define static tables, they are filled in JavaDocConverter's constructor
 std::map<std::string, std::pair<JavaDocConverter::tagHandler, std::string> > JavaDocConverter::tagHandlers;
 
-using std::string;
 using std::list;
+using std::string;
 using std::vector;
 
 void JavaDocConverter::fillStaticTables() {
-  if (tagHandlers.size()) // fill only once
+  if (tagHandlers.size())  // fill only once
     return;
 
   /*
@@ -114,8 +114,8 @@ void JavaDocConverter::fillStaticTables() {
   tagHandlers["result"] = make_pair(&JavaDocConverter::handleTagSame, "return");
   tagHandlers["return"] = make_pair(&JavaDocConverter::handleTagSame, "");
   tagHandlers["returns"] = make_pair(&JavaDocConverter::handleTagSame, "return");
-  //tagHandlers["see"] = make_pair(&JavaDocConverter::handleTagSame, "");
-  //tagHandlers["sa"] = make_pair(&JavaDocConverter::handleTagSame, "see");
+  // tagHandlers["see"] = make_pair(&JavaDocConverter::handleTagSame, "");
+  // tagHandlers["sa"] = make_pair(&JavaDocConverter::handleTagSame, "see");
   tagHandlers["since"] = make_pair(&JavaDocConverter::handleTagSame, "");
   tagHandlers["throws"] = make_pair(&JavaDocConverter::handleTagSame, "");
   tagHandlers["throw"] = make_pair(&JavaDocConverter::handleTagSame, "throws");
@@ -139,7 +139,8 @@ void JavaDocConverter::fillStaticTables() {
   tagHandlers["note"] = make_pair(&JavaDocConverter::handleTagMessage, "Note: ");
   tagHandlers["overload"] = make_pair(&JavaDocConverter::handleTagMessage,
                                       "This is an overloaded member function, provided for"
-                                      " convenience. It differs from the above function only in what" " argument(s) it accepts.");
+                                      " convenience. It differs from the above function only in what"
+                                      " argument(s) it accepts.");
   tagHandlers["par"] = make_pair(&JavaDocConverter::handleTagPar, "");
   tagHandlers["remark"] = make_pair(&JavaDocConverter::handleTagMessage, "Remarks: ");
   tagHandlers["remarks"] = make_pair(&JavaDocConverter::handleTagMessage, "Remarks: ");
@@ -152,7 +153,7 @@ void JavaDocConverter::fillStaticTables() {
   tagHandlers["f{"] = make_pair(&JavaDocConverter::handleTagVerbatim, "");
 
   tagHandlers["warning"] = make_pair(&JavaDocConverter::handleTagMessage, "Warning: ");
-  // this command just prints it's contents
+  // this command just prints its contents
   // (it is internal command of swig's parser, contains plain text)
   tagHandlers["plainstd::string"] = make_pair(&JavaDocConverter::handlePlainString, "");
   tagHandlers["plainstd::endl"] = make_pair(&JavaDocConverter::handleNewLine, "");
@@ -227,12 +228,11 @@ void JavaDocConverter::fillStaticTables() {
   tagHandlers["&rarr"] = make_pair(&JavaDocConverter::handleHtmlEntity, "&rarr");
 }
 
-JavaDocConverter::JavaDocConverter(int flags) :
-  DoxygenTranslator(flags) {
+JavaDocConverter::JavaDocConverter(int flags) : DoxygenTranslator(flags) {
   fillStaticTables();
 }
 
-/**
+/*
  * Formats comment lines by inserting '\n *' at to long lines and tabs for
  * indent. Currently it is disabled, which means original comment format is
  * preserved. Experience shows, that this is usually better than breaking
@@ -242,7 +242,7 @@ JavaDocConverter::JavaDocConverter(int flags) :
  */
 std::string JavaDocConverter::formatCommand(std::string unformattedLine, int indent) {
   std::string formattedLines;
-  return unformattedLine; // currently disabled
+  return unformattedLine;  // currently disabled
   std::string::size_type lastPosition = 0;
   std::string::size_type i = 0;
   int isFirstLine = 1;
@@ -254,18 +254,18 @@ std::string JavaDocConverter::formatCommand(std::string unformattedLine, int ind
       i += APPROX_LINE_LENGTH - indent * TAB_SIZE;
     }
 
-    i = unformattedLine.find(" ", i);
+    i = unformattedLine.find(' ', i);
 
     if (i > 0 && i + 1 < unformattedLine.length()) {
       if (!isFirstLine)
         for (int j = 0; j < indent; j++) {
           formattedLines.append("\t");
-      } else {
+        }
+      else {
         isFirstLine = 0;
       }
       formattedLines.append(unformattedLine.substr(lastPosition, i - lastPosition + 1));
       formattedLines.append("\n *");
-
     }
   }
   if (lastPosition < unformattedLine.length()) {
@@ -280,7 +280,7 @@ std::string JavaDocConverter::formatCommand(std::string unformattedLine, int ind
   return formattedLines;
 }
 
-/**
+/*
  * Returns true, if the given parameter exists in the current node
  * (for example param is a name of function parameter). If feature
  * 'doxygen:nostripparams' is set, then this method always returns
@@ -303,7 +303,7 @@ bool JavaDocConverter::paramExists(std::string param) {
     /* doesn't seem to work always: in some cases (especially for 'self' parameters)
      * tmap:in is present, but tmap:in:next is not and so this code skips all the parameters
      */
-    //p = Getattr(p, "tmap:in") ? Getattr(p, "tmap:in:next") : nextSibling(p);
+    // p = Getattr(p, "tmap:in") ? Getattr(p, "tmap:in:next") : nextSibling(p);
     p = nextSibling(p);
   }
 
@@ -328,13 +328,13 @@ std::string JavaDocConverter::translateSubtree(DoxygenEntity &doxygenEntity) {
   return translatedComment;
 }
 
-/**
+/*
  * Checks if a handler for the given tag exists, and calls it.
  */
 void JavaDocConverter::translateEntity(DoxygenEntity &tag, std::string &translatedComment) {
 
   std::map<std::string, std::pair<tagHandler, std::string> >::iterator it;
-  it = tagHandlers.find(tag.typeOfEntity);
+  it = tagHandlers.find(getBaseCommand(tag.typeOfEntity));
 
   if (it != tagHandlers.end()) {
     (this->*(it->second.first))(tag, translatedComment, it->second.second);
@@ -345,14 +345,12 @@ void JavaDocConverter::translateEntity(DoxygenEntity &tag, std::string &translat
   }
 }
 
-
 void JavaDocConverter::handleTagAnchor(DoxygenEntity &tag, std::string &translatedComment, std::string &) {
   translatedComment += "<a id=\"" + translateSubtree(tag) + "\"></a>";
 }
 
-
 void JavaDocConverter::handleTagHtml(DoxygenEntity &tag, std::string &translatedComment, std::string &arg) {
-  if (tag.entityList.size()) { // do not include empty tags
+  if (tag.entityList.size()) {  // do not include empty tags
     std::string tagData = translateSubtree(tag);
     // wrap the thing, ignoring whitespace
     size_t wsPos = tagData.find_last_not_of("\n\t ");
@@ -463,7 +461,11 @@ void JavaDocConverter::handleTagImage(DoxygenEntity &tag, std::string &translate
   if (it != tag.entityList.end())
     title = it->data;
 
-  translatedComment += "<img src=" + file;
+  translatedComment += "<img src=";
+  if (file.size() >= 2 && file[0] == '"' && file[file.size() - 1] == '"')
+    translatedComment += file;
+  else
+    translatedComment += "\"" + file + "\"";
   if (title.size())
     translatedComment += " alt=" + title;
 
@@ -484,7 +486,6 @@ void JavaDocConverter::handleTagPar(DoxygenEntity &tag, std::string &translatedC
   translatedComment += "</p>";
 }
 
-
 void JavaDocConverter::handleTagParam(DoxygenEntity &tag, std::string &translatedComment, std::string &) {
   std::string dummy;
 
@@ -499,13 +500,12 @@ void JavaDocConverter::handleTagParam(DoxygenEntity &tag, std::string &translate
   handleParagraph(tag, translatedComment, dummy);
 }
 
-
 void JavaDocConverter::handleTagRef(DoxygenEntity &tag, std::string &translatedComment, std::string &) {
   std::string dummy;
   if (!tag.entityList.size())
     return;
 
-  // we translate to link, although \page is not supported in Java, but 
+  // we translate to link, although \page is not supported in Java, but
   // reader at least knows what to look at. Also for \anchor tag on the same
   // page this link works.
   string anchor = tag.entityList.begin()->data;
@@ -517,7 +517,6 @@ void JavaDocConverter::handleTagRef(DoxygenEntity &tag, std::string &translatedC
   translatedComment += "<a href=\"#" + anchor + "\">" + anchorText + "</a>";
 }
 
-
 string JavaDocConverter::convertLink(string linkObject) {
   if (GetFlag(currentNode, "feature:doxygen:nolinktranslate"))
     return linkObject;
@@ -527,8 +526,7 @@ string JavaDocConverter::convertLink(string linkObject) {
   if (lbracePos == string::npos || rbracePos == string::npos || lbracePos >= rbracePos)
     return "";
 
-  string paramsStr = linkObject.substr(lbracePos + 1,
-                                       rbracePos - lbracePos - 1);
+  string paramsStr = linkObject.substr(lbracePos + 1, rbracePos - lbracePos - 1);
   // strip the params, to fill them later
   string additionalObject = linkObject.substr(rbracePos + 1, string::npos);
   linkObject = linkObject.substr(0, lbracePos);
@@ -593,7 +591,7 @@ string JavaDocConverter::convertLink(string linkObject) {
     Swig_typemap_attach_parms("jstype", dummyParam, NULL);
     Language::instance()->replaceSpecialVariables(0, Getattr(dummyParam, "tmap:jstype"), dummyParam);
 
-    //Swig_print(dummyParam, 1);
+    // Swig_print(dummyParam, 1);
     linkObject += Char(Getattr(dummyParam, "tmap:jstype"));
     if (i != params.size() - 1)
       linkObject += ",";
@@ -700,15 +698,14 @@ int JavaDocConverter::shiftEndlinesUpTree(DoxygenEntity &root, int level) {
   }
 
   int removedCount = 0;
-  while (!root.entityList.empty()
-         && root.entityList.rbegin()->typeOfEntity == "plainstd::endl") {
+  while (!root.entityList.empty() && root.entityList.rbegin()->typeOfEntity == "plainstd::endl") {
     root.entityList.pop_back();
     removedCount++;
   }
   return removedCount;
 }
 
-/**
+/*
  * This makes sure that all comment lines contain '*'. It is not mandatory in doxygen,
  * but highly recommended for Javadoc. '*' in empty lines are indented according
  * to indentation of the first line. Indentation of non-empty lines is not
@@ -756,7 +753,7 @@ std::string JavaDocConverter::indentAndInsertAsterisks(const string &doc) {
       if (translatedStr[nonspaceIdx] != '\n') {
         // add '* ' to each line without it
         translatedStr = translatedStr.substr(0, nonspaceIdx) + "* " + translatedStr.substr(nonspaceIdx);
-        //printf(translatedStr.c_str());
+        // printf(translatedStr.c_str());
       } else {
         // we found empty line, replace it with indented '*'
         translatedStr = translatedStr.substr(0, idx + 1) + indentStr + "* " + translatedStr.substr(nonspaceIdx);
@@ -770,7 +767,7 @@ std::string JavaDocConverter::indentAndInsertAsterisks(const string &doc) {
   if (nonspaceEndIdx != string::npos) {
     if (translatedStr[nonspaceEndIdx] != '\n') {
       if (!singleLineComment)
-	translatedStr += '\n';
+        translatedStr += '\n';
     } else {
       // remove trailing spaces
       translatedStr = translatedStr.substr(0, nonspaceEndIdx + 1);
@@ -817,14 +814,12 @@ String *JavaDocConverter::makeDocumentation(Node *node) {
   shiftEndlinesUpTree(root);
 
   // strip line endings at the beginning
-  while (!root.entityList.empty()
-         && root.entityList.begin()->typeOfEntity == "plainstd::endl") {
+  while (!root.entityList.empty() && root.entityList.begin()->typeOfEntity == "plainstd::endl") {
     root.entityList.pop_front();
   }
 
   // and at the end
-  while (!root.entityList.empty()
-         && root.entityList.rbegin()->typeOfEntity == "plainstd::endl") {
+  while (!root.entityList.empty() && root.entityList.rbegin()->typeOfEntity == "plainstd::endl") {
     root.entityList.pop_back();
   }
 

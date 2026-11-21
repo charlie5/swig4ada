@@ -1,10 +1,10 @@
 /* -----------------------------------------------------------------------------
- * This file is part of SWIG, which is licensed as a whole under version 3 
+ * This file is part of SWIG, which is licensed as a whole under version 3
  * (or any later version) of the GNU General Public License. Some additional
  * terms also apply to certain portions of SWIG. The full details of the SWIG
  * license and copyrights can be found in the LICENSE and COPYRIGHT files
  * included with the SWIG source code as distributed by the SWIG developers
- * and at http://www.swig.org/legal.html.
+ * and at https://www.swig.org/legal.html.
  *
  * string.c
  *
@@ -19,11 +19,11 @@ extern DohObjInfo DohStringType;
 typedef struct String {
   DOH *file;
   int line;
-  int maxsize;			/* Max size allocated */
-  int len;			/* Current length     */
-  int hashkey;			/* Hash key value     */
-  int sp;			/* Current position   */
-  char *str;			/* String data        */
+  int maxsize; /* Max size allocated */
+  int len;     /* Current length     */
+  int hashkey; /* Hash key value     */
+  int sp;      /* Current position   */
+  char *str;   /* String data        */
 } String;
 
 /* -----------------------------------------------------------------------------
@@ -31,9 +31,9 @@ typedef struct String {
  * ----------------------------------------------------------------------------- */
 
 static void *String_data(DOH *so) {
-  String *s = (String *) ObjData(so);
+  String *s = (String *)ObjData(so);
   s->str[s->len] = 0;
-  return (void *) s->str;
+  return (void *)s->str;
 }
 
 /* static char *String_char(DOH *so) {
@@ -48,7 +48,7 @@ static void *String_data(DOH *so) {
 static int String_dump(DOH *so, DOH *out) {
   int nsent;
   int ret;
-  String *s = (String *) ObjData(so);
+  String *s = (String *)ObjData(so);
   nsent = 0;
   while (nsent < s->len) {
     ret = Write(out, s->str + nsent, (s->len - nsent));
@@ -65,15 +65,15 @@ static int String_dump(DOH *so, DOH *out) {
 
 static DOH *CopyString(DOH *so) {
   String *str;
-  String *s = (String *) ObjData(so);
-  str = (String *) DohMalloc(sizeof(String));
+  String *s = (String *)ObjData(so);
+  str = (String *)DohMalloc(sizeof(String));
   str->hashkey = s->hashkey;
   str->sp = s->sp;
   str->line = s->line;
   str->file = s->file;
   if (str->file)
     Incref(str->file);
-  str->str = (char *) DohMalloc(s->len + 1);
+  str->str = (char *)DohMalloc(s->len + 1);
   memcpy(str->str, s->str, s->len);
   str->maxsize = s->len;
   str->len = s->len;
@@ -87,7 +87,7 @@ static DOH *CopyString(DOH *so) {
  * ----------------------------------------------------------------------------- */
 
 static void DelString(DOH *so) {
-  String *s = (String *) ObjData(so);
+  String *s = (String *)ObjData(so);
   DohFree(s->str);
   DohFree(s);
 }
@@ -97,10 +97,9 @@ static void DelString(DOH *so) {
  * ----------------------------------------------------------------------------- */
 
 static int String_len(DOH *so) {
-  String *s = (String *) ObjData(so);
+  String *s = (String *)ObjData(so);
   return s->len;
 }
-
 
 /* -----------------------------------------------------------------------------
  * String_cmp() - Compare two strings
@@ -110,8 +109,8 @@ static int String_cmp(DOH *so1, DOH *so2) {
   String *s1, *s2;
   char *c1, *c2;
   int maxlen, i;
-  s1 = (String *) ObjData(so1);
-  s2 = (String *) ObjData(so2);
+  s1 = (String *)ObjData(so1);
+  s2 = (String *)ObjData(so2);
   maxlen = s1->len;
   if (s2->len < maxlen)
     maxlen = s2->len;
@@ -139,8 +138,8 @@ static int String_cmp(DOH *so1, DOH *so2) {
  * ----------------------------------------------------------------------------- */
 
 static int String_equal(DOH *so1, DOH *so2) {
-  String *s1 = (String *) ObjData(so1);
-  String *s2 = (String *) ObjData(so2);
+  String *s1 = (String *)ObjData(so1);
+  String *s2 = (String *)ObjData(so2);
   int len = s1->len;
   if (len != s2->len) {
     return 0;
@@ -152,17 +151,17 @@ static int String_equal(DOH *so1, DOH *so2) {
     int i = mlen;
     for (; i; --i) {
       if (*(c1++) != *(c2++))
-	return 0;
+        return 0;
       if (*(c1++) != *(c2++))
-	return 0;
+        return 0;
       if (*(c1++) != *(c2++))
-	return 0;
+        return 0;
       if (*(c1++) != *(c2++))
-	return 0;
+        return 0;
     }
     for (i = len - (mlen << 2); i; --i) {
       if (*(c1++) != *(c2++))
-	return 0;
+        return 0;
     }
     return 1;
 #else
@@ -176,23 +175,31 @@ static int String_equal(DOH *so1, DOH *so2) {
  * ----------------------------------------------------------------------------- */
 
 static int String_hash(DOH *so) {
-  String *s = (String *) ObjData(so);
+  String *s = (String *)ObjData(so);
   if (s->hashkey >= 0) {
     return s->hashkey;
   } else {
-    char *c = s->str;
+    /* We use the djb2 hash function: https://theartincode.stanis.me/008-djb2/
+     *
+     * One difference is we use initial seed 0.  It seems the usual seed value
+     * is intended to help spread out hash values, which is beneficial if
+     * linear probing is used but DOH Hash uses a chain of buckets instead, and
+     * grouped hash values are probably more cache friendly.  In tests using
+     * 0 seems slightly faster anyway.
+     */
+    const char *c = s->str;
     unsigned int len = s->len > 50 ? 50 : s->len;
     unsigned int h = 0;
     unsigned int mlen = len >> 2;
     unsigned int i = mlen;
     for (; i; --i) {
-      h = (h << 5) + *(c++);
-      h = (h << 5) + *(c++);
-      h = (h << 5) + *(c++);
-      h = (h << 5) + *(c++);
+      h = h + (h << 5) + *(c++);
+      h = h + (h << 5) + *(c++);
+      h = h + (h << 5) + *(c++);
+      h = h + (h << 5) + *(c++);
     }
     for (i = len - (mlen << 2); i; --i) {
-      h = (h << 5) + *(c++);
+      h = h + (h << 5) + *(c++);
     }
     h &= 0x7fffffff;
     s->hashkey = (int)h;
@@ -207,16 +214,16 @@ static int String_hash(DOH *so) {
 static void DohString_append(DOH *so, const DOHString_or_char *str) {
   int oldlen, newlen, newmaxsize, l, sp;
   char *tc;
-  String *s = (String *) ObjData(so);
+  String *s = (String *)ObjData(so);
   char *newstr = 0;
 
   if (DohCheck(str)) {
-    String *ss = (String *) ObjData(str);
-    newstr = (char *) String_data((DOH *) str);
+    String *ss = (String *)ObjData(str);
+    newstr = (char *)String_data((DOH *)str);
     l = ss->len;
   } else {
-    newstr = (char *) (str);
-    l = (int) strlen(newstr);
+    newstr = (char *)(str);
+    l = (int)strlen(newstr);
   }
   if (!newstr)
     return;
@@ -228,8 +235,7 @@ static void DohString_append(DOH *so, const DOHString_or_char *str) {
     newmaxsize = 2 * s->maxsize;
     if (newlen >= newmaxsize - 1)
       newmaxsize = newlen + 1;
-    s->str = (char *) DohRealloc(s->str, newmaxsize);
-    assert(s->str);
+    s->str = (char *)DohRealloc(s->str, newmaxsize);
     s->maxsize = newmaxsize;
   }
   tc = s->str;
@@ -240,25 +246,25 @@ static void DohString_append(DOH *so, const DOHString_or_char *str) {
     tc += sp;
     for (; i; --i) {
       if (*(tc++) == '\n')
-	s->line++;
+        s->line++;
     }
     s->sp = oldlen + l;
   }
   s->len += l;
 }
 
-
 /* -----------------------------------------------------------------------------
- * String_clear() - Clear a string
+ * String_clear() - Clear string contents
+ *
+ * File and line numbering info left unmodified.
  * ----------------------------------------------------------------------------- */
 
 static void String_clear(DOH *so) {
-  String *s = (String *) ObjData(so);
+  String *s = (String *)ObjData(so);
   s->hashkey = -1;
   s->len = 0;
   *(s->str) = 0;
   s->sp = 0;
-  s->line = 1;
 }
 
 /* -----------------------------------------------------------------------------
@@ -275,16 +281,15 @@ static int String_insert(DOH *so, int pos, DOH *str) {
     return 0;
   }
 
-
-  s = (String *) ObjData(so);
+  s = (String *)ObjData(so);
   s->hashkey = -1;
   if (DohCheck(str)) {
-    String *ss = (String *) ObjData(str);
-    data = (char *) String_data(str);
+    String *ss = (String *)ObjData(str);
+    data = (char *)String_data(str);
     len = ss->len;
   } else {
-    data = (char *) (str);
-    len = (int) strlen(data);
+    data = (char *)(str);
+    len = (int)strlen(data);
   }
 
   if (pos < 0)
@@ -295,8 +300,7 @@ static int String_insert(DOH *so, int pos, DOH *str) {
   /* See if there is room to insert the new data */
   while (s->maxsize <= s->len + len) {
     int newsize = 2 * s->maxsize;
-    s->str = (char *) DohRealloc(s->str, newsize);
-    assert(s->str);
+    s->str = (char *)DohRealloc(s->str, newsize);
     s->maxsize = newsize;
   }
   memmove(s->str + pos + len, s->str + pos, (s->len - pos));
@@ -306,7 +310,7 @@ static int String_insert(DOH *so, int pos, DOH *str) {
 
     for (i = 0; i < len; i++) {
       if (data[i] == '\n')
-	s->line++;
+        s->line++;
     }
     s->sp += len;
   }
@@ -320,7 +324,7 @@ static int String_insert(DOH *so, int pos, DOH *str) {
  * ----------------------------------------------------------------------------- */
 
 static int String_delitem(DOH *so, int pos) {
-  String *s = (String *) ObjData(so);
+  String *s = (String *)ObjData(so);
   s->hashkey = -1;
   if (pos == DOH_END)
     pos = s->len - 1;
@@ -346,7 +350,7 @@ static int String_delitem(DOH *so, int pos) {
  * ----------------------------------------------------------------------------- */
 
 static int String_delslice(DOH *so, int sindex, int eindex) {
-  String *s = (String *) ObjData(so);
+  String *s = (String *)ObjData(so);
   int size;
   if (s->len == 0)
     return 0;
@@ -369,7 +373,7 @@ static int String_delslice(DOH *so, int sindex, int eindex) {
     }
     for (i = sindex; i < end; i++) {
       if (s->str[i] == '\n')
-	s->line--;
+        s->line--;
     }
     assert(s->sp >= 0);
   }
@@ -384,7 +388,7 @@ static int String_delslice(DOH *so, int sindex, int eindex) {
  * ----------------------------------------------------------------------------- */
 
 static DOH *String_str(DOH *so) {
-  String *s = (String *) ObjData(so);
+  String *s = (String *)ObjData(so);
   s->str[s->len] = 0;
   return NewString(s->str);
 }
@@ -396,13 +400,13 @@ static DOH *String_str(DOH *so) {
 static int String_read(DOH *so, void *buffer, int len) {
   int reallen, retlen;
   char *cb;
-  String *s = (String *) ObjData(so);
+  String *s = (String *)ObjData(so);
   if ((s->sp + len) > s->len)
     reallen = (s->len - s->sp);
   else
     reallen = len;
 
-  cb = (char *) buffer;
+  cb = (char *)buffer;
   retlen = reallen;
 
   if (reallen > 0) {
@@ -417,14 +421,13 @@ static int String_read(DOH *so, void *buffer, int len) {
  * ----------------------------------------------------------------------------- */
 static int String_write(DOH *so, const void *buffer, int len) {
   int newlen;
-  String *s = (String *) ObjData(so);
+  String *s = (String *)ObjData(so);
   s->hashkey = -1;
   if (s->sp > s->len)
     s->sp = s->len;
   newlen = s->sp + len + 1;
   if (newlen > s->maxsize) {
-    s->str = (char *) DohRealloc(s->str, newlen);
-    assert(s->str);
+    s->str = (char *)DohRealloc(s->str, newlen);
     s->maxsize = newlen;
     s->len = s->sp + len;
   }
@@ -442,7 +445,7 @@ static int String_write(DOH *so, const void *buffer, int len) {
 
 static int String_seek(DOH *so, long offset, int whence) {
   int pos, nsp, inc;
-  String *s = (String *) ObjData(so);
+  String *s = (String *)ObjData(so);
   if (whence == SEEK_SET)
     pos = 0;
   else if (whence == SEEK_CUR)
@@ -469,7 +472,7 @@ static int String_seek(DOH *so, long offset, int whence) {
     while (sp != nsp) {
       int prev = sp + inc;
       if (prev >= 0 && prev <= len && tc[prev] == '\n')
-	s->line += inc;
+        s->line += inc;
       sp += inc;
     }
 #else
@@ -477,13 +480,13 @@ static int String_seek(DOH *so, long offset, int whence) {
     char *tc = s->str;
     if (inc > 0) {
       while (sp != nsp) {
-	if (tc[++sp] == '\n')
-	  ++s->line;
+        if (tc[++sp] == '\n')
+          ++s->line;
       }
     } else {
       while (sp != nsp) {
-	if (tc[--sp] == '\n')
-	  --s->line;
+        if (tc[--sp] == '\n')
+          --s->line;
       }
     }
 #endif
@@ -498,8 +501,8 @@ static int String_seek(DOH *so, long offset, int whence) {
  * ----------------------------------------------------------------------------- */
 
 static long String_tell(DOH *so) {
-  String *s = (String *) ObjData(so);
-  return (long) (s->sp);
+  String *s = (String *)ObjData(so);
+  return (long)(s->sp);
 }
 
 /* -----------------------------------------------------------------------------
@@ -507,7 +510,7 @@ static long String_tell(DOH *so) {
  * ----------------------------------------------------------------------------- */
 
 static int String_putc(DOH *so, int ch) {
-  String *s = (String *) ObjData(so);
+  String *s = (String *)ObjData(so);
   int len = s->len;
   int sp = s->sp;
   s->hashkey = -1;
@@ -516,17 +519,16 @@ static int String_putc(DOH *so, int ch) {
     char *tc = s->str;
     if (len > (maxsize - 2)) {
       maxsize *= 2;
-      tc = (char *) DohRealloc(tc, maxsize);
-      assert(tc);
-      s->maxsize = (int) maxsize;
+      tc = (char *)DohRealloc(tc, maxsize);
+      s->maxsize = (int)maxsize;
       s->str = tc;
     }
     tc += sp;
-    *tc = (char) ch;
+    *tc = (char)ch;
     *(++tc) = 0;
     s->len = s->sp = sp + 1;
   } else {
-    s->str[s->sp++] = (char) ch;
+    s->str[s->sp++] = (char)ch;
   }
   if (ch == '\n')
     s->line++;
@@ -539,11 +541,11 @@ static int String_putc(DOH *so, int ch) {
 
 static int String_getc(DOH *so) {
   int c;
-  String *s = (String *) ObjData(so);
+  String *s = (String *)ObjData(so);
   if (s->sp >= s->len)
     c = EOF;
   else
-    c = (int)(unsigned char) s->str[s->sp++];
+    c = (int)(unsigned char)s->str[s->sp++];
   if (c == '\n')
     s->line++;
   return c;
@@ -554,7 +556,7 @@ static int String_getc(DOH *so) {
  * ----------------------------------------------------------------------------- */
 
 static int String_ungetc(DOH *so, int ch) {
-  String *s = (String *) ObjData(so);
+  String *s = (String *)ObjData(so);
   if (ch == EOF)
     return ch;
   if (s->sp <= 0)
@@ -578,8 +580,8 @@ static char *end_quote(char *s) {
     if (nl && (nl < q)) {
       /* A new line appears before the end of the string */
       if (*(nl - 1) == '\\') {
-	s = nl + 1;
-	continue;
+        s = nl + 1;
+        continue;
       }
       /* String was terminated by a newline.  Wing it */
       return qs;
@@ -595,9 +597,16 @@ static char *end_quote(char *s) {
   }
 }
 
+static char *end_comment(char *s) {
+  char *substring = strstr(s, "*/");
+  if (substring)
+    ++substring;
+  return substring;
+}
+
 static char *match_simple(char *base, char *s, char *token, int tokenlen) {
-  (void) base;
-  (void) tokenlen;
+  (void)base;
+  (void)tokenlen;
   return strstr(s, token);
 }
 
@@ -606,12 +615,14 @@ static char *match_identifier(char *base, char *s, char *token, int tokenlen) {
     s = strstr(s, token);
     if (!s)
       return 0;
-    if ((s > base) && (isalnum((int) *(s - 1)) || (*(s - 1) == '_'))) {
-      s += tokenlen;
+    if ((s > base) && (isalnum((int)*(s - 1)) || (*(s - 1) == '_'))) {
+      /* We could advance by tokenlen if strstr(s, token) matches can't overlap. */
+      ++s;
       continue;
     }
-    if (isalnum((int) *(s + tokenlen)) || (*(s + tokenlen) == '_')) {
-      s += tokenlen;
+    if (isalnum((int)*(s + tokenlen)) || (*(s + tokenlen) == '_')) {
+      /* We could advance by tokenlen if strstr(s, token) matches can't overlap. */
+      ++s;
       continue;
     }
     return s;
@@ -619,14 +630,15 @@ static char *match_identifier(char *base, char *s, char *token, int tokenlen) {
   return 0;
 }
 
-
 static char *match_identifier_begin(char *base, char *s, char *token, int tokenlen) {
+  (void)tokenlen;
   while (s) {
     s = strstr(s, token);
     if (!s)
       return 0;
-    if ((s > base) && (isalnum((int) *(s - 1)) || (*(s - 1) == '_'))) {
-      s += tokenlen;
+    if ((s > base) && (isalnum((int)*(s - 1)) || (*(s - 1) == '_'))) {
+      /* We could advance by tokenlen if strstr(s, token) matches can't overlap. */
+      ++s;
       continue;
     }
     return s;
@@ -635,13 +647,14 @@ static char *match_identifier_begin(char *base, char *s, char *token, int tokenl
 }
 
 static char *match_identifier_end(char *base, char *s, char *token, int tokenlen) {
-  (void) base;
+  (void)base;
   while (s) {
     s = strstr(s, token);
     if (!s)
       return 0;
-    if (isalnum((int) *(s + tokenlen)) || (*(s + tokenlen) == '_')) {
-      s += tokenlen;
+    if (isalnum((int)*(s + tokenlen)) || (*(s + tokenlen) == '_')) {
+      /* We could advance by tokenlen if strstr(s, token) matches can't overlap. */
+      ++s;
       continue;
     }
     return s;
@@ -650,13 +663,14 @@ static char *match_identifier_end(char *base, char *s, char *token, int tokenlen
 }
 
 static char *match_number_end(char *base, char *s, char *token, int tokenlen) {
-  (void) base;
+  (void)base;
   while (s) {
     s = strstr(s, token);
     if (!s)
       return 0;
-    if (isdigit((int) *(s + tokenlen))) {
-      s += tokenlen;
+    if (isdigit((int)*(s + tokenlen))) {
+      /* We could advance by tokenlen if strstr(s, token) matches can't overlap. */
+      ++s;
       continue;
     }
     return s;
@@ -667,16 +681,17 @@ static char *match_number_end(char *base, char *s, char *token, int tokenlen) {
 /* -----------------------------------------------------------------------------
  * replace_simple()
  *
- * Replaces count non-overlapping occurrences of token with rep in a string.   
+ * Replaces count non-overlapping occurrences of token with rep in a string.
  * ----------------------------------------------------------------------------- */
 
-static int replace_simple(String *str, char *token, char *rep, int flags, int count, char *(*match) (char *, char *, char *, int)) {
-  int tokenlen;			/* Length of the token */
-  int replen;			/* Length of the replacement */
+static int replace_simple(String *str, char *token, char *rep, int flags, int count, char *(*match)(char *, char *, char *, int)) {
+  int tokenlen; /* Length of the token */
+  int replen;   /* Length of the replacement */
   int delta, expand = 0;
   int ic;
   int rcount = 0;
   int noquote = 0;
+  int nocomment = 0;
   char *c, *s, *t, *first;
   char *q, *q2;
   char *base;
@@ -688,37 +703,67 @@ static int replace_simple(String *str, char *token, char *rep, int flags, int co
 
   base = str->str;
   tokenlen = (int)strlen(token);
-  s = (*match) (base, base, token, tokenlen);
+  s = (*match)(base, base, token, tokenlen);
 
   if (!s)
-    return 0;			/* No matches.  Who cares */
+    return 0; /* No matches.  Who cares */
 
   str->hashkey = -1;
 
   if (flags & DOH_REPLACE_NOQUOTE)
     noquote = 1;
 
+  if (flags & DOH_REPLACE_NOCOMMENT)
+    nocomment = 1;
+
+  assert(!(noquote && nocomment)); /* quote and comment combination not implemented */
+
   /* If we are not replacing inside quotes, we need to do a little extra work */
   if (noquote) {
     q = strpbrk(base, "\"\'");
     if (!q) {
-      noquote = 0;		/* Well, no quotes to worry about. Oh well */
+      noquote = 0; /* Well, no quotes to worry about. Oh well */
     } else {
       while (q && (q < s)) {
-	/* First match was found inside a quote.  Try to find another match */
-	q2 = end_quote(q);
-	if (!q2) {
-	  return 0;
-	}
-	if (q2 > s) {
-	  /* Find next match */
-	  s = (*match) (base, q2 + 1, token, tokenlen);
-	}
-	if (!s)
-	  return 0;		/* Oh well, no matches */
-	q = strpbrk(q2 + 1, "\"\'");
-	if (!q)
-	  noquote = 0;		/* No more quotes */
+        /* First match was found inside a quote.  Try to find another match */
+        q2 = end_quote(q);
+        if (!q2) {
+          return 0;
+        }
+        if (q2 > s) {
+          /* Find next match */
+          s = (*match)(base, q2 + 1, token, tokenlen);
+        }
+        if (!s)
+          return 0; /* Oh well, no matches */
+        q = strpbrk(q2 + 1, "\"\'");
+        if (!q)
+          noquote = 0; /* No more quotes */
+      }
+    }
+  }
+
+  /* If we are not replacing inside comments, we need to do a little extra work */
+  if (nocomment) {
+    q = strstr(base, "/*");
+    if (!q) {
+      nocomment = 0; /* Well, no comments to worry about. Oh well */
+    } else {
+      while (q && (q < s)) {
+        /* First match was found inside a comment.  Try to find another match */
+        q2 = end_comment(q);
+        if (!q2) {
+          return 0;
+        }
+        if (q2 > s) {
+          /* Find next match */
+          s = (*match)(base, q2 + 1, token, tokenlen);
+        }
+        if (!s)
+          return 0; /* Oh well, no matches */
+        q = strstr(q2 + 1, "/*");
+        if (!q)
+          nocomment = 0; /* No more comments */
       }
     }
   }
@@ -732,51 +777,75 @@ static int replace_simple(String *str, char *token, char *rep, int flags, int co
     /* String is either shrinking or staying the same size */
     /* In this case, we do the replacement in place without memory reallocation */
     ic = count;
-    t = s;			/* Target of memory copies */
+    t = s; /* Target of memory copies */
     while (ic && s) {
       if (replen) {
-	memcpy(t, rep, replen);
-	t += replen;
+        memcpy(t, rep, replen);
+        t += replen;
       }
       rcount++;
       expand += delta;
       /* Find the next location */
       s += tokenlen;
       if (ic == 1)
-	break;
-      c = (*match) (base, s, token, tokenlen);
+        break;
+      c = (*match)(base, s, token, tokenlen);
 
       if (noquote) {
-	q = strpbrk(s, "\"\'");
-	if (!q) {
-	  noquote = 0;
-	} else {
-	  while (q && (q < c)) {
-	    /* First match was found inside a quote.  Try to find another match */
-	    q2 = end_quote(q);
-	    if (!q2) {
-	      c = 0;
-	      break;
-	    }
-	    if (q2 > c)
-	      c = (*match) (base, q2 + 1, token, tokenlen);
-	    if (!c)
-	      break;
-	    q = strpbrk(q2 + 1, "\"\'");
-	    if (!q)
-	      noquote = 0;	/* No more quotes */
-	  }
-	}
+        q = strpbrk(s, "\"\'");
+        if (!q) {
+          noquote = 0;
+        } else {
+          while (q && (q < c)) {
+            /* First match was found inside a quote.  Try to find another match */
+            q2 = end_quote(q);
+            if (!q2) {
+              c = 0;
+              break;
+            }
+            if (q2 > c)
+              c = (*match)(base, q2 + 1, token, tokenlen);
+            if (!c)
+              break;
+            q = strpbrk(q2 + 1, "\"\'");
+            if (!q)
+              noquote = 0; /* No more quotes */
+          }
+        }
+      }
+      if (nocomment) {
+        q = strstr(s, "/*");
+        if (!q) {
+          nocomment = 0;
+        } else {
+          while (q && (q < c)) {
+            /* First match was found inside a comment.  Try to find another match */
+            q2 = end_comment(q);
+            if (!q2) {
+              c = 0;
+              break;
+            }
+            if (q2 > c)
+              c = (*match)(base, q2 + 1, token, tokenlen);
+            if (!c)
+              break;
+            q = strstr(q2 + 1, "/*");
+            if (!q)
+              nocomment = 0; /* No more comments */
+          }
+        }
       }
       if (delta) {
-	if (c) {
-	  memmove(t, s, c - s);
-	  t += (c - s);
-	} else {
-	  memmove(t, s, (str->str + str->len) - s + 1);
-	}
+        if (c) {
+          memmove(t, s, c - s);
+          t += (c - s);
+        } else {
+          memmove(t, s, (str->str + str->len) - s + 1);
+        }
       } else {
-	t += (c - s);
+        if (c) {
+          t += (c - s);
+        }
       }
       s = c;
       ic--;
@@ -787,7 +856,7 @@ static int replace_simple(String *str, char *token, char *rep, int flags, int co
     str->len += expand;
     str->str[str->len] = 0;
     if (str->sp >= str->len)
-      str->sp += expand;	/* Fix the end of file pointer */
+      str->sp += expand; /* Fix the end of file pointer */
     return rcount;
   }
   /* The string is expanding as a result of the replacement */
@@ -799,46 +868,68 @@ static int replace_simple(String *str, char *token, char *rep, int flags, int co
     rcount++;
     ic = count - 1;
     s += tokenlen;
-    while (ic && (c = (*match) (base, s, token, tokenlen))) {
+    while (ic && (c = (*match)(base, s, token, tokenlen))) {
       if (noquote) {
-	q = strpbrk(s, "\"\'");
-	if (!q) {
-	  break;
-	} else {
-	  while (q && (q < c)) {
-	    /* First match was found inside a quote.  Try to find another match */
-	    q2 = end_quote(q);
-	    if (!q2) {
-	      c = 0;
-	      break;
-	    }
-	    if (q2 > c) {
-	      c = (*match) (base, q2 + 1, token, tokenlen);
-	      if (!c)
-		break;
-	    }
-	    q = strpbrk(q2 + 1, "\"\'");
-	    if (!q)
-	      noquote = 0;
-	  }
-	}
+        q = strpbrk(s, "\"\'");
+        if (!q) {
+          break;
+        } else {
+          while (q && (q < c)) {
+            /* First match was found inside a quote.  Try to find another match */
+            q2 = end_quote(q);
+            if (!q2) {
+              c = 0;
+              break;
+            }
+            if (q2 > c) {
+              c = (*match)(base, q2 + 1, token, tokenlen);
+              if (!c)
+                break;
+            }
+            q = strpbrk(q2 + 1, "\"\'");
+            if (!q)
+              noquote = 0;
+          }
+        }
+      }
+      if (nocomment) {
+        q = strstr(s, "/*");
+        if (!q) {
+          break;
+        } else {
+          while (q && (q < c)) {
+            /* First match was found inside a comment.  Try to find another match */
+            q2 = end_comment(q);
+            if (!q2) {
+              c = 0;
+              break;
+            }
+            if (q2 > c) {
+              c = (*match)(base, q2 + 1, token, tokenlen);
+              if (!c)
+                break;
+            }
+            q = strstr(q2 + 1, "/*");
+            if (!q)
+              nocomment = 0;
+          }
+        }
       }
       if (c) {
-	rcount++;
-	ic--;
-	s = c + tokenlen;
+        rcount++;
+        ic--;
+        s = c + tokenlen;
       } else {
-	break;
+        break;
       }
     }
 
-    expand = delta * rcount;	/* Total amount of expansion for the replacement */
+    expand = delta * rcount; /* Total amount of expansion for the replacement */
     newsize = str->maxsize;
     while ((str->len + expand) >= newsize)
       newsize *= 2;
 
-    ns = (char *) DohMalloc(newsize);
-    assert(ns);
+    ns = (char *)DohMalloc(newsize);
     t = ns;
     s = first;
 
@@ -851,35 +942,58 @@ static int replace_simple(String *str, char *token, char *rep, int flags, int co
       memcpy(t, rep, replen);
       t += replen;
       s += tokenlen;
-      c = (*match) (base, s, token, tokenlen);
+      c = (*match)(base, s, token, tokenlen);
       if (noquote) {
-	q = strpbrk(s, "\"\'");
-	if (!q) {
-	  noquote = 0;
-	} else {
-	  while (q && (q < c)) {
-	    /* First match was found inside a quote.  Try to find another match */
-	    q2 = end_quote(q);
-	    if (!q2) {
-	      c = 0;
-	      break;
-	    }
-	    if (q2 > c) {
-	      c = (*match) (base, q2 + 1, token, tokenlen);
-	      if (!c)
-		break;
-	    }
-	    q = strpbrk(q2 + 1, "\"\'");
-	    if (!q)
-	      noquote = 0;	/* No more quotes */
-	  }
-	}
+        q = strpbrk(s, "\"\'");
+        if (!q) {
+          noquote = 0;
+        } else {
+          while (q && (q < c)) {
+            /* First match was found inside a quote.  Try to find another match */
+            q2 = end_quote(q);
+            if (!q2) {
+              c = 0;
+              break;
+            }
+            if (q2 > c) {
+              c = (*match)(base, q2 + 1, token, tokenlen);
+              if (!c)
+                break;
+            }
+            q = strpbrk(q2 + 1, "\"\'");
+            if (!q)
+              noquote = 0; /* No more quotes */
+          }
+        }
+      }
+      if (nocomment) {
+        q = strstr(s, "/*");
+        if (!q) {
+          nocomment = 0;
+        } else {
+          while (q && (q < c)) {
+            /* First match was found inside a comment.  Try to find another match */
+            q2 = end_comment(q);
+            if (!q2) {
+              c = 0;
+              break;
+            }
+            if (q2 > c) {
+              c = (*match)(base, q2 + 1, token, tokenlen);
+              if (!c)
+                break;
+            }
+            q = strstr(q2 + 1, "/*");
+            if (!q)
+              nocomment = 0; /* No more comments */
+          }
+        }
       }
       if (i < (rcount - 1)) {
-	memcpy(t, s, c - s);
-	t += (c - s);
+        memcpy(t, s, c - s);
+        t += (c - s);
       } else {
-	memcpy(t, s, (str->str + str->len) - s + 1);
+        memcpy(t, s, (str->str + str->len) - s + 1);
       }
       s = c;
     }
@@ -901,7 +1015,7 @@ static int replace_simple(String *str, char *token, char *rep, int flags, int co
 
 static int String_replace(DOH *stro, const DOHString_or_char *token, const DOHString_or_char *rep, int flags) {
   int count = -1;
-  String *str = (String *) ObjData(stro);
+  String *str = (String *)ObjData(stro);
 
   if (flags & DOH_REPLACE_FIRST)
     count = 1;
@@ -925,14 +1039,14 @@ static int String_replace(DOH *stro, const DOHString_or_char *token, const DOHSt
 
 static void String_chop(DOH *so) {
   char *c;
-  String *str = (String *) ObjData(so);
+  String *str = (String *)ObjData(so);
   /* Replace trailing whitespace */
   c = str->str + str->len - 1;
-  while ((str->len > 0) && (isspace((int) *c))) {
+  while ((str->len > 0) && (isspace((int)*c))) {
     if (str->sp >= str->len) {
       str->sp--;
       if (*c == '\n')
-	str->line--;
+        str->line--;
     }
     str->len--;
     c--;
@@ -944,7 +1058,7 @@ static void String_chop(DOH *so) {
 
 static void String_setfile(DOH *so, DOH *file) {
   DOH *fo;
-  String *str = (String *) ObjData(so);
+  String *str = (String *)ObjData(so);
 
   if (!DohCheck(file)) {
     fo = NewString(file);
@@ -957,26 +1071,26 @@ static void String_setfile(DOH *so, DOH *file) {
 }
 
 static DOH *String_getfile(DOH *so) {
-  String *str = (String *) ObjData(so);
+  String *str = (String *)ObjData(so);
   return str->file;
 }
 
 static void String_setline(DOH *so, int line) {
-  String *str = (String *) ObjData(so);
+  String *str = (String *)ObjData(so);
   str->line = line;
 }
 
 static int String_getline(DOH *so) {
-  String *str = (String *) ObjData(so);
+  String *str = (String *)ObjData(so);
   return str->line;
 }
 
 static DohListMethods StringListMethods = {
-  0,				/* doh_getitem */
-  0,				/* doh_setitem */
-  String_delitem,		/* doh_delitem */
-  String_insert,		/* doh_insitem */
-  String_delslice,		/* doh_delslice */
+  0,               /* doh_getitem */
+  0,               /* doh_setitem */
+  String_delitem,  /* doh_delitem */
+  String_insert,   /* doh_insitem */
+  String_delslice, /* doh_delslice */
 };
 
 static DohFileMethods StringFileMethods = {
@@ -987,7 +1101,6 @@ static DohFileMethods StringFileMethods = {
   String_ungetc,
   String_seek,
   String_tell,
-  0,				/* close */
 };
 
 static DohStringMethods StringStringMethods = {
@@ -996,33 +1109,32 @@ static DohStringMethods StringStringMethods = {
 };
 
 DohObjInfo DohStringType = {
-  "String",			/* objname */
-  DelString,			/* doh_del */
-  CopyString,			/* doh_copy */
-  String_clear,			/* doh_clear */
-  String_str,			/* doh_str */
-  String_data,			/* doh_data */
-  String_dump,			/* doh_dump */
-  String_len,	    	        /* doh_len */
-  String_hash,			/* doh_hash    */
-  String_cmp,			/* doh_cmp */
-  String_equal,	    	        /* doh_equal */
-  0,				/* doh_first    */
-  0,				/* doh_next     */
-  String_setfile,		/* doh_setfile */
-  String_getfile,		/* doh_getfile */
-  String_setline,		/* doh_setline */
-  String_getline,		/* doh_getline */
-  0,				/* doh_mapping */
-  &StringListMethods,		/* doh_sequence */
-  &StringFileMethods,		/* doh_file */
-  &StringStringMethods,		/* doh_string */
-  0,				/* doh_position */
-  0
+  "String",             /* objname */
+  DelString,            /* doh_del */
+  CopyString,           /* doh_copy */
+  String_clear,         /* doh_clear */
+  String_str,           /* doh_str */
+  String_data,          /* doh_data */
+  String_dump,          /* doh_dump */
+  String_len,           /* doh_len */
+  String_hash,          /* doh_hash    */
+  String_cmp,           /* doh_cmp */
+  String_equal,         /* doh_equal */
+  0,                    /* doh_first    */
+  0,                    /* doh_next     */
+  String_setfile,       /* doh_setfile */
+  String_getfile,       /* doh_getfile */
+  String_setline,       /* doh_setline */
+  String_getline,       /* doh_getline */
+  0,                    /* doh_mapping */
+  &StringListMethods,   /* doh_sequence */
+  &StringFileMethods,   /* doh_file */
+  &StringStringMethods, /* doh_string */
+  0,                    /* doh_reserved */
+  0,                    /* clientdata */
 };
 
-
-#define INIT_MAXSIZE  16
+#define INIT_MAXSIZE 16
 
 /* -----------------------------------------------------------------------------
  * NewString() - Create a new string
@@ -1034,26 +1146,26 @@ DOHString *DohNewString(const DOHString_or_char *so) {
   char *s;
   int hashkey = -1;
   if (DohCheck(so)) {
-    str = (String *) ObjData(so);
-    s = (char *) String_data((String *) so);
+    str = (String *)ObjData(so);
+    s = (char *)String_data((String *)so);
     l = s ? str->len : 0;
     hashkey = str->hashkey;
   } else {
-    s = (char *) so;
-    l = s ? (int) strlen(s) : 0;
+    s = (char *)so;
+    l = s ? (int)strlen(s) : 0;
   }
 
-  str = (String *) DohMalloc(sizeof(String));
+  str = (String *)DohMalloc(sizeof(String));
   str->hashkey = hashkey;
   str->sp = 0;
-  str->line = 1;
+  str->line = 0;
   str->file = 0;
   max = INIT_MAXSIZE;
   if (s) {
     if ((l + 1) > max)
       max = l + 1;
   }
-  str->str = (char *) DohMalloc(max);
+  str->str = (char *)DohMalloc(max);
   str->maxsize = max;
   if (s) {
     strcpy(str->str, s);
@@ -1066,19 +1178,18 @@ DOHString *DohNewString(const DOHString_or_char *so) {
   return DohObjMalloc(&DohStringType, str);
 }
 
-
 /* -----------------------------------------------------------------------------
  * NewStringEmpty() - Create a new string
  * ----------------------------------------------------------------------------- */
 
 DOHString *DohNewStringEmpty(void) {
   int max = INIT_MAXSIZE;
-  String *str = (String *) DohMalloc(sizeof(String));
+  String *str = (String *)DohMalloc(sizeof(String));
   str->hashkey = 0;
   str->sp = 0;
-  str->line = 1;
+  str->line = 0;
   str->file = 0;
-  str->str = (char *) DohMalloc(max);
+  str->str = (char *)DohMalloc(max);
   str->maxsize = max;
   str->str[0] = 0;
   str->len = 0;
@@ -1094,26 +1205,26 @@ DOHString *DohNewStringWithSize(const DOHString_or_char *so, int len) {
   String *str;
   char *s;
   if (DohCheck(so)) {
-    s = (char *) String_data((String *) so);
+    s = (char *)String_data((String *)so);
   } else {
-    s = (char *) so;
+    s = (char *)so;
   }
 
-  str = (String *) DohMalloc(sizeof(String));
+  str = (String *)DohMalloc(sizeof(String));
   str->hashkey = -1;
   str->sp = 0;
-  str->line = 1;
+  str->line = 0;
   str->file = 0;
   max = INIT_MAXSIZE;
   if (s) {
-    l = (int) len;
+    l = (int)len;
     if ((l + 1) > max)
       max = l + 1;
   }
-  str->str = (char *) DohMalloc(max);
+  str->str = (char *)DohMalloc(max);
   str->maxsize = max;
   if (s) {
-    strncpy(str->str, s, len);
+    memcpy(str->str, s, len);
     str->str[l] = 0;
     str->len = l;
     str->sp = l;
@@ -1137,7 +1248,7 @@ DOHString *DohNewStringf(const DOHString_or_char *fmt, ...) {
   r = NewStringEmpty();
   DohvPrintf(r, Char(fmt), ap);
   va_end(ap);
-  return (DOHString *) r;
+  return (DOHString *)r;
 }
 
 /* -----------------------------------------------------------------------------

@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 30;
+use Test::More tests => 31;
 BEGIN { use_ok('li_std_string') }
 require_ok('li_std_string');
 
@@ -24,7 +24,7 @@ is(li_std_string::test_const_reference("Fum"), "Fum", "Test 3");
 
 # Verify type-checking for %typemap(in) const std::string & {}
 eval { li_std_string::test_const_reference(undef) };
-like($@, qr/\bValueError\b/, "Test 4");
+like($@, qr/\bNullReferenceError\b/, "Test 4");
 
 #
 # Input and output typemaps for pointers and non-const references to
@@ -77,6 +77,7 @@ is(li_std_string::test_reference_input("hello"), "hello", "reference_input");
 
 is(li_std_string::test_reference_inout("hello"), "hellohello", "reference_inout");
 
+is(li_std_string::test_reference_output(), "output", "reference_output");
 
 no strict;
 my $gen1 = new li_std_string::Foo();
@@ -100,14 +101,14 @@ is($gen1->testl("9234567890121111113"), "9234567890121111114", "ulonglong big nu
 
 is(li_std_string::stdstring_empty(), "", "stdstring_empty");
 
-is(li_std_string::c_empty(),  "", "c_empty");
+is(li_std_string::c_empty(), "", "c_empty");
 
 
-is(li_std_string::c_null(), undef, "c_empty");
+is(li_std_string::c_null(), undef, "c_null");
 
 
-is(li_std_string::get_null(li_std_string::c_null()), undef, "c_empty");
+is(li_std_string::get_null(li_std_string::c_null()), undef, "get_null c_null");
 
-is(li_std_string::get_null(li_std_string::c_empty()), "non-null", "c_empty");
+is(li_std_string::get_null(li_std_string::c_empty()), "non-null", "get_null c_empty");
 
-is(li_std_string::get_null(li_std_string::stdstring_empty()), "non-null", "stdstring_empty");
+is(li_std_string::get_null(li_std_string::stdstring_empty()), "non-null", "get_null stdstring_empty");

@@ -1,10 +1,10 @@
 /* -----------------------------------------------------------------------------
- * This file is part of SWIG, which is licensed as a whole under version 3 
+ * This file is part of SWIG, which is licensed as a whole under version 3
  * (or any later version) of the GNU General Public License. Some additional
  * terms also apply to certain portions of SWIG. The full details of the SWIG
  * license and copyrights can be found in the LICENSE and COPYRIGHT files
  * included with the SWIG source code as distributed by the SWIG developers
- * and at http://www.swig.org/legal.html.
+ * and at https://www.swig.org/legal.html.
  *
  * stype.c
  *
@@ -20,7 +20,7 @@
  * Synopsis
  *
  * The purpose of this module is to provide a general purpose type representation
- * based on simple text strings. 
+ * based on simple text strings.
  *
  * General idea:
  *
@@ -38,14 +38,20 @@
  *        p.q(const).char                 char const *
  *
  * All type constructors are denoted by a trailing '.':
- * 
+ *
  *  'p.'                = Pointer (*)
  *  'r.'                = Reference (&)
  *  'z.'                = Rvalue reference (&&)
+ *  'v.'                = Variadic (...)
  *  'a(n).'             = Array of size n  [n]
  *  'f(..,..).'         = Function with arguments  (args)
  *  'q(str).'           = Qualifier, such as const or volatile (cv-qualifier)
  *  'm(cls).'           = Pointer to member (cls::*)
+ *  'auto.'             = C++20 constrained placeholder marker, always paired
+ *                        with a 'c(<id>)' base, e.g. 'auto.c(Numeric)'
+ *                        represents 'Numeric auto'.
+ *  'c(<id>)'           = Base carrying the concept-id of a C++20
+ *                        constrained 'Concept auto' placeholder.
  *
  * The encoding follows the order that you might describe a type in words.
  * For example "p.a(200).int" is "A pointer to array of int's" and
@@ -82,7 +88,7 @@
  * characters (*, [, <, etc...) in its type encoding.  One reason for this
  * is that SWIG might be extended to encode data in formats such as XML
  * where you might want to do this:
- * 
+ *
  *      <function>
  *         <type>p.p.int</type>
  *         ...
@@ -100,79 +106,68 @@
  * this pretty easy.
  *
  * Why not use a bunch of nested data structures?  Are you kidding? How
- * would that be easier to use than a few simple string operations? 
+ * would that be easier to use than a few simple string operations?
  * ----------------------------------------------------------------------------- */
-
 
 SwigType *NewSwigType(int t) {
   switch (t) {
   case T_BOOL:
     return NewString("bool");
-    break;
+  case T_UNKNOWN:
+    /* Handle like T_INT since we used to just use T_INT where we now use
+     * T_UNKNOWN.
+     */
   case T_INT:
     return NewString("int");
-    break;
   case T_UINT:
     return NewString("unsigned int");
-    break;
   case T_SHORT:
     return NewString("short");
-    break;
   case T_USHORT:
     return NewString("unsigned short");
-    break;
   case T_LONG:
     return NewString("long");
-    break;
   case T_ULONG:
     return NewString("unsigned long");
-    break;
   case T_FLOAT:
     return NewString("float");
-    break;
   case T_DOUBLE:
     return NewString("double");
-    break;
+  case T_LONGDOUBLE:
+    return NewString("long double");
+  case T_FLTCPLX:
+    return NewString("float _Complex");
   case T_COMPLEX:
-    return NewString("complex");
-    break;
+    return NewString("_Complex");
   case T_CHAR:
     return NewString("char");
-    break;
   case T_SCHAR:
     return NewString("signed char");
-    break;
   case T_UCHAR:
     return NewString("unsigned char");
-    break;
-  case T_STRING: {
+  case T_STRING:
+    {
       SwigType *t = NewString("char");
       SwigType_add_qualifier(t, "const");
       SwigType_add_pointer(t);
       return t;
-      break;
     }
   case T_WCHAR:
     return NewString("wchar_t");
-    break;
-  case T_WSTRING: {
-    SwigType *t = NewString("wchar_t");
-    SwigType_add_pointer(t);
-    return t;
-    break;
-  }
+  case T_WSTRING:
+    {
+      SwigType *t = NewString("wchar_t");
+      SwigType_add_pointer(t);
+      return t;
+    }
   case T_LONGLONG:
     return NewString("long long");
-    break;
   case T_ULONGLONG:
     return NewString("unsigned long long");
-    break;
   case T_VOID:
     return NewString("void");
-    break;
   case T_AUTO:
     return NewString("auto");
-    break;
   default:
     break;
   }
@@ -260,8 +255,12 @@ int SwigType_isconst(const SwigType *t) {
 int SwigType_ismutable(const SwigType *t) {
   int r;
   SwigType *qt = SwigType_typedef_resolve_all(t);
-  if (SwigType_isreference(qt) || SwigType_isrvalue_reference(qt) || SwigType_isarray(qt)) {
+  if (SwigType_isreference(qt) || SwigType_isrvalue_reference(qt)) {
     Delete(SwigType_pop(qt));
+  } else {
+    while (SwigType_isarray(qt)) {
+      Delete(SwigType_pop(qt));
+    }
   }
   r = SwigType_isconst(qt);
   Delete(qt);
@@ -287,11 +286,11 @@ int SwigType_issimple(const SwigType *t) {
       int nest = 1;
       c++;
       while (*c && nest) {
-	if (*c == '<')
-	  nest++;
-	if (*c == '>')
-	  nest--;
-	c++;
+        if (*c == '<')
+          nest++;
+        if (*c == '>')
+          nest--;
+        c++;
       }
       c--;
     }
@@ -349,28 +348,28 @@ SwigType *SwigType_default_create(const SwigType *ty) {
     numitems = Len(l);
 
     if (numitems >= 1) {
-      String *last_subtype = Getitem(l, numitems-1);
+      String *last_subtype = Getitem(l, numitems - 1);
       if (SwigType_isenum(last_subtype))
-	Setitem(l, numitems-1, NewString("enum SWIGTYPE"));
+        Setitem(l, numitems - 1, NewString("enum SWIGTYPE"));
       else
-	Setitem(l, numitems-1, NewString("SWIGTYPE"));
+        Setitem(l, numitems - 1, NewString("SWIGTYPE"));
     }
 
     for (it = First(l); it.item; it = Next(it)) {
       String *subtype = it.item;
       if (SwigType_isarray(subtype)) {
-	if (Equal(subtype, "a()."))
-	  Append(r, NewString("a()."));
-	else
-	  Append(r, NewString("a(ANY)."));
+        if (Equal(subtype, "a()."))
+          Append(r, NewString("a()."));
+        else
+          Append(r, NewString("a(ANY)."));
       } else if (SwigType_isfunction(subtype)) {
-	Append(r, NewString("f(ANY).SWIGTYPE"));
-	break;
+        Append(r, NewString("f(ANY).SWIGTYPE"));
+        break;
       } else if (SwigType_ismemberpointer(subtype)) {
-	Append(r, NewString("m(CLASS).SWIGTYPE"));
-	break;
+        Append(r, NewString("m(CLASS).SWIGTYPE"));
+        break;
       } else {
-	Append(r, subtype);
+        Append(r, subtype);
       }
     }
 
@@ -425,45 +424,45 @@ SwigType *SwigType_default_deduce(const SwigType *t) {
 
   numitems = Len(l);
   if (numitems >= 1) {
-    String *last_subtype = Getitem(l, numitems-1);
+    String *last_subtype = Getitem(l, numitems - 1);
     int is_enum = SwigType_isenum(last_subtype);
 
-    if (numitems >=2 ) {
-      String *subtype = Getitem(l, numitems-2); /* last but one */
+    if (numitems >= 2) {
+      String *subtype = Getitem(l, numitems - 2); /* last but one */
       if (SwigType_isarray(subtype)) {
-	if (is_enum) {
-	  /* enum deduction, enum SWIGTYPE => SWIGTYPE */
-	  Setitem(l, numitems-1, NewString("SWIGTYPE"));
-	} else {
-	  /* array deduction, a(ANY). => a(). => p. */
-	  String *deduced_subtype = 0;
-	  if (Strcmp(subtype, "a().") == 0) {
-	    deduced_subtype = NewString("p.");
-	  } else if (Strcmp(subtype, "a(ANY).") == 0) {
-	    deduced_subtype = NewString("a().");
-	  } else {
-	    assert(0);
-	  }
-	  Setitem(l, numitems-2, deduced_subtype);
-	}
+        if (is_enum) {
+          /* enum deduction, enum SWIGTYPE => SWIGTYPE */
+          Setitem(l, numitems - 1, NewString("SWIGTYPE"));
+        } else {
+          /* array deduction, a(ANY). => a(). => p. */
+          String *deduced_subtype = 0;
+          if (Strcmp(subtype, "a().") == 0) {
+            deduced_subtype = NewString("p.");
+          } else if (Strcmp(subtype, "a(ANY).") == 0) {
+            deduced_subtype = NewString("a().");
+          } else {
+            assert(0);
+          }
+          Setitem(l, numitems - 2, deduced_subtype);
+        }
       } else if (SwigType_ismemberpointer(subtype)) {
-	/* member pointer deduction, m(CLASS). => p. */
-	Setitem(l, numitems-2, NewString("p."));
+        /* member pointer deduction, m(CLASS). => p. */
+        Setitem(l, numitems - 2, NewString("p."));
       } else if (is_enum && !SwigType_isqualifier(subtype)) {
-	/* enum deduction, enum SWIGTYPE => SWIGTYPE */
-	Setitem(l, numitems-1, NewString("SWIGTYPE"));
+        /* enum deduction, enum SWIGTYPE => SWIGTYPE */
+        Setitem(l, numitems - 1, NewString("SWIGTYPE"));
       } else {
-	/* simple type deduction, eg, r.p.p. => r.p. */
-	/* also function pointers eg, p.f(ANY). => p. */
-	Delitem(l, numitems-2);
+        /* simple type deduction, eg, r.p.p. => r.p. */
+        /* also function pointers eg, p.f(ANY). => p. */
+        Delitem(l, numitems - 2);
       }
     } else {
       if (is_enum) {
-	/* enum deduction, enum SWIGTYPE => SWIGTYPE */
-	Setitem(l, numitems-1, NewString("SWIGTYPE"));
+        /* enum deduction, enum SWIGTYPE => SWIGTYPE */
+        Setitem(l, numitems - 1, NewString("SWIGTYPE"));
       } else {
-	/* delete the only item, we are done with deduction */
-	Delitem(l, 0);
+        /* delete the only item, we are done with deduction */
+        Delitem(l, 0);
       }
     }
   } else {
@@ -482,7 +481,6 @@ SwigType *SwigType_default_deduce(const SwigType *t) {
   Delete(l);
   return r;
 }
-
 
 /* -----------------------------------------------------------------------------
  * SwigType_namestr()
@@ -549,7 +547,7 @@ String *SwigType_str(const SwigType *s, const_String_or_char_ptr id) {
   int nelements, i;
 
   if (id) {
-    /* stringify the id expanding templates, for example when the id is a fully qualified templated class name */
+    /* Stringify the id expanding templates, for example when the id is a fully qualified class template name */
     String *id_str = NewString(id); /* unfortunate copy due to current const limitations */
     result = SwigType_str(id_str, 0);
     Delete(id_str);
@@ -569,8 +567,8 @@ String *SwigType_str(const SwigType *s, const_String_or_char_ptr id) {
       nextelement = Getitem(elements, i + 1);
       forwardelement = nextelement;
       if (SwigType_isqualifier(nextelement)) {
-	if (i < (nelements - 2))
-	  forwardelement = Getitem(elements, i + 2);
+        if (i < (nelements - 2))
+          forwardelement = Getitem(elements, i + 2);
       }
     } else {
       nextelement = 0;
@@ -578,17 +576,17 @@ String *SwigType_str(const SwigType *s, const_String_or_char_ptr id) {
     }
     if (SwigType_isqualifier(element)) {
       if (!member_function_qualifiers) {
-	DOH *q = 0;
-	q = SwigType_parm(element);
-	Insert(result, 0, " ");
-	Insert(result, 0, q);
-	Delete(q);
+        DOH *q = 0;
+        q = SwigType_parm(element);
+        Insert(result, 0, " ");
+        Insert(result, 0, q);
+        Delete(q);
       }
     } else if (SwigType_ispointer(element)) {
       Insert(result, 0, "*");
       if ((forwardelement) && ((SwigType_isfunction(forwardelement) || (SwigType_isarray(forwardelement))))) {
-	Insert(result, 0, "(");
-	Append(result, ")");
+        Insert(result, 0, "(");
+        Append(result, ")");
       }
     } else if (SwigType_ismemberpointer(element)) {
       String *q;
@@ -596,34 +594,44 @@ String *SwigType_str(const SwigType *s, const_String_or_char_ptr id) {
       Insert(result, 0, "::*");
       Insert(result, 0, q);
       if ((forwardelement) && ((SwigType_isfunction(forwardelement) || (SwigType_isarray(forwardelement))))) {
-	Insert(result, 0, "(");
-	Append(result, ")");
+        Insert(result, 0, "(");
+        Append(result, ")");
       }
       {
-	String *next3elements = NewStringEmpty();
-	int j;
-	for (j = i + 1; j < i + 4 && j < nelements; j++) {
-	  Append(next3elements, Getitem(elements, j));
-	}
-	if (SwigType_isfunction(next3elements))
-	  member_function_qualifiers = SwigType_pop_function_qualifiers(next3elements);
-	Delete(next3elements);
+        String *next3elements = NewStringEmpty();
+        int j;
+        for (j = i + 1; j < i + 4 && j < nelements; j++) {
+          Append(next3elements, Getitem(elements, j));
+        }
+        if (SwigType_isfunction(next3elements))
+          member_function_qualifiers = SwigType_pop_function_qualifiers(next3elements);
+        Delete(next3elements);
       }
       Delete(q);
     } else if (SwigType_isreference(element)) {
       if (!member_function_qualifiers)
-	Insert(result, 0, "&");
+        Insert(result, 0, "&");
       if ((forwardelement) && ((SwigType_isfunction(forwardelement) || (SwigType_isarray(forwardelement))))) {
-	Insert(result, 0, "(");
-	Append(result, ")");
+        Insert(result, 0, "(");
+        Append(result, ")");
       }
     } else if (SwigType_isrvalue_reference(element)) {
       if (!member_function_qualifiers)
-	Insert(result, 0, "&&");
+        Insert(result, 0, "&&");
       if ((forwardelement) && ((SwigType_isfunction(forwardelement) || (SwigType_isarray(forwardelement))))) {
-	Insert(result, 0, "(");
-	Append(result, ")");
+        Insert(result, 0, "(");
+        Append(result, ")");
       }
+    } else if (SwigType_isvariadic(element)) {
+      Insert(result, 0, "...");
+      if ((forwardelement) && ((SwigType_isfunction(forwardelement) || (SwigType_isarray(forwardelement))))) {
+        Insert(result, 0, "(");
+        Append(result, ")");
+      }
+    } else if (strcmp(Char(element), "auto.") == 0) {
+      /* C++20 constrained placeholder marker, paired with a c(<id>) base. */
+      Insert(result, 0, " ");
+      Insert(result, 0, "auto");
     } else if (SwigType_isarray(element)) {
       DOH *size;
       Append(result, "[");
@@ -638,29 +646,37 @@ String *SwigType_str(const SwigType *s, const_String_or_char_ptr id) {
       parms = SwigType_parmlist(element);
       plen = Len(parms);
       for (j = 0; j < plen; j++) {
-	p = SwigType_str(Getitem(parms, j), 0);
-	Append(result, p);
-	if (j < (plen - 1))
-	  Append(result, ",");
+        p = SwigType_str(Getitem(parms, j), 0);
+        Append(result, p);
+        if (j < (plen - 1))
+          Append(result, ",");
       }
       Append(result, ")");
       if (member_function_qualifiers) {
-	String *p = SwigType_str(member_function_qualifiers, 0);
-	Append(result, " ");
-	Append(result, p);
-	Delete(p);
-	Delete(member_function_qualifiers);
-	member_function_qualifiers = 0;
+        String *p = SwigType_str(member_function_qualifiers, 0);
+        Append(result, " ");
+        Append(result, p);
+        Delete(p);
+        Delete(member_function_qualifiers);
+        member_function_qualifiers = 0;
       }
       Delete(parms);
     } else {
       if (strcmp(Char(element), "v(...)") == 0) {
-	Insert(result, 0, "...");
+        Insert(result, 0, "...");
+      } else if (SwigType_isconcept(element)) {
+        /* c(<id>) base - emit just the concept-id, expanding any inner template-id. */
+        String *cn = SwigType_parm(element);
+        String *cn_namestr = SwigType_namestr(cn);
+        Insert(result, 0, " ");
+        Insert(result, 0, cn_namestr);
+        Delete(cn_namestr);
+        Delete(cn);
       } else {
-	String *bs = SwigType_namestr(element);
-	Insert(result, 0, " ");
-	Insert(result, 0, bs);
-	Delete(bs);
+        String *bs = SwigType_namestr(element);
+        Insert(result, 0, " ");
+        Insert(result, 0, bs);
+        Delete(bs);
       }
     }
     element = nextelement;
@@ -698,12 +714,12 @@ SwigType *SwigType_ltype(const SwigType *s) {
     td = 0;
     while ((td = SwigType_typedef_resolve(tt))) {
       if (td && (SwigType_isconst(td) || SwigType_isarray(td) || SwigType_isreference(td) || SwigType_isrvalue_reference(td))) {
-	/* We need to use the typedef type */
-	Delete(tt);
-	break;
+        /* We need to use the typedef type */
+        Delete(tt);
+        break;
       } else if (td) {
-	Delete(tt);
-	tt = td;
+        Delete(tt);
+        tt = td;
       }
     }
     if (td) {
@@ -733,49 +749,49 @@ SwigType *SwigType_ltype(const SwigType *s) {
     } else if (SwigType_ismemberpointer(element)) {
       Append(result, element);
       {
-	String *next3elements = NewStringEmpty();
-	int j;
-	for (j = i + 1; j < i + 4 && j < nelements; j++) {
-	  Append(next3elements, Getitem(elements, j));
-	}
-	if (SwigType_isfunction(next3elements)) {
-	  SwigType *member_function_qualifiers = SwigType_pop_function_qualifiers(next3elements);
-	  /* compilers won't let us cast from a member function without qualifiers to one with qualifiers, so the qualifiers are kept in the ltype */
-	  if (member_function_qualifiers)
-	    Append(result, member_function_qualifiers);
-	  Delete(member_function_qualifiers);
-	  ignore_member_function_qualifiers = 1;
-	}
-	Delete(next3elements);
+        String *next3elements = NewStringEmpty();
+        int j;
+        for (j = i + 1; j < i + 4 && j < nelements; j++) {
+          Append(next3elements, Getitem(elements, j));
+        }
+        if (SwigType_isfunction(next3elements)) {
+          SwigType *member_function_qualifiers = SwigType_pop_function_qualifiers(next3elements);
+          /* compilers won't let us cast from a member function without qualifiers to one with qualifiers, so the qualifiers are kept in the ltype */
+          if (member_function_qualifiers)
+            Append(result, member_function_qualifiers);
+          Delete(member_function_qualifiers);
+          ignore_member_function_qualifiers = 1;
+        }
+        Delete(next3elements);
       }
       firstarray = 0;
     } else if (SwigType_isreference(element)) {
       if (notypeconv) {
-	Append(result, element);
+        Append(result, element);
       } else {
-	Append(result, "p.");
+        Append(result, "p.");
       }
       firstarray = 0;
     } else if (SwigType_isrvalue_reference(element)) {
       if (notypeconv) {
-	Append(result, element);
+        Append(result, element);
       } else {
-	Append(result, "p.");
+        Append(result, "p.");
       }
       firstarray = 0;
     } else if (SwigType_isarray(element) && firstarray) {
       if (notypeconv) {
-	Append(result, element);
+        Append(result, element);
       } else {
-	Append(result, "p.");
+        Append(result, "p.");
       }
       firstarray = 0;
     } else if (SwigType_isenum(element)) {
       int anonymous_enum = (Cmp(element, "enum ") == 0);
       if (notypeconv || !anonymous_enum) {
-	Append(result, element);
+        Append(result, element);
       } else {
-	Append(result, "int");
+        Append(result, "int");
       }
     } else {
       Append(result, element);
@@ -815,7 +831,7 @@ String *SwigType_lstr(const SwigType *s, const_String_or_char_ptr id) {
 /* -----------------------------------------------------------------------------
  * SwigType_rcaststr()
  *
- * Produces a casting string that maps the type returned by lstr() to the real 
+ * Produces a casting string that maps the type returned by lstr() to the real
  * datatype printed by str().
  * ----------------------------------------------------------------------------- */
 
@@ -851,6 +867,8 @@ String *SwigType_rcaststr(const SwigType *s, const_String_or_char_ptr name) {
     td = 0;
   } else {
     td = SwigType_typedef_resolve(rs);
+    if (td)
+      td = SwigType_typedef_resolve_all(td);
   }
 
   if (td) {
@@ -873,8 +891,8 @@ String *SwigType_rcaststr(const SwigType *s, const_String_or_char_ptr name) {
       nextelement = Getitem(elements, i + 1);
       forwardelement = nextelement;
       if (SwigType_isqualifier(nextelement)) {
-	if (i < (nelements - 2))
-	  forwardelement = Getitem(elements, i + 2);
+        if (i < (nelements - 2))
+          forwardelement = Getitem(elements, i + 2);
       }
     } else {
       nextelement = 0;
@@ -882,18 +900,18 @@ String *SwigType_rcaststr(const SwigType *s, const_String_or_char_ptr name) {
     }
     if (SwigType_isqualifier(element)) {
       if (!member_function_qualifiers) {
-	DOH *q = 0;
-	q = SwigType_parm(element);
-	Insert(result, 0, " ");
-	Insert(result, 0, q);
-	Delete(q);
-	clear = 0;
+        DOH *q = 0;
+        q = SwigType_parm(element);
+        Insert(result, 0, " ");
+        Insert(result, 0, q);
+        Delete(q);
+        clear = 0;
       }
     } else if (SwigType_ispointer(element)) {
       Insert(result, 0, "*");
       if ((forwardelement) && ((SwigType_isfunction(forwardelement) || (SwigType_isarray(forwardelement))))) {
-	Insert(result, 0, "(");
-	Append(result, ")");
+        Insert(result, 0, "(");
+        Append(result, ")");
       }
       firstarray = 0;
     } else if (SwigType_ismemberpointer(element)) {
@@ -902,54 +920,54 @@ String *SwigType_rcaststr(const SwigType *s, const_String_or_char_ptr name) {
       q = SwigType_parm(element);
       Insert(result, 0, q);
       if ((forwardelement) && ((SwigType_isfunction(forwardelement) || (SwigType_isarray(forwardelement))))) {
-	Insert(result, 0, "(");
-	Append(result, ")");
+        Insert(result, 0, "(");
+        Append(result, ")");
       }
       {
-	String *next3elements = NewStringEmpty();
-	int j;
-	for (j = i + 1; j < i + 4 && j < nelements; j++) {
-	  Append(next3elements, Getitem(elements, j));
-	}
-	if (SwigType_isfunction(next3elements))
-	  member_function_qualifiers = SwigType_pop_function_qualifiers(next3elements);
-	Delete(next3elements);
+        String *next3elements = NewStringEmpty();
+        int j;
+        for (j = i + 1; j < i + 4 && j < nelements; j++) {
+          Append(next3elements, Getitem(elements, j));
+        }
+        if (SwigType_isfunction(next3elements))
+          member_function_qualifiers = SwigType_pop_function_qualifiers(next3elements);
+        Delete(next3elements);
       }
       firstarray = 0;
       Delete(q);
     } else if (SwigType_isreference(element)) {
       if (!member_function_qualifiers) {
-	Insert(result, 0, "&");
-	if (!isfunction)
-	  isreference = 1;
+        Insert(result, 0, "&");
+        if (!isfunction)
+          isreference = 1;
       }
       if ((forwardelement) && ((SwigType_isfunction(forwardelement) || (SwigType_isarray(forwardelement))))) {
-	Insert(result, 0, "(");
-	Append(result, ")");
+        Insert(result, 0, "(");
+        Append(result, ")");
       }
     } else if (SwigType_isrvalue_reference(element)) {
       if (!member_function_qualifiers) {
-	Insert(result, 0, "&&");
-	if (!isfunction)
-	  isreference = 1;
+        Insert(result, 0, "&&");
+        if (!isfunction)
+          isreference = 1;
       }
       if ((forwardelement) && ((SwigType_isfunction(forwardelement) || (SwigType_isarray(forwardelement))))) {
-	Insert(result, 0, "(");
-	Append(result, ")");
+        Insert(result, 0, "(");
+        Append(result, ")");
       }
       clear = 0;
     } else if (SwigType_isarray(element)) {
       DOH *size;
       if (firstarray && !isreference) {
-	Append(result, "(*)");
-	firstarray = 0;
+        Append(result, "(*)");
+        firstarray = 0;
       } else {
-	Append(result, "[");
-	size = SwigType_parm(element);
-	Append(result, size);
-	Append(result, "]");
-	Delete(size);
-	clear = 0;
+        Append(result, "[");
+        size = SwigType_parm(element);
+        Append(result, size);
+        Append(result, "]");
+        Delete(size);
+        clear = 0;
       }
     } else if (SwigType_isfunction(element)) {
       DOH *parms, *p;
@@ -958,22 +976,22 @@ String *SwigType_rcaststr(const SwigType *s, const_String_or_char_ptr name) {
       parms = SwigType_parmlist(element);
       plen = Len(parms);
       for (j = 0; j < plen; j++) {
-	p = SwigType_str(Getitem(parms, j), 0);
-	Append(result, p);
-	Delete(p);
-	if (j < (plen - 1))
-	  Append(result, ",");
+        p = SwigType_str(Getitem(parms, j), 0);
+        Append(result, p);
+        Delete(p);
+        if (j < (plen - 1))
+          Append(result, ",");
       }
       Append(result, ")");
       Delete(parms);
       if (member_function_qualifiers) {
-	String *p = SwigType_str(member_function_qualifiers, 0);
-	Append(result, " ");
-	Append(result, p);
-	Delete(p);
-	Delete(member_function_qualifiers);
-	member_function_qualifiers = 0;
-	clear = 0;
+        String *p = SwigType_str(member_function_qualifiers, 0);
+        Append(result, " ");
+        Append(result, p);
+        Delete(p);
+        Delete(member_function_qualifiers);
+        member_function_qualifiers = 0;
+        clear = 0;
       }
       isfunction = 1;
     } else {
@@ -1001,7 +1019,6 @@ String *SwigType_rcaststr(const SwigType *s, const_String_or_char_ptr name) {
   return cast;
 }
 
-
 /* -----------------------------------------------------------------------------
  * SwigType_lcaststr()
  *
@@ -1012,6 +1029,8 @@ String *SwigType_lcaststr(const SwigType *s, const_String_or_char_ptr name) {
   String *result;
 
   result = NewStringEmpty();
+  if (name && Len(name) == 0)
+    name = 0;
 
   if (SwigType_isarray(s)) {
     String *lstr = SwigType_lstr(s, 0);
@@ -1033,6 +1052,20 @@ String *SwigType_lcaststr(const SwigType *s, const_String_or_char_ptr name) {
     String *lstr = SwigType_lstr(s, 0);
     Printf(result, "(%s)%s", lstr, name);
     Delete(lstr);
+  } else if (SwigType_ispointer(s)) {
+    SwigType *sc = Copy(s);
+    Delete(SwigType_pop(sc));
+    if (SwigType_isqualifier(sc) && name && !Equal(name, "0")) {
+      /* Only cast const pointer values (remove const in cast - they are assigned to a non-const pointer type) */
+      SwigType_add_pointer(sc);
+      String *lstr = SwigType_lstr(sc, 0);
+      Printf(result, "(%s)%s", lstr, name);
+      Delete(lstr);
+    } else {
+      if (name)
+        Append(result, name);
+    }
+    Delete(sc);
   } else {
     if (name)
       Append(result, name);
@@ -1048,8 +1081,8 @@ String *SwigType_lcaststr(const SwigType *s, const_String_or_char_ptr name) {
       typedef int Integer;
       void test2(bar<Integer *> *x);
     }
-    Mangling is more consistent and changes from 
-    _p_foo__barT_int_p_t to 
+    Mangling is more consistent and changes from
+    _p_foo__barT_int_p_t to
     _p_foo__barT_p_int_t.
 */
 static void mangle_stringcopy(String *destination, const char *source, int count) {
@@ -1116,15 +1149,15 @@ static void mangle_namestr(String *mangled, SwigType *t) {
       p = SwigType_parmlist(c + 1);
       sz = Len(p);
       for (i = 0; i < sz; i++) {
-	mangle_subtype(mangled, Getitem(p, i));
-	Putc('_', mangled);
+        mangle_subtype(mangled, Getitem(p, i));
+        Putc('_', mangled);
       }
       Putc('t', mangled);
       suffix = SwigType_templatesuffix(t);
       if (Len(suffix) > 0) {
-	mangle_namestr(mangled, suffix);
+        mangle_namestr(mangled, suffix);
       } else {
-	Append(mangled, suffix);
+        Append(mangled, suffix);
       }
       Delete(suffix);
       Delete(p);
@@ -1190,7 +1223,9 @@ static String *manglestr_default(const SwigType *s) {
   SwigType *type = ss;
 
   if (SwigType_istemplate(ss)) {
-    SwigType *ty = Swig_symbol_template_deftype(ss, 0);
+    SwigType *dt = Swig_symbol_template_deftype(ss, 0);
+    String *ty = Swig_symbol_type_qualify(dt, 0);
+    Delete(dt);
     Delete(ss);
     ss = ty;
     type = ss;
@@ -1202,7 +1237,7 @@ static String *manglestr_default(const SwigType *s) {
 
   c = Char(result);
   while (*c) {
-    if (!isalnum((int) *c))
+    if (!isalnum((int)*c))
       *c = '_';
     c++;
   }
@@ -1212,7 +1247,7 @@ static String *manglestr_default(const SwigType *s) {
     base = b;
   }
 
-  Replace(base, "struct ", "", DOH_REPLACE_ANY);	/* This might be problematic */
+  Replace(base, "struct ", "", DOH_REPLACE_ANY); /* This might be problematic */
   Replace(base, "class ", "", DOH_REPLACE_ANY);
   Replace(base, "union ", "", DOH_REPLACE_ANY);
   Replace(base, "enum ", "", DOH_REPLACE_ANY);
@@ -1235,7 +1270,7 @@ static String *manglestr_default(const SwigType *s) {
       *c = 'f';
     else if (*c == ')')
       *c = 'F';
-    else if (!isalnum((int) *c))
+    else if (!isalnum((int)*c))
       *c = '_';
     c++;
   }
@@ -1253,10 +1288,10 @@ static String *manglestr_default(const SwigType *s) {
 String *SwigType_manglestr(const SwigType *s) {
 #if 0
   /* Debugging checks to ensure a proper SwigType is passed in and not a stringified type */
-  String *angle = Strstr(s, "<");
+  String *angle = Strchr(s, '<');
   if (angle && Strncmp(angle, "<(", 2) != 0)
     Printf(stderr, "SwigType_manglestr error: %s\n", s);
-  else if (Strstr(s, "*") || Strstr(s, "&") || Strstr(s, "["))
+  else if (Strchr(s, '*') || Strchr(s, '&') || Strchr(s, '['))
     Printf(stderr, "SwigType_manglestr error: %s\n", s);
 #endif
   return manglestr_default(s);
@@ -1266,6 +1301,11 @@ String *SwigType_manglestr(const SwigType *s) {
  * SwigType_typename_replace()
  *
  * Replaces a typename in a type with something else.  Needed for templates.
+ * Collapses duplicate const into a single const.
+ * Reference collapsing probably should be implemented here.
+ * Example:
+ *   t=r.q(const).T pat=T rep=int           =>  r.q(const).int
+ *   t=r.q(const).T pat=T rep=q(const).int  =>  r.q(const).int  (duplicate const removed)
  * ----------------------------------------------------------------------------- */
 
 void SwigType_typename_replace(SwigType *t, String *pat, String *rep) {
@@ -1287,58 +1327,84 @@ void SwigType_typename_replace(SwigType *t, String *pat, String *rep) {
     String *e = Getitem(elem, i);
     if (SwigType_issimple(e)) {
       if (Equal(e, pat)) {
-	/* Replaces a type of the form 'pat' with 'rep<args>' */
-	Replace(e, pat, rep, DOH_REPLACE_ANY);
+        /* Replaces a type of the form 'pat' with 'rep<args>' */
+        if (SwigType_isconst(rep) && i > 0 && SwigType_isconst(Getitem(elem, i - 1))) {
+          /* Collapse duplicate const into a single const */
+          SwigType *rep_without_const = Copy(rep);
+          Delete(SwigType_pop(rep_without_const));
+          Replace(e, pat, rep_without_const, DOH_REPLACE_ANY);
+          Delete(rep_without_const);
+        } else {
+          Replace(e, pat, rep, DOH_REPLACE_ANY);
+        }
       } else if (SwigType_istemplate(e)) {
-	/* Replaces a type of the form 'pat<args>' with 'rep' */
-	if (Equal(e, pat)) {
-	  String *repbase = SwigType_templateprefix(rep);
-	  Replace(e, pat, repbase, DOH_REPLACE_ID | DOH_REPLACE_FIRST);
-	  Delete(repbase);
-	}
-	{
-	  String *tsuffix;
-	  List *tparms = SwigType_parmlist(e);
-	  int j, jlen;
-	  String *nt = SwigType_templateprefix(e);
-	  Append(nt, "<(");
-	  jlen = Len(tparms);
-	  for (j = 0; j < jlen; j++) {
-	    SwigType_typename_replace(Getitem(tparms, j), pat, rep);
-	    Append(nt, Getitem(tparms, j));
-	    if (j < (jlen - 1))
-	      Putc(',', nt);
-	  }
-	  tsuffix = SwigType_templatesuffix(e);
-	  SwigType_typename_replace(tsuffix, pat, rep);
-	  Printf(nt, ")>%s", tsuffix);
-	  Delete(tsuffix);
-	  Clear(e);
-	  Append(e, nt);
-	  Delete(nt);
-	  Delete(tparms);
-	}
+        /* Replaces a type of the form 'pat<args>' with 'rep' */
+        {
+          /* To match "e=TemplateTemplateT<(float)>"
+           * with "pat=TemplateTemplateT"
+           * we need to compare only the first part of the string e.
+           */
+          int len = Len(pat);
+
+          /* Len(e) > len, not >= (because we expect at least a
+           * character '<' following the template typename)
+           */
+          if (Len(e) > len) {
+            String *firstPartOfType = NewStringWithSize(e, len);
+            const char *e_as_char = Char(e);
+
+            if (Equal(firstPartOfType, pat) && e_as_char[len] == '<') {
+              String *repbase = SwigType_templateprefix(rep);
+              Replace(e, pat, repbase, DOH_REPLACE_ID | DOH_REPLACE_FIRST);
+              Delete(repbase);
+            }
+            Delete(firstPartOfType);
+          }
+        }
+
+        {
+          String *tsuffix;
+          List *tparms = SwigType_parmlist(e);
+          int j, jlen;
+          String *nt = SwigType_templateprefix(e);
+          Append(nt, "<(");
+          jlen = Len(tparms);
+          for (j = 0; j < jlen; j++) {
+            SwigType_typename_replace(Getitem(tparms, j), pat, rep);
+            Append(nt, Getitem(tparms, j));
+            if (j < (jlen - 1))
+              Putc(',', nt);
+          }
+          tsuffix = SwigType_templatesuffix(e);
+          SwigType_typename_replace(tsuffix, pat, rep);
+          Printf(nt, ")>%s", tsuffix);
+          Delete(tsuffix);
+          Clear(e);
+          Append(e, nt);
+          Delete(nt);
+          Delete(tparms);
+        }
       } else if (Swig_scopename_check(e)) {
-	String *first = 0;
-	String *rest = 0;
-	Swig_scopename_split(e, &first, &rest);
+        String *first = 0;
+        String *rest = 0;
+        Swig_scopename_split(e, &first, &rest);
 
-	/* Swig_scopename_split doesn't handle :: prefix very well ... could do with a rework */
-	if (Strncmp(rest, "::", 2) == 0) {
-	  String *tmp = NewString(Char(rest) + 2);
-	  Clear(rest);
-	  Printv(rest, tmp, NIL);
-	  Delete(tmp);
-	  assert(!first);
-	}
+        /* Swig_scopename_split doesn't handle :: prefix very well ... could do with a rework */
+        if (Strncmp(rest, "::", 2) == 0) {
+          String *tmp = NewString(Char(rest) + 2);
+          Clear(rest);
+          Printv(rest, tmp, NIL);
+          Delete(tmp);
+          assert(!first);
+        }
 
-	Clear(e);
-	if (first)
-	  SwigType_typename_replace(first, pat, rep);
-	SwigType_typename_replace(rest, pat, rep);
-	Printv(e, first ? first : "", "::", rest, NIL);
-	Delete(first);
-	Delete(rest);
+        Clear(e);
+        if (first)
+          SwigType_typename_replace(first, pat, rep);
+        SwigType_typename_replace(rest, pat, rep);
+        Printv(e, first ? first : "", "::", rest, NIL);
+        Delete(first);
+        Delete(rest);
       }
     } else if (SwigType_isfunction(e)) {
       int j, jlen;
@@ -1347,10 +1413,10 @@ void SwigType_typename_replace(SwigType *t, String *pat, String *rep) {
       Append(e, "f(");
       jlen = Len(fparms);
       for (j = 0; j < jlen; j++) {
-	SwigType_typename_replace(Getitem(fparms, j), pat, rep);
-	Append(e, Getitem(fparms, j));
-	if (j < (jlen - 1))
-	  Putc(',', e);
+        SwigType_typename_replace(Getitem(fparms, j), pat, rep);
+        Append(e, Getitem(fparms, j));
+        if (j < (jlen - 1))
+          Putc(',', e);
       }
       Append(e, ").");
       Delete(fparms);
@@ -1366,9 +1432,100 @@ void SwigType_typename_replace(SwigType *t, String *pat, String *rep) {
 }
 
 /* -----------------------------------------------------------------------------
+ * SwigType_variadic_replace()
+ *
+ * Replaces variadic parameter with a list of (zero or more) parameters.
+ * Needed for variadic templates.
+ * ----------------------------------------------------------------------------- */
+
+void SwigType_variadic_replace(SwigType *t, Parm *unexpanded_variadic_parm, ParmList *expanded_variadic_parms) {
+  String *nt;
+  int i, ilen;
+  List *elem;
+  if (!unexpanded_variadic_parm)
+    return;
+
+  if (SwigType_isvariadic(t)) {
+    /* Based on expand_variadic_parms() but input is single SwigType (t) instead of ParmList */
+    String *unexpanded_name = Getattr(unexpanded_variadic_parm, "name");
+    ParmList *expanded = CopyParmList(expanded_variadic_parms);
+    Parm *ep = expanded;
+    SwigType *fparms;
+    while (ep) {
+      SwigType *newtype = Copy(t);
+      SwigType_del_variadic(newtype);
+      Replaceid(newtype, unexpanded_name, Getattr(ep, "type"));
+      Setattr(ep, "type", newtype);
+      ep = nextSibling(ep);
+    }
+    Clear(t);
+    fparms = SwigType_function_parms_only(expanded);
+    Append(t, fparms);
+    Delete(expanded);
+
+    return;
+  }
+  nt = NewStringEmpty();
+  elem = SwigType_split(t);
+  ilen = Len(elem);
+  for (i = 0; i < ilen; i++) {
+    String *e = Getitem(elem, i);
+    if (SwigType_isfunction(e)) {
+      int j, jlen;
+      List *fparms = SwigType_parmlist(e);
+      Clear(e);
+      Append(e, "f(");
+      jlen = Len(fparms);
+      for (j = 0; j < jlen; j++) {
+        SwigType *type = Getitem(fparms, j);
+        SwigType_variadic_replace(type, unexpanded_variadic_parm, expanded_variadic_parms);
+        if (Len(type) > 0) {
+          if (j != 0)
+            Putc(',', e);
+          Append(e, type);
+        } else {
+          assert(j == jlen - 1); /* A variadic parm was replaced with zero parms, variadic parms are only changed at the end of the list */
+        }
+      }
+      Append(e, ").");
+      Delete(fparms);
+    }
+    if (SwigType_istemplate(e)) {
+      int j, jlen;
+      List *tparms = SwigType_templateargslist(e);
+      String *tprefix = SwigType_templateprefix(e);
+      String *tsuffix = SwigType_templatesuffix(e);
+      Clear(e);
+      Append(e, tprefix);
+      Append(e, "<(");
+      jlen = Len(tparms);
+      for (j = 0; j < jlen; j++) {
+        SwigType *type = Getitem(tparms, j);
+        SwigType_variadic_replace(type, unexpanded_variadic_parm, expanded_variadic_parms);
+        if (Len(type) > 0) {
+          if (j != 0)
+            Putc(',', e);
+          Append(e, type);
+        } else {
+          assert(j == jlen - 1); /* A variadic parm was replaced with zero parms, variadic parms are only changed at the end of the list */
+        }
+      }
+      Append(e, ")>");
+      Append(e, tsuffix);
+      Delete(tparms);
+    }
+    Append(nt, e);
+  }
+  Clear(t);
+  Append(t, nt);
+  Delete(nt);
+  Delete(elem);
+}
+
+/* -----------------------------------------------------------------------------
  * SwigType_remove_global_scope_prefix()
  *
- * Removes the unary scope operator (::) prefix indicating global scope in all 
+ * Removes the unary scope operator (::) prefix indicating global scope in all
  * components of the type
  * ----------------------------------------------------------------------------- */
 

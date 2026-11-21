@@ -12,13 +12,8 @@ build:
 	SWIG_LIB_DIR='$(SWIG_LIB_DIR)' SWIGEXE='$(SWIGEXE)' \
 	SWIGOPT='$(SWIGOPT)' LIBS='$(LIBS)' TARGET='foo' INTERFACE='foo.i' python_cpp
 
-static:
-	$(MAKE) -f $(TOP)/Makefile SRCDIR='$(SRCDIR)' \
-	SWIG_LIB_DIR='$(SWIG_LIB_DIR)' SWIGEXE='$(SWIGEXE)' \
-	SWIGOPT='$(SWIGOPT)' LIBS='$(LIBS)' TARGET='foo' INTERFACE='foo.i' python_cpp_static
-
 clean:
 	$(MAKE) -f $(TOP)/Makefile SRCDIR='$(SRCDIR)' TARGET='foo' python_clean
 	if test -d pkg1; then \
-		cd pkg1 && $(MAKE) -f $(TOP)/../Makefile SRCDIR='$(SRCDIR)' TARGET='foo' python_clean; \
+		$(MAKE) -C pkg1 -f $(TOP)/../Makefile SRCDIR='$(SRCDIR)' TARGET='foo' python_clean; \
 	fi

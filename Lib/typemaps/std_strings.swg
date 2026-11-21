@@ -17,12 +17,8 @@ SWIG_AsPtr_dec(String)(SWIG_Object obj, String **val)
       return SWIG_OLDOBJ;
     }
   } else {
-    static int init = 0;
-    static swig_type_info* descriptor = 0;
-    if (!init) {
-      descriptor = SWIG_TypeQuery(#String " *");
-      init = 1;
-    }
+    %error_clear;
+    static swig_type_info *descriptor = SWIG_TypeQuery(#String " *");
     if (descriptor) {
       String *vptr;
       int res = SWIG_ConvertPtr(obj, (void**)&vptr, descriptor, 0);
@@ -41,6 +37,16 @@ SWIGINTERNINLINE SWIG_Object
 SWIG_From_dec(String)(const String& s)
 {
   return SWIG_FromCharPtrAndSize(s.data(), s.size());
+}
+}
+%enddef
+
+%define %std_string_view_from(String, SWIG_FromCharPtrAndSize, Frag)
+%fragment(SWIG_From_frag(String),"header",fragment=Frag) {
+SWIGINTERNINLINE SWIG_Object
+SWIG_From_dec(String)(const String& s)
+{
+  return SWIG_FromCharPtrAndSize(s.data() ? s.data() : "", s.size());
 }
 }
 %enddef
@@ -72,6 +78,21 @@ SWIG_AsVal_dec(String)(SWIG_Object obj, String *val)
 %std_string_asptr(String, Char, AsPtrMethod, #AsPtrMethod)
 %std_string_asval(String)
 %std_string_from(String, FromMethod, #FromMethod)
+
+%typemaps_asptrfromn(%arg(CheckCode), String);
+
+%enddef
+
+
+/* An empty string_view returns NULL from data() but SWIG_FromCharPtrAndSize()
+ * implementations treat that as invalid and return None/Null/undef or similar
+ * in the target language so we can't just use %typemaps_std_string.
+ */
+%define %typemaps_std_string_view(String, Char, AsPtrMethod, FromMethod, CheckCode)
+
+%std_string_asptr(String, Char, AsPtrMethod, #AsPtrMethod)
+%std_string_asval(String)
+%std_string_view_from(String, FromMethod, #FromMethod)
 
 %typemaps_asptrfromn(%arg(CheckCode), String);
 

@@ -6,6 +6,13 @@
 %warnfilter(SWIGWARN_PARSE_KEYWORD) final; // 'final' is a java keyword, renaming to '_final'
 %warnfilter(SWIGWARN_PARSE_KEYWORD) override; // 'override' is a C# keyword, renaming to '_override'
 
+%{
+#if defined(__clang__)
+// Suppress: class with destructor marked 'final' cannot be inherited from [-Wfinal-dtor-non-final-class]
+#pragma clang diagnostic ignored "-Wfinal-dtor-non-final-class"
+#endif
+%}
+
 // throw is invalid in C++17 and later, only SWIG to use it
 #define TESTCASE_THROW1(T1) throw(T1)
 %{
@@ -27,7 +34,7 @@ struct Base {
   virtual ~Base() {}
 };
 
-struct Derived /*final*/ : Base {
+struct Derived final : Base {
   virtual void stuff() const noexcept override final {}
   virtual void override1() const noexcept override;
   virtual void override2() const noexcept override;
@@ -90,7 +97,7 @@ struct FinalOverrideMethods {
     virtual void override(int) {}
     virtual ~FinalOverrideMethods() = default;
 };
-struct FinalOverrideVariables {
+struct FinalOverrideVars {
     int final;
     double override;
 };
@@ -138,3 +145,31 @@ void DerivedNoVirtualStruct::ef() {}
 DerivedNoVirtualStruct::~DerivedNoVirtualStruct() {}
 %}
 
+%inline %{
+namespace Outer {
+  namespace final {
+    template <typename T> struct smart_ptr {
+      typedef T type;
+    };
+  }
+  namespace override {
+    template <typename T> struct dumb_ptr {
+      typedef T type;
+    };
+  }
+}
+%}
+
+%template(SmartPtrBaseStruct) Outer::final::smart_ptr<DerivedStruct>;
+
+%inline %{
+class ObjectDB
+{
+public:
+  static void smart1(typename Outer::final::smart_ptr<DerivedStruct>::type *objectT) {}
+  static void smart2(Outer::final::smart_ptr<DerivedStruct>::type *objectT) {}
+  static void dumb1(typename Outer::override::dumb_ptr<DerivedStruct>::type *objectT) {}
+  static void dumb2(Outer::override::dumb_ptr<DerivedStruct>::type *objectT) {}
+  static Outer::final::smart_ptr<DerivedStruct>::type get() { return DerivedStruct(); }
+};
+%}

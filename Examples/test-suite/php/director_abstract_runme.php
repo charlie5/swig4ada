@@ -1,13 +1,12 @@
 <?php
 
 require "tests.php";
-require "director_abstract.php";
 
-// No new functions
-check::functions(array('foo_ping','foo_pong','example0_getxsize','example0_color','example0_get_color','example1_getxsize','example1_color','example1_get_color','example2_getxsize','example2_color','example2_get_color','example4_getxsize','example4_color','example4_get_color','example3_i_color','example3_i_get_color','g','a_f'));
-// No new classes
+// New functions
+check::functions(array('g'));
+// New classes
 check::classes(array('director_abstract','Foo','Example0','Example1','Example2','Example4','Example3_i','A'));
-// now new vars
+// No new vars
 check::globals(array());
 
 class MyFoo extends Foo {
@@ -23,19 +22,19 @@ check::equal($a->ping(), "MyFoo::ping()", "MyFoo::ping failed");
 check::equal($a->pong(), "Foo::pong();MyFoo::ping()", "MyFoo::pong failed");
 
 class MyExample1 extends Example1 {
-  function Color($r, $g, $b) {
+  function Color($r, $g = NULL, $b = NULL) {
     return $r;
   }
 }
 
 class MyExample2 extends Example1 {
-  function Color($r, $g, $b) {
+  function Color($r, $g = NULL, $b = NULL) {
     return $g;
   }
 }
 
 class MyExample3 extends Example1 {
-  function Color($r, $g, $b) {
+  function Color($r, $g = NULL, $b = NULL) {
     return $b;
   }
 }
@@ -59,4 +58,3 @@ $class = new ReflectionClass('Example3_i');
 check::equal($class->isAbstract(), true, "Example3_i abstractness failed");
 
 check::done();
-?>

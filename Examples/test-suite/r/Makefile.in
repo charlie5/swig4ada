@@ -8,6 +8,10 @@ WRAPSUFFIX   = .R
 R_OPT        = --quiet --no-save --no-restore
 RUNR         = R CMD BATCH $(R_OPT) '--args $(SCRIPTDIR)'
 
+HAVE_CXX11   = @HAVE_CXX11@
+HAVE_CXX14   = @HAVE_CXX14@
+HAVE_CXX17   = @HAVE_CXX17@
+HAVE_CXX20   = @HAVE_CXX20@
 srcdir       = @srcdir@
 top_srcdir   = @top_srcdir@
 top_builddir = @top_builddir@
@@ -23,19 +27,12 @@ CPP_TEST_CASES += \
         r_overload_comma \
 	r_use_isnull
 
-# These tests are failing because enums currently cannot handle
-# arithmetic expressions
-
-FAILING_CPP_TESTS = \
-	preproc_constants
-
-FAILING_C_TESTS = \
-	preproc_constants_c
-
 include $(srcdir)/../common.mk
 
 # Overridden variables here
-# none!
+
+# Ensure testsuite remains free from SWIG warnings.
+SWIGOPT += -Werror
 
 # Custom tests - tests with additional commandline options
 # none!

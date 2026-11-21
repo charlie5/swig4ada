@@ -36,7 +36,7 @@
      * @param line line number
      * @param isGetSize if set, for every object location both address and size are returned
      *
-     * @link Connection::getId() @endlink <br>
+     * @link Connection::getId() @endlink<br>
      */
     void getAddress(int &fileName,
                     int line,
@@ -62,7 +62,7 @@
      * used for unspecified parameters.
      * <p>
      *
-     * @link advancedWinIDEALaunching.py Python example.@endlink <br>
+     * @link advancedWinIDEALaunching.py Python example.@endlink<br>
      */
     class CConnectionConfig
     {
@@ -95,13 +95,68 @@
     class ClassWithNestedEnum {
     public:
         /**
-         * Enum description.
+         * ENested description.
          */
         typedef enum {ONE,  ///< desc of one
                       TWO,  ///< desc of two
                       THREE ///< desc of three
         } ENested;
 
+        /**
+         * ENestedOdd description.
+         */
+        typedef enum {ODD_ONE   ///< desc of odd_one
+                     ,ODD_TWO   ///< desc of odd_two
+                     ,ODD_THREE ///< desc of odd_three
+        } ENestedOdd;
+
+        /**
+         * ENestedOddPartial1 description.
+         */
+        typedef enum {ODD_PARTIAL1_ONE
+                     ,ODD_PARTIAL1_TWO   ///< desc of odd_partial1_two
+                     ,ODD_PARTIAL1_THREE ///< desc of odd_partial1_three
+        } ENestedOddPartial1;
+
+        /**
+         * ENestedOddPartial3 description.
+         */
+        typedef enum {ODD_PARTIAL3_ONE   ///< desc of odd_partial3_one
+                     ,ODD_PARTIAL3_TWO   ///< desc of odd_partial3_two
+                     ,ODD_PARTIAL3_THREE
+        } ENestedOddPartial3;
+
+        /** Description for TESTENUM. */
+        enum TESTENUM
+        {
+          /** something for none */
+          TEST_NONE = 0,
+          /** something for one */
+          TEST_ONE,
+          /** something for two */
+          TEST_TWO  /** something more for two */
+        };
+    };
+
+    /// SIOBeam struct description
+    struct SIOBeam {
+
+      /** testfunction - testing extra trailing doc comment */
+      void testfunction(
+          /** testfunction aaa parm */
+          int testf_aaa,
+          /** testfunction bbb parm */
+          double testf_bbb,
+          /** testfunction ccc parm */
+          bool testf_ccc /** testfunction more for two parm */
+          ) {}
+
+      /// Constructor for input from an existing SIO file
+      explicit SIOBeam(
+          const char * filename,   ///< Name of input SIO file.
+          int elevationOrder=1, ///< Interpolation order (0-3) in elevation
+          int bearingOrder=1   ///< Interpolation order (0-3) in bearing
+          ) {}
     };
 
     /// @return This is a bad place for this tag, but it should be ignored.
@@ -121,7 +176,57 @@
      */
     void showList() { }
 
+    /** Incorrectly documented members, these should be post document comments, Github issue #1636 */
+    struct IncorrectlyDocumentedMembers
+    {
+      int aaaa; //! really for bbbb value
+      int bbbb; //! not for bbbb value, is quietly ignored by Doxygen and SWIG
+    };
+
+    struct OrphanedComment
+    {
+      /** Doxygen quietly ignores this; SWIG < 4.3.0 gave parse error. */
+    };
+
     #include "doxygen_misc_constructs.h"
 
+    // @file block (single-line //! style) must not bleed into the next class doc (GitHub issue #3403).
+    //! @file      doxygen_misc_constructs.i
+    //! @brief     File-level brief description.
+    //! @authors   Someone
+
+    //! This is the real class description.
+    struct FileHeaderTestClass {};
+
+    // Same @file bleed test as above but with the /// style (GitHub issue #3403).
+    /// @file      doxygen_misc_constructs.i
+    /// @brief     File-level brief description.
+    /// @authors   Someone
+
+    /// Real class description (slash style).
+    struct SlashFileHeaderTestClass {};
+
+    // @name/@{ member grouping: @{ must not be discarded as part of the structural block,
+    // and the member's own doc comment must still attach (regression guard for GitHub #3403 fix).
+    struct GroupedMembers {
+      /// @name constants and types
+      //@{
+
+      enum WeekFlags { Sunday_First, Monday_First };
+
+      //@}
+
+      //! @name Logging
+      //! @{
+
+      //! Doc for the first grouped member.
+      int loggingMember1;
+
+      //! Doc for the second grouped member.
+      int loggingMember2;
+      //! @}
+    };
+
 %}
+
     %include "doxygen_misc_constructs.h"

@@ -23,4 +23,3 @@ struct OverloadDerived2 : OverloadBase {
   virtual void nnn() {}
 };
 %}
-

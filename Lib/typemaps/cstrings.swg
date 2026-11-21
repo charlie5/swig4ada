@@ -50,7 +50,7 @@
  *
  *     %cstring_bounded_output(Char *outx, 512);
  *     void foo(Char *outx) {
- *         sprintf(outx,"blah blah\n");
+ *         strcpy(outx,"blah blah\n");
  *     }
  *
  */
@@ -59,7 +59,7 @@
 %typemap(in,noblock=1,numinputs=0) TYPEMAP (Char temp[MAX+1])  {
   $1 = ($1_ltype) temp;
 }
-%typemap(freearg,match="in") TYPEMAP "";
+%typemap(freearg,match="in") TYPEMAP ""
 %typemap(argout,noblock=1,fragment= #SWIG_FromCharPtr ) TYPEMAP {
   $1[MAX] = 0;  
   %append_output(SWIG_FromCharPtr($1));
@@ -85,7 +85,7 @@
 %typemap(in,noblock=1,numinputs=0) TYPEMAP(Char temp[SIZE]) {
   $1 = ($1_ltype) temp;
 }
-%typemap(freearg,match="in") TYPEMAP "";
+%typemap(freearg,match="in") TYPEMAP ""
 %typemap(argout,noblock=1,fragment= #SWIG_FromCharPtrAndSize) TYPEMAP {
   %append_output(SWIG_FromCharPtrAndSize($1,SIZE));
 }
@@ -122,7 +122,7 @@
   temp[n - 1] = 0;                                                             
   $1 = ($1_ltype) temp;                                                    
 }
-%typemap(freearg,match="in") TYPEMAP "";
+%typemap(freearg,match="in") TYPEMAP ""
 %typemap(argout,noblock=1,fragment=#SWIG_FromCharPtr) TYPEMAP {
   $1[MAX] = 0;
   %append_output(SWIG_FromCharPtr($1));
@@ -160,7 +160,7 @@
   if (alloc == SWIG_NEWOBJ) %delete_array(t);
   $1[n-1] = 0;
 }
-%typemap(freearg,match="in") TYPEMAP "";
+%typemap(freearg,match="in") TYPEMAP ""
 %typemap(argout,noblock=1,fragment=#SWIG_FromCharPtr) TYPEMAP { 
   %append_output(SWIG_FromCharPtr($1));
   %delete_array($1);                                  
@@ -175,7 +175,7 @@
  *
  *     %cstring_output_maxsize(Char *outx, int max) {
  *     void foo(Char *outx, int max) {
- *         sprintf(outx,"blah blah\n");
+ *         strcpy(outx,"blah blah\n");
  *     }
  */
 
@@ -205,7 +205,7 @@
  *
  *     %cstring_output_withsize(Char *outx, int *max) {
  *     void foo(Char *outx, int *max) {
- *         sprintf(outx,"blah blah\n");
+ *         strcpy(outx,"blah blah\n");
  *         *max = strlen(outx);  
  *     }
  */
@@ -225,7 +225,7 @@
   if (buff$argnum) %delete_array(buff$argnum);
 } 
 %typemap(argout,noblock=1,fragment=#SWIG_FromCharPtrAndSize) (TYPEMAP,SIZE) { 
-  %append_output(SWIG_FromCharPtrAndSize($1,*$2));
+  %append_output(SWIG_FromCharPtrAndSize($1,(size_t)(*$2)));
 }
 %enddef
 
@@ -236,10 +236,10 @@
  * This macro is used to return Character data that was
  * allocated with new or malloc.
  *
- *     %cstring_output_allocate(Char **outx, free($1));
+ *     %cstring_output_allocate(Char **outx, free(*$1));
  *     void foo(Char **outx) {
  *         *outx = (Char *) malloc(512);
- *         sprintf(outx,"blah blah\n");
+ *         strcpy(outx,"blah blah\n");
  *     }
  */
  
@@ -247,7 +247,7 @@
 %typemap(in,noblock=1,numinputs=0) TYPEMAP($*1_ltype temp = 0) {
   $1 = &temp;
 }
-%typemap(freearg,match="in") TYPEMAP "";
+%typemap(freearg,match="in") TYPEMAP ""
 %typemap(argout,noblock=1,fragment=#SWIG_FromCharPtr) TYPEMAP { 
   if (*$1) {
     %append_output(SWIG_FromCharPtr(*$1));
@@ -263,10 +263,10 @@
  * This macro is used to return Character data that was
  * allocated with new or malloc.
  *
- *     %cstring_output_allocate_size(Char **outx, int *sz, free($1));
+ *     %cstring_output_allocate_size(Char **outx, int *sz, free(*$1));
  *     void foo(Char **outx, int *sz) {
  *         *outx = (Char *) malloc(512);
- *         sprintf(outx,"blah blah\n");
+ *         strcpy(outx,"blah blah\n");
  *         *sz = strlen(outx);
  *     }
  */
@@ -275,10 +275,10 @@
 %typemap(in,noblock=1,numinputs=0) (TYPEMAP, SIZE) ($*1_ltype temp = 0, $*2_ltype tempn) {
   $1 = &temp; $2 = &tempn;
 }
-%typemap(freearg,match="in") (TYPEMAP,SIZE) "";
+%typemap(freearg,match="in") (TYPEMAP,SIZE) ""
 %typemap(argout,noblock=1,fragment=#SWIG_FromCharPtrAndSize)(TYPEMAP,SIZE) {   
   if (*$1) {
-    %append_output(SWIG_FromCharPtrAndSize(*$1,*$2));
+    %append_output(SWIG_FromCharPtrAndSize(*$1,(size_t)(*$2)));
     RELEASE;
   }
 }

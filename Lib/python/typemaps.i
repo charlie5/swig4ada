@@ -72,7 +72,7 @@ multiple output values, they are returned in the form of a Python tuple.
          
 For example, suppose you were trying to wrap the modf() function in the
 C math library which splits x into integral and fractional parts (and
-returns the integer part in one of its parameters).K:
+returns the integer part in one of its parameters) :
 
         double modf(double x, double *ip);
 
@@ -138,10 +138,6 @@ up as the return value of the function.  Thus, to apply this function
 to a Python variable you might do this :
 
        x = neg(x)
-
-Note : previous versions of SWIG used the symbol 'BOTH' to mark
-input/output arguments.   This is still supported, but will be slowly
-phased out in future releases.
 
 */
 

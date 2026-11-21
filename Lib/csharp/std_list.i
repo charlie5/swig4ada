@@ -19,7 +19,7 @@
 
 // MACRO for use within the std::list class body
 %define SWIG_STD_LIST_MINIMUM_INTERNAL(CSINTERFACE, CTYPE...)
-%typemap(csinterfaces) std::list< CTYPE > "global::System.IDisposable, global::System.Collections.IEnumerable, global::System.Collections.Generic.CSINTERFACE<$typemap(cstype, CTYPE)>\n";
+%typemap(csinterfaces) std::list< CTYPE > "global::System.IDisposable, global::System.Collections.IEnumerable, global::System.Collections.Generic.CSINTERFACE<$typemap(cstype, CTYPE)>\n"
 
 %apply void *VOID_INT_PTR { std::list< CTYPE >::iterator * };
 
@@ -414,6 +414,8 @@ public:
     bool equals(iterator *iter1, iterator *iter2) {
       if (iter1 == NULL && iter2 == NULL)
         return true;
+      if (iter1 == NULL || iter2 == NULL)
+        return false;
       std::list< CTYPE >::iterator it1 = *iter1;
       std::list< CTYPE >::iterator it2 = *iter2;
       return it1 == it2;

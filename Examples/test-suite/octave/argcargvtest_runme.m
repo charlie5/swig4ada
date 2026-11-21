@@ -11,7 +11,13 @@ if (mainv(targs,1) != 'hola')
 endif
 
 targs={'hi', 'hola'};
+if (mainv(targs,0) != 'hi')
+  error("bad main typemap");
+endif
 if (mainv(targs,1) != 'hola')
+  error("bad main typemap");
+endif
+if (mainv(targs,2) != '<<NULL>>')
   error("bad main typemap");
 endif
 
@@ -27,3 +33,43 @@ endif
 
 
 initializeApp(largs);
+
+# Check that an empty array works.
+empty_args={};
+if (mainc(empty_args) != 0)
+  error("bad main typemap");
+endif
+if (mainv(empty_args,0) != '<<NULL>>')
+  error("bad main typemap");
+endif
+
+# Check that empty strings are handled.
+empty_string={"hello", blanks(0), "world"};
+if (mainc(empty_string) != 3)
+  error("bad main typemap");
+endif
+if (mainv(empty_string, 0) != "hello")
+  error("bad main typemap");
+endif
+if (mainv(empty_string, 1) != "")
+  error("bad main typemap");
+endif
+if (mainv(empty_string, 2) != "world")
+  error("bad main typemap");
+endif
+if (mainv(empty_string, 3) != "<<NULL>>")
+  error("bad main typemap");
+endif
+
+# Non-string element mid-list - exercises the per-element type-check
+# cleanup path that frees $2[0..i-1] before %argument_fail.
+mixed_args={"alpha", 42, "gamma"};
+try
+  error_flag = 0;
+  mainc(mixed_args);
+  error_flag = 1;
+catch
+end_try_catch
+if (error_flag)
+  error("non-string element should raise a type error");
+endif

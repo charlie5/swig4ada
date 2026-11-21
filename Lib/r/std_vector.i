@@ -122,11 +122,39 @@
       }
     };
 
-   // vectors of 64 bit unsigned int
-#if defined(SWIGWORDSIZE64)
+   // vectors of unsigned long (32 or 64 bit int, depending on architecture)
     template <>
-      struct traits_from_ptr<std::vector<unsigned long int> > {
-      static SEXP from (std::vector<unsigned long int> *val, int owner = 0) {
+      struct traits_from_ptr<std::vector<unsigned long> > {
+      static SEXP from (std::vector<unsigned long> *val, int owner = 0) {
+        SEXP result;
+        PROTECT(result = Rf_allocVector(INTSXP, val->size()));
+        for (unsigned pos = 0; pos < val->size(); pos++)
+          {
+            INTEGER_POINTER(result)[pos] = ((*val)[pos]);
+          }
+        UNPROTECT(1);
+        return(result);
+      }
+    };
+   // vectors of int (32 or 64 bit int, depending on architecture)
+    template <>
+      struct traits_from_ptr<std::vector<long> > {
+      static SEXP from (std::vector<long> *val, int owner = 0) {
+        SEXP result;
+        PROTECT(result = Rf_allocVector(INTSXP, val->size()));
+        for (unsigned pos = 0; pos < val->size(); pos++)
+          {
+            INTEGER_POINTER(result)[pos] = ((*val)[pos]);
+          }
+        UNPROTECT(1);
+        return(result);
+      }
+    };
+
+   // vectors of 64 bit unsigned long long
+    template <>
+      struct traits_from_ptr<std::vector<unsigned long long> > {
+      static SEXP from (std::vector<unsigned long long> *val, int owner = 0) {
         SEXP result;
         PROTECT(result = Rf_allocVector(INTSXP, val->size()));
         for (unsigned pos = 0; pos < val->size(); pos++)
@@ -139,8 +167,8 @@
     };
      // vectors of 64 bit int
     template <>
-      struct traits_from_ptr<std::vector<long int> > {
-      static SEXP from (std::vector<long int> *val, int owner = 0) {
+      struct traits_from_ptr<std::vector<long long> > {
+      static SEXP from (std::vector<long long> *val, int owner = 0) {
         SEXP result;
         PROTECT(result = Rf_allocVector(INTSXP, val->size()));
         for (unsigned pos = 0; pos < val->size(); pos++)
@@ -151,35 +179,7 @@
         return(result);
       }
     };
-#else
-    template <>
-      struct traits_from_ptr<std::vector<unsigned long long int> > {
-      static SEXP from (std::vector<unsigned long long int> *val, int owner = 0) {
-        SEXP result;
-        PROTECT(result = Rf_allocVector(INTSXP, val->size()));
-        for (unsigned pos = 0; pos < val->size(); pos++)
-          {
-            INTEGER_POINTER(result)[pos] = ((*val)[pos]);
-          }
-        UNPROTECT(1);
-        return(result);
-      }
-    };
-     // vectors of 64 bit int
-    template <>
-      struct traits_from_ptr<std::vector<long long int> > {
-      static SEXP from (std::vector<long long int> *val, int owner = 0) {
-        SEXP result;
-        PROTECT(result = Rf_allocVector(INTSXP, val->size()));
-        for (unsigned pos = 0; pos < val->size(); pos++)
-          {
-            INTEGER_POINTER(result)[pos] = ((*val)[pos]);
-          }
-        UNPROTECT(1);
-        return(result);
-      }
-    };
-#endif
+
     // vectors of bool
     template <>
       struct traits_from_ptr<std::vector<bool> > {
@@ -194,7 +194,7 @@
         return(result);
       }
     };
-    
+
     // vectors of strings
     template <>
       struct traits_from_ptr<std::vector<std::basic_string<char> > > {
@@ -203,7 +203,7 @@
          PROTECT(result = Rf_allocVector(STRSXP, val->size()));
          for (unsigned pos = 0; pos < val->size(); pos++)
            {
-             CHARACTER_POINTER(result)[pos] = Rf_mkChar(((*val)[pos]).c_str());
+             SET_STRING_ELT(result, pos, Rf_mkChar(((*val)[pos]).c_str()));
            }
         UNPROTECT(1);
         return(result);
@@ -395,20 +395,19 @@
     }
   };
 
-#if defined(SWIGWORDSIZE64)
-    // 64 bit integer types
+    // long (32 bit or 64 bit depending on architecture)
     template <>
-  struct traits_asptr < std::vector<unsigned long int> > {
-    static int asptr(SEXP obj, std::vector<unsigned long int> **val) {
-      std::vector<unsigned long int> *p;
+  struct traits_asptr < std::vector<unsigned long> > {
+    static int asptr(SEXP obj, std::vector<unsigned long> **val) {
+      std::vector<unsigned long> *p;
       unsigned int sexpsz = Rf_length(obj);
-      p = new std::vector<unsigned long int>(sexpsz);
+      p = new std::vector<unsigned long>(sexpsz);
       SEXP coerced;
       PROTECT(coerced = Rf_coerceVector(obj, INTSXP));
       int *S = INTEGER_POINTER(coerced);
       for (unsigned pos = 0; pos < p->size(); pos++)
         {
-          (*p)[pos] = static_cast<unsigned long int>(S[pos]);
+          (*p)[pos] = static_cast<unsigned long>(S[pos]);
         }
       int res = SWIG_OK;
       if (SWIG_IsOK(res)) {
@@ -420,18 +419,18 @@
   };
 
     template <>
-  struct traits_asptr < std::vector<long int> > {
-    static int asptr(SEXP obj, std::vector<long int> **val) {
-      std::vector<long int> *p;
+  struct traits_asptr < std::vector<long> > {
+    static int asptr(SEXP obj, std::vector<long> **val) {
+      std::vector<long> *p;
       // not sure how to check the size of the SEXP obj is correct
       int sexpsz = Rf_length(obj);
-      p = new std::vector<long int>(sexpsz);
+      p = new std::vector<long>(sexpsz);
       SEXP coerced;
       PROTECT(coerced = Rf_coerceVector(obj, INTSXP));
       int *S = INTEGER_POINTER(coerced);
       for (unsigned pos = 0; pos < p->size(); pos++)
         {
-          (*p)[pos] = static_cast<long int>(S[pos]);
+          (*p)[pos] = static_cast<long>(S[pos]);
         }
       int res = SWIG_OK;
       if (SWIG_IsOK(res)) {
@@ -442,20 +441,19 @@
     }
   };
 
-#else
     // 64 bit integer types
     template <>
-  struct traits_asptr < std::vector<unsigned long long int> > {
-    static int asptr(SEXP obj, std::vector<unsigned long long int> **val) {
-      std::vector<unsigned long long int> *p;
+  struct traits_asptr < std::vector<unsigned long long> > {
+    static int asptr(SEXP obj, std::vector<unsigned long long> **val) {
+      std::vector<unsigned long long> *p;
       unsigned int sexpsz = Rf_length(obj);
-      p = new std::vector<unsigned long long int>(sexpsz);
+      p = new std::vector<unsigned long long>(sexpsz);
       SEXP coerced;
       PROTECT(coerced = Rf_coerceVector(obj, INTSXP));
       int *S = INTEGER_POINTER(coerced);
       for (unsigned pos = 0; pos < p->size(); pos++)
         {
-          (*p)[pos] = static_cast<unsigned long long int>(S[pos]);
+          (*p)[pos] = static_cast<unsigned long long>(S[pos]);
         }
       int res = SWIG_OK;
       if (SWIG_IsOK(res)) {
@@ -467,18 +465,18 @@
   };
 
     template <>
-  struct traits_asptr < std::vector<long long int> > {
-    static int asptr(SEXP obj, std::vector<long long int> **val) {
-      std::vector<long long int> *p;
+  struct traits_asptr < std::vector<long long> > {
+    static int asptr(SEXP obj, std::vector<long long> **val) {
+      std::vector<long long> *p;
       // not sure how to check the size of the SEXP obj is correct
       int sexpsz = Rf_length(obj);
-      p = new std::vector<long long int>(sexpsz);
+      p = new std::vector<long long>(sexpsz);
       SEXP coerced;
       PROTECT(coerced = Rf_coerceVector(obj, INTSXP));
       int *S = INTEGER_POINTER(coerced);
       for (unsigned pos = 0; pos < p->size(); pos++)
         {
-          (*p)[pos] = static_cast<long long int>(S[pos]);
+          (*p)[pos] = static_cast<long long>(S[pos]);
         }
       int res = SWIG_OK;
       if (SWIG_IsOK(res)) {
@@ -488,8 +486,6 @@
       return res;
     }
   };
-
-#endif
 
     template <>
   struct traits_asptr < std::vector<bool> > {
@@ -544,7 +540,7 @@
   struct traits_asptr < std::vector<T> > {
     static int asptr(SEXP obj, std::vector<T> **val) {
       std::vector<T> *p;
-      int res = SWIG_R_ConvertPtr(obj, (void**)&p, type_info< std::vector<T> >(), 0);
+      int res = SWIG_ConvertPtr(obj, (void**)&p, type_info< std::vector<T> >(), 0);
       if (SWIG_IsOK(res)) {
         if (val) *val = p;
       }
@@ -653,6 +649,27 @@
             for (unsigned vpos = 0; vpos < val->at(pos).size(); ++vpos)
               {
                 LOGICAL_POINTER(VECTOR_ELT(result, pos))[vpos] = (val->at(pos).at(vpos));
+              }
+          }
+        UNPROTECT(1);
+        return(result);
+      }
+    };
+
+  template <>
+    struct traits_from_ptr<std::vector<std::vector<std::basic_string<char> > > > {
+      static SEXP from (std::vector< std::vector<std::basic_string<char> > > *val, int owner = 0) {
+        SEXP result;
+        // allocate the R list
+        PROTECT(result = Rf_allocVector(VECSXP, val->size()));
+        for (unsigned pos = 0; pos < val->size(); pos++)
+          {
+            // allocate the R vector
+            SET_VECTOR_ELT(result, pos, Rf_allocVector(STRSXP, val->at(pos).size()));
+            // Fill the R vector
+            for (unsigned vpos = 0; vpos < val->at(pos).size(); ++vpos)
+              {
+                SET_STRING_ELT(VECTOR_ELT(result, pos), vpos, Rf_mkChar(val->at(pos).at(vpos).c_str()));
               }
           }
         UNPROTECT(1);
@@ -806,7 +823,7 @@
     static int asptr(SEXP obj, std::vector< std::vector<T> > **val) {
       std::vector< std::vector<T> > *p;
       Rprintf("vector of vectors - unsupported content\n");
-      int res = SWIG_R_ConvertPtr(obj, (void**)&p, type_info< std::vector< std::vector<T> > > (), 0);
+      int res = SWIG_ConvertPtr(obj, (void**)&p, type_info< std::vector< std::vector<T> > > (), 0);
       if (SWIG_IsOK(res)) {
         if (val) *val = p;
       }
@@ -841,7 +858,7 @@
 %typemap("rtypecheck") std::vector<double>, std::vector<double> *, std::vector<double> &
     %{ is.numeric($arg) %}
 %typemap("rtype") std::vector<double> "numeric"
-%typemap("scoercein") std::vector<double>, std::vector<double> *, std::vector<double> & "$input = as.numeric($input);";
+%typemap("scoercein") std::vector<double>, std::vector<double> *, std::vector<double> & "$input = as.numeric($input);"
 
 %typemap_traits_ptr(SWIG_TYPECHECK_VECTOR, std::vector<float>)
 %traits_type_name(std::vector<float>)
@@ -857,7 +874,7 @@
 %typemap("rtypecheck") std::vector<bool>, std::vector<bool> *, std::vector<bool> &
    %{ is.logical($arg) %}
 %typemap("rtype") std::vector<bool> "logical"
-%typemap("scoercein") std::vector<bool> , std::vector<bool> & "$input = as.logical($input);";
+%typemap("scoercein") std::vector<bool> , std::vector<bool> & "$input = as.logical($input);"
 
 
 %typemap_traits_ptr(SWIG_TYPECHECK_VECTOR, std::vector<int>);
@@ -866,7 +883,7 @@
    %{ is.integer($arg) || is.numeric($arg) %}
 
 %typemap("rtype") std::vector<int> "integer"
-%typemap("scoercein") std::vector<int> , std::vector<int> *, std::vector<int> & "$input = as.integer($input);";
+%typemap("scoercein") std::vector<int> , std::vector<int> *, std::vector<int> & "$input = as.integer($input);"
 
 // strings
 %typemap("rtype") std::vector< std::basic_string<char> >,  
@@ -887,8 +904,6 @@ std::vector< std::basic_string<char> > *,
    std::vector< std::basic_string<char> > & 
 %{    %}
 
-%apply std::vector< std::basic_string<char> > { std::vector< std::string> };
-
 // all the related integer vectors
 // signed
 %typemap_traits_ptr(SWIG_TYPECHECK_VECTOR, std::vector<signed char>);
@@ -897,13 +912,11 @@ std::vector< std::basic_string<char> > *,
 %typemap_traits_ptr(SWIG_TYPECHECK_VECTOR, std::vector<signed short>);
 %traits_type_name(std::vector<signed short>);
 
-#if defined(SWIGWORDSIZE64)
-%typemap_traits_ptr(SWIG_TYPECHECK_VECTOR, std::vector<long int>);
-%traits_type_name(std::vector<long int>);
-#else
-%typemap_traits_ptr(SWIG_TYPECHECK_VECTOR, std::vector<long long int>);
-%traits_type_name(std::vector<long long int>);
-#endif
+%typemap_traits_ptr(SWIG_TYPECHECK_VECTOR, std::vector<long>);
+%traits_type_name(std::vector<long>);
+
+%typemap_traits_ptr(SWIG_TYPECHECK_VECTOR, std::vector<long long>);
+%traits_type_name(std::vector<long long>);
 
 // unsigned
 %typemap_traits_ptr(SWIG_TYPECHECK_VECTOR, std::vector<unsigned char>);
@@ -915,13 +928,11 @@ std::vector< std::basic_string<char> > *,
 %typemap_traits_ptr(SWIG_TYPECHECK_VECTOR, std::vector<unsigned int>);
 %traits_type_name(std::vector<unsigned int>);
 
-#if defined(SWIGWORDSIZE64)
-%typemap_traits_ptr(SWIG_TYPECHECK_VECTOR, std::vector<unsigned long int>);
-%traits_type_name(std::vector<unsigned long int>);
-#else
-%typemap_traits_ptr(SWIG_TYPECHECK_VECTOR, std::vector<unsigned long long int>);
-%traits_type_name(std::vector<unsigned long long int>);
-#endif
+%typemap_traits_ptr(SWIG_TYPECHECK_VECTOR, std::vector<unsigned long>);
+%traits_type_name(std::vector<unsigned long>);
+
+%typemap_traits_ptr(SWIG_TYPECHECK_VECTOR, std::vector<unsigned long long>);
+%traits_type_name(std::vector<unsigned long long>);
 
 // These R side typemaps are common for integer types
 // but we can't use %apply as it will copy the C side ones too
@@ -932,13 +943,11 @@ std::vector< std::basic_string<char> > *,
 %typemap("rtype") std::vector<unsigned char>, std::vector<unsigned char> *, std::vector<unsigned char> & = std::vector<int>;
 %typemap("rtype") std::vector<unsigned int>, std::vector<unsigned int> *, std::vector<unsigned int> & = std::vector<int>;
 
-#if defined(SWIGWORDSIZE64)
-%typemap("rtype") std::vector<long int>, std::vector<long int> *, std::vector<long int> & = std::vector<int>;
-%typemap("rtype") std::vector<unsigned long int>, std::vector<unsigned long int> *, std::vector<unsigned long int> & = std::vector<int>;
-#else
-%typemap("rtype") std::vector<long long int>, std::vector<long long int> *, std::vector<long long int> & = std::vector<int>;
-%typemap("rtype") std::vector<unsigned long long int>, std::vector<unsigned long long int> *, std::vector<unsigned long long int> & = std::vector<int>;
-#endif
+%typemap("rtype") std::vector<long>, std::vector<long> *, std::vector<long> & = std::vector<int>;
+%typemap("rtype") std::vector<unsigned long>, std::vector<unsigned long> *, std::vector<unsigned long> & = std::vector<int>;
+
+%typemap("rtype") std::vector<long long>, std::vector<long long> *, std::vector<long long> & = std::vector<int>;
+%typemap("rtype") std::vector<unsigned long long>, std::vector<unsigned long long> *, std::vector<unsigned long long> & = std::vector<int>;
 
 
 %typemap("scoercein") std::vector<signed char>, std::vector<signed char> *, std::vector<signed char> & = std::vector<int>;
@@ -946,26 +955,22 @@ std::vector< std::basic_string<char> > *,
 %typemap("scoercein") std::vector<unsigned char>, std::vector<unsigned char> *, std::vector<unsigned char> & = std::vector<int>;
 %typemap("scoercein") std::vector<unsigned int>, std::vector<unsigned int> *, std::vector<unsigned int> & = std::vector<int>;
 
-#if defined(SWIGWORDSIZE64)
-%typemap("scoercein") std::vector<long int>, std::vector<long int> *, std::vector<long int> & = std::vector<int>;
-%typemap("scoercein") std::vector<unsigned long int>, std::vector<unsigned long int> *, std::vector<unsigned long int> & = std::vector<int>;
-#else
-%typemap("scoercein") std::vector<long long int>, std::vector<long long int> *, std::vector<long long int> & = std::vector<int>;
-%typemap("scoercein") std::vector<unsigned long long int>, std::vector<unsigned long long int> *, std::vector<unsigned long long int> & = std::vector<int>;
-#endif
+%typemap("scoercein") std::vector<long>, std::vector<long> *, std::vector<long> & = std::vector<int>;
+%typemap("scoercein") std::vector<unsigned long>, std::vector<unsigned long> *, std::vector<unsigned long> & = std::vector<int>;
+
+%typemap("scoercein") std::vector<long long>, std::vector<long long> *, std::vector<long long> & = std::vector<int>;
+%typemap("scoercein") std::vector<unsigned long long>, std::vector<unsigned long long> *, std::vector<unsigned long long> & = std::vector<int>;
 
 %typemap("rtypecheck") std::vector<signed char>, std::vector<signed char> *, std::vector<signed char> & = std::vector<int>;
 %typemap("rtypecheck") std::vector<signed short>, std::vector<signed short> *, std::vector<signed short> & = std::vector<int>;
 %typemap("rtypecheck") std::vector<unsigned char>, std::vector<unsigned char> *, std::vector<unsigned char> & = std::vector<int>;
 %typemap("rtypecheck") std::vector<unsigned int>, std::vector<unsigned int> *, std::vector<unsigned int> & = std::vector<int>;
 
-#if defined(SWIGWORDSIZE64)
-%typemap("rtypecheck") std::vector<long int>, std::vector<long int> *, std::vector<long int> &  = std::vector<int>;
-%typemap("rtypecheck") std::vector<unsigned long int>, std::vector<unsigned long int> *, std::vector<unsigned long int> & = std::vector<int>;
-#else
-%typemap("rtypecheck") std::vector<long long int>, std::vector<long long int> *, std::vector<long long int> & = std::vector<int>;
-%typemap("rtypecheck") std::vector<unsigned long long int>, std::vector<unsigned long long int> *, std::vector<unsigned long long int> & = std::vector<int>;
-#endif
+%typemap("rtypecheck") std::vector<long>, std::vector<long> *, std::vector<long> &  = std::vector<int>;
+%typemap("rtypecheck") std::vector<unsigned long>, std::vector<unsigned long> *, std::vector<unsigned long> & = std::vector<int>;
+
+%typemap("rtypecheck") std::vector<long long>, std::vector<long long> *, std::vector<long long> & = std::vector<int>;
+%typemap("rtypecheck") std::vector<unsigned long long>, std::vector<unsigned long long> *, std::vector<unsigned long long> & = std::vector<int>;
 
 ///////////////////////////////////////////////////////////////
 
@@ -974,21 +979,21 @@ std::vector< std::basic_string<char> > *,
 %typemap("rtypecheck") std::vector<std::vector<int> >, std::vector<std::vector<int> > *, std::vector<std::vector<int> > &
    %{ is.list($arg) && all(sapply($arg , is.integer) || sapply($arg, is.numeric)) %}
 %typemap("rtype") std::vector<std::vector<int> >, std::vector<std::vector<int> > *, std::vector<std::vector<int> > & "list"
-%typemap("scoercein") std::vector< std::vector<int> >, std::vector<std::vector<int> > *, std::vector<std::vector<int> > & "$input = lapply($input, as.integer);";
+%typemap("scoercein") std::vector< std::vector<int> >, std::vector<std::vector<int> > *, std::vector<std::vector<int> > & "$input = lapply($input, as.integer);"
 
 %typemap_traits_ptr(SWIG_TYPECHECK_VECTOR, std::vector<std::vector<unsigned int> >);
 %traits_type_name(std::vector< std::vector<unsigned int> >);
 %typemap("rtypecheck") std::vector<std::vector<unsigned int> >, std::vector<std::vector<unsigned int> > *, std::vector<std::vector<unsigned int> > &
    %{ is.list($arg) && all(sapply($arg , is.integer) || sapply($arg, is.numeric)) %}
 %typemap("rtype") std::vector<std::vector<unsigned int> >, std::vector<std::vector<unsigned int> > *, std::vector<std::vector<unsigned int> > & "list"
-%typemap("scoercein") std::vector< std::vector<unsigned int> >, std::vector<std::vector<int> > *, std::vector<std::vector<unsigned int> > & "$input = lapply($input, as.integer);";
+%typemap("scoercein") std::vector< std::vector<unsigned int> >, std::vector<std::vector<int> > *, std::vector<std::vector<unsigned int> > & "$input = lapply($input, as.integer);"
 
 %typemap_traits_ptr(SWIG_TYPECHECK_VECTOR, std::vector<std::vector<float> >);
 %traits_type_name(std::vector< std::vector<float> >);
 %typemap("rtypecheck") std::vector<std::vector<float> >, std::vector<std::vector<float> > *, std::vector<std::vector<float> > &
    %{ is.list($arg) && all(sapply($arg , is.integer) || sapply($arg, is.numeric)) %}
 %typemap("rtype") std::vector<std::vector<float> >, std::vector<std::vector<float> > *, std::vector<std::vector<float> > "list"
-%typemap("scoercein") std::vector< std::vector<float> >, std::vector<std::vector<float> > *, std::vector<std::vector<float> > & "$input = lapply($input, as.numeric);";
+%typemap("scoercein") std::vector< std::vector<float> >, std::vector<std::vector<float> > *, std::vector<std::vector<float> > & "$input = lapply($input, as.numeric);"
 
 %typemap_traits_ptr(SWIG_TYPECHECK_VECTOR, std::vector<std::vector<double> >);
 %traits_type_name(std::vector< std::vector<double> >);
@@ -1003,7 +1008,14 @@ std::vector< std::basic_string<char> > *,
 %typemap("rtypecheck") std::vector<std::vector<bool> >, std::vector<std::vector<bool> > *, std::vector<std::vector<bool> > &
    %{ is.list($arg) && all(sapply($arg , is.integer) || sapply($arg, is.numeric)) %}
 %typemap("rtype") std::vector<std::vector<bool> >, std::vector<std::vector<bool> > *, std::vector<std::vector<bool> > & "list"
-%typemap("scoercein") std::vector< std::vector<bool> >, std::vector<std::vector<bool> > *, std::vector<std::vector<bool> > & "$input = lapply($input, as.logical);";
+%typemap("scoercein") std::vector< std::vector<bool> >, std::vector<std::vector<bool> > *, std::vector<std::vector<bool> > & "$input = lapply($input, as.logical);"
+
+%typemap_traits_ptr(SWIG_TYPECHECK_VECTOR, std::vector<std::vector<std::basic_string<char> > >);
+%traits_type_name(std::vector< std::vector<std::basic_string<char> > >);
+%typemap("rtypecheck") std::vector<std::vector<std::basic_string<char> > >, std::vector<std::vector<std::basic_string<char> > > *, std::vector<std::vector<std::basic_string<char> > > &
+   %{ is.list($arg) && all(sapply($arg , is.character)) %}
+%typemap("rtype") std::vector<std::vector<std::basic_string<char> > >, std::vector<std::vector<std::basic_string<char> > > *, std::vector<std::vector<std::basic_string<char> > > & "list"
+%typemap("scoercein") std::vector< std::vector<std::basic_string<char> > >, std::vector<std::vector<std::basic_string<char> > > *, std::vector<std::vector<std::basic_string<char> > > & "$input = lapply($input, as.character);"
 
 // we don't want these to be given R classes as they
 // have already been turned into R vectors.
@@ -1049,25 +1061,27 @@ std::vector< std::basic_string<char> > *,
    std::vector< std::vector<double> >&,
    std::vector< std::vector<bool> >,
    std::vector< std::vector<bool> >*,
-   std::vector< std::vector<bool> >&
+   std::vector< std::vector<bool> >&,
+   std::vector< std::vector<std::basic_string<char> > >,
+   std::vector< std::vector<std::basic_string<char> > >*,
+   std::vector< std::vector<std::basic_string<char> > >&
  %{    %}
 
-#if defined(SWIGWORDSIZE64)
-%typemap(scoerceout) std::vector<long int>,
-   std::vector<long int>*,
-   std::vector<long int>&,
-   std::vector<unsigned long int>,
-   std::vector<unsigned long int>*,
-   std::vector<unsigned long int>&
- %{    %}
-#else
-
-%typemap(scoerceout) std::vector<long long int>,
-   std::vector<long long int>*,
-   std::vector<long long int>&,
-   std::vector<unsigned long long int>,
-   std::vector<unsigned long long int>*,
-   std::vector<unsigned long long int>&
+%typemap(scoerceout) std::vector<long>,
+   std::vector<long>*,
+   std::vector<long>&,
+   std::vector<unsigned long>,
+   std::vector<unsigned long>*,
+   std::vector<unsigned long>&
  %{    %}
 
-#endif
+%typemap(scoerceout) std::vector<long long>,
+   std::vector<long long>*,
+   std::vector<long long>&,
+   std::vector<unsigned long long>,
+   std::vector<unsigned long long>*,
+   std::vector<unsigned long long>&
+ %{    %}
+
+%apply std::vector< std::basic_string<char> > { std::vector<std::string> };
+%apply std::vector< std::vector< std::basic_string<char> > > { std::vector< std::vector<std::string> > };

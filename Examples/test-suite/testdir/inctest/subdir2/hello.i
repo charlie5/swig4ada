@@ -3,6 +3,7 @@
 
 %{
 typedef char * TypedefString;
+#include <string.h>
 %}
 
 
@@ -14,8 +15,8 @@ typedef char * TypedefString;
   };
 
   TypedefString importtest2(TypedefString str) {
-    strcpy(str, "white");
-    return str;
+    static char result[] = "white";
+    return strcmp(str, "black") == 0 ? result : str;
   }
 
 %}

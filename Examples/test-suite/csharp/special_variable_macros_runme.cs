@@ -20,5 +20,11 @@ public class runme {
       throw new Exception("test failed");
     NewName newName = NewName.factory("factoryname");
     name = newName.getStoredName();
+    if (special_variable_macros.makeStringInt("stringint", 999) != "stringint")
+      throw new Exception("test failed");
+    if (special_variable_macros.provideStringInt(999) != "1000")
+      throw new Exception("test failed");
+    if (special_variable_macros.shortFunction(1, 1) != (200*2 + 200*3))
+      throw new Exception("test failed");
   }
 }

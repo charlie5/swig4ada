@@ -7,7 +7,7 @@
 </head>
 <body>
 
-<H1><a name="Javascript">27 SWIG and Javascript</a></H1>
+<H1><a name="Javascript">28 SWIG and Javascript</a></H1>
 <!-- INDEX -->
 <div class="sectiontoc">
 <ul>
@@ -22,6 +22,7 @@
 <ul>
 <li><a href="#Javascript_node_extensions">Creating node.js Extensions</a>
 <ul>
+<li><a href="#Javascript_using_yeoman">Using <code>yeoman</code> to generate a Node-API skeleton</a>
 <li><a href="#Javascript_troubleshooting">Troubleshooting</a>
 </ul>
 <li><a href="#Javascript_embedded_webkit">Embedded Webkit</a>
@@ -43,6 +44,7 @@
 <li><a href="#Javascript_emitter">Emitter</a>
 <li><a href="#Javascript_emitter_states">Emitter states</a>
 <li><a href="#Javascript_jsc_exceptions">Handling Exceptions in JavascriptCore</a>
+<li><a href="#Javascript_napi_exceptions">Handling Exceptions in Node-API</a>
 </ul>
 </ul>
 </div>
@@ -52,21 +54,26 @@
 
 <p>This chapter describes SWIG's support of Javascript. It does not cover SWIG basics, but only information that is specific to this module.</p>
 
-<H2><a name="Javascript_overview">27.1 Overview</a></H2>
+<H2><a name="Javascript_overview">28.1 Overview</a></H2>
 
 
 <p>Javascript is a prototype-based scripting language that is dynamic, weakly typed and has first-class functions. Its arguably the most popular language for web development.
-Javascript has gone beyond being a browser-based scripting language and with <a href="https://nodejs.org">node.js</a>, it is also used as a backend development language.</p>
+Javascript has gone beyond being a browser-based scripting language and can be used as a backend development language with <a href="https://nodejs.org">node.js</a>.</p>
 <p>Native Javascript extensions can be used for applications that embed a web-browser view or that embed a Javascript engine (such as <em>node.js</em>). Extending a general purpose web-browser is not possible as this would be a severe security issue.</p>
-<p>SWIG Javascript currently supports <strong>JavascriptCore</strong>, the Javascript engine used by <code>Safari/Webkit</code>, and <a href="https://v8.dev/"><strong>v8</strong></a>, which is used by <code>Chromium</code> and <code>node.js</code>.</p>
+<p>SWIG/Javascript currently supports:</p>
+<ul>
+<li><strong>Node.js</strong> 12 or later.  SWIG can optionally generate Node-API code, which needs Node.js 12.17 or later.</li>
+<li><strong>JavascriptCore</strong> 4.0 or later.  JavascriptCore is used by Safari/Webkit</li>
+<li><a href="https://v8.dev/"><strong>v8</strong></a> 7.4 or later (we currently CI test with 7.8 and 10.2).  v8 is used by Chromium and Node.js.</li>
+</ul>
 <p><a href="https://webkit.org/">WebKit</a> is a modern browser implementation available as open-source which can be embedded into an application.
-With <a href="https://github.com/rogerwang/node-webkit">node-webkit</a> there is a platform which uses Google's <code>Chromium</code> as Web-Browser widget and <code>node.js</code> for javascript extensions.
+<a href="https://github.com/nwjs/nw.js">NW.jst</a> provides an app runtime which uses Google's Chromium as Web-Browser widget and node.js for javascript extensions.
 </p>
 
-<H2><a name="Javascript_preliminaries">27.2 Preliminaries</a></H2>
+<H2><a name="Javascript_preliminaries">28.2 Preliminaries</a></H2>
 
 
-<H3><a name="Javascript_running_swig">27.2.1 Running SWIG</a></H3>
+<H3><a name="Javascript_running_swig">28.2.1 Running SWIG</a></H3>
 
 
 <p>Suppose that you defined a SWIG module such as the following:</p>
@@ -79,7 +86,7 @@ With <a href="https://github.com/rogerwang/node-webkit">node-webkit</a> there is
 int gcd(int x, int y);
 extern double Foo;</pre>
 </div>
-<p>To build a Javascript module, run SWIG using the <code>-javascript</code> option and a desired target engine <code>-jsc</code>, <code>-v8</code>, or <code>-node</code>. The generator for <code>node</code> is essentially delegating to the <code>v8</code> generator and adds some necessary preprocessor definitions.</p>
+<p>To build a Javascript module, run SWIG using the <code>-javascript</code> option and a desired target engine <code>-jsc</code>, <code>-v8</code>, <code>-node</code> or <code>-napi</code>. <code>-v8</code> allows for interfacing with a raw embedded version of V8. In this case, it is up to the user to implement a binary module loading protocol. There are two generators supporting Node.js. The older generator for <code>node</code> is essentially delegating to the <code>v8</code> generator and adds some necessary preprocessor definitions. The more recent <code>-napi</code> generator produces <code>node-addon-api</code> that interfaces to Node.js through Node-API. The V8 generator is more mature, while the Node-API generator offers a number of advantages such as binary stable ABI allowing for publishing of universal binary modules on npm, Electron support and automatic multi-threading.</p>
 <div class="shell">
 <pre>
 $ swig -javascript -jsc example.i</pre>
@@ -89,19 +96,7 @@ $ swig -javascript -jsc example.i</pre>
 <pre>
 $ swig -c++ -javascript -jsc example.i</pre>
 </div>
-<p>The V8 code that SWIG generates should work with most versions from 3.11.10 up to 3.29.14 and later.</p>
-<p>The API headers for V8 &gt;= 4.3.0 define constants which SWIG can use to
-determine the V8 version it is compiling for.  For versions &lt; 4.3.0, you
-need to specify the V8 version when running SWIG.  This is specified as a hex
-constant, but the constant is read as pairs of decimal digits, so for V8
-3.25.30 use constant 0x032530.  This scheme can't represent components &gt; 99,
-but this constant is only useful for V8 &lt; 4.3.0, and no V8 versions from
-that era had a component &gt; 99.  For example:</p>
-<div class="shell">
-<pre>
-$ swig -c++ -javascript -v8 -DV8_VERSION=0x032530 example.i</pre>
-</div>
-<p>If you're targeting V8 &gt;= 4.3.0, you would just run swig like so:</p>
+<p>To generate code for V8, you would run swig like so:</p>
 <div class="shell">
 <pre>
 $ swig -c++ -javascript -v8 example.i</pre>
@@ -121,7 +116,7 @@ void example_initialize(v8::Handle&lt;v8::Object&gt; exports)</pre>
 <b>Note</b>: be aware that <code>v8</code> has a C++ API, and thus, the generated modules must be compiled as C++.
 </p>
 
-<H3><a name="Javascript_running_tests_examples">27.2.2 Running Tests and Examples</a></H3>
+<H3><a name="Javascript_running_tests_examples">28.2.2 Running Tests and Examples</a></H3>
 
 
 <p>The configuration for tests and examples currently supports Linux and Mac only and not MinGW (Windows) yet.</p>
@@ -134,48 +129,47 @@ $ sudo apt-get install libjavascriptcoregtk-1.0-dev</pre>
 <p>Running with <code>V8</code> requires <code>libv8</code>:</p>
 <div class="shell">
 <pre>
-$ sudo apt-get install libv8-dev</pre>
+$ sudo apt-get install libnode-dev</pre>
+</div>
+<p>Running with Node-API requires <code>node-addon-api</code>:</p>
+<div class="shell">
+  <pre>
+$ sudo npm install -g node-addon-api</pre>
 </div>
 <p>Examples can be run using</p>
 <div class="shell">
 <pre>
 $ make check-javascript-examples ENGINE=jsc</pre>
 </div>
-<p><code>ENGINE</code> can be <code>node</code>, <code>jsc</code>, or <code>v8</code>.</p>
+<p><code>ENGINE</code> can be <code>node</code>, <code>jsc</code>, <code>v8</code>, or <code>napi</code>.</p>
 <p>The test-suite can be run using</p>
 <div class="shell">
 <pre>
 $ make check-javascript-test-suite ENGINE=jsc</pre>
 </div>
-<p>You can specify a specific <code>V8</code> version for running the examples and tests</p>
-<div class="shell">
-<pre>
-$ make check-javascript-examples V8_VERSION=0x032530 ENGINE=v8</pre>
-</div>
 
-<H3><a name="Javascript_known_issues">27.2.3 Known Issues</a></H3>
+<H3><a name="Javascript_known_issues">28.2.3 Known Issues</a></H3>
 
 
 <p>At the moment, the Javascript generators pass all tests syntactically, i.e., the generated source code compiles. However, there are still remaining runtime issues.</p>
 
 <ul>
-    <li><p>Default optional arguments do not work for all targeted interpreters</p></li>
+    <li><p>Default optional arguments do not work for all targeted interpreters except Node-API</p></li>
     <li><p>Multiple output arguments do not work for JSC</p></li>
     <li><p>C89 incompatibility: the JSC generator might still generate C89 violating code</p></li>
-    <li><p><code>long long</code> is not supported</p></li>
-    <li><p><code>%native</code> is not supported</p></li>
+    <li><p><code>long long</code> is not supported except with Node-API</p></li>
     <li><p>Javascript callbacks are not supported</p></li>
     <li><p><code>instanceOf</code> does not work under JSC</p></li>
 </ul>
 
-<p>The primary development environment has been Linux (Ubuntu 12.04). Windows and Mac OS X have been tested sporadically. Therefore, the generators might have more issues on those platforms. Please report back any problem you observe to help us improving this module quickly.</p>
+<p>The primary development environment has been Linux (Ubuntu 22.04). Windows and Mac OS X have been tested sporadically. Therefore, the generators might have more issues on those platforms. Please report back any problem you observe to help us improving this module quickly.</p>
 
-<H2><a name="Javascript_integration">27.3 Integration</a></H2>
+<H2><a name="Javascript_integration">28.3 Integration</a></H2>
 
 
 <p>This chapter gives a short introduction how to use a native Javascript extension: as a <code>node.js</code> module, and as an extension for an embedded Webkit.</p>
 
-<H3><a name="Javascript_node_extensions">27.3.1 Creating node.js Extensions</a></H3>
+<H3><a name="Javascript_node_extensions">28.3.1 Creating node.js Extensions</a></H3>
 
 
 <p>To install <code>node.js</code> you can download an installer from their <a href="https://launchpad.net/~chris-lea/+archive/node.js">web-site</a> for Mac OS X and Windows. For Linux you can either build the source yourself and run <code>sudo checkinstall</code> or keep to the (probably stone-age) packaged version. For Ubuntu there is a <a href="https://launchpad.net/~chris-lea/+archive/ubuntu/node.js/">PPA</a> available.</p>
@@ -221,7 +215,27 @@ require("./build/Release/example")</pre>
 </div>
 <p>A more detailed explanation is given in the <a href="#Javascript_examples">Examples</a> section.</p>
 
-<H4><a name="Javascript_troubleshooting">27.3.1.1 Troubleshooting</a></H4>
+<H4><a name="Javascript_using_yeoman">28.3.1.1 Using <code>yeoman</code> to generate a Node-API skeleton</a></H4>
+
+
+<p>If targeting Node-API, the easiest way to bootstrap a project is by using the <code>yeoman</code> generator: </p>
+<div class="shell">
+<pre>
+$ sudo npm install -g yo
+$ sudo npm install -g generator-napi-module
+$ mkdir example
+$ cd example
+$ yo napi-module                     # the choice of template is irrelevant, SWIG will replace the C++ code
+$ npm install node-addon-api@latest  # the yeoman version is outdated
+$ swig -javascript -napi -c++ -o src/example.cc example.i
+$ node-gyp configure
+$ node-gyp build
+</pre>
+</div>
+<p>There is also the <a href="https://github.com/mmomtchev/node-magickwand"><code>node-magickwand</code></a> project that can be used as a tutorial for building and publishing a complex C++ library to
+  npm as a ready-to-use real-world binary module.</p>
+
+<H4><a name="Javascript_troubleshooting">28.3.1.2 Troubleshooting</a></H4>
 
 
 <ul>
@@ -233,12 +247,12 @@ require("./build/Release/example")</pre>
 $ sudo apt-get remove gyp</pre>
 </div>
 
-<H3><a name="Javascript_embedded_webkit">27.3.2 Embedded Webkit</a></H3>
+<H3><a name="Javascript_embedded_webkit">28.3.2 Embedded Webkit</a></H3>
 
 
 <p>Webkit is pre-installed on Mac OS X and available as a library for GTK.</p>
 
-<H4><a name="Javascript_osx">27.3.2.1 Mac OS X</a></H4>
+<H4><a name="Javascript_osx">28.3.2.1 Mac OS X</a></H4>
 
 
 <p>There is general information about programming with WebKit on <a href="https://developer.apple.com/library/mac/documentation/cocoa/conceptual/DisplayWebContent/DisplayWebContent.html">Apple Developer Documentation</a>. Details about <code>Cocoa</code> programming are not covered here.</p>
@@ -286,10 +300,10 @@ extern bool example_initialize(JSGlobalContextRef context, JSObjectRef* exports)
 @end</pre>
 </div>
 
-<H4><a name="Javascript_gtk">27.3.2.2 GTK</a></H4>
+<H4><a name="Javascript_gtk">28.3.2.2 GTK</a></H4>
 
 
-<p>There is general information about programming GTK at <a href="https://developer.gnome.org/gtk2/">GTK documentation</a> and in the <a href="https://developer.gnome.org/gtk-tutorial/">GTK tutorial</a>, and for Webkit there is a <a href="http://webkitgtk.org/reference/webkitgtk/stable/index.html">Webkit GTK+ API Reference</a>.</p>
+<p>There is general information about programming GTK at <a href="https://developer.gnome.org/gtk2/">GTK documentation</a> and in the <a href="https://developer.gnome.org/gtk-tutorial/">GTK tutorial</a>, and for Webkit there is a <a href="https://webkitgtk.org/reference/webkitgtk/stable/index.html">Webkit GTK+ API Reference</a>.</p>
 <p>An integration of a native extension 'example' would look like this:</p>
 <div class="code">
 <pre>
@@ -320,7 +334,7 @@ int main(int argc, char* argv[])
   ...
 
   // Load a web page into the browser instance
-  webkit_web_view_load_uri(webView, "http://www.webkitgtk.org/");
+  webkit_web_view_load_uri(webView, "https://www.webkitgtk.org/");
 
   ...
 
@@ -331,7 +345,7 @@ int main(int argc, char* argv[])
 }</pre>
 </div>
 
-<H3><a name="Javascript_applications_webkit">27.3.3 Creating Applications with node-webkit</a></H3>
+<H3><a name="Javascript_applications_webkit">28.3.3 Creating Applications with node-webkit</a></H3>
 
 
 <p>To get started with <code>node-webkit</code> there is a very informative set of <a href="https://github.com/rogerwang/node-webkit/wiki">wiki pages</a>.</p>
@@ -402,7 +416,7 @@ the main window.</p>
 
 <p>
 As known from <code>node.js</code> one can use <code>require</code> to load javascript modules.
-Additionally, <code>node-webkit</code> provides an API that allows to manipulate the window's menu,
+Additionally, <code>node-webkit</code> provides an API that allows manipulating the window's menu,
 open new windows, and many more things.
 </p>
 
@@ -422,12 +436,12 @@ open new windows, and many more things.
 };</pre>
 </div>
 
-<H2><a name="Javascript_examples">27.4 Examples</a></H2>
+<H2><a name="Javascript_examples">28.4 Examples</a></H2>
 
 
 <p>Some basic examples are shown here in more detail.</p>
 
-<H3><a name="Javascript_simple_example">27.4.1 Simple</a></H3>
+<H3><a name="Javascript_simple_example">28.4.1 Simple</a></H3>
 
 
 <p>The common example <code>simple</code> looks like this:</p>
@@ -475,9 +489,9 @@ example.Foo = 3.1415926;</pre>
 </div>
 <p>First the module <code>example</code> is loaded from the previously built extension. Global methods and variables are available in the scope of the module.</p>
 
-<p><b>Note</b>: ECMAScript 5, the currently implemented Javascript standard, does not have modules. <code>node.js</code> and other implementations provide this mechanism defined by the <a href="http://wiki.commonjs.org/wiki/CommonJS">CommonJS</a> group. For browsers this is provided by <a href="http://browserify.org">Browserify</a>, for instance.</p>
+<p><b>Note</b>: ECMAScript 5, the currently implemented Javascript standard, does not have modules. <code>node.js</code> and other implementations provide this mechanism defined by the <a href="https://wiki.commonjs.org/wiki/CommonJS">CommonJS</a> group. For browsers this is provided by <a href="https://browserify.org">Browserify</a>, for instance.</p>
 
-<H3><a name="Javascript_class_example">27.4.2 Class</a></H3>
+<H3><a name="Javascript_class_example">28.4.2 Class</a></H3>
 
 
 <p>The common example <code>class</code> defines three classes, <code>Shape</code>, <code>Circle</code>, and <code>Square</code>:</p>
@@ -607,15 +621,15 @@ at emitKey (readline.js:1095:12)</pre>
 <b>Note</b>: In ECMAScript 5 there is no concept for classes. Instead each function can be used as a constructor function which is executed by the 'new' operator. Furthermore, during construction the key property <code>prototype</code> of the constructor function is used to attach a prototype instance to the created object. A prototype is essentially an object itself that is the first-class delegate of a class used whenever the access to a property of an object fails. The very same prototype instance is shared among all instances of one type. Prototypal inheritance is explained in more detail on in <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Inheritance_and_the_prototype_chain">Inheritance and the prototype chain</a>, for instance.
 </p>
 
-<H2><a name="Javascript_implementation">27.5 Implementation</a></H2>
+<H2><a name="Javascript_implementation">28.5 Implementation</a></H2>
 
 
 <p>The Javascript Module implementation has taken a very different approach compared to other language modules in order to support different Javascript interpreters.</p>
 
-<H3><a name="Javascript_source_code">27.5.1 Source Code</a></H3>
+<H3><a name="Javascript_source_code">28.5.1 Source Code</a></H3>
 
 
-<p>The Javascript module is implemented in <code>Source/Modules/javascript.cxx</code>. It dispatches the code generation to a <code>JSEmitter</code> instance, <code>V8Emitter</code> or <code>JSCEmitter</code>. Additionally there are some helpers: <code>Template</code>, for templated code generation, and <code>JSEmitterState</code>, which is used to manage state information during AST traversal. This rough map shall make it easier to find a way through this huge source file:</p>
+<p>The Javascript module is implemented in <code>Source/Modules/javascript.cxx</code>. It dispatches the code generation to a <code>JSEmitter</code> instance, <code>V8Emitter</code>, <code>JSCEmitter</code> or <code>NAPIEmitter</code>. Additionally there are some helpers: <code>Template</code>, for templated code generation, and <code>JSEmitterState</code>, which is used to manage state information during AST traversal. This rough map shall make it easier to find a way through this huge source file:</p>
 <div class="code">
 <pre>
 // module wide defines
@@ -639,6 +653,7 @@ class JSEmitter { ... };
 
 JSEmitter *swig_javascript_create_JSCEmitter();
 JSEmitter *swig_javascript_create_V8Emitter();
+JSEmitter *swig_javascript_create_NAPIEmitter();
 
 // ###############################
 // # Javascript module
@@ -677,7 +692,8 @@ class JSCEmitter: public JSEmitter { ... };
 
 JSCEmitter::JSCEmitter() { ... }
 
-void JSCEmitter::marshalInputArgs(Node *n, ParmList *parms, Wrapper *wrapper, MarshallingMode mode, bool is_member, bool is_static) { ... }
+void JSCEmitter::marshalInputArgs(Node *n, ParmList *parms, Wrapper *wrapper,
+                                  MarshallingMode mode, bool is_member, bool is_static) { ... }
 ...
 
 // JSCEmitter factory
@@ -713,10 +729,10 @@ Template::Template(const String *code_) { ... }
 ...</pre>
 </div>
 
-<H3><a name="Javascript_code_templates">27.5.2 Code Templates</a></H3>
+<H3><a name="Javascript_code_templates">28.5.2 Code Templates</a></H3>
 
 
-<p>All generated code is created on the basis of code templates. The templates for <em>JavascriptCore</em> can be found in <code>Lib/javascript/jsc/javascriptcode.swg</code>, for <em>v8</em> in <code>Lib/javascript/v8/javascriptcode.swg</code>.</p>
+<p>All generated code is created on the basis of code templates. The templates for <em>JavascriptCore</em> can be found in <code>Lib/javascript/jsc/javascriptcode.swg</code>, for <em>v8</em> in <code>Lib/javascript/v8/javascriptcode.swg</code> and for <em>Node-API</em> in <code>Lib/javascript/napi/javascriptcode.swg</code>.</p>
 <p>To track the originating code template for generated code you can run</p>
 <div class="shell">
 <pre>
@@ -752,7 +768,7 @@ t_register.replace("$jsparent", state.clazz(NAME_MANGLED))
 </div>
 <p><code>Template</code> creates a copy of that string and <code>Template::replace</code> uses Swig's <code>Replaceall</code> to replace variables in the template. <code>Template::trim</code> can be used to eliminate leading and trailing whitespaces. <code>Template::print</code> is used to write the final template string to a Swig <code>DOH</code> (based on <code>Printv</code>). All methods allow chaining.</p>
 
-<H3><a name="Javascript_emitter">27.5.3 Emitter</a></H3>
+<H3><a name="Javascript_emitter">28.5.3 Emitter</a></H3>
 
 
 <p>The Javascript module delegates code generation to a <code>JSEmitter</code> instance. The following extract shows the essential interface:</p>
@@ -871,7 +887,7 @@ int JAVASCRIPT::classHandler(Node *n) {
 </div>
 <p>In <code>enterClass</code> the emitter stores state information that is necessary when processing class members. In <code>exitClass</code> the wrapper code for the whole class is generated.</p>
 
-<H3><a name="Javascript_emitter_states">27.5.4 Emitter states</a></H3>
+<H3><a name="Javascript_emitter_states">28.5.4 Emitter states</a></H3>
 
 
 <p>For storing information during the AST traversal the emitter provides a <code>JSEmitterState</code> with different slots to store data representing the scopes global, class, function, and variable.</p>
@@ -915,13 +931,14 @@ state.clazz(NAME, Getattr(n, "sym:name"));</pre>
 <p>State information can be retrieved using <code>state.clazz(NAME)</code> or with <code>Getattr</code> on <code>state.clazz()</code> which actually returns a <code>Hash</code> instance.</p>
 
 
-<H3><a name="Javascript_jsc_exceptions">27.5.5 Handling Exceptions in JavascriptCore</a></H3>
+<H3><a name="Javascript_jsc_exceptions">28.5.5 Handling Exceptions in JavascriptCore</a></H3>
 
 
 <p>Applications with an embedded JavascriptCore should be able to present detailed exception messages that occur in the Javascript engine. Below is an example derived from code provided by Brian Barnes on how these exception details can be extracted.</p>
 <div class="code">
 <pre>
-void script_exception_to_string(JSContextRef js_context, JSValueRef exception_value_ref, char* return_error_string, int return_error_string_max_length)
+void script_exception_to_string(JSContextRef js_context, JSValueRef exception_value_ref,
+                                char* return_error_string, int return_error_string_max_length)
 {
   JSObjectRef exception_object;
   JSValueRef value_ref;
@@ -995,5 +1012,30 @@ if(js_exception)
 }</pre>
 </div>
 
+<H3><a name="Javascript_napi_exceptions">28.5.6 Handling Exceptions in Node-API</a></H3>
+
+
+<p>Node-API is the only generator that provides fully automatic conversion of C++ exceptions to JavaScript exceptions when building with C++ exceptions enabled in `binding.gyp`:</p>
+<div class="code">
+<pre>
+'conditions': [
+  ['OS=="mac"',
+    {
+      'xcode_settings': {
+        'GCC_ENABLE_CPP_RTTI': 'YES',
+        'GCC_ENABLE_CPP_EXCEPTIONS' : 'YES'
+      }
+    }
+  ],
+  ['OS=="linux" or OS=="freebsd" or OS=="openbsd" or OS=="solaris"',
+    {
+      'cflags!': [ '-fno-exceptions' ],
+      'cflags_cc!': [ '-fno-exceptions', '-fno-rtti' ]
+    }
+  ]
+]
+</pre>
+</div>
+<p>In this case, nothing else is needed for the C++ exceptions to be passed to JavaScript.</p>
 </body>
 </html>

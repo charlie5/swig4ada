@@ -12,7 +12,7 @@ comment_verifier.check(inspect.getdoc(doxygen_misc_constructs.getAddress),
 :param fileName: name of the file, where the source line is located
 :type line: int
 :param line: line number
-:type isGetSize: boolean
+:type isGetSize: boolean, optional
 :param isGetSize: if set, for every object location both address and size are returned
 
 Connection::getId() """)
@@ -44,7 +44,7 @@ comment_verifier.check(inspect.getdoc(doxygen_misc_constructs.getConnection),
 
 
 comment_verifier.check(inspect.getdoc(doxygen_misc_constructs.getFirstLetter),
-    r''
+    r""
 )
 
 comment_verifier.check(inspect.getdoc(doxygen_misc_constructs.ClassWithNestedEnum),
@@ -73,7 +73,7 @@ comment_verifier.check(inspect.getdoc(doxygen_misc_constructs.isNoSpaceValidB),
 )
 
 comment_verifier.check(inspect.getdoc(doxygen_misc_constructs.isNoSpaceValidC),
-    r''
+    r""
 )
 
 comment_verifier.check(inspect.getdoc(doxygen_misc_constructs.backslashA),
@@ -131,3 +131,30 @@ Spaces at the start of line should be taken into account:
 :type fileName: string
 :param fileName: name of the log file"""
 );
+
+comment_verifier.check(inspect.getdoc(doxygen_misc_constructs.doc_ends_with_quote),
+    r'''This doc comment ends with a quote: "and that's ok"'''
+);
+
+comment_verifier.check(inspect.getdoc(doxygen_misc_constructs.doc_with_triple_quotes),
+    r'''This comment contains embedded triple-quoted string:
+
+    """How quaint"""'''
+);
+
+comment_verifier.check(inspect.getdoc(doxygen_misc_constructs.FileHeaderTestClass),
+    r"""This is the real class description."""
+)
+
+comment_verifier.check(inspect.getdoc(doxygen_misc_constructs.SlashFileHeaderTestClass),
+    r"""Real class description (slash style)."""
+)
+
+comment_verifier.check(doxygen_misc_constructs.GroupedMembers.loggingMember1.__doc__,
+    r"""Doc for the first grouped member."""
+)
+comment_verifier.check(doxygen_misc_constructs.GroupedMembers.loggingMember2.__doc__,
+    r"""Doc for the second grouped member."""
+)
+comment_verifier.check(inspect.getdoc(doxygen_misc_constructs.GroupedMembers),
+    "")

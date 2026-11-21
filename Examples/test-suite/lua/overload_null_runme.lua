@@ -1,5 +1,4 @@
-require("import")	-- the import fn
-import("overload_null")	-- import lib into global
+require("overload_null")
 
 o = overload_null.Overload()
 x = overload_null.X()
@@ -29,13 +28,13 @@ assert(14 == o:byval1cpr(nil))
 assert(15 == o:byval2cpr(nil))
 assert(16 == o:byval2cpr(x))
 
--- forward class declaration
-assert(17 == o:byval1forwardptr(x))
-assert(18 == o:byval1forwardptr(nil))
+-- fwd class declaration
+assert(17 == o:byval1fwdptr(x))
+assert(18 == o:byval1fwdptr(nil))
 
-assert(19 == o:byval2forwardptr(nil))
-assert(20 == o:byval2forwardptr(x))
+assert(19 == o:byval2fwdptr(nil))
+assert(20 == o:byval2fwdptr(x))
 
-assert(21 == o:byval1forwardref(x))
+assert(21 == o:byval1fwdref(x))
 
-assert(22 == o:byval2forwardref(x))
+assert(22 == o:byval2fwdref(x))

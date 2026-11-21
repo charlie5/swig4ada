@@ -23,14 +23,9 @@
 /* Python fragments for char* strings */
 %include <pystrings.swg>
 
-/* Backward compatibility output helper */
-%fragment("t_output_helper","header") %{
-#define t_output_helper SWIG_Python_AppendOutput
-%}
-
 
 /* ------------------------------------------------------------
- *  Unified typemap section
+ *  Unified Typemap Library section
  * ------------------------------------------------------------ */
 
 /* directors are supported in Python */
@@ -50,7 +45,7 @@
 /* Overload of the output/constant/exception/dirout handling */
 
 /* append output */
-#define SWIG_AppendOutput(result, obj)  SWIG_Python_AppendOutput(result, obj)
+#define SWIG_AppendOutput(result, obj)  SWIG_Python_AppendOutput(result, obj, $isvoid)
 
 /* set constant */
 #if defined(SWIGPYTHON_BUILTIN)
@@ -62,13 +57,33 @@
 /* raise */
 #define SWIG_Raise(obj, type, desc)     SWIG_Python_Raise(obj, type, desc)
 
-/* Include the unified typemap library */
+/* clear errors */
+#define %error_clear PyErr_Clear()
+
+/* PEP 484 type hints. Included before the Unified Typemap Library so that the
+   %apply in the library, such as %apply size_t { std::size_t }, also copies the
+   pytyping typemaps and not just the in, out and typecheck typemaps. */
+%include <pytyping.swg>
+
+/* Include the Unified Typemap Library */
 %include <typemaps/swigtypemaps.swg>
 
 
 /*  ------------------------------------------------------------
  *  Python extra typemaps / typemap overrides
  * ------------------------------------------------------------ */
+
+/* Add missing error handling to PyObject * */
+%typemap(out,noblock=1) PyObject * {
+  $result = $1;
+  if (!$result) SWIG_fail;
+}
+
+%typemap(out,noblock=1)  PyObject * const & {
+  $result = *$1;
+  if (!$result) SWIG_fail;
+}
+
 
 /* Get the address of the 'python self' object */
 
@@ -83,7 +98,7 @@
 { SWIG_PY_POINTER, "$symname", 0, 0, (void *)($value), &$descriptor }
 %typemap(consttab) SWIGTYPE ((* const)(ANY)) = SWIGTYPE ((*)(ANY));
 
-%typemap(constcode) SWIGTYPE ((*)(ANY)) "";
+%typemap(constcode) SWIGTYPE ((*)(ANY)) ""
 %typemap(constcode) SWIGTYPE ((* const)(ANY)) = SWIGTYPE ((*)(ANY));
 
 
@@ -98,7 +113,7 @@
     if (robj && !PyErr_Occurred()) {
       SwigPyObject_append((PyObject *) SWIG_Python_GetSwigThis($result), 
 			  (PyObject *) SWIG_Python_GetSwigThis(robj));
-      Py_DECREF(robj);
+      SWIG_Py_DECREF(robj);
     }
   }
 }

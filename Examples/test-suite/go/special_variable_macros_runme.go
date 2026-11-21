@@ -1,6 +1,6 @@
 package main
 
-import "special_variable_macros"
+import "swigtests/special_variable_macros"
 
 func main() {
 	name := special_variable_macros.NewName()
@@ -24,5 +24,14 @@ func main() {
 	}
 	if special_variable_macros.TestJohn(special_variable_macros.NewPairIntBool(10, false)) != 123 {
 		panic("test failed")
+	}
+	if special_variable_macros.MakeStringInt("stringint", 999) != "stringint" {
+		panic("test failed")
+	}
+	if special_variable_macros.ProvideStringInt(999) != "1000" {
+		panic("test failed")
+	}
+	if special_variable_macros.ShortFunction(1, 1) != (200*2 + 200*3) {
+		panic("test failed");
 	}
 }

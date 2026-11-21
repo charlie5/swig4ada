@@ -4,15 +4,15 @@
  * terms also apply to certain portions of SWIG. The full details of the SWIG
  * license and copyrights can be found in the LICENSE and COPYRIGHT files
  * included with the SWIG source code as distributed by the SWIG developers
- * and at http://www.swig.org/legal.html.
+ * and at https://www.swig.org/legal.html.
  *
  * javadoc.h
  *
  * Module to return documentation for nodes formatted for JavaDoc
  * ----------------------------------------------------------------------------- */
 
-#ifndef JAVADOCCONVERTER_H_
-#define JAVADOCCONVERTER_H_
+#ifndef SWIG_JAVADOC_H
+#define SWIG_JAVADOC_H
 
 #include "doxytranslator.h"
 #include <map>
@@ -56,14 +56,14 @@ protected:
    * Typedef for the function that handles one tag
    * arg - some string argument to easily pass it through lookup table
    */
-  typedef void (JavaDocConverter::*tagHandler) (DoxygenEntity &tag, std::string &translatedComment, std::string &arg);
+  typedef void (JavaDocConverter::*tagHandler)(DoxygenEntity &tag, std::string &translatedComment, std::string &arg);
 
-  /**
+  /*
    * Copies verbatim args of the tag to output, used for commands like \f$, ...
    */
   void handleTagVerbatim(DoxygenEntity &tag, std::string &translatedComment, std::string &arg);
 
-  /** Creates anchor link. */
+  /* Creates anchor link. */
   void handleTagAnchor(DoxygenEntity &tag, std::string &translatedComment, std::string &arg);
 
   /*
@@ -138,7 +138,7 @@ protected:
   void handleTagParam(DoxygenEntity &tag, std::string &translatedComment, std::string &arg);
 
   /*
-   * Writes link for \ref tag. 
+   * Writes link for \ref tag.
    */
   void handleTagRef(DoxygenEntity &tag, std::string &translatedComment, std::string &);
 

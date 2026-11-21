@@ -5,7 +5,6 @@
 /* Scilab version macro */
 
 #include "version.h"
-#define SWIG_SCILAB_VERSION (SCI_VERSION_MAJOR * 100) + (SCI_VERSION_MINOR * 10) + SCI_VERSION_MAINTENANCE
 
 /* Scilab standard headers */
 
@@ -13,11 +12,14 @@
 extern "C" {
 #endif
 #include "api_scilab.h"
-#if SWIG_SCILAB_VERSION < 540
+#ifndef CONST_PTR /* Scilab < 2025.0.0 */
+#define CONST_PTR const
+#endif
+#if SCI_VERSION_MAJOR < 5 || SCI_VERSION_MAJOR == 5 && SCI_VERSION_MINOR < 4
 #define __USE_DEPRECATED_STACK_FUNCTIONS__
 #include "stack-c.h"
 #endif
-#if SWIG_SCILAB_VERSION < 600
+#if SCI_VERSION_MAJOR < 6
 #include "MALLOC.h"
 #endif
 #include "Scierror.h"
@@ -31,12 +33,12 @@ extern "C" {
 
 /* Gateway signature */
 
-#if SWIG_SCILAB_VERSION >= 600
-#define SWIG_GatewayParameters char* fname, void *pvApiCtx
-#define SWIG_GatewayArguments fname, pvApiCtx
-#else
+#if SCI_VERSION_MAJOR < 6
 #define SWIG_GatewayParameters char* fname, unsigned long fname_len
 #define SWIG_GatewayArguments fname, fname_len
+# else
+#define SWIG_GatewayParameters char* fname, void *pvApiCtx
+#define SWIG_GatewayArguments fname, pvApiCtx
 #endif
 
 /* Function name management functions */
@@ -47,10 +49,8 @@ static char *SWIG_Scilab_GetFuncName(void) {
   return SwigFuncName;
 }
 static void SWIG_Scilab_SetFuncName(char *funcName) {
-  if (SwigFuncName != NULL) {
-    free(SwigFuncName);
-    SwigFuncName = NULL;
-  }
+  free(SwigFuncName);
+  SwigFuncName = NULL;
   if (funcName) {
     SwigFuncName = (char *)malloc(strlen(funcName) + 1);
     if (SwigFuncName)
@@ -60,29 +60,29 @@ static void SWIG_Scilab_SetFuncName(char *funcName) {
 
 /* Api context management functions */
 
-#if SWIG_SCILAB_VERSION >= 600
+#if SCI_VERSION_MAJOR < 6
+#define SWIG_Scilab_SetApiContext(apiCtx)
+#else
 static void *pvApiCtx = NULL;
 static void SWIG_Scilab_SetApiContext(void *apiCtx) {
   pvApiCtx = apiCtx;
 }
-#else
-#define SWIG_Scilab_SetApiContext(apiCtx)
 #endif
 
 /* Argument management functions */
 
-#if SWIG_SCILAB_VERSION >= 540
-#define SWIG_CheckInputArgument(pvApiCtx, minInputArgument, maxInputArgument) CheckInputArgument(pvApiCtx, minInputArgument, maxInputArgument)
-#define SWIG_CheckInputArgumentAtLeast(pvApiCtx, minInputArgument) CheckInputArgumentAtLeast(pvApiCtx, minInputArgument)
-#define SWIG_CheckOutputArgument(pvApiCtx, minOutputArgument, maxOutputArgument) CheckOutputArgument(pvApiCtx, minOutputArgument, maxOutputArgument)
-#define SWIG_NbInputArgument(pvApiCtx) nbInputArgument(pvApiCtx)
-#define SWIG_AssignOutputArgument(pvApiCtx, outputArgumentPos, argumentPos) AssignOutputVariable(pvApiCtx, outputArgumentPos) = argumentPos
-#else
+#if SCI_VERSION_MAJOR < 5 || SCI_VERSION_MAJOR == 5 && SCI_VERSION_MINOR < 4
 #define SWIG_CheckInputArgument(pvApiCtx, minInputArgument, maxInputArgument) CheckRhs(minInputArgument, maxInputArgument)
 #define SWIG_CheckInputArgumentAtLeast(pvApiCtx, minInputArgument) CheckRhs(minInputArgument, 256)
 #define SWIG_CheckOutputArgument(pvApiCtx, minOutputArgument, maxOutputArgument) CheckLhs(minOutputArgument, maxOutputArgument)
 #define SWIG_NbInputArgument(pvApiCtx) Rhs
 #define SWIG_AssignOutputArgument(pvApiCtx, outputArgumentPos, argumentPos) LhsVar(outputArgumentPos) = argumentPos
+#else
+#define SWIG_CheckInputArgument(pvApiCtx, minInputArgument, maxInputArgument) CheckInputArgument(pvApiCtx, minInputArgument, maxInputArgument)
+#define SWIG_CheckInputArgumentAtLeast(pvApiCtx, minInputArgument) CheckInputArgumentAtLeast(pvApiCtx, minInputArgument)
+#define SWIG_CheckOutputArgument(pvApiCtx, minOutputArgument, maxOutputArgument) CheckOutputArgument(pvApiCtx, minOutputArgument, maxOutputArgument)
+#define SWIG_NbInputArgument(pvApiCtx) nbInputArgument(pvApiCtx)
+#define SWIG_AssignOutputArgument(pvApiCtx, outputArgumentPos, argumentPos) AssignOutputVariable(pvApiCtx, outputArgumentPos) = argumentPos
 #endif
 
 typedef int SwigSciObject;
@@ -134,6 +134,8 @@ SWIG_Scilab_ErrorType(int code) {
     return "SystemError";
   case SWIG_AttributeError:
     return "AttributeError";
+  case SWIG_NullReferenceError:
+    return "NullReferenceError";
   default:
     return "RuntimeError";
   }
@@ -330,7 +332,7 @@ SwigScilabPtrFromObject(void *pvApiCtx, int iVarOut, void *pvObj, swig_type_info
       pstTypeName = SWIG_TypeName(descriptor);
     }
 
-    sciErr = createMatrixOfStringInList(pvApiCtx, SWIG_NbInputArgument(pvApiCtx) + iVarOut, piMListAddr, 1, 1, 1, &pstTypeName);
+    sciErr = createMatrixOfStringInList(pvApiCtx, SWIG_NbInputArgument(pvApiCtx) + iVarOut, piMListAddr, 1, 1, 1, (char CONST_PTR* CONST_PTR*)&pstTypeName);
     if (sciErr.iErr) {
       printError(&sciErr, 0);
       return SWIG_ERROR;
@@ -436,7 +438,7 @@ SWIG_Scilab_NewMemberObj(void *pvApiCtx, int iVarOut, void *ptr, int sz, swig_ty
 #ifdef __cplusplus
 extern "C"
 #endif
-int SWIG_this(SWIG_GatewayParameters) {
+SWIGEXPORT int SWIG_this(SWIG_GatewayParameters) {
   void *ptrValue = NULL;
   if (SwigScilabPtrToObject(pvApiCtx, 1, &ptrValue, NULL, 0, fname) == SWIG_OK) {
     SWIG_Scilab_SetOutputPosition(1);
@@ -453,7 +455,7 @@ int SWIG_this(SWIG_GatewayParameters) {
 #ifdef __cplusplus
 extern "C"
 #endif
-int SWIG_ptr(SWIG_GatewayParameters) {
+SWIGEXPORT int SWIG_ptr(SWIG_GatewayParameters) {
   if (SWIG_NbInputArgument(pvApiCtx) > 0) {
     SciErr sciErr;
     int *piAddrVar1 = NULL;

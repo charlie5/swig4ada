@@ -29,7 +29,7 @@
 
 
 /* ------------------------------------------------------------
- *  Unified typemap section
+ *  Unified Typemap Library section
  * ------------------------------------------------------------ */
 
 /* No director support in Tcl */
@@ -56,7 +56,7 @@
 #define SWIG_Raise(obj,type,desc)        SWIG_Tcl_SetErrorObj(interp,type,obj)
 
 
-/* Include the unified typemap library */
+/* Include the Unified Typemap Library */
 %include <typemaps/swigtypemaps.swg>
 
 
@@ -76,11 +76,6 @@
 }
 
 #endif
-
-%typemap(throws,noblock=1) SWIGTYPE CLASS {
-  SWIG_set_result(SWIG_NewInstanceObj(%as_voidptr(SWIG_new_copy($1, $1_ltype)), $&1_descriptor, 1));
-  SWIG_fail;
-}
 
 %typemap(out)    SWIGTYPE    =  SWIGTYPE INSTANCE;
 %typemap(out)    SWIGTYPE *  =  SWIGTYPE *INSTANCE;

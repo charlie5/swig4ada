@@ -17,7 +17,7 @@ note: it should be passed by value, not byref or as a pointer.
 
 The SWIGLUA_FN holds a pointer to the lua_State, and the stack index where the function is held.
 The macro SWIGLUA_FN_GET() will put a copy of the lua function at the top of the stack.
-After that its fairly simple to write the rest of the code (assuming know how to use lua),
+After that it's fairly simple to write the rest of the code (assuming know how to use lua),
 just push the parameters, call the function and return the result.
 
   int my_func(int a, int b, SWIGLUA_FN fn)
@@ -119,6 +119,6 @@ void swiglua_ref_get(SWIGLUA_REF* pref){
 %{  swiglua_ref_set(&$1,L,$input); %}
 
 %typemap(out) SWIGLUA_REF
-%{  if ($1.L!=0)  {swiglua_ref_get(&$1);} else {lua_pushnil(L);}
+%{  if ($1.L!=0) {swiglua_ref_get(&$1);} else {lua_pushnil(L);}
   SWIG_arg++; %}
 

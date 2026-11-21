@@ -1,4 +1,4 @@
-%module namespace_template
+%module xxx
 
 namespace test {
   template<typename T> T max(T a, T b) { return (a > b) ? a : b; }
@@ -7,6 +7,11 @@ namespace test {
     vector() { }
     ~vector() { }
   }; 
+}
+
+namespace test1 {
+  %template(maxchar) ::test::max<char>;
+  %template(vectorchar) ::test::vector<char>;
 }
 
 namespace test2 {
@@ -32,9 +37,18 @@ namespace test4 {
   %template(vectorInteger) vector<Integer>;
 }
 
-using namespace test;
 namespace test5 {
+// Empty namespace
+}
+template<typename T> struct GlobalVector {
+  void gook(T i) {}
+  void geeko(double d) {}
+  void geeky(int d) {}
+};
+%template(GlobalVectorIntPtr) test5::GlobalVector<int *>; // should fail as GlobalVector is in global namespace
+
+using namespace test;
+namespace test6 {
   %template(maxdouble) max<double>;
   %template(vectordouble) vector<double>;
 }
-

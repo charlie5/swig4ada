@@ -36,3 +36,9 @@ x = Typedef_inherit.do_blah2(d)
 if x != "Grok::blah"
   puts "Whoa! Bad return #{x}"
 end
+
+x = d.far1
+if x != "Spam::far1"
+  puts "Whoa! Bad return #{x}"
+end
+

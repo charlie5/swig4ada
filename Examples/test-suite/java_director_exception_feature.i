@@ -134,12 +134,15 @@
 
 %feature("director") Foo;
 
+%typemap(javaclassmodifiers) MyNS::Exception1, MyNS::Exception2, MyNS::Unexpected %{@SuppressWarnings("serial")
+public class%}
+
 // Rename exceptions on java side to make translation of exceptions more clear
 %rename(MyJavaException1) MyNS::Exception1;
 %rename(MyJavaException2) MyNS::Exception2;
 %rename(MyJavaUnexpected) MyNS::Unexpected;
 
-%typemap(javabase) ::MyNS::Exception1,::MyNS::Exception2,::MyNS::Unexpected "java.lang.Exception";
+%typemap(javabase) ::MyNS::Exception1,::MyNS::Exception2,::MyNS::Unexpected "java.lang.Exception"
 %rename(getMessage) what() const;  // Rename all what() methods
 
 namespace MyNS {
@@ -198,6 +201,7 @@ public:
 class Bar {
 public:
   Bar(Foo* d) { delegate=d; }
+  virtual ~Bar() {}
   virtual std::string ping(int excp) throw(int,MyNS::Exception2)
   {
     return delegate->ping(excp);

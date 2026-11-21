@@ -16,6 +16,10 @@
 LANGUAGE     = errors
 ERROR_EXT    = newerr
 
+HAVE_CXX11   = @HAVE_CXX11@
+HAVE_CXX14   = @HAVE_CXX14@
+HAVE_CXX17   = @HAVE_CXX17@
+HAVE_CXX20   = @HAVE_CXX20@
 srcdir       = @srcdir@
 top_srcdir   = @top_srcdir@
 top_builddir = @top_builddir@
@@ -45,22 +49,26 @@ include $(srcdir)/../common.mk
 # whatever we do here.
 $(DOXYGEN_ERROR_TEST_CASES): SWIGOPT += -doxygen
 
-# Portable dos2unix / todos for stripping CR
-TODOS        = tr -d '\r'
-#TODOS        = sed -e 's/\r$$//' # On Mac OS X behaves as if written 's/r$$//'
+# Unique module names are obtained from the .i file name (required for parallel make).
+# Note: -module overrides %module in the .i file.
+MODULE_OPTION=-module $*
+nomodule.ctest: MODULE_OPTION =
+
+# Portable dos2unix / fromdos for stripping CR
+FROMDOS       = tr -d '\r'
 
 # strip source directory from output, so that diffs compare
 STRIP_SRCDIR = sed -e 's|\\|/|g' -e 's|^$(SRCDIR)||'
 
 # Rules for the different types of tests
 %.cpptest:
-	echo "$(ACTION)ing errors testcase $*"
-	-$(SWIGINVOKE) -c++ -python -Wall -Fstandard $(SWIGOPT) $(SRCDIR)$*.i 2>&1 | $(TODOS) | $(STRIP_SRCDIR) > $*.$(ERROR_EXT)
+	$(ECHO_PROGRESS) "$(ACTION)ing errors testcase $*"
+	-$(SWIGINVOKE) -c++ -python -Wall -Fstandard $(MODULE_OPTION) $(SWIGOPT) $(SRCDIR)$*.i 2>&1 | $(FROMDOS) | $(STRIP_SRCDIR) > $*.$(ERROR_EXT)
 	$(COMPILETOOL) diff -c $(SRCDIR)$*.stderr $*.$(ERROR_EXT)
 
 %.ctest:
-	echo "$(ACTION)ing errors testcase $*"
-	-$(SWIGINVOKE) -python -Wall -Fstandard $(SWIGOPT) $(SRCDIR)$*.i 2>&1 | $(TODOS) | $(STRIP_SRCDIR) > $*.$(ERROR_EXT)
+	$(ECHO_PROGRESS) "$(ACTION)ing errors testcase $*"
+	-$(SWIGINVOKE) -python -Wall -Fstandard $(MODULE_OPTION) $(SWIGOPT) $(SRCDIR)$*.i 2>&1 | $(FROMDOS) | $(STRIP_SRCDIR) > $*.$(ERROR_EXT)
 	$(COMPILETOOL) diff -c $(SRCDIR)$*.stderr $*.$(ERROR_EXT)
 
 %.clean:

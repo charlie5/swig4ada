@@ -4,7 +4,7 @@
  * terms also apply to certain portions of SWIG. The full details of the SWIG
  * license and copyrights can be found in the LICENSE and COPYRIGHT files
  * included with the SWIG source code as distributed by the SWIG developers
- * and at http://www.swig.org/legal.html.
+ * and at https://www.swig.org/legal.html.
  *
  * doxyentity.cxx
  *
@@ -16,9 +16,8 @@
 
 using std::cout;
 
-DoxygenEntity::DoxygenEntity(const std::string &typeEnt):typeOfEntity(typeEnt), isLeaf(true) {
+DoxygenEntity::DoxygenEntity(const std::string &typeEnt) : typeOfEntity(typeEnt), isLeaf(true) {
 }
-
 
 /* Basic node for commands that have
  * only 1 item after them
@@ -28,13 +27,11 @@ DoxygenEntity::DoxygenEntity(const std::string &typeEnt):typeOfEntity(typeEnt), 
 DoxygenEntity::DoxygenEntity(const std::string &typeEnt, const std::string &param1) : typeOfEntity(typeEnt), data(param1), isLeaf(true) {
 }
 
-
 /* Nonterminal node
  * contains
  */
 DoxygenEntity::DoxygenEntity(const std::string &typeEnt, const DoxygenEntityList &entList) : typeOfEntity(typeEnt), isLeaf(false), entityList(entList) {
 }
-
 
 void DoxygenEntity::printEntity(int level) const {
 
@@ -42,7 +39,7 @@ void DoxygenEntity::printEntity(int level) const {
 
   if (isLeaf) {
     for (int i = 0; i < thisLevel; i++) {
-      cout << "\t";
+      cout << '\t';
     }
 
     cout << "Node Leaf Command: '" << typeOfEntity << "',  ";
@@ -55,7 +52,7 @@ void DoxygenEntity::printEntity(int level) const {
   } else {
 
     for (int i = 0; i < thisLevel; i++) {
-      cout << "\t";
+      cout << '\t';
     }
 
     cout << "Node Command: '" << typeOfEntity << "'" << std::endl;

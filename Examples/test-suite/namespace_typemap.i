@@ -2,6 +2,7 @@
 %module namespace_typemap
 
 %{
+#include <string.h>
 namespace test {
    /* A minimalistic string class */
    class string_class {
@@ -15,7 +16,7 @@ namespace test {
 	strcpy(data,s);
       }
      ~string_class() {
-        if (data) delete [] data;
+        delete [] data;
       }
       char *c_str() {
         return data;
@@ -84,7 +85,9 @@ namespace test {
     class string_class;
 #ifdef SWIGPYTHON
 	%typemap(in) string_class * {
-	    $1 = new string_class(SWIG_Python_str_AsChar($input));
+	    PyObject *bytes = NULL;
+	    $1 = new string_class(SWIG_PyUnicode_AsUTF8AndSize($input, NULL, &bytes));
+	    Py_DecRef(bytes);
 	}
 	%typemap(freearg) string_class * {
 	    delete $1;
@@ -114,6 +117,18 @@ namespace test {
 	    buf[$input.n] = '\0';
 	    $1 = new string_class(buf);
 	    delete[] buf;
+	}
+	%typemap(freearg) string_class * {
+	    delete $1;
+	}
+#endif
+#ifdef SWIGJAVASCRIPT
+  %fragment("SWIG_AsCharPtrAndSize");
+	%typemap(in) string_class * {
+			char *data;
+			SWIG_AsCharPtrAndSize($input, &data, NULL, NULL);
+			$1 = new string_class(data);
+			free(data);
 	}
 	%typemap(freearg) string_class * {
 	    delete $1;
@@ -239,7 +254,7 @@ namespace test {
 namespace Split {
 #ifdef SWIGPYTHON
     %typemap(in) PosInteger {
-	$1 = PyInt_AsLong($input);
+	$1 = PyLong_AsLong($input);
 	if ($1 < 0) {
 	    PyErr_SetString(PyExc_ValueError,"domain error\n");
 	    SWIG_fail;

@@ -7,11 +7,9 @@
 SWIGINTERN swig_type_info*
 SWIG_pchar_descriptor(void)
 {
-  static int init = 0;
   static swig_type_info* info = 0;
-  if (!init) {
+  if (!info) {
     info = SWIG_TypeQuery("_p_char");
-    init = 1;
   }
   return info;
 }
@@ -24,12 +22,28 @@ SWIG_strnlen(const char* s, size_t maxlen)
   const char *p;
   for (p = s; maxlen-- && *p; p++)
     ;
-  return p - s;
+  return (size_t)(p - s);
+}
+}
+
+%fragment("SWIG_NewCopyCharArray","header") {
+SWIGINTERNINLINE char *SWIG_NewCopyCharArray(const char *cptr, size_t size)
+{
+  char *ret = NULL;
+  if (size > 0 && cptr != NULL) {
+    ret = %new_array(size,char);
+    if (ret != NULL) {
+      memcpy(ret, cptr, size * sizeof(char));
+    }
+  }
+  return ret;
 }
 }
 
 %include <typemaps/strings.swg>
 %typemaps_string(%checkcode(STRING), %checkcode(CHAR),
+		 SWIGWARN_TYPEMAP_CHARLEAK_MSG,
 		 char, Char, SWIG_AsCharPtrAndSize, SWIG_FromCharPtrAndSize,
 		 strlen, SWIG_strnlen,
+		 SWIG_NewCopyCharArray,
 		"<limits.h>", CHAR_MIN, CHAR_MAX)

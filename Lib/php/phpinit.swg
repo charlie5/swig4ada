@@ -7,19 +7,10 @@
 
 %init %{
 SWIG_php_minit {
+  zend_class_entry SWIGUNUSED internal_ce;
   SWIG_InitializeModule((void*)&module_number);
-%}
-
-%fragment("swig_php_init_member_ptr2", "header") %{
-#define SWIG_MEMBER_PTR "CLASS::*"
-
-static void swig_member_ptr_dtor(zend_resource *res) {
-  efree(res->ptr);
-}
-
-static int swig_member_ptr = 0;
-%}
-
-%fragment("swig_php_init_member_ptr", "init", fragment="swig_php_init_member_ptr2") %{
-  swig_member_ptr = zend_register_list_destructors_ex(swig_member_ptr_dtor, NULL, SWIG_MEMBER_PTR, module_number);
+#if PHP_MAJOR_VERSION == 8 && PHP_MINOR_VERSION == 0
+  /* This hack is needed to avoid segfaults. */
+  EG(class_table) = CG(class_table);
+#endif
 %}

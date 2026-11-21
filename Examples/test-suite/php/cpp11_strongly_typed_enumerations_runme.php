@@ -1,7 +1,6 @@
 <?php
 
 require "tests.php";
-require "cpp11_strongly_typed_enumerations.php";
 
 function enumCheck($actual, $expected) {
   check::equal($actual, $expected, "Enum value mismatch");
@@ -157,6 +156,10 @@ $val = enumCheck(Class2::Enum14_Val6j, $val);
 #$val = enumCheck(Class2::Struct1.Enum14_Val5m, 4141);
 #$val = enumCheck(Class2::Struct1.Enum14_Val6m, $val);
 
+# Enum class and enumerator renamed with %rename (QEnum18 -> Enum18, QVal1 -> Val1)
+enumCheck(Enum18_Val1, 1181);
+enumCheck(Enum18_Val2, 1182);
+
 $class1 = new Class1();
 enumCheck($class1->class1Test1(Enum1_Val5a), 13);
 enumCheck($class1->class1Test2(Class1::Enum12_Val5c), 1121);
@@ -166,4 +169,4 @@ enumCheck(globalTest1(Enum1_Val5a), 13);
 enumCheck(globalTest2(Class1::Enum12_Val5c), 1121);
 #enumCheck(globalTest3(Class1::Struct1.Enum12_Val5f), 3121);
 
-?>
+check::done();

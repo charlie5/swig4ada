@@ -11,7 +11,7 @@
   or as a member variable:
   
      struct A {
-       SwigPtr_PyObject obj;
+       SwigPtr_PyObject _obj;
        A(PyObject *o) : _obj(o) {
        }
      };
@@ -19,8 +19,8 @@
    or as a input/output value 
 
      SwigPtr_PyObject func(SwigPtr_PyObject obj) {     
-       SwigPtr_PyObject out = PyString_FromFormat("hello %s", PyObject_AsString(obj));
-       Py_DECREF(out);
+       SwigPtr_PyObject out = PyUnicode_FromFormat("hello %s", PyObject_AsString(obj));
+       SWIG_Py_DECREF(out);
        return out;
      }
 
@@ -37,24 +37,46 @@
    
 */
 
+/*
+  The director wrapper variable holding a director method argument is a
+  SwigVar_PyObject, which DECREFs on scope exit.  The argument itself is a
+  borrowed reference, so INCREF it to balance that DECREF, otherwise the
+  reference count is decremented on each and every director upcall until the
+  object is freed while still in use.
+
+  The cast to PyObject * is required.  Without it, a SwigVar_PyObject argument
+  is assigned via the implicitly declared copy assignment operator, which adds a
+  reference of its own, and the object then leaks one reference per upcall.  The
+  cast selects SwigVar_PyObject::operator=(PyObject *) instead, which does not
+  adjust the count, leaving the SWIG_Py_XINCREF below as the one and only
+  increment for every argument type handled here.
+
+  This must be declared before the %apply directives below so that
+  SwigPtr_PyObject and SwigVar_PyObject arguments are covered too.
+*/
+%typemap(directorin,noblock=1) PyObject *, PyObject *const& {
+  $input = (PyObject *)$1;
+  SWIG_Py_XINCREF($input);
+}
+
 namespace swig {
   %ignore SwigPtr_PyObject;
   struct SwigPtr_PyObject {};
   %apply PyObject * {SwigPtr_PyObject};
   %apply PyObject * const& {SwigPtr_PyObject const&};
 
-  %typemap(typecheck,precedence=SWIG_TYPECHECK_SWIGOBJECT,noblock=1) SwigPtr_PyObject const& "$1 = ($input != 0);";
+  %typemap(typecheck,precedence=SWIG_TYPECHECK_SWIGOBJECT,noblock=1) SwigPtr_PyObject const& "$1 = ($input != 0);"
 
 
   /* For output */
   %typemap(out,noblock=1)  SwigPtr_PyObject {
     $result = (PyObject *)$1;
-    Py_INCREF($result);
+    SWIG_Py_INCREF($result);
   }
   
   %typemap(out,noblock=1)  SwigPtr_PyObject const & {
     $result = (PyObject *)*$1;
-    Py_INCREF($result);
+    SWIG_Py_INCREF($result);
   }
   
 }
@@ -73,7 +95,7 @@ namespace swig {
     SwigPtr_PyObject(const SwigPtr_PyObject& item) : _obj(item._obj)
     {
       SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-      Py_XINCREF(_obj);      
+      SWIG_Py_XINCREF(_obj);
       SWIG_PYTHON_THREAD_END_BLOCK;
     }
     
@@ -81,7 +103,7 @@ namespace swig {
     {
       if (initial_ref) {
         SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-        Py_XINCREF(_obj);
+        SWIG_Py_XINCREF(_obj);
         SWIG_PYTHON_THREAD_END_BLOCK;
       }
     }
@@ -89,8 +111,8 @@ namespace swig {
     SwigPtr_PyObject & operator=(const SwigPtr_PyObject& item) 
     {
       SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-      Py_XINCREF(item._obj);
-      Py_XDECREF(_obj);
+      SWIG_Py_XINCREF(item._obj);
+      SWIG_Py_XDECREF(_obj);
       _obj = item._obj;
       SWIG_PYTHON_THREAD_END_BLOCK;
       return *this;      
@@ -99,7 +121,7 @@ namespace swig {
     ~SwigPtr_PyObject() 
     {
       SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-      Py_XDECREF(_obj);
+      SWIG_Py_XDECREF(_obj);
       SWIG_PYTHON_THREAD_END_BLOCK;
     }
     
@@ -121,7 +143,7 @@ namespace swig {
   as in
 
   int func () {
-    SwigVar_PyObject obj = PyString_FromString("hello");
+    SwigVar_PyObject obj = PyUnicode_FromString("hello");
   }
 
   ie, 'obj' is created and destructed in the same scope from
@@ -145,7 +167,7 @@ namespace swig {
     
     SwigVar_PyObject & operator = (PyObject* obj)
     {
-      Py_XDECREF(_obj);
+      SWIG_Py_XDECREF(_obj);
       _obj = obj;
       return *this;      
     }

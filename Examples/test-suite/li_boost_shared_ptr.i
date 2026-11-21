@@ -5,7 +5,7 @@
 // like 'top'. There is a wrapper for shared_ptr in shared_ptr_wrapper.h which enables one to
 // count the instances of shared_ptr. Uncomment the SHARED_PTR_WRAPPER macro to turn this on.
 //
-// Also note the debug_shared flag  which can be set from the target language.
+// Also note the debug_shared flag which can be set from the target language.
 
 %module li_boost_shared_ptr
 
@@ -44,7 +44,7 @@
 # define SWIG_SHARED_PTR_NAMESPACE SwigBoost
 #endif
 
-#if defined(SWIGJAVA) || defined(SWIGCSHARP) || defined(SWIGPYTHON) || defined(SWIGD) || defined(SWIGOCTAVE) || defined(SWIGRUBY)
+#if defined(SWIGC) || defined(SWIGJAVA) || defined(SWIGCSHARP) || defined(SWIGPYTHON) || defined(SWIGD) || defined(SWIGOCTAVE) || defined(SWIGRUBY) || defined(SWIGR) || defined(SWIGLUA)
 #define SHARED_PTR_WRAPPERS_IMPLEMENTED
 #endif
 
@@ -242,6 +242,10 @@ std::string nullsmartpointerpointertest(SwigBoost::shared_ptr<Klass>* k) {
   else
     return "also not null";
 }
+
+SwigBoost::shared_ptr<Klass>* sp_pointer_null() { return NULL; }
+SwigBoost::shared_ptr<Klass>* null_sp_pointer() { static SwigBoost::shared_ptr<Klass> static_sp; return &static_sp; }
+SwigBoost::shared_ptr<Klass> sp_value_null() { return SwigBoost::shared_ptr<Klass>(); }
 // $owner
 Klass *pointerownertest() {
   return new Klass("pointerownertest");
@@ -264,6 +268,7 @@ long use_count(const SwigBoost::shared_ptr<KlassDerived>& sptr) {
 long use_count(const SwigBoost::shared_ptr<Klass>& sptr) {
   return sptr.use_count();
 }
+
 const SwigBoost::shared_ptr<Klass>& ref_1() {
   static SwigBoost::shared_ptr<Klass> sptr;
   return sptr;
@@ -340,7 +345,7 @@ template <class T1, class T2> struct Base {
   T1 baseVal1;
   T2 baseVal2;
   Base(T1 t1, T2 t2) : baseVal1(t1*2), baseVal2(t2*2) {}
-  virtual std::string getValue() const { return "Base<>"; };
+  virtual std::string getValue() const { return "Base<>"; }
   virtual ~Base() {}
 };
 %}
@@ -357,7 +362,7 @@ template <class T1, class T2> struct Pair : Base<T1, T2> {
   T1 val1;
   T2 val2;
   Pair(T1 t1, T2 t2) : Base<T1, T2>(t1, t2), val1(t1), val2(t2) {}
-  virtual std::string getValue() const { return "Pair<>"; };
+  virtual std::string getValue() const { return "Pair<>"; }
 };
 Pair<int, double> pair_id2(Pair<int, double> p) { return p; }
 SwigBoost::shared_ptr< Pair<int, double> > pair_id1(SwigBoost::shared_ptr< Pair<int, double> > p) { return p; }

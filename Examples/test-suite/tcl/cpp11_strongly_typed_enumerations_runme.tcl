@@ -1,5 +1,5 @@
 
-if [ catch { load ./cpp11_strongly_typed_enumerations[info sharedlibextension] cpp11_strongly_typed_enumerations} err_msg ] {
+if [ catch { load ./cpp11_strongly_typed_enumerations[info sharedlibextension] Cpp11_strongly_typed_enumerations} err_msg ] {
 	puts stderr "Could not load shared object:\n$err_msg"
 }
 
@@ -161,6 +161,10 @@ set val [enumCheck $Class2_Enum14_Val6j $val]
 #set val [enumCheck $Class2_Struct1_Enum14_Val4 $val]
 #set val [enumCheck $Class2_Struct1_Enum14_Val5m 4141]
 #set val [enumCheck $Class2_Struct1_Enum14_Val6m $val]
+
+# Enum class and enumerator renamed with %rename (QEnum18 -> Enum18, QVal1 -> Val1)
+enumCheck $Enum18_Val1 1181
+enumCheck $Enum18_Val2 1182
 
 set class1 [Class1]
 enumCheck [$class1 class1Test1 $Enum1_Val5a] 13

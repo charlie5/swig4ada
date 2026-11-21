@@ -529,11 +529,35 @@ static void find_hash(ARGS *args)
 	free(input_base);
 
 	if (!direct_i_file) {
+		int had_c_opt = 0;
+		/* Strip -c before invoking the preprocessor.  -c is meaningless with -E
+		   and newer compilers (Apple clang 21 / upstream LLVM 21) emit
+		   "argument unused during compilation: '-c'" to stderr in that case.
+		   The preprocessor's stderr is hashed below, so any such warning would
+		   diverge the cache key between "-c foo.c" (preprocessor invoked) and
+		   "-c foo.i" (preprocessor skipped, stderr empty) and prevent a cache
+		   hit between the two.  The hashed argument list above still contains
+		   -c, so consistency between the two paths is preserved. */
+		for (i = 1; i < args->argc; i++) {
+			if (strcmp(args->argv[i], "-c") == 0) {
+				free(args->argv[i]);
+				memmove(&args->argv[i], &args->argv[i+1],
+					(args->argc - i) * sizeof(args->argv[0]));
+				args->argc--;
+				had_c_opt = 1;
+				break;
+			}
+		}
+
 		/* run cpp on the input file to obtain the .i */
 		args_add(args, "-E");
 		args_add(args, input_file);
 		status = execute(args->argv, path_stdout, path_stderr);
 		args_pop(args, 2);
+
+		if (had_c_opt) {
+			args_add(args, "-c");
+		}
 	} else {
 		/* we are compiling a .i or .ii file - that means we
 		   can skip the cpp stage and directly form the
@@ -735,13 +759,15 @@ static void from_cache(int first)
 	}
 
 	/* send the cpp stderr, if applicable */
-	fd_cpp_stderr = open(cpp_stderr, O_RDONLY | O_BINARY);
-	if (fd_cpp_stderr != -1) {
-		copy_fd(fd_cpp_stderr, 2);
-		close(fd_cpp_stderr);
-		unlink(cpp_stderr);
-		free(cpp_stderr);
-		cpp_stderr = NULL;
+	if (cpp_stderr) {
+		fd_cpp_stderr = open(cpp_stderr, O_RDONLY | O_BINARY);
+		if (fd_cpp_stderr != -1) {
+			copy_fd(fd_cpp_stderr, 2);
+			close(fd_cpp_stderr);
+			unlink(cpp_stderr);
+			free(cpp_stderr);
+			cpp_stderr = NULL;
+		}
 	}
 
 	/* send the stderr */
@@ -1089,7 +1115,7 @@ static void process_args(int argc, char **argv)
 				}
 				*p = 0;
 			}
-			else  {
+			else {
 				int len = p - default_depfile_name;
 				
 				p = x_malloc(len + 3);
@@ -1130,7 +1156,7 @@ static void process_args(int argc, char **argv)
 	}
 }
 
-static void detect_swig()
+static void detect_swig(void)
 {
 	char *basename = str_basename(orig_args->argv[0]);
 	if (strstr(basename, "swig") || getenv("CCACHE_SWIG")) {

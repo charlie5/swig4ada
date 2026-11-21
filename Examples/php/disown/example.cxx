@@ -1,4 +1,4 @@
-/* File : example.c */
+/* File : example.cxx */
 
 #include "example.h"
 #include <math.h>
@@ -39,7 +39,6 @@ double Square::perimeter(void) {
 }
 
 ShapeContainer::~ShapeContainer() {
-  iterator i=shapes.begin();
   for( iterator i = shapes.begin(); i != shapes.end(); ++i ) {
     delete *i;
   }

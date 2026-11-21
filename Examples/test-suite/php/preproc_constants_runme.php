@@ -1,7 +1,6 @@
 <?php
 
 require "tests.php";
-require "preproc_constants.php";
 
 check::equal(gettype(preproc_constants::CONST_INT1), "integer", "preproc_constants.CONST_INT1 has unexpected type");
 check::equal(gettype(preproc_constants::CONST_INT2), "integer", "preproc_constants.CONST_INT2 has unexpected type");
@@ -26,13 +25,30 @@ check::equal(gettype(preproc_constants::CONST_DOUBLE1), "double", "preproc_const
 check::equal(gettype(preproc_constants::CONST_DOUBLE2), "double", "preproc_constants.CONST_DOUBLE2 has unexpected type");
 check::equal(gettype(preproc_constants::CONST_DOUBLE3), "double", "preproc_constants.CONST_DOUBLE3 has unexpected type");
 check::equal(gettype(preproc_constants::CONST_DOUBLE4), "double", "preproc_constants.CONST_DOUBLE4 has unexpected type");
-check::equal(gettype(preproc_constants::CONST_DOUBLE5), "double", "preproc_constants.CONST_DOUBLE5 has unexpected type");
-check::equal(gettype(preproc_constants::CONST_DOUBLE6), "double", "preproc_constants.CONST_DOUBLE6 has unexpected type");
+# C/C++ `float` constants are wrapped as PHP `double` as PHP doesn't have a
+# `float` type.
+check::equal(gettype(preproc_constants::CONST_FLOAT1), "double", "preproc_constants.CONST_FLOAT1 has unexpected type");
+check::equal(gettype(preproc_constants::CONST_FLOAT2), "double", "preproc_constants.CONST_FLOAT2 has unexpected type");
 check::equal(gettype(preproc_constants::CONST_BOOL1), "boolean", "preproc_constants.CONST_BOOL1 has unexpected type");
 check::equal(gettype(preproc_constants::CONST_BOOL2), "boolean", "preproc_constants.CONST_BOOL2 has unexpected type");
 check::equal(gettype(preproc_constants::CONST_CHAR), "string", "preproc_constants.CONST_CHAR has unexpected type");
 check::equal(gettype(preproc_constants::CONST_STRING1), "string", "preproc_constants.CONST_STRING1 has unexpected type");
 check::equal(gettype(preproc_constants::CONST_STRING2), "string", "preproc_constants.CONST_STRING2 has unexpected type");
+check::equal(gettype(preproc_constants::CONST_STRING3), "string", "preproc_constants.CONST_STRING3 has unexpected type");
+check::equal(gettype(preproc_constants::CONST_STRING4), "string", "preproc_constants.CONST_STRING4 has unexpected type");
+if (false) {
+  // Currently SWIG/PHP truncates at a zero byte in a string constant.  PHP
+  // strings support embedded zero bytes so this ought to work, but is an
+  // uncommon case.
+  check::equal(preproc_constants::CONST_STRING4, "zer\0zer\0");
+  check::equal(CONST_STRING4, "zer\0zer\0");
+} else {
+  // Test the current behaviour for now to ensure this testcase gets updated
+  // when this gets fixed, and also to check we don't mangle the value in some
+  // other way.
+  check::equal(preproc_constants::CONST_STRING4, "zer");
+  check::equal(CONST_STRING4, "zer");
+}
 
 check::equal(gettype(preproc_constants::INT_AND_BOOL), "integer", "preproc_constants.INT_AND_BOOL has unexpected type");
 check::equal(gettype(preproc_constants::INT_AND_CHAR), "integer", "preproc_constants.INT_AND_CHAR has unexpected type");
@@ -51,6 +67,8 @@ check::equal(gettype(preproc_constants::EXPR_PLUS), "integer", "preproc_constant
 check::equal(gettype(preproc_constants::EXPR_MINUS), "integer", "preproc_constants.EXPR_MINUS has unexpected type");
 check::equal(gettype(preproc_constants::EXPR_LSHIFT), "integer", "preproc_constants.EXPR_LSHIFT has unexpected type");
 check::equal(gettype(preproc_constants::EXPR_RSHIFT), "integer", "preproc_constants.EXPR_RSHIFT has unexpected type");
+check::equal(gettype(preproc_constants::EXPR_LT), "boolean", "preproc_constants.EXPR_LT has unexpected type");
+check::equal(gettype(preproc_constants::EXPR_GT), "boolean", "preproc_constants.EXPR_GT has unexpected type");
 check::equal(gettype(preproc_constants::EXPR_LTE), "boolean", "preproc_constants.EXPR_LTE has unexpected type");
 check::equal(gettype(preproc_constants::EXPR_GTE), "boolean", "preproc_constants.EXPR_GTE has unexpected type");
 check::equal(gettype(preproc_constants::EXPR_INEQUALITY), "boolean", "preproc_constants.EXPR_INEQUALITY has unexpected type");
@@ -65,4 +83,4 @@ check::equal(gettype(preproc_constants::EXPR_MIXED1), "double", "preproc_constan
 check::equal(gettype(preproc_constants::EXPR_WCHAR_MAX), "integer", "preproc_constants.EXPR_WCHAR_MAX has unexpected type");
 check::equal(gettype(preproc_constants::EXPR_WCHAR_MIN), "integer", "preproc_constants.EXPR_WCHAR_MIN has unexpected type");
 
-?>
+check::done();

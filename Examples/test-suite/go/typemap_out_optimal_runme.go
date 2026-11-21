@@ -1,8 +1,9 @@
 package main
 
-import . "typemap_out_optimal"
+import . "swigtests/typemap_out_optimal"
 
 func main() {
-	SetXXDebug(false)
+	SetXXTrace(false)
 	_ = XXCreate()
+	_ = XXCreateConst()
 }

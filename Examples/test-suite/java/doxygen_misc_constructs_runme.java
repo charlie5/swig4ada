@@ -1,6 +1,5 @@
 
 import doxygen_misc_constructs.*;
-import com.sun.javadoc.*;
 import java.util.HashMap;
 
 public class doxygen_misc_constructs_runme {
@@ -15,14 +14,7 @@ public class doxygen_misc_constructs_runme {
 
   public static void main(String argv[])
   {
-    /*
-      Here we are using internal javadoc tool, it accepts the name of the class as paramterer,
-      and calls the start() method of that class with parsed information.
-    */
-    CommentParser parser = new CommentParser();
-    com.sun.tools.javadoc.Main.execute("doxygen_misc_constructs runtime test",
-                                       "CommentParser",
-                                       new String[]{"-quiet", "doxygen_misc_constructs"});
+    CommentParser.parse("doxygen_misc_constructs");
 
     HashMap<String, String> wantedComments = new HashMap<String, String>();
 
@@ -105,7 +97,7 @@ public class doxygen_misc_constructs_runme {
     		"\n");
 
     wantedComments.put("doxygen_misc_constructs.ClassWithNestedEnum.ENested",
-    		" Enum description.\n" +
+    		" ENested description.\n" +
     		"\n");
 
     wantedComments.put("doxygen_misc_constructs.ClassWithNestedEnum.ENested.ONE",
@@ -116,6 +108,81 @@ public class doxygen_misc_constructs_runme {
 
     wantedComments.put("doxygen_misc_constructs.ClassWithNestedEnum.ENested.THREE",
     		" desc of three\n");
+
+    wantedComments.put("doxygen_misc_constructs.ClassWithNestedEnum.ENestedOdd",
+    		" ENestedOdd description.\n" +
+    		"\n");
+
+    wantedComments.put("doxygen_misc_constructs.ClassWithNestedEnum.ENestedOdd.ODD_ONE",
+    		" desc of odd_one\n");
+
+    wantedComments.put("doxygen_misc_constructs.ClassWithNestedEnum.ENestedOdd.ODD_TWO",
+    		" desc of odd_two\n");
+
+    wantedComments.put("doxygen_misc_constructs.ClassWithNestedEnum.ENestedOdd.ODD_THREE",
+    		" desc of odd_three\n");
+
+    wantedComments.put("doxygen_misc_constructs.ClassWithNestedEnum.ENestedOddPartial1",
+    		" ENestedOddPartial1 description.\n" +
+    		"\n");
+
+    wantedComments.put("doxygen_misc_constructs.ClassWithNestedEnum.ENestedOddPartial1.ODD_PARTIAL1_THREE",
+    		" desc of odd_partial1_three\n");
+
+    wantedComments.put("doxygen_misc_constructs.ClassWithNestedEnum.ENestedOddPartial1.ODD_PARTIAL1_TWO",
+    		" desc of odd_partial1_two\n");
+
+    wantedComments.put("doxygen_misc_constructs.ClassWithNestedEnum.ENestedOddPartial3",
+    		" ENestedOddPartial3 description.\n" +
+    		"\n");
+
+    wantedComments.put("doxygen_misc_constructs.ClassWithNestedEnum.ENestedOddPartial3.ODD_PARTIAL3_ONE",
+    		" desc of odd_partial3_one\n");
+
+    wantedComments.put("doxygen_misc_constructs.ClassWithNestedEnum.ENestedOddPartial3.ODD_PARTIAL3_TWO",
+    		" desc of odd_partial3_two\n");
+
+    wantedComments.put("doxygen_misc_constructs.ClassWithNestedEnum.TESTENUM",
+    		" Description for TESTENUM.\n" +
+    		"\n");
+
+    wantedComments.put("doxygen_misc_constructs.ClassWithNestedEnum.TESTENUM.TEST_NONE",
+    		" something for none\n");
+
+    wantedComments.put("doxygen_misc_constructs.ClassWithNestedEnum.TESTENUM.TEST_ONE",
+    		" something for one\n");
+
+    wantedComments.put("doxygen_misc_constructs.ClassWithNestedEnum.TESTENUM.TEST_TWO",
+    		" something for two  something more for two\n");
+
+    wantedComments.put("doxygen_misc_constructs.SIOBeam",
+    		" SIOBeam struct description\n" +
+    		"\n");
+
+    wantedComments.put("doxygen_misc_constructs.SIOBeam.testfunction(int, double, boolean)",
+                "  testfunction - testing extra trailing doc comment <br>\n" +
+                " @param testf_aaa testfunction aaa parm <br>\n" +
+                " @param testf_bbb testfunction bbb parm <br>\n" +
+                " @param testf_ccc testfunction ccc parm  testfunction more for two parm\n" +
+    		"\n");
+
+    wantedComments.put("doxygen_misc_constructs.SIOBeam(java.lang.String, int, int)",
+                "  Constructor for input from an existing SIO file<br>\n" +
+                " @param filename Name of input SIO file.<br>\n" +
+                " @param elevationOrder Interpolation order (0-3) in elevation<br>\n" +
+                " @param bearingOrder Interpolation order (0-3) in bearing\n" +
+    		"\n");
+
+    wantedComments.put("doxygen_misc_constructs.SIOBeam(java.lang.String, int)",
+                "  Constructor for input from an existing SIO file<br>\n" +
+                " @param filename Name of input SIO file.<br>\n" +
+                " @param elevationOrder Interpolation order (0-3) in elevation<br>\n" +
+    		"\n");
+
+    wantedComments.put("doxygen_misc_constructs.SIOBeam(java.lang.String)",
+                "  Constructor for input from an existing SIO file<br>\n" +
+                " @param filename Name of input SIO file.<br>\n" +
+    		"\n");
 
     wantedComments.put("doxygen_misc_constructs.StructWithReturnComment",
     		" @return This is a bad place for this tag, but it should be ignored.");
@@ -132,6 +199,16 @@ public class doxygen_misc_constructs_runme {
 " <br>\n" +
 "        And this is not a list item any more.\n" +
     		"");
+
+    wantedComments.put("doxygen_misc_constructs.IncorrectlyDocumentedMembers",
+    		" Incorrectly documented members, these should be post document comments, Github issue #1636");
+
+    wantedComments.put("doxygen_misc_constructs.IncorrectlyDocumentedMembers.setBbbb(int)",
+    		" really for bbbb value");
+
+    wantedComments.put("doxygen_misc_constructs.IncorrectlyDocumentedMembers.getBbbb()",
+    		" really for bbbb value");
+
     wantedComments.put("doxygen_misc_constructs.doxygen_misc_constructs.isNoSpaceValidA()",
     		" This comment without space after '*' is valid in Doxygen.\n" +
     		"\n" +
@@ -193,8 +270,33 @@ public class doxygen_misc_constructs_runme {
                 "\n" +
                 " @param fileName name of the log file\n");
 
+    wantedComments.put("doxygen_misc_constructs.FileHeaderTestClass",
+    		"\n" +
+    		"\n" +
+    		" This is the real class description.\n" +
+    		"\n" +
+    		"");
+
+    wantedComments.put("doxygen_misc_constructs.SlashFileHeaderTestClass",
+    		" Real class description (slash style).\n");
+
+    wantedComments.put("doxygen_misc_constructs.GroupedMembers.setLoggingMember1(int)",
+    		" Doc for the first grouped member.\n");
+    wantedComments.put("doxygen_misc_constructs.GroupedMembers.getLoggingMember1()",
+    		" Doc for the first grouped member.\n");
+    wantedComments.put("doxygen_misc_constructs.GroupedMembers.setLoggingMember2(int)",
+    		" Doc for the second grouped member.\n");
+    wantedComments.put("doxygen_misc_constructs.GroupedMembers.getLoggingMember2()",
+    		" Doc for the second grouped member.\n");
+
+    wantedComments.put("doxygen_misc_constructs.doxygen_misc_constructs.doc_ends_with_quote()",
+            "This doc comment ends with a quote: \"and that's ok\"");
+
+    wantedComments.put("doxygen_misc_constructs.doxygen_misc_constructs.doc_with_triple_quotes()",
+            "This comment contains embedded triple-quoted string:\n" +
+            "\"\"\"How quaint\"\"\"");
 
     // and ask the parser to check comments for us
-    System.exit(parser.check(wantedComments));
+    System.exit(CommentParser.check(wantedComments));
   }
 }

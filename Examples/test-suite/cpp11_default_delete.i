@@ -28,7 +28,13 @@ A1::A1(const A1&) = default;
 
 struct A2 {
   void funk(int i) {}
+
+// Workaround clang 10.0.1 -std=c++17 linker error (oddly for Java and not Python):
+// Undefined symbols for architecture x86_64:"___cxa_deleted_virtual", referenced from: vtable for A2
+#if !(defined(__clang__) && __cplusplus >= 201703L)
   virtual void fff(int) = delete;
+#endif
+
   virtual ~A2() = default;
   template<class T> void funk(T) = delete;
 };
@@ -51,8 +57,33 @@ struct sometype {
   sometype() = delete;
   sometype(int) = delete;
   sometype(double);
+  static sometype make(double d) { return sometype(d); }
+  static void take(sometype s) {}
 };
 sometype::sometype(double) {}
+
+struct sometype2 {
+  sometype2() = delete;
+  sometype2(double) {}
+  static sometype2 make(double d) { return sometype2(d); }
+  static void take(sometype2 s) {}
+};
+
+struct sometype3 {
+  int num;
+#if __cplusplus >= 202002L
+  // Uniform/aggregate initialization was removed in C++20 if there is a user declared constructor, so the initialization in make() below does not work
+  // This example can only be tested for C++11 to C++17, in C++20 the constructor declaration is removed by making it an aggregate
+  // SWIG still sees the deleted constructor below
+#else
+  sometype3() = delete;
+#endif
+  static sometype3 make(int n) {
+    // Note: Can only be constructed via copy constructor, so use C++11 uniform initialization to create
+    return sometype3 {n};
+  }
+  static void take(sometype3 s) {}
+};
 
 /* Not working with prerelease of gcc-4.8
 struct nonew {
@@ -71,11 +102,11 @@ struct moveonly {
 };
 
 struct ConstructorThrow {
-  ConstructorThrow() throw() = default;
-  ConstructorThrow(const ConstructorThrow&) throw() = delete;
-  ConstructorThrow(ConstructorThrow&&) throw() = delete;
-  ConstructorThrow& operator=(const ConstructorThrow&) throw() = delete;
-  ~ConstructorThrow() throw() = default;
+  ConstructorThrow() noexcept = default;
+  ConstructorThrow(const ConstructorThrow&) noexcept = delete;
+  ConstructorThrow(ConstructorThrow&&) noexcept = delete;
+  ConstructorThrow& operator=(const ConstructorThrow&) noexcept = delete;
+  ~ConstructorThrow() noexcept = default;
 };
 
 %}

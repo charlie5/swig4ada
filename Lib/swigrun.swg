@@ -7,13 +7,11 @@
 
 /* This should only be incremented when either the layout of swig_type_info changes,
    or for whatever reason, the runtime changes incompatibly */
-#define SWIG_RUNTIME_VERSION "4"
+#define SWIG_RUNTIME_VERSION "5"
 
 /* define SWIG_TYPE_TABLE_NAME as "SWIG_TYPE_TABLE" */
 #ifdef SWIG_TYPE_TABLE
-# define SWIG_QUOTE_STRING(x) #x
-# define SWIG_EXPAND_AND_QUOTE_STRING(x) SWIG_QUOTE_STRING(x)
-# define SWIG_TYPE_TABLE_NAME SWIG_EXPAND_AND_QUOTE_STRING(SWIG_TYPE_TABLE)
+# define SWIG_TYPE_TABLE_NAME SWIG_STRINGIFY(SWIG_TYPE_TABLE)
 #else
 # define SWIG_TYPE_TABLE_NAME
 #endif
@@ -44,6 +42,8 @@
 #define SWIG_POINTER_DISOWN        0x1
 #define SWIG_CAST_NEW_MEMORY       0x2
 #define SWIG_POINTER_NO_NULL       0x4
+#define SWIG_POINTER_CLEAR         0x8
+#define SWIG_POINTER_RELEASE       (SWIG_POINTER_CLEAR | SWIG_POINTER_DISOWN)
 
 /* Flags for new pointer objects */
 #define SWIG_POINTER_OWN           0x1
@@ -115,7 +115,7 @@
    SWIG errors code.
 
    Finally, if the SWIG_CASTRANK_MODE is enabled, the result code
-   allows to return the 'cast rank', for example, if you have this
+   allows returning the 'cast rank', for example, if you have this
 
        int food(double)
        int fooi(int);
@@ -129,7 +129,13 @@
 */
 
 #define SWIG_OK                    (0)
+/* Runtime errors are < 0 */
 #define SWIG_ERROR                 (-1)
+/* Errors in range -1 to -99 are in swigerrors.swg (errors for all languages including those not using the runtime) */
+/* Errors in range -100 to -199 are language specific errors defined in *errors.swg */
+/* Errors < -200 are generic runtime specific errors */
+#define SWIG_ERROR_RELEASE_NOT_OWNED (-200)
+
 #define SWIG_IsOK(r)               (r >= 0)
 #define SWIG_ArgError(r)           ((r != SWIG_ERROR) ? r : SWIG_TypeError)
 
@@ -137,20 +143,26 @@
 #define SWIG_CASTRANKLIMIT         (1 << 8)
 /* The NewMask denotes the object was created (using new/malloc) */
 #define SWIG_NEWOBJMASK            (SWIG_CASTRANKLIMIT  << 1)
-/* The TmpMask is for in/out typemaps that use temporal objects */
+/* The TmpMask is for in/out typemaps that use temporary objects */
 #define SWIG_TMPOBJMASK            (SWIG_NEWOBJMASK << 1)
+/* The binary string mask denotes using string without unicode */
+#define SWIG_BINARYSTRMASK         (SWIG_TMPOBJMASK << 1)
 /* Simple returning values */
 #define SWIG_BADOBJ                (SWIG_ERROR)
 #define SWIG_OLDOBJ                (SWIG_OK)
 #define SWIG_NEWOBJ                (SWIG_OK | SWIG_NEWOBJMASK)
 #define SWIG_TMPOBJ                (SWIG_OK | SWIG_TMPOBJMASK)
-/* Check, add and del mask methods */
+#define SWIG_BINARYSTR             (SWIG_OK | SWIG_BINARYSTRMASK)
+/* Check, add and del object mask methods */
 #define SWIG_AddNewMask(r)         (SWIG_IsOK(r) ? (r | SWIG_NEWOBJMASK) : r)
 #define SWIG_DelNewMask(r)         (SWIG_IsOK(r) ? (r & ~SWIG_NEWOBJMASK) : r)
 #define SWIG_IsNewObj(r)           (SWIG_IsOK(r) && (r & SWIG_NEWOBJMASK))
 #define SWIG_AddTmpMask(r)         (SWIG_IsOK(r) ? (r | SWIG_TMPOBJMASK) : r)
 #define SWIG_DelTmpMask(r)         (SWIG_IsOK(r) ? (r & ~SWIG_TMPOBJMASK) : r)
 #define SWIG_IsTmpObj(r)           (SWIG_IsOK(r) && (r & SWIG_TMPOBJMASK))
+#define SWIG_AddBinaryStrMask(r)   (SWIG_IsOK(r) ? (r | SWIG_BINARYSTRMASK) : r)
+#define SWIG_DelBinaryStrMask(r)   (SWIG_IsOK(r) ? (r & ~SWIG_BINARYSTRMASK) : r)
+#define SWIG_IsBinaryStr(r)        (SWIG_IsOK(r) && (r & SWIG_BINARYSTRMASK))
 
 /* Cast-Rank Mode */
 #if defined(SWIG_CASTRANK_MODE)
@@ -197,8 +209,8 @@ typedef struct swig_type_info {
 typedef struct swig_cast_info {
   swig_type_info         *type;			/* pointer to type that is equivalent to this type */
   swig_converter_func     converter;		/* function to cast the void pointers */
-  struct swig_cast_info  *next;			/* pointer to next cast in linked list */
-  struct swig_cast_info  *prev;			/* pointer to the previous cast */
+  struct swig_cast_info  *next;			/* pointer to next array of casts | pointer to cast hashed by value */
+  unsigned int            value;		/* index of the last valid element in the array | typename hash value */
 } swig_cast_info;
 
 /* Structure used to store module information
@@ -260,54 +272,146 @@ SWIG_TypeEquiv(const char *nb, const char *tb) {
 }
 
 /*
+ * Hash function for type name strings, based on maRushPrime1Hash (http://amsoftware.narod.ru/algo2.html)
+ */
+SWIGRUNTIME unsigned int SWIG_Hash(const char *str, unsigned int len) {
+  const unsigned char *data = (const unsigned char *)str;
+  unsigned int hash = len, i = 0, k;
+  int rem = (int)len;
+
+  while (rem >= (int)sizeof(unsigned int)) {
+    memcpy(&k, data, sizeof(unsigned int));
+    k += i++;
+    hash ^= k;
+    hash *= 171717;
+    data += sizeof(unsigned int);
+    rem -= (int)sizeof(unsigned int);
+  }
+
+  switch (rem) {
+    case 3: k = (unsigned int)(data[2]) << 16;
+            k |= (unsigned int)(data[1]) << 8;
+            k |= (unsigned int)(data[0]);
+            k += i++;
+            hash ^= k;
+            hash *= 171717;
+            break;
+    case 2: k = (unsigned int)(data[1]) << 8;
+            k |= (unsigned int)(data[0]);
+            k += i++;
+            hash ^= k;
+            hash *= 171717;
+            break;
+    case 1: k = (unsigned int)(data[0]);
+            k += i++;
+            hash ^= k;
+            hash *= 171717;
+            break;
+  }
+  return hash;
+}
+
+/*
   Check the typename
 */
 SWIGRUNTIME swig_cast_info *
 SWIG_TypeCheck(const char *c, swig_type_info *ty) {
+  static const unsigned int scan_threshold = 4;
   if (ty) {
-    swig_cast_info *iter = ty->cast;
-    while (iter) {
-      if (strcmp(iter->type->name, c) == 0) {
-        if (iter == ty->cast)
-          return iter;
-        /* Move iter to the top of the linked list */
-        iter->prev->next = iter->next;
-        if (iter->next)
-          iter->next->prev = iter->prev;
-        iter->next = ty->cast;
-        iter->prev = 0;
-        if (ty->cast) ty->cast->prev = iter;
-        ty->cast = iter;
-        return iter;
+    swig_cast_info *head = ty->cast;
+    unsigned int hash_value = 0;
+    int hashed = 0;
+
+    while (head) {
+
+      if (strcmp(head->type->name, c) == 0) {
+        return head;
       }
-      iter = iter->next;
+
+      if (head->value) {
+        swig_cast_info *iter;
+        swig_cast_info *last = head + head->value;
+        swig_cast_info *first = head + 1;
+        int search = 1;
+
+        if (!hashed) {
+          if (head->value < scan_threshold) {
+            for (iter = first; iter <= last; iter++) {
+              if (strcmp(iter->type->name, c) == 0) {
+                return iter;
+              }
+            }
+            search = 0;
+          } else {
+            hashed = 1;
+            hash_value = SWIG_Hash(c, (unsigned int)strlen(c));
+          }
+        }
+
+        if (search) {
+          /* Binary search over sorted <'next'|'value'> pairs */
+          do {
+            iter = first + ((last - first) >> 1);
+            if (iter->value < hash_value) {
+              first = iter + 1;
+            } else if (iter->value == hash_value) {
+
+              if (strcmp(iter->next->type->name, c) == 0) {
+                return iter->next;
+              }
+
+              /* Hash collision check */
+              for (last = iter + 1; last->next && last->value == hash_value; last++) {
+                if (strcmp(last->next->type->name, c) == 0) {
+                  return last->next;
+                }
+              }
+              for (first = iter - 1; first != head && first->value == hash_value; first--) {
+                if (strcmp(first->next->type->name, c) == 0) {
+                  return first->next;
+                }
+              }
+              break;
+            } else
+              last = iter - 1;
+          } while (first <= last);
+        }
+      }
+      head = head->next;
     }
   }
   return 0;
 }
 
 /*
-  Identical to SWIG_TypeCheck, except strcmp is replaced with a pointer comparison
+  Check the type by type address
 */
 SWIGRUNTIME swig_cast_info *
-SWIG_TypeCheckStruct(swig_type_info *from, swig_type_info *ty) {
+SWIG_TypeCheckStruct(const swig_type_info *from, swig_type_info *ty) {
   if (ty) {
-    swig_cast_info *iter = ty->cast;
-    while (iter) {
-      if (iter->type == from) {
-        if (iter == ty->cast)
-          return iter;
-        /* Move iter to the top of the linked list */
-        iter->prev->next = iter->next;
-        if (iter->next)
-          iter->next->prev = iter->prev;
-        iter->next = ty->cast;
-        iter->prev = 0;
-        if (ty->cast) ty->cast->prev = iter;
-        ty->cast = iter;
-        return iter;
+    swig_cast_info *head = ty->cast;
+    while (head) {
+      if (head->type == from) {
+        return head;
       }
-      iter = iter->next;
+
+      if (head->value) {
+        swig_cast_info *iter;
+        swig_cast_info *last = head + head->value;
+        swig_cast_info *first = head + 1;
+
+        /* Binary search over sorted array of casts */
+        do {
+          iter = first + ((last - first) >> 1);
+          if (iter->type < from) {
+            first = iter + 1;
+          } else if (iter->type == from) {
+            return iter;
+          } else
+            last = iter - 1;
+        } while (first <= last);
+      }
+      head = head->next;
     }
   }
   return 0;
@@ -350,9 +454,9 @@ SWIG_TypeName(const swig_type_info *ty) {
 SWIGRUNTIME const char *
 SWIG_TypePrettyName(const swig_type_info *type) {
   /* The "str" field contains the equivalent pretty names of the
-     type, separated by vertical-bar characters.  We choose
-     to print the last name, as it is often (?) the most
-     specific. */
+     type, separated by vertical-bar characters.  Choose the last
+     name. It should be the most specific; a fully resolved name
+     but not necessarily with default template parameters expanded. */
   if (!type) return NULL;
   if (type->str != NULL) {
     const char *last_name = type->str;
@@ -370,20 +474,24 @@ SWIG_TypePrettyName(const swig_type_info *type) {
 */
 SWIGRUNTIME void
 SWIG_TypeClientData(swig_type_info *ti, void *clientdata) {
-  swig_cast_info *cast = ti->cast;
+  swig_cast_info *head = ti->cast;
   /* if (ti->clientdata == clientdata) return; */
   ti->clientdata = clientdata;
 
-  while (cast) {
-    if (!cast->converter) {
-      swig_type_info *tc = cast->type;
-      if (!tc->clientdata) {
-	SWIG_TypeClientData(tc, clientdata);
+  while (head) {
+    swig_cast_info *cast;
+    for (cast = head; (unsigned int)(cast - head) <= head->value; cast++) {
+      if (!cast->converter) {
+        swig_type_info *tc = cast->type;
+        if (!tc->clientdata) {
+          SWIG_TypeClientData(tc, clientdata);
+        }
       }
     }
-    cast = cast->next;
+    head = head->next;
   }
 }
+
 SWIGRUNTIME void
 SWIG_TypeNewClientData(swig_type_info *ti, void *clientdata) {
   SWIG_TypeClientData(ti, clientdata);
@@ -522,7 +630,7 @@ SWIG_PackVoidPtr(char *buff, void *ptr, const char *name, size_t bsz) {
   if ((2*sizeof(void *) + 2) > bsz) return 0;
   *(r++) = '_';
   r = SWIG_PackData(r,&ptr,sizeof(void *));
-  if (strlen(name) + 1 > (bsz - (r - buff))) return 0;
+  if (strlen(name) + 1 > (bsz - (size_t)(r - buff))) return 0;
   strcpy(r,name);
   return buff;
 }

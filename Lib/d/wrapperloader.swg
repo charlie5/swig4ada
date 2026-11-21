@@ -40,9 +40,10 @@ private {
   } else {
     version(D_Version2) {
       static import std.conv;
+    } else {
+      static import std.c.string;
     }
     static import std.string;
-    static import std.c.string;
   }
 
   version(D_Version2) {
@@ -112,7 +113,7 @@ private {
     version(Tango) {
       import tango.sys.Common;
     } else version(linux) {
-      import std.c.linux.linux;
+      import core.sys.posix.dlfcn;
     } else {
       extern(C) {
         const RTLD_NOW = 2;
@@ -281,27 +282,20 @@ static this() {
       "))library.loadSymbol(`" ~ symbol ~ "`);";
   }
 
-  //#if !defined(SWIG_D_NO_EXCEPTION_HELPER)
   mixin(bindCode("swigRegisterExceptionCallbacks$module", "SWIGRegisterExceptionCallbacks_$module"));
-  //#endif // SWIG_D_NO_EXCEPTION_HELPER
-  //#if !defined(SWIG_D_NO_STRING_HELPER)
   mixin(bindCode("swigRegisterStringCallback$module", "SWIGRegisterStringCallback_$module"));
-  //#endif // SWIG_D_NO_STRING_HELPER
   $wrapperloaderbindcode
 }
 
-//#if !defined(SWIG_D_NO_EXCEPTION_HELPER)
 extern(C) void function(
   SwigExceptionCallback exceptionCallback,
   SwigExceptionCallback illegalArgumentCallback,
   SwigExceptionCallback illegalElementCallback,
   SwigExceptionCallback ioCallback,
-  SwigExceptionCallback noSuchElementCallback) swigRegisterExceptionCallbacks$module;
-//#endif // SWIG_D_NO_EXCEPTION_HELPER
+  SwigExceptionCallback noSuchElementCallback,
+  SwigExceptionCallback nullReferenceCallback) swigRegisterExceptionCallbacks$module;
 
-//#if !defined(SWIG_D_NO_STRING_HELPER)
 extern(C) void function(SwigStringCallback callback) swigRegisterStringCallback$module;
-//#endif // SWIG_D_NO_STRING_HELPER
 %}
 
 %pragma(d) wrapperloaderbindcommand = %{

@@ -43,6 +43,7 @@
 <ul>
 <li><a name="i7.1" href="#7.1">7.1 Debugging DOH Types The Hard Way</a>
 <li><a name="i7.2" href="#7.2">7.2 Debugging DOH memory allocation problems</a>
+<li><a name="i7.3" href="#7.3">7.3 Further debugging information</a>
 </ul>
 </ul>
 
@@ -71,9 +72,9 @@ to code).
 </tr>
 
 <tr><td>Examples</td>
-<td>This subdir tree contains examples of using SWIG w/ different
+<td>This subdir tree contains examples of using SWIG with different
 scripting languages, including makefiles.  Typically, there are the
-"simple" and "class" examples, w/ some languages offering additional
+"simple" and "class" examples, with some languages offering additional
 examples.  See the README more index.html file in each directory
 for more info.  [FIXME: Ref SWIG user manual.]</td>
 </tr>
@@ -108,7 +109,7 @@ subdir tree.</td>
   </tr>
 
   <tr><td>CParse</td>
-  <td>Parser (lex / yacc) files and support</td>
+  <td>Parser (bison) files and support</td>
   </tr>
 
   <tr><td>Modules</td>
@@ -441,12 +442,12 @@ Resulting output:
 
 <blockquote>
 <pre>
-hash len: 5
-get: hashval2
-hash item: hashval5 [h5]
-hash item: hashval1 [h1]
-hash item: hashval2 [h2]
-hash item: hashval3 [h3]
+list len: 5
+get: listval2
+list item: newlistval1
+list item: listval2
+list item: listval3
+list item: listval5
 </pre>
 </blockquote>
 
@@ -494,12 +495,12 @@ Resulting output:
 
 <blockquote>
 <pre>
-list len: 5
-get: listval2
-list item: newlistval1
-list item: listval2
-list item: listval3
-list item: listval5
+hash len: 5
+get: hashval2
+hash item: hashval5 [h5]
+hash item: hashval1 [h1]
+hash item: hashval2 [h2]
+hash item: hashval3 [h3]
 </pre>
 </blockquote>
 
@@ -519,7 +520,27 @@ list item: listval5
 <h3>2.10 Utility functions </h3>
 </a>
 
-[ TODO ]
+<p>
+DOH wraps some standard C library functions - these wrapped versions should
+always be used in code in the SWIG tool itself (but not in generated code).
+When compiling with GCC or clang, the original library function names are
+marked as "poisoned" symbols so you should get an error if you accidentally
+use one of the unwrapped functions.  These functions are:
+
+<ul>
+    <li><tt>Calloc(m,n)</tt> : wrapper for <tt>calloc(m,n)</tt> which exits on memory failure so never returns <tt>NULL</tt>.
+    <li><tt>Malloc(n)</tt> : wrapper for <tt>malloc(n)</tt> which exits on memory failure so never returns <tt>NULL</tt>.
+    <li><tt>Realloc(p,n)</tt> : wrapper for <tt>realloc(p,n)</tt> which exits on memory failure so never returns <tt>NULL</tt>.
+    <li><tt>Free(p)</tt> : wrapper for <tt>free(p)</tt> (doesn't currently do anything special, really done for consistency with <tt>Malloc()</tt> etc).
+    <li><tt>Exit(r)</tt> : wrapper for <tt>exit(r)</tt> which for SWIG removes generated files if <tt>r&gt;0</tt>.
+</ul>
+
+<tt>abort()</tt> is also poisoned - please use <tt>Exit(EXIT_FAILURE)</tt> instead so that generated files are removed.
+</p>
+
+<p>
+[ TODO document others ]
+</p>
 
 <a name="3" href="#i3">
 <h2>3. Types and Typemaps</h2>
@@ -535,7 +556,7 @@ manipulate datatypes.
 <li><tt>SwigType_str(SwigType *t, char *name)</tt>.<br>
  This function produces the exact string 
 representation of the datatype <tt>t</tt>.  <tt>name</tt> is an optional parameter that 
-specifies a declaration name.   This is used when dealing with more complicated datatypes
+specifies a declaration name and can be <tt>NULL</tt>.  This is used when dealing with more complicated datatypes
 such as arrays and pointers to functions where the output might look something like
 "<tt>int (*name)(int, double)</tt>".
 
@@ -1194,22 +1215,33 @@ that are used after they have been deleted. This is because the DOH memory alloc
 grabs a chunk of memory from the C memory allocator and manages the usage internally.
 Stale DOH object usage can be checked for by defining <tt>DOH_DEBUG_MEMORY_POOLS</tt> in 
 <tt>memory.c</tt>. If an attempt to use an object is made after the reference count is
-zero, an assertion is triggered instead of quietly re-using the stale object...
+zero, a fatal error is triggered instead of quietly re-using the stale object:
 </p>
 
 <blockquote>
 <pre>
-swig: DOH/memory.c:91: DohCheck: Assertion `!DOH_object_already_deleted' failed.
+Fatal internal error: Attempt to delete a non-DOH object.
 </pre>
 </blockquote>
 
 <p>
 This can be memory intensive as previously used memory in the pool is not re-used so is
 only recommended for diagnosing memory corruption problems.
+The valgrind tool is commonly used for debugging memory problems and <tt>DOH_DEBUG_MEMORY_POOLS</tt>
+should also be defined when using valgrind.
+</p>
+
+
+<a name="7.3" href="#i7.3">
+<h3>7.3 Further debugging information</h3>
+</a>
+
+<p>
+There is also useful practical information about debugging SWIG in the <i>Extending SWIG to support new languages</i> chapter in the main documentation manual.
 </p>
 
 <hr>
-Copyright (C) 1999-2010 SWIG Development Team.
+Copyright (C) 1999-2024 SWIG Development Team.
 
 </body>
 </html>

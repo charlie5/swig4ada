@@ -44,7 +44,7 @@ the steps look like this (Linux):
 <blockquote>
 <pre>
 unix % swig -tcl interface.i
-unix % gcc -fpic -c interface_wrap.c -I/usr/local/include
+unix % gcc -fPIC -c interface_wrap.c -I/usr/local/include
 unix % gcc -shared interface_wrap.o $(OBJS) -o interface.so
 unix % tclsh8.3
 % load ./interface.so
@@ -63,7 +63,7 @@ The examples have been extensively tested on the following platforms:
 </ul>
 
 Your mileage may vary.  If you experience a problem, please let us know by 
-contacting us on the <a href="http://www.swig.org/mail.html">mailing lists</a>.
+contacting us on the <a href="https://www.swig.org/mail.html">mailing lists</a>.
 </body>
 </html>
 

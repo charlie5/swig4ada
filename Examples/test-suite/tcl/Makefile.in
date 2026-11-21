@@ -3,9 +3,13 @@
 #######################################################################
 
 LANGUAGE     = tcl
-TCLSH        = tclsh
+TCLSH        = @TCLSH@
 SCRIPTSUFFIX = _runme.tcl
 
+HAVE_CXX11   = @HAVE_CXX11@
+HAVE_CXX14   = @HAVE_CXX14@
+HAVE_CXX17   = @HAVE_CXX17@
+HAVE_CXX20   = @HAVE_CXX20@
 srcdir       = @srcdir@
 top_srcdir   = @top_srcdir@
 top_builddir = @top_builddir@
@@ -22,7 +26,9 @@ C_TEST_CASES += \
 include $(srcdir)/../common.mk
 
 # Overridden variables here
-# none!
+
+# Ensure testsuite remains free from SWIG warnings.
+SWIGOPT += -Werror
 
 # Custom tests - tests with additional commandline options
 # none!

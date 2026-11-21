@@ -6,16 +6,6 @@
 %fragment("StdUnorderedMultimapTraits","header",fragment="StdMapCommonTraits",fragment="StdUnorderedMapForwardIteratorTraits")
 {
   namespace swig {
-    template <class SwigPySeq, class K, class T, class Hash, class Compare, class Alloc>
-    inline void 
-    assign(const SwigPySeq& swigpyseq, std::unordered_multimap<K,T,Hash,Compare,Alloc> *unordered_multimap) {
-      typedef typename std::unordered_multimap<K,T,Hash,Compare,Alloc>::value_type value_type;
-      typename SwigPySeq::const_iterator it = swigpyseq.begin();
-      for (;it != swigpyseq.end(); ++it) {
-	unordered_multimap->insert(value_type(it->first, it->second));
-      }
-    }
-
     template <class K, class T, class Hash, class Compare, class Alloc>
     struct traits_reserve<std::unordered_multimap<K,T,Hash,Compare,Alloc> >  {
       static void reserve(std::unordered_multimap<K,T,Hash,Compare,Alloc> &seq, typename std::unordered_multimap<K,T,Hash,Compare,Alloc>::size_type n) {
@@ -30,13 +20,11 @@
 	int res = SWIG_ERROR;
 	if (PyDict_Check(obj)) {
 	  SwigVar_PyObject items = PyObject_CallMethod(obj,(char *)"items",NULL);
-%#if PY_VERSION_HEX >= 0x03000000
-          /* In Python 3.x the ".items()" method returns a dict_items object */
-          items = PySequence_Fast(items, ".items() didn't return a sequence!");
-%#endif
+	  /* In Python 3.x the ".items()" method returns a dict_items object */
+	  items = PySequence_Fast(items, ".items() didn't return a sequence!");
 	  res = traits_asptr_stdseq<std::unordered_multimap<K,T,Hash,Compare,Alloc>, std::pair<K, T> >::asptr(items, val);
 	} else {
-	  unordered_multimap_type *p;
+	  unordered_multimap_type *p = 0;
 	  swig_type_info *descriptor = swig::type_info<unordered_multimap_type>();
 	  res = descriptor ? SWIG_ConvertPtr(obj, (void **)&p, descriptor, 0) : SWIG_ERROR;
 	  if (SWIG_IsOK(res) && val)  *val = p;
@@ -57,7 +45,7 @@
 	  return SWIG_InternalNewPointerObj(new unordered_multimap_type(unordered_multimap), desc, SWIG_POINTER_OWN);
 	} else {
 	  size_type size = unordered_multimap.size();
-	  Py_ssize_t pysize = (size <= (size_type) INT_MAX) ? (Py_ssize_t) size : -1;
+	  Py_ssize_t pysize = (size <= (size_type)PY_SSIZE_T_MAX) ? (Py_ssize_t)size : -1;
 	  if (pysize < 0) {
 	    SWIG_PYTHON_THREAD_BEGIN_BLOCK;
 	    PyErr_SetString(PyExc_OverflowError, "unordered_multimap size not valid in python");

@@ -27,7 +27,7 @@ KW(synchronized, final)
 
 /* C# Keywords */
 KW(string, out)
-struct sealed {int i;};
+struct stackalloc {int i;};
 
 /* Go Keywords */
 KW(go, defer)
@@ -36,6 +36,22 @@ KW(chan, fallthrough)
 /* Lua keywords */
 KW(end, function)
 KW(nil,local)
+
+/* Javascript keywords */
+KW(instanceof, finally)
+KW(finally, instanceof)
+KW(yield, with)
+
+/* Keywords used as member variables shouldn't be renamed in Javascript. */
+struct S {
+  int yield;
+};
+
+struct S make_S_with_yield(int yield) {
+  struct S s;
+  s.yield = yield;
+  return s;
+}
 
 %}
 

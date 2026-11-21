@@ -89,8 +89,6 @@ struct SpeedClass {
   const colour myColour2;
   speedtd1 mySpeedtd1;
   SpeedClass() : myColour2(red), mySpeedtd1(slow) { }
-private:
-  SpeedClass& operator=(const SpeedClass&);
 };
 
 int                            speedTest0(int s) { return s; }
@@ -580,6 +578,14 @@ enumWithMacro enumWithMacroTest(enumWithMacro e) { return e; }
 }
 %}
 
+#ifdef SWIGCSHARP
+// It seems these never worked for SWIG/C#.
+%ignore global_typeunsigned1;
+%ignore global_typeunsigned2;
+%ignore global_typeunsigned3;
+%ignore global_typeunsigned4;
+#endif
+
 %inline %{
 namespace DifferentSpace {
 enum DifferentTypes {
@@ -602,7 +608,13 @@ enum {
   global_typechar = 'C',
   global_typedefaultint,
   global_typecharcompound='A'+1,
-  global_typecharcompound2='B' << 2
+  global_typecharcompound2='B' << 2,
+  // Regression tests for #3070 affecting SWIG/Java, introduced in 4.3.0:
+  global_typeunsigned1 = 0x80000000,
+  global_typeunsigned2 = 0xffffffff,
+  // These should also work in > 4.3.0.
+  global_typeunsigned3 = 2147483648,
+  global_typeunsigned4 = 4294967295
 };
 int globalDifferentTypesTest(int n) { return n; }
 }
@@ -662,6 +674,16 @@ struct EnumCharStruct {
     enumcharAE3 = '\xC6' // AE (latin1 encoded)
   };
 };
+
+// We can't test this for C# and Java it seems.
+#if !defined(SWIGCSHARP) && !defined(SWIGJAVA)
+enum Enum2995 {
+   T1 = (1 == 1),
+   T2 = !false,
+   F1 = (1 != 1),
+   F2 = !true,
+};
+#endif
 %}
 
 #if defined(SWIGJAVA)

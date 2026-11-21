@@ -20,12 +20,12 @@
 
 
 /* ------------------------------------------------------------
- *  Unified typemap section
+ *  Unified Typemap Library section
  * ------------------------------------------------------------ */
 
 /* Javascript types */
 
-#define SWIG_Object                     v8::Handle<v8::Value>
+#define SWIG_Object                     SWIGV8_VALUE
 #define VOID_Object                     SWIGV8_UNDEFINED()
 
 /* Overload of the output/constant/exception/dirout handling */
@@ -37,7 +37,7 @@
 #define SWIG_SetConstant(name, obj)
 
 /* raise */
-#define SWIG_Raise(obj, type, desc)  SWIG_V8_Raise(type)
+#define SWIG_Raise(obj, type, desc)  SWIG_V8_Raise(obj, type)
 
-/* Include the unified typemap library */
+/* Include the Unified Typemap Library */
 %include <typemaps/swigtypemaps.swg>

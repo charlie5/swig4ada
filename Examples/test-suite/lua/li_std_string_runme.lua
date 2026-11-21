@@ -1,15 +1,8 @@
-require("import")	-- the import fn
-import("li_std_string")	-- import lib
-
-for k,v in pairs(li_std_string) do _G[k]=v end -- move to global
-
--- catch "undefined" global variables
-local env = _ENV -- Lua 5.2
-if not env then env = getfenv () end -- Lua 5.1
-setmetatable(env, {__index=function (t,i) error("undefined global variable `"..i.."'",2) end})
+require_to_globs("li_std_string")
+catch_undef_globs() -- catch "undefined" global variables
 
 -- helper to check type
-function is_std_string(s) 
+function is_std_string(s)
 	return type(s)=='userdata' and swig_type(s)=='std::string *'
 end
 
@@ -36,7 +29,7 @@ test_const_pointer(cobj)
 -- swig doesn't appear to diff between const object ptrs & object ptrs very well
 test_pointer(cobj)	-- this wants an non const object (give it a const one!)
 
--- refs are also wrappered as ptrs (unless the correct typemaps are applied)
+-- refs are also wrapped as ptrs (unless the correct typemaps are applied)
 robj=test_reference_out()
 assert(is_std_string(robj) and robj:c_str()=="test_reference_out message")	-- check type & value
 
@@ -44,21 +37,27 @@ test_reference(robj)
 test_reference(obj)	-- object ptr is ok
 test_reference(cobj)	-- obj const ptr is also ok
 
+-- Test INPUT, INOUT and OUTPUT string& typemaps:
+assert(test_reference_input("hello")=="hello")
+s=test_reference_inout("hello")
+assert(s=="hellohello")
+assert(test_reference_output()=="output")
+
 -- throwing string
 ok,ex=pcall(test_throw)
-assert(ok==false and type(ex)=="string")	-- failed & threw string
+assert(not ok and type(ex)=="string")	-- failed & threw string
 
 ok,ex=pcall(test_const_reference_throw)
-assert(ok==false and type(ex)=="string")	-- failed & threw string
+assert(not ok and type(ex)=="string")	-- failed & threw string
 
 -- const ptrs are now converted to lua strings
 -- they used to be std::string*
 ok,ex=pcall(test_const_pointer_throw)
-assert(ok==false and type(ex)=="string")	-- failed & threw object
+assert(not ok and type(ex)=="string")	-- failed & threw object
 
--- ditto non const ptrs 
+-- ditto non const ptrs
 ok,ex=pcall(test_pointer_throw)
-assert(ok==false and type(ex)=="string")	-- failed & threw object
+assert(not ok and type(ex)=="string")	-- failed & threw object
 
 -- testing std::string variables
 -- Global variables
@@ -88,14 +87,14 @@ assert(type(struc.MemberString2)=="string") -- typemaps make this a string
 assert(type(struc.ConstMemberString)=="string")
 
 -- set a const (should fail with error)
-assert(pcall(function () struc.ConstMemberString="c" end)==false)
+assert(not pcall(function () struc.ConstMemberString="c" end))
 --print(struc.MemberString:data(),struc.MemberString2,struc.ConstMemberString:data())
 
 --check type again
 assert(type(struc.MemberString2)=="string") -- typemaps make this a string
 assert(type(struc.ConstMemberString)=="string")
 
--- for static types: they are really variables, 
+-- for static types: they are really variables,
 -- so we must still use the module name
 
 -- check static type
@@ -104,7 +103,7 @@ assert(type(li_std_string.Structure_ConstStaticMemberString)=="string")
 
 -- try setting (should fail with error)
 --li_std_string.Structure_StaticMemberString2='e'
-assert(pcall(function () li_std_string.Structure_ConstStaticMemberString='f' end)==false)
+assert(not pcall(function () li_std_string.Structure_ConstStaticMemberString='f' end))
 --[[print(li_std_string.Structure_StaticMemberString:data(),
 		li_std_string.Structure_StaticMemberString2,
 		li_std_string.Structure_ConstStaticMemberString:data())]]
@@ -113,3 +112,16 @@ assert(pcall(function () li_std_string.Structure_ConstStaticMemberString='f' end
 assert(type(li_std_string.Structure_StaticMemberString)=="string")
 assert(type(li_std_string.Structure_StaticMemberString2)=="string")
 assert(type(li_std_string.Structure_ConstStaticMemberString)=="string")
+
+
+assert(stdstring_empty()=="")
+assert(c_empty()=="")
+assert(c_null()==nil)
+assert(get_null(c_null())==nil)
+assert(get_null(c_empty())=="non-null")
+assert(get_null(stdstring_empty())=="non-null")
+
+-- Regression test for bug fixed in SWIG 4.2.0: depending on the order of
+-- evaluation of function arguments by the compiler, a numeric value might be
+-- passed as an empty string (seen with GCC 12.2 on x86-64 Linux).
+assert(test_value(1234) == "1234")

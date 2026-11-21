@@ -1,6 +1,6 @@
 package main
 
-import . "smart_pointer_extend"
+import . "swigtests/smart_pointer_extend"
 
 func main() {
 	f := NewFoo()
@@ -19,6 +19,10 @@ func main() {
 	}
 
 	if d.Foo() != p.Foo() {
+		panic(0)
+	}
+
+	if d.Bar() != p.Bar() {
 		panic(0)
 	}
 

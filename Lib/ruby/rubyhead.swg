@@ -1,4 +1,22 @@
+#if __GNUC__ >= 7
+#pragma GCC diagnostic push
+#if defined(__cplusplus)
+#pragma GCC diagnostic ignored "-Wregister"
+#if __GNUC__ >= 10
+#pragma GCC diagnostic ignored "-Wvolatile"
+#if __GNUC__ >= 11
+#pragma GCC diagnostic ignored "-Wdeprecated-enum-enum-conversion"
+#endif
+#endif
+#endif
+#endif
+
 #include <ruby.h>
+#include <ruby/version.h> /* For RUBY_API_VERSION_CODE */
+
+#if __GNUC__ >= 7
+#pragma GCC diagnostic pop
+#endif
 
 /* Ruby 1.9.1 has a "memoisation optimisation" when compiling with GCC which
  * breaks using rb_intern as an lvalue, as SWIG does.  We work around this
@@ -94,42 +112,78 @@
 #ifndef RTYPEDDATA_P
 # define RTYPEDDATA_P(x) (TYPE(x) != T_DATA)
 #endif
+#ifndef TYPED_DATA_EMBEDDED
+# define RTYPEDDATA_GET_DATA(x) RTYPEDDATA_DATA(x)
+#endif
 
+/* Flags shared by every rb_data_type_t that SWIG allocates with
+   TypedData_Make_Struct, so the static descriptors and the per class cext_type
+   stay in step. The rb_data_type_t flags member, and RUBY_TYPED_FREE_IMMEDIATELY,
+   only exist from Ruby 2.1, so this macro (and every use of it) is guarded by
+   '#ifdef RUBY_TYPED_FREE_IMMEDIATELY' and is simply absent on older Ruby. Ruby
+   3.3+ additionally defines TYPED_DATA_EMBEDDED and can store the small, fixed
+   size swig_ruby_wrapped_object inside the object slot rather than a separate
+   malloc; that embedding also needs FREE_IMMEDIATELY. */
+#ifdef RUBY_TYPED_FREE_IMMEDIATELY
+# ifdef TYPED_DATA_EMBEDDED
+#  define SWIG_RUBY_TYPED_DATA_FLAGS (RUBY_TYPED_FREE_IMMEDIATELY | RUBY_TYPED_EMBEDDABLE)
+# else
+#  define SWIG_RUBY_TYPED_DATA_FLAGS (RUBY_TYPED_FREE_IMMEDIATELY)
+# endif
+#endif
+
+/* Wrapper attached to every SWIG TypedData object. It holds the wrapped pointer
+   together with the per-object mark and free functions. The static rb_data_type_t
+   shared by a class can not carry per-object ownership, which changes as ownership
+   is transferred at runtime, so that information is kept here instead. */
+struct swig_ruby_wrapped_object {
+  void *data;
+  void (*dmark)(void *);
+  void (*dfree)(void *);
+};
 
 
 /*
- * Need to be very careful about how these macros are defined, especially
- * when compiling C++ code or C code with an ANSI C compiler.
+ * The following macros are used for providing the correct type of a
+ * function pointer to the Ruby C API.
  *
- * VALUEFUNC(f) is a macro used to typecast a C function that implements
- * a Ruby method so that it can be passed as an argument to API functions
- * like rb_define_method() and rb_define_singleton_method().
+ * Starting with Ruby 2.7 these macros act transparently due to Ruby's moving
+ * moving away from ANYARGS and instead employing strict function signatures.
  *
- * VOIDFUNC(f) is a macro used to typecast a C function that implements
- * either the "mark" or "free" stuff for a Ruby Data object, so that it
- * can be passed as an argument to API functions like Data_Wrap_Struct()
- * and Data_Make_Struct().
+ * Note: In case of C (not C++) the macros are transparent even before
+ * Ruby 2.7 due to the fact that the Ruby C API used function declarators
+ * with empty parentheses, which allows for an unspecified number of
+ * arguments.
+ *
+ * PROTECTFUNC(f) is used for the function pointer argument of the Ruby
+ * C API function rb_protect().
+ *
+ * VALUEFUNC(f) is used for the function pointer argument(s) of Ruby C API
+ * functions like rb_define_method() and rb_define_singleton_method().
+ *
+ * VOIDFUNC(f) is used to typecast a C function that implements either
+ * the "mark" or "free" stuff for a Ruby Data object, so that it can be
+ * passed as an argument to Ruby C API functions like TypedData_Wrap_Struct()
+ * and TypedData_Make_Struct().
+ *
+ * SWIG_RUBY_VOID_ANYARGS_FUNC(f) is used for the function pointer
+ * argument(s) of Ruby C API functions like rb_define_virtual_variable().
+ *
+ * SWIG_RUBY_INT_ANYARGS_FUNC(f) is used for the function pointer
+ * argument(s) of Ruby C API functions like st_foreach().
  */
- 
-#ifdef __cplusplus
-#  ifndef RUBY_METHOD_FUNC /* These definitions should work for Ruby 1.4.6 */
-#    define PROTECTFUNC(f) ((VALUE (*)()) f)
-#    define VALUEFUNC(f) ((VALUE (*)()) f)
-#    define VOIDFUNC(f)  ((void (*)()) f)
-#  else
-#    ifndef ANYARGS /* These definitions should work for Ruby 1.6 */
-#      define PROTECTFUNC(f) ((VALUE (*)()) f)
-#      define VALUEFUNC(f) ((VALUE (*)()) f)
-#      define VOIDFUNC(f)  ((RUBY_DATA_FUNC) f)
-#    else /* These definitions should work for Ruby 1.7+ */
-#      define PROTECTFUNC(f) ((VALUE (*)(VALUE)) f)
-#      define VALUEFUNC(f) ((VALUE (*)(ANYARGS)) f)
-#      define VOIDFUNC(f)  ((RUBY_DATA_FUNC) f)
-#    endif
-#  endif
+#if defined(__cplusplus) && RUBY_API_VERSION_CODE < 20700
+#  define PROTECTFUNC(f) ((VALUE (*)(VALUE)) f)
+#  define VALUEFUNC(f) ((VALUE (*)(ANYARGS)) f)
+#  define VOIDFUNC(f) ((RUBY_DATA_FUNC) f)
+#  define SWIG_RUBY_VOID_ANYARGS_FUNC(f) ((void (*)(ANYARGS))(f))
+#  define SWIG_RUBY_INT_ANYARGS_FUNC(f) ((int (*)(ANYARGS))(f))
 #else
+#  define PROTECTFUNC(f) (f)
 #  define VALUEFUNC(f) (f)
 #  define VOIDFUNC(f) (f)
+#  define SWIG_RUBY_VOID_ANYARGS_FUNC(f) (f)
+#  define SWIG_RUBY_INT_ANYARGS_FUNC(f) (f)
 #endif
 
 /* Don't use for expressions have side effect */

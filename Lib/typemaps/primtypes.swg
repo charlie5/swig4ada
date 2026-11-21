@@ -10,8 +10,6 @@
     bool
     signed char
     unsigned char
-    signed wchar_t     // in C++
-    unsigned wchar_t   // in C++
     short
     unsigned short
     int
@@ -130,13 +128,6 @@ SWIG_AsVal_dec(bool)(SWIG_Object obj, bool *val)
 %numeric_slong(int,             "<limits.h>", INT_MIN, INT_MAX)
 %numeric_ulong(unsigned int,    "<limits.h>", UINT_MAX)
 
-/* signed/unsigned wchar_t */
-
-#ifdef __cplusplus
-%numeric_slong(signed wchar_t,   "<wchar.h>", WCHAR_MIN, WCHAR_MAX)
-%numeric_ulong(unsigned wchar_t, "<wchar.h>", UWCHAR_MAX)
-#endif
-
 /* float */
 
 %numeric_float(float,           "SWIG_Float_Overflow_Check", SWIG_Float_Overflow_Check(v))
@@ -246,15 +237,18 @@ SWIG_AsVal_dec(ptrdiff_t)(SWIG_Object obj, ptrdiff_t *val)
 
 %fragment("SWIG_CanCastAsInteger","header",
 	  fragment=SWIG_AsVal_frag(double),
+	  fragment="<errno.h>",
 	  fragment="<float.h>",
 	  fragment="<math.h>") {
 SWIGINTERNINLINE int
 SWIG_CanCastAsInteger(double *d, double min, double max) {
   double x = *d;
   if ((min <= x && x <= max)) {
-   double fx = floor(x);
-   double cx = ceil(x);
-   double rd =  ((x - fx) < 0.5) ? fx : cx; /* simple rint */
+   double fx, cx, rd;
+   errno = 0;
+   fx = floor(x);
+   cx = ceil(x);
+   rd =  ((x - fx) < 0.5) ? fx : cx; /* simple rint */
    if ((errno == EDOM) || (errno == ERANGE)) {
      errno = 0;
    } else {

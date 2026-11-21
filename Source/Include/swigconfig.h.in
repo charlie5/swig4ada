@@ -3,26 +3,35 @@
 /* define if the Boost library is available */
 #undef HAVE_BOOST
 
+/* define if the compiler supports basic C++11 syntax */
+#undef HAVE_CXX11
+
+/* define if the compiler supports basic C++14 syntax */
+#undef HAVE_CXX14
+
+/* define if the compiler supports basic C++17 syntax */
+#undef HAVE_CXX17
+
+/* define if the compiler supports basic C++20 syntax */
+#undef HAVE_CXX20
+
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
-/* Define to 1 if you have the `dl' library (-ldl). */
+/* Define to 1 if you have the 'dl' library (-ldl). */
 #undef HAVE_LIBDL
 
-/* Define to 1 if you have the `dld' library (-ldld). */
+/* Define to 1 if you have the 'dld' library (-ldld). */
 #undef HAVE_LIBDLD
 
-/* Define to 1 if you have the <memory.h> header file. */
-#undef HAVE_MEMORY_H
-
-/* Define if you have PCRE library */
+/* Define if you have PCRE2 library */
 #undef HAVE_PCRE
-
-/* Define if popen is available */
-#undef HAVE_POPEN
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
+
+/* Define to 1 if you have the <stdio.h> header file. */
+#undef HAVE_STDIO_H
 
 /* Define to 1 if you have the <stdlib.h> header file. */
 #undef HAVE_STDLIB_H
@@ -63,10 +72,9 @@
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
 
-/* The size of `void *', as computed by sizeof. */
-#undef SIZEOF_VOID_P
-
-/* Define to 1 if you have the ANSI C header files. */
+/* Define to 1 if all of the C89 standard headers exist (not just the ones
+   required in a freestanding environment). This macro is provided for
+   backward compatibility; new code need not use it. */
 #undef STDC_HEADERS
 
 /* Compiler that built SWIG */

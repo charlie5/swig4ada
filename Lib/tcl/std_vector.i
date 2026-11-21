@@ -34,11 +34,11 @@
 %{
 #include <vector>
 
-Tcl_Obj* SwigString_FromString(const std::string &s) {
-    return Tcl_NewStringObj(s.data(), (int)s.length());
+SWIGINTERN Tcl_Obj* SwigString_FromString(const std::string &s) {
+    return Tcl_NewStringObj(s.data(), (Tcl_Size)s.length());
 }
 
-int Tcl_GetBoolFromObj(Tcl_Interp *interp, Tcl_Obj *o, bool *val) {
+SWIGINTERN int SWIG_Tcl_GetBoolFromObj(Tcl_Interp *interp, Tcl_Obj *o, bool *val) {
   int v;
   int res = Tcl_GetBooleanFromObj(interp, o, &v);
   if (res == TCL_OK) {
@@ -47,9 +47,10 @@ int Tcl_GetBoolFromObj(Tcl_Interp *interp, Tcl_Obj *o, bool *val) {
   return res;  
 }
  
-int SwigString_AsString(Tcl_Interp *interp, Tcl_Obj *o, std::string *val) {
-    int len;
+SWIGINTERN int SwigString_AsString(Tcl_Interp *interp, Tcl_Obj *o, std::string *val) {
+    Tcl_Size len;
     const char* temp = Tcl_GetStringFromObj(o, &len);
+    (void)interp;
     if (temp == NULL)
         return TCL_ERROR;
     val->assign(temp, len);
@@ -84,16 +85,16 @@ namespace std {
     template<class T> class vector {
         %typemap(in) vector< T > (std::vector< T > *v) {
             Tcl_Obj **listobjv;
-            int       nitems;
-            int       i;
+            Tcl_Size  nitems;
+            Tcl_Size  i;
             T*        temp;
 
-            if (SWIG_ConvertPtr($input, (void **) &v, \
+            if (SWIG_ConvertPtr($input, (void **) &v,
                                 $&1_descriptor, 0) == 0){
                 $1 = *v;
             } else {
                 // It isn't a vector< T > so it should be a list of T's
-                if(Tcl_ListObjGetElements(interp, $input, \
+                if(Tcl_ListObjGetElements(interp, $input,
                                           &nitems, &listobjv) == TCL_ERROR)
                     return TCL_ERROR;
                 $1 = std::vector< T >();
@@ -113,12 +114,12 @@ namespace std {
         %typemap(in) const vector< T >* (std::vector< T > *v, std::vector< T > w),
                      const vector< T >& (std::vector< T > *v, std::vector< T > w) {
             Tcl_Obj **listobjv;
-            int       nitems;
-            int       i;
+            Tcl_Size  nitems;
+            Tcl_Size  i;
             T*        temp;
 
-            if(SWIG_ConvertPtr($input, (void **) &v, \
-                               $&1_descriptor, 0) == 0) {
+            if(SWIG_ConvertPtr($input, (void **) &v,
+                               $1_descriptor, 0) == 0) {
                 $1 = v;
             } else {
                 // It isn't a vector< T > so it should be a list of T's
@@ -143,7 +144,7 @@ namespace std {
         %typemap(out) vector< T > {
             for (unsigned int i=0; i<$1.size(); i++) {
                 T* ptr = new T((($1_type &)$1)[i]);
-                Tcl_ListObjAppendElement(interp, $result, \
+                Tcl_ListObjAppendElement(interp, $result,
                                          SWIG_NewInstanceObj(ptr, 
                                                              $descriptor(T *), 
                                                              0));
@@ -152,11 +153,11 @@ namespace std {
 
         %typecheck(SWIG_TYPECHECK_VECTOR) vector< T > {
             Tcl_Obj **listobjv;
-            int       nitems;
+            Tcl_Size  nitems;
             T*        temp;
             std::vector< T > *v;
             
-            if(SWIG_ConvertPtr($input, (void **) &v, \
+            if(SWIG_ConvertPtr($input, (void **) &v,
                                $&1_descriptor, 0) == 0) {
                 /* wrapped vector */
                 $1 = 1;
@@ -168,7 +169,7 @@ namespace std {
                 else
                     if (nitems == 0)
                         $1 = 1;
-                //check the first value to see if it is of correct type
+                    //check the first value to see if it is of correct type
                     else if ((SWIG_ConvertPtr(listobjv[0],
                                               (void **) &temp, 
                                               $descriptor(T *),0)) != 0)
@@ -181,11 +182,11 @@ namespace std {
         %typecheck(SWIG_TYPECHECK_VECTOR) const vector< T >&,
                                           const vector< T >* {
             Tcl_Obj **listobjv;
-            int       nitems;
+            Tcl_Size   nitems;
             T*         temp;
             std::vector< T > *v;
 
-            if(SWIG_ConvertPtr($input, (void **) &v, \
+            if(SWIG_ConvertPtr($input, (void **) &v,
                                $1_descriptor, 0) == 0){
                 /* wrapped vector */
                 $1 = 1;
@@ -197,7 +198,7 @@ namespace std {
                 else
                     if (nitems == 0)
                         $1 = 1;
-                //check the first value to see if it is of correct type
+                    //check the first value to see if it is of correct type
                     else if ((SWIG_ConvertPtr(listobjv[0],
                                               (void **) &temp,
                                               $descriptor(T *),0)) != 0)
@@ -260,11 +261,11 @@ namespace std {
 
         %typemap(in) vector< T > (std::vector< T > *v){
             Tcl_Obj **listobjv;
-            int       nitems;
-            int       i;
+            Tcl_Size  nitems;
+            Tcl_Size  i;
             T         temp;
 
-            if(SWIG_ConvertPtr($input, (void **) &v, \
+            if(SWIG_ConvertPtr($input, (void **) &v,
                                $&1_descriptor, 0) == 0) {
                 $1 = *v;
             } else {
@@ -284,11 +285,11 @@ namespace std {
         %typemap(in) const vector< T >& (std::vector< T > *v,std::vector< T > w),
                      const vector< T >* (std::vector< T > *v,std::vector< T > w) {
             Tcl_Obj **listobjv;
-            int       nitems;
-            int       i;
+            Tcl_Size  nitems;
+            Tcl_Size  i;
             T         temp;
 
-            if(SWIG_ConvertPtr($input, (void **) &v, \
+            if(SWIG_ConvertPtr($input, (void **) &v,
                                $1_descriptor, 0) == 0) {
                 $1 = v;
             } else {
@@ -308,18 +309,18 @@ namespace std {
 
         %typemap(out) vector< T > {
             for (unsigned int i=0; i<$1.size(); i++) {
-                Tcl_ListObjAppendElement(interp, $result, \
+                Tcl_ListObjAppendElement(interp, $result,
                                          CONVERT_TO((($1_type &)$1)[i]));
             }
         }
        
         %typecheck(SWIG_TYPECHECK_VECTOR) vector< T > {
             Tcl_Obj **listobjv;
-            int       nitems;
+            Tcl_Size  nitems;
             T         temp;
             std::vector< T > *v;
 
-            if(SWIG_ConvertPtr($input, (void **) &v, \
+            if(SWIG_ConvertPtr($input, (void **) &v,
                                $&1_descriptor, 0) == 0){
                 /* wrapped vector */
                 $1 = 1;
@@ -331,22 +332,22 @@ namespace std {
                 else
                     if (nitems == 0)
                         $1 = 1;
-                //check the first value to see if it is of correct type
-                if (CONVERT_FROM(interp, listobjv[0], &temp) == TCL_ERROR)
-                    $1 = 0;
-                else
-                    $1 = 1;
+                    //check the first value to see if it is of correct type
+                    else if (CONVERT_FROM(interp, listobjv[0], &temp) == TCL_ERROR)
+                        $1 = 0;
+                    else
+                        $1 = 1;
             }
         }      
 
         %typecheck(SWIG_TYPECHECK_VECTOR) const vector< T >&,
 	                                      const vector< T >*{
             Tcl_Obj **listobjv;
-            int       nitems;
+            Tcl_Size  nitems;
             T         temp;
             std::vector< T > *v;
 
-            if(SWIG_ConvertPtr($input, (void **) &v, \
+            if(SWIG_ConvertPtr($input, (void **) &v,
                                $1_descriptor, 0) == 0){
                 /* wrapped vector */
                 $1 = 1;
@@ -358,11 +359,11 @@ namespace std {
                 else
                     if (nitems == 0)
                         $1 = 1;
-                //check the first value to see if it is of correct type
-                if (CONVERT_FROM(interp, listobjv[0], &temp) == TCL_ERROR)
-                    $1 = 0;
-                else
-                    $1 = 1;
+                    //check the first value to see if it is of correct type
+                    else if (CONVERT_FROM(interp, listobjv[0], &temp) == TCL_ERROR)
+                        $1 = 0;
+                    else
+                        $1 = 1;
             }
         }
         
@@ -412,7 +413,7 @@ namespace std {
     };
     %enddef
 
-    specialize_std_vector(bool, Tcl_GetBoolFromObj, Tcl_NewBooleanObj);
+    specialize_std_vector(bool, SWIG_Tcl_GetBoolFromObj, Tcl_NewBooleanObj);
     specialize_std_vector(char, SwigInt_As<char>,Tcl_NewIntObj);
     specialize_std_vector(int, Tcl_GetIntFromObj,Tcl_NewIntObj);
     specialize_std_vector(short, SwigInt_As<short>, Tcl_NewIntObj);

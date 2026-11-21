@@ -1,10 +1,6 @@
 // Simple tests of overloaded functions
 %module overload_simple
 
-#ifdef SWIGCHICKEN
-%warnfilter(SWIGWARN_LANG_OVERLOAD_SHADOW) fbool;
-#endif
-
 #ifdef SWIGLUA
 // lua only has one numeric type, so most of the overloads shadow each other creating warnings
 %warnfilter(SWIGWARN_LANG_OVERLOAD_SHADOW) foo;
@@ -170,10 +166,17 @@ char *fid(double, double) {
 %}
 
 %inline %{
-unsigned long long ull() { return 0ULL; }
-unsigned long long ull(unsigned long long ull) { return ull; }
-long long ll() { return 0LL; }
-long long ll(long long ull) { return ull; }
+int sizeof_long() { return sizeof(long); }
+
+unsigned long as_ul() { return 0UL; }
+unsigned long as_ul(unsigned long ul) { return ul; }
+long as_l() { return 0L; }
+long as_l(long l) { return l; }
+
+unsigned long long as_ull() { return 0ULL; }
+unsigned long long as_ull(unsigned long long ull) { return ull; }
+long long as_ll() { return 0LL; }
+long long as_ll(long long ll) { return ll; }
 %}
 
 %include cmalloc.i
@@ -200,7 +203,7 @@ long long ll(long long ull) { return ull; }
   class Graph {
   public:
     int val;
-    Graph(int i) : val(i) {};
+    Graph(int i) : val(i) {}
   };
 }
 

@@ -3,11 +3,8 @@ SWIGOPT    =
 LIBS       =
 
 build:
-	cd pkg4 && $(MAKE) SWIGOPT='$(SWIGOPT)' LIBS='$(LIBS)' build
-
-static:
-	cd pkg4 && $(MAKE) SWIGOPT='$(SWIGOPT)' LIBS='$(LIBS)' static
+	$(MAKE) -C pkg4 SWIGOPT='$(SWIGOPT)' LIBS='$(LIBS)' build
 
 clean:
 	$(MAKE) -f $(TOP)/Makefile SRCDIR='$(SRCDIR)' python_clean
-	cd pkg4 && $(MAKE) clean
+	$(MAKE) -C pkg4 clean

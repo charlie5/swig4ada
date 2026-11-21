@@ -13,7 +13,11 @@
           fragment=SWIG_From_frag(double))
 {
 SWIGINTERNINLINE JSObjectRef
-SWIG_From_dec(Type)(%ifcplusplus(const Type&, Type) c)
+#if defined(__cplusplus)
+SWIG_From_dec(Type)(const Type& c)
+#else
+SWIG_From_dec(Type)(Type c)
+#endif
 {
   JSValueRef vals[2];
   vals[0] =  SWIG_From(double)(Real(c));
@@ -127,7 +131,7 @@ SWIG_AsVal_dec(Type)(JSValueRef o, Type *val)
     float re;
     int res = SWIG_AddCast(SWIG_AsVal(float)(o, &re));
     if (SWIG_IsOK(res)) {
-      if (val) *val = Constructor(re, 0.0);
+      if (val) *val = Constructor(re, 0.0f);
       return res;
     }
   }

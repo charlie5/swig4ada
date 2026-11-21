@@ -48,6 +48,7 @@ class set {
 
 %typemap(javabase) std::set<T> "java.util.AbstractSet<$typemap(jboxtype, T)>"
 %proxycode %{
+  @SuppressWarnings("this-escape")
   public $javaclassname(java.util.Collection<? extends $typemap(jboxtype, T)> collection) {
     this();
     addAll(collection);
@@ -55,6 +56,10 @@ class set {
 
   public int size() {
     return sizeImpl();
+  }
+
+  public boolean add($typemap(jboxtype, T) key) {
+    return addImpl(key);
   }
 
   public boolean addAll(java.util.Collection<? extends $typemap(jboxtype, T)> collection) {
@@ -91,6 +96,10 @@ class set {
 
       public boolean hasNext() {
         return curr.isNot(end);
+      }
+
+      public void remove() {
+        throw new java.lang.UnsupportedOperationException();
       }
     }.init();
   }
@@ -134,7 +143,7 @@ class set {
   public:
 
     struct iterator {
-      %typemap(javaclassmodifiers) iterator "protected class"
+      %typemap(javaclassmodifiers) iterator "public class"
       %extend {
         void incrementUnchecked() {
           ++(*$self);
@@ -172,7 +181,7 @@ class set {
       %fragment("SWIG_SetSize");
 
       // Returns whether item was inserted.
-      bool add(const T& key) {
+      bool addImpl(const T& key) {
         return self->insert(key).second;
       }
 

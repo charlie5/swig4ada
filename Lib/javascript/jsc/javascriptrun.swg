@@ -7,23 +7,27 @@
 #define SWIG_exception(code, msg) do { SWIG_JSC_exception(context, exception, code, msg); SWIG_fail; } while (0)
 #define SWIG_fail                 goto fail
 
-SWIGRUNTIME void SWIG_Javascript_Raise(JSContextRef context, JSValueRef *exception, const char* type) {
-  JSStringRef message = JSStringCreateWithUTF8CString(type);
+SWIGRUNTIME void SWIG_Javascript_Raise_ValueRef(JSContextRef context, JSValueRef *exception, JSValueRef valRef) {
   JSValueRef error_arguments[1]; 
   JSObjectRef exception_object;
-  JSValueRef exception_value;
-  exception_value = JSValueMakeString(context, message);
   /* Converting the result to an object will let JavascriptCore add 
      "sourceURL" (file) and "line" (number) and "message" to the exception,
      instead of just returning a raw string. This is extremely important for debugging your errors.
      Using JSObjectMakeError is better than JSValueToObject because the latter only populates
      "sourceURL" and "line", but not "message" or any others I don't know about.
    */
-  error_arguments[0] = exception_value;
+  error_arguments[0] = valRef;
   exception_object = JSObjectMakeError(context, 1, error_arguments, NULL);
 
   /* Return the exception_object */
   *exception = exception_object;
+}
+
+SWIGRUNTIME void SWIG_Javascript_Raise(JSContextRef context, JSValueRef *exception, const char* msg) {
+  JSStringRef message = JSStringCreateWithUTF8CString(msg);
+  JSValueRef exception_value = JSValueMakeString(context, message);
+
+  SWIG_Javascript_Raise_ValueRef(context, exception, exception_value);
 
   JSStringRelease(message);
 }
@@ -117,28 +121,33 @@ SWIGRUNTIME int SWIG_JSC_ConvertInstancePtr(JSContextRef context, JSObjectRef ob
   SwigPrivData *cdata;
 
   cdata = (SwigPrivData *) JSObjectGetPrivate(objRef);
-  if(cdata == NULL) {
+  if (cdata == NULL) {
     return SWIG_ERROR;
   }
-  if(cdata->info != info) {
-    bool type_valid = false;
-    swig_cast_info *t = info->cast;
-    while(t != NULL) {
-      if(t->type == cdata->info) {
-        type_valid = true;
-        break;
-      }
-      t = t->next;
-    }
-    if(!type_valid) {
-      return SWIG_TypeError;
+  assert(ptr);
+  *ptr = NULL;
+  if (!info || cdata->info == info) {
+    *ptr = cdata->swigCObject;
+  } else {
+    swig_cast_info *tc = SWIG_TypeCheckStruct(cdata->info, info);
+    if (tc) {
+      int newmemory = 0;
+      *ptr = SWIG_TypeCast(tc, cdata->swigCObject, &newmemory);
+      assert(!newmemory); /* newmemory handling not yet implemented */
+    } else {
+      return SWIG_ERROR;
     }
   }
 
-  *ptr = cdata->swigCObject;
-
-  if(flags & SWIG_POINTER_DISOWN) {
-    cdata->swigCMemOwn = false;
+  if (((flags & SWIG_POINTER_RELEASE) == SWIG_POINTER_RELEASE) && !cdata->swigCMemOwn) {
+    return SWIG_ERROR_RELEASE_NOT_OWNED;
+  } else {
+    if (flags & SWIG_POINTER_DISOWN) {
+      cdata->swigCMemOwn = false;
+    }
+    if (flags & SWIG_POINTER_CLEAR) {
+      cdata->swigCObject = 0;
+    }
   }
 
   return SWIG_OK;
@@ -264,11 +273,12 @@ int SWIG_JSC_ConvertPacked(JSContextRef context, JSValueRef valRef, void *ptr, s
 SWIGRUNTIME
 JSValueRef SWIG_JSC_NewPackedObj(JSContextRef context, void *data, size_t size, swig_type_info *type) {
 
-  JSClassRef classRef = _SwigObject_classRef;
+  JSClassRef classRef = _SwigPackedData_classRef;
   JSObjectRef result = JSObjectMake(context, classRef, NULL);
 
   SwigPackedData* cdata = (SwigPackedData*) malloc(sizeof(SwigPackedData));
-  cdata->data = data;
+  cdata->data = malloc(size);
+  memcpy(cdata->data, data, size);
   cdata->size = size;
   cdata->type = type;
 
@@ -318,12 +328,38 @@ unsigned int SWIGJSC_ArrayLength(JSContextRef context, JSObjectRef arr) {
 }
 
 SWIGRUNTIME
+bool SWIGJSC_ValueIsArray(JSContextRef context, JSValueRef value) {
+  if (JSValueIsObject(context, value)) {
+    static JSStringRef ArrayString = NULL;
+    static JSStringRef isArrayString = NULL;
+    JSObjectRef array = NULL;
+    JSObjectRef isArray = NULL;
+    JSValueRef retval = NULL;
+
+    if (!ArrayString)
+      ArrayString = JSStringCreateWithUTF8CString("Array");
+    if (!isArrayString)
+      isArrayString = JSStringCreateWithUTF8CString("isArray");
+
+    array = (JSObjectRef)JSObjectGetProperty(context, JSContextGetGlobalObject(context), ArrayString, NULL);
+    isArray = (JSObjectRef)JSObjectGetProperty(context, array, isArrayString, NULL);
+    retval = JSObjectCallAsFunction(context, isArray, NULL, 1, &value, NULL);
+
+    if (JSValueIsBoolean(context, retval))
+      return JSValueToBoolean(context, retval);
+  }
+  return false;
+}
+
+SWIGRUNTIME
 JSValueRef SWIGJSC_AppendOutput(JSContextRef context, JSValueRef value, JSValueRef obj) {
   JSObjectRef arr;
   unsigned int length;
 
   if (JSValueIsUndefined(context, value)) {
     arr = JSObjectMakeArray(context, 0, 0, 0);
+  } else if (!SWIGJSC_ValueIsArray(context, value)) {
+    arr = JSObjectMakeArray(context, 1, &value, 0);
   } else {
     arr = JSValueToObject(context, value, 0);
   }

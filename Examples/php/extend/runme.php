@@ -2,8 +2,6 @@
 
 # This file illustrates the cross language polymorphism using directors.
 
-require("example.php");
-
 # CEO class, which overrides Employee::getPosition().
 
 class CEO extends Manager {
@@ -27,7 +25,7 @@ print "----------------------\n";
 $list = new EmployeeList();
 
 # EmployeeList owns its items, so we must surrender ownership of objects
-# we add. This involves first clearing the ->disown member to tell the
+# we add. This involves first clearing the ->thisown member to tell the
 # C++ director to start reference counting.
 
 $e->thisown = 0;
@@ -72,5 +70,3 @@ print "----------------------\n";
 # All done.
 
 print "php exit\n";
-
-?>

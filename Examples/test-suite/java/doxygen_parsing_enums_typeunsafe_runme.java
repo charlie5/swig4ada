@@ -1,6 +1,5 @@
 
 import doxygen_parsing_enums_typeunsafe.*;
-import com.sun.javadoc.*;
 import java.util.HashMap;
 
 public class doxygen_parsing_enums_typeunsafe_runme {
@@ -15,14 +14,7 @@ public class doxygen_parsing_enums_typeunsafe_runme {
   
   public static void main(String argv[]) 
   {
-    /*
-      Here we are using internal javadoc tool, it accepts the name of the class as paramterer,
-      and calls the start() method of that class with parsed information.
-    */
-    CommentParser parser = new CommentParser();
-    com.sun.tools.javadoc.Main.execute("doxygen_parsing_enums_typeunsafe runtime test",
-                                       "CommentParser",
-                                       new String[]{"-quiet", "doxygen_parsing_enums_typeunsafe"});
+    CommentParser.parse("doxygen_parsing_enums_typeunsafe");
 
     HashMap<String, String> wantedComments = new HashMap<String, String>();
     
@@ -34,6 +26,11 @@ public class doxygen_parsing_enums_typeunsafe_runme {
     		" The comment for the third item \n" +
     		" \n" +
     		"");
+    wantedComments.put("doxygen_parsing_enums_typeunsafe.SomeAnotherEnum.SOME_ITEM_4",
+    		" The comment for the fourth item \n" +
+    		" over two lines \n" +
+    		" \n" +
+    		"");
     wantedComments.put("doxygen_parsing_enums_typeunsafe.SomeAnotherEnum.SOME_ITEM_1",
     		" The comment for the first item \n" +
     		" \n" +
@@ -43,6 +40,7 @@ public class doxygen_parsing_enums_typeunsafe_runme {
     		"");
     wantedComments.put("doxygen_parsing_enums_typeunsafe.SomeAnotherEnum",
     		" Testing comments before enum items \n" +
+    		" Including two line comments \n" +
     		" \n" +
     		"");
     wantedComments.put("doxygen_parsing_enums_typeunsafe.SomeAnotherEnum2",
@@ -61,6 +59,6 @@ public class doxygen_parsing_enums_typeunsafe_runme {
     		"Post comment after last comma.");
     
     // and ask the parser to check comments for us
-    System.exit(parser.check(wantedComments));
+    System.exit(CommentParser.check(wantedComments));
   }
 }

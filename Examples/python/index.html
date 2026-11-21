@@ -44,7 +44,7 @@ the steps look like this (Linux):
 <blockquote>
 <pre>
 % swig -python interface.i
-% gcc -fpic -c interface_wrap.c -I/usr/local/include/python1.5
+% gcc -fPIC -c interface_wrap.c -I/usr/local/include/python1.5
 % gcc -shared interface_wrap.o $(OBJS) -o interfacemodule.so 
 % python
 Python 1.5.2 (#3, Oct  9 1999, 22:09:34)  [GCC 2.95.1 19990816 (release)] on linux2
@@ -88,12 +88,9 @@ to look at the <a href="http://www.python.org/sigs/distutils-sig/">distutils</a>
 
 <h2>Compatibility</h2>
 
-For Python 3, set the environment variable <tt>PY3=1</tt>.
-This will ensure the 2to3 program is run prior to running any example.
-
 <p>
 Your mileage may vary.  If you experience a problem, please let us know by 
-contacting us on the <a href="http://www.swig.org/mail.html">mailing lists</a>.
+contacting us on the <a href="https://www.swig.org/mail.html">mailing lists</a>.
 </body>
 </html>
 

@@ -1,13 +1,12 @@
 <?php
 
 require "tests.php";
-require "director_stl.php";
 
 // No new functions
-check::functions(array('foo_bar','foo_ping','foo_pong','foo_tping','foo_tpong','foo_pident','foo_vident','foo_vsecond','foo_tpident','foo_tvident','foo_tvsecond','foo_vidents','foo_tvidents'));
-// No new classes
+check::functions(array());
+// New classes
 check::classes(array('Foo'));
-// now new vars
+// No new vars
 check::globals(array());
 
 class MyFoo extends Foo {
@@ -27,7 +26,7 @@ class MyFoo extends Foo {
     return $v;
   }
 
-  function vsecond($v1, $v2) {
+  function vsecond($v1, $v2 = NULL) {
     return $v2;
   }
 }
@@ -57,4 +56,3 @@ $vs;
 $a->tvidents($vs);*/
 
 check::done();
-?>

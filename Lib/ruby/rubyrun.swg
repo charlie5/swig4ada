@@ -69,6 +69,7 @@ typedef struct {
   VALUE mImpl;
   void  (*mark)(void *);
   void  (*destroy)(void *);
+  rb_data_type_t cext_type;
   int trackObjects;
 } swig_class;
 
@@ -80,6 +81,7 @@ static VALUE swig_runtime_data_type_pointer = Qnil;
 /* Global IDs used to keep some internal SWIG stuff */
 static ID swig_arity_id = 0;
 static ID swig_call_id  = 0;
+static ID swig_lowerthan_id = 0;
 
 /*
   If your swig extension is to be run within an embedded ruby and has
@@ -113,10 +115,8 @@ static ID swig_call_id  = 0;
 
 SWIGRUNTIME VALUE 
 getExceptionClass(void) {
-  static int init = 0;
-  static VALUE rubyExceptionClass ;
-  if (!init) {
-    init = 1;
+  static VALUE rubyExceptionClass = Qnil;
+  if (rubyExceptionClass == Qnil) {
     rubyExceptionClass = rb_const_get(_mSWIG, rb_intern("Exception"));
   }
   return rubyExceptionClass;
@@ -131,7 +131,7 @@ SWIG_Ruby_ExceptionType(swig_type_info *desc, VALUE obj) {
   VALUE exceptionClass = getExceptionClass();
   if (rb_obj_is_kind_of(obj, exceptionClass)) {
     return obj;
-  }  else {
+  } else {
     return rb_exc_new3(rb_eRuntimeError, rb_obj_as_string(obj));
   }
 }
@@ -144,6 +144,7 @@ SWIG_Ruby_InitRuntime(void)
     _mSWIG = rb_define_module("SWIG");
     swig_call_id  = rb_intern("call");
     swig_arity_id = rb_intern("arity");
+    swig_lowerthan_id = rb_intern("<");
   }
 }
 
@@ -151,26 +152,71 @@ SWIG_Ruby_InitRuntime(void)
 SWIGRUNTIME void
 SWIG_Ruby_define_class(swig_type_info *type)
 {
-  char *klass_name = (char *) malloc(4 + strlen(type->name) + 1);
-  sprintf(klass_name, "TYPE%s", type->name);
+  size_t klass_len = 4 + strlen(type->name) + 1;
+  char *klass_name = (char *) malloc(klass_len);
+  SWIG_snprintf(klass_name, klass_len, "TYPE%s", type->name);
   if (NIL_P(_cSWIG_Pointer)) {
     _cSWIG_Pointer = rb_define_class_under(_mSWIG, "Pointer", rb_cObject);
     rb_undef_method(CLASS_OF(_cSWIG_Pointer), "new");
   }
-  rb_define_class_under(_mSWIG, klass_name, _cSWIG_Pointer);
+  rb_undef_alloc_func(rb_define_class_under(_mSWIG, klass_name, _cSWIG_Pointer));
   free((void *) klass_name);
 }
+
+/* ---------------------------------------------------------------------------
+ * SWIG_Ruby_mark_swig_type()
+ *
+ * Generic mark callback for the TypedData wrapper. It forwards to the per-object
+ * mark function recorded in the wrapper, if one was set.
+ * --------------------------------------------------------------------------- */
+static void SWIG_Ruby_mark_swig_type(void *data) {
+  struct swig_ruby_wrapped_object *wrobj = (struct swig_ruby_wrapped_object *)data;
+  if (!wrobj)
+    return;
+  if (wrobj->dmark)
+    wrobj->dmark(wrobj->data);
+}
+
+/* ---------------------------------------------------------------------------
+ * SWIG_Ruby_free_swig_type()
+ *
+ * Generic free callback for the TypedData wrapper. It forwards to the per-object
+ * free function recorded in the wrapper, if one was set, then frees the wrapper.
+ * --------------------------------------------------------------------------- */
+static void SWIG_Ruby_free_swig_type(void *data) {
+  struct swig_ruby_wrapped_object *wrobj = (struct swig_ruby_wrapped_object *)data;
+  if (!wrobj)
+    return;
+  if (wrobj->dfree)
+    wrobj->dfree(wrobj->data);
+#ifndef TYPED_DATA_EMBEDDED
+  ruby_xfree(wrobj);
+#endif
+}
+
+/* TypedData descriptor for the anonymous SWIG::TYPE* pointer wrappers (types
+   without a Ruby class). Classes use their own SwigClass*.cext_type so heap
+   dumps show the C++ class name. */
+static const rb_data_type_t swig_type_data_type = {
+  "swig_type",
+  { 0, SWIG_Ruby_free_swig_type, 0, 0 },
+  0, 0
+#ifdef RUBY_TYPED_FREE_IMMEDIATELY
+  , SWIG_RUBY_TYPED_DATA_FLAGS
+#endif
+};
 
 /* Create a new pointer object */
 SWIGRUNTIME VALUE
 SWIG_Ruby_NewPointerObj(void *ptr, swig_type_info *type, int flags)
 {
-  int own =  flags & SWIG_POINTER_OWN; 
+  int own =  flags & SWIG_POINTER_OWN;
   int track;
   char *klass_name;
   swig_class *sklass;
   VALUE klass;
   VALUE obj;
+  struct swig_ruby_wrapped_object *wrobj;
 
   if (!ptr)
     return Qnil;
@@ -198,21 +244,26 @@ SWIG_Ruby_NewPointerObj(void *ptr, swig_type_info *type, int flags)
     }
 
     /* Create a new Ruby object */
-    obj = Data_Wrap_Struct(sklass->klass, VOIDFUNC(sklass->mark), 
-			   ( own ? VOIDFUNC(sklass->destroy) : 
-			     (track ? VOIDFUNC(SWIG_RubyRemoveTracking) : 0 )
-			     ), ptr);
+    obj = TypedData_Make_Struct(sklass->klass, struct swig_ruby_wrapped_object, &sklass->cext_type, wrobj);
+    wrobj->data = ptr;
+    wrobj->dmark = sklass->mark;
+    wrobj->dfree = own ? sklass->destroy : (track ? SWIG_RubyRemoveTracking : 0);
 
     /* If tracking is on for this class then track this object. */
     if (track) {
       SWIG_RubyAddTracking(ptr, obj);
     }
   } else {
-    klass_name = (char *) malloc(4 + strlen(type->name) + 1);
-    sprintf(klass_name, "TYPE%s", type->name);
+    size_t klass_len = 4 + strlen(type->name) + 1;
+    klass_name = (char *) malloc(klass_len);
+    SWIG_snprintf(klass_name, klass_len, "TYPE%s", type->name);
     klass = rb_const_get(_mSWIG, rb_intern(klass_name));
     free((void *) klass_name);
-    obj = Data_Wrap_Struct(klass, 0, 0, ptr);
+
+    obj = TypedData_Make_Struct(klass, struct swig_ruby_wrapped_object, &swig_type_data_type, wrobj);
+    wrobj->data = ptr;
+    wrobj->dmark = 0;
+    wrobj->dfree = 0;
   }
   rb_iv_set(obj, "@__swigtype__", rb_str_new2(type->name));
 
@@ -224,8 +275,12 @@ SWIGRUNTIME VALUE
 SWIG_Ruby_NewClassInstance(VALUE klass, swig_type_info *type)
 {
   VALUE obj;
+  struct swig_ruby_wrapped_object *wrobj;
   swig_class *sklass = (swig_class *) type->clientdata;
-  obj = Data_Wrap_Struct(klass, VOIDFUNC(sklass->mark), VOIDFUNC(sklass->destroy), 0);
+  obj = TypedData_Make_Struct(klass, struct swig_ruby_wrapped_object, &sklass->cext_type, wrobj);
+  wrobj->data = 0;
+  wrobj->dmark = sklass->mark;
+  wrobj->dfree = sklass->destroy;
   rb_iv_set(obj, "@__swigtype__", rb_str_new2(type->name));
   return obj;
 }
@@ -235,6 +290,8 @@ SWIGRUNTIMEINLINE char *
 SWIG_Ruby_MangleStr(VALUE obj)
 {
   VALUE stype = rb_iv_get(obj, "@__swigtype__");
+  if (NIL_P(stype))
+    return NULL;
   return StringValuePtr(stype);
 }
 
@@ -247,9 +304,12 @@ typedef struct {
 SWIGRUNTIME swig_ruby_owntype
 SWIG_Ruby_AcquirePtr(VALUE obj, swig_ruby_owntype own) {
   swig_ruby_owntype oldown = {0, 0};
-  if (TYPE(obj) == T_DATA && !RTYPEDDATA_P(obj)) {
-    oldown.datafree = RDATA(obj)->dfree;
-    RDATA(obj)->dfree = own.datafree;
+  if (RB_TYPE_P(obj, RUBY_T_DATA) && RTYPEDDATA_P(obj)) {
+    struct swig_ruby_wrapped_object *wrobj = (struct swig_ruby_wrapped_object *)RTYPEDDATA_GET_DATA(obj);
+    if (wrobj) {
+      oldown.datafree = wrobj->dfree;
+      wrobj->dfree = own.datafree;
+    }
   }
   return oldown;
 }
@@ -261,24 +321,39 @@ SWIG_Ruby_ConvertPtrAndOwn(VALUE obj, void **ptr, swig_type_info *ty, int flags,
   char *c;
   swig_cast_info *tc;
   void *vptr = 0;
+  struct swig_ruby_wrapped_object *wrobj = 0;
+  /* Stand in used when the Ruby object has been detached from its wrapper, so that the ownership
+     handling below can run unchanged with any write to it harmlessly discarded. */
+  struct swig_ruby_wrapped_object detached = {0, 0, 0};
 
   /* Grab the pointer */
   if (NIL_P(obj)) {
     if (ptr)
       *ptr = 0;
     return (flags & SWIG_POINTER_NO_NULL) ? SWIG_NullReferenceError : SWIG_OK;
+  } else if (RB_TYPE_P(obj, RUBY_T_DATA) && RTYPEDDATA_P(obj)) {
+    wrobj = (struct swig_ruby_wrapped_object *)RTYPEDDATA_GET_DATA(obj);
+    /* Hand written code targeting SWIG 4.4 and earlier sometimes invalidates a proxy with
+       'DATA_PTR(obj) = NULL'. Before SWIG 4.5 that cleared the wrapped pointer itself, but now it
+       detaches the whole wrapper unless Ruby embedded it in the object slot. Treat the detached
+       object as one whose pointer has been cleared, which is what such code intends. */
+    if (!wrobj)
+      wrobj = &detached;
+    vptr = wrobj->data;
   } else {
-    if (TYPE(obj) != T_DATA || (TYPE(obj) == T_DATA && RTYPEDDATA_P(obj))) {
-      return SWIG_ERROR;
-    }
-    Data_Get_Struct(obj, void, vptr);
+    return SWIG_ERROR;
   }
-  
+
   if (own) {
-    own->datafree = RDATA(obj)->dfree;
+    own->datafree = wrobj->dfree;
     own->own = 0;
   }
-    
+
+  if (((flags & SWIG_POINTER_RELEASE) == SWIG_POINTER_RELEASE)) {
+    if (!wrobj->dfree)
+      return SWIG_ERROR_RELEASE_NOT_OWNED;
+  }
+
   /* Check to see if the input object is giving up ownership
      of the underlying C struct or C++ object.  If so then we
      need to reset the destructor since the Ruby object no 
@@ -290,7 +365,7 @@ SWIG_Ruby_ConvertPtrAndOwn(VALUE obj, void **ptr, swig_type_info *ty, int flags,
       swig_class *sklass = (swig_class *) ty->clientdata;
       track = sklass->trackObjects;
     }
-		
+
     if (track) {
       /* We are tracking objects for this class.  Thus we change the destructor
        * to SWIG_RubyRemoveTracking.  This allows us to
@@ -298,10 +373,14 @@ SWIG_Ruby_ConvertPtrAndOwn(VALUE obj, void **ptr, swig_type_info *ty, int flags,
        * when the Ruby object is garbage collected.  If we don't
        * do this, then it is possible we will return a reference 
        * to a Ruby object that no longer exists thereby crashing Ruby. */
-      RDATA(obj)->dfree = SWIG_RubyRemoveTracking;
-    } else {    
-      RDATA(obj)->dfree = 0;
+      wrobj->dfree = SWIG_RubyRemoveTracking;
+    } else {
+      wrobj->dfree = 0;
     }
+  }
+
+  if (flags & SWIG_POINTER_CLEAR) {
+    wrobj->data = 0;
   }
 
   /* Do type-checking if type info was provided */
@@ -385,6 +464,18 @@ SWIG_Ruby_ConvertPacked(VALUE obj, void *ptr, int sz, swig_type_info *ty) {
   return SWIG_ERROR;
 }
 
+/* TypedData descriptor for the per-module runtime data. The struct name is
+   versioned so a module only ever reads runtime data written by a compatible
+   SWIG version. */
+static const rb_data_type_t swig_runtime_data_type = {
+  "swig_runtime_data" SWIG_RUNTIME_VERSION SWIG_TYPE_TABLE_NAME,
+  { 0, 0, 0, 0 },
+  0, 0
+#ifdef RUBY_TYPED_FREE_IMMEDIATELY
+  , RUBY_TYPED_FREE_IMMEDIATELY
+#endif
+};
+
 SWIGRUNTIME swig_module_info *
 SWIG_Ruby_GetModule(void *SWIGUNUSEDPARM(clientdata))
 {
@@ -398,7 +489,11 @@ SWIG_Ruby_GetModule(void *SWIGUNUSEDPARM(clientdata))
   /* first check if pointer already created */
   pointer = rb_gv_get("$swig_runtime_data_type_pointer" SWIG_RUNTIME_VERSION SWIG_TYPE_TABLE_NAME);
   if (pointer != Qnil) {
-    Data_Get_Struct(pointer, swig_module_info, ret);
+    /* Each module defines its own swig_runtime_data_type, so the data is read
+       directly rather than through TypedData_Get_Struct, which would reject a
+       wrapper created by another module's (equivalent) descriptor. */
+    if (!RB_TYPE_P(pointer, RUBY_T_DATA)) rb_check_typeddata(pointer, &swig_runtime_data_type);
+    ret = (swig_module_info *)RTYPEDDATA_GET_DATA(pointer);
   }
 
   /* reinstate warnings */
@@ -409,10 +504,14 @@ SWIG_Ruby_GetModule(void *SWIGUNUSEDPARM(clientdata))
 SWIGRUNTIME void 
 SWIG_Ruby_SetModule(swig_module_info *pointer)
 {
-  /* register a new class */
+  /* register a new class - undefine its allocator before wrapping an instance,
+     otherwise wrapping marks the class as a T_DATA class and Ruby 3.x warns when
+     the allocator is undefined afterwards. The class still can not be instantiated
+     from Ruby. */
   VALUE cl = rb_define_class("swig_runtime_data", rb_cObject);
+  rb_undef_alloc_func(cl);
+  swig_runtime_data_type_pointer = TypedData_Wrap_Struct(cl, &swig_runtime_data_type, pointer);
   /* create and store the structure pointer to a global variable */
-  swig_runtime_data_type_pointer = Data_Wrap_Struct(cl, 0, 0, pointer);
   rb_define_readonly_variable("$swig_runtime_data_type_pointer" SWIG_RUNTIME_VERSION SWIG_TYPE_TABLE_NAME, &swig_runtime_data_type_pointer);
 }
 
@@ -441,7 +540,7 @@ int SWIG_Ruby_arity( VALUE proc, int minimal )
 {
   if ( rb_respond_to( proc, swig_arity_id ) )
     {
-      VALUE num = rb_funcall( proc, swig_arity_id, 0 );
+      VALUE num = rb_funcall2( proc, swig_arity_id, 0, 0 );
       int arity = NUM2INT(num);
       if ( arity < 0 && (arity+1) < -minimal ) return 1;
       if ( arity == minimal ) return 1;

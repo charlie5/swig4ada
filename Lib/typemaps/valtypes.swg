@@ -38,7 +38,7 @@
     } 
     $1 = %static_cast(val,$ltype);
   }
-  %typemap(freearg) Type "";
+  %typemap(freearg) Type ""
   %typemap(in,noblock=1,fragment=frag) const Type & ($*ltype temp, Type val, int ecode = 0) {  
     ecode = asval_meth($input, &val);
     if (!SWIG_IsOK(ecode)) {
@@ -47,7 +47,7 @@
     temp = %static_cast(val, $*ltype);
     $1 = &temp;
   }
-  %typemap(freearg) const Type& "";
+  %typemap(freearg) const Type& ""
 %enddef
 
 /* out */
@@ -180,6 +180,7 @@
 /*---------------------------------------------------------------------
  * typemap definition for types with from method
  *---------------------------------------------------------------------*/
+
 %define %typemaps_from(FromMeth, FromFrag, Type...)
   %value_out_typemap(%arg(FromMeth), %arg(FromFrag), Type);
   %value_varout_typemap(%arg(FromMeth), %arg(FromFrag), Type);
@@ -191,7 +192,7 @@
 
 
 /*---------------------------------------------------------------------
- * typemap definition for types with alval/from method
+ * typemap definition for types with asval/from method
  *---------------------------------------------------------------------*/
 
 %define %typemaps_asvalfrom(CheckCode, AsValMeth, FromMeth,

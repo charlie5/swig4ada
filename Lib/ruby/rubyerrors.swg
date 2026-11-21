@@ -8,15 +8,12 @@
 
 
 /* Define custom exceptions for errors that do not map to existing Ruby
-   exceptions.  Note this only works for C++ since a global cannot be
-   initialized by a function in C.  For C, fallback to rb_eRuntimeError.*/
+   exceptions. */
 
 SWIGINTERN VALUE 
 getNullReferenceError(void) {
-  static int init = 0;
-  static VALUE rb_eNullReferenceError ;
-  if (!init) {
-    init = 1;
+  static VALUE rb_eNullReferenceError = Qnil;
+  if (rb_eNullReferenceError == Qnil) {
     rb_eNullReferenceError = rb_define_class("NullReferenceError", rb_eRuntimeError);
   }
   return rb_eNullReferenceError;
@@ -24,10 +21,8 @@ getNullReferenceError(void) {
 
 SWIGINTERN VALUE 
 getObjectPreviouslyDeletedError(void) {
-  static int init = 0;
-  static VALUE rb_eObjectPreviouslyDeleted ;
-  if (!init) {
-    init = 1;
+  static VALUE rb_eObjectPreviouslyDeleted = Qnil;
+  if (rb_eObjectPreviouslyDeleted == Qnil) {
     rb_eObjectPreviouslyDeleted = rb_define_class("ObjectPreviouslyDeleted", rb_eRuntimeError);
   }
   return rb_eObjectPreviouslyDeleted;
@@ -110,7 +105,7 @@ const char* Ruby_Format_TypeError( const char* msg,
     }
 
   str = rb_str_cat2( str, "Expected argument " );
-  sprintf( buf, "%d of type ", argn-1 );
+  SWIG_snprintf( buf, sizeof( buf), "%d of type ", argn-1 );
   str = rb_str_cat2( str, buf );
   str = rb_str_cat2( str, type );
   str = rb_str_cat2( str, ", but got " );

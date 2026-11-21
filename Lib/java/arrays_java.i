@@ -104,7 +104,7 @@ JAVA_ARRAYS_DECL(int, jint, Int, Int)                 /* int[] */
 JAVA_ARRAYS_DECL(unsigned int, jlong, Long, Uint)     /* unsigned int[] */
 JAVA_ARRAYS_DECL(long, jint, Int, Long)               /* long[] */
 JAVA_ARRAYS_DECL(unsigned long, jlong, Long, Ulong)   /* unsigned long[] */
-JAVA_ARRAYS_DECL(jlong, jlong, Long, Longlong)        /* long long[] */
+JAVA_ARRAYS_DECL(long long, jlong, Long, Longlong)    /* long long[] */
 JAVA_ARRAYS_DECL(float, jfloat, Float, Float)         /* float[] */
 JAVA_ARRAYS_DECL(double, jdouble, Double, Double)     /* double[] */
 
@@ -128,7 +128,7 @@ JAVA_ARRAYS_IMPL(int, jint, Int, Int)                 /* int[] */
 JAVA_ARRAYS_IMPL(unsigned int, jlong, Long, Uint)     /* unsigned int[] */
 JAVA_ARRAYS_IMPL(long, jint, Int, Long)               /* long[] */
 JAVA_ARRAYS_IMPL(unsigned long, jlong, Long, Ulong)   /* unsigned long[] */
-JAVA_ARRAYS_IMPL(jlong, jlong, Long, Longlong)        /* long long[] */
+JAVA_ARRAYS_IMPL(long long, jlong, Long, Longlong)    /* long long[] */
 JAVA_ARRAYS_IMPL(float, jfloat, Float, Float)         /* float[] */
 JAVA_ARRAYS_IMPL(double, jdouble, Double, Double)     /* double[] */
 
@@ -147,19 +147,19 @@ JAVA_ARRAYS_IMPL(double, jdouble, Double, Double)     /* double[] */
 %typemap(jstype) CTYPE[ANY], CTYPE[]            %{JTYPE[]%}
 
 %typemap(in) CTYPE[] (JNITYPE *jarr)
-%{  if (!SWIG_JavaArrayIn##JFUNCNAME(jenv, &jarr, (CTYPE **)&$1, $input)) return $null; %}
+%{  if (!SWIG_JavaArrayIn##JFUNCNAME(jenv, &jarr, ($&1_ltype)&$1, $input)) return $null; %}
 %typemap(in) CTYPE[ANY] (JNITYPE *jarr)
 %{  if ($input && JCALL1(GetArrayLength, jenv, $input) != $1_size) {
     SWIG_JavaThrowException(jenv, SWIG_JavaIndexOutOfBoundsException, "incorrect array size");
     return $null;
   }
-  if (!SWIG_JavaArrayIn##JFUNCNAME(jenv, &jarr, (CTYPE **)&$1, $input)) return $null; %}
+  if (!SWIG_JavaArrayIn##JFUNCNAME(jenv, &jarr, ($&1_ltype)&$1, $input)) return $null; %}
 %typemap(argout) CTYPE[ANY], CTYPE[] 
-%{ SWIG_JavaArrayArgout##JFUNCNAME(jenv, jarr$argnum, (CTYPE *)$1, $input); %}
+%{ SWIG_JavaArrayArgout##JFUNCNAME(jenv, jarr$argnum, ($1_ltype)$1, $input); %}
 %typemap(out) CTYPE[ANY]
-%{$result = SWIG_JavaArrayOut##JFUNCNAME(jenv, (CTYPE *)$1, $1_dim0); %}
+%{$result = SWIG_JavaArrayOut##JFUNCNAME(jenv, ($1_ltype)$1, $1_dim0); %}
 %typemap(out) CTYPE[] 
-%{$result = SWIG_JavaArrayOut##JFUNCNAME(jenv, (CTYPE *)$1, FillMeInAsSizeCannotBeDeterminedAutomatically); %}
+%{$result = SWIG_JavaArrayOut##JFUNCNAME(jenv, ($1_ltype)$1, FillMeInAsSizeCannotBeDeterminedAutomatically); %}
 %typemap(freearg) CTYPE[ANY], CTYPE[] 
 #ifdef __cplusplus
 %{ delete [] $1; %}
@@ -227,6 +227,12 @@ JAVA_ARRAYS_TYPEMAPS(double, double, jdouble, Double, "[D")     /* double[ANY] *
     double[ANY], double[]
     ""
 
+#if defined(SWIGWORDSIZE64)
+%apply long long[ANY] { long[ANY] };
+%apply unsigned long long[ANY] { unsigned long[ANY] };
+%apply long long[] { long[] };
+%apply unsigned long long[] { unsigned long[] };
+#endif
 
 /* Arrays of proxy classes. The typemaps in this macro make it possible to treat an array of 
  * class/struct/unions as an array of Java classes. 

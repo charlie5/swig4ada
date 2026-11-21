@@ -1,1 +1,1 @@
-%include <typemaps/cdata.swg>
+%include <javascript/cdata.i>

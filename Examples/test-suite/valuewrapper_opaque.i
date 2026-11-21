@@ -14,7 +14,7 @@ class C;
 %{
 template<typename T> class TemplateClass {
 public:
-TemplateClass<T>(T a) {}
+TemplateClass(T a) {}
 };
 
 struct B
@@ -135,8 +135,8 @@ class BB {
 friend class AA;
 
 protected:
-	BB(int aa) { this->a = aa; };
-	BB() {};
+	BB(int aa) { this->a = aa; }
+	BB() {}
 	
 	int a;
 };

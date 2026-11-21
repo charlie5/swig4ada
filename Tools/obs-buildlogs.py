@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import os
 import subprocess
@@ -11,9 +11,9 @@ def remove_old_files():
     os.remove(file)
 
 def download():
-  repos = subprocess.Popen(['osc', 'repositories'], stdout=subprocess.PIPE)
+  repos = subprocess.Popen(["osc", "repositories"], stdout=subprocess.PIPE)
   for line in repos.stdout:
-    command = ['osc', 'buildlog', '--last'] + line.split()
+    command = ["osc", "buildlog", "--last"] + line.split()
     filename = "-".join(line.split()) + ".log"
     print("Downloading logs using: {}".format(" ".join(command)))
     buildlog = subprocess.Popen(command, stdout=subprocess.PIPE)

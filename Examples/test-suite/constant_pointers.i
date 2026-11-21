@@ -10,7 +10,6 @@ This testcase primarily test constant pointers, eg int* const.  Only a getter is
 #endif
 
 %warnfilter(SWIGWARN_TYPEMAP_SWIGTYPELEAK);                   /* memory leak when setting a ptr/ref variable */
-%warnfilter(SWIGWARN_TYPEMAP_SWIGTYPELEAK_MSG);               /* Setting a pointer/reference variable may leak memory. */
  
 
 %inline %{
@@ -53,8 +52,6 @@ public:
     int* array_member1[ARRAY_SIZE];
     ParametersTest* array_member2[ARRAY_SIZE];
     MemberVariablesTest() : member3(NULL), member4(NULL) {}
-private:
-  MemberVariablesTest& operator=(const MemberVariablesTest&);
 };
 void foofunction(const int *const i) {}
 
@@ -80,8 +77,6 @@ public:
     void ret8(int*const& a) {}
     int*const& ret9() {return GlobalIntPtr;}
     ReturnValuesTest() : int3(NULL) {}
-private:
-  ReturnValuesTest& operator=(const ReturnValuesTest&);
 };
 
 const int* globalRet1() {return &GlobalInt;}
@@ -113,8 +108,6 @@ int* const globalRet2() {return &GlobalInt;}
     A* ap;
     const A* cap;
     Acptr acptr;  
-  private:
-    B& operator=(const B&);
   };
 
   const B* bar(const B* b) {

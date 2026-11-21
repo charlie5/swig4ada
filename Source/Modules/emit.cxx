@@ -1,10 +1,10 @@
 /* -----------------------------------------------------------------------------
- * This file is part of SWIG, which is licensed as a whole under version 3 
+ * This file is part of SWIG, which is licensed as a whole under version 3
  * (or any later version) of the GNU General Public License. Some additional
  * terms also apply to certain portions of SWIG. The full details of the SWIG
  * license and copyrights can be found in the LICENSE and COPYRIGHT files
  * included with the SWIG source code as distributed by the SWIG developers
- * and at http://www.swig.org/legal.html.
+ * and at https://www.swig.org/legal.html.
  *
  * emit.cxx
  *
@@ -64,8 +64,6 @@ void emit_parameter_variables(ParmList *l, Wrapper *f) {
   Swig_cargs(f, l);
 
   /* Attach typemaps to parameters */
-  /*  Swig_typemap_attach_parms("ignore",l,f); */
-
   Swig_typemap_attach_parms("default", l, f);
   Swig_typemap_attach_parms("arginit", l, f);
 
@@ -74,7 +72,6 @@ void emit_parameter_variables(ParmList *l, Wrapper *f) {
   while (p) {
     tm = Getattr(p, "tmap:arginit");
     if (tm) {
-      Replace(tm, "$target", Getattr(p, "lname"), DOH_REPLACE_ANY);
       Printv(f->code, tm, "\n", NIL);
       p = Getattr(p, "tmap:arginit:next");
     } else {
@@ -87,7 +84,6 @@ void emit_parameter_variables(ParmList *l, Wrapper *f) {
   while (p) {
     tm = Getattr(p, "tmap:default");
     if (tm) {
-      Replace(tm, "$target", Getattr(p, "lname"), DOH_REPLACE_ANY);
       Printv(f->code, tm, "\n", NIL);
       p = Getattr(p, "tmap:default:next");
     } else {
@@ -110,23 +106,17 @@ void emit_attach_parmmaps(ParmList *l, Wrapper *f) {
   Swig_typemap_attach_parms("freearg", l, f);
 
   {
-    /* This is compatibility code to deal with the deprecated "ignore" typemap */
+    /* Handle in typemaps with numinputs=0. */
     Parm *p = l;
-    Parm *np;
     while (p) {
       String *tm = Getattr(p, "tmap:in");
-      if (tm && checkAttribute(p, "tmap:in:numinputs", "0")) {
-	Replaceall(tm, "$target", Getattr(p, "lname"));
-	Printv(f->code, tm, "\n", NIL);
-	np = Getattr(p, "tmap:in:next");
-	while (p && (p != np)) {
-	  /*	  Setattr(p,"ignore","1");    Deprecate */
-	  p = nextSibling(p);
-	}
-      } else if (tm) {
-	p = Getattr(p, "tmap:in:next");
+      if (tm) {
+        if (checkAttribute(p, "tmap:in:numinputs", "0")) {
+          Printv(f->code, tm, "\n", NIL);
+        }
+        p = Getattr(p, "tmap:in:next");
       } else {
-	p = nextSibling(p);
+        p = nextSibling(p);
       }
     }
   }
@@ -140,23 +130,15 @@ void emit_attach_parmmaps(ParmList *l, Wrapper *f) {
     while (p) {
       npin = Getattr(p, "tmap:in:next");
 
-      /*
-         if (Getattr(p,"tmap:ignore")) {
-         npin = Getattr(p,"tmap:ignore:next");
-         } else if (Getattr(p,"tmap:in")) {
-         npin = Getattr(p,"tmap:in:next");
-         }
-       */
-
       if (Getattr(p, "tmap:freearg")) {
-	npfreearg = Getattr(p, "tmap:freearg:next");
-	if (npin != npfreearg) {
-	  while (p != npin) {
-	    Delattr(p, "tmap:freearg");
-	    Delattr(p, "tmap:freearg:next");
-	    p = nextSibling(p);
-	  }
-	}
+        npfreearg = Getattr(p, "tmap:freearg:next");
+        if (npin != npfreearg) {
+          while (p != npin) {
+            Delattr(p, "tmap:freearg");
+            Delattr(p, "tmap:freearg:next");
+            p = nextSibling(p);
+          }
+        }
       }
       p = npin;
     }
@@ -171,13 +153,13 @@ void emit_attach_parmmaps(ParmList *l, Wrapper *f) {
     Parm *lp = 0;
     while (p) {
       if (!checkAttribute(p, "tmap:in:numinputs", "0")) {
-	lp = p;
-	p = Getattr(p, "tmap:in:next");
-	continue;
+        lp = p;
+        p = Getattr(p, "tmap:in:next");
+        continue;
       }
       if (SwigType_isvarargs(Getattr(p, "type"))) {
-	Swig_warning(WARN_LANG_VARARGS, input_file, line_number, "Variable length arguments discarded.\n");
-	Setattr(p, "tmap:in", "");
+        Swig_warning(WARN_LANG_VARARGS, input_file, line_number, "Variable length arguments discarded.\n");
+        Setattr(p, "tmap:in", "");
       }
       lp = 0;
       p = nextSibling(p);
@@ -187,18 +169,18 @@ void emit_attach_parmmaps(ParmList *l, Wrapper *f) {
     if (lp) {
       p = lp;
       while (p) {
-	if (SwigType_isvarargs(Getattr(p, "type"))) {
-	  // Mark the head of the ParmList that it has varargs
-	  Setattr(l, "emit:varargs", lp);
-//Printf(stdout, "setting emit:varargs %s ... %s +++ %s\n", Getattr(l, "emit:varargs"), Getattr(l, "type"), Getattr(p, "type"));
-	  break;
-	}
-	p = nextSibling(p);
+        if (SwigType_isvarargs(Getattr(p, "type"))) {
+          // Mark the head of the ParmList that it has varargs
+          Setattr(l, "emit:varargs", lp);
+          // Printf(stdout, "setting emit:varargs %s ... %s +++ %s\n", Getattr(l, "emit:varargs"), Getattr(l, "type"), Getattr(p, "type"));
+          break;
+        }
+        p = nextSibling(p);
       }
     }
   }
 
-  /* 
+  /*
    * An equivalent type can be used in the typecheck typemap for SWIG to detect the overloading of equivalent
    * target language types. This is primarily for the smartptr feature, where a pointer and a smart pointer
    * are seen as equivalent types in the target language.
@@ -208,22 +190,29 @@ void emit_attach_parmmaps(ParmList *l, Wrapper *f) {
     while (p) {
       String *tm = Getattr(p, "tmap:typecheck");
       if (tm) {
-	String *equivalent = Getattr(p, "tmap:typecheck:equivalent");
-	if (equivalent) {
-	  String *precedence = Getattr(p, "tmap:typecheck:precedence");
-	  if (precedence && Strcmp(precedence, "0") != 0)
-	    Swig_error(Getfile(tm), Getline(tm), "The 'typecheck' typemap for %s contains an 'equivalent' attribute for a 'precedence' that is not set to SWIG_TYPECHECK_POINTER or 0.\n", SwigType_str(Getattr(p, "type"), 0));
-	  SwigType *cpt = Swig_cparse_type(equivalent);
-	  if (cpt) {
-	    Setattr(p, "equivtype", cpt);
-	    Delete(cpt);
-	  } else {
-	    Swig_error(Getfile(tm), Getline(tm), "Invalid type (%s) in 'equivalent' attribute in 'typecheck' typemap for type %s.\n", equivalent, SwigType_str(Getattr(p, "type"), 0));
-	  }
-	}
-	p = Getattr(p, "tmap:typecheck:next");
+        String *equivalent = Getattr(p, "tmap:typecheck:equivalent");
+        if (equivalent) {
+          String *precedence = Getattr(p, "tmap:typecheck:precedence");
+          if (precedence && Strcmp(precedence, "0") != 0)
+            Swig_error(Getfile(tm),
+                       Getline(tm),
+                       "The 'typecheck' typemap for %s contains an 'equivalent' attribute for a 'precedence' that is not set to SWIG_TYPECHECK_POINTER or 0.\n",
+                       SwigType_str(Getattr(p, "type"), 0));
+          SwigType *cpt = Swig_cparse_type(equivalent);
+          if (cpt) {
+            Setattr(p, "equivtype", cpt);
+            Delete(cpt);
+          } else {
+            Swig_error(Getfile(tm),
+                       Getline(tm),
+                       "Invalid type (%s) in 'equivalent' attribute in 'typecheck' typemap for type %s.\n",
+                       equivalent,
+                       SwigType_str(Getattr(p, "type"), 0));
+          }
+        }
+        p = Getattr(p, "tmap:typecheck:next");
       } else {
-	p = nextSibling(p);
+        p = nextSibling(p);
       }
     }
   }
@@ -281,18 +270,18 @@ int emit_num_required(ParmList *parms) {
       p = Getattr(p, "tmap:in:next");
     } else {
       if (Getattr(p, "tmap:default"))
-	break;
+        break;
       if (Getattr(p, "value")) {
-	if (!first_default_arg)
-	  first_default_arg = p;
-	if (compactdefargs)
-	  break;
+        if (!first_default_arg)
+          first_default_arg = p;
+        if (compactdefargs)
+          break;
       }
       nargs += GetInt(p, "tmap:in:numinputs");
       if (Getattr(p, "tmap:in")) {
-	p = Getattr(p, "tmap:in:next");
+        p = Getattr(p, "tmap:in:next");
       } else {
-	p = nextSibling(p);
+        p = nextSibling(p);
       }
     }
   }
@@ -303,16 +292,16 @@ int emit_num_required(ParmList *parms) {
     p = first_default_arg;
     while (p) {
       if (Getattr(p, "tmap:in") && checkAttribute(p, "tmap:in:numinputs", "0")) {
-	p = Getattr(p, "tmap:in:next");
+        p = Getattr(p, "tmap:in:next");
       } else {
-	if (!Getattr(p, "value") && (!Getattr(p, "tmap:default"))) {
-	  Swig_error(Getfile(p), Getline(p), "Non-optional argument '%s' follows an optional argument.\n", Getattr(p, "name"));
-	}
-	if (Getattr(p, "tmap:in")) {
-	  p = Getattr(p, "tmap:in:next");
-	} else {
-	  p = nextSibling(p);
-	}
+        if (!Getattr(p, "value") && (!Getattr(p, "tmap:default"))) {
+          Swig_error(Getfile(p), Getline(p), "Non-optional argument '%s' follows an optional argument.\n", Getattr(p, "name"));
+        }
+        if (Getattr(p, "tmap:in")) {
+          p = Getattr(p, "tmap:in:next");
+        } else {
+          p = nextSibling(p);
+        }
       }
     }
   }
@@ -355,8 +344,8 @@ bool emit_isvarargs_function(Node *n) {
   if (over) {
     for (Node *sibling = over; sibling; sibling = Getattr(sibling, "sym:nextSibling")) {
       if (ParmList_has_varargs(Getattr(sibling, "parms"))) {
-	has_varargs = true;
-	break;
+        has_varargs = true;
+        break;
       }
     }
   } else {
@@ -369,7 +358,7 @@ bool emit_isvarargs_function(Node *n) {
  * void emit_mark_vararg_parms()
  *
  * Marks the vararg parameters which are to be ignored.
- * Vararg parameters are marked as ignored if there is no 'in' varargs (...) 
+ * Vararg parameters are marked as ignored if there is no 'in' varargs (...)
  * typemap.
  * ----------------------------------------------------------------------------- */
 
@@ -378,7 +367,7 @@ void emit_mark_varargs(ParmList *l) {
   while (p) {
     if (SwigType_isvarargs(Getattr(p, "type")))
       if (!Getattr(p, "tmap:in"))
-	Setattr(p, "varargs:ignore", "1");
+        Setattr(p, "varargs:ignore", "1");
     p = nextSibling(p);
   }
 }
@@ -414,9 +403,8 @@ int emit_action_code(Node *n, String *wrappercode, String *eaction) {
   if (tm)
     tm = Copy(tm);
   if ((tm) && Len(tm) && (Strcmp(tm, "1") != 0)) {
-    if (Strstr(tm, "$")) {
+    if (Strchr(tm, '$')) {
       Swig_replace_special_variables(n, parentNode(n), tm);
-      Replaceall(tm, "$function", eaction); // deprecated
       Replaceall(tm, "$action", eaction);
     }
     Printv(wrappercode, tm, "\n", NIL);
@@ -431,7 +419,7 @@ int emit_action_code(Node *n, String *wrappercode, String *eaction) {
 /* -----------------------------------------------------------------------------
  * int emit_action()
  *
- * Emits the call to the wrapped function. 
+ * Emits the call to the wrapped function.
  * Adds in exception specification exception handling and %exception code.
  * ----------------------------------------------------------------------------- */
 String *emit_action(Node *n) {
@@ -450,12 +438,12 @@ String *emit_action(Node *n) {
       c = Char(t);
       tok = strtok(c, ",");
       while (tok) {
-	String *fname = NewString(tok);
-	Setfile(fname, Getfile(n));
-	Setline(fname, Getline(n));
-	Swig_fragment_emit(fname);
-	Delete(fname);
-	tok = strtok(NULL, ",");
+        String *fname = NewString(tok);
+        Setfile(fname, Getfile(n));
+        Setline(fname, Getline(n));
+        Swig_fragment_emit(fname);
+        Delete(fname);
+        tok = strtok(NULL, ",");
       }
       Delete(t);
     }
@@ -525,20 +513,13 @@ String *emit_action(Node *n) {
         Printv(eaction, em, "\n", NIL);
         Printf(eaction, "}");
       } else {
-	Swig_warning(WARN_TYPEMAP_THROW, Getfile(n), Getline(n), "No 'throws' typemap defined for exception type '%s'\n", SwigType_str(Getattr(ep, "type"), 0));
+        Swig_warning(WARN_TYPEMAP_THROW, Getfile(n), Getline(n), "No 'throws' typemap defined for exception type '%s'\n", SwigType_str(Getattr(ep, "type"), 0));
         unknown_catch = 1;
       }
     }
     if (unknown_catch && !has_varargs) {
       Printf(eaction, " catch(...) {\nthrow;\n}");
     }
-  }
-
-  /* Look for except typemap (Deprecated) */
-  tm = Swig_typemap_lookup("except", n, Swig_cresult_name(), 0);
-  if (tm) {
-    Setattr(n, "feature:except", tm);
-    tm = 0;
   }
 
   /* emit the except feature code */

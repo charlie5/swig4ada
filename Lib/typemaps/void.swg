@@ -10,7 +10,7 @@
     %argument_fail(res, "$type", $symname, $argnum); 
   }
 }
-%typemap(freearg) void * "";
+%typemap(freearg) void * ""
 
 %typemap(in,noblock=1) void * const& ($*ltype temp = 0, int res) {
   res = SWIG_ConvertPtr($input, %as_voidptrptr(&temp), 0, $disown);
@@ -19,7 +19,7 @@
   }
   $1 =  &temp;
 }
-%typemap(freearg) void * const& "";
+%typemap(freearg) void * const& ""
 
 
 /* out */
@@ -74,7 +74,8 @@
   if (!SWIG_IsOK(res)) { 
     %dirout_fail(res,"$type");
   }
-  static $*ltype temp = %reinterpret_cast(argp, $*ltype);
+  static $*ltype temp;
+  temp = %reinterpret_cast(argp, $*ltype);
   $result =  &temp;
 }
 
