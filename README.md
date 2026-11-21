@@ -180,6 +180,8 @@ Other things to know
 - An overloaded function keeps its name, and a default argument gives one Ada function for each form of
   the call. An operator needs a name: '%rename (plus) Money::operator+;'.
 - A static member function is a function of the package of its class.
+- A static member variable is a variable of the package of its class ('Counter.total'), or a constant
+  where it has a value in the class.
 - 'operator->' is the function 'dereference', and the functions of the class which a smart pointer points
   to are also functions of the smart pointer.
 - A class of a namespace has its package directly under the module, as namespaces are not kept.
@@ -194,7 +196,6 @@ Limitations
   marked as overriding.
 - A class which has a member of a structure nested in it, where that structure has a member of another
   type declared in the class, gives specifications which do not compile.
-- Static member variables.
 - The destructor of a class with virtual functions is imported by its C++ symbol, which is made for a
   class in namespaces and for the simpler template instances only.
 - Directors.
