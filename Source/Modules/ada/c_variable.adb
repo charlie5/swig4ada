@@ -17,6 +17,8 @@ is
                    Value            => <>,
                    link_Symbol      => <>,
                    owner_Class      => null,
+                   is_anonymous_Bits => False,
+                   is_ignored_Member => False,
                    is_Static        => <>,
                    is_class_Pointer => <>,
                    is_Pointer       => <>,

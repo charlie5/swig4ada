@@ -220,6 +220,9 @@ is
          the_c_Type := c_type.new_standard_c_Type (Self.nameSpace_std,  +"double");
          Self.register (the_c_Type,  doh_SwigType (-"double"), is_core_C_type => True);
 
+         the_c_Type := c_type.new_standard_c_Type (Self.nameSpace_std,  +"long double");
+         Self.register (the_c_Type,  doh_SwigType (-"long double"), is_core_C_type => True);
+
 
          the_c_Type := c_type.new_standard_c_Type (Self.nameSpace_std,  +"bool");
          Self.register (the_c_Type,  doh_SwigType (-"bool"), is_core_C_type => True);
@@ -439,6 +442,13 @@ is
                                                             base_type => Self.fetch_ada_Type (+"long_Float")).all'Access;
             Self.name_Map_of_ada_type.insert (the_ada_Type.qualified_Name,
                                               the_ada_Type);
+
+
+            the_ada_Type := ada_type.a_subtype.new_subType (Self.Package_interfaces_c,
+                                                            +"long_double",
+                                                            base_type => Self.fetch_ada_Type (+"long_Float")).all'Access;
+            Self.name_Map_of_ada_type.insert (the_ada_Type.qualified_Name,
+                                              the_ada_Type);
          end package_Interfaces_C;
 
 
@@ -622,6 +632,7 @@ is
             --
             add_associated_swig_package_Types_for (Self.fetch_ada_Type (+"interfaces.c.c_float"),   c_type_name => "float");
             add_associated_swig_package_Types_for (Self.fetch_ada_Type (+"interfaces.c.double"),    c_type_name => "double");
+            add_associated_swig_package_Types_for (Self.fetch_ada_Type (+"interfaces.c.long_double"),   c_type_name => "long_double");
 
             --  sized signed integers
             --
@@ -1052,6 +1063,18 @@ is
 
          Self.associate (Self.fetch_ada_Type (+"swig.pointers.double_pointer_Array"),   Self.fetch_c_Type (+"double*[]"));
          Self.associate (Self.fetch_ada_Type (+"swig.pointers.double_pointer_Pointer"), Self.fetch_c_Type (+"double**" ));
+
+
+         -------------------
+         --  C 'long double'
+         --
+         Self.associate (Self.fetch_ada_Type (+"interfaces.c.long_double"),                  Self.fetch_c_Type (+"long double"));
+
+         Self.associate (Self.fetch_ada_Type (+"swig.long_double_Array"),                    Self.fetch_c_Type (+"long double[]"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.long_double_Pointer"),         Self.fetch_c_Type (+"long double*" ));
+
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.long_double_pointer_Array"),   Self.fetch_c_Type (+"long double*[]"));
+         Self.associate (Self.fetch_ada_Type (+"swig.pointers.long_double_pointer_Pointer"), Self.fetch_c_Type (+"long double**" ));
       end associate_core_c_and_ada_Types;
 
 

@@ -1154,6 +1154,16 @@ is
    end add_Component;
 
 
+   procedure remove_Component (Self  : access Item;
+                               Index : in     Positive)
+   is
+   begin
+      Self.my.Components (Index .. Self.my.component_Count - 1) := Self.my.Components (Index + 1 .. Self.my.component_Count);
+      Self.my.component_Count                                   := Self.my.component_Count - 1;
+   end remove_Component;
+
+
+
    function component_Count (Self : access Item) return Natural
    is
    begin

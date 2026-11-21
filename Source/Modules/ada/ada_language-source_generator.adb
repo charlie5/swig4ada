@@ -19,6 +19,7 @@ with a_Namespace,
      ada_Type,
      ada_Variable,
 
+     ada.Strings.fixed,
      ada.Strings.Maps.constants,
      ada.Characters.handling,
      ada.Containers.indefinite_hashed_Maps,
@@ -345,6 +346,13 @@ is
                   loop
                      the_Component := Self.Components (Each);
 
+                     if the_Component.is_anonymous_Bits
+                     then
+                        goto next_Component;     -- It has no component, and only takes part in the layout.
+                     end if;
+
+                     type_Modifier := null_unbounded_String;     -- A bit-field is not aliased.
+
                      if is_a_Union
                      then
                         append (the_Source,  NL & "         when " & the_component.Name & "_variant =>");
@@ -449,24 +457,33 @@ is
                      end if;
 
 
-                     if         the_Component.bit_Field /= -1
-                       and then the_Component.my_Type.all in ada_type.elementary.scalar.discrete.Enumeration.item'Class
-                     then
+                     if         the_Component.bit_Field > 0
+                       and then the_Component.my_Type.resolved_Type.all not in ada_type.elementary.scalar.discrete.Enumeration.item'Class
+                     then   -- A bit-field holds the values which its bits allow.
                         declare
-                           ultimate_base_Type_Name : constant unbounded_String := to_unbounded_String (to_Lower (to_String (the_Component.my_Type.resolved_Type.Name)));
+                           the_type_Name : constant String  := to_Lower (to_String (the_Component.my_Type.resolved_Type.qualified_Name));
+                           is_a_Char     : constant Boolean :=        the_type_Name in "interfaces.c.char" | "interfaces.c.plain_char" | "character"
+                                                               or else to_Lower (to_String (the_Component.my_Type.qualified_Name)) = "swig.bool";
+                           is_Unsigned   : constant Boolean :=        ada.Strings.fixed.Index (the_type_Name, "unsigned") /= 0
+                                                               or else ada.Strings.fixed.Index (the_type_Name, "size_t")   /= 0;
+                           the_Bits      : constant String  := Natural'Image (the_Component.bit_Field);
                         begin
-                           if         Index (ultimate_base_Type_Name, "unsigned") = 0
-                             and then Index (ultimate_base_Type_Name, "bool")     = 0
-                           then   -- Must be signed.
+                           if is_a_Char
+                           then
+                              append (the_Source,   " range " & type_Name & "'Val (0) .. " & type_Name & "'Val (2**" & the_Bits & " - 1)");
+                           elsif is_Unsigned
+                           then
+                              append (the_Source,   " range 0 .. 2**" & the_Bits & " - 1");
+                           else
                               append (the_Source,   " range -2**" & Natural'Image (the_Component.bit_Field - 1)
-                                      & " .. 2**"     & Natural'Image (the_Component.bit_Field - 1) & " - 1");
-                           else   -- Must be unsigned.
-                              append (the_Source,   " range 0 .. 2**" & Natural'Image (the_Component.bit_Field) & " - 1");
+                                                  & " .. 2**"     & Natural'Image (the_Component.bit_Field - 1) & " - 1");
                            end if;
                         end;
                      end if;
 
                      append (the_Source,  ";");
+
+                     <<next_Component>>
                   end loop;
                end;
 
@@ -578,6 +595,244 @@ is
 
 
 
+   --  The layout of a record which has bit-fields.
+   --
+   --  GNAT does not lay out bit-fields as C does, so the place of every component is worked out here, by the rules of the
+   --  System V ABI (which the Itanium C++ ABI follows), and written as a record representation clause. The sizes of the
+   --  C types are those of the machine which generates the binding.
+   --
+
+   type component_Place is
+      record
+         First : Natural := 0;     -- In bits, from the start of the record.
+         Size  : Natural := 0;
+      end record;
+
+   type component_Places is array (Positive range <>) of component_Place;
+
+
+   function rounded_Up (Value : in Natural;   To : in Positive) return Natural
+   is
+   begin
+      return ((Value + To - 1) / To) * To;
+   end rounded_Up;
+
+
+
+   function laid_Out (the_Record : in     ada_Type.composite.a_record.view;
+                      Places     :    out component_Places;
+                      Size       :    out Natural;
+                      Alignment  :    out Natural) return Boolean;
+   --
+   --  Gives the place of each component, and the size and alignment of the record, in bits. Returns False when
+   --  the size of a component is not known.
+
+
+
+   function size_by_Name (the_Name : in String) return Natural
+   --
+   --  The size, in bits, of a standard type by its name in lower case, or 0. A pointer is one more than the size of an address.
+   --
+   is
+   begin
+      return (if    the_Name in "interfaces.c.strings.chars_ptr" | "system.address" | "swig.void_ptr"                     then Standard'Address_Size + 1
+
+              elsif the_Name in   "interfaces.c.char"     | "interfaces.c.plain_char"  | "interfaces.c.signed_char" | "interfaces.c.unsigned_char"
+                                | "swig.bool"             | "interfaces.c.extensions.bool" | "character" | "short_short_integer"
+                                | "interfaces.integer_8"  | "interfaces.unsigned_8"                                        then 8
+
+              elsif the_Name in   "interfaces.c.short"    | "interfaces.c.unsigned_short" | "short_integer"
+                                | "interfaces.integer_16" | "interfaces.unsigned_16"                                       then 16
+
+              elsif the_Name in "interfaces.c.int" | "interfaces.c.unsigned" | "integer" | "natural"                       then interfaces.C.int'Size
+
+              elsif the_Name in "interfaces.integer_32" | "interfaces.unsigned_32" | "interfaces.c.c_float" | "float"      then 32
+
+              elsif the_Name in   "interfaces.c.long" | "interfaces.c.unsigned_long" | "interfaces.c.size_t" | "interfaces.c.ptrdiff_t"
+                                | "long_integer"                                                                           then interfaces.C.long'Size
+
+              elsif the_Name in   "swig.long_long" | "swig.unsigned_long_long" | "interfaces.c.extensions.long_long"
+                                | "interfaces.c.extensions.unsigned_long_long" | "long_long_integer"
+                                | "interfaces.integer_64" | "interfaces.unsigned_64" | "interfaces.c.double" | "long_float" then 64
+
+              elsif the_Name = "interfaces.c.long_double"                                                                   then interfaces.C.long_double'Size
+              else  0);
+   end size_by_Name;
+
+
+
+   function size_Known (the_Type  : in     ada_Type.view;
+                        Bounds    : in     ada_Variable.array_bounds_Vectors.Vector;
+                        Size      :    out Natural;
+                        Alignment :    out Natural) return Boolean
+   --
+   --  Gives the size and alignment, in bits, of a component of the type and array bounds.
+   --
+   is
+      address_Size  : constant Natural := Standard'Address_Size;
+      the_Type_Name : constant String  := to_Lower (to_String (the_Type.qualified_Name));
+      the_Resolved  : constant ada_Type.view := (if the_Type.resolved_Type /= null then the_Type.resolved_Type else the_Type);
+      the_Name      : constant String  := to_Lower (to_String (the_Resolved.qualified_Name));
+      Count         :          Natural := 1;
+      element_Type  :          ada_Type.view;
+   begin
+      Size      := 0;
+      Alignment := 8;
+
+      if not Bounds.is_Empty
+      then   -- An array, whose type is that of an array with no bounds.
+         for Bound of Bounds
+         loop
+            if Bound < 0
+            then
+               return False;
+            end if;
+
+            Count := Count * (Bound + 1);
+         end loop;
+
+         if the_Name in "interfaces.c.char_array" | "string"
+         then
+            Size := 8 * Count;
+            return True;
+
+         elsif the_Resolved.all in ada_Type.composite.an_array.item'Class
+         then
+            element_Type := ada_Type.composite.an_array.view (the_Resolved).element_Type;
+
+            if not size_Known (element_Type, ada_Variable.array_bounds_Vectors.empty_Vector, Size, Alignment)
+            then
+               return False;
+            end if;
+
+            Size := Size * Count;
+            return True;
+         else
+            return False;
+         end if;
+      end if;
+
+      if        the_Resolved.all in ada_Type.elementary.an_access.item'Class
+        or else size_by_Name (the_Type_Name) = address_Size + 1     -- (See 'size_by_Name'.)
+        or else size_by_Name (the_Name)      = address_Size + 1
+      then
+         Size := address_Size;
+
+      elsif size_by_Name (the_Type_Name) /= 0
+      then
+         Size := size_by_Name (the_Type_Name);
+
+      elsif size_by_Name (the_Name) /= 0
+      then
+         Size := size_by_Name (the_Name);
+
+      elsif the_Resolved.all in ada_Type.elementary.scalar.discrete.enumeration.item'Class
+      then
+         Size := ada_Type.elementary.scalar.discrete.enumeration.view (the_Resolved).object_Size;
+
+         if Size = 0
+         then
+            Size := interfaces.C.int'Size;
+         end if;
+
+      elsif the_Resolved.all in ada_Type.composite.a_record.item'Class
+      then
+         declare
+            the_Record : constant ada_Type.composite.a_record.view := ada_Type.composite.a_record.view (the_Resolved);
+            the_Places :          component_Places (1 .. the_Record.component_Count);
+         begin
+            return laid_Out (the_Record, the_Places, Size, Alignment);
+         end;
+      else
+         return False;
+      end if;
+
+      Alignment := Size;
+      return True;
+   end size_Known;
+
+
+
+   function laid_Out (the_Record : in     ada_Type.composite.a_record.view;
+                      Places     :    out component_Places;
+                      Size       :    out Natural;
+                      Alignment  :    out Natural) return Boolean
+   is
+      the_Component   : access ada_Variable.item'Class;
+      Position        :        Natural := 0;     -- The next free bit.
+      component_Size  :        Natural;
+      component_Align :        Natural;
+   begin
+      Size      := 0;
+      Alignment := 8;
+      Places    := [others => <>];
+
+      if not the_Record.base_Classes.is_Empty
+      then
+         return False;     -- The layout of a derived class is not worked out.
+      end if;
+
+      if the_Record.is_Virtual
+      then   -- The pointer to the table of virtual functions comes first.
+         Position  := Standard'Address_Size;
+         Alignment := Standard'Address_Size;
+      end if;
+
+      for Each in 1 .. the_Record.component_Count
+      loop
+         the_Component := the_Record.Components (Each);
+
+         if not size_Known (the_Component.my_Type, the_Component.array_Bounds, component_Size, component_Align)
+         then
+            dlog (  "The size of '" & the_Component.my_Type.qualified_Name & "' is not known, for member '" & the_Component.Name
+                  & "' of '" & the_Record.declaration_Package.qualified_Name & "'.");
+            return False;
+         end if;
+
+         if the_Record.is_Union
+         then
+            Places (Each) := (First => 0, Size => (if the_Component.bit_Field >= 0 then the_Component.bit_Field else component_Size));
+            Size          := Natural'Max (Size, component_Size);
+            Alignment     := Natural'Max (Alignment, component_Align);
+
+         elsif the_Component.bit_Field = 0
+         then   -- A bit-field of no width ends the unit which holds the bit-fields before it.
+            Position := rounded_Up (Position, component_Size);
+
+         elsif the_Component.bit_Field > 0
+         then   -- A bit-field does not cross a unit of its own type.
+            if Position / component_Size /= (Position + the_Component.bit_Field - 1) / component_Size
+            then
+               Position := rounded_Up (Position, component_Size);
+            end if;
+
+            Places (Each) := (First => Position, Size => the_Component.bit_Field);
+            Position      := Position + the_Component.bit_Field;
+
+            if not the_Component.is_anonymous_Bits     -- The type of a bit-field with no name does not align the record.
+            then
+               Alignment := Natural'Max (Alignment, component_Align);
+            end if;
+
+         else
+            Position      := rounded_Up (Position, component_Align);
+            Places (Each) := (First => Position, Size => component_Size);
+            Position      := Position + component_Size;
+            Alignment     := Natural'Max (Alignment, component_Align);
+         end if;
+      end loop;
+
+      if not the_Record.is_Union
+      then
+         Size := Position;
+      end if;
+
+      Size := rounded_Up (Size, Alignment);
+      return True;
+   end laid_Out;
+
+
+
    function  representation_Text (Self : in ada_Type.view) return String
    is
       the_Source : unbounded_String;
@@ -589,58 +844,43 @@ is
          begin
             if the_Record.contains_bit_Fields
             then
-               append (the_Source,
-                         NL & NL
-                       & "   for " & the_Record.Name & " use" & NL
-                       & "      record"                        );
-
                declare
+                  the_Places    : component_Places (1 .. the_Record.component_Count);
+                  the_Size      : Natural;
+                  the_Alignment : Natural;
                   the_Component : access ada_Variable.item'Class;
-                  bit_Count     :        Natural := 0;
-                  at_Count      :        Natural := 0;
-                  First         :        Natural;
-                  Last          :        Natural;
                begin
-                  for Each in 1 .. the_Record.component_Count
-                  loop
-                     the_Component := the_Record.Components (Each);
+                  if not laid_Out (the_Record, the_Places, the_Size, the_Alignment)
+                  then
+                     log (  "Warning: unable to lay out the bit-fields of '" & the_Record.declaration_Package.qualified_Name
+                          & "', as the size of one of its members is not known. Its record does not match the layout of its class.");
+                  else
+                     append (the_Source,
+                               NL & NL
+                             & "   for " & the_Record.Name & " use" & NL
+                             & "      record"                        );
 
-                     if the_Component.bit_Field /= -1
+                     for Each in 1 .. the_Record.component_Count
+                     loop
+                        the_Component := the_Record.Components (Each);
+
+                        if not the_Component.is_anonymous_Bits
+                        then
+                           append (the_Source,   NL & "         " & the_Component.Name & " at 0 range"
+                                               & Natural'Image (the_Places (Each).First) & " .."
+                                               & Natural'Image (the_Places (Each).First + the_Places (Each).Size - 1) & ";");
+                        end if;
+                     end loop;
+
+                     append (the_Source,  NL & "      end record;" & NL);
+
+                     if not the_Record.is_Virtual
                      then
-                        First     := bit_Count;
-                        bit_Count := bit_Count + the_Component.bit_Field;
-                        Last      := bit_Count - 1;
-
-                        append (the_Source,  NL & "         " & the_Component.Name & " at ");
-
-                        if the_Record.is_Virtual
-                        then
-                           append (the_Source,  "system.Storage_Unit ");
-
-                           if at_Count /= 0
-                           then
-                              append (the_Source,  "+" & Natural'Image (at_Count));
-                           end if;
-                        else
-                           append (the_Source,  Natural'Image (at_Count));
-                        end if;
-
-
-                        append (the_Source,  " range " & Natural'Image (First) & " .. " & Natural'Image (Last) & ";");
-
-                        if bit_Count >= system.word_Size
-                        then
-                           bit_Count := bit_Count - system.word_Size;                       -- tbd: check these are correct & portable
-                           at_Count  := at_Count + system.word_Size / system.storage_Unit;  --
-                        end if;
-
-                     else
-                        null;
+                        append (the_Source,   "   for " & the_Record.Name & "'Size use"      & Natural'Image (the_Size)                          & ";" & NL
+                                            & "   for " & the_Record.Name & "'Alignment use" & Natural'Image (the_Alignment / system.Storage_Unit) & ";" & NL);
                      end if;
-                  end loop;
+                  end if;
                end;
-
-               append (the_Source,  NL & "      end record;" & NL);
             end if;
 
 

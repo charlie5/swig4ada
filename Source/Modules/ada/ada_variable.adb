@@ -21,6 +21,7 @@ is
                     is_raw_Storage => False,
 
                     bit_Field        => -1,
+                    is_anonymous_Bits => False,
                     array_Bounds     => <>,
                     is_Pointer       => False,
                     is_class_pointer => False);

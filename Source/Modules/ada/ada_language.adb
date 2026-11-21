@@ -18,6 +18,7 @@ with
      DOHs.Binding,
      DOHs.Pointers,
 
+     ada.Containers.Vectors,
      ada.Strings.fixed,
      ada.Strings.Maps,
      ada.Text_IO,
@@ -84,6 +85,7 @@ is
    function  cpp_Symbol (qualified_Name : in String;   Suffix : in String) return String;
    procedure bind_constructors_of_abstract_Class (Self : access Item;   the_Class : in Node_Pointer);
    procedure bind_other_base_Classes             (Self : access Item;   the_Class : in Node_Pointer);
+   procedure add_hidden_Members                  (Self : access Item;   Before    : in Node_Pointer);
 
    procedure register_Mirror (Self : access Item;   proxy_Name              : in unbounded_String;
                                                     the_c_Type              : in c_Type.view;
@@ -419,37 +421,77 @@ is
       use c_Type;
       not_fully_known_Types : c_Type.Vector;
       Count                 : Natural := 0;
-   begin
-      -- Build a list of all types which are unknown or which depend on types that are not fully known.
-      --
-      for Each of Self.name_Map_of_c_type
-      loop
-         if Each.c_type_Kind = Unknown
-         then
-            Count := Count + 1;
-            not_fully_known_Types.append (Each);
-         end if;
-      end loop;
 
-      while Count /= 0
-      loop
-         Count := 0;
 
+      procedure find_the_not_fully_known_Types
+      is
+      begin
+         -- Build a list of all types which are unknown or which depend on types that are not fully known.
+         --
          for Each of Self.name_Map_of_c_type
          loop
-            if not not_fully_known_Types.contains (Each)
+            if Each.c_type_Kind = Unknown
             then
-               for i in 1 .. Integer (not_fully_known_Types.Length)
+               Count := Count + 1;
+               not_fully_known_Types.append (Each);
+            end if;
+         end loop;
+
+         while Count /= 0
+         loop
+            Count := 0;
+
+            for Each of Self.name_Map_of_c_type
+            loop
+               if not not_fully_known_Types.contains (Each)
+               then
+                  for i in 1 .. Integer (not_fully_known_Types.Length)
+                  loop
+                     if Each.depends_directly_on (not_fully_known_Types.Element (i).all'Access)
+                     then
+                        Count := Count + 1;
+                        not_fully_known_Types.append (Each);
+                     end if;
+                  end loop;
+               end if;
+            end loop;
+         end loop;
+      end find_the_not_fully_known_Types;
+
+   begin
+      find_the_not_fully_known_Types;
+
+      --  A member which the interface file ignores only reserves its storage. Where its type is not known, the
+      --  storage is given up, so that the class itself is still bound (the member may well have been ignored
+      --  because its type cannot be bound).
+      --
+      declare
+         Dropped : Boolean := False;
+      begin
+         for Each of Self.name_Map_of_c_type
+         loop
+            if Each.c_type_Kind = c_Class
+            then
+               for i in reverse 1 .. Each.component_Count
                loop
-                  if Each.depends_directly_on (not_fully_known_Types.Element (i).all'Access)
+                  if         Each.Components (i).is_ignored_Member
+                    and then not_fully_known_Types.contains (Each.Components (i).my_Type)
                   then
-                     Count := Count + 1;
-                     not_fully_known_Types.append (Each);
+                     log (  "Warning: the ignored member '" & Each.Components (i).Name & "' of class '" & Each.Name
+                          & "' has a type which is not known, so its storage is left out. The layout of the record does not match that of the class.");
+                     Each.remove_Component (i);
+                     Dropped := True;
                   end if;
                end loop;
             end if;
          end loop;
-      end loop;
+
+         if Dropped
+         then
+            not_fully_known_Types.clear;
+            find_the_not_fully_known_Types;
+         end if;
+      end;
 
       -- Rid not fully known C types from top module.
       --
@@ -1872,6 +1914,8 @@ is
 
       Status := swigMod.Language.item (Self.all).classHandler (the_Node);     -- Process all class members.
 
+      add_hidden_Members (Self, before => null);                              -- Those which follow the last member.
+
       bind_constructors_of_abstract_Class (Self, the_Node);
       bind_other_base_Classes             (Self, the_Node);
 
@@ -2476,6 +2520,8 @@ is
             new_Variable : c_Variable.view;
             bit_Field    : constant String := Attribute (the_Node, "bitfield");
          begin
+            add_hidden_Members (Self, before => the_Node);
+
             if swig_Type_is_array
             then
                declare
@@ -2918,6 +2964,172 @@ is
    -----------
    --- Utility
    --
+
+   procedure add_hidden_Members (Self : access Item;   Before : in Node_Pointer)
+   --
+   --  Two kinds of member take part in the layout of a class, but are not handed on by the core:
+   --
+   --    - A bit-field with no name ('unsigned : 2;'). The parser notes each one on the node of the class, by its line,
+   --      width and type. It becomes a component with no name of its own, which is given no declaration.
+   --
+   --    - A member variable which the interface file ignores ('%ignore Sensor::state;'). It becomes a component
+   --      named '<member>_storage', as without it every member which follows would be out of place.
+   --
+   --  Those of the current class which come before the given member (or all of them, when it is null), and are
+   --  not yet components, are added.
+   --
+   is
+      use type C.int;
+
+      type hidden_Member is
+         record
+            Line     : Integer;
+            the_Node : Node_Pointer;         -- Null for a bit-field with no name.
+            Width    : unbounded_String;
+            the_Type : unbounded_String;
+         end record;
+
+      package hidden_Vectors is new ada.Containers.Vectors (Positive, hidden_Member);
+
+      function "<" (Left, Right : in hidden_Member) return Boolean
+      is (Left.Line < Right.Line);
+
+      package Sorting is new hidden_Vectors.generic_Sorting;
+
+      the_Class   : constant Node_Pointer := Self.getCurrentClass;
+      before_Line : constant Integer      := (if Before = null then Integer'Last else Integer (DohGetline (DOH_Pointer (Before))));
+      the_Hidden  :          hidden_Vectors.Vector;
+      Used        :          Natural      := 0;
+      the_Child   :          Node_Pointer;
+   begin
+      if the_Class = null
+      then
+         return;
+      end if;
+
+      --  The ignored members, in the order of their declaration, up to the given member.
+      --
+      the_Child := first_Child (the_Class);
+
+      while the_Child /= null
+        and then the_Child /= Before
+      loop
+         if         Attribute (the_Child, "nodeType") = "cdecl"
+           and then Attribute (the_Child, "feature:ignore") /= ""
+           and then Attribute (the_Child, "feature:extend")  = ""
+           and then Attribute (the_Child, "name")           /= ""
+           and then Attribute (the_Child, "storage") not in "static" | "typedef" | "friend" | "extern"
+           and then (        get_Attribute (the_Child, "decl") = null
+                     or else SwigType_isfunction (SwigType_Pointer (get_Attribute (the_Child, "decl"))) = 0)
+         then
+            the_Hidden.append (hidden_Member'(Line     => Integer (DohGetline (DOH_Pointer (the_Child))),
+                                              the_Node => the_Child,
+                                              Width    => <>,
+                                              the_Type => <>));
+         end if;
+
+         the_Child := next_Sibling (the_Child);
+      end loop;
+
+      --  The bit-fields with no name, which are known by their lines alone.
+      --
+      if get_Attribute (the_Class, "anonymous_bitfields") /= null
+      then
+         declare
+            the_Fields : constant doh_List := doh_List (get_Attribute (the_Class, "anonymous_bitfields"));
+         begin
+            for i in 1 .. DohLen (the_Fields)
+            loop
+               declare
+                  the_Field : constant String  := +DohGetitem (the_Fields, i - 1);     -- '<line>|<width>|<type>'
+                  Bar_1     : constant Natural := ada.Strings.fixed.Index (the_Field, "|");
+                  Bar_2     : constant Natural := ada.Strings.fixed.Index (the_Field, "|", from => Bar_1 + 1);
+                  the_Line  : constant Integer := Integer'Value (the_Field (the_Field'First .. Bar_1 - 1));
+               begin
+                  if the_Line < before_Line
+                  then
+                     the_Hidden.append (hidden_Member'(Line     => the_Line,
+                                                       the_Node => null,
+                                                       Width    => +the_Field (Bar_1 + 1 .. Bar_2 - 1),
+                                                       the_Type => +the_Field (Bar_2 + 1 .. the_Field'Last)));
+                  end if;
+               end;
+            end loop;
+         end;
+      end if;
+
+      if the_Hidden.is_Empty
+      then
+         return;
+      end if;
+
+      Sorting.sort (the_Hidden);
+
+      for Each of Self.current_c_Class.Components
+      loop
+         if Each.is_anonymous_Bits or else Each.is_ignored_Member
+         then
+            Used := Used + 1;
+         end if;
+      end loop;
+
+      for i in Used + 1 .. Natural (the_Hidden.Length)
+      loop
+         declare
+            use swigg.Utility;
+
+            the_Member   : constant hidden_Member := the_Hidden.Element (i);
+            new_Variable :          c_Variable.view;
+         begin
+            if the_Member.the_Node = null
+            then
+               new_Variable := c_Variable.new_c_Variable (+("anonymous_bits_" & ada.Strings.fixed.Trim (Natural'Image (i), ada.Strings.Left)),
+                                                          Self.demand_c_Type_for (doh_swigType (to_Doh (to_String (the_Member.the_Type)))));
+               new_Variable.is_anonymous_Bits := True;
+               new_Variable.bit_Field         := Integer (Value (resolved_c_integer_Expression (Self, the_Member.Width,
+                                                                                                      Self.integer_symbol_value_Map,
+                                                                                                      Self.current_class_namespace_Prefix)));
+            else
+               declare
+                  the_swig_Type :          SwigType_Pointer := SwigType_Pointer (doh_Copy (DOH_Pointer (get_Attribute (the_Member.the_Node, "type"))));
+                  the_Name      : constant String           := Attribute (the_Member.the_Node, "name") & "_storage";
+                  bit_Field     : constant String           := Attribute (the_Member.the_Node, "bitfield");
+               begin
+                  if get_Attribute (the_Member.the_Node, "decl") /= null
+                  then
+                     SwigType_push (the_swig_Type, String_Pointer (get_Attribute (the_Member.the_Node, "decl")));
+                  end if;
+
+                  strip_all_qualifiers (DOH_Pointer (the_swig_Type));
+
+                  if SwigType_isArray (the_swig_Type) /= 0
+                  then
+                     new_Variable := c_Variable.new_c_Variable (+the_Name,
+                                                                Self.demand_c_Type_for (doh_swigType (to_Doh (to_String (strip_array_Bounds (doh_Copy (DOH_Pointer (the_swig_Type))))))));
+                     Self.add_array_Bounds_to (new_Variable, doh_SwigType (the_swig_Type));
+                  else
+                     new_Variable := c_Variable.new_c_Variable (+the_Name,
+                                                                Self.demand_c_Type_for (doh_SwigType (the_swig_Type)));
+                  end if;
+
+                  new_Variable.is_ignored_Member := True;
+                  new_Variable.is_class_Pointer  := SwigType_isPointer (the_swig_Type) /= 0;
+
+                  if bit_Field /= ""
+                  then
+                     new_Variable.bit_Field := Integer (Value (resolved_c_integer_Expression (Self, +bit_Field,
+                                                                                                    Self.integer_symbol_value_Map,
+                                                                                                    Self.current_class_namespace_Prefix)));
+                  end if;
+               end;
+            end if;
+
+            Self.current_c_Class.add_Component (new_Variable);
+         end;
+      end loop;
+   end add_hidden_Members;
+
+
 
    procedure bind_other_base_Classes (Self : access Item;   the_Class : in Node_Pointer)
    --
@@ -4119,6 +4331,9 @@ is
 
       --  The symbol of a variable is its C name, which its Ada name may differ from (a variable 'Abstract' is 'the_Abstract').
       --
+      the_ada_Variable.bit_Field         := the_c_Variable.bit_Field;
+      the_ada_Variable.is_anonymous_Bits := the_c_Variable.is_anonymous_Bits;
+
       the_ada_Variable.link_Symbol := (if the_c_Variable.link_Symbol /= "" then the_c_Variable.link_Symbol
                                                                            else the_c_Variable.Name);
 

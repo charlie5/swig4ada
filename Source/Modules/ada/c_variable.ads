@@ -27,6 +27,8 @@ is
          owner_Class      : c_Type.view;          -- The class of a static member variable.
 
          bit_Field        : Integer := undefined_Bitfield;
+         is_anonymous_Bits : Boolean := False;    -- A bit-field with no name, which only takes part in the layout of its class.
+         is_ignored_Member : Boolean := False;    -- A member which the interface file ignores, and which only reserves its storage.
 
          is_Static        : Boolean := False;
          is_class_Pointer : Boolean := False;

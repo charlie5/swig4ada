@@ -257,6 +257,7 @@ is
    procedure add_Base                            (Self : access Item;   base_Class    : in     c_Type.view);
 
    procedure add_Component                       (Self : access Item;   new_Component : access c_Variable.item'Class);
+   procedure remove_Component                    (Self : access Item;   Index         : in     Positive);
    function  component_Count                     (Self : access Item) return Natural;
    function  Components                          (Self : access Item) return record_Components;
 
