@@ -741,8 +741,32 @@ is
    is
       the_Node       :          Node_Pointer renames N;
 
-      node_Type      : constant doh_swigType := doh_swigType (get_Attribute (the_Node, "name"));   -- Swig 'forward declaration' nodes do not have a 'type' attribute,
-      the_class_Name : constant String       := Attribute    (the_Node, "name");                   -- so we are using 'name' instead.
+      the_class_Name : constant String       := Attribute    (the_Node, "name");                   -- Swig 'forward declaration' nodes do not have a 'type'
+                                                                                                   -- attribute, so we are using 'name' instead.
+
+      --  A class which is declared in a namespace ('namespace cv { class Mat; }') is named without it here, but
+      --  with it wherever it is used ('cv::Mat') and where it is defined, so it is made known by its full name.
+      --
+      function scope_of_the_Class return String
+      is
+         use type DOHs.Pointers.DOH_Pointer;
+      begin
+         if         Self.in_cpp_Mode
+           and then ada.Strings.fixed.Index (the_class_Name, "::") = 0
+           and then DOH_Pointer (Swig_symbol_qualified (the_Node)) /= null
+         then
+            return +DOH_Pointer (Swig_symbol_qualified (the_Node));
+         else
+            return "";
+         end if;
+      end scope_of_the_Class;
+
+      the_Scope      : constant String       := scope_of_the_Class;
+      the_bound_Name : constant String       := (if the_Scope /= "" and then Attribute (the_Node, "sym:name") /= ""
+                                                 then Attribute (the_Node, "sym:name")
+                                                 else the_class_Name);
+      node_Type      : constant doh_swigType := (if the_Scope = "" then doh_swigType (get_Attribute (the_Node, "name"))
+                                                                   else doh_swigType (to_Doh (the_Scope & "::" & the_class_Name)));
       Kind           : constant String       := Attribute    (the_Node, "kind");
       is_a_Struct    : constant Boolean      := Kind = "struct";
 
@@ -761,9 +785,11 @@ is
          return SWIG_OK;     -- The class has already been partially or fully declared, so do nothing.
 
       else
+         --  The class is named as it is bound, which a '%rename' may have changed ('TagLib::FLAC::File' as 'FLACFile').
+         --
          if is_a_Struct
-         then   new_c_Class := c_Type.new_opaque_Struct    (Namespace => Self.current_c_nameSpace, Name => +the_class_Name);
-         else   new_c_Class := c_Type.new_incomplete_Class (Namespace => Self.current_c_nameSpace, Name => +the_class_Name);
+         then   new_c_Class := c_Type.new_opaque_Struct    (Namespace => Self.current_c_nameSpace, Name => +the_bound_Name);
+         else   new_c_Class := c_Type.new_incomplete_Class (Namespace => Self.current_c_nameSpace, Name => +the_bound_Name);
          end if;
 
          Self.register (new_c_Class, node_Type);
