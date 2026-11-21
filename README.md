@@ -182,6 +182,9 @@ Other things to know
 - A static member function is a function of the package of its class.
 - A static member variable is a variable of the package of its class ('Counter.total'), or a constant
   where it has a value in the class.
+- A member whose type is a nested structure or union with no name has a type named for it
+  ('Variant_val' for 'union { ... } val;' in 'Variant'). The members of an anonymous union are reached
+  through a member of the outer type: 'the_Variant.anonymous_3.i'.
 - A structure with bit-fields is laid out as C has it, by a record representation clause, for the machine
   which generates the binding.
 - Where a record is laid out for the generating machine, the wrapper checks, when it is compiled, that the
@@ -201,8 +204,7 @@ Other things to know
 Limitations
 -----------
 
-- A class with a virtual base class, or with a nested class or union which has no name, has a record which
-  does not match it. A warning says so.
+- A class with a virtual base class has a record which does not match it. A warning says so.
 - With more than one base class which has virtual functions, only the first is a parent of the Ada type.
   The others are reached by 'as_<base>', and a function of the class which overrides one of theirs is not
   marked as overriding.
