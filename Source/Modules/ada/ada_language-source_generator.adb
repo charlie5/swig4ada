@@ -741,7 +741,8 @@ is
                      end if;
 
                   else
-                     if Type_is_from_limited_With
+                     if         Type_is_from_limited_With
+                       and then the_Parameter.my_Type.resolved_Type.all in ada_Type.elementary.an_access.to_Type.item'Class
                      then
                         append (the_Mode,  "access");
                         limited_Pointer_base_Type := Access_to_Type_view (the_Parameter.my_Type.resolved_Type).accessed_Type;
@@ -1241,6 +1242,40 @@ is
 
 
 
+      function is_a_Class_of_another_Package (the_Type : in ada_Type.view) return Boolean
+      --
+      --  True when 'the_Type' is the record of a class or structure of another package, which has a member of a type of this
+      --  package (a structure nested in a class, with a member of an enumeration of the class, which a function of the class
+      --  returns). That package needs the whole of this one, and the two package specifications cannot both 'with' each other.
+      --  So this package uses a limited view of the other, which suffices for a parameter or result of a subprogram.
+      --
+      is
+      begin
+         if         the_Type.all in ada_Type.composite.a_record.item'Class
+           and then ada_Package.view (the_Type.declaration_Package) /= ada_Package.view (the_Package)
+           and then the_Type.declaration_Package.cpp_class_Type = ada_Type.composite.a_record.view (the_Type)
+         then
+            for Each of ada_Type.composite.a_record.view (the_Type).Components
+            loop
+               declare
+                  the_member_Type : constant ada_Type.view := (if Each.my_Type.resolved_Type /= null then Each.my_Type.resolved_Type
+                                                                                                     else Each.my_Type);
+               begin
+                  if         the_member_Type.all not in ada_Type.elementary.an_access.item'Class     -- A limited view suffices for a pointer.
+                    and then (       ada_Package.view (Each.my_Type   .declaration_Package) = ada_Package.view (the_Package)
+                              or else ada_Package.view (the_member_Type.declaration_Package) = ada_Package.view (the_Package))
+                  then
+                     return True;
+                  end if;
+               end;
+            end loop;
+         end if;
+
+         return False;
+      end is_a_Class_of_another_Package;
+
+
+
       function is_unusable_Array (the_Type : in ada_Type.view) return Boolean
       --
       --  An array type cannot be declared when its element type is an abstract C++ class or is an
@@ -1432,6 +1467,11 @@ is
                   then
                      the_Context.add (ada_Type.elementary.an_Access.to_Type.view (the_Parameter.my_Type.resolved_Type).accessed_Type,
                                       is_access => True);
+
+                  elsif is_a_Class_of_another_Package (the_Parameter.my_Type)
+                  then
+                     the_Context.add (the_Parameter.my_Type,
+                                      is_access => True);
                   else
                      the_Context.add (the_Parameter.my_Type,
                                       is_access => False);
@@ -1456,6 +1496,11 @@ is
                   elsif is_mutually_dependent (the_return_Type)
                   then
                      the_Context.add (ada_Type.elementary.an_access.to_type.view (the_return_Type.resolved_Type).accessed_Type,
+                                      is_access => True);
+
+                  elsif is_a_Class_of_another_Package (the_return_Type)
+                  then
+                     the_Context.add (the_return_Type,
                                       is_access => True);
                   else
                      the_Context.add (the_Subprogram.return_Type,

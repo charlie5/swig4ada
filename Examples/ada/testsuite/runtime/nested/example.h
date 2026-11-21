@@ -9,11 +9,10 @@ public:
 
   static const int Cylinders = 4;
 
-  /* The structure has no member of the nested enumeration type: the package of the structure would then need that
-     of the class, which needs that of the structure for 'read', and two Ada specifications cannot need each other. */
+  /* The structure needs the package of the class, for the enumeration, and the class that of the structure, for 'read'. */
   struct Reading {
     Speed speed;
-    int   state_number;
+    State state;
   };
 
   class Gauge {
@@ -32,9 +31,10 @@ public:
   void    start ()                { state = Idle; }
   void    run (Speed s)           { state = Running;  speed = s; }
   Mode    mode ()                 { return state; }
-  Reading read ()                 { Reading r;  r.speed = speed;  r.state_number = (int) state;  return r; }
+  Reading read ()                 { Reading r;  r.speed = speed;  r.state = state;  return r; }
   Gauge*  get_gauge ()            { return &gauge; }
 };
 
 inline int  as_number (Engine::State s)     { return (int) s; }
+inline int  reading_total (Engine::Reading r)  { return r.speed + (int) r.state; }
 inline int  gauge_value (Engine::Gauge* g)  { return g->value; }

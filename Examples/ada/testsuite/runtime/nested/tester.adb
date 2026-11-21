@@ -38,7 +38,9 @@ begin
       the_Reading : constant Reading.Item := Engine.read (the_Engine);
    begin
       check (the_Reading.speed = 120,                      "a nested structure is returned by value");
-      check (the_Reading.state_number = 4,                 "with the number of the literal which follows one with a value");
+      check (the_Reading.state = Engine.Running,           "with its member of the nested enumeration type");
+      check (as_number (the_Reading.state) = 4,            "whose literal follows one with a value of its own");
+      check (reading_total (the_Reading) = 124,            "and the nested structure is passed by value");
    end;
 
    declare
