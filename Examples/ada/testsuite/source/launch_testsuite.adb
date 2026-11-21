@@ -37,6 +37,7 @@ is
    do_broken_C         : constant Boolean := True;
    do_broken_Cxx       : constant Boolean := True;
    do_Newer            : constant Boolean := True;     -- The cases which were added with SWIG 4.5.1.
+   do_Older            : constant Boolean := True;     -- The cases of SWIG 4.0.0 which had not been added until 2026-11-22.
 
    check_Wrappers      : constant Boolean := True;     -- Compile each generated wrapper.
    check_Specs         : constant Boolean := True;     -- Compile each generated spec.
@@ -897,7 +898,7 @@ begin
       generate ("director_shared_ptr.i",                      use_CPP => True);
       generate ("director_simple.i",                          use_CPP => True);
       generate ("director_template.i",                        use_CPP => True);
-      --  generate ("director_unwrap_result.i",              use_CPP => True);     -- A function of a class returns a typedef of a pointer to that class, whose package needs that of the class.
+      generate ("director_unwrap_result.i",                   use_CPP => True);
       generate ("director_using_member_scopes.i",             use_CPP => True);
       generate ("doxygen_autodoc_docstring.i",                use_CPP => True);
       generate ("doxygen_basic_translate_style2.i",           use_CPP => True);
@@ -953,6 +954,304 @@ begin
    end if;
 
 
+   ---------------------------------------------
+   --- Older cases, which were not run until now
+   --
+   --  The cases of upstream's lists which were in SWIG 4.0.0, and had not been added to this launcher.
+   --  One which is commented out fails, for the reason which is given with it.
+   --
+   if do_Older
+   then
+      new_Line;
+      new_Line;
+      put_Line ("Generating the older C tests.");
+      new_Line;
+
+      generate ("bom_utf8.i");
+      generate ("c_delete.i");
+      generate ("c_delete_function.i");
+      generate ("default_args_c.i");
+      generate ("empty_c.i");
+      generate ("enum_forward.i");
+      generate ("enum_macro.i");
+      generate ("enum_missing.i");
+      generate ("global_functions.i");
+      generate ("infinity.i");
+      generate ("keyword_rename_c.i");
+      generate ("memberin_extend_c.i");
+      generate ("nested_extend_c.i");
+      --  generate ("nested_structs.i");                                            -- Wrapper: a member of a record is not where its structure has it.
+      generate ("overload_extend2.i");
+      generate ("overload_extend_c.i");
+      generate ("preproc_constants_c.i");
+      generate ("preproc_defined.i");
+      generate ("preproc_gcc_output.i");
+      generate ("preproc_include.i");
+      generate ("preproc_line_file.i");
+      generate ("simple_array.i");
+      generate ("string_simple.i");
+      generate ("struct_initialization.i");
+      generate ("typedef_classforward_same_name.i");
+      generate ("union_parameter.i");
+
+      new_Line;
+      new_Line;
+      put_Line ("Generating the older C++ tests.");
+      new_Line;
+
+      generate ("allprotected_not.i",                         use_CPP => True);
+      --  generate ("argcargvtest.i",                         use_CPP => True);     -- Needs the library file 'argcargv.i', which Lib/ada lacks.
+      generate ("autodoc.i",                                  use_CPP => True);
+      generate ("catches.i",                                  use_CPP => True);
+      generate ("char_binary.i",                              use_CPP => True);
+      generate ("chartest.i",                                 use_CPP => True);
+      generate ("class_forward.i",                            use_CPP => True);
+      --  generate ("class_scope_namespace.i",                use_CPP => True);     -- Spec: a class has the name of an opaque type of the top package.
+      generate ("constant_directive.i",                       use_CPP => True);
+      generate ("constant_expr.i",                            use_CPP => True);
+      generate ("constructor_rename.i",                       use_CPP => True);
+      generate ("conversion_operators.i",                     use_CPP => True);
+      generate ("cpp11_alias_nested_template_scoping.i",      use_CPP => True);
+      generate ("cpp11_alignment.i",                          use_CPP => True);
+      generate ("cpp11_alternate_function_syntax.i",          use_CPP => True);
+      generate ("cpp11_constexpr.i",                          use_CPP => True);
+      generate ("cpp11_decltype.i",                           use_CPP => True);
+      generate ("cpp11_default_delete.i",                     use_CPP => True);
+      generate ("cpp11_delegating_constructors.i",            use_CPP => True);
+      generate ("cpp11_director_enums.i",                     use_CPP => True);
+      --  generate ("cpp11_directors.i",                      use_CPP => True);     -- Wrapper: a pure virtual function with a trailing result type is defined wrongly in the concrete class.
+      generate ("cpp11_explicit_conversion_operators.i",      use_CPP => True);
+      generate ("cpp11_final_directors.i",                    use_CPP => True);
+      --  generate ("cpp11_final_override.i",                 use_CPP => True);     -- Wrapper: the concrete class of an abstract class defines a function which is final.
+      generate ("cpp11_function_objects.i",                   use_CPP => True);
+      generate ("cpp11_inheriting_constructors.i",            use_CPP => True);
+      --  generate ("cpp11_initializer_list.i",               use_CPP => True);     -- Wrapper: a parameter of an initializer list is declared twice.
+      generate ("cpp11_initializer_list_extend.i",            use_CPP => True);
+      generate ("cpp11_lambda_functions.i",                   use_CPP => True);
+      generate ("cpp11_noexcept.i",                           use_CPP => True);
+      generate ("cpp11_null_pointer_constant.i",              use_CPP => True);
+      generate ("cpp11_raw_string_literals.i",                use_CPP => True);
+      generate ("cpp11_ref_qualifiers.i",                     use_CPP => True);
+      generate ("cpp11_ref_qualifiers_rvalue_unignore.i",     use_CPP => True);
+      generate ("cpp11_ref_qualifiers_typemaps.i",            use_CPP => True);
+      generate ("cpp11_result_of.i",                          use_CPP => True);
+      generate ("cpp11_rvalue_reference.i",                   use_CPP => True);
+      generate ("cpp11_rvalue_reference2.i",                  use_CPP => True);
+      generate ("cpp11_rvalue_reference3.i",                  use_CPP => True);
+      generate ("cpp11_shared_ptr_const.i",                   use_CPP => True);
+      generate ("cpp11_shared_ptr_nullptr_in_containers.i",   use_CPP => True);
+      generate ("cpp11_shared_ptr_overload.i",                use_CPP => True);
+      generate ("cpp11_shared_ptr_upcast.i",                  use_CPP => True);
+      --  generate ("cpp11_sizeof_object.i",                  use_CPP => True);     -- Spec: a class has the name of a variable of the top package, but for its case.
+      generate ("cpp11_static_assert.i",                      use_CPP => True);
+      generate ("cpp11_std_array.i",                          use_CPP => True);
+      generate ("cpp11_strongly_typed_enumerations.i",        use_CPP => True);
+      generate ("cpp11_template_double_brackets.i",           use_CPP => True);
+      generate ("cpp11_template_explicit.i",                  use_CPP => True);
+      generate ("cpp11_template_typedefs.i",                  use_CPP => True);
+      generate ("cpp11_thread_local.i",                       use_CPP => True);
+      generate ("cpp11_type_aliasing.i",                      use_CPP => True);
+      generate ("cpp11_type_traits.i",                        use_CPP => True);
+      --  generate ("cpp11_uniform_initialization.i",         use_CPP => True);     -- Spec: an array variable of two dimensions, the first unknown.
+      generate ("cpp11_unrestricted_unions.i",                use_CPP => True);
+      generate ("cpp11_userdefined_literals.i",               use_CPP => True);
+      generate ("cpp11_variadic_templates.i",                 use_CPP => True);
+      generate ("cpp14_binary_integer_literals.i",            use_CPP => True);
+      generate ("cpp17_hex_floating_literals.i",              use_CPP => True);
+      generate ("cpp17_nested_namespaces.i",                  use_CPP => True);
+      generate ("cpp17_nspace_nested_namespaces.i",           use_CPP => True);
+      generate ("cpp17_u8_char_literals.i",                   use_CPP => True);
+      generate ("curiously_recurring_template_pattern.i",     use_CPP => True);
+      generate ("default_arg_expressions.i",                  use_CPP => True);
+      generate ("default_arg_values.i",                       use_CPP => True);
+      generate ("destructor_methodmodifiers.i",               use_CPP => True);
+      --  generate ("director_abstract.i",                    use_CPP => True);     -- Wrapper: two construction functions of an abstract class are given one name.
+      generate ("director_alternating.i",                     use_CPP => True);
+      generate ("director_basic.i",                           use_CPP => True);
+      generate ("director_binary_string.i",                   use_CPP => True);
+      generate ("director_classes.i",                         use_CPP => True);
+      generate ("director_classic.i",                         use_CPP => True);
+      generate ("director_constructor.i",                     use_CPP => True);
+      generate ("director_default.i",                         use_CPP => True);
+      generate ("director_detect.i",                          use_CPP => True);
+      generate ("director_enum.i",                            use_CPP => True);
+      generate ("director_exception.i",                       use_CPP => True);
+      generate ("director_exception_catches.i",               use_CPP => True);
+      generate ("director_exception_nothrow.i",               use_CPP => True);
+      generate ("director_extend.i",                          use_CPP => True);
+      generate ("director_finalizer.i",                       use_CPP => True);
+      generate ("director_frob.i",                            use_CPP => True);
+      generate ("director_ignore.i",                          use_CPP => True);
+      generate ("director_namespace_clash.i",                 use_CPP => True);
+      generate ("director_nested.i",                          use_CPP => True);
+      generate ("director_nspace.i",                          use_CPP => True);
+      generate ("director_nspace_director_name_collision.i",  use_CPP => True);
+      generate ("director_overload.i",                        use_CPP => True);
+      generate ("director_overload2.i",                       use_CPP => True);
+      generate ("director_ownership.i",                       use_CPP => True);
+      generate ("director_pass_by_value.i",                   use_CPP => True);
+      generate ("director_primitives.i",                      use_CPP => True);
+      --  generate ("director_property.i",                    use_CPP => True);     -- Wrapper: the record of a class has not the size of the class.
+      --  generate ("director_protected.i",                   use_CPP => True);     -- Generator: a name is defined twice ('Foo_s').
+      generate ("director_protected_overloaded.i",            use_CPP => True);
+      --  generate ("director_redefined.i",                   use_CPP => True);     -- Spec: a function is marked as overriding, and does not.
+      generate ("director_ref.i",                             use_CPP => True);
+      generate ("director_string.i",                          use_CPP => True);
+      generate ("director_thread.i",                          use_CPP => True);
+      generate ("director_unroll.i",                          use_CPP => True);
+      --  generate ("director_using.i",                       use_CPP => True);     -- Wrapper: the concrete class of an abstract template instance is still abstract.
+      generate ("director_void.i",                            use_CPP => True);
+      generate ("director_wombat.i",                          use_CPP => True);
+      generate ("doxygen_alias.i",                            use_CPP => True);
+      generate ("doxygen_basic_notranslate.i",                use_CPP => True);
+      generate ("doxygen_basic_translate.i",                  use_CPP => True);
+      generate ("doxygen_ignore.i",                           use_CPP => True);
+      generate ("doxygen_misc_constructs.i",                  use_CPP => True);
+      generate ("doxygen_nested_class.i",                     use_CPP => True);
+      generate ("doxygen_parsing.i",                          use_CPP => True);
+      generate ("doxygen_parsing_enums.i",                    use_CPP => True);
+      generate ("doxygen_translate.i",                        use_CPP => True);
+      generate ("doxygen_translate_all_tags.i",               use_CPP => True);
+      generate ("doxygen_translate_links.i",                  use_CPP => True);
+      generate ("enum_ignore.i",                              use_CPP => True);
+      generate ("enum_rename.i",                              use_CPP => True);
+      generate ("equality.i",                                 use_CPP => True);
+      generate ("exception_classname.i",                      use_CPP => True);
+      generate ("expressions.i",                              use_CPP => True);
+      generate ("extend_constructor_destructor.i",            use_CPP => True);
+      generate ("extend_special_variables.i",                 use_CPP => True);
+      generate ("extend_template_method.i",                   use_CPP => True);
+      generate ("extend_typedef_class.i",                     use_CPP => True);
+      generate ("extern_c.i",                                 use_CPP => True);
+      generate ("friends_template.i",                         use_CPP => True);
+      generate ("funcptr_cpp.i",                              use_CPP => True);
+      generate ("functors.i",                                 use_CPP => True);
+      generate ("global_namespace.i",                         use_CPP => True);
+      generate ("global_scope_types.i",                       use_CPP => True);
+      generate ("import_fragments.i",                         use_CPP => True);
+      generate ("inherit_member.i",                           use_CPP => True);
+      --  generate ("insert_directive.i",                     use_CPP => True);     -- The input includes a header which the test suite makes when it is run.
+      generate ("kwargs_feature.i",                           use_CPP => True);
+      generate ("li_attribute_template.i",                    use_CPP => True);
+      generate ("li_boost_shared_ptr_attribute.i",            use_CPP => True);
+      generate ("li_boost_shared_ptr_director.i",             use_CPP => True);
+      generate ("li_boost_shared_ptr_template.i",             use_CPP => True);
+      generate ("li_carrays_cpp.i",                           use_CPP => True);
+      generate ("li_cdata_cpp.i",                             use_CPP => True);
+      generate ("li_cpointer_cpp.i",                          use_CPP => True);
+      --  generate ("li_std_auto_ptr.i",                      use_CPP => True);     -- Needs the library file 'std_auto_ptr.i', which Lib/ada lacks.
+      generate ("li_std_combinations.i",                      use_CPP => True);
+      generate ("li_std_except_as_class.i",                   use_CPP => True);
+      --  generate ("li_std_pair_using.i",                    use_CPP => True);     -- Generator: the template 'pair' is not found through a using declaration.
+      generate ("li_std_vector_back_reference.i",             use_CPP => True);
+      --  generate ("li_std_vector_enum.i",                   use_CPP => True);     -- Spec: the packages of a vector and of its enumeration depend on each other.
+      generate ("li_std_vector_member_var.i",                 use_CPP => True);
+      --  generate ("li_std_vector_ptr.i",                    use_CPP => True);     -- Wrapper: a pointer to a reference, for a vector of pointers.
+      generate ("li_swigtype_inout.i",                        use_CPP => True);
+      --  generate ("li_typemaps_apply.i",                    use_CPP => True);     -- Wrapper: the typemaps of 'typemaps.i' are applied to a reference to a bool.
+      generate ("member_funcptr_galore.i",                    use_CPP => True);
+      generate ("member_pointer_const.i",                     use_CPP => True);
+      generate ("memberin_extend.i",                          use_CPP => True);
+      generate ("multiple_inheritance_abstract.i",            use_CPP => True);
+      generate ("multiple_inheritance_interfaces.i",          use_CPP => True);
+      generate ("multiple_inheritance_nspace.i",              use_CPP => True);
+      generate ("multiple_inheritance_shared_ptr.i",          use_CPP => True);
+      generate ("namespace_chase.i",                          use_CPP => True);
+      generate ("namespace_forward_declaration.i",            use_CPP => True);
+      generate ("native_directive.i",                         use_CPP => True);
+      generate ("naturalvar_more.i",                          use_CPP => True);
+      generate ("naturalvar_onoff.i",                         use_CPP => True);
+      generate ("nested_class.i",                             use_CPP => True);
+      generate ("nested_directors.i",                         use_CPP => True);
+      generate ("nested_ignore.i",                            use_CPP => True);
+      generate ("nested_in_template.i",                       use_CPP => True);
+      --  generate ("nested_scope.i",                         use_CPP => True);     -- Generator: an array type is added twice to the map of Ada types.
+      generate ("nested_template_base.i",                     use_CPP => True);
+      generate ("nested_workaround.i",                        use_CPP => True);
+      generate ("newobject3.i",                               use_CPP => True);
+      generate ("nspace.i",                                   use_CPP => True);
+      generate ("nspace_extend.i",                            use_CPP => True);
+      generate ("operator_pointer_ref.i",                     use_CPP => True);
+      generate ("operbool.i",                                 use_CPP => True);
+      generate ("overload_arrays.i",                          use_CPP => True);
+      generate ("overload_bool.i",                            use_CPP => True);
+      generate ("overload_method.i",                          use_CPP => True);
+      generate ("overload_null.i",                            use_CPP => True);
+      generate ("overload_numeric.i",                         use_CPP => True);
+      generate ("overload_polymorphic.i",                     use_CPP => True);
+      generate ("overload_return_type.i",                     use_CPP => True);
+      generate ("preproc_constants.i",                        use_CPP => True);
+      generate ("proxycode.i",                                use_CPP => True);
+      generate ("redefined_not.i",                            use_CPP => True);
+      generate ("rename_pcre_encoder.i",                      use_CPP => True);
+      generate ("rename_pcre_enum.i",                         use_CPP => True);
+      generate ("rename_predicates.i",                        use_CPP => True);
+      generate ("rename_rstrip_encoder.i",                    use_CPP => True);
+      generate ("rename_simple.i",                            use_CPP => True);
+      generate ("rename_strip_encoder.i",                     use_CPP => True);
+      generate ("rename_wildcard.i",                          use_CPP => True);
+      generate ("smart_pointer_const_overload.i",             use_CPP => True);
+      generate ("smart_pointer_ignore.i",                     use_CPP => True);
+      generate ("smart_pointer_template_const_overload.i",    use_CPP => True);
+      generate ("smart_pointer_template_defaults_overload.i", use_CPP => True);
+      generate ("special_variable_attributes.i",              use_CPP => True);
+      --  generate ("special_variable_macros.i",              use_CPP => True);     -- Wrapper: a typemap of the input assigns a string to a class result.
+      generate ("stl_no_default_constructor.i",               use_CPP => True);
+      generate ("string_constants.i",                         use_CPP => True);
+      generate ("struct_initialization_cpp.i",                use_CPP => True);
+      --  generate ("swig_exception.i",                       use_CPP => True);     -- Wrapper: 'SWIG_exception' returns 0 from a function whose result is a class.
+      generate ("symbol_clash.i",                             use_CPP => True);
+      generate ("template_basic.i",                           use_CPP => True);
+      generate ("template_class_reuse_name.i",                use_CPP => True);
+      generate ("template_default_arg_overloaded.i",          use_CPP => True);
+      generate ("template_default_arg_overloaded_extend.i",   use_CPP => True);
+      --  generate ("template_default_arg_virtual_destructor.i",use_CPP => True);     -- Wrapper: a parameter is declared twice.
+      --  generate ("template_default_cache.i",               use_CPP => True);     -- Generator: a name is added twice to the map of Ada types.
+      --  generate ("template_default_class_parms_typedef.i", use_CPP => True);     -- Wrapper: a parameter is declared twice.
+      generate ("template_empty_inherit.i",                   use_CPP => True);
+      generate ("template_keyword_in_type.i",                 use_CPP => True);
+      generate ("template_namespace_forward_declaration.i",   use_CPP => True);
+      generate ("template_nested.i",                          use_CPP => True);
+      generate ("template_nested_typemaps.i",                 use_CPP => True);
+      generate ("template_parameters_global_scope.i",         use_CPP => True);
+      generate ("template_partial_specialization.i",          use_CPP => True);
+      --  generate ("template_partial_specialization_typedef.i",use_CPP => True);     -- Spec: a pointer to a pointer to 'unsigned' is not declared.
+      generate ("template_private_assignment.i",              use_CPP => True);
+      --  generate ("template_templated_constructors.i",      use_CPP => True);     -- Wrapper: a class in a namespace is named without it.
+      generate ("template_typedef_class_template.i",          use_CPP => True);
+      generate ("template_typedef_inherit.i",                 use_CPP => True);
+      generate ("template_typedef_typedef.i",                 use_CPP => True);
+      --  generate ("template_typemaps_typedef.i",            use_CPP => True);     -- Generator: an array type is added twice to the map of Ada types.
+      --  generate ("template_typemaps_typedef2.i",           use_CPP => True);     -- Generator: an array type is added twice to the map of Ada types.
+      generate ("template_using_directive_and_declaration_forward.i",use_CPP => True);
+      generate ("template_using_directive_typedef.i",         use_CPP => True);
+      generate ("threads_exception.i",                        use_CPP => True);
+      --  generate ("typedef_struct_cpp.i",                   use_CPP => True);     -- Wrapper: the record of a class has not the size of the class.
+      generate ("typedef_typedef.i",                          use_CPP => True);
+      --  generate ("typemap_array_qualifiers.i",             use_CPP => True);     -- Generator: a type is sought which is not in the map of C types.
+      generate ("typemap_arrays.i",                           use_CPP => True);
+      generate ("typemap_delete.i",                           use_CPP => True);
+      --  generate ("typemap_directorout.i",                  use_CPP => True);     -- Wrapper: a typemap of the input converts from 'void*'.
+      generate ("typemap_documentation.i",                    use_CPP => True);
+      generate ("typemap_global_scope.i",                     use_CPP => True);
+      generate ("typemap_manyargs.i",                         use_CPP => True);
+      generate ("typemap_out_optimal.i",                      use_CPP => True);
+      generate ("typemap_qualifier_strip.i",                  use_CPP => True);
+      generate ("typemap_template.i",                         use_CPP => True);
+      generate ("typemap_template_parm_typedef.i",            use_CPP => True);
+      generate ("typemap_template_parms.i",                   use_CPP => True);
+      generate ("typemap_template_typedef.i",                 use_CPP => True);
+      generate ("unicode_strings.i",                          use_CPP => True);
+      generate ("using_directive_and_declaration.i",          use_CPP => True);
+      generate ("using_directive_and_declaration_forward.i",  use_CPP => True);
+      generate ("using_namespace_loop.i",                     use_CPP => True);
+      generate ("varargs_overload.i",                         use_CPP => True);
+      generate ("variable_replacement.i",                     use_CPP => True);
+      generate ("virtual_vs_nonvirtual_base.i",               use_CPP => True);
+      generate ("wallkw.i",                                   use_CPP => True);
+   end if;
+
+
    -----------------
    --- Compile check
    --
@@ -994,6 +1293,7 @@ begin
       run ("strings");             -- Strings of the C++ standard library.
       run ("directives");          -- Directives which change a binding.
       run ("derived_layouts");     -- Classes whose members lie in the unused tail of a base class.
+      run ("moves");               -- Objects which are moved and not copied, and a pointer which owns its object.
    end if;
 
 
