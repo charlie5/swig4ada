@@ -1249,6 +1249,17 @@ begin
       generate ("variable_replacement.i",                     use_CPP => True);
       generate ("virtual_vs_nonvirtual_base.i",               use_CPP => True);
       generate ("wallkw.i",                                   use_CPP => True);
+
+      --  The modules of the cases of several modules ('MULTI_CPP_TEST_CASES' of 'common.mk') which were not run:
+      --  each imports the first of its case.
+      --
+      generate ("import_share_a.i",                           use_CPP => True);
+      generate ("import_share_b.i",                           use_CPP => True);
+      generate ("import_share_c.i",                           use_CPP => True);
+      generate ("import_stl_a.i",                             use_CPP => True);
+      generate ("import_stl_b.i",                             use_CPP => True);
+      generate ("import_stl_c.i",                             use_CPP => True);
+      generate ("packageoption_c.i",                          use_CPP => True);
    end if;
 
 

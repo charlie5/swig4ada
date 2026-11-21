@@ -8,6 +8,13 @@
 #define SHIFTED     (1 << 6)
 #define NEGATIVE    (-7)
 #define DERIVED     (COUNT * 2 + 1)
+#define QUOTED      "a \"quoted\" word"
+#define TABBED      "one\ttwo"
+#define BINARY      0b1010
+#define PACKED      (('a' << 8) | 'b')
+#define LETTER_SUM  ('A' + 2)
+#define COMPARED    (COUNT > 10)
+#define REMAINDER   (COUNT % 5)
 
 const int      limit   = 100;
 const double   epsilon = 0.25;
@@ -17,6 +24,7 @@ enum              { anonymous_one = 1, anonymous_five = 5 };
 enum Flags        { None = 0, Read = 1, Write = 2, Execute = 4, All = Read | Write | Execute };
 enum class Mode   { Off, On, Automatic = 7 };
 enum Small : unsigned char  { Tiny = 1, Huge = 200 };
+enum Marks        { Comma = ',', Newline = '\n', Capital = 'A', After, Escaped = '\x43' + 1 };     // values which are characters
 
 struct Limits {
   enum Kind { Soft, Hard = 3 };
@@ -40,3 +48,7 @@ inline int   small_number (Small s)         { return (int) s; }
 inline void  set_level    (Level* l, Level to)   { *l = to; }
 inline void  top_level    (Level& l)        { l = Top; }
 inline int   kind_number  (Limits::Kind k)  { return (int) k; }
+inline int   mark_number  (Marks m)         { return (int) m; }
+inline Marks mark_of      (char c)          { return (Marks) c; }
+inline const char* quoted_text ()           { return QUOTED; }
+inline const char* tabbed_text ()           { return TABBED; }

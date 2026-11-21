@@ -88,5 +88,29 @@ begin
       check (kind_number (Limits.Hard) = 3,                         "whose literal has a value of its own");
    end nested;
 
+   written_constants :
+   begin
+      check (String'(Strings.Value (QUOTED)) = "a ""quoted"" word",                   "a string which holds quotes");
+      check (String'(Strings.Value (QUOTED)) = Strings.Value (quoted_text),           "is the string which C++ has");
+
+      check (String'(Strings.Value (TABBED)) = "one" & Character'Val (9) & "two",     "a string which holds an escape");
+      check (String'(Strings.Value (TABBED)) = Strings.Value (tabbed_text),           "is the string which C++ has");
+
+      check (BINARY = 10,                                           "a binary number");
+      check (PACKED = 16#6162#,                                     "an expression of characters and shifts");
+      check (LETTER_SUM = 67,                                       "a character which is added to");
+      check (COMPARED = True,                                       "a comparison");
+      check (REMAINDER = 2,                                         "a remainder");
+   end written_constants;
+
+   character_enumerations :
+   begin
+      check (mark_number (Comma) = 44 and mark_number (Capital) = 65,   "an enumeration whose values are characters");
+      check (mark_number (Newline) = 10,                            "one of which is an escape");
+      check (mark_number (After) = 66,                              "a literal which follows a character");
+      check (mark_number (Escaped) = 68,                            "and one which is an expression of a character");
+      check (mark_of (',') = Comma and mark_of ('B') = After,       "C++ returns the literal of a character");
+   end character_enumerations;
+
    finish;
 end Tester;

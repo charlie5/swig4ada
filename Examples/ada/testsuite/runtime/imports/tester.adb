@@ -2,6 +2,7 @@ with
      imports.Binding,
      imports.Horse,
      imports.Horse.Guards,
+     imports.Vec3,
 
      imports_base.Binding,
      imports_base.Animal,
@@ -86,6 +87,20 @@ begin
       check (speed_of (the_Animal'unchecked_Access) = 6,  "an object of the imported class is used by the importing module");
       Animal.destruct_0 (the_Animal);
    end an_object_of_the_imported_class;
+
+   a_structure_derived_from_an_imported_structure :
+   declare
+      the_Vec : aliased Vec3.Item;
+   begin
+      fill3 (the_Vec'unchecked_Access);
+
+      check (the_Vec.Vec.x = 1.0 and the_Vec.Vec.y = 2.0, "the members of the imported base structure are where C++ has them");
+      check (the_Vec.z = 3.0,                             "and the member which the structure adds follows them");
+
+      the_Vec.Vec.y := 20.0;
+      the_Vec.z     := 30.0;
+      check (sum3 (the_Vec'unchecked_Access) = 51.0,      "C++ reads what Ada wrote to both");
+   end a_structure_derived_from_an_imported_structure;
 
    finish;
 end Tester;

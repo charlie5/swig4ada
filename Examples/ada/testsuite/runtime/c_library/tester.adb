@@ -3,6 +3,7 @@ with
      c_library.the_Record,
      c_library.Number,
      c_library.Node,
+     c_library.Shape,
 
      Callbacks,
 
@@ -102,6 +103,27 @@ begin
       check (visit (First'unchecked_Access, Callbacks.add_to'Access, Offset'Address) = 36,
              "C calls an Ada function for each node, with a context");
    end a_linked_list_and_a_callback;
+
+   structures_with_no_name :
+   declare
+      the_Shape : aliased Shape.Item;
+   begin
+      fill_shape (the_Shape'unchecked_Access);
+
+      check (the_Shape.kind = 1,                           "a member ahead of a structure with no name");
+      check (the_Shape.origin.x = 2 and the_Shape.origin.y = 3,   "a member which is declared with such a structure");
+      check (the_Shape.corner.x = 4 and the_Shape.corner.y = 5,   "and a second");
+      check (the_Shape.link.y = 5,                         "and a pointer to one");
+      check (the_Shape.size.width = 6 and the_Shape.size.height = 7,   "a member of a structure with a name, which follows them");
+      check (the_Shape.tag = 8,                            "and the last member");
+
+      the_Shape.origin.y := 30;
+      the_Shape.tag      := 80;
+      check (shape_sum (the_Shape'unchecked_Access) = 1 + 2 + 30 + 4 + 5 + 6 + 7 + 80,   "C reads what Ada wrote to them");
+
+      the_Shape.link := the_Shape.origin'unchecked_Access;
+      check (linked_y (the_Shape'unchecked_Access) = 30,   "and follows a pointer which Ada set");
+   end structures_with_no_name;
 
    finish;
 end Tester;

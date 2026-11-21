@@ -11,6 +11,12 @@ public:
   Colour      get_coat ()     { return coat; }
 };
 
+/* A plain structure which is derived from one of the imported module. */
+struct Vec3 : Vec { double z; };
+
+inline void   fill3      (Vec3* v)           { v->x = 1.0;  v->y = 2.0;  v->z = 3.0; }
+inline double sum3       (Vec3* v)           { return v->x + v->y + v->z; }
+
 inline Vec    scaled     (Vec v, double k)   { Vec r;  r.x = v.x * k;  r.y = v.y * k;  return r; }
 inline Colour brightest  (Colour a, Colour b)  { return a > b ? a : b; }
 inline int    speed_of   (Animal* a)         { return a->speed (); }
