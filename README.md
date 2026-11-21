@@ -192,8 +192,8 @@ Limitations
 - With more than one base class which has virtual functions, only the first is a parent of the Ada type.
   The others are reached by 'as_<base>', and a function of the class which overrides one of theirs is not
   marked as overriding.
-- A structure nested in a class, which has a member of a type declared in that class and is passed or
-  returned by value by a function of the class, gives specifications which do not compile.
+- A class which has a member of a structure nested in it, where that structure has a member of another
+  type declared in the class, gives specifications which do not compile.
 - Static member variables.
 - The destructor of a class with virtual functions is imported by its C++ symbol, which is made for a
   class in namespaces and for the simpler template instances only.
