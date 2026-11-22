@@ -642,25 +642,8 @@ is
                   delete (Expression_pad.all,  First, Last);
                end;
 
-            elsif     Length  (Expression_pad.all)    = 1
-              or else Element (Expression_pad.all, 2) = ' '          -- nb: This disallows symbol identifiers of length 1.
-            then
-               begin
-                  if Element (Expression_pad.all, 1) in '0' .. '9'
-                  then
-                     append (the_Elements,  an_Element'(Kind  => Value,
-                                                        Value => to_Int (Expression_pad.all),
-                                                        others => <>));
-                  else
-                     append (the_Elements,  an_Element'(Kind  => Value,
-                                                        Value => to_Integer (Character'Pos (Element (Expression_pad.all, 1))),
-                                                        others => <>));
-                  end if;
-
-                  delete (Expression_pad.all,  1, 1);
-               end;
-
-            else  -- Should be a symbol identifier.
+            else  -- Should be a symbol identifier. (A character is written within quotes, and is dealt with above: a lone
+                  -- letter was once taken for one, which gave the name of a function, or of another constant, a value.)
                declare
                   First      : Natural;
                   Last       : Natural;
