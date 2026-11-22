@@ -28,6 +28,7 @@ with
 
      ada_Type,
 
+     c_Expressions,
      gmp.Discrete,
 
      ada.Containers.hashed_Maps,
@@ -158,8 +159,6 @@ is
 private
 
    use c_Declarable,
-
-       GMP,
        GMP.discrete;
 
 
@@ -172,10 +171,7 @@ private
    ----------------------
    --- symbol_value_Maps
    --
-   package symbol_value_Maps is new ada.Containers.hashed_Maps (unbounded_String,
-                                                                discrete.Integer,
-                                                                ada.Strings.unbounded.Hash,
-                                                                "=");
+   package symbol_value_Maps renames c_Expressions.symbol_value_Maps;     -- The values of the constants which are known, by name.
    use symbol_value_maps;
 
 
