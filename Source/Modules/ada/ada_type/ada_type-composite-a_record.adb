@@ -156,6 +156,17 @@ is
          end if;
       end loop;
 
+      --  A record needs the whole of the package of each of its base classes, as it does that of a component.
+      --
+      for Each of Self.base_Classes
+      loop
+         if        Each.declaration_Package = a_Package
+           or else Each.depends_on (a_Package, Depth + 1)
+         then
+            return True;
+         end if;
+      end loop;
+
       return False;
    end depends_on;
 

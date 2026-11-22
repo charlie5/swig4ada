@@ -17,8 +17,60 @@ is
    --  Makes the class of the C model, or completes one which has been declared ahead.
    --
    is
+      use type c_Type.a_c_type_Kind;
+
+      --  A template instance may have been used, ahead of its '%template', by its name with the default arguments
+      --  of its template given ('Two<(int,long)>' for 'Two<(int)>').
+      --
+      its_Form  : constant String := +DOH_Pointer (node_Type);
+      full_Form : constant String := +doh_Item (Swig_symbol_template_deftype (node_Type, null));
+
+      Known_as  : constant String := (if    Self.swig_type_Map_of_c_type.contains (+its_Form)  then its_Form
+                                      elsif Self.swig_type_Map_of_c_type.contains (+full_Form) then full_Form
+                                      else  "");
+
+
+      procedure name_after_the_Class (Prefix : in String;   Suffix : in String)
+      --
+      --  Names a type which was made with the class when it was not known (its pointer, say) after the class.
+      --
+      is
+         Key      : constant unbounded_String := +(Prefix & Known_as);
+         the_Name : constant unbounded_String := +(class_Name & Suffix);
+      begin
+         if Self.swig_type_Map_of_c_type.contains (Key)
+         then
+            Self.swig_type_Map_of_c_type.Element (Key).Name_is (the_Name);
+
+            if not Self.name_Map_of_c_type.contains (the_Name)
+            then
+               Self.name_Map_of_c_type.insert (the_Name, Self.swig_type_Map_of_c_type.Element (Key));
+            end if;
+         end if;
+      end name_after_the_Class;
+
    begin
-      if Self.swig_type_Map_of_c_type.contains (+DOH_Pointer (node_Type))
+      if         Known_as /= ""
+        and then Self.swig_type_Map_of_c_type.Element (+Known_as).c_type_Kind = c_Type.Unknown
+      then
+         --  The class has been used before it is declared (a template instance ahead of its '%template', say), and
+         --  was then made a type which is not known, with its pointer and array types. It becomes the class, under
+         --  the name by which the class is bound, and the types which were made with it are named after it.
+         --
+         new_c_Class     := Self.swig_type_Map_of_c_type.Element (+Known_as);
+         new_c_Class.all := c_Type.c_Class_construct (Namespace => Self.current_c_Namespace,
+                                                      Name      => +class_Name);
+         name_after_the_Class ("a.",   "[]");
+         name_after_the_Class ("p.",   "*");
+         name_after_the_Class ("a.p.", "*[]");
+         name_after_the_Class ("p.p.", "**");
+
+         if not Self.name_Map_of_c_type.contains (+class_Name)
+         then
+            Self.name_Map_of_c_type.insert (+class_Name, new_c_Class);
+         end if;
+
+      elsif Self.swig_type_Map_of_c_type.contains (+DOH_Pointer (node_Type))
       then   -- The class has been 'forward' declared.
          new_c_Class     := Self.swig_type_Map_of_c_type.Element (+DOH_Pointer (node_Type));      -- Get the 'opaque' c type.
          new_c_Class.all := c_Type.c_Class_construct (Namespace => Self.current_c_Namespace,      -- Morph it to a c class.

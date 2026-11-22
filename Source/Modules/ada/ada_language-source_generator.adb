@@ -984,6 +984,12 @@ is
             then   -- Only a limited view of the package of the accessed type is had, in which its pointer type cannot be seen.
                append (the_Source,
                        "access " & qualified_Name (ada_Type.elementary.an_access.to_Type.view (Self.return_Type.resolved_Type).accessed_Type));
+
+               if         ada_Type.elementary.an_access.to_Type.view (Self.return_Type.resolved_Type).accessed_Type.all in ada_Type.composite.a_record.item'Class
+                 and then ada_Type.elementary.an_access.to_Type.view (Self.return_Type.resolved_Type).accessed_Type.declaration_Package.models_a_virtual_cpp_Class
+               then   -- As the pointer type of a virtual class is: it may point to an object of a derived class.
+                  append (the_Source, "'Class");
+               end if;
             else
                append (the_Source,
                        qualified_Name (Self.return_Type)); -- .resolved_Type));
@@ -1334,7 +1340,7 @@ is
       function is_mutually_dependent (the_Type : in ada_Type.view) return Boolean
       --
       --  True when 'the_Type' is a pointer to a type of another package, a subprogram of which has a parameter or result
-      --  of a type of this package. The two package specifications cannot both 'with' each other, so this package
+      --  of a type of this package, or whose class is derived from that of this package. The two package specifications cannot both 'with' each other, so this package
       --  uses a limited view of the other, which suffices for a pointer.
       --
       is
@@ -1354,6 +1360,14 @@ is
            or else the_other_Package.cpp_class_Type = null
          then
             return False;
+         end if;
+
+         --  Likewise where the class of the other package is derived from, or has a member of, the class of this one
+         --  ('class Derived : public Base', where 'Base' has a function which returns a pointer to 'Derived').
+         --
+         if the_other_Package.cpp_class_Type.depends_on (the_Package, Depth => 0)
+         then
+            return True;
          end if;
 
          for each_Subprogram of the_other_Package.Subprograms
