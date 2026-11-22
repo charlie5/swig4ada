@@ -36,37 +36,37 @@ is
       end if;
    end enter_Name;
 
-begin
-   strip_all_Qualifiers (the_swig_Type);
-
-   if Self.swig_type_Map_of_c_type.Contains (+the_swig_Type)
-   then   -- The swig type is already registered (such as by 'typedef struct foo {...} foo;').
-      dlog (+"The C type named '" & the_c_Type.Name & "' for swig type '" & to_String (the_swig_Type) & "' is already registered.");
-      return;
-   end if;
-
-   --  dlog ("");
-   --  dlog (+"Registering new C type named '" & the_c_Type.Name & "' for swig type '" & to_String (the_swig_Type) & "'    is a new Type: " & Boolean'Image (is_a_new_Type));
-
-   do_c_Type:
+   procedure register_the_Type
+   --
+   --  The type itself, by its swig type and by its name.
+   --
+   is
    begin
-      enter_swig_Type (+the_swig_Type, the_c_Type);
+      do_c_Type:
+      begin
+         enter_swig_Type (+the_swig_Type, the_c_Type);
 
-      if unbounded_String' (+the_swig_Type) /= the_c_Type.Name
-      then
-         enter_swig_Type (the_c_Type.Name, the_c_Type);
-      end if;
+         if unbounded_String' (+the_swig_Type) /= the_c_Type.Name
+         then
+            enter_swig_Type (the_c_Type.Name, the_c_Type);
+         end if;
 
-      enter_Name (the_c_Type.Name, the_c_Type);
+         enter_Name (the_c_Type.Name, the_c_Type);
 
-      if is_a_new_Type
-      then
-         Self.add_new_c_Type (the_c_Type);
-      end if;
-   end do_c_Type;
+         if is_a_new_Type
+         then
+            Self.add_new_c_Type (the_c_Type);
+         end if;
+      end do_c_Type;
+   end register_the_Type;
 
 
-   do_level_1_indirection:
+
+   procedure register_its_Array
+   --
+   --  The array of the type.
+   --
+   is
    begin
       if create_array_Type
       then   -- Add associated array.
@@ -97,7 +97,16 @@ begin
             end if;
          end;
       end if;
+   end register_its_Array;
 
+
+
+   procedure register_its_Pointer
+   --
+   --  The pointer to the type.
+   --
+   is
+   begin
       declare   -- Add associated pointer.
          pointer_swigType : constant doh_swigType := doh_swigType (swigtype_add_Pointer (SwigType_Pointer (doh_copy (the_swig_Type))));
       begin
@@ -137,7 +146,16 @@ begin
             Self.add_new_c_Type (the_c_type_Pointer);
          end if;
       end;
+   end register_its_Pointer;
 
+
+
+   procedure register_its_Reference
+   --
+   --  The reference to the type, which is a pointer too.
+   --
+   is
+   begin
       declare   -- Add associated reference.
          reference_swigType : constant doh_swigType := doh_swigType (SwigType_add_reference (SwigType_Pointer (doh_copy (the_swig_Type))));
       begin
@@ -171,82 +189,95 @@ begin
             enter_Name (the_c_reference_to_const_Name, the_c_type_Pointer);
          end;
       end;
-   end do_level_1_indirection;
+   end register_its_Reference;
 
 
-   do_level_2_indirection:
+
+   procedure register_its_pointer_Pointer
+   --
+   --  The pointer to a pointer to the type.
+   --
+   is
    begin
-      declare
-         array_of_pointers_swigType : constant doh_swigType
-           := doh_SwigType (to_DOH ("a." & (+doh_Item (swigtype_add_Pointer (SwigType_Pointer (doh_copy (the_swig_Type)))))));
-         the_c_type_pointer_Array   : c_Type.view;
+      do_level_2_indirection:
       begin
-         the_c_type_pointer_Array := c_type.new_array_Type (the_c_Type.nameSpace,
-                                                            the_c_Type.Name & "*[]",
-                                                            element_Type => the_c_type_Pointer);
-         the_c_type_pointer_Array.add_array_Dimension;
+         declare
+            array_of_pointers_swigType : constant doh_swigType
+              := doh_SwigType (to_DOH ("a." & (+doh_Item (swigtype_add_Pointer (SwigType_Pointer (doh_copy (the_swig_Type)))))));
+            the_c_type_pointer_Array   : c_Type.view;
+         begin
+            the_c_type_pointer_Array := c_type.new_array_Type (the_c_Type.nameSpace,
+                                                               the_c_Type.Name & "*[]",
+                                                               element_Type => the_c_type_Pointer);
+            the_c_type_pointer_Array.add_array_Dimension;
 
-         enter_swig_Type (+array_of_pointers_swigType, the_c_type_pointer_Array);
+            enter_swig_Type (+array_of_pointers_swigType, the_c_type_pointer_Array);
 
-         if unbounded_String' (+the_swig_Type) /= the_c_Type.Name
-         then
-            enter_swig_Type ("a.p." & the_c_Type.Name, the_c_type_pointer_Array);
-         end if;
+            if unbounded_String' (+the_swig_Type) /= the_c_Type.Name
+            then
+               enter_swig_Type ("a.p." & the_c_Type.Name, the_c_type_pointer_Array);
+            end if;
 
-         enter_Name (the_c_type_pointer_Array.Name, the_c_type_pointer_Array);
+            enter_Name (the_c_type_pointer_Array.Name, the_c_type_pointer_Array);
+
+            if is_a_new_Type
+            then
+               Self.add_new_c_Type (the_c_type_pointer_Array);
+            end if;
+         end;
+
+         the_c_type_pointer_Pointer := c_type.new_type_Pointer (the_c_Type.nameSpace,
+                                                                the_c_Type.Name & "**",
+                                                                accessed_Type => the_c_type_Pointer);
+
+         declare   -- Add pointer pointer.
+            pointer_to_pointer_swigType : constant doh_swigType
+              := doh_SwigType (swigtype_add_Pointer (swigtype_add_Pointer (SwigType_Pointer (doh_copy (the_swig_Type)))));
+         begin
+            enter_swig_Type (+pointer_to_pointer_swigType, the_c_type_pointer_Pointer);
+
+            if unbounded_String' (+the_swig_Type) /= the_c_Type.Name
+            then
+               enter_swig_Type ("p.p." & the_c_Type.Name, the_c_type_pointer_Pointer);
+            end if;
+
+            enter_swig_Type ("r.p." & the_c_Type.Name, the_c_type_pointer_Pointer);     -- A reference to a pointer is passed as a pointer to it.
+
+            enter_Name (the_c_type_pointer_Pointer.Name, the_c_type_pointer_Pointer);
+         end;
+
+
+         declare   -- Register pointer pointer to 'const'.
+            the_pointer_to_pointer_to_const_swigType : constant doh_swigType
+              := doh_SwigType (swigtype_add_Pointer (swigtype_add_Pointer (swigtype_add_Qualifier (SwigType_Pointer (doh_copy (the_swig_Type)),
+                                                                                                  const_String (to_Doh ("const"))))));
+            the_c_pointer_to_pointer_to_const_Name   : constant unbounded_String   := "const " & the_c_Type.Name & "**";
+         begin
+            enter_swig_Type (+the_pointer_to_pointer_to_const_swigType, the_c_type_pointer_Pointer);
+
+            if unbounded_String'(+the_swig_Type) /= the_c_Type.Name
+            then
+               enter_swig_Type ("p.p.q(const)." & the_c_Type.Name, the_c_type_pointer_Pointer);
+            end if;
+
+            enter_Name (the_c_pointer_to_pointer_to_const_Name, the_c_type_pointer_Pointer);
+         end;
 
          if is_a_new_Type
          then
-            Self.add_new_c_Type (the_c_type_pointer_Array);
+            Self.add_new_c_Type (the_c_type_pointer_Pointer);
          end if;
-      end;
-
-      the_c_type_pointer_Pointer := c_type.new_type_Pointer (the_c_Type.nameSpace,
-                                                             the_c_Type.Name & "**",
-                                                             accessed_Type => the_c_type_Pointer);
-
-      declare   -- Add pointer pointer.
-         pointer_to_pointer_swigType : constant doh_swigType
-           := doh_SwigType (swigtype_add_Pointer (swigtype_add_Pointer (SwigType_Pointer (doh_copy (the_swig_Type)))));
-      begin
-         enter_swig_Type (+pointer_to_pointer_swigType, the_c_type_pointer_Pointer);
-
-         if unbounded_String' (+the_swig_Type) /= the_c_Type.Name
-         then
-            enter_swig_Type ("p.p." & the_c_Type.Name, the_c_type_pointer_Pointer);
-         end if;
-
-         enter_swig_Type ("r.p." & the_c_Type.Name, the_c_type_pointer_Pointer);     -- A reference to a pointer is passed as a pointer to it.
-
-         enter_Name (the_c_type_pointer_Pointer.Name, the_c_type_pointer_Pointer);
-      end;
+      end do_level_2_indirection;
+   end register_its_pointer_Pointer;
 
 
-      declare   -- Register pointer pointer to 'const'.
-         the_pointer_to_pointer_to_const_swigType : constant doh_swigType
-           := doh_SwigType (swigtype_add_Pointer (swigtype_add_Pointer (swigtype_add_Qualifier (SwigType_Pointer (doh_copy (the_swig_Type)),
-                                                                                               const_String (to_Doh ("const"))))));
-         the_c_pointer_to_pointer_to_const_Name   : constant unbounded_String   := "const " & the_c_Type.Name & "**";
-      begin
-         enter_swig_Type (+the_pointer_to_pointer_to_const_swigType, the_c_type_pointer_Pointer);
 
-         if unbounded_String'(+the_swig_Type) /= the_c_Type.Name
-         then
-            enter_swig_Type ("p.p.q(const)." & the_c_Type.Name, the_c_type_pointer_Pointer);
-         end if;
-
-         enter_Name (the_c_pointer_to_pointer_to_const_Name, the_c_type_pointer_Pointer);
-      end;
-
-      if is_a_new_Type
-      then
-         Self.add_new_c_Type (the_c_type_pointer_Pointer);
-      end if;
-   end do_level_2_indirection;
-
-
-   if add_level_3_Indirection
-   then
+   procedure register_the_third_Level
+   --
+   --  The pointer to a pointer to a pointer to the type.
+   --
+   is
+   begin
       do_level_3_indirection:
       declare
          the_c_type_pointer_pointer_Pointer : constant c_Type.view := c_type.new_type_Pointer (the_c_Type.nameSpace,
@@ -299,6 +330,30 @@ begin
             Self.add_new_c_Type (the_c_type_pointer_pointer_Pointer);
          end if;
       end do_level_3_indirection;
+   end register_the_third_Level;
+
+
+
+begin
+   strip_all_Qualifiers (the_swig_Type);
+
+   if Self.swig_type_Map_of_c_type.Contains (+the_swig_Type)
+   then   -- The swig type is already registered (such as by 'typedef struct foo {...} foo;').
+      dlog (+"The C type named '" & the_c_Type.Name & "' for swig type '" & to_String (the_swig_Type) & "' is already registered.");
+      return;
    end if;
 
+   --  dlog ("");
+   --  dlog (+"Registering new C type named '" & the_c_Type.Name & "' for swig type '" & to_String (the_swig_Type) & "'    is a new Type: " & Boolean'Image (is_a_new_Type));
+
+   register_the_Type;
+   register_its_Array;
+   register_its_Pointer;
+   register_its_Reference;
+   register_its_pointer_Pointer;
+
+   if add_level_3_Indirection
+   then
+      register_the_third_Level;
+   end if;
 end register;
