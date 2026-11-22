@@ -46,6 +46,8 @@ begin
       check (Leaf.Item (Node.as_leaf (the_Leaf'Access).all).value = 9,   "whose members are read through it");
       check (Node.as_leaf (the_Leaf'Access).weight = 5,      "and whose function dispatches");
 
+      check (Node.weight_of (the_Node'Access, the_Node'unchecked_Access, the_Leaf'Access) = 6,   "and takes a pointer to an object of it");
+
       Leaf.destruct_0 (the_Leaf);
       Node.destruct_0 (the_Node);
    end a_base_class_which_knows_its_derived_Class;

@@ -1,15 +1,10 @@
 Ada_do_test
 _ZN13module_traits8categoryE
-_ZN16interface_traits12polarizationE
 _ZN1B16should_be_stringE
 _ZN3fooIdE4testE
 _ZN3fooIiE4testE
 _ZN3ns16Traits1cE
 _ZN3oss6ModuleINS_7etraitsEE1PE
-_ZN3oss6traits5pmodeE
-_ZN3oss7etraits5pmodeE
-_ZN3oss7traits25pmodeE
-_ZN3oss7traits35pmodeE
 _ZN5Piece13SimpleJust123E
 _ZN5Piece14AsYouExpect123E
 _ZN5Piece20SimpleAsYouExpect123E
@@ -20,7 +15,6 @@ _ZN6SizeOfILiEE4sizeE
 _ZN6SizeOfIiE4sizeE
 _ZN6SizeOfIiiE4sizeE
 _ZN6SizeOfIiiiE4sizeE
-_ZN7etraits5pmodeE
 _ZSt3cin
 _ZSt4cerr
 _ZSt4clog

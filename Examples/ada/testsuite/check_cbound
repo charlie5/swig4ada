@@ -1,0 +1,95 @@
+#!/bin/bash
+#
+#  Tries the tool which has just been built on cBound, the bindings which are made with it,
+#  before the tool is installed: a change which breaks a binding is then seen here, and not
+#  after it has been committed.
+#
+#  cBound is copied (into 'unit-build/cbound'), so its own folder is left as it is. Each binding of
+#  the copy is generated again with 'ada-build/swig4ada' and the 'Lib' of this repository, and then
+#  cBound's own './check_all' builds each binding and runs its demos.
+#
+#  Usage:  ./check_cbound          The folder of cBound is taken from the environment variable CBOUND,
+#                                  or is 'component/cBound' beside the 'applet' folder which holds this repository.
+#
+#  Exits with a failure status if a binding cannot be generated or a step of './check_all' fails.
+#  The files which are generated differently from those of cBound are listed, with their differences,
+#  in 'generated/cbound-changes.log': they are what a commit to cBound will hold once the tool is installed.
+#
+
+Here=$(cd "$(dirname "$0")" && pwd)
+Repository=$(cd "$Here/../../.." && pwd)
+CBound=${CBOUND:-$(cd "$Repository/../../../.." 2> /dev/null && pwd)/component/cBound}
+
+if [ ! -x "$CBound/check_all" ]
+then
+   echo "cBound is not at '$CBound', so it is not checked."
+   exit 0
+fi
+
+Copy=$Here/unit-build/cbound
+Changes=$Here/generated/cbound-changes.log
+
+mkdir -p "$Here/unit-build" "$Here/generated"
+rm -rf "$Copy"
+rsync -a --exclude .git "$CBound/" "$Copy/"
+
+export PATH=$Repository/ada-build:$PATH
+export SWIG_LIB=$Repository/Lib
+unset  SWIG4ADA_DEBUG
+
+Failures=0
+
+for Each in "$Copy"/tier-*/*/generate
+do
+   Binding=$(basename "$(dirname "$Each")")
+
+   if (cd "$Each" && bash ./builder && bash ./export_source) > "$Copy/$Binding-generate.log" 2>&1
+   then
+      echo "   ok      $Binding generated"
+   else
+      echo "   FAILED  $Binding generated"
+      tail -15 "$Copy/$Binding-generate.log" | sed 's/^/              | /'
+      Failures=$((Failures + 1))
+   fi
+done
+
+echo
+
+if ! "$Copy/check_all"
+then
+   Failures=$((Failures + 1))
+fi
+
+#  What is generated differently.
+#
+: > "$Changes"
+Changed=0
+
+for Each in "$Copy"/tier-*/*/source/thin
+do
+   Theirs=$CBound/${Each#"$Copy"/}
+
+   while read -r Line
+   do
+      Changed=$((Changed + 1))
+      echo "=== $Line" >> "$Changes"
+   done < <(diff -rq "$Theirs" "$Each" 2>&1 | sed "s|$Copy/||g; s|$CBound/||g")
+
+   diff -ru "$Theirs" "$Each" | sed "s|$Copy/||g; s|$CBound/||g" >> "$Changes"
+done
+
+echo
+echo "Files of cBound which are generated differently: $Changed"
+
+if [ "$Changed" != 0 ]
+then
+   grep '^===' "$Changes" | sed 's/^=== /   /'
+   echo "(see 'generated/cbound-changes.log')"
+fi
+
+if [ "$Failures" != 0 ]
+then
+   echo
+   echo "cBound does not work with this tool !"
+   exit 1
+fi

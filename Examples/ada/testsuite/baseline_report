@@ -1,0 +1,133 @@
+#!/usr/bin/env python3
+#
+#  Says which of the differences between the specs of the baseline and those which have just been
+#  generated can break a program that uses a binding: a declaration which is gone, a subprogram whose
+#  parameters or result have changed, a variable or type which has changed, and a package which is now
+#  seen through a limited view (or no longer is). They are few among the differences of a run, and are
+#  the ones to read before the baseline is accepted.
+#
+#  Usage:  ./baseline_report [<baseline folder> [<generated folder>]]       ('baseline' and 'generated').
+#
+#  Writes 'baseline-report.log' into the generated folder, and prints a count of each kind.
+#
+
+import os, re, sys
+
+Baseline  = sys.argv[1] if len(sys.argv) > 1 else "baseline"
+Generated = sys.argv[2] if len(sys.argv) > 2 else "generated"
+
+
+def declarations(Text):
+    """The declarations of a spec, as (kind, name) -> list of the text of each (an overloaded name has several)."""
+    Found = {}
+
+    def add(Kind, Name, Whole):
+        Found.setdefault((Kind, Name.lower()), []).append(" ".join(Whole.split()))
+
+    Text = re.sub(r"--[^\n]*", "", Text)
+
+    for Match in re.finditer(r"^(limited\s+with|with)\s+([\w.]+)\s*;", Text, re.M | re.I):
+        add("limited view" if Match.group(1).lower().startswith("limited") else "with", Match.group(2), Match.group(0))
+
+    Index = 0
+    Start = re.compile(r"\b(function|procedure)\s+(\w+)", re.I)
+
+    while True:
+        Match = Start.search(Text, Index)
+
+        if not Match:
+            break
+
+        Place = Match.end()
+        Depth = 0
+
+        while Place < len(Text):          # To the semicolon which ends the declaration, past those between its parameters.
+            if   Text[Place] == "(":  Depth += 1
+            elif Text[Place] == ")":  Depth -= 1
+            elif Text[Place] == ";" and Depth == 0:  break
+            Place += 1
+
+        Whole = Text[Match.start():Place]
+
+        #  The '_vN' twin of an overloaded subprogram, and the renaming which gives it its name, are of the private part.
+        #
+        if not re.search(r"\brenames\b", Whole, re.I) and not re.search(r"_v\d+$", Match.group(2)):
+            add(Match.group(1).lower(), Match.group(2), Whole)
+
+        Index = Place
+
+    for Match in re.finditer(r"^   (\w+)\s*:\s*([^;]*);", Text, re.M):
+        add("object", Match.group(1), Match.group(0))
+
+    for Match in re.finditer(r"^      (\w+)\s*:\s*([^;]*);", Text, re.M):     # Of a record. Those of two records of a spec are taken together.
+        add("component", Match.group(1), Match.group(0))
+
+    for Match in re.finditer(r"^   (?:sub)?type\s+(\w+)\s+is\b([^;]*)", Text, re.M | re.I):
+        add("type", Match.group(1), Match.group(0))
+
+    return Found
+
+
+def specs(Folder):
+    return {Each for Each in os.listdir(Folder) if Each.endswith(".ads")}
+
+
+Old_specs = specs(Baseline)
+New_specs = specs(Generated)
+
+Gone, Changed, Views, New = [], [], [], []
+
+for Each in sorted(Old_specs - New_specs):
+    Gone.append(f"{Each}: the whole spec")
+
+for Each in sorted(Old_specs & New_specs):
+    Old_text = open(os.path.join(Baseline,  Each), errors="replace").read()
+    New_text = open(os.path.join(Generated, Each), errors="replace").read()
+
+    if Old_text == New_text:
+        continue
+
+    Old = declarations(Old_text)
+    New_ = declarations(New_text)
+
+    for Key in sorted(set(Old) | set(New_)):
+        Kind, Name = Key
+        Was = sorted(Old.get(Key, []))
+        Now = sorted(New_.get(Key, []))
+
+        if Was == Now:
+            continue
+
+        if Kind == "limited view":
+            Views.append(f"{Each}: {'now has only a limited view of' if Now else 'now has the whole of'} {Name}")
+        elif Kind == "with":
+            pass                               # A change of the context alone breaks nothing, and a limited view is told above.
+        elif not Now:
+            Gone.append(f"{Each}: {Kind} {Name}")
+        elif not Was:
+            New.append(f"{Each}: {Kind} {Name}")
+        else:
+            Changed.append(f"{Each}: {Kind} {Name}\n" + "".join(f"         was: {One}\n" for One in Was if One not in Now)
+                                                      + "".join(f"         now: {One}\n" for One in Now if One not in Was))
+
+Added_specs = sorted(New_specs - Old_specs)
+
+with open(os.path.join(Generated, "baseline-report.log"), "w") as Report:
+    def section(Title, Lines):
+        Report.write(f"{Title}: {len(Lines)}\n")
+        for Line in Lines:
+            Report.write(f"   {Line.rstrip()}\n")
+        Report.write("\n")
+
+    Report.write("The differences from the baseline which may break a program that uses a binding.\n\n")
+    section("Limited views which have changed",                   Views)
+    section("Declarations which are gone",                        Gone)
+    section("Declarations which have changed",                    Changed)
+    section("Declarations which are new (these break nothing)",   New)
+    section("Specs which are new (these break nothing)",          Added_specs)
+
+print(f"   Limited views which have changed: {len(Views)}")
+print(f"   Declarations which are gone:      {len(Gone)}")
+print(f"   Declarations which have changed:  {len(Changed)}")
+print(f"   Declarations which are new:       {len(New)}, and {len(Added_specs)} specs")
+print(f"   (see '{Generated}/baseline-report.log')")

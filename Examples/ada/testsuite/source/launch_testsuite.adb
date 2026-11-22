@@ -44,6 +44,7 @@ is
    check_Baseline      : constant Boolean := True;     -- Say which of the generated specs and wrappers differ from those of the baseline.
    do_Runtime          : constant Boolean := True;     -- Build and run the run-time cases.
    do_Examples         : constant Boolean := True;     -- Build each example of 'Examples/ada' and run its tester.
+   do_cBound           : constant Boolean := True;     -- Try the tool on a copy of cBound, the bindings which are made with it, where it is present.
    do_Units            : constant Boolean := True;     -- Build and run the tests of single units of the Ada module.
 
    Root                : constant String  := "../../../..";     -- The repository root, as seen from the 'generated' folder.
@@ -103,6 +104,10 @@ is
 
       return Success and then Status = 0;
    end run;
+
+
+
+   function Contents (of_File : in String) return String;
 
 
 
@@ -182,6 +187,17 @@ is
          new_Line;
          put_Line (baseline_Changes'Image & " specs or wrappers differ from the baseline: see 'generated/baseline-changes.log'.");
          put_Line ("If they are as they should be, './launch_testsuite accept' makes them the baseline.");
+
+         --  Most of the differences of a run break nothing. Those which may break a program that uses
+         --  a binding are picked out, as they are the ones to read before the baseline is accepted.
+         --
+         if         ada.Directories.exists ("baseline")
+           and then run ("./baseline_report > generated/baseline-report.txt 2>&1", Step_Log)
+         then
+            new_Line;
+            put_Line ("Of these, the changes which may break a program that uses a binding:");
+            put      (Contents ("generated/baseline-report.txt"));
+         end if;
       end if;
    end check_against_Baseline;
 
@@ -1617,6 +1633,30 @@ begin
       run_Example ("template");
       run_Example ("typedef");
       run_Example ("variables");
+   end if;
+
+   --  cBound is the one user of the tool which is at hand, and a change which breaks one of its bindings is best seen
+   --  before the tool is installed. './check_cbound' generates each binding of a copy of it again, with the tool as it
+   --  is built, and runs cBound's own checks. What is then generated differently is listed, and is no failure.
+   --
+   if do_cBound
+   then
+      new_Line;
+      run_Step ("that cBound works with the tool", "./check_cbound");
+
+      if ada.Directories.exists ("unit-build/that cBound works with the tool.log")
+      then
+         declare
+            the_Log : constant String  := Contents ("unit-build/that cBound works with the tool.log");
+            First   : constant Natural := ada.Strings.fixed.Index (the_Log, "Files of cBound which are generated differently");
+         begin
+            if First /= 0
+            then
+               put (the_Log (First .. the_Log'Last));
+               new_Line;
+            end if;
+         end;
+      end if;
    end if;
 
 

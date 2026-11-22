@@ -33,6 +33,7 @@ public:
   virtual ~Node () {}
   virtual int weight ()   { return 1; }
   Leaf* as_leaf ();                         // Returns a pointer to the derived class.
+  int   weight_of (Node* other, Leaf* leaf);   // Takes a pointer to the derived class.
 };
 
 class Leaf : public Node {
@@ -43,3 +44,4 @@ public:
 };
 
 inline Leaf* Node::as_leaf ()   { return dynamic_cast <Leaf*> (this); }
+inline int   Node::weight_of (Node* other, Leaf* leaf)   { return other->weight () + leaf->weight (); }

@@ -18,6 +18,9 @@ public:
   static const int    limit      = 16;      /* Constants with a value need have no symbol. */
   static const long   big_limit  = 1L << 20;
   static const int    unset;                /* A constant whose value is given elsewhere. */
+  static const Mode   start      = Down;    /* Of an enumeration, of a truth value and of a character, likewise. */
+  static const bool   enabled    = true;
+  static const char   mark       = 'M';
 
   int id;
   Counter () : id (++total)       {}

@@ -7,6 +7,7 @@ with
      static_members.int_Pool,
 
      interfaces.C.Strings,
+     swig,
 
      Checks;
 
@@ -58,6 +59,9 @@ begin
    begin
       check (Counter.limit = 16,                                    "a constant with a value, which has no symbol");
       check (Counter.big_limit = 1_048_576,                         "one whose value is an expression");
+      check (Counter.start = Counter.Down,                    "a constant of an enumeration has its value");
+      check (Counter.enabled /= swig.bool'Val (0),            "and one which is a truth value");
+      check (Counter.mark = 'M',                              "and one which is a character");
       check (Counter.unset = 99,                                    "a constant whose value is given elsewhere");
    end constants;
 
