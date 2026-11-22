@@ -6,6 +6,8 @@ with
      virtual_classes.Square,
      virtual_classes.Square.Guards,
      virtual_classes.Grid,
+     virtual_classes.Scaler,
+     virtual_classes.Tripler,
 
      swig.Pointers,
 
@@ -137,6 +139,26 @@ begin
       Shape.destruct_0 (Shape.Item (the_Hexagon));
       check (shape_count = 0,                                 "the shape is destructed");
    end a_class_derived_from_an_abstract_class;
+
+   virtual_functions_with_a_default_Argument :
+   declare
+      the_Tripler : aliased Tripler.Item   := Tripler.Item (Tripler.construct);
+      as_Scaler   : constant Scaler.Pointer := the_Tripler'unchecked_Access;
+   begin
+      --  Each such function is one virtual function, and those which follow it are in their own places.
+      --
+      check (as_Scaler.scaled (5, 2) = 11,                "a virtual function with a default argument dispatches, with all its arguments");
+      check (Scaler.scaled (as_Scaler, 5) = 11,           "and with the default one left out");
+      check (as_Scaler.after = 70,                        "the virtual function which follows it dispatches to its own function");
+      check (as_Scaler.offset (4) = 104,                  "a pure virtual function with a default argument");
+      check (Scaler.offset (as_Scaler) = 101,             "and with the argument left out");
+      check (as_Scaler.last = 90,                         "the last virtual function of the class is in its place");
+
+      check (call_scaled (as_Scaler) = 11,                "C++ calls the first");
+      check (call_after  (as_Scaler) = 70,                "the one which follows it");
+      check (call_offset (as_Scaler) = 101,               "the pure one");
+      check (call_last   (as_Scaler) = 90,                "and the last");
+   end virtual_functions_with_a_default_Argument;
 
    finish;
 end Tester;

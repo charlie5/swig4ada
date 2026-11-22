@@ -6,6 +6,6 @@
 #include "example.h"
 %}
 
-%feature ("flatnested");     // Bind a nested class as a class of the module.
+// A nested class is bound as a class of the module, beside the class which holds it. Nothing asks for that here.
 
 %include "example.h"

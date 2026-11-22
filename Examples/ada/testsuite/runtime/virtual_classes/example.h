@@ -58,3 +58,27 @@ inline Shape* new_square (double w)  { return new Square (w); }
 inline void   dispose    (Shape* s)  { delete s; }
 
 inline int    shape_count ()         { return Shape::count; }
+
+/* Virtual functions with a default argument. C++ has one virtual function of each, of all its arguments. */
+
+class Scaler {
+public:
+  virtual ~Scaler () {}
+  virtual int scaled (int a, int factor = 2)   { return a * factor; }
+  virtual int after  ()                        { return 7; }
+  virtual int offset (int a = 1) = 0;
+  virtual int last   ()                        { return 9; }
+};
+
+class Tripler : public Scaler {
+public:
+  virtual int scaled (int a, int factor = 2)   { return a * factor + 1; }
+  virtual int after  ()                        { return 70; }
+  virtual int offset (int a = 1)               { return a + 100; }
+  virtual int last   ()                        { return 90; }
+};
+
+inline int call_scaled (Scaler* s)   { return s->scaled (5); }
+inline int call_after  (Scaler* s)   { return s->after (); }
+inline int call_offset (Scaler* s)   { return s->offset (); }
+inline int call_last   (Scaler* s)   { return s->last (); }

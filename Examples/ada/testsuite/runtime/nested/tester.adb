@@ -3,6 +3,8 @@ with
      nested.Engine,
      nested.Gauge,
      nested.Reading,
+     nested.Pump,
+     nested.Pump_Gauge,
 
      interfaces.C,
 
@@ -66,6 +68,18 @@ begin
       check (Gauge.doubled (the_Gauge.all) = 100,          "a function of a nested class, reached by a pointer");
       check (gauge_value (the_Gauge) = 50,                 "a pointer to a nested class is passed to C++");
    end;
+
+   a_nested_class_of_a_name_which_is_taken :
+   declare
+      the_Pump  : aliased Pump.Item := Pump.construct;
+      its_Gauge : aliased Pump_Gauge.Item := Pump.read_gauge (the_Pump);
+   begin
+      --  'Pump::Gauge' cannot be the package 'Gauge', which is that of 'Engine::Gauge', so it is named after its class too.
+      --
+      check (its_Gauge.pressure = 2.5,                             "a nested class whose name is taken by another is bound under its own");
+      check (the_Pump.gauge.pressure = 2.5,                        "and is the type of a member of the class which holds it");
+      check (pressure_of (its_Gauge'unchecked_Access) = 2.5,       "and of a parameter");
+   end a_nested_class_of_a_name_which_is_taken;
 
    finish;
 end Tester;

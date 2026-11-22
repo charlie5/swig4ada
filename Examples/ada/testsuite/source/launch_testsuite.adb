@@ -1507,7 +1507,7 @@ begin
       generate ("native_directive.i",                         use_CPP => True);
       generate ("naturalvar_more.i",                          use_CPP => True);
       generate ("naturalvar_onoff.i",                         use_CPP => True);
-      generate ("nested_class.i",                             use_CPP => True);
+      generate ("nested_class.i",                             use_CPP => True,     check_Layout => False);     -- 'Outer2' has a member which is shown to SWIG and not to the compiler.
       generate ("nested_directors.i",                         use_CPP => True);
       generate ("nested_ignore.i",                            use_CPP => True);
       generate ("nested_in_template.i",                       use_CPP => True);

@@ -43,3 +43,15 @@ public:
 inline int  as_number (Engine::State s)     { return (int) s; }
 inline int  reading_total (Engine::Reading r)  { return r.speed + (int) r.state; }
 inline int  gauge_value (Engine::Gauge* g)  { return g->value; }
+
+/* A second class has a nested class of the same name as that of the first, which cannot be the same package. */
+
+class Pump {
+public:
+  struct Gauge { double pressure;  Gauge () : pressure (2.5) {} };
+
+  Gauge gauge;
+  Gauge read_gauge ()            { return gauge; }
+};
+
+inline double pressure_of (Pump::Gauge* g)   { return g->pressure; }
