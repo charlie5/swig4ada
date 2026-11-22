@@ -177,8 +177,10 @@ directory. Setting the environment variable <tt>SWIG4ADA_DEBUG</tt> does the sam
 </tr>
 
 <tr>
-<td>-namespace &lt;ns&gt;</td>
-<td>Generate the packages as children of the package &lt;ns&gt;.</td>
+<td>-namespace &lt;package&gt;</td>
+<td>Generate the packages of the module as children of the package which is named
+(<tt>outer.shapes</tt>, in <tt>outer-shapes.ads</tt>). That package is not generated: it
+must exist, and may be one of the program's own.</td>
 </tr>
 
 <tr>
