@@ -57,7 +57,8 @@ A program which uses the binding compiles the specs and the wrapper, and needs t
 and 'swig*.adb' files at the root of this repository; they are not installed, so add that folder to the
 source directories of your project. The projects under 'Examples/ada' show how.
 
-'swig4ada-debug.log' is written to the current directory on every run.
+With the option '-debug-log' (or the environment variable 'SWIG4ADA_DEBUG' set), a record of what the
+module does is written to 'swig4ada-debug.log' in the current directory.
 
 
 Using a generated binding
