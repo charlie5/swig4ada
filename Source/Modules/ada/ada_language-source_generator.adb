@@ -895,6 +895,13 @@ is
                         append (the_Source,  the_Parameter.my_Type.qualified_Name);
                      else
                         append (the_Source,  limited_Pointer_base_Type.qualified_Name);
+
+                        if         limited_Pointer_base_Type.all in ada_Type.composite.a_record.item'Class
+                          and then limited_Pointer_base_Type.declaration_Package.models_a_virtual_cpp_Class
+                          and then not is_the_self_Parameter
+                        then   -- As the pointer type of a virtual class is: an object of a derived class may be given.
+                           append (the_Source,  "'Class");
+                        end if;
                      end if;
                   end if;
 

@@ -1246,6 +1246,37 @@ is
                                                                                                           Self.integer_symbol_value_Map,
                                                                                                           Self.current_class_namespace_Prefix)));
 
+               elsif c_Type."=" (new_Variable.my_Type.c_type_Kind, c_Type.Enum)
+               then   -- A value of an enumeration is given by its number ('static const Colour first = Red;'), where that is not negative.
+                  declare
+                     --  The value is most often a literal of the enumeration, which may be named with its scope ('Counter::Down').
+                     --
+                     Colons      : constant Natural := ada.Strings.fixed.Index (value_Text, "::", Going => ada.Strings.Backward);
+                     the_Literal : constant String  := (if Colons = 0 then value_Text else value_Text (Colons + 2 .. value_Text'Last));
+                     is_Found    :          Boolean := False;
+                  begin
+                     for Each of new_Variable.my_Type.Literals
+                     loop
+                        if Each.Name = the_Literal
+                        then
+                           new_Variable.Value := +Image (Each.Value);
+                           is_Found           := True;
+                        end if;
+                     end loop;
+
+                     if not is_Found
+                     then
+                        new_Variable.Value := +Image (resolved_c_integer_Expression (Self, +value_Text,
+                                                                                           Self.integer_symbol_value_Map,
+                                                                                           Self.current_class_namespace_Prefix));
+                     end if;
+
+                     if not (for all Each of to_String (new_Variable.Value) => Each in '0' .. '9')
+                     then   -- A negative number is not one which is given by its position, so the constant is imported.
+                        new_Variable.Value := null_unbounded_String;
+                     end if;
+                  end;
+
                elsif new_Variable.my_Type.is_a_standard_Real
                then
                   new_Variable.Value := +ada.Strings.fixed.Trim (Long_Float'Image (Long_Float'Value (value_Text)), ada.Strings.Both);
