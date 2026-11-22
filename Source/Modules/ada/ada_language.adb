@@ -61,7 +61,7 @@ is
    usage_help_Text : constant array (1 .. 4) of access String
      := [new String'("Ada Options (available with -ada)"),
          new String'("       -debug-log      - Write a record of what the module does to 'swig4ada-debug.log'"),
-         new String'("       -namespace <ns> - Generate wrappers into Ada namespace <ns>"),
+         new String'("       -namespace <package> - Make the packages of the module children of <package>, which must exist"),
          new String'("       -no-check-layout - Check the layout of a class, when the wrapper is compiled, only where its record is laid out here")];
 
    NL : constant String := new_line_Token;
@@ -195,6 +195,11 @@ is
                then
                   Swig_mark_arg (Each);
                   Swig_mark_arg (Each + 1);
+
+                  --  The packages of the module, and of those which it imports, are children of the package which is named.
+                  --
+                  Self.Package_namespace := ada_Package.new_ada_Package (Name   => Value (String_in (argV, Each + 1)),
+                                                                         Parent => Self.Package_standard);
 
                   Each := Each + 1;            -- Skip the next argument, as it has just been used.
                else
@@ -1821,7 +1826,8 @@ is
    exception
       when constraint_Error =>   -- No element in map.
          the_Module := new swig_Module.item;
-         the_Module.define (Named, Self.Package_standard);
+         the_Module.define (Named, (if ada_Package."=" (Self.Package_namespace, null) then Self.Package_standard
+                                                                     else Self.Package_namespace));
 
          Self.name_Map_of_module.insert (Named, the_Module);
          Self.new_Modules       .append (the_Module);

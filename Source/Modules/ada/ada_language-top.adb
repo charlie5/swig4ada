@@ -39,7 +39,8 @@ begin
 
    --  Setup the principal namespace and module package names.
    --
-   Self.Module_top.define (module_Name, Self.Package_standard);
+   Self.Module_top.define (module_Name, (if ada_Package."=" (Self.Package_namespace, null) then Self.Package_standard
+                                                                          else Self.Package_namespace));
 
    --  Print the SWIG banner message.
    --

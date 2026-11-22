@@ -23,6 +23,7 @@ is
 
                                    new_Modules           => <>,
                                    all_layout_Checks     => True,
+                                   Package_namespace     => null,
                                    wrapper_Symbols       => <>,
                                    imported_Classes_defined_here => <>,
                                    name_Map_of_module    => <>,

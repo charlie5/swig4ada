@@ -306,6 +306,8 @@ private
 
          all_layout_Checks : Boolean := True;                       -- Check the layout of every class in the wrapper file (unless '-no-check-layout').
 
+         Package_namespace : ada_Package.view;                      -- The package which holds the packages of each module ('-namespace'), if any.
+
          current_linkage_Symbol : unbounded_String;
          current_lStr           : unbounded_String;
 
