@@ -177,7 +177,14 @@ is
    is
       use type C.int;
       Each : C.int := 0;
+
+      --  The parser keeps a nested class with no name for this module, which binds it itself (see
+      --  'bind_unnamed_nested_Classes'), though the other nested classes are moved out beside their class.
+      --
+      keep_unnamed_nested_Classes : C.int with Import, Convention => C, External_Name => "cparse_keep_unnamed_nested";
    begin
+      keep_unnamed_nested_Classes := 1;
+
       indent_Log;
       log ("");
       log ("Parsing C headers.");
@@ -945,6 +952,8 @@ is
          if        is_pure_Virtual
            or else C."/=" (Self.is_smart_Pointer, 0)               -- The function of the pointee has its class name already.
            or else Attribute (the_Node, "feature:extend") /= ""    -- A function added by '%extend' is not a member, and is called by a name which the core makes.
+           or else (         check_Attribute (the_Node, "storage", "virtual")     -- The form of a virtual function with a default argument left out is
+                    and then get_Attribute (the_Node, "defaultargs") /= null)     -- not virtual in Ada, so the wrapper makes the virtual call.
          then
             return "";
          else   -- The class is named as C++ knows it ('Base< int >'), which for a template instance is not the name it is bound by.
@@ -972,7 +981,8 @@ is
                                                   +Attribute (the_Node, "sym:name"),
                                                   Self.current_c_Class.nameSpace.all'Access,
                                                   is_Destructor => False,
-                                                  is_Overriding => is_Overriding);
+                                                  is_Overriding =>          is_Overriding
+                                                                   and then get_Attribute (the_Node, "defaultargs") = null);     -- Only the form of all its arguments is virtual.
 
          if c_Function."/=" (the_new_Function, null)     -- No function is made for an overload which cannot be told apart in Ada.
          then
@@ -1154,6 +1164,16 @@ is
       unindent_Log;
       return SWIG_OK;
    end memberVariableHandler;
+
+
+
+   overriding
+   function nestedClassesSupport (Self : access Item) return swigMod.Language.NestedClassSupport
+   is
+      pragma Unreferenced (Self);
+   begin
+      return swigMod.Language.NCS_None;
+   end nestedClassesSupport;
 
 
 

@@ -2871,7 +2871,7 @@ DllExport int SWIGSTDCALL Ada_Language_unrollVirtualMethods__SWIG_1 (
   arg5 = (int *)a_arg5;
   
   
-  result = (int)(arg1)->Language::unrollVirtualMethods(arg2,arg3,arg4,*arg5);
+  result = (int)(arg1)->unrollVirtualMethods(arg2,arg3,arg4,*arg5);
   jresult = result; 
   
   
@@ -3171,7 +3171,7 @@ DllExport int SWIGSTDCALL Ada_Language_addSymbol__SWIG_1 (
   
   arg3 = (Node *)a_arg3; 
   
-  result = (int)(arg1)->Language::addSymbol((String const *)arg2,(Node const *)arg3);
+  result = (int)(arg1)->addSymbol((String const *)arg2,(Node const *)arg3);
   jresult = result; 
   
   
@@ -3243,7 +3243,7 @@ DllExport int SWIGSTDCALL Ada_Language_addInterfaceSymbol__SWIG_1 (
   
   arg3 = (Node *)a_arg3; 
   
-  result = (int)(arg1)->Language::addInterfaceSymbol((String const *)arg2,arg3);
+  result = (int)(arg1)->addInterfaceSymbol((String const *)arg2,arg3);
   jresult = result; 
   
   
@@ -3318,7 +3318,7 @@ DllExport void* SWIGSTDCALL Ada_Language_symbolLookup__SWIG_1 (
   
   arg2 = (String *)a_arg2; 
   
-  result = (Node *)(arg1)->Language::symbolLookup((String const *)arg2);
+  result = (Node *)(arg1)->symbolLookup((String const *)arg2);
   jresult = (void*) result;
   
   
@@ -4241,7 +4241,7 @@ DllExport void* SWIGSTDCALL Ada_Language_makeParameterName__SWIG_1 (
   arg4 = (int) a_arg4; 
   
   
-  result = (String *)((Language const *)arg1)->Language::makeParameterName(arg2,arg3,arg4);
+  result = (String *)((Language const *)arg1)->makeParameterName(arg2,arg3,arg4);
   jresult = (void*) result;
   
   

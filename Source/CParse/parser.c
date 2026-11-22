@@ -126,6 +126,10 @@ static int      cparse_externc = 0;
 int		ignore_nested_classes = 0;
 int		kwargs_supported = 0;
 
+/* swig4ada: a language module which binds a nested class with no name itself (see below) sets this, so that it is
+   kept for the module where nested classes are flattened for it by default, as where they are ignored. */
+int		cparse_keep_unnamed_nested = 0;
+
 /* -----------------------------------------------------------------------------
  *                            Doxygen Comment Globals
  * ----------------------------------------------------------------------------- */
@@ -1878,7 +1882,7 @@ static String *add_qualifier_to_declarator(SwigType *type, SwigType *qualifier) 
 }
 
 
-#line 1882 "CParse/parser.c"
+#line 1886 "CParse/parser.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -2246,7 +2250,7 @@ typedef enum yysymbol_kind_t yysymbol_kind_t;
 
 
 /* Second part of user prologue.  */
-#line 2131 "CParse/parser.y"
+#line 2135 "CParse/parser.y"
 
 
 // Default-initialised instances of token types to avoid uninitialised fields.
@@ -2333,7 +2337,7 @@ static Node *new_enum_node(SwigType *enum_base_type) {
 }
 
 
-#line 2337 "CParse/parser.c"
+#line 2341 "CParse/parser.c"
 
 
 #ifdef short
@@ -2680,73 +2684,73 @@ union yyalloc
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,  2227,  2227,  2239,  2243,  2246,  2249,  2252,  2255,  2260,
-    2269,  2274,  2283,  2288,  2289,  2290,  2291,  2292,  2301,  2317,
-    2328,  2329,  2330,  2331,  2332,  2333,  2334,  2335,  2336,  2337,
-    2338,  2339,  2340,  2341,  2342,  2343,  2344,  2345,  2346,  2353,
-    2353,  2435,  2445,  2459,  2477,  2495,  2513,  2517,  2528,  2537,
-    2550,  2557,  2561,  2572,  2582,  2597,  2610,  2610,  2671,  2672,
-    2679,  2697,  2731,  2736,  2746,  2752,  2770,  2813,  2820,  2847,
-    2853,  2860,  2861,  2864,  2865,  2872,  2918,  2964,  2975,  2978,
-    3005,  3011,  3019,  3025,  3033,  3034,  3035,  3038,  3044,  3051,
-    3087,  3088,  3122,  3141,  3151,  3166,  3188,  3193,  3196,  3207,
-    3218,  3223,  3236,  3248,  3530,  3540,  3547,  3548,  3549,  3553,
-    3553,  3586,  3592,  3602,  3616,  3623,  3710,  3761,  3825,  3892,
-    3938,  3985,  4027,  4069,  4086,  4101,  4105,  4132,  4136,  4147,
-    4148,  4154,  4155,  4156,  4157,  4161,  4162,  4166,  4170,  4175,
-    4180,  4191,  4197,  4203,  4211,  4216,  4219,  4222,  4226,  4227,
-    4227,  4239,  4242,  4245,  4254,  4257,  4264,  4287,  4316,  4414,
-    4473,  4483,  4484,  4485,  4486,  4487,  4488,  4497,  4497,  4772,
-    4772,  4962,  4963,  4975,  4994,  4994,  5227,  5233,  5239,  5245,
-    5251,  5252,  5253,  5254,  5257,  5258,  5259,  5260,  5270,  5278,
-    5281,  5286,  5289,  5300,  5308,  5316,  5324,  5393,  5404,  5415,
-    5427,  5437,  5449,  5484,  5494,  5500,  5500,  5558,  5558,  5580,
-    5607,  5610,  5615,  5618,  5623,  5629,  5632,  5662,  5663,  5680,
-    5681,  5682,  5683,  5684,  5685,  5686,  5687,  5688,  5689,  5690,
-    5691,  5692,  5693,  5694,  5695,  5696,  5698,  5699,  5703,  5707,
-    5707,  5726,  5766,  5807,  5828,  5851,  5875,  5900,  5925,  5933,
-    5940,  5947,  5955,  5963,  5966,  5968,  5969,  5970,  5971,  5972,
-    5973,  5974,  5975,  5978,  5982,  5987,  5994,  6013,  6014,  6015,
-    6017,  6023,  6065,  6068,  6069,  6077,  6078,  6088,  6089,  6090,
-    6091,  6092,  6093,  6094,  6101,  6113,  6114,  6118,  6123,  6129,
-    6136,  6143,  6148,  6160,  6175,  6190,  6206,  6222,  6230,  6231,
-    6237,  6245,  6250,  6253,  6264,  6292,  6302,  6305,  6313,  6319,
-    6325,  6331,  6337,  6345,  6368,  6385,  6404,  6423,  6428,  6436,
-    6445,  6454,  6458,  6467,  6478,  6489,  6501,  6511,  6525,  6534,
-    6544,  6554,  6564,  6576,  6588,  6601,  6612,  6623,  6635,  6649,
-    6654,  6660,  6672,  6680,  6691,  6702,  6713,  6732,  6738,  6751,
-    6759,  6766,  6773,  6784,  6796,  6807,  6819,  6830,  6841,  6863,
-    6876,  6881,  6887,  6893,  6899,  6908,  6917,  6918,  6927,  6936,
-    6942,  6948,  6953,  6959,  6967,  6978,  6989,  7000,  7005,  7010,
-    7013,  7030,  7048,  7058,  7063,  7067,  7072,  7079,  7082,  7087,
-    7094,  7098,  7104,  7108,  7114,  7115,  7116,  7122,  7128,  7132,
-    7133,  7137,  7142,  7148,  7149,  7150,  7151,  7153,  7156,  7159,
-    7162,  7162,  7179,  7182,  7195,  7221,  7222,  7276,  7280,  7284,
-    7288,  7292,  7296,  7300,  7304,  7308,  7312,  7316,  7320,  7324,
-    7328,  7334,  7335,  7338,  7339,  7343,  7351,  7360,  7361,  7364,
-    7365,  7369,  7370,  7380,  7384,  7389,  7395,  7405,  7416,  7427,
-    7432,  7437,  7438,  7444,  7452,  7470,  7488,  7489,  7516,  7520,
-    7524,  7528,  7532,  7537,  7585,  7588,  7589,  7594,  7595,  7600,
-    7606,  7606,  7623,  7629,  7646,  7649,  7654,  7661,  7662,  7663,
-    7669,  7675,  7688,  7700,  7708,  7716,  7723,  7733,  7740,  7741,
-    7751,  7759,  7769,  7808,  7818,  7828,  7838,  7849,  7860,  7881,
-    7904,  7905,  7906,  7907,  7908,  7909,  7910,  7911,  7912,  7913,
-    7916,  7921,  7926,  7931,  7936,  7941,  7946,  7951,  7956,  7961,
-    7966,  7971,  7976,  7981,  7990,  8001,  8006,  8011,  8028,  8033,
-    8038,  8043,  8048,  8053,  8058,  8063,  8068,  8073,  8078,  8083,
-    8088,  8093,  8102,  8112,  8117,  8122,  8128,  8143,  8150,  8176,
-    8187,  8192,  8199,  8202,  8207,  8210,  8210,  8211,  8214,  8231,
-    8240,  8240,  8259,  8259,  8278,  8279,  8280,  8283,  8288,  8295,
-    8296,  8300,  8306,  8309,  8312,  8317,  8318,  8321,  8322,  8325,
-    8328,  8331,  8334,  8339,  8340,  8352,  8355,  8360,  8363,  8368,
-    8373,  8377,  8381,  8387,  8392,  8398,  8403,  8406,  8413,  8414,
-    8418,  8422,  8427,  8438,  8449,  8455,  8461,  8467,  8481,  8482,
-    8485,  8486,  8487,  8488,  8491,  8503,  8509,  8518,  8519,  8520,
-    8523,  8524,  8525,  8528,  8529,  8532,  8536,  8540,  8543,  8546,
-    8549,  8554,  8560,  8564,  8567,  8571,  8577,  8580,  8587,  8588,
-    8596,  8600,  8604,  8607,  8610,  8613,  8619,  8623,  8626,  8630,
-    8636,  8641,  8643,  8649,  8655,  8661,  8664,  8665,  8669,  8672,
-    8685,  8689,  8694,  8701,  8710,  8715,  8722,  8727,  8736,  8737
+       0,  2231,  2231,  2243,  2247,  2250,  2253,  2256,  2259,  2264,
+    2273,  2278,  2287,  2292,  2293,  2294,  2295,  2296,  2305,  2321,
+    2332,  2333,  2334,  2335,  2336,  2337,  2338,  2339,  2340,  2341,
+    2342,  2343,  2344,  2345,  2346,  2347,  2348,  2349,  2350,  2357,
+    2357,  2439,  2449,  2463,  2481,  2499,  2517,  2521,  2532,  2541,
+    2554,  2561,  2565,  2576,  2586,  2601,  2614,  2614,  2675,  2676,
+    2683,  2701,  2735,  2740,  2750,  2756,  2774,  2817,  2824,  2851,
+    2857,  2864,  2865,  2868,  2869,  2876,  2922,  2968,  2979,  2982,
+    3009,  3015,  3023,  3029,  3037,  3038,  3039,  3042,  3048,  3055,
+    3091,  3092,  3126,  3145,  3155,  3170,  3192,  3197,  3200,  3211,
+    3222,  3227,  3240,  3252,  3534,  3544,  3551,  3552,  3553,  3557,
+    3557,  3590,  3596,  3606,  3620,  3627,  3714,  3765,  3829,  3896,
+    3942,  3989,  4031,  4073,  4090,  4105,  4109,  4136,  4140,  4151,
+    4152,  4158,  4159,  4160,  4161,  4165,  4166,  4170,  4174,  4179,
+    4184,  4195,  4201,  4207,  4215,  4220,  4223,  4226,  4230,  4231,
+    4231,  4243,  4246,  4249,  4258,  4261,  4268,  4291,  4320,  4418,
+    4477,  4487,  4488,  4489,  4490,  4491,  4492,  4501,  4501,  4776,
+    4776,  4966,  4967,  4979,  4998,  4998,  5231,  5237,  5243,  5249,
+    5255,  5256,  5257,  5258,  5261,  5262,  5263,  5264,  5274,  5282,
+    5285,  5290,  5293,  5304,  5312,  5320,  5328,  5397,  5408,  5419,
+    5431,  5441,  5453,  5488,  5498,  5504,  5504,  5562,  5562,  5584,
+    5611,  5614,  5619,  5622,  5627,  5633,  5636,  5666,  5667,  5684,
+    5685,  5686,  5687,  5688,  5689,  5690,  5691,  5692,  5693,  5694,
+    5695,  5696,  5697,  5698,  5699,  5700,  5702,  5703,  5707,  5711,
+    5711,  5730,  5770,  5811,  5832,  5855,  5879,  5904,  5929,  5937,
+    5944,  5951,  5959,  5967,  5970,  5972,  5973,  5974,  5975,  5976,
+    5977,  5978,  5979,  5982,  5986,  5991,  5998,  6017,  6018,  6019,
+    6021,  6027,  6069,  6072,  6073,  6081,  6082,  6092,  6093,  6094,
+    6095,  6096,  6097,  6098,  6105,  6117,  6118,  6122,  6127,  6133,
+    6140,  6147,  6152,  6164,  6179,  6194,  6210,  6226,  6234,  6235,
+    6241,  6249,  6254,  6257,  6268,  6296,  6306,  6309,  6317,  6323,
+    6329,  6335,  6341,  6349,  6372,  6389,  6408,  6427,  6432,  6440,
+    6449,  6458,  6462,  6471,  6482,  6493,  6505,  6515,  6529,  6538,
+    6548,  6558,  6568,  6580,  6592,  6605,  6616,  6627,  6639,  6653,
+    6658,  6664,  6676,  6684,  6695,  6706,  6717,  6736,  6742,  6755,
+    6763,  6770,  6777,  6788,  6800,  6811,  6823,  6834,  6845,  6867,
+    6880,  6885,  6891,  6897,  6903,  6912,  6921,  6922,  6931,  6940,
+    6946,  6952,  6957,  6963,  6971,  6982,  6993,  7004,  7009,  7014,
+    7017,  7034,  7052,  7062,  7067,  7071,  7076,  7083,  7086,  7091,
+    7098,  7102,  7108,  7112,  7118,  7119,  7120,  7126,  7132,  7136,
+    7137,  7141,  7146,  7152,  7153,  7154,  7155,  7157,  7160,  7163,
+    7166,  7166,  7183,  7186,  7199,  7225,  7226,  7280,  7284,  7288,
+    7292,  7296,  7300,  7304,  7308,  7312,  7316,  7320,  7324,  7328,
+    7332,  7338,  7339,  7342,  7343,  7347,  7355,  7364,  7365,  7368,
+    7369,  7373,  7374,  7384,  7388,  7393,  7399,  7409,  7420,  7431,
+    7436,  7441,  7442,  7448,  7456,  7474,  7492,  7493,  7520,  7524,
+    7528,  7532,  7536,  7541,  7589,  7592,  7593,  7598,  7599,  7604,
+    7610,  7610,  7627,  7633,  7650,  7653,  7658,  7665,  7666,  7667,
+    7673,  7679,  7692,  7704,  7712,  7720,  7727,  7737,  7744,  7745,
+    7755,  7763,  7773,  7812,  7822,  7832,  7842,  7853,  7864,  7885,
+    7908,  7909,  7910,  7911,  7912,  7913,  7914,  7915,  7916,  7917,
+    7920,  7925,  7930,  7935,  7940,  7945,  7950,  7955,  7960,  7965,
+    7970,  7975,  7980,  7985,  7994,  8005,  8010,  8015,  8032,  8037,
+    8042,  8047,  8052,  8057,  8062,  8067,  8072,  8077,  8082,  8087,
+    8092,  8097,  8106,  8116,  8121,  8126,  8132,  8147,  8154,  8180,
+    8191,  8196,  8203,  8206,  8211,  8214,  8214,  8215,  8218,  8235,
+    8244,  8244,  8263,  8263,  8282,  8283,  8284,  8287,  8292,  8299,
+    8300,  8304,  8310,  8313,  8316,  8321,  8322,  8325,  8326,  8329,
+    8332,  8335,  8338,  8343,  8344,  8356,  8359,  8364,  8367,  8372,
+    8377,  8381,  8385,  8391,  8396,  8402,  8407,  8410,  8417,  8418,
+    8422,  8426,  8431,  8442,  8453,  8459,  8465,  8471,  8485,  8486,
+    8489,  8490,  8491,  8492,  8495,  8507,  8513,  8522,  8523,  8524,
+    8527,  8528,  8529,  8532,  8533,  8536,  8540,  8544,  8547,  8550,
+    8553,  8558,  8564,  8568,  8571,  8575,  8581,  8584,  8591,  8592,
+    8600,  8604,  8608,  8611,  8614,  8617,  8623,  8627,  8630,  8634,
+    8640,  8645,  8647,  8653,  8659,  8665,  8668,  8669,  8673,  8676,
+    8689,  8693,  8698,  8705,  8714,  8719,  8726,  8731,  8740,  8741
 };
 #endif
 
@@ -5919,7 +5923,7 @@ yyreduce:
   switch (yyn)
     {
   case 2: /* program: interface  */
-#line 2227 "CParse/parser.y"
+#line 2231 "CParse/parser.y"
                             {
                    if (!classes) classes = NewHash();
 		   Setattr((yyvsp[0].node),"classes",classes); 
@@ -5932,60 +5936,60 @@ yyreduce:
 		   Setattr((yyvsp[0].node),"module",module_node);
 	           top = (yyvsp[0].node);
                }
-#line 5936 "CParse/parser.c"
+#line 5940 "CParse/parser.c"
     break;
 
   case 3: /* program: PARSETYPE parm END  */
-#line 2239 "CParse/parser.y"
+#line 2243 "CParse/parser.y"
                                     {
                  top = Copy(Getattr((yyvsp[-1].p),"type"));
 		 Delete((yyvsp[-1].p));
                }
-#line 5945 "CParse/parser.c"
+#line 5949 "CParse/parser.c"
     break;
 
   case 4: /* program: PARSETYPE error  */
-#line 2243 "CParse/parser.y"
+#line 2247 "CParse/parser.y"
                                  {
                  top = 0;
                }
-#line 5953 "CParse/parser.c"
+#line 5957 "CParse/parser.c"
     break;
 
   case 5: /* program: PARSEPARM parm END  */
-#line 2246 "CParse/parser.y"
+#line 2250 "CParse/parser.y"
                                     {
                  top = (yyvsp[-1].p);
                }
-#line 5961 "CParse/parser.c"
+#line 5965 "CParse/parser.c"
     break;
 
   case 6: /* program: PARSEPARM error  */
-#line 2249 "CParse/parser.y"
+#line 2253 "CParse/parser.y"
                                  {
                  top = 0;
                }
-#line 5969 "CParse/parser.c"
+#line 5973 "CParse/parser.c"
     break;
 
   case 7: /* program: PARSEPARMS LPAREN parms RPAREN END  */
-#line 2252 "CParse/parser.y"
+#line 2256 "CParse/parser.y"
                                                     {
                  top = (yyvsp[-2].pl);
                }
-#line 5977 "CParse/parser.c"
+#line 5981 "CParse/parser.c"
     break;
 
   case 8: /* program: PARSEPARMS error  */
-#line 2255 "CParse/parser.y"
+#line 2259 "CParse/parser.y"
                                   {
                  top = 0;
                }
-#line 5985 "CParse/parser.c"
+#line 5989 "CParse/parser.c"
     break;
 
   case 9: /* interface: interface declaration  */
-#line 2260 "CParse/parser.y"
+#line 2264 "CParse/parser.y"
                                            {  
                    /* add declaration to end of linked list (the declaration isn't always a single declaration, sometimes it is a linked list itself) */
                    if (currentDeclComment != NULL) {
@@ -5995,21 +5999,21 @@ yyreduce:
                    appendChild((yyvsp[-1].node),(yyvsp[0].node));
                    (yyval.node) = (yyvsp[-1].node);
                }
-#line 5999 "CParse/parser.c"
+#line 6003 "CParse/parser.c"
     break;
 
   case 10: /* interface: interface DOXYGENSTRING  */
-#line 2269 "CParse/parser.y"
+#line 2273 "CParse/parser.y"
                                              {
 		   Delete(currentDeclComment);
                    currentDeclComment = (yyvsp[0].str); 
                    (yyval.node) = (yyvsp[-1].node);
                }
-#line 6009 "CParse/parser.c"
+#line 6013 "CParse/parser.c"
     break;
 
   case 11: /* interface: interface DOXYGENPOSTSTRING  */
-#line 2274 "CParse/parser.y"
+#line 2278 "CParse/parser.y"
                                                  {
                    Node *node = lastChild((yyvsp[-1].node));
                    if (node) {
@@ -6019,25 +6023,25 @@ yyreduce:
 		   }
                    (yyval.node) = (yyvsp[-1].node);
                }
-#line 6023 "CParse/parser.c"
+#line 6027 "CParse/parser.c"
     break;
 
   case 12: /* interface: %empty  */
-#line 2283 "CParse/parser.y"
+#line 2287 "CParse/parser.y"
                         {
                    (yyval.node) = new_node("top");
                }
-#line 6031 "CParse/parser.c"
+#line 6035 "CParse/parser.c"
     break;
 
   case 16: /* declaration: SEMI  */
-#line 2291 "CParse/parser.y"
+#line 2295 "CParse/parser.y"
                       { (yyval.node) = 0; }
-#line 6037 "CParse/parser.c"
+#line 6041 "CParse/parser.c"
     break;
 
   case 17: /* declaration: error  */
-#line 2292 "CParse/parser.y"
+#line 2296 "CParse/parser.y"
                        {
 		  if (cparse_unknown_directive) {
 		      Swig_error(cparse_file, cparse_line, "Unknown directive '%s'.\n", cparse_unknown_directive);
@@ -6046,32 +6050,32 @@ yyreduce:
 		  }
 		  Exit(EXIT_FAILURE);
                }
-#line 6050 "CParse/parser.c"
+#line 6054 "CParse/parser.c"
     break;
 
   case 18: /* declaration: c_constructor_decl  */
-#line 2301 "CParse/parser.y"
+#line 2305 "CParse/parser.y"
                                     { 
                   if ((yyval.node)) {
    		      add_symbols((yyval.node));
                   }
                   (yyval.node) = (yyvsp[0].node); 
 	       }
-#line 6061 "CParse/parser.c"
+#line 6065 "CParse/parser.c"
     break;
 
   case 19: /* declaration: error CONVERSIONOPERATOR  */
-#line 2317 "CParse/parser.y"
+#line 2321 "CParse/parser.y"
                                           {
                   (yyval.node) = 0;
 		  Delete((yyvsp[0].str));
                   skip_decl();
                }
-#line 6071 "CParse/parser.c"
+#line 6075 "CParse/parser.c"
     break;
 
   case 39: /* $@1: %empty  */
-#line 2353 "CParse/parser.y"
+#line 2357 "CParse/parser.y"
                                                              {
                Node *cls;
 	       String *clsname;
@@ -6113,11 +6117,11 @@ yyreduce:
 	       Namespaceprefix= Swig_symbol_qualifiedscopename(0);
 	       Delete(clsname);
 	     }
-#line 6117 "CParse/parser.c"
+#line 6121 "CParse/parser.c"
     break;
 
   case 40: /* extend_directive: EXTEND options classkeyopt idcolon LBRACE $@1 cpp_members RBRACE  */
-#line 2393 "CParse/parser.y"
+#line 2397 "CParse/parser.y"
                                   {
                String *clsname;
 	       extendmode = 0;
@@ -6154,30 +6158,30 @@ yyreduce:
 	       (yyval.node) = 0;
 
 	     }
-#line 6158 "CParse/parser.c"
+#line 6162 "CParse/parser.c"
     break;
 
   case 41: /* apply_directive: APPLY typemap_parm LBRACE tm_list RBRACE  */
-#line 2435 "CParse/parser.y"
+#line 2439 "CParse/parser.y"
                                                            {
                     (yyval.node) = new_node("apply");
                     Setattr((yyval.node),"pattern",Getattr((yyvsp[-3].p),"pattern"));
 		    appendChild((yyval.node),(yyvsp[-1].p));
                }
-#line 6168 "CParse/parser.c"
+#line 6172 "CParse/parser.c"
     break;
 
   case 42: /* clear_directive: CLEAR tm_list SEMI  */
-#line 2445 "CParse/parser.y"
+#line 2449 "CParse/parser.y"
                                      {
 		 (yyval.node) = new_node("clear");
 		 appendChild((yyval.node),(yyvsp[-1].p));
                }
-#line 6177 "CParse/parser.c"
+#line 6181 "CParse/parser.c"
     break;
 
   case 43: /* constant_directive: CONSTANT identifier EQUAL definetype SEMI  */
-#line 2459 "CParse/parser.y"
+#line 2463 "CParse/parser.y"
                                                                 {
 		 SwigType *type = NewSwigType((yyvsp[-1].dtype).type);
 		 if (Len(type) > 0) {
@@ -6196,11 +6200,11 @@ yyreduce:
 		   (yyval.node) = 0;
 		 }
 	       }
-#line 6200 "CParse/parser.c"
+#line 6204 "CParse/parser.c"
     break;
 
   case 44: /* constant_directive: CONSTANT type declarator def_args SEMI  */
-#line 2477 "CParse/parser.y"
+#line 2481 "CParse/parser.y"
                                                         {
 		 SwigType_push((yyvsp[-3].type), (yyvsp[-2].decl).type);
 		 /* Sneaky callback function trick */
@@ -6217,11 +6221,11 @@ yyreduce:
 		 SetFlag((yyval.node), "feature:immutable");
 		 add_symbols((yyval.node));
                }
-#line 6221 "CParse/parser.c"
+#line 6225 "CParse/parser.c"
     break;
 
   case 45: /* constant_directive: CONSTANT type direct_declarator LPAREN parms RPAREN cv_ref_qualifier def_args SEMI  */
-#line 2495 "CParse/parser.y"
+#line 2499 "CParse/parser.y"
                                                                                                     {
 		 SwigType_add_function((yyvsp[-7].type), (yyvsp[-4].pl));
 		 SwigType_push((yyvsp[-7].type), (yyvsp[-2].dtype).qualifier);
@@ -6240,29 +6244,29 @@ yyreduce:
 		 SetFlag((yyval.node), "feature:immutable");
 		 add_symbols((yyval.node));
 	       }
-#line 6244 "CParse/parser.c"
+#line 6248 "CParse/parser.c"
     break;
 
   case 46: /* constant_directive: CONSTANT error SEMI  */
-#line 2513 "CParse/parser.y"
+#line 2517 "CParse/parser.y"
                                      {
 		 Swig_warning(WARN_PARSE_BAD_VALUE,cparse_file,cparse_line,"Bad constant value (ignored).\n");
 		 (yyval.node) = 0;
 	       }
-#line 6253 "CParse/parser.c"
+#line 6257 "CParse/parser.c"
     break;
 
   case 47: /* constant_directive: CONSTANT error END  */
-#line 2517 "CParse/parser.y"
+#line 2521 "CParse/parser.y"
                                     {
 		 Swig_error(cparse_file,cparse_line,"Missing semicolon (';') after %%constant.\n");
 		 Exit(EXIT_FAILURE);
 	       }
-#line 6262 "CParse/parser.c"
+#line 6266 "CParse/parser.c"
     break;
 
   case 48: /* echo_directive: ECHO HBLOCK  */
-#line 2528 "CParse/parser.y"
+#line 2532 "CParse/parser.y"
                              {
 		 char temp[64];
 		 Replace((yyvsp[0].str),"$file",cparse_file, DOH_REPLACE_ANY);
@@ -6272,11 +6276,11 @@ yyreduce:
 		 Delete((yyvsp[0].str));
                  (yyval.node) = 0;
 	       }
-#line 6276 "CParse/parser.c"
+#line 6280 "CParse/parser.c"
     break;
 
   case 49: /* echo_directive: ECHO string  */
-#line 2537 "CParse/parser.y"
+#line 2541 "CParse/parser.y"
                              {
 		 char temp[64];
 		 String *s = (yyvsp[0].str);
@@ -6287,30 +6291,30 @@ yyreduce:
 		 Delete(s);
                  (yyval.node) = 0;
                }
-#line 6291 "CParse/parser.c"
+#line 6295 "CParse/parser.c"
     break;
 
   case 50: /* stringtype: string LBRACE parm RBRACE  */
-#line 2550 "CParse/parser.y"
+#line 2554 "CParse/parser.y"
                                           {		 
                  (yyval.node) = NewHash();
                  Setattr((yyval.node),"value",(yyvsp[-3].str));
 		 Setattr((yyval.node),"type",Getattr((yyvsp[-1].p),"type"));
                }
-#line 6301 "CParse/parser.c"
+#line 6305 "CParse/parser.c"
     break;
 
   case 51: /* fname: string  */
-#line 2557 "CParse/parser.y"
+#line 2561 "CParse/parser.y"
                        {
                  (yyval.node) = NewHash();
                  Setattr((yyval.node),"value",(yyvsp[0].str));
               }
-#line 6310 "CParse/parser.c"
+#line 6314 "CParse/parser.c"
     break;
 
   case 53: /* fragment_directive: FRAGMENT LPAREN fname COMMA kwargs RPAREN HBLOCK  */
-#line 2572 "CParse/parser.y"
+#line 2576 "CParse/parser.y"
                                                                      {
                    Hash *p = (yyvsp[-2].node);
 		   (yyval.node) = new_node("fragment");
@@ -6321,11 +6325,11 @@ yyreduce:
 		   Setattr((yyval.node),"code",(yyvsp[0].str));
 		   Delete((yyvsp[0].str));
                  }
-#line 6325 "CParse/parser.c"
+#line 6329 "CParse/parser.c"
     break;
 
   case 54: /* fragment_directive: FRAGMENT LPAREN fname COMMA kwargs RPAREN LBRACE  */
-#line 2582 "CParse/parser.y"
+#line 2586 "CParse/parser.y"
                                                                     {
 		   Hash *p = (yyvsp[-2].node);
 		   String *code;
@@ -6341,22 +6345,22 @@ yyreduce:
 		   Setattr((yyval.node),"code",code);
 		   Delete(code);
                  }
-#line 6345 "CParse/parser.c"
+#line 6349 "CParse/parser.c"
     break;
 
   case 55: /* fragment_directive: FRAGMENT LPAREN fname RPAREN SEMI  */
-#line 2597 "CParse/parser.y"
+#line 2601 "CParse/parser.y"
                                                      {
 		   (yyval.node) = new_node("fragment");
 		   Setattr((yyval.node),"value",Getattr((yyvsp[-2].node),"value"));
 		   Setattr((yyval.node),"type",Getattr((yyvsp[-2].node),"type"));
 		   Setattr((yyval.node),"emitonly","1");
 		 }
-#line 6356 "CParse/parser.c"
+#line 6360 "CParse/parser.c"
     break;
 
   case 56: /* @2: %empty  */
-#line 2610 "CParse/parser.y"
+#line 2614 "CParse/parser.y"
                                                              {
 		     (yyval.loc).filename = Copy(cparse_file);
 		     (yyval.loc).line = cparse_line;
@@ -6367,11 +6371,11 @@ yyreduce:
 		         scanner_set_main_input_file(NewString(maininput));
 		     }
                }
-#line 6371 "CParse/parser.c"
+#line 6375 "CParse/parser.c"
     break;
 
   case 57: /* include_directive: includetype options string BEGINFILE @2 interface ENDOFFILE  */
-#line 2619 "CParse/parser.y"
+#line 2623 "CParse/parser.y"
                                           {
                      String *mname = 0;
                      (yyval.node) = (yyvsp[-1].node);
@@ -6422,23 +6426,23 @@ yyreduce:
 		     }
 		     Setattr((yyval.node),"options",(yyvsp[-5].node));
                }
-#line 6426 "CParse/parser.c"
+#line 6430 "CParse/parser.c"
     break;
 
   case 58: /* includetype: INCLUDE  */
-#line 2671 "CParse/parser.y"
+#line 2675 "CParse/parser.y"
                          { (yyval.includetype) = INCLUDE_INCLUDE; }
-#line 6432 "CParse/parser.c"
+#line 6436 "CParse/parser.c"
     break;
 
   case 59: /* includetype: IMPORT  */
-#line 2672 "CParse/parser.y"
+#line 2676 "CParse/parser.y"
                          { (yyval.includetype) = INCLUDE_IMPORT; ++import_mode;}
-#line 6438 "CParse/parser.c"
+#line 6442 "CParse/parser.c"
     break;
 
   case 60: /* inline_directive: INLINE HBLOCK  */
-#line 2679 "CParse/parser.y"
+#line 2683 "CParse/parser.y"
                                  {
                  String *cpps;
 		 if (Namespaceprefix) {
@@ -6457,11 +6461,11 @@ yyreduce:
 		 }
 		 Delete((yyvsp[0].str));
 	       }
-#line 6461 "CParse/parser.c"
+#line 6465 "CParse/parser.c"
     break;
 
   case 61: /* inline_directive: INLINE LBRACE  */
-#line 2697 "CParse/parser.y"
+#line 2701 "CParse/parser.y"
                                {
                  String *cpps;
 		 int start_line = cparse_line;
@@ -6484,21 +6488,21 @@ yyreduce:
 		   Delete(cpps);
 		 }
                }
-#line 6488 "CParse/parser.c"
+#line 6492 "CParse/parser.c"
     break;
 
   case 62: /* insert_directive: HBLOCK  */
-#line 2731 "CParse/parser.y"
+#line 2735 "CParse/parser.y"
                           {
                  (yyval.node) = new_node("insert");
 		 Setattr((yyval.node),"code",(yyvsp[0].str));
 		 Delete((yyvsp[0].str));
 	       }
-#line 6498 "CParse/parser.c"
+#line 6502 "CParse/parser.c"
     break;
 
   case 63: /* insert_directive: INSERT LPAREN idstring RPAREN string  */
-#line 2736 "CParse/parser.y"
+#line 2740 "CParse/parser.y"
                                                       {
 		 String *code = NewStringEmpty();
 		 (yyval.node) = new_node("insert");
@@ -6509,22 +6513,22 @@ yyreduce:
 		   (yyval.node) = 0;
 		 } 
                }
-#line 6513 "CParse/parser.c"
+#line 6517 "CParse/parser.c"
     break;
 
   case 64: /* insert_directive: INSERT LPAREN idstring RPAREN HBLOCK  */
-#line 2746 "CParse/parser.y"
+#line 2750 "CParse/parser.y"
                                                       {
 		 (yyval.node) = new_node("insert");
 		 Setattr((yyval.node),"section",(yyvsp[-2].id));
 		 Setattr((yyval.node),"code",(yyvsp[0].str));
 		 Delete((yyvsp[0].str));
                }
-#line 6524 "CParse/parser.c"
+#line 6528 "CParse/parser.c"
     break;
 
   case 65: /* insert_directive: INSERT LPAREN idstring RPAREN LBRACE  */
-#line 2752 "CParse/parser.y"
+#line 2756 "CParse/parser.y"
                                                       {
 		 String *code;
 		 if (skip_balanced('{','}') < 0) Exit(EXIT_FAILURE);
@@ -6536,11 +6540,11 @@ yyreduce:
 		 Setattr((yyval.node),"code", code);
 		 Delete(code);
 	       }
-#line 6540 "CParse/parser.c"
+#line 6544 "CParse/parser.c"
     break;
 
   case 66: /* module_directive: MODULE options idstring  */
-#line 2770 "CParse/parser.y"
+#line 2774 "CParse/parser.y"
                                           {
                  (yyval.node) = new_node("module");
 		 if ((yyvsp[-1].node)) {
@@ -6577,11 +6581,11 @@ yyreduce:
 		 }		 
 		 if (!module_node) module_node = (yyval.node);
 	       }
-#line 6581 "CParse/parser.c"
+#line 6585 "CParse/parser.c"
     break;
 
   case 67: /* native_directive: NATIVE LPAREN identifier RPAREN storage_class identifier SEMI  */
-#line 2813 "CParse/parser.y"
+#line 2817 "CParse/parser.y"
                                                                                                   {
                  (yyval.node) = new_node("native");
 		 Setattr((yyval.node),"name",(yyvsp[-4].id));
@@ -6589,11 +6593,11 @@ yyreduce:
 		 Delete((yyvsp[-2].str));
 	         add_symbols((yyval.node));
 	       }
-#line 6593 "CParse/parser.c"
+#line 6597 "CParse/parser.c"
     break;
 
   case 68: /* native_directive: NATIVE LPAREN identifier RPAREN storage_class type declarator SEMI  */
-#line 2820 "CParse/parser.y"
+#line 2824 "CParse/parser.y"
                                                                                     {
 		 if (!SwigType_isfunction((yyvsp[-1].decl).type)) {
 		   Swig_error(cparse_file,cparse_line,"%%native declaration '%s' is not a function.\n", (yyvsp[-1].decl).id);
@@ -6612,44 +6616,44 @@ yyreduce:
 		 Delete((yyvsp[-3].str));
 	         add_symbols((yyval.node));
 	       }
-#line 6616 "CParse/parser.c"
+#line 6620 "CParse/parser.c"
     break;
 
   case 69: /* pragma_directive: PRAGMA pragma_lang identifier EQUAL pragma_arg  */
-#line 2847 "CParse/parser.y"
+#line 2851 "CParse/parser.y"
                                                                   {
                  (yyval.node) = new_node("pragma");
 		 Setattr((yyval.node),"lang",(yyvsp[-3].id));
 		 Setattr((yyval.node),"name",(yyvsp[-2].id));
 		 Setattr((yyval.node),"value",(yyvsp[0].str));
 	       }
-#line 6627 "CParse/parser.c"
+#line 6631 "CParse/parser.c"
     break;
 
   case 70: /* pragma_directive: PRAGMA pragma_lang identifier  */
-#line 2853 "CParse/parser.y"
+#line 2857 "CParse/parser.y"
                                               {
 		(yyval.node) = new_node("pragma");
 		Setattr((yyval.node),"lang",(yyvsp[-1].id));
 		Setattr((yyval.node),"name",(yyvsp[0].id));
 	      }
-#line 6637 "CParse/parser.c"
+#line 6641 "CParse/parser.c"
     break;
 
   case 73: /* pragma_lang: LPAREN identifier RPAREN  */
-#line 2864 "CParse/parser.y"
+#line 2868 "CParse/parser.y"
                                          { (yyval.id) = (yyvsp[-1].id); }
-#line 6643 "CParse/parser.c"
+#line 6647 "CParse/parser.c"
     break;
 
   case 74: /* pragma_lang: %empty  */
-#line 2865 "CParse/parser.y"
+#line 2869 "CParse/parser.y"
                        { (yyval.id) = "swig"; }
-#line 6649 "CParse/parser.c"
+#line 6653 "CParse/parser.c"
     break;
 
   case 75: /* rename_directive: rename_namewarn declarator idstring SEMI  */
-#line 2872 "CParse/parser.y"
+#line 2876 "CParse/parser.y"
                                                             {
                 SwigType *t = (yyvsp[-2].decl).type;
 		Hash *kws = NewHash();
@@ -6696,11 +6700,11 @@ yyreduce:
                 (yyval.node) = 0;
 		scanner_clear_rename();
               }
-#line 6700 "CParse/parser.c"
+#line 6704 "CParse/parser.c"
     break;
 
   case 76: /* rename_directive: rename_namewarn LPAREN kwargs RPAREN declarator cpp_const SEMI  */
-#line 2918 "CParse/parser.y"
+#line 2922 "CParse/parser.y"
                                                                                {
 		String *fixname;
 		Hash *kws = (yyvsp[-4].node);
@@ -6747,11 +6751,11 @@ yyreduce:
                 (yyval.node) = 0;
 		scanner_clear_rename();
               }
-#line 6751 "CParse/parser.c"
+#line 6755 "CParse/parser.c"
     break;
 
   case 77: /* rename_directive: rename_namewarn LPAREN kwargs RPAREN string SEMI  */
-#line 2964 "CParse/parser.y"
+#line 2968 "CParse/parser.y"
                                                                  {
 		if ((yyvsp[-5].intvalue)) {
 		  Swig_name_rename_add(Namespaceprefix,(yyvsp[-1].str),0,(yyvsp[-3].node),0);
@@ -6761,102 +6765,102 @@ yyreduce:
 		(yyval.node) = 0;
 		scanner_clear_rename();
               }
-#line 6765 "CParse/parser.c"
+#line 6769 "CParse/parser.c"
     break;
 
   case 78: /* rename_namewarn: RENAME  */
-#line 2975 "CParse/parser.y"
+#line 2979 "CParse/parser.y"
                          {
 		    (yyval.intvalue) = 1;
                 }
-#line 6773 "CParse/parser.c"
+#line 6777 "CParse/parser.c"
     break;
 
   case 79: /* rename_namewarn: NAMEWARN  */
-#line 2978 "CParse/parser.y"
+#line 2982 "CParse/parser.y"
                            {
                     (yyval.intvalue) = 0;
                 }
-#line 6781 "CParse/parser.c"
+#line 6785 "CParse/parser.c"
     break;
 
   case 80: /* feature_directive: FEATURE LPAREN idstring featattr RPAREN declarator cpp_const stringbracesemi  */
-#line 3005 "CParse/parser.y"
+#line 3009 "CParse/parser.y"
                                                                                                  {
                     String *val = (yyvsp[0].str) ? NewString((yyvsp[0].str)) : NewString("1");
                     new_feature((yyvsp[-5].id), val, (yyvsp[-4].node), (yyvsp[-2].decl).id, (yyvsp[-2].decl).type, (yyvsp[-2].decl).parms, (yyvsp[-1].dtype).qualifier);
                     (yyval.node) = 0;
                     scanner_clear_rename();
                   }
-#line 6792 "CParse/parser.c"
+#line 6796 "CParse/parser.c"
     break;
 
   case 81: /* feature_directive: FEATURE LPAREN idstring COMMA stringnum featattr RPAREN declarator cpp_const SEMI  */
-#line 3011 "CParse/parser.y"
+#line 3015 "CParse/parser.y"
                                                                                                       {
                     String *val = Len((yyvsp[-5].str)) ? (yyvsp[-5].str) : 0;
                     new_feature((yyvsp[-7].id), val, (yyvsp[-4].node), (yyvsp[-2].decl).id, (yyvsp[-2].decl).type, (yyvsp[-2].decl).parms, (yyvsp[-1].dtype).qualifier);
                     (yyval.node) = 0;
                     scanner_clear_rename();
                   }
-#line 6803 "CParse/parser.c"
+#line 6807 "CParse/parser.c"
     break;
 
   case 82: /* feature_directive: FEATURE LPAREN idstring featattr RPAREN stringbracesemi  */
-#line 3019 "CParse/parser.y"
+#line 3023 "CParse/parser.y"
                                                                             {
                     String *val = (yyvsp[0].str) ? NewString((yyvsp[0].str)) : NewString("1");
                     new_feature((yyvsp[-3].id), val, (yyvsp[-2].node), 0, 0, 0, 0);
                     (yyval.node) = 0;
                     scanner_clear_rename();
                   }
-#line 6814 "CParse/parser.c"
+#line 6818 "CParse/parser.c"
     break;
 
   case 83: /* feature_directive: FEATURE LPAREN idstring COMMA stringnum featattr RPAREN SEMI  */
-#line 3025 "CParse/parser.y"
+#line 3029 "CParse/parser.y"
                                                                                  {
                     String *val = Len((yyvsp[-3].str)) ? (yyvsp[-3].str) : 0;
                     new_feature((yyvsp[-5].id), val, (yyvsp[-2].node), 0, 0, 0, 0);
                     (yyval.node) = 0;
                     scanner_clear_rename();
                   }
-#line 6825 "CParse/parser.c"
+#line 6829 "CParse/parser.c"
     break;
 
   case 85: /* stringbracesemi: SEMI  */
-#line 3034 "CParse/parser.y"
+#line 3038 "CParse/parser.y"
                        { (yyval.str) = 0; }
-#line 6831 "CParse/parser.c"
+#line 6835 "CParse/parser.c"
     break;
 
   case 86: /* stringbracesemi: PARMS LPAREN parms RPAREN SEMI  */
-#line 3035 "CParse/parser.y"
+#line 3039 "CParse/parser.y"
                                                  { (yyval.str) = (yyvsp[-2].pl); }
-#line 6837 "CParse/parser.c"
+#line 6841 "CParse/parser.c"
     break;
 
   case 87: /* featattr: COMMA idstring EQUAL stringnum featattr  */
-#line 3038 "CParse/parser.y"
+#line 3042 "CParse/parser.y"
                                                               {
 		  (yyval.node) = NewHash();
 		  Setattr((yyval.node),"name",(yyvsp[-3].id));
 		  Setattr((yyval.node),"value",(yyvsp[-1].str));
 		  if ((yyvsp[0].node)) set_nextSibling((yyval.node), (yyvsp[0].node));
 		}
-#line 6848 "CParse/parser.c"
+#line 6852 "CParse/parser.c"
     break;
 
   case 88: /* featattr: %empty  */
-#line 3044 "CParse/parser.y"
+#line 3048 "CParse/parser.y"
                          {
 		  (yyval.node) = 0;
 		}
-#line 6856 "CParse/parser.c"
+#line 6860 "CParse/parser.c"
     break;
 
   case 89: /* varargs_directive: VARARGS LPAREN varargs_parms RPAREN declarator cpp_const SEMI  */
-#line 3051 "CParse/parser.y"
+#line 3055 "CParse/parser.y"
                                                                                   {
                  Parm *val;
 		 String *name;
@@ -6892,11 +6896,11 @@ yyreduce:
 		 Delete(name);
 		 (yyval.node) = 0;
               }
-#line 6896 "CParse/parser.c"
+#line 6900 "CParse/parser.c"
     break;
 
   case 91: /* varargs_parms: NUM_INT COMMA parm  */
-#line 3088 "CParse/parser.y"
+#line 3092 "CParse/parser.y"
                                      { 
 		  int i;
 		  int n;
@@ -6921,11 +6925,11 @@ yyreduce:
 		    }
 		  }
                 }
-#line 6925 "CParse/parser.c"
+#line 6929 "CParse/parser.c"
     break;
 
   case 92: /* typemap_directive: TYPEMAP LPAREN typemap_type RPAREN tm_list stringbrace  */
-#line 3122 "CParse/parser.y"
+#line 3126 "CParse/parser.y"
                                                                             {
 		   (yyval.node) = 0;
 		   if ((yyvsp[-3].tmap).method) {
@@ -6945,11 +6949,11 @@ yyreduce:
 		     Delete((yyvsp[-3].tmap).method);
 		   }
 	       }
-#line 6949 "CParse/parser.c"
+#line 6953 "CParse/parser.c"
     break;
 
   case 93: /* typemap_directive: TYPEMAP LPAREN typemap_type RPAREN tm_list SEMI  */
-#line 3141 "CParse/parser.y"
+#line 3145 "CParse/parser.y"
                                                                  {
 		 (yyval.node) = 0;
 		 if ((yyvsp[-3].tmap).method) {
@@ -6960,11 +6964,11 @@ yyreduce:
 		 }
 		 Delete((yyvsp[-3].tmap).kwargs);
 	       }
-#line 6964 "CParse/parser.c"
+#line 6968 "CParse/parser.c"
     break;
 
   case 94: /* typemap_directive: TYPEMAP LPAREN typemap_type RPAREN tm_list EQUAL typemap_parm SEMI  */
-#line 3151 "CParse/parser.y"
+#line 3155 "CParse/parser.y"
                                                                                     {
 		   (yyval.node) = 0;
 		   if ((yyvsp[-5].tmap).method) {
@@ -6976,11 +6980,11 @@ yyreduce:
 		   }
 		   Delete((yyvsp[-5].tmap).kwargs);
 	       }
-#line 6980 "CParse/parser.c"
+#line 6984 "CParse/parser.c"
     break;
 
   case 95: /* typemap_type: kwargs  */
-#line 3166 "CParse/parser.y"
+#line 3170 "CParse/parser.y"
                         {
 		 String *name = Getattr((yyvsp[0].node), "name");
 		 Hash *p = nextSibling((yyvsp[0].node));
@@ -7001,27 +7005,27 @@ yyreduce:
 		   p = nextSibling(p);
 		 }
                 }
-#line 7005 "CParse/parser.c"
+#line 7009 "CParse/parser.c"
     break;
 
   case 96: /* tm_list: tm_list_builder  */
-#line 3188 "CParse/parser.y"
+#line 3192 "CParse/parser.y"
                                  {
 		 (yyval.p) = (yyvsp[0].pbuilder).parms;
 	       }
-#line 7013 "CParse/parser.c"
+#line 7017 "CParse/parser.c"
     break;
 
   case 97: /* tm_list_builder: typemap_parm  */
-#line 3193 "CParse/parser.y"
+#line 3197 "CParse/parser.y"
                               {
                  (yyval.pbuilder).parms = (yyval.pbuilder).last = (yyvsp[0].p);
 	       }
-#line 7021 "CParse/parser.c"
+#line 7025 "CParse/parser.c"
     break;
 
   case 98: /* tm_list_builder: tm_list_builder COMMA typemap_parm  */
-#line 3196 "CParse/parser.y"
+#line 3200 "CParse/parser.y"
                                                         {
 		 // Build a linked list in the order specified, but avoiding
 		 // a right recursion rule because "Right recursion uses up
@@ -7031,11 +7035,11 @@ yyreduce:
 		 (yyval.pbuilder).parms = (yyvsp[-2].pbuilder).parms;
 		 (yyval.pbuilder).last = (yyvsp[0].p);
 	       }
-#line 7035 "CParse/parser.c"
+#line 7039 "CParse/parser.c"
     break;
 
   case 99: /* typemap_parm: type plain_declarator  */
-#line 3207 "CParse/parser.y"
+#line 3211 "CParse/parser.y"
                                        {
                   Parm *parm;
 		  SwigType_push((yyvsp[-1].type),(yyvsp[0].decl).type);
@@ -7047,43 +7051,43 @@ yyreduce:
 		  /*		  $$ = NewParmWithoutFileLineInfo($type,$plain_declarator.id);
 				  Setattr($$,"parms",$plain_declarator.parms); */
                 }
-#line 7051 "CParse/parser.c"
+#line 7055 "CParse/parser.c"
     break;
 
   case 100: /* typemap_parm: LPAREN parms RPAREN  */
-#line 3218 "CParse/parser.y"
+#line 3222 "CParse/parser.y"
                                      {
                   (yyval.p) = new_node("typemapitem");
 		  Setattr((yyval.p),"pattern",(yyvsp[-1].pl));
 		  /*		  Setattr($$,"multitype",$parms); */
                }
-#line 7061 "CParse/parser.c"
+#line 7065 "CParse/parser.c"
     break;
 
   case 101: /* typemap_parm: LPAREN parms RPAREN LPAREN parms RPAREN  */
-#line 3223 "CParse/parser.y"
+#line 3227 "CParse/parser.y"
                                                                       {
 		 (yyval.p) = new_node("typemapitem");
 		 Setattr((yyval.p),"pattern", (yyvsp[-4].pl));
 		 /*                 Setattr($$,"multitype",$in); */
 		 Setattr((yyval.p),"parms",(yyvsp[-1].pl));
                }
-#line 7072 "CParse/parser.c"
+#line 7076 "CParse/parser.c"
     break;
 
   case 102: /* types_directive: TYPES LPAREN parms RPAREN stringbracesemi  */
-#line 3236 "CParse/parser.y"
+#line 3240 "CParse/parser.y"
                                                             {
                    (yyval.node) = new_node("types");
 		   Setattr((yyval.node),"parms",(yyvsp[-2].pl));
                    if ((yyvsp[0].str))
 		     Setattr((yyval.node),"convcode",NewString((yyvsp[0].str)));
                }
-#line 7083 "CParse/parser.c"
+#line 7087 "CParse/parser.c"
     break;
 
   case 103: /* template_directive: SWIGTEMPLATE LPAREN idstringopt RPAREN idcolonnt LESSTHAN valparms GREATERTHAN SEMI  */
-#line 3248 "CParse/parser.y"
+#line 3252 "CParse/parser.y"
                                                                                                         {
                   Parm *p;
 		  Node *n = 0;
@@ -7360,20 +7364,20 @@ yyreduce:
 		  Namespaceprefix = Swig_symbol_qualifiedscopename(0);
 		  Delete(symname);
                 }
-#line 7364 "CParse/parser.c"
+#line 7368 "CParse/parser.c"
     break;
 
   case 104: /* warn_directive: WARN string  */
-#line 3530 "CParse/parser.y"
+#line 3534 "CParse/parser.y"
                              {
 		  Swig_warning(0,cparse_file, cparse_line,"%s\n", (yyvsp[0].str));
 		  (yyval.node) = 0;
                }
-#line 7373 "CParse/parser.c"
+#line 7377 "CParse/parser.c"
     break;
 
   case 105: /* c_declaration: c_decl  */
-#line 3540 "CParse/parser.y"
+#line 3544 "CParse/parser.y"
                          {
                     (yyval.node) = (yyvsp[0].node); 
                     if ((yyval.node)) {
@@ -7381,21 +7385,21 @@ yyreduce:
                       default_arguments((yyval.node));
    	            }
                 }
-#line 7385 "CParse/parser.c"
+#line 7389 "CParse/parser.c"
     break;
 
   case 109: /* $@3: %empty  */
-#line 3553 "CParse/parser.y"
+#line 3557 "CParse/parser.y"
                                        {
 		  if (Strcmp((yyvsp[-1].str),"C") == 0) {
 		    cparse_externc = 1;
 		  }
 		}
-#line 7395 "CParse/parser.c"
+#line 7399 "CParse/parser.c"
     break;
 
   case 110: /* c_declaration: EXTERN string LBRACE $@3 interface RBRACE  */
-#line 3557 "CParse/parser.y"
+#line 3561 "CParse/parser.y"
                                    {
 		  cparse_externc = 0;
 		  if (Strcmp((yyvsp[-4].str),"C") == 0) {
@@ -7425,22 +7429,22 @@ yyreduce:
 		    appendChild((yyval.node),firstChild((yyvsp[-1].node)));
 		  }
                 }
-#line 7429 "CParse/parser.c"
+#line 7433 "CParse/parser.c"
     break;
 
   case 111: /* c_declaration: cpp_lambda_decl  */
-#line 3586 "CParse/parser.y"
+#line 3590 "CParse/parser.y"
                                   {
 		  (yyval.node) = (yyvsp[0].node);
 		  SWIG_WARN_NODE_BEGIN((yyval.node));
 		  Swig_warning(WARN_CPP11_LAMBDA, cparse_file, cparse_line, "Lambda expressions and closures are not fully supported yet.\n");
 		  SWIG_WARN_NODE_END((yyval.node));
 		}
-#line 7440 "CParse/parser.c"
+#line 7444 "CParse/parser.c"
     break;
 
   case 112: /* c_declaration: USING idcolon EQUAL type plain_declarator SEMI  */
-#line 3592 "CParse/parser.y"
+#line 3596 "CParse/parser.y"
                                                                  {
 		  /* Convert using statement to a typedef statement */
 		  (yyval.node) = new_node("cdecl");
@@ -7451,11 +7455,11 @@ yyreduce:
 		  SetFlag((yyval.node),"typealias");
 		  add_symbols((yyval.node));
 		}
-#line 7455 "CParse/parser.c"
+#line 7459 "CParse/parser.c"
     break;
 
   case 113: /* c_declaration: TEMPLATE LESSTHAN template_parms GREATERTHAN requires_clause_opt USING idcolon EQUAL type plain_declarator SEMI  */
-#line 3602 "CParse/parser.y"
+#line 3606 "CParse/parser.y"
                                                                                                                                   {
 		  /* Convert alias template to a "template" typedef statement */
 		  (yyval.node) = new_node("template");
@@ -7470,11 +7474,11 @@ yyreduce:
 		    Setattr((yyval.node), "constraint", (yyvsp[-6].node));
 		  add_symbols((yyval.node));
 		}
-#line 7474 "CParse/parser.c"
+#line 7478 "CParse/parser.c"
     break;
 
   case 115: /* c_decl: storage_class type declarator cpp_const initializer c_decl_tail  */
-#line 3623 "CParse/parser.y"
+#line 3627 "CParse/parser.y"
                                                                           {
 	      String *decl = (yyvsp[-3].decl).type;
               (yyval.node) = new_node("cdecl");
@@ -7562,11 +7566,11 @@ yyreduce:
               if ((yyval.node)) promote_abbreviated_template((yyval.node));
 	      Delete((yyvsp[-5].str));
            }
-#line 7566 "CParse/parser.c"
+#line 7570 "CParse/parser.c"
     break;
 
   case 116: /* c_decl: storage_class type declarator cpp_const EQUAL error SEMI  */
-#line 3710 "CParse/parser.y"
+#line 3714 "CParse/parser.y"
                                                                       {
 	      String *decl = (yyvsp[-4].decl).type;
 	      (yyval.node) = new_node("cdecl");
@@ -7613,11 +7617,11 @@ yyreduce:
 		Swig_error(cparse_file, cparse_line, "Static function %s cannot have a qualifier.\n", Swig_name_decl((yyval.node)));
 	      Delete((yyvsp[-6].str));
 	   }
-#line 7617 "CParse/parser.c"
+#line 7621 "CParse/parser.c"
     break;
 
   case 117: /* c_decl: storage_class idcolon AUTO declarator cpp_const ARROW cpp_alternate_rettype virt_specifier_seq_opt initializer c_decl_tail  */
-#line 3761 "CParse/parser.y"
+#line 3765 "CParse/parser.y"
                                                                                                                                         {
               Node *atom;
               (yyval.node) = new_node("cdecl");
@@ -7680,11 +7684,11 @@ yyreduce:
               if ((yyval.node)) promote_abbreviated_template((yyval.node));
 	      Delete((yyvsp[-9].str));
            }
-#line 7684 "CParse/parser.c"
+#line 7688 "CParse/parser.c"
     break;
 
   case 118: /* c_decl: storage_class AUTO declarator cpp_const ARROW cpp_alternate_rettype virt_specifier_seq_opt initializer c_decl_tail  */
-#line 3825 "CParse/parser.y"
+#line 3829 "CParse/parser.y"
                                                                                                                                 {
               (yyval.node) = new_node("cdecl");
 	      if ((yyvsp[-5].dtype).qualifier) SwigType_push((yyvsp[-6].decl).type, (yyvsp[-5].dtype).qualifier);
@@ -7745,11 +7749,11 @@ yyreduce:
               if ((yyval.node)) promote_abbreviated_template((yyval.node));
 	      Delete((yyvsp[-8].str));
            }
-#line 7749 "CParse/parser.c"
+#line 7753 "CParse/parser.c"
     break;
 
   case 119: /* c_decl: storage_class AUTO declarator cpp_const LBRACE  */
-#line 3892 "CParse/parser.y"
+#line 3896 "CParse/parser.y"
                                                             {
 	      if (skip_balanced('{','}') < 0) Exit(EXIT_FAILURE);
 
@@ -7791,11 +7795,11 @@ yyreduce:
 		Swig_error(cparse_file, cparse_line, "Static function %s cannot have a qualifier.\n", Swig_name_decl((yyval.node)));
 	      Delete((yyvsp[-4].str));
 	   }
-#line 7795 "CParse/parser.c"
+#line 7799 "CParse/parser.c"
     break;
 
   case 120: /* c_decl: storage_class idcolon AUTO declarator cpp_const LBRACE  */
-#line 3938 "CParse/parser.y"
+#line 3942 "CParse/parser.y"
                                                                     {
 	      Node *atom;
 	      if (skip_balanced('{','}') < 0) Exit(EXIT_FAILURE);
@@ -7839,11 +7843,11 @@ yyreduce:
 		Swig_error(cparse_file, cparse_line, "Static function %s cannot have a qualifier.\n", Swig_name_decl((yyval.node)));
 	      Delete((yyvsp[-5].str));
 	   }
-#line 7843 "CParse/parser.c"
+#line 7847 "CParse/parser.c"
     break;
 
   case 121: /* c_decl: storage_class AUTO declarator cpp_const SEMI  */
-#line 3985 "CParse/parser.y"
+#line 3989 "CParse/parser.y"
                                                           {
 	      (yyval.node) = new_node("cdecl");
 	      if ((yyvsp[-1].dtype).qualifier) SwigType_push((yyvsp[-2].decl).type, (yyvsp[-1].dtype).qualifier);
@@ -7883,11 +7887,11 @@ yyreduce:
 		Swig_error(cparse_file, cparse_line, "Static function %s cannot have a qualifier.\n", Swig_name_decl((yyval.node)));
 	      Delete((yyvsp[-4].str));
 	   }
-#line 7887 "CParse/parser.c"
+#line 7891 "CParse/parser.c"
     break;
 
   case 122: /* c_decl: storage_class idcolon AUTO declarator cpp_const SEMI  */
-#line 4027 "CParse/parser.y"
+#line 4031 "CParse/parser.y"
                                                                   {
 	      Node *atom;
 	      (yyval.node) = new_node("cdecl");
@@ -7929,11 +7933,11 @@ yyreduce:
 		Swig_error(cparse_file, cparse_line, "Static function %s cannot have a qualifier.\n", Swig_name_decl((yyval.node)));
 	      Delete((yyvsp[-5].str));
 	   }
-#line 7933 "CParse/parser.c"
+#line 7937 "CParse/parser.c"
     break;
 
   case 123: /* c_decl: storage_class AUTO idcolon EQUAL definetype SEMI  */
-#line 4069 "CParse/parser.y"
+#line 4073 "CParse/parser.y"
                                                               {
 	      SwigType *type = deduce_type(&(yyvsp[-1].dtype));
 	      if (!type)
@@ -7950,11 +7954,11 @@ yyreduce:
 	      Delete((yyvsp[-5].str));
 	      Delete(type);
 	   }
-#line 7954 "CParse/parser.c"
+#line 7958 "CParse/parser.c"
     break;
 
   case 124: /* c_decl: storage_class AUTO idcolon EQUAL error SEMI  */
-#line 4086 "CParse/parser.y"
+#line 4090 "CParse/parser.y"
                                                          {
 	      SwigType *type = NewString("auto");
 	      (yyval.node) = new_node("cdecl");
@@ -7966,20 +7970,20 @@ yyreduce:
 	      Delete((yyvsp[-5].str));
 	      Delete(type);
 	   }
-#line 7970 "CParse/parser.c"
+#line 7974 "CParse/parser.c"
     break;
 
   case 125: /* c_decl_tail: SEMI  */
-#line 4101 "CParse/parser.y"
+#line 4105 "CParse/parser.y"
                       { 
                    (yyval.node) = 0;
                    Clear(scanner_ccode); 
                }
-#line 7979 "CParse/parser.c"
+#line 7983 "CParse/parser.c"
     break;
 
   case 126: /* c_decl_tail: COMMA declarator cpp_const initializer c_decl_tail  */
-#line 4105 "CParse/parser.y"
+#line 4109 "CParse/parser.y"
                                                                         {
 		 (yyval.node) = new_node("cdecl");
 		 if ((yyvsp[-2].dtype).qualifier) SwigType_push((yyvsp[-3].decl).type,(yyvsp[-2].dtype).qualifier);
@@ -8007,20 +8011,20 @@ yyreduce:
 		   set_nextSibling((yyval.node), (yyvsp[0].node));
 		 }
 	       }
-#line 8011 "CParse/parser.c"
+#line 8015 "CParse/parser.c"
     break;
 
   case 127: /* c_decl_tail: LBRACE  */
-#line 4132 "CParse/parser.y"
+#line 4136 "CParse/parser.y"
                         { 
                    if (skip_balanced('{','}') < 0) Exit(EXIT_FAILURE);
                    (yyval.node) = 0;
                }
-#line 8020 "CParse/parser.c"
+#line 8024 "CParse/parser.c"
     break;
 
   case 128: /* c_decl_tail: error  */
-#line 4136 "CParse/parser.y"
+#line 4140 "CParse/parser.y"
                        {
 		   (yyval.node) = 0;
 		   if (yychar == RPAREN) {
@@ -8030,183 +8034,183 @@ yyreduce:
 		   }
 		   Exit(EXIT_FAILURE);
                }
-#line 8034 "CParse/parser.c"
+#line 8038 "CParse/parser.c"
     break;
 
   case 130: /* initializer: COLON expr  */
-#line 4148 "CParse/parser.y"
+#line 4152 "CParse/parser.y"
                            {
 		(yyval.dtype) = default_dtype;
 		(yyval.dtype).bitfield = (yyvsp[0].dtype).val;
 	      }
-#line 8043 "CParse/parser.c"
+#line 8047 "CParse/parser.c"
     break;
 
   case 134: /* cpp_alternate_rettype: c_enum_key idcolon  */
-#line 4157 "CParse/parser.y"
+#line 4161 "CParse/parser.y"
                                    {
 		(yyval.type) = (yyvsp[0].str);
 		Insert((yyval.type), 0, "enum ");
 	      }
-#line 8052 "CParse/parser.c"
+#line 8056 "CParse/parser.c"
     break;
 
   case 135: /* cpp_alternate_rettype: idcolon  */
-#line 4161 "CParse/parser.y"
+#line 4165 "CParse/parser.y"
                         { (yyval.type) = (yyvsp[0].str); }
-#line 8058 "CParse/parser.c"
+#line 8062 "CParse/parser.c"
     break;
 
   case 136: /* cpp_alternate_rettype: idcolon AND  */
-#line 4162 "CParse/parser.y"
+#line 4166 "CParse/parser.y"
                             {
                 (yyval.type) = (yyvsp[-1].str);
                 SwigType_add_reference((yyval.type));
               }
-#line 8067 "CParse/parser.c"
+#line 8071 "CParse/parser.c"
     break;
 
   case 137: /* cpp_alternate_rettype: idcolon LAND  */
-#line 4166 "CParse/parser.y"
+#line 4170 "CParse/parser.y"
                              {
                 (yyval.type) = (yyvsp[-1].str);
                 SwigType_add_rvalue_reference((yyval.type));
               }
-#line 8076 "CParse/parser.c"
+#line 8080 "CParse/parser.c"
     break;
 
   case 138: /* cpp_alternate_rettype: CONST_QUAL idcolon AND  */
-#line 4170 "CParse/parser.y"
+#line 4174 "CParse/parser.y"
                                        {
                 (yyval.type) = (yyvsp[-1].str);
                 SwigType_add_qualifier((yyval.type), "const");
                 SwigType_add_reference((yyval.type));
               }
-#line 8086 "CParse/parser.c"
+#line 8090 "CParse/parser.c"
     break;
 
   case 139: /* cpp_alternate_rettype: CONST_QUAL idcolon LAND  */
-#line 4175 "CParse/parser.y"
+#line 4179 "CParse/parser.y"
                                         {
                 (yyval.type) = (yyvsp[-1].str);
                 SwigType_add_qualifier((yyval.type), "const");
                 SwigType_add_rvalue_reference((yyval.type));
               }
-#line 8096 "CParse/parser.c"
+#line 8100 "CParse/parser.c"
     break;
 
   case 141: /* cpp_lambda_decl: storage_class AUTO idcolon EQUAL lambda_introducer lambda_template requires_clause_opt LPAREN parms RPAREN cpp_const lambda_body lambda_tail  */
-#line 4191 "CParse/parser.y"
+#line 4195 "CParse/parser.y"
                                                                                                                                                                {
 		  (yyval.node) = new_node("lambda");
 		  Setattr((yyval.node),"name",(yyvsp[-10].str));
 		  Delete((yyvsp[-12].str));
 		  add_symbols((yyval.node));
 	        }
-#line 8107 "CParse/parser.c"
+#line 8111 "CParse/parser.c"
     break;
 
   case 142: /* cpp_lambda_decl: storage_class AUTO idcolon EQUAL lambda_introducer lambda_template requires_clause_opt LPAREN parms RPAREN cpp_const ARROW type requires_clause_opt lambda_body lambda_tail  */
-#line 4197 "CParse/parser.y"
+#line 4201 "CParse/parser.y"
                                                                                                                                                                                               {
 		  (yyval.node) = new_node("lambda");
 		  Setattr((yyval.node),"name",(yyvsp[-13].str));
 		  Delete((yyvsp[-15].str));
 		  add_symbols((yyval.node));
 		}
-#line 8118 "CParse/parser.c"
+#line 8122 "CParse/parser.c"
     break;
 
   case 143: /* cpp_lambda_decl: storage_class AUTO idcolon EQUAL lambda_introducer lambda_template requires_clause_opt lambda_body lambda_tail  */
-#line 4203 "CParse/parser.y"
+#line 4207 "CParse/parser.y"
                                                                                                                                  {
 		  (yyval.node) = new_node("lambda");
 		  Setattr((yyval.node),"name",(yyvsp[-6].str));
 		  Delete((yyvsp[-8].str));
 		  add_symbols((yyval.node));
 		}
-#line 8129 "CParse/parser.c"
+#line 8133 "CParse/parser.c"
     break;
 
   case 144: /* lambda_introducer: LBRACKET  */
-#line 4211 "CParse/parser.y"
+#line 4215 "CParse/parser.y"
                              {
 		  if (skip_balanced('[',']') < 0) Exit(EXIT_FAILURE);
 	        }
-#line 8137 "CParse/parser.c"
+#line 8141 "CParse/parser.c"
     break;
 
   case 145: /* lambda_template: LESSTHAN  */
-#line 4216 "CParse/parser.y"
+#line 4220 "CParse/parser.y"
                            {
 		  if (skip_balanced('<','>') < 0) Exit(EXIT_FAILURE);
 		}
-#line 8145 "CParse/parser.c"
+#line 8149 "CParse/parser.c"
     break;
 
   case 147: /* lambda_body: LBRACE  */
-#line 4222 "CParse/parser.y"
+#line 4226 "CParse/parser.y"
                      {
 		  if (skip_balanced('{','}') < 0) Exit(EXIT_FAILURE);
 		}
-#line 8153 "CParse/parser.c"
+#line 8157 "CParse/parser.c"
     break;
 
   case 149: /* $@4: %empty  */
-#line 4227 "CParse/parser.y"
+#line 4231 "CParse/parser.y"
                          {
 		  if (skip_balanced('(',')') < 0) Exit(EXIT_FAILURE);
 		}
-#line 8161 "CParse/parser.c"
+#line 8165 "CParse/parser.c"
     break;
 
   case 150: /* lambda_tail: LPAREN $@4 SEMI  */
-#line 4229 "CParse/parser.y"
+#line 4233 "CParse/parser.y"
                        {
 		}
-#line 8168 "CParse/parser.c"
+#line 8172 "CParse/parser.c"
     break;
 
   case 151: /* c_enum_key: ENUM  */
-#line 4239 "CParse/parser.y"
+#line 4243 "CParse/parser.y"
                   {
 		   (yyval.id) = "enum";
 	      }
-#line 8176 "CParse/parser.c"
+#line 8180 "CParse/parser.c"
     break;
 
   case 152: /* c_enum_key: ENUM CLASS  */
-#line 4242 "CParse/parser.y"
+#line 4246 "CParse/parser.y"
                            {
 		   (yyval.id) = "enum class";
 	      }
-#line 8184 "CParse/parser.c"
+#line 8188 "CParse/parser.c"
     break;
 
   case 153: /* c_enum_key: ENUM STRUCT  */
-#line 4245 "CParse/parser.y"
+#line 4249 "CParse/parser.y"
                             {
 		   (yyval.id) = "enum struct";
 	      }
-#line 8192 "CParse/parser.c"
+#line 8196 "CParse/parser.c"
     break;
 
   case 154: /* c_enum_inherit: COLON type_right  */
-#line 4254 "CParse/parser.y"
+#line 4258 "CParse/parser.y"
                                   {
                    (yyval.type) = (yyvsp[0].type);
               }
-#line 8200 "CParse/parser.c"
+#line 8204 "CParse/parser.c"
     break;
 
   case 155: /* c_enum_inherit: %empty  */
-#line 4257 "CParse/parser.y"
+#line 4261 "CParse/parser.y"
                        { (yyval.type) = 0; }
-#line 8206 "CParse/parser.c"
+#line 8210 "CParse/parser.c"
     break;
 
   case 156: /* c_enum_forward_decl: storage_class c_enum_key ename c_enum_inherit SEMI  */
-#line 4264 "CParse/parser.y"
+#line 4268 "CParse/parser.y"
                                                                          {
 		   SwigType *ty = 0;
 		   int scopedenum = (yyvsp[-2].id) && !Equal((yyvsp[-3].id), "enum");
@@ -8222,11 +8226,11 @@ yyreduce:
 		   Delete((yyvsp[-4].str));
 		   add_symbols((yyval.node));
 	      }
-#line 8226 "CParse/parser.c"
+#line 8230 "CParse/parser.c"
     break;
 
   case 157: /* c_enum_decl: storage_class c_enum_key ename c_enum_inherit LBRACE enumlist RBRACE SEMI  */
-#line 4287 "CParse/parser.y"
+#line 4291 "CParse/parser.y"
                                                                                          {
 		  SwigType *ty = 0;
 		  int scopedenum = (yyvsp[-5].id) && !Equal((yyvsp[-6].id), "enum");
@@ -8256,11 +8260,11 @@ yyreduce:
 		  }
 		  Delete((yyvsp[-7].str));
                }
-#line 8260 "CParse/parser.c"
+#line 8264 "CParse/parser.c"
     break;
 
   case 158: /* c_enum_decl: storage_class c_enum_key ename c_enum_inherit LBRACE enumlist RBRACE declarator cpp_const initializer c_decl_tail  */
-#line 4316 "CParse/parser.y"
+#line 4320 "CParse/parser.y"
                                                                                                                                    {
 		 Node *n;
 		 SwigType *ty = 0;
@@ -8357,11 +8361,11 @@ yyreduce:
 		 Delete((yyvsp[-10].str));
 		 Delete(unnamed);
 	       }
-#line 8361 "CParse/parser.c"
+#line 8365 "CParse/parser.c"
     break;
 
   case 159: /* c_constructor_decl: storage_class type LPAREN parms RPAREN ctor_end  */
-#line 4414 "CParse/parser.y"
+#line 4418 "CParse/parser.y"
                                                                      {
                    /* This is a sick hack.  If the ctor_end has parameters,
                       and the parms parameter only has 1 parameter, this
@@ -8413,20 +8417,20 @@ yyreduce:
 		      Exit(EXIT_FAILURE);
 		    }
                 }
-#line 8417 "CParse/parser.c"
+#line 8421 "CParse/parser.c"
     break;
 
   case 160: /* deduction_guide: storage_class type LPAREN parms RPAREN ARROW type requires_clause_opt SEMI  */
-#line 4473 "CParse/parser.y"
+#line 4477 "CParse/parser.y"
                                                                                              {
                     (yyval.node) = 0;
                     Delete((yyvsp[-8].str));
                 }
-#line 8426 "CParse/parser.c"
+#line 8430 "CParse/parser.c"
     break;
 
   case 167: /* @5: %empty  */
-#line 4497 "CParse/parser.y"
+#line 4501 "CParse/parser.y"
                                                                                             {
                    String *prefix;
                    List *bases = 0;
@@ -8523,11 +8527,11 @@ yyreduce:
 		     Delete(code);
 		   }
                }
-#line 8527 "CParse/parser.c"
+#line 8531 "CParse/parser.c"
     break;
 
   case 168: /* cpp_class_decl: storage_class cpptype idcolon class_virt_specifier_opt inherit LBRACE @5 cpp_members RBRACE cpp_opt_declarators  */
-#line 4592 "CParse/parser.y"
+#line 4596 "CParse/parser.y"
                                                               {
 		   Node *p;
 		   SwigType *ty;
@@ -8705,11 +8709,11 @@ yyreduce:
 		   Classprefix = currentOuterClass ? Getattr(currentOuterClass, "Classprefix") : 0;
 		   Delete((yyvsp[-9].str));
 	       }
-#line 8709 "CParse/parser.c"
+#line 8713 "CParse/parser.c"
     break;
 
   case 169: /* @6: %empty  */
-#line 4772 "CParse/parser.y"
+#line 4776 "CParse/parser.y"
                                                           {
 	       String *unnamed;
 	       String *code;
@@ -8756,11 +8760,11 @@ yyreduce:
 	       Setattr((yyval.node), "code", code);
 	       Delete(code);
 	     }
-#line 8760 "CParse/parser.c"
+#line 8764 "CParse/parser.c"
     break;
 
   case 170: /* cpp_class_decl: storage_class cpptype inherit LBRACE @6 cpp_members RBRACE cpp_opt_declarators  */
-#line 4817 "CParse/parser.y"
+#line 4821 "CParse/parser.y"
                                                             {
 	       String *unnamed;
                List *bases = 0;
@@ -8786,8 +8790,8 @@ yyreduce:
 	       /* swig4ada: a class with no name is dealt with here whether or not nested classes are flattened, as flattening
 		  loses the members which are declared with it, and takes the members of an anonymous union for members of the
 		  outer class. A typedef of such a class gives it a name, and is still flattened. */
-	       if (cparse_cplusplus && currentOuterClass && ignore_nested_classes
-		   && (!GetFlag((yyval.node), "feature:flatnested") || !((yyvsp[-7].str) && Equal((yyvsp[-7].str), "typedef")))) {
+	       if (cparse_cplusplus && currentOuterClass && (ignore_nested_classes || cparse_keep_unnamed_nested)
+		   && (!(GetFlag((yyval.node), "feature:flatnested") || cparse_keep_unnamed_nested) || !((yyvsp[-7].str) && Equal((yyvsp[-7].str), "typedef")))) {
 		 String *name;
 		 /* swig4ada: the class is kept on the node of the outer class, with its members and the names of the members
 		    which are declared with it, for a language module which lays the outer class out itself. */
@@ -8904,17 +8908,17 @@ yyreduce:
 	       Classprefix = currentOuterClass ? Getattr(currentOuterClass, "Classprefix") : 0;
 	       Delete((yyvsp[-7].str));
               }
-#line 8908 "CParse/parser.c"
+#line 8912 "CParse/parser.c"
     break;
 
   case 171: /* cpp_opt_declarators: SEMI  */
-#line 4962 "CParse/parser.y"
+#line 4966 "CParse/parser.y"
                             { (yyval.node) = 0; }
-#line 8914 "CParse/parser.c"
+#line 8918 "CParse/parser.c"
     break;
 
   case 172: /* cpp_opt_declarators: declarator cpp_const initializer c_decl_tail  */
-#line 4963 "CParse/parser.y"
+#line 4967 "CParse/parser.y"
                                                                     {
                         (yyval.node) = new_node("cdecl");
                         Setattr((yyval.node),"name",(yyvsp[-3].decl).id);
@@ -8922,11 +8926,11 @@ yyreduce:
                         Setattr((yyval.node),"parms",(yyvsp[-3].decl).parms);
 			set_nextSibling((yyval.node), (yyvsp[0].node));
                     }
-#line 8926 "CParse/parser.c"
+#line 8930 "CParse/parser.c"
     break;
 
   case 173: /* cpp_forward_class_decl: storage_class cpptype idcolon SEMI  */
-#line 4975 "CParse/parser.y"
+#line 4979 "CParse/parser.y"
                                                             {
 	      if ((yyvsp[-3].str) && Strstr((yyvsp[-3].str), "friend")) {
 		/* Ignore */
@@ -8940,22 +8944,22 @@ yyreduce:
 	      }
 	      Delete((yyvsp[-3].str));
              }
-#line 8944 "CParse/parser.c"
+#line 8948 "CParse/parser.c"
     break;
 
   case 174: /* $@7: %empty  */
-#line 4994 "CParse/parser.y"
+#line 4998 "CParse/parser.y"
                                                                                      {
 		    if (currentOuterClass)
 		      Setattr(currentOuterClass, "template_parameters", template_parameters);
 		    template_parameters = (yyvsp[-2].tparms);
 		    parsing_template_declaration = 1;
 		  }
-#line 8955 "CParse/parser.c"
+#line 8959 "CParse/parser.c"
     break;
 
   case 175: /* cpp_template_decl: TEMPLATE LESSTHAN template_parms GREATERTHAN requires_clause_opt $@7 cpp_template_possible  */
-#line 4999 "CParse/parser.y"
+#line 5003 "CParse/parser.y"
                                           {
 			String *tname = 0;
 			int     error = 0;
@@ -9182,90 +9186,90 @@ yyreduce:
 			  template_parameters = 0;
 			parsing_template_declaration = 0;
                 }
-#line 9186 "CParse/parser.c"
+#line 9190 "CParse/parser.c"
     break;
 
   case 176: /* cpp_template_decl: TEMPLATE cpptype idcolon  */
-#line 5227 "CParse/parser.y"
+#line 5231 "CParse/parser.y"
                                            {
 		  Swig_warning(WARN_PARSE_EXPLICIT_TEMPLATE, cparse_file, cparse_line, "Explicit template instantiation ignored.\n");
                   (yyval.node) = 0; 
 		}
-#line 9195 "CParse/parser.c"
+#line 9199 "CParse/parser.c"
     break;
 
   case 177: /* cpp_template_decl: TEMPLATE cpp_alternate_rettype idcolon LPAREN parms RPAREN  */
-#line 5233 "CParse/parser.y"
+#line 5237 "CParse/parser.y"
                                                                              {
 			Swig_warning(WARN_PARSE_EXPLICIT_TEMPLATE, cparse_file, cparse_line, "Explicit template instantiation ignored.\n");
                   (yyval.node) = 0; 
 		}
-#line 9204 "CParse/parser.c"
+#line 9208 "CParse/parser.c"
     break;
 
   case 178: /* cpp_template_decl: EXTERN TEMPLATE cpptype idcolon  */
-#line 5239 "CParse/parser.y"
+#line 5243 "CParse/parser.y"
                                                   {
 		  Swig_warning(WARN_PARSE_EXTERN_TEMPLATE, cparse_file, cparse_line, "Extern template ignored.\n");
                   (yyval.node) = 0; 
                 }
-#line 9213 "CParse/parser.c"
+#line 9217 "CParse/parser.c"
     break;
 
   case 179: /* cpp_template_decl: EXTERN TEMPLATE cpp_alternate_rettype idcolon LPAREN parms RPAREN  */
-#line 5245 "CParse/parser.y"
+#line 5249 "CParse/parser.y"
                                                                                     {
 			Swig_warning(WARN_PARSE_EXTERN_TEMPLATE, cparse_file, cparse_line, "Extern template ignored.\n");
                   (yyval.node) = 0; 
 		}
-#line 9222 "CParse/parser.c"
+#line 9226 "CParse/parser.c"
     break;
 
   case 183: /* cpp_template_possible: cpp_template_decl  */
-#line 5254 "CParse/parser.y"
+#line 5258 "CParse/parser.y"
                                     {
 		  (yyval.node) = 0;
                 }
-#line 9230 "CParse/parser.c"
+#line 9234 "CParse/parser.c"
     break;
 
   case 188: /* cpp_concept_decl: CONCEPT idcolon EQUAL constraint SEMI  */
-#line 5270 "CParse/parser.y"
+#line 5274 "CParse/parser.y"
                                                          {
                   (yyval.node) = new_node("concept");
                   Setattr((yyval.node), "name", (yyvsp[-3].str));
                   Setattr((yyval.node), "type", NewString("bool"));
                   Setattr((yyval.node), "constraint", (yyvsp[-1].node));
                 }
-#line 9241 "CParse/parser.c"
+#line 9245 "CParse/parser.c"
     break;
 
   case 189: /* template_parms: template_parms_builder  */
-#line 5278 "CParse/parser.y"
+#line 5282 "CParse/parser.y"
                                         {
 		 (yyval.tparms) = (yyvsp[0].pbuilder).parms;
 	       }
-#line 9249 "CParse/parser.c"
+#line 9253 "CParse/parser.c"
     break;
 
   case 190: /* template_parms: %empty  */
-#line 5281 "CParse/parser.y"
+#line 5285 "CParse/parser.y"
                         {
 		 (yyval.tparms) = 0;
 	       }
-#line 9257 "CParse/parser.c"
+#line 9261 "CParse/parser.c"
     break;
 
   case 191: /* template_parms_builder: templateparameter  */
-#line 5286 "CParse/parser.y"
+#line 5290 "CParse/parser.y"
                                            {
 		    (yyval.pbuilder).parms = (yyval.pbuilder).last = (yyvsp[0].p);
 		  }
-#line 9265 "CParse/parser.c"
+#line 9269 "CParse/parser.c"
     break;
 
   case 192: /* template_parms_builder: template_parms_builder COMMA templateparameter  */
-#line 5289 "CParse/parser.y"
+#line 5293 "CParse/parser.y"
                                                                        {
 		    // Build a linked list in the order specified, but avoiding
 		    // a right recursion rule because "Right recursion uses up
@@ -9275,11 +9279,11 @@ yyreduce:
 		    (yyval.pbuilder).parms = (yyvsp[-2].pbuilder).parms;
 		    (yyval.pbuilder).last = (yyvsp[0].p);
 		  }
-#line 9279 "CParse/parser.c"
+#line 9283 "CParse/parser.c"
     break;
 
   case 193: /* templateparameter: templcpptype def_args  */
-#line 5300 "CParse/parser.y"
+#line 5304 "CParse/parser.y"
                                           {
 		    (yyval.p) = NewParmWithoutFileLineInfo((yyvsp[-1].type), 0);
 		    Setfile((yyval.p), cparse_file);
@@ -9288,11 +9292,11 @@ yyreduce:
 		    if ((yyvsp[0].dtype).stringval) Setattr((yyval.p), "stringval", (yyvsp[0].dtype).stringval);
 		    if ((yyvsp[0].dtype).numval) Setattr((yyval.p), "numval", (yyvsp[0].dtype).numval);
 		  }
-#line 9292 "CParse/parser.c"
+#line 9296 "CParse/parser.c"
     break;
 
   case 194: /* templateparameter: TEMPLATE LESSTHAN template_parms GREATERTHAN cpptype idcolon def_args  */
-#line 5308 "CParse/parser.y"
+#line 5312 "CParse/parser.y"
                                                                                           {
 		    (yyval.p) = NewParmWithoutFileLineInfo(NewStringf("template< %s > %s %s", ParmList_str_defaultargs((yyvsp[-4].tparms)), (yyvsp[-2].type), (yyvsp[-1].str)), (yyvsp[-1].str));
 		    Setfile((yyval.p), cparse_file);
@@ -9301,11 +9305,11 @@ yyreduce:
 		      Setattr((yyval.p), "value", (yyvsp[0].dtype).val);
 		    }
 		  }
-#line 9305 "CParse/parser.c"
+#line 9309 "CParse/parser.c"
     break;
 
   case 195: /* templateparameter: TEMPLATE LESSTHAN template_parms GREATERTHAN cpptype def_args  */
-#line 5316 "CParse/parser.y"
+#line 5320 "CParse/parser.y"
                                                                                   {
 		    (yyval.p) = NewParmWithoutFileLineInfo(NewStringf("template< %s > %s", ParmList_str_defaultargs((yyvsp[-3].tparms)), (yyvsp[-1].type)), 0);
 		    Setfile((yyval.p), cparse_file);
@@ -9314,11 +9318,11 @@ yyreduce:
 		      Setattr((yyval.p), "value", (yyvsp[0].dtype).val);
 		    }
 		  }
-#line 9318 "CParse/parser.c"
+#line 9322 "CParse/parser.c"
     break;
 
   case 196: /* templateparameter: parm  */
-#line 5324 "CParse/parser.y"
+#line 5328 "CParse/parser.y"
                          {
 		    Parm *p = (yyvsp[0].p);
 		    String *name = Getattr(p, "name");
@@ -9384,11 +9388,11 @@ yyreduce:
                       }
                     }
                   }
-#line 9388 "CParse/parser.c"
+#line 9392 "CParse/parser.c"
     break;
 
   case 197: /* cpp_using_decl: USING idcolon SEMI  */
-#line 5393 "CParse/parser.y"
+#line 5397 "CParse/parser.y"
                                     {
                   String *uname = Swig_symbol_type_qualify((yyvsp[-1].str),0);
                   /* Possible TODO: In testcase using_member_multiple_inherit class Susing3, uname is "Susing1::usingmethod" instead of "Susing2::usingmethod" */
@@ -9400,11 +9404,11 @@ yyreduce:
 		  Delete(name);
 		  add_symbols((yyval.node));
              }
-#line 9404 "CParse/parser.c"
+#line 9408 "CParse/parser.c"
     break;
 
   case 198: /* cpp_using_decl: USING using_conversion SEMI  */
-#line 5404 "CParse/parser.y"
+#line 5408 "CParse/parser.y"
                                            {
                   /* Inherited conversion operator, e.g. "using Base::operator int;". */
                   String *uname = Swig_symbol_type_qualify((yyvsp[-1].str), 0);
@@ -9416,11 +9420,11 @@ yyreduce:
                   Delete(name);
                   add_symbols((yyval.node));
              }
-#line 9420 "CParse/parser.c"
+#line 9424 "CParse/parser.c"
     break;
 
   case 199: /* cpp_using_decl: USING idcolon ELLIPSIS SEMI  */
-#line 5415 "CParse/parser.y"
+#line 5419 "CParse/parser.y"
                                            {
                   /* C++17 pack expansion in a using-declaration, e.g. "using Ts::operator()...;" */
                   String *uname = Swig_symbol_type_qualify((yyvsp[-2].str), 0);
@@ -9433,11 +9437,11 @@ yyreduce:
                   Delete(name);
                   add_symbols((yyval.node));
              }
-#line 9437 "CParse/parser.c"
+#line 9441 "CParse/parser.c"
     break;
 
   case 200: /* cpp_using_decl: USING TYPENAME idcolon SEMI  */
-#line 5427 "CParse/parser.y"
+#line 5431 "CParse/parser.y"
                                            {
 		  String *uname = Swig_symbol_type_qualify((yyvsp[-1].str),0);
 		  String *name = Swig_scopename_last((yyvsp[-1].str));
@@ -9448,11 +9452,11 @@ yyreduce:
 		  Delete(name);
 		  add_symbols((yyval.node));
 	     }
-#line 9452 "CParse/parser.c"
+#line 9456 "CParse/parser.c"
     break;
 
   case 201: /* cpp_using_decl: USING TYPENAME idcolon ELLIPSIS SEMI  */
-#line 5437 "CParse/parser.y"
+#line 5441 "CParse/parser.y"
                                                     {
                   /* C++17 member type pack expansion, e.g. "using typename Ts::type...;" */
                   String *uname = Swig_symbol_type_qualify((yyvsp[-2].str), 0);
@@ -9465,11 +9469,11 @@ yyreduce:
                   Delete(name);
                   add_symbols((yyval.node));
              }
-#line 9469 "CParse/parser.c"
+#line 9473 "CParse/parser.c"
     break;
 
   case 202: /* cpp_using_decl: USING NAMESPACE idcolon SEMI  */
-#line 5449 "CParse/parser.y"
+#line 5453 "CParse/parser.y"
                                             {
 	       Node *n = Swig_symbol_clookup((yyvsp[-1].str),0);
 	       if (!n) {
@@ -9499,11 +9503,11 @@ yyreduce:
 		 }
 	       }
              }
-#line 9503 "CParse/parser.c"
+#line 9507 "CParse/parser.c"
     break;
 
   case 203: /* using_conversion: using_scope CONVERSIONOPERATOR type  */
-#line 5484 "CParse/parser.y"
+#line 5488 "CParse/parser.y"
                                                        {
                   /* The conversion type was re-fed to the scanner and is reparsed here as 'type',
                      but it is already part of the CONVERSIONOPERATOR name, so it is discarded. */
@@ -9512,20 +9516,20 @@ yyreduce:
                   Delete((yyvsp[-1].str));
                   Delete((yyvsp[0].type));
              }
-#line 9516 "CParse/parser.c"
+#line 9520 "CParse/parser.c"
     break;
 
   case 204: /* using_scope: idtemplate DCOLON  */
-#line 5494 "CParse/parser.y"
+#line 5498 "CParse/parser.y"
                                  {
                   (yyval.str) = NewStringf("%s::", (yyvsp[-1].str));
                   Delete((yyvsp[-1].str));
              }
-#line 9525 "CParse/parser.c"
+#line 9529 "CParse/parser.c"
     break;
 
   case 205: /* @8: %empty  */
-#line 5500 "CParse/parser.y"
+#line 5504 "CParse/parser.y"
                                                     {
                 Hash *h;
 		Node *parent_ns = 0;
@@ -9570,11 +9574,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		}
 		Delete(scopes);
              }
-#line 9574 "CParse/parser.c"
+#line 9578 "CParse/parser.c"
     break;
 
   case 206: /* cpp_namespace_decl: NAMESPACE idcolon LBRACE @8 interface RBRACE  */
-#line 5543 "CParse/parser.y"
+#line 5547 "CParse/parser.y"
                                       {
 		Node *n = (yyvsp[-2].node);
 		Node *top_ns = 0;
@@ -9590,11 +9594,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		Delete((yyvsp[-1].node));
 		(yyval.node) = top_ns;
              }
-#line 9594 "CParse/parser.c"
+#line 9598 "CParse/parser.c"
     break;
 
   case 207: /* @9: %empty  */
-#line 5558 "CParse/parser.y"
+#line 5562 "CParse/parser.y"
                                       {
 	       Hash *h;
 	       (yyval.node) = Swig_symbol_current();
@@ -9608,11 +9612,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 	       }
 	       Namespaceprefix = 0;
              }
-#line 9612 "CParse/parser.c"
+#line 9616 "CParse/parser.c"
     break;
 
   case 208: /* cpp_namespace_decl: NAMESPACE LBRACE @9 interface RBRACE  */
-#line 5570 "CParse/parser.y"
+#line 5574 "CParse/parser.y"
                                       {
 	       (yyval.node) = (yyvsp[-1].node);
 	       set_nodeType((yyval.node),"namespace");
@@ -9623,11 +9627,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 	       Namespaceprefix = Swig_symbol_qualifiedscopename(0);
 	       add_symbols((yyval.node));
              }
-#line 9627 "CParse/parser.c"
+#line 9631 "CParse/parser.c"
     break;
 
   case 209: /* cpp_namespace_decl: NAMESPACE identifier EQUAL idcolon SEMI  */
-#line 5580 "CParse/parser.y"
+#line 5584 "CParse/parser.y"
                                                        {
 	       /* Namespace alias */
 	       Node *n;
@@ -9653,64 +9657,64 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		 }
 	       }
              }
-#line 9657 "CParse/parser.c"
+#line 9661 "CParse/parser.c"
     break;
 
   case 210: /* cpp_members: cpp_members_builder  */
-#line 5607 "CParse/parser.y"
+#line 5611 "CParse/parser.y"
                                   {
 		 (yyval.node) = (yyvsp[0].nodebuilder).node;
 	       }
-#line 9665 "CParse/parser.c"
+#line 9669 "CParse/parser.c"
     break;
 
   case 211: /* cpp_members: cpp_members_builder DOXYGENSTRING  */
-#line 5610 "CParse/parser.y"
+#line 5614 "CParse/parser.y"
                                                    {
 		 /* Quietly ignore misplaced doxygen string after a member, like Doxygen does */
 		 (yyval.node) = (yyvsp[-1].nodebuilder).node;
 		 Delete((yyvsp[0].str));
 	       }
-#line 9675 "CParse/parser.c"
+#line 9679 "CParse/parser.c"
     break;
 
   case 212: /* cpp_members: %empty  */
-#line 5615 "CParse/parser.y"
+#line 5619 "CParse/parser.y"
                         {
 		 (yyval.node) = 0;
 	       }
-#line 9683 "CParse/parser.c"
+#line 9687 "CParse/parser.c"
     break;
 
   case 213: /* cpp_members: DOXYGENSTRING  */
-#line 5618 "CParse/parser.y"
+#line 5622 "CParse/parser.y"
                                {
 		 /* Quietly ignore misplaced doxygen string in empty class, like Doxygen does */
 		 (yyval.node) = 0;
 		 Delete((yyvsp[0].str));
 	       }
-#line 9693 "CParse/parser.c"
+#line 9697 "CParse/parser.c"
     break;
 
   case 214: /* cpp_members: error  */
-#line 5623 "CParse/parser.y"
+#line 5627 "CParse/parser.y"
                        {
 		 Swig_error(cparse_file, cparse_line, "Syntax error in input(3).\n");
 		 Exit(EXIT_FAILURE);
 	       }
-#line 9702 "CParse/parser.c"
+#line 9706 "CParse/parser.c"
     break;
 
   case 215: /* cpp_members_builder: cpp_member  */
-#line 5629 "CParse/parser.y"
+#line 5633 "CParse/parser.y"
                                  {
 	     (yyval.nodebuilder).node = (yyval.nodebuilder).last = (yyvsp[0].node);
 	   }
-#line 9710 "CParse/parser.c"
+#line 9714 "CParse/parser.c"
     break;
 
   case 216: /* cpp_members_builder: cpp_members_builder cpp_member  */
-#line 5632 "CParse/parser.y"
+#line 5636 "CParse/parser.y"
                                                 {
 	     // Build a linked list in the order specified, but avoiding
 	     // a right recursion rule because "Right recursion uses up
@@ -9733,11 +9737,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 	       (yyval.nodebuilder) = (yyvsp[-1].nodebuilder);
 	     }
 	   }
-#line 9737 "CParse/parser.c"
+#line 9741 "CParse/parser.c"
     break;
 
   case 218: /* cpp_member_no_dox: cpp_constructor_decl  */
-#line 5663 "CParse/parser.y"
+#line 5667 "CParse/parser.y"
                                     { 
                  (yyval.node) = (yyvsp[0].node); 
 		 if (extendmode && current_class) {
@@ -9755,69 +9759,69 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		 add_symbols((yyval.node));
                  default_arguments((yyval.node));
              }
-#line 9759 "CParse/parser.c"
+#line 9763 "CParse/parser.c"
     break;
 
   case 225: /* cpp_member_no_dox: storage_class idcolon SEMI  */
-#line 5686 "CParse/parser.y"
+#line 5690 "CParse/parser.y"
                                           { (yyval.node) = 0; Delete((yyvsp[-2].str)); }
-#line 9765 "CParse/parser.c"
+#line 9769 "CParse/parser.c"
     break;
 
   case 232: /* cpp_member_no_dox: anonymous_bitfield  */
-#line 5693 "CParse/parser.y"
+#line 5697 "CParse/parser.y"
                                   { (yyval.node) = 0; }
-#line 9771 "CParse/parser.c"
+#line 9775 "CParse/parser.c"
     break;
 
   case 235: /* cpp_member_no_dox: SEMI  */
-#line 5696 "CParse/parser.y"
+#line 5700 "CParse/parser.y"
                     { (yyval.node) = 0; }
-#line 9777 "CParse/parser.c"
+#line 9781 "CParse/parser.c"
     break;
 
   case 237: /* cpp_member: DOXYGENSTRING cpp_member_no_dox  */
-#line 5699 "CParse/parser.y"
+#line 5703 "CParse/parser.y"
                                                {
 	         (yyval.node) = (yyvsp[0].node);
 		 set_comment((yyvsp[0].node), (yyvsp[-1].str));
 	     }
-#line 9786 "CParse/parser.c"
+#line 9790 "CParse/parser.c"
     break;
 
   case 238: /* cpp_member: cpp_member_no_dox DOXYGENPOSTSTRING  */
-#line 5703 "CParse/parser.y"
+#line 5707 "CParse/parser.y"
                                                    {
 	         (yyval.node) = (yyvsp[-1].node);
 		 set_comment((yyvsp[-1].node), (yyvsp[0].str));
 	     }
-#line 9795 "CParse/parser.c"
+#line 9799 "CParse/parser.c"
     break;
 
   case 239: /* $@10: %empty  */
-#line 5707 "CParse/parser.y"
+#line 5711 "CParse/parser.y"
                              {
 	       extendmode = 1;
 	       if (cplus_mode != CPLUS_PUBLIC) {
 		 Swig_error(cparse_file,cparse_line,"%%extend can only be used in a public section\n");
 	       }
 	     }
-#line 9806 "CParse/parser.c"
+#line 9810 "CParse/parser.c"
     break;
 
   case 240: /* cpp_member: EXTEND LBRACE $@10 cpp_members RBRACE  */
-#line 5712 "CParse/parser.y"
+#line 5716 "CParse/parser.y"
                                   {
 	       extendmode = 0;
 	       (yyval.node) = new_node("extend");
 	       mark_nodes_as_extend((yyvsp[-1].node));
 	       appendChild((yyval.node), (yyvsp[-1].node));
 	     }
-#line 9817 "CParse/parser.c"
+#line 9821 "CParse/parser.c"
     break;
 
   case 241: /* cpp_constructor_decl: storage_class type LPAREN parms RPAREN ctor_end  */
-#line 5726 "CParse/parser.y"
+#line 5730 "CParse/parser.y"
                                                                        {
 	      /* Cannot be a constructor declaration/definition if parsed as a friend destructor/constructor
 	         or a badly declared friend function without return type */
@@ -9854,11 +9858,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
               }
 	      Delete((yyvsp[-5].str));
               }
-#line 9858 "CParse/parser.c"
+#line 9862 "CParse/parser.c"
     break;
 
   case 242: /* cpp_destructor_decl: storage_class NOT idtemplate LPAREN parms RPAREN cpp_vend  */
-#line 5766 "CParse/parser.y"
+#line 5770 "CParse/parser.y"
                                                                                 {
 	       String *name = SwigType_templateprefix((yyvsp[-4].str)); /* A destructor can optionally be declared with template parameters before C++20, strip these off */
 	       Insert(name, 0, "~");
@@ -9896,11 +9900,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 	       add_symbols((yyval.node));
 	       Delete((yyvsp[-6].str));
 	      }
-#line 9900 "CParse/parser.c"
+#line 9904 "CParse/parser.c"
     break;
 
   case 243: /* cpp_conversion_operator: storage_class CONVERSIONOPERATOR type pointer LPAREN parms RPAREN cpp_vend  */
-#line 5807 "CParse/parser.y"
+#line 5811 "CParse/parser.y"
                                                                                                      {
                  (yyval.node) = new_node("cdecl");
                  Setattr((yyval.node),"type",(yyvsp[-5].type));
@@ -9922,11 +9926,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		 Delete((yyvsp[-6].str));
 		 Delete((yyvsp[-7].str));
               }
-#line 9926 "CParse/parser.c"
+#line 9930 "CParse/parser.c"
     break;
 
   case 244: /* cpp_conversion_operator: storage_class CONVERSIONOPERATOR type AND LPAREN parms RPAREN cpp_vend  */
-#line 5828 "CParse/parser.y"
+#line 5832 "CParse/parser.y"
                                                                                         {
 		 SwigType *decl;
                  (yyval.node) = new_node("cdecl");
@@ -9950,11 +9954,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		 Delete((yyvsp[-6].str));
 		 Delete((yyvsp[-7].str));
 	       }
-#line 9954 "CParse/parser.c"
+#line 9958 "CParse/parser.c"
     break;
 
   case 245: /* cpp_conversion_operator: storage_class CONVERSIONOPERATOR type LAND LPAREN parms RPAREN cpp_vend  */
-#line 5851 "CParse/parser.y"
+#line 5855 "CParse/parser.y"
                                                                                          {
 		 SwigType *decl;
                  (yyval.node) = new_node("cdecl");
@@ -9978,11 +9982,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		 Delete((yyvsp[-6].str));
 		 Delete((yyvsp[-7].str));
 	       }
-#line 9982 "CParse/parser.c"
+#line 9986 "CParse/parser.c"
     break;
 
   case 246: /* cpp_conversion_operator: storage_class CONVERSIONOPERATOR type pointer AND LPAREN parms RPAREN cpp_vend  */
-#line 5875 "CParse/parser.y"
+#line 5879 "CParse/parser.y"
                                                                                                 {
 		 SwigType *decl;
                  (yyval.node) = new_node("cdecl");
@@ -10007,11 +10011,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		 Delete((yyvsp[-7].str));
 		 Delete((yyvsp[-8].str));
 	       }
-#line 10011 "CParse/parser.c"
+#line 10015 "CParse/parser.c"
     break;
 
   case 247: /* cpp_conversion_operator: storage_class CONVERSIONOPERATOR type LPAREN parms RPAREN cpp_vend  */
-#line 5900 "CParse/parser.y"
+#line 5904 "CParse/parser.y"
                                                                                    {
 		String *t = NewStringEmpty();
 		(yyval.node) = new_node("cdecl");
@@ -10033,87 +10037,87 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		Delete((yyvsp[-5].str));
 		Delete((yyvsp[-6].str));
               }
-#line 10037 "CParse/parser.c"
+#line 10041 "CParse/parser.c"
     break;
 
   case 248: /* cpp_catch_decl: CATCH LPAREN parms RPAREN LBRACE  */
-#line 5925 "CParse/parser.y"
+#line 5929 "CParse/parser.y"
                                                   {
                  if (skip_balanced('{','}') < 0) Exit(EXIT_FAILURE);
                  (yyval.node) = 0;
                }
-#line 10046 "CParse/parser.c"
+#line 10050 "CParse/parser.c"
     break;
 
   case 249: /* cpp_static_assert: STATIC_ASSERT LPAREN  */
-#line 5933 "CParse/parser.y"
+#line 5937 "CParse/parser.y"
                                          {
                 if (skip_balanced('(',')') < 0) Exit(EXIT_FAILURE);
                 (yyval.node) = 0;
               }
-#line 10055 "CParse/parser.c"
+#line 10059 "CParse/parser.c"
     break;
 
   case 250: /* cpp_protection_decl: PUBLIC COLON  */
-#line 5940 "CParse/parser.y"
+#line 5944 "CParse/parser.y"
                                    { 
                 (yyval.node) = new_node("access");
 		Setattr((yyval.node),"kind","public");
                 cplus_mode = CPLUS_PUBLIC;
               }
-#line 10065 "CParse/parser.c"
+#line 10069 "CParse/parser.c"
     break;
 
   case 251: /* cpp_protection_decl: PRIVATE COLON  */
-#line 5947 "CParse/parser.y"
+#line 5951 "CParse/parser.y"
                               { 
                 (yyval.node) = new_node("access");
                 Setattr((yyval.node),"kind","private");
 		cplus_mode = CPLUS_PRIVATE;
 	      }
-#line 10075 "CParse/parser.c"
+#line 10079 "CParse/parser.c"
     break;
 
   case 252: /* cpp_protection_decl: PROTECTED COLON  */
-#line 5955 "CParse/parser.y"
+#line 5959 "CParse/parser.y"
                                 { 
 		(yyval.node) = new_node("access");
 		Setattr((yyval.node),"kind","protected");
 		cplus_mode = CPLUS_PROTECTED;
 	      }
-#line 10085 "CParse/parser.c"
+#line 10089 "CParse/parser.c"
     break;
 
   case 263: /* cpp_vend: cpp_const SEMI  */
-#line 5978 "CParse/parser.y"
+#line 5982 "CParse/parser.y"
                                 { 
                      Clear(scanner_ccode);
                      (yyval.dtype) = (yyvsp[-1].dtype);
                }
-#line 10094 "CParse/parser.c"
+#line 10098 "CParse/parser.c"
     break;
 
   case 264: /* cpp_vend: cpp_const EQUAL definetype SEMI  */
-#line 5982 "CParse/parser.y"
+#line 5986 "CParse/parser.y"
                                                  { 
                      Clear(scanner_ccode);
                      (yyval.dtype) = (yyvsp[-3].dtype);
                      (yyval.dtype).val = (yyvsp[-1].dtype).val;
                }
-#line 10104 "CParse/parser.c"
+#line 10108 "CParse/parser.c"
     break;
 
   case 265: /* cpp_vend: cpp_const LBRACE  */
-#line 5987 "CParse/parser.y"
+#line 5991 "CParse/parser.y"
                                   { 
                      if (skip_balanced('{','}') < 0) Exit(EXIT_FAILURE);
                      (yyval.dtype) = (yyvsp[-1].dtype);
                }
-#line 10113 "CParse/parser.c"
+#line 10117 "CParse/parser.c"
     break;
 
   case 266: /* anonymous_bitfield: storage_class anon_bitfield_type COLON expr SEMI  */
-#line 5994 "CParse/parser.y"
+#line 5998 "CParse/parser.y"
                                                                        {
                    /* swig4ada: A bit-field with no name takes part in the layout of its class, so its line, width
                       and type are noted on the class, for a language module which lays the class out itself. */
@@ -10131,17 +10135,17 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
                    }
                    Delete((yyvsp[-4].str));
                  }
-#line 10135 "CParse/parser.c"
+#line 10139 "CParse/parser.c"
     break;
 
   case 270: /* anon_bitfield_type: idcolon  */
-#line 6017 "CParse/parser.y"
+#line 6021 "CParse/parser.y"
                          { (yyval.type) = (yyvsp[0].str); }
-#line 10141 "CParse/parser.c"
+#line 10145 "CParse/parser.c"
     break;
 
   case 271: /* storage_class: storage_class_list  */
-#line 6023 "CParse/parser.y"
+#line 6027 "CParse/parser.y"
                                     {
 		 String *r = NewStringEmpty();
 
@@ -10184,34 +10188,34 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		   (yyval.str) = r;
 		 }
 	       }
-#line 10188 "CParse/parser.c"
+#line 10192 "CParse/parser.c"
     break;
 
   case 272: /* storage_class: %empty  */
-#line 6065 "CParse/parser.y"
+#line 6069 "CParse/parser.y"
                         { (yyval.str) = 0; }
-#line 10194 "CParse/parser.c"
+#line 10198 "CParse/parser.c"
     break;
 
   case 274: /* storage_class_list: storage_class_list storage_class_raw  */
-#line 6069 "CParse/parser.y"
+#line 6073 "CParse/parser.y"
                                                           {
 		  if ((yyvsp[-1].intvalue) & (yyvsp[0].intvalue)) {
 		    Swig_error(cparse_file, cparse_line, "Repeated storage class or type specifier '%s'\n", storage_class_string((yyvsp[0].intvalue)));
 		  }
 		  (yyval.intvalue) = (yyvsp[-1].intvalue) | (yyvsp[0].intvalue);
 	       }
-#line 10205 "CParse/parser.c"
+#line 10209 "CParse/parser.c"
     break;
 
   case 275: /* storage_class_raw: EXTERN  */
-#line 6077 "CParse/parser.y"
+#line 6081 "CParse/parser.y"
                             { (yyval.intvalue) = SWIG_STORAGE_CLASS_EXTERN; }
-#line 10211 "CParse/parser.c"
+#line 10215 "CParse/parser.c"
     break;
 
   case 276: /* storage_class_raw: EXTERN string  */
-#line 6078 "CParse/parser.y"
+#line 6082 "CParse/parser.y"
                                {
 		   if (Strcmp((yyvsp[0].str),"C") == 0) {
 		     (yyval.intvalue) = SWIG_STORAGE_CLASS_EXTERNC;
@@ -10222,53 +10226,53 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		     (yyval.intvalue) = 0;
 		   }
 	       }
-#line 10226 "CParse/parser.c"
+#line 10230 "CParse/parser.c"
     break;
 
   case 277: /* storage_class_raw: STATIC  */
-#line 6088 "CParse/parser.y"
+#line 6092 "CParse/parser.y"
                         { (yyval.intvalue) = SWIG_STORAGE_CLASS_STATIC; }
-#line 10232 "CParse/parser.c"
+#line 10236 "CParse/parser.c"
     break;
 
   case 278: /* storage_class_raw: TYPEDEF  */
-#line 6089 "CParse/parser.y"
+#line 6093 "CParse/parser.y"
                          { (yyval.intvalue) = SWIG_STORAGE_CLASS_TYPEDEF; }
-#line 10238 "CParse/parser.c"
+#line 10242 "CParse/parser.c"
     break;
 
   case 279: /* storage_class_raw: VIRTUAL  */
-#line 6090 "CParse/parser.y"
+#line 6094 "CParse/parser.y"
                          { (yyval.intvalue) = SWIG_STORAGE_CLASS_VIRTUAL; }
-#line 10244 "CParse/parser.c"
+#line 10248 "CParse/parser.c"
     break;
 
   case 280: /* storage_class_raw: FRIEND  */
-#line 6091 "CParse/parser.y"
+#line 6095 "CParse/parser.y"
                         { (yyval.intvalue) = SWIG_STORAGE_CLASS_FRIEND; }
-#line 10250 "CParse/parser.c"
+#line 10254 "CParse/parser.c"
     break;
 
   case 281: /* storage_class_raw: EXPLICIT  */
-#line 6092 "CParse/parser.y"
+#line 6096 "CParse/parser.y"
                           { (yyval.intvalue) = SWIG_STORAGE_CLASS_EXPLICIT; }
-#line 10256 "CParse/parser.c"
+#line 10260 "CParse/parser.c"
     break;
 
   case 282: /* storage_class_raw: CONSTEXPR  */
-#line 6093 "CParse/parser.y"
+#line 6097 "CParse/parser.y"
                            { (yyval.intvalue) = SWIG_STORAGE_CLASS_CONSTEXPR; }
-#line 10262 "CParse/parser.c"
+#line 10266 "CParse/parser.c"
     break;
 
   case 283: /* storage_class_raw: THREAD_LOCAL  */
-#line 6094 "CParse/parser.y"
+#line 6098 "CParse/parser.y"
                               { (yyval.intvalue) = SWIG_STORAGE_CLASS_THREAD_LOCAL; }
-#line 10268 "CParse/parser.c"
+#line 10272 "CParse/parser.c"
     break;
 
   case 284: /* parms: rawparms  */
-#line 6101 "CParse/parser.y"
+#line 6105 "CParse/parser.y"
                           {
                  Parm *p;
 		 (yyval.pl) = (yyvsp[0].pl);
@@ -10278,47 +10282,47 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		   p = nextSibling(p);
                  }
                }
-#line 10282 "CParse/parser.c"
+#line 10286 "CParse/parser.c"
     break;
 
   case 285: /* rawparms: parm  */
-#line 6113 "CParse/parser.y"
+#line 6117 "CParse/parser.y"
                        { (yyval.pl) = (yyvsp[0].p); }
-#line 10288 "CParse/parser.c"
+#line 10292 "CParse/parser.c"
     break;
 
   case 286: /* rawparms: parm DOXYGENPOSTSTRING  */
-#line 6114 "CParse/parser.y"
+#line 6118 "CParse/parser.y"
                                          {
 		  set_comment((yyvsp[-1].p), (yyvsp[0].str));
 		  (yyval.pl) = (yyvsp[-1].p);
 		}
-#line 10297 "CParse/parser.c"
+#line 10301 "CParse/parser.c"
     break;
 
   case 287: /* rawparms: parm DOXYGENSTRING  */
-#line 6118 "CParse/parser.y"
+#line 6122 "CParse/parser.y"
                                      {
 		  /* Misplaced doxygen string, attach it to previous parameter, like Doxygen does */
 		  set_comment((yyvsp[-1].p), (yyvsp[0].str));
 		  (yyval.pl) = (yyvsp[-1].p);
 		}
-#line 10307 "CParse/parser.c"
+#line 10311 "CParse/parser.c"
     break;
 
   case 288: /* rawparms: parm COMMA parms  */
-#line 6123 "CParse/parser.y"
+#line 6127 "CParse/parser.y"
                                    {
 		  if ((yyvsp[0].pl)) {
 		    set_nextSibling((yyvsp[-2].p), (yyvsp[0].pl));
 		  }
 		  (yyval.pl) = (yyvsp[-2].p);
 		}
-#line 10318 "CParse/parser.c"
+#line 10322 "CParse/parser.c"
     break;
 
   case 289: /* rawparms: parm DOXYGENPOSTSTRING COMMA parms  */
-#line 6129 "CParse/parser.y"
+#line 6133 "CParse/parser.y"
                                                      {
 		  if ((yyvsp[0].pl)) {
 		    set_nextSibling((yyvsp[-3].p), (yyvsp[0].pl));
@@ -10326,11 +10330,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		  set_comment((yyvsp[-3].p), (yyvsp[-2].str));
 		  (yyval.pl) = (yyvsp[-3].p);
 		}
-#line 10330 "CParse/parser.c"
+#line 10334 "CParse/parser.c"
     break;
 
   case 290: /* rawparms: parm COMMA DOXYGENPOSTSTRING parms  */
-#line 6136 "CParse/parser.y"
+#line 6140 "CParse/parser.y"
                                                      {
 		  if ((yyvsp[0].pl)) {
 		    set_nextSibling((yyvsp[-3].p), (yyvsp[0].pl));
@@ -10338,19 +10342,19 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		  set_comment((yyvsp[-3].p), (yyvsp[-1].str));
 		  (yyval.pl) = (yyvsp[-3].p);
 		}
-#line 10342 "CParse/parser.c"
+#line 10346 "CParse/parser.c"
     break;
 
   case 291: /* rawparms: %empty  */
-#line 6143 "CParse/parser.y"
+#line 6147 "CParse/parser.y"
                          {
 		  (yyval.pl) = 0;
 		}
-#line 10350 "CParse/parser.c"
+#line 10354 "CParse/parser.c"
     break;
 
   case 292: /* parm_no_dox: rawtype parameter_declarator  */
-#line 6148 "CParse/parser.y"
+#line 6152 "CParse/parser.y"
                                                {
                    SwigType_push((yyvsp[-1].type),(yyvsp[0].decl).type);
 		   (yyval.p) = NewParmWithoutFileLineInfo((yyvsp[-1].type),(yyvsp[0].decl).id);
@@ -10363,11 +10367,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		   if ((yyvsp[0].decl).numdefarg)
 		     Setattr((yyval.p), "numval", (yyvsp[0].decl).numdefarg);
 		}
-#line 10367 "CParse/parser.c"
+#line 10371 "CParse/parser.c"
     break;
 
   case 293: /* parm_no_dox: AUTO parameter_declarator  */
-#line 6160 "CParse/parser.y"
+#line 6164 "CParse/parser.y"
                                             {
                    /* C++14 generic lambda / C++20 abbreviated function template parm, e.g. 'auto x'.  Placed in parm_no_dox
                     * rather than type_right so it does not collide with the 'storage_class AUTO declarator ...' rules. */
@@ -10383,11 +10387,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
                    if ((yyvsp[0].decl).numdefarg)
                      Setattr((yyval.p), "numval", (yyvsp[0].decl).numdefarg);
                 }
-#line 10387 "CParse/parser.c"
+#line 10391 "CParse/parser.c"
     break;
 
   case 294: /* parm_no_dox: idcolon AUTO parameter_declarator  */
-#line 6175 "CParse/parser.y"
+#line 6179 "CParse/parser.y"
                                                     {
                    /* C++20 abbreviated function template with concept type-constraint, e.g. 'Numeric auto x'. */
                    SwigType *t = NewStringf("c(%s)", (yyvsp[-2].str));
@@ -10403,11 +10407,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
                    if ((yyvsp[0].decl).numdefarg)
                      Setattr((yyval.p), "numval", (yyvsp[0].decl).numdefarg);
                 }
-#line 10407 "CParse/parser.c"
+#line 10411 "CParse/parser.c"
     break;
 
   case 295: /* parm_no_dox: type_qualifier AUTO parameter_declarator  */
-#line 6190 "CParse/parser.y"
+#line 6194 "CParse/parser.y"
                                                            {
                    /* C++20 abbreviated function template with a CV-qualifier on the auto placeholder, e.g.
                     * 'const auto x', 'const auto& x', 'volatile auto* x'. */
@@ -10424,11 +10428,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
                    if ((yyvsp[0].decl).numdefarg)
                      Setattr((yyval.p), "numval", (yyvsp[0].decl).numdefarg);
                 }
-#line 10428 "CParse/parser.c"
+#line 10432 "CParse/parser.c"
     break;
 
   case 296: /* parm_no_dox: type_qualifier idcolon AUTO parameter_declarator  */
-#line 6206 "CParse/parser.y"
+#line 6210 "CParse/parser.y"
                                                                    {
                    /* C++20 abbreviated function template with a CV-qualified type-constraint, e.g. 'const Numeric auto& x'. */
                    SwigType *t = NewStringf("c(%s)", (yyvsp[-2].str));
@@ -10445,31 +10449,31 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
                    if ((yyvsp[0].decl).numdefarg)
                      Setattr((yyval.p), "numval", (yyvsp[0].decl).numdefarg);
                 }
-#line 10449 "CParse/parser.c"
+#line 10453 "CParse/parser.c"
     break;
 
   case 297: /* parm_no_dox: ELLIPSIS  */
-#line 6222 "CParse/parser.y"
+#line 6226 "CParse/parser.y"
                            {
 		  SwigType *t = NewString("v(...)");
 		  (yyval.p) = NewParmWithoutFileLineInfo(t, 0);
 		  Setfile((yyval.p),cparse_file);
 		  Setline((yyval.p),cparse_line);
 		}
-#line 10460 "CParse/parser.c"
+#line 10464 "CParse/parser.c"
     break;
 
   case 299: /* parm: DOXYGENSTRING parm_no_dox  */
-#line 6231 "CParse/parser.y"
+#line 6235 "CParse/parser.y"
                                             {
 		  (yyval.p) = (yyvsp[0].p);
 		  set_comment((yyvsp[0].p), (yyvsp[-1].str));
 		}
-#line 10469 "CParse/parser.c"
+#line 10473 "CParse/parser.c"
     break;
 
   case 300: /* valparms: valparms_builder  */
-#line 6237 "CParse/parser.y"
+#line 6241 "CParse/parser.y"
                             {
 		 (yyval.p) = (yyvsp[0].pbuilder).parms;
                  for (Parm *p = (yyval.p); p; p = nextSibling(p)) {
@@ -10478,27 +10482,27 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		   }
                  }
 	       }
-#line 10482 "CParse/parser.c"
+#line 10486 "CParse/parser.c"
     break;
 
   case 301: /* valparms: %empty  */
-#line 6245 "CParse/parser.y"
+#line 6249 "CParse/parser.y"
                         {
 		 (yyval.p) = 0;
 	       }
-#line 10490 "CParse/parser.c"
+#line 10494 "CParse/parser.c"
     break;
 
   case 302: /* valparms_builder: valparm  */
-#line 6250 "CParse/parser.y"
+#line 6254 "CParse/parser.y"
                            {
 		    (yyval.pbuilder).parms = (yyval.pbuilder).last = (yyvsp[0].p);
 		  }
-#line 10498 "CParse/parser.c"
+#line 10502 "CParse/parser.c"
     break;
 
   case 303: /* valparms_builder: valparms_builder COMMA valparm  */
-#line 6253 "CParse/parser.y"
+#line 6257 "CParse/parser.y"
                                                        {
 		    // Build a linked list in the order specified, but avoiding
 		    // a right recursion rule because "Right recursion uses up
@@ -10508,11 +10512,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		    (yyval.pbuilder).parms = (yyvsp[-2].pbuilder).parms;
 		    (yyval.pbuilder).last = (yyvsp[0].p);
 		  }
-#line 10512 "CParse/parser.c"
+#line 10516 "CParse/parser.c"
     break;
 
   case 304: /* valparm: parm  */
-#line 6264 "CParse/parser.y"
+#line 6268 "CParse/parser.y"
                       {
 		  (yyval.p) = (yyvsp[0].p);
 		  {
@@ -10541,11 +10545,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		  }
 
                }
-#line 10545 "CParse/parser.c"
+#line 10549 "CParse/parser.c"
     break;
 
   case 305: /* valparm: valexpr  */
-#line 6292 "CParse/parser.y"
+#line 6296 "CParse/parser.y"
                          {
                   (yyval.p) = NewParmWithoutFileLineInfo(0,0);
                   Setfile((yyval.p),cparse_file);
@@ -10554,19 +10558,19 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		  if ((yyvsp[0].dtype).stringval) Setattr((yyval.p), "stringval", (yyvsp[0].dtype).stringval);
 		  if ((yyvsp[0].dtype).numval) Setattr((yyval.p), "numval", (yyvsp[0].dtype).numval);
                }
-#line 10558 "CParse/parser.c"
+#line 10562 "CParse/parser.c"
     break;
 
   case 306: /* def_args: EQUAL definetype  */
-#line 6302 "CParse/parser.y"
+#line 6306 "CParse/parser.y"
                                   { 
                  (yyval.dtype) = (yyvsp[0].dtype);
                }
-#line 10566 "CParse/parser.c"
+#line 10570 "CParse/parser.c"
     break;
 
   case 307: /* def_args: EQUAL definetype LBRACKET  */
-#line 6305 "CParse/parser.y"
+#line 6309 "CParse/parser.y"
                                            {
 		 if (skip_balanced('[', ']') < 0) Exit(EXIT_FAILURE);
 		 (yyval.dtype) = default_dtype;
@@ -10575,64 +10579,64 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		 Append((yyval.dtype).val, scanner_ccode);
 		 Clear(scanner_ccode);
                }
-#line 10579 "CParse/parser.c"
+#line 10583 "CParse/parser.c"
     break;
 
   case 308: /* def_args: EQUAL LBRACE  */
-#line 6313 "CParse/parser.y"
+#line 6317 "CParse/parser.y"
                               {
 		 if (skip_balanced('{','}') < 0) Exit(EXIT_FAILURE);
 		 (yyval.dtype) = default_dtype;
 		 (yyval.dtype).val = NewString(scanner_ccode);
 		 (yyval.dtype).type = T_UNKNOWN;
 	       }
-#line 10590 "CParse/parser.c"
+#line 10594 "CParse/parser.c"
     break;
 
   case 309: /* def_args: %empty  */
-#line 6319 "CParse/parser.y"
+#line 6323 "CParse/parser.y"
                         {
 		 (yyval.dtype) = default_dtype;
                  (yyval.dtype).type = T_UNKNOWN;
                }
-#line 10599 "CParse/parser.c"
+#line 10603 "CParse/parser.c"
     break;
 
   case 310: /* parameter_declarator: declarator def_args  */
-#line 6325 "CParse/parser.y"
+#line 6329 "CParse/parser.y"
                                            {
                  (yyval.decl) = (yyvsp[-1].decl);
 		 (yyval.decl).defarg = (yyvsp[0].dtype).val;
 		 (yyval.decl).stringdefarg = (yyvsp[0].dtype).stringval;
 		 (yyval.decl).numdefarg = (yyvsp[0].dtype).numval;
             }
-#line 10610 "CParse/parser.c"
+#line 10614 "CParse/parser.c"
     break;
 
   case 311: /* parameter_declarator: abstract_declarator def_args  */
-#line 6331 "CParse/parser.y"
+#line 6335 "CParse/parser.y"
                                            {
 	      (yyval.decl) = (yyvsp[-1].decl);
 	      (yyval.decl).defarg = (yyvsp[0].dtype).val;
 	      (yyval.decl).stringdefarg = (yyvsp[0].dtype).stringval;
 	      (yyval.decl).numdefarg = (yyvsp[0].dtype).numval;
             }
-#line 10621 "CParse/parser.c"
+#line 10625 "CParse/parser.c"
     break;
 
   case 312: /* parameter_declarator: def_args  */
-#line 6337 "CParse/parser.y"
+#line 6341 "CParse/parser.y"
                        {
 	      (yyval.decl) = default_decl;
 	      (yyval.decl).defarg = (yyvsp[0].dtype).val;
 	      (yyval.decl).stringdefarg = (yyvsp[0].dtype).stringval;
 	      (yyval.decl).numdefarg = (yyvsp[0].dtype).numval;
             }
-#line 10632 "CParse/parser.c"
+#line 10636 "CParse/parser.c"
     break;
 
   case 313: /* parameter_declarator: direct_declarator LPAREN parms RPAREN qualifiers_exception_specification  */
-#line 6345 "CParse/parser.y"
+#line 6349 "CParse/parser.y"
                                                                                        {
 	      SwigType *t;
 	      (yyval.decl) = (yyvsp[-4].decl);
@@ -10654,11 +10658,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		(yyval.decl).type = t;
 	      }
 	    }
-#line 10658 "CParse/parser.c"
+#line 10662 "CParse/parser.c"
     break;
 
   case 314: /* plain_declarator: declarator  */
-#line 6368 "CParse/parser.y"
+#line 6372 "CParse/parser.y"
                               {
                  (yyval.decl) = (yyvsp[0].decl);
 		 if (SwigType_isfunction((yyvsp[0].decl).type)) {
@@ -10676,11 +10680,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		   (yyval.decl).parms = 0;
 		 }
             }
-#line 10680 "CParse/parser.c"
+#line 10684 "CParse/parser.c"
     break;
 
   case 315: /* plain_declarator: abstract_declarator  */
-#line 6385 "CParse/parser.y"
+#line 6389 "CParse/parser.y"
                                   {
               (yyval.decl) = (yyvsp[0].decl);
 	      if (SwigType_isfunction((yyvsp[0].decl).type)) {
@@ -10698,11 +10702,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		(yyval.decl).parms = 0;
 	      }
             }
-#line 10702 "CParse/parser.c"
+#line 10706 "CParse/parser.c"
     break;
 
   case 316: /* plain_declarator: direct_declarator LPAREN parms RPAREN cv_ref_qualifier  */
-#line 6404 "CParse/parser.y"
+#line 6408 "CParse/parser.y"
                                                                      {
 	      SwigType *t;
 	      (yyval.decl) = (yyvsp[-4].decl);
@@ -10722,19 +10726,19 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		(yyval.decl).type = t;
 	      }
 	    }
-#line 10726 "CParse/parser.c"
+#line 10730 "CParse/parser.c"
     break;
 
   case 317: /* plain_declarator: %empty  */
-#line 6423 "CParse/parser.y"
+#line 6427 "CParse/parser.y"
                      {
 	      (yyval.decl) = default_decl;
 	    }
-#line 10734 "CParse/parser.c"
+#line 10738 "CParse/parser.c"
     break;
 
   case 318: /* declarator: pointer notso_direct_declarator  */
-#line 6428 "CParse/parser.y"
+#line 6432 "CParse/parser.y"
                                               {
               (yyval.decl) = (yyvsp[0].decl);
 	      if ((yyval.decl).type) {
@@ -10743,11 +10747,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 	      }
 	      (yyval.decl).type = (yyvsp[-1].type);
            }
-#line 10747 "CParse/parser.c"
+#line 10751 "CParse/parser.c"
     break;
 
   case 319: /* declarator: pointer AND notso_direct_declarator  */
-#line 6436 "CParse/parser.y"
+#line 6440 "CParse/parser.y"
                                                  {
               (yyval.decl) = (yyvsp[0].decl);
 	      SwigType_add_reference((yyvsp[-2].type));
@@ -10757,11 +10761,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 	      }
 	      (yyval.decl).type = (yyvsp[-2].type);
            }
-#line 10761 "CParse/parser.c"
+#line 10765 "CParse/parser.c"
     break;
 
   case 320: /* declarator: pointer LAND notso_direct_declarator  */
-#line 6445 "CParse/parser.y"
+#line 6449 "CParse/parser.y"
                                                   {
               (yyval.decl) = (yyvsp[0].decl);
 	      SwigType_add_rvalue_reference((yyvsp[-2].type));
@@ -10771,20 +10775,20 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 	      }
 	      (yyval.decl).type = (yyvsp[-2].type);
            }
-#line 10775 "CParse/parser.c"
+#line 10779 "CParse/parser.c"
     break;
 
   case 321: /* declarator: direct_declarator  */
-#line 6454 "CParse/parser.y"
+#line 6458 "CParse/parser.y"
                                {
               (yyval.decl) = (yyvsp[0].decl);
 	      if (!(yyval.decl).type) (yyval.decl).type = NewStringEmpty();
            }
-#line 10784 "CParse/parser.c"
+#line 10788 "CParse/parser.c"
     break;
 
   case 322: /* declarator: AND notso_direct_declarator  */
-#line 6458 "CParse/parser.y"
+#line 6462 "CParse/parser.y"
                                          {
 	     (yyval.decl) = (yyvsp[0].decl);
 	     (yyval.decl).type = NewStringEmpty();
@@ -10794,11 +10798,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 	       Delete((yyvsp[0].decl).type);
 	     }
            }
-#line 10798 "CParse/parser.c"
+#line 10802 "CParse/parser.c"
     break;
 
   case 323: /* declarator: LAND notso_direct_declarator  */
-#line 6467 "CParse/parser.y"
+#line 6471 "CParse/parser.y"
                                           {
 	     /* Introduced in C++11, move operator && */
              /* Adds one S/R conflict */
@@ -10810,11 +10814,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 	       Delete((yyvsp[0].decl).type);
 	     }
            }
-#line 10814 "CParse/parser.c"
+#line 10818 "CParse/parser.c"
     break;
 
   case 324: /* declarator: idcolon DSTAR notso_direct_declarator  */
-#line 6478 "CParse/parser.y"
+#line 6482 "CParse/parser.y"
                                                    { 
 	     SwigType *t = NewStringEmpty();
 
@@ -10826,11 +10830,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 	     }
 	     (yyval.decl).type = t;
 	     }
-#line 10830 "CParse/parser.c"
+#line 10834 "CParse/parser.c"
     break;
 
   case 325: /* declarator: pointer idcolon DSTAR notso_direct_declarator  */
-#line 6489 "CParse/parser.y"
+#line 6493 "CParse/parser.y"
                                                            { 
 	     SwigType *t = NewStringEmpty();
 	     (yyval.decl) = (yyvsp[0].decl);
@@ -10843,11 +10847,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 	     (yyval.decl).type = (yyvsp[-3].type);
 	     Delete(t);
 	   }
-#line 10847 "CParse/parser.c"
+#line 10851 "CParse/parser.c"
     break;
 
   case 326: /* declarator: pointer idcolon DSTAR AND notso_direct_declarator  */
-#line 6501 "CParse/parser.y"
+#line 6505 "CParse/parser.y"
                                                                { 
 	     (yyval.decl) = (yyvsp[0].decl);
 	     SwigType_add_memberpointer((yyvsp[-4].type),(yyvsp[-3].str));
@@ -10858,11 +10862,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 	     }
 	     (yyval.decl).type = (yyvsp[-4].type);
 	   }
-#line 10862 "CParse/parser.c"
+#line 10866 "CParse/parser.c"
     break;
 
   case 327: /* declarator: idcolon DSTAR AND notso_direct_declarator  */
-#line 6511 "CParse/parser.y"
+#line 6515 "CParse/parser.y"
                                                        { 
 	     SwigType *t = NewStringEmpty();
 	     (yyval.decl) = (yyvsp[0].decl);
@@ -10874,11 +10878,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 	     } 
 	     (yyval.decl).type = t;
 	   }
-#line 10878 "CParse/parser.c"
+#line 10882 "CParse/parser.c"
     break;
 
   case 328: /* declarator: pointer ELLIPSIS notso_direct_declarator  */
-#line 6525 "CParse/parser.y"
+#line 6529 "CParse/parser.y"
                                                        {
               (yyval.decl) = (yyvsp[0].decl);
 	      if ((yyval.decl).type) {
@@ -10888,11 +10892,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 	      (yyval.decl).type = (yyvsp[-2].type);
 	      SwigType_add_variadic((yyval.decl).type);
            }
-#line 10892 "CParse/parser.c"
+#line 10896 "CParse/parser.c"
     break;
 
   case 329: /* declarator: pointer AND ELLIPSIS notso_direct_declarator  */
-#line 6534 "CParse/parser.y"
+#line 6538 "CParse/parser.y"
                                                           {
               (yyval.decl) = (yyvsp[0].decl);
 	      SwigType_add_reference((yyvsp[-3].type));
@@ -10903,11 +10907,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 	      (yyval.decl).type = (yyvsp[-3].type);
 	      SwigType_add_variadic((yyval.decl).type);
            }
-#line 10907 "CParse/parser.c"
+#line 10911 "CParse/parser.c"
     break;
 
   case 330: /* declarator: pointer LAND ELLIPSIS notso_direct_declarator  */
-#line 6544 "CParse/parser.y"
+#line 6548 "CParse/parser.y"
                                                            {
               (yyval.decl) = (yyvsp[0].decl);
 	      SwigType_add_rvalue_reference((yyvsp[-3].type));
@@ -10918,11 +10922,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 	      (yyval.decl).type = (yyvsp[-3].type);
 	      SwigType_add_variadic((yyval.decl).type);
            }
-#line 10922 "CParse/parser.c"
+#line 10926 "CParse/parser.c"
     break;
 
   case 331: /* declarator: AND ELLIPSIS notso_direct_declarator  */
-#line 6554 "CParse/parser.y"
+#line 6558 "CParse/parser.y"
                                                   {
 	     (yyval.decl) = (yyvsp[0].decl);
 	     (yyval.decl).type = NewStringEmpty();
@@ -10933,11 +10937,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 	       Delete((yyvsp[0].decl).type);
 	     }
            }
-#line 10937 "CParse/parser.c"
+#line 10941 "CParse/parser.c"
     break;
 
   case 332: /* declarator: LAND ELLIPSIS notso_direct_declarator  */
-#line 6564 "CParse/parser.y"
+#line 6568 "CParse/parser.y"
                                                    {
 	     /* Introduced in C++11, move operator && */
              /* Adds one S/R conflict */
@@ -10950,11 +10954,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 	       Delete((yyvsp[0].decl).type);
 	     }
            }
-#line 10954 "CParse/parser.c"
+#line 10958 "CParse/parser.c"
     break;
 
   case 333: /* declarator: idcolon DSTAR ELLIPSIS notso_direct_declarator  */
-#line 6576 "CParse/parser.y"
+#line 6580 "CParse/parser.y"
                                                             {
 	     SwigType *t = NewStringEmpty();
 
@@ -10967,11 +10971,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 	     }
 	     (yyval.decl).type = t;
 	     }
-#line 10971 "CParse/parser.c"
+#line 10975 "CParse/parser.c"
     break;
 
   case 334: /* declarator: pointer idcolon DSTAR ELLIPSIS notso_direct_declarator  */
-#line 6588 "CParse/parser.y"
+#line 6592 "CParse/parser.y"
                                                                     {
 	     SwigType *t = NewStringEmpty();
 	     (yyval.decl) = (yyvsp[0].decl);
@@ -10985,11 +10989,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 	     (yyval.decl).type = (yyvsp[-4].type);
 	     Delete(t);
 	   }
-#line 10989 "CParse/parser.c"
+#line 10993 "CParse/parser.c"
     break;
 
   case 335: /* declarator: pointer idcolon DSTAR AND ELLIPSIS notso_direct_declarator  */
-#line 6601 "CParse/parser.y"
+#line 6605 "CParse/parser.y"
                                                                         {
 	     (yyval.decl) = (yyvsp[0].decl);
 	     SwigType_add_memberpointer((yyvsp[-5].type),(yyvsp[-4].str));
@@ -11001,11 +11005,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 	     }
 	     (yyval.decl).type = (yyvsp[-5].type);
 	   }
-#line 11005 "CParse/parser.c"
+#line 11009 "CParse/parser.c"
     break;
 
   case 336: /* declarator: pointer idcolon DSTAR LAND ELLIPSIS notso_direct_declarator  */
-#line 6612 "CParse/parser.y"
+#line 6616 "CParse/parser.y"
                                                                          {
 	     (yyval.decl) = (yyvsp[0].decl);
 	     SwigType_add_memberpointer((yyvsp[-5].type),(yyvsp[-4].str));
@@ -11017,11 +11021,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 	     }
 	     (yyval.decl).type = (yyvsp[-5].type);
 	   }
-#line 11021 "CParse/parser.c"
+#line 11025 "CParse/parser.c"
     break;
 
   case 337: /* declarator: idcolon DSTAR AND ELLIPSIS notso_direct_declarator  */
-#line 6623 "CParse/parser.y"
+#line 6627 "CParse/parser.y"
                                                                 {
 	     SwigType *t = NewStringEmpty();
 	     (yyval.decl) = (yyvsp[0].decl);
@@ -11034,11 +11038,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 	     } 
 	     (yyval.decl).type = t;
 	   }
-#line 11038 "CParse/parser.c"
+#line 11042 "CParse/parser.c"
     break;
 
   case 338: /* declarator: idcolon DSTAR LAND ELLIPSIS notso_direct_declarator  */
-#line 6635 "CParse/parser.y"
+#line 6639 "CParse/parser.y"
                                                                  {
 	     SwigType *t = NewStringEmpty();
 	     (yyval.decl) = (yyvsp[0].decl);
@@ -11051,39 +11055,39 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 	     } 
 	     (yyval.decl).type = t;
 	   }
-#line 11055 "CParse/parser.c"
+#line 11059 "CParse/parser.c"
     break;
 
   case 339: /* notso_direct_declarator: idcolon  */
-#line 6649 "CParse/parser.y"
+#line 6653 "CParse/parser.y"
                                   {
                 /* Note: This is non-standard C.  Template declarator is allowed to follow an identifier */
 		 (yyval.decl) = default_decl;
                  (yyval.decl).id = Char((yyvsp[0].str));
                   }
-#line 11065 "CParse/parser.c"
+#line 11069 "CParse/parser.c"
     break;
 
   case 340: /* notso_direct_declarator: NOT idcolon  */
-#line 6654 "CParse/parser.y"
+#line 6658 "CParse/parser.y"
                                 {
 		  (yyval.decl) = default_decl;
                   (yyval.decl).id = Char(NewStringf("~%s",(yyvsp[0].str)));
                   }
-#line 11074 "CParse/parser.c"
+#line 11078 "CParse/parser.c"
     break;
 
   case 341: /* notso_direct_declarator: LPAREN idcolon RPAREN  */
-#line 6660 "CParse/parser.y"
+#line 6664 "CParse/parser.y"
                                          {
 		  (yyval.decl) = default_decl;
                   (yyval.decl).id = Char((yyvsp[-1].str));
                   }
-#line 11083 "CParse/parser.c"
+#line 11087 "CParse/parser.c"
     break;
 
   case 342: /* notso_direct_declarator: LPAREN pointer notso_direct_declarator RPAREN  */
-#line 6672 "CParse/parser.y"
+#line 6676 "CParse/parser.y"
                                                                       {
 		    (yyval.decl) = (yyvsp[-1].decl);
 		    if ((yyval.decl).type) {
@@ -11092,11 +11096,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		    }
 		    (yyval.decl).type = (yyvsp[-2].type);
                   }
-#line 11096 "CParse/parser.c"
+#line 11100 "CParse/parser.c"
     break;
 
   case 343: /* notso_direct_declarator: LPAREN idcolon DSTAR notso_direct_declarator RPAREN  */
-#line 6680 "CParse/parser.y"
+#line 6684 "CParse/parser.y"
                                                                             {
 		    SwigType *t;
 		    (yyval.decl) = (yyvsp[-1].decl);
@@ -11108,11 +11112,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		    }
 		    (yyval.decl).type = t;
 		    }
-#line 11112 "CParse/parser.c"
+#line 11116 "CParse/parser.c"
     break;
 
   case 344: /* notso_direct_declarator: notso_direct_declarator LBRACKET RBRACKET  */
-#line 6691 "CParse/parser.y"
+#line 6695 "CParse/parser.y"
                                                                   { 
 		    SwigType *t;
 		    (yyval.decl) = (yyvsp[-2].decl);
@@ -11124,11 +11128,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		    }
 		    (yyval.decl).type = t;
                   }
-#line 11128 "CParse/parser.c"
+#line 11132 "CParse/parser.c"
     break;
 
   case 345: /* notso_direct_declarator: notso_direct_declarator LBRACKET expr RBRACKET  */
-#line 6702 "CParse/parser.y"
+#line 6706 "CParse/parser.y"
                                                                        { 
 		    SwigType *t;
 		    (yyval.decl) = (yyvsp[-3].decl);
@@ -11140,11 +11144,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		    }
 		    (yyval.decl).type = t;
                   }
-#line 11144 "CParse/parser.c"
+#line 11148 "CParse/parser.c"
     break;
 
   case 346: /* notso_direct_declarator: notso_direct_declarator LPAREN parms RPAREN  */
-#line 6713 "CParse/parser.y"
+#line 6717 "CParse/parser.y"
                                                                     {
 		    SwigType *t;
                     (yyval.decl) = (yyvsp[-3].decl);
@@ -11162,30 +11166,30 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		      (yyval.decl).type = t;
 		    }
 		  }
-#line 11166 "CParse/parser.c"
+#line 11170 "CParse/parser.c"
     break;
 
   case 347: /* direct_declarator: idcolon  */
-#line 6732 "CParse/parser.y"
+#line 6736 "CParse/parser.y"
                             {
                 /* Note: This is non-standard C.  Template declarator is allowed to follow an identifier */
 		 (yyval.decl) = default_decl;
                  (yyval.decl).id = Char((yyvsp[0].str));
                   }
-#line 11176 "CParse/parser.c"
+#line 11180 "CParse/parser.c"
     break;
 
   case 348: /* direct_declarator: NOT idcolon  */
-#line 6738 "CParse/parser.y"
+#line 6742 "CParse/parser.y"
                                 {
 		  (yyval.decl) = default_decl;
                   (yyval.decl).id = Char(NewStringf("~%s",(yyvsp[0].str)));
                   }
-#line 11185 "CParse/parser.c"
+#line 11189 "CParse/parser.c"
     break;
 
   case 349: /* direct_declarator: LPAREN pointer direct_declarator RPAREN  */
-#line 6751 "CParse/parser.y"
+#line 6755 "CParse/parser.y"
                                                                 {
 		    (yyval.decl) = (yyvsp[-1].decl);
 		    if ((yyval.decl).type) {
@@ -11194,11 +11198,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		    }
 		    (yyval.decl).type = (yyvsp[-2].type);
                   }
-#line 11198 "CParse/parser.c"
+#line 11202 "CParse/parser.c"
     break;
 
   case 350: /* direct_declarator: LPAREN AND direct_declarator RPAREN  */
-#line 6759 "CParse/parser.y"
+#line 6763 "CParse/parser.y"
                                                             {
                     (yyval.decl) = (yyvsp[-1].decl);
 		    if (!(yyval.decl).type) {
@@ -11206,11 +11210,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		    }
 		    SwigType_add_reference((yyval.decl).type);
                   }
-#line 11210 "CParse/parser.c"
+#line 11214 "CParse/parser.c"
     break;
 
   case 351: /* direct_declarator: LPAREN LAND direct_declarator RPAREN  */
-#line 6766 "CParse/parser.y"
+#line 6770 "CParse/parser.y"
                                                              {
                     (yyval.decl) = (yyvsp[-1].decl);
 		    if (!(yyval.decl).type) {
@@ -11218,11 +11222,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		    }
 		    SwigType_add_rvalue_reference((yyval.decl).type);
                   }
-#line 11222 "CParse/parser.c"
+#line 11226 "CParse/parser.c"
     break;
 
   case 352: /* direct_declarator: LPAREN idcolon DSTAR declarator RPAREN  */
-#line 6773 "CParse/parser.y"
+#line 6777 "CParse/parser.y"
                                                            {
 		    SwigType *t;
 		    (yyval.decl) = (yyvsp[-1].decl);
@@ -11234,11 +11238,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		    }
 		    (yyval.decl).type = t;
 		  }
-#line 11238 "CParse/parser.c"
+#line 11242 "CParse/parser.c"
     break;
 
   case 353: /* direct_declarator: LPAREN idcolon DSTAR type_qualifier declarator RPAREN  */
-#line 6784 "CParse/parser.y"
+#line 6788 "CParse/parser.y"
                                                                           {
 		    SwigType *t;
 		    (yyval.decl) = (yyvsp[-1].decl);
@@ -11251,11 +11255,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		    }
 		    (yyval.decl).type = t;
 		  }
-#line 11255 "CParse/parser.c"
+#line 11259 "CParse/parser.c"
     break;
 
   case 354: /* direct_declarator: LPAREN idcolon DSTAR abstract_declarator RPAREN  */
-#line 6796 "CParse/parser.y"
+#line 6800 "CParse/parser.y"
                                                                     {
 		    SwigType *t;
 		    (yyval.decl) = (yyvsp[-1].decl);
@@ -11267,11 +11271,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		    }
 		    (yyval.decl).type = t;
 		  }
-#line 11271 "CParse/parser.c"
+#line 11275 "CParse/parser.c"
     break;
 
   case 355: /* direct_declarator: LPAREN idcolon DSTAR type_qualifier abstract_declarator RPAREN  */
-#line 6807 "CParse/parser.y"
+#line 6811 "CParse/parser.y"
                                                                                    {
 		    SwigType *t;
 		    (yyval.decl) = (yyvsp[-1].decl);
@@ -11284,11 +11288,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		    }
 		    (yyval.decl).type = t;
 		  }
-#line 11288 "CParse/parser.c"
+#line 11292 "CParse/parser.c"
     break;
 
   case 356: /* direct_declarator: direct_declarator LBRACKET RBRACKET  */
-#line 6819 "CParse/parser.y"
+#line 6823 "CParse/parser.y"
                                                             { 
 		    SwigType *t;
 		    (yyval.decl) = (yyvsp[-2].decl);
@@ -11300,11 +11304,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		    }
 		    (yyval.decl).type = t;
                   }
-#line 11304 "CParse/parser.c"
+#line 11308 "CParse/parser.c"
     break;
 
   case 357: /* direct_declarator: direct_declarator LBRACKET expr RBRACKET  */
-#line 6830 "CParse/parser.y"
+#line 6834 "CParse/parser.y"
                                                                  { 
 		    SwigType *t;
 		    (yyval.decl) = (yyvsp[-3].decl);
@@ -11316,11 +11320,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		    }
 		    (yyval.decl).type = t;
                   }
-#line 11320 "CParse/parser.c"
+#line 11324 "CParse/parser.c"
     break;
 
   case 358: /* direct_declarator: direct_declarator LPAREN parms RPAREN  */
-#line 6841 "CParse/parser.y"
+#line 6845 "CParse/parser.y"
                                                               {
 		    SwigType *t;
                     (yyval.decl) = (yyvsp[-3].decl);
@@ -11338,11 +11342,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		      (yyval.decl).type = t;
 		    }
 		  }
-#line 11342 "CParse/parser.c"
+#line 11346 "CParse/parser.c"
     break;
 
   case 359: /* direct_declarator: OPERATOR ID LPAREN parms RPAREN  */
-#line 6863 "CParse/parser.y"
+#line 6867 "CParse/parser.y"
                                                    {
 		    (yyval.decl) = default_decl;
 		    SwigType *t;
@@ -11354,54 +11358,54 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		    (yyval.decl).have_parms = 1;
 		    (yyval.decl).type = t;
 		  }
-#line 11358 "CParse/parser.c"
+#line 11362 "CParse/parser.c"
     break;
 
   case 360: /* abstract_declarator: pointer variadic_opt  */
-#line 6876 "CParse/parser.y"
+#line 6880 "CParse/parser.y"
                                            {
 		    (yyval.decl) = default_decl;
 		    (yyval.decl).type = (yyvsp[-1].type);
 		    if ((yyvsp[0].intvalue)) SwigType_add_variadic((yyval.decl).type);
                   }
-#line 11368 "CParse/parser.c"
+#line 11372 "CParse/parser.c"
     break;
 
   case 361: /* abstract_declarator: pointer direct_abstract_declarator  */
-#line 6881 "CParse/parser.y"
+#line 6885 "CParse/parser.y"
                                                        { 
                      (yyval.decl) = (yyvsp[0].decl);
                      SwigType_push((yyvsp[-1].type),(yyvsp[0].decl).type);
 		     (yyval.decl).type = (yyvsp[-1].type);
 		     Delete((yyvsp[0].decl).type);
                   }
-#line 11379 "CParse/parser.c"
+#line 11383 "CParse/parser.c"
     break;
 
   case 362: /* abstract_declarator: pointer AND variadic_opt  */
-#line 6887 "CParse/parser.y"
+#line 6891 "CParse/parser.y"
                                              {
 		    (yyval.decl) = default_decl;
 		    (yyval.decl).type = (yyvsp[-2].type);
 		    SwigType_add_reference((yyval.decl).type);
 		    if ((yyvsp[0].intvalue)) SwigType_add_variadic((yyval.decl).type);
 		  }
-#line 11390 "CParse/parser.c"
+#line 11394 "CParse/parser.c"
     break;
 
   case 363: /* abstract_declarator: pointer LAND variadic_opt  */
-#line 6893 "CParse/parser.y"
+#line 6897 "CParse/parser.y"
                                               {
 		    (yyval.decl) = default_decl;
 		    (yyval.decl).type = (yyvsp[-2].type);
 		    SwigType_add_rvalue_reference((yyval.decl).type);
 		    if ((yyvsp[0].intvalue)) SwigType_add_variadic((yyval.decl).type);
 		  }
-#line 11401 "CParse/parser.c"
+#line 11405 "CParse/parser.c"
     break;
 
   case 364: /* abstract_declarator: pointer AND direct_abstract_declarator  */
-#line 6899 "CParse/parser.y"
+#line 6903 "CParse/parser.y"
                                                            {
 		    (yyval.decl) = (yyvsp[0].decl);
 		    SwigType_add_reference((yyvsp[-2].type));
@@ -11411,11 +11415,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		    }
 		    (yyval.decl).type = (yyvsp[-2].type);
                   }
-#line 11415 "CParse/parser.c"
+#line 11419 "CParse/parser.c"
     break;
 
   case 365: /* abstract_declarator: pointer LAND direct_abstract_declarator  */
-#line 6908 "CParse/parser.y"
+#line 6912 "CParse/parser.y"
                                                             {
 		    (yyval.decl) = (yyvsp[0].decl);
 		    SwigType_add_rvalue_reference((yyvsp[-2].type));
@@ -11425,11 +11429,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		    }
 		    (yyval.decl).type = (yyvsp[-2].type);
                   }
-#line 11429 "CParse/parser.c"
+#line 11433 "CParse/parser.c"
     break;
 
   case 367: /* abstract_declarator: AND direct_abstract_declarator  */
-#line 6918 "CParse/parser.y"
+#line 6922 "CParse/parser.y"
                                                    {
 		    (yyval.decl) = (yyvsp[0].decl);
 		    (yyval.decl).type = NewStringEmpty();
@@ -11439,11 +11443,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		      Delete((yyvsp[0].decl).type);
 		    }
                   }
-#line 11443 "CParse/parser.c"
+#line 11447 "CParse/parser.c"
     break;
 
   case 368: /* abstract_declarator: LAND direct_abstract_declarator  */
-#line 6927 "CParse/parser.y"
+#line 6931 "CParse/parser.y"
                                                     {
 		    (yyval.decl) = (yyvsp[0].decl);
 		    (yyval.decl).type = NewStringEmpty();
@@ -11453,54 +11457,54 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		      Delete((yyvsp[0].decl).type);
 		    }
                   }
-#line 11457 "CParse/parser.c"
+#line 11461 "CParse/parser.c"
     break;
 
   case 369: /* abstract_declarator: AND variadic_opt  */
-#line 6936 "CParse/parser.y"
+#line 6940 "CParse/parser.y"
                                      {
 		    (yyval.decl) = default_decl;
                     (yyval.decl).type = NewStringEmpty();
 		    SwigType_add_reference((yyval.decl).type);
 		    if ((yyvsp[0].intvalue)) SwigType_add_variadic((yyval.decl).type);
                   }
-#line 11468 "CParse/parser.c"
+#line 11472 "CParse/parser.c"
     break;
 
   case 370: /* abstract_declarator: LAND variadic_opt  */
-#line 6942 "CParse/parser.y"
+#line 6946 "CParse/parser.y"
                                       {
 		    (yyval.decl) = default_decl;
                     (yyval.decl).type = NewStringEmpty();
 		    SwigType_add_rvalue_reference((yyval.decl).type);
 		    if ((yyvsp[0].intvalue)) SwigType_add_variadic((yyval.decl).type);
                   }
-#line 11479 "CParse/parser.c"
+#line 11483 "CParse/parser.c"
     break;
 
   case 371: /* abstract_declarator: idcolon DSTAR  */
-#line 6948 "CParse/parser.y"
+#line 6952 "CParse/parser.y"
                                   { 
 		    (yyval.decl) = default_decl;
 		    (yyval.decl).type = NewStringEmpty();
                     SwigType_add_memberpointer((yyval.decl).type,(yyvsp[-1].str));
       	          }
-#line 11489 "CParse/parser.c"
+#line 11493 "CParse/parser.c"
     break;
 
   case 372: /* abstract_declarator: idcolon DSTAR type_qualifier  */
-#line 6953 "CParse/parser.y"
+#line 6957 "CParse/parser.y"
                                                  {
 		    (yyval.decl) = default_decl;
 		    (yyval.decl).type = NewStringEmpty();
 		    SwigType_add_memberpointer((yyval.decl).type, (yyvsp[-2].str));
 		    SwigType_push((yyval.decl).type, (yyvsp[0].str));
 		  }
-#line 11500 "CParse/parser.c"
+#line 11504 "CParse/parser.c"
     break;
 
   case 373: /* abstract_declarator: pointer idcolon DSTAR  */
-#line 6959 "CParse/parser.y"
+#line 6963 "CParse/parser.y"
                                           { 
 		    (yyval.decl) = default_decl;
 		    SwigType *t = NewStringEmpty();
@@ -11509,11 +11513,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		    SwigType_push((yyval.decl).type,t);
 		    Delete(t);
                   }
-#line 11513 "CParse/parser.c"
+#line 11517 "CParse/parser.c"
     break;
 
   case 374: /* abstract_declarator: pointer idcolon DSTAR direct_abstract_declarator  */
-#line 6967 "CParse/parser.y"
+#line 6971 "CParse/parser.y"
                                                                      { 
 		    (yyval.decl) = (yyvsp[0].decl);
 		    SwigType_add_memberpointer((yyvsp[-3].type),(yyvsp[-2].str));
@@ -11523,11 +11527,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		    }
 		    (yyval.decl).type = (yyvsp[-3].type);
                   }
-#line 11527 "CParse/parser.c"
+#line 11531 "CParse/parser.c"
     break;
 
   case 375: /* direct_abstract_declarator: direct_abstract_declarator LBRACKET RBRACKET  */
-#line 6978 "CParse/parser.y"
+#line 6982 "CParse/parser.y"
                                                                               { 
 		    SwigType *t;
 		    (yyval.decl) = (yyvsp[-2].decl);
@@ -11539,11 +11543,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		    }
 		    (yyval.decl).type = t;
                   }
-#line 11543 "CParse/parser.c"
+#line 11547 "CParse/parser.c"
     break;
 
   case 376: /* direct_abstract_declarator: direct_abstract_declarator LBRACKET expr RBRACKET  */
-#line 6989 "CParse/parser.y"
+#line 6993 "CParse/parser.y"
                                                                           { 
 		    SwigType *t;
 		    (yyval.decl) = (yyvsp[-3].decl);
@@ -11555,39 +11559,39 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		    }
 		    (yyval.decl).type = t;
                   }
-#line 11559 "CParse/parser.c"
+#line 11563 "CParse/parser.c"
     break;
 
   case 377: /* direct_abstract_declarator: LBRACKET RBRACKET  */
-#line 7000 "CParse/parser.y"
+#line 7004 "CParse/parser.y"
                                       { 
 		    (yyval.decl) = default_decl;
 		    (yyval.decl).type = NewStringEmpty();
 		    SwigType_add_array((yyval.decl).type,"");
                   }
-#line 11569 "CParse/parser.c"
+#line 11573 "CParse/parser.c"
     break;
 
   case 378: /* direct_abstract_declarator: LBRACKET expr RBRACKET  */
-#line 7005 "CParse/parser.y"
+#line 7009 "CParse/parser.y"
                                            { 
 		    (yyval.decl) = default_decl;
 		    (yyval.decl).type = NewStringEmpty();
 		    SwigType_add_array((yyval.decl).type,(yyvsp[-1].dtype).val);
 		  }
-#line 11579 "CParse/parser.c"
+#line 11583 "CParse/parser.c"
     break;
 
   case 379: /* direct_abstract_declarator: LPAREN abstract_declarator RPAREN  */
-#line 7010 "CParse/parser.y"
+#line 7014 "CParse/parser.y"
                                                       {
                     (yyval.decl) = (yyvsp[-1].decl);
 		  }
-#line 11587 "CParse/parser.c"
+#line 11591 "CParse/parser.c"
     break;
 
   case 380: /* direct_abstract_declarator: direct_abstract_declarator LPAREN parms RPAREN  */
-#line 7013 "CParse/parser.y"
+#line 7017 "CParse/parser.y"
                                                                        {
 		    SwigType *t;
                     (yyval.decl) = (yyvsp[-3].decl);
@@ -11605,11 +11609,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		      (yyval.decl).have_parms = 1;
 		    }
 		  }
-#line 11609 "CParse/parser.c"
+#line 11613 "CParse/parser.c"
     break;
 
   case 381: /* direct_abstract_declarator: direct_abstract_declarator LPAREN parms RPAREN cv_ref_qualifier  */
-#line 7030 "CParse/parser.y"
+#line 7034 "CParse/parser.y"
                                                                                         {
 		    SwigType *t;
                     (yyval.decl) = (yyvsp[-4].decl);
@@ -11628,11 +11632,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		      (yyval.decl).have_parms = 1;
 		    }
 		  }
-#line 11632 "CParse/parser.c"
+#line 11636 "CParse/parser.c"
     break;
 
   case 382: /* direct_abstract_declarator: LPAREN parms RPAREN  */
-#line 7048 "CParse/parser.y"
+#line 7052 "CParse/parser.y"
                                         {
 		    (yyval.decl) = default_decl;
                     (yyval.decl).type = NewStringEmpty();
@@ -11640,207 +11644,207 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		    (yyval.decl).parms = (yyvsp[-1].pl);
 		    (yyval.decl).have_parms = 1;
                   }
-#line 11644 "CParse/parser.c"
+#line 11648 "CParse/parser.c"
     break;
 
   case 383: /* pointer: pointer STAR type_qualifier  */
-#line 7058 "CParse/parser.y"
+#line 7062 "CParse/parser.y"
                                              {
 	     (yyval.type) = (yyvsp[-2].type);
              SwigType_add_pointer((yyval.type));
 	     SwigType_push((yyval.type),(yyvsp[0].str));
            }
-#line 11654 "CParse/parser.c"
+#line 11658 "CParse/parser.c"
     break;
 
   case 384: /* pointer: pointer STAR  */
-#line 7063 "CParse/parser.y"
+#line 7067 "CParse/parser.y"
                               {
 	     (yyval.type) = (yyvsp[-1].type);
 	     SwigType_add_pointer((yyval.type));
 	   }
-#line 11663 "CParse/parser.c"
+#line 11667 "CParse/parser.c"
     break;
 
   case 385: /* pointer: STAR type_qualifier  */
-#line 7067 "CParse/parser.y"
+#line 7071 "CParse/parser.y"
                                  {
 	     (yyval.type) = NewStringEmpty();
 	     SwigType_add_pointer((yyval.type));
 	     SwigType_push((yyval.type),(yyvsp[0].str));
            }
-#line 11673 "CParse/parser.c"
+#line 11677 "CParse/parser.c"
     break;
 
   case 386: /* pointer: STAR  */
-#line 7072 "CParse/parser.y"
+#line 7076 "CParse/parser.y"
                   {
 	     (yyval.type) = NewStringEmpty();
 	     SwigType_add_pointer((yyval.type));
            }
-#line 11682 "CParse/parser.c"
+#line 11686 "CParse/parser.c"
     break;
 
   case 387: /* cv_ref_qualifier: type_qualifier  */
-#line 7079 "CParse/parser.y"
+#line 7083 "CParse/parser.y"
                                   {
 		  (yyval.dtype).qualifier = (yyvsp[0].str);
 	       }
-#line 11690 "CParse/parser.c"
+#line 11694 "CParse/parser.c"
     break;
 
   case 388: /* cv_ref_qualifier: type_qualifier ref_qualifier  */
-#line 7082 "CParse/parser.y"
+#line 7086 "CParse/parser.y"
                                               {
 		  (yyval.dtype).qualifier = (yyvsp[-1].str);
 		  (yyval.dtype).refqualifier = (yyvsp[0].str);
 		  SwigType_push((yyval.dtype).qualifier, (yyvsp[0].str));
 	       }
-#line 11700 "CParse/parser.c"
+#line 11704 "CParse/parser.c"
     break;
 
   case 389: /* cv_ref_qualifier: ref_qualifier  */
-#line 7087 "CParse/parser.y"
+#line 7091 "CParse/parser.y"
                                {
 		  (yyval.dtype).qualifier = NewStringEmpty();
 		  (yyval.dtype).refqualifier = (yyvsp[0].str);
 		  SwigType_push((yyval.dtype).qualifier, (yyvsp[0].str));
 	       }
-#line 11710 "CParse/parser.c"
+#line 11714 "CParse/parser.c"
     break;
 
   case 390: /* ref_qualifier: AND  */
-#line 7094 "CParse/parser.y"
+#line 7098 "CParse/parser.y"
                     {
 	          (yyval.str) = NewStringEmpty();
 	          SwigType_add_reference((yyval.str));
 	       }
-#line 11719 "CParse/parser.c"
+#line 11723 "CParse/parser.c"
     break;
 
   case 391: /* ref_qualifier: LAND  */
-#line 7098 "CParse/parser.y"
+#line 7102 "CParse/parser.y"
                       {
 	          (yyval.str) = NewStringEmpty();
 	          SwigType_add_rvalue_reference((yyval.str));
 	       }
-#line 11728 "CParse/parser.c"
+#line 11732 "CParse/parser.c"
     break;
 
   case 392: /* type_qualifier: type_qualifier_raw  */
-#line 7104 "CParse/parser.y"
+#line 7108 "CParse/parser.y"
                                     {
 	          (yyval.str) = NewStringEmpty();
 	          if ((yyvsp[0].id)) SwigType_add_qualifier((yyval.str),(yyvsp[0].id));
                }
-#line 11737 "CParse/parser.c"
+#line 11741 "CParse/parser.c"
     break;
 
   case 393: /* type_qualifier: type_qualifier type_qualifier_raw  */
-#line 7108 "CParse/parser.y"
+#line 7112 "CParse/parser.y"
                                                        {
 		  (yyval.str) = (yyvsp[-1].str);
 	          if ((yyvsp[0].id)) SwigType_add_qualifier((yyval.str),(yyvsp[0].id));
                }
-#line 11746 "CParse/parser.c"
+#line 11750 "CParse/parser.c"
     break;
 
   case 394: /* type_qualifier_raw: CONST_QUAL  */
-#line 7114 "CParse/parser.y"
+#line 7118 "CParse/parser.y"
                                  { (yyval.id) = "const"; }
-#line 11752 "CParse/parser.c"
+#line 11756 "CParse/parser.c"
     break;
 
   case 395: /* type_qualifier_raw: VOLATILE  */
-#line 7115 "CParse/parser.y"
+#line 7119 "CParse/parser.y"
                                { (yyval.id) = "volatile"; }
-#line 11758 "CParse/parser.c"
+#line 11762 "CParse/parser.c"
     break;
 
   case 396: /* type_qualifier_raw: REGISTER  */
-#line 7116 "CParse/parser.y"
+#line 7120 "CParse/parser.y"
                                { (yyval.id) = 0; }
-#line 11764 "CParse/parser.c"
+#line 11768 "CParse/parser.c"
     break;
 
   case 397: /* type: rawtype  */
-#line 7122 "CParse/parser.y"
+#line 7126 "CParse/parser.y"
                                     {
                    (yyval.type) = (yyvsp[0].type);
                    Replace((yyval.type),"typename ","", DOH_REPLACE_ANY);
                 }
-#line 11773 "CParse/parser.c"
+#line 11777 "CParse/parser.c"
     break;
 
   case 398: /* rawtype: type_qualifier type_right  */
-#line 7128 "CParse/parser.y"
+#line 7132 "CParse/parser.y"
                                            {
                    (yyval.type) = (yyvsp[0].type);
 	           SwigType_push((yyval.type),(yyvsp[-1].str));
                }
-#line 11782 "CParse/parser.c"
+#line 11786 "CParse/parser.c"
     break;
 
   case 400: /* rawtype: type_right type_qualifier  */
-#line 7133 "CParse/parser.y"
+#line 7137 "CParse/parser.y"
                                            {
 		  (yyval.type) = (yyvsp[-1].type);
 	          SwigType_push((yyval.type),(yyvsp[0].str));
 	       }
-#line 11791 "CParse/parser.c"
+#line 11795 "CParse/parser.c"
     break;
 
   case 401: /* rawtype: type_qualifier type_right type_qualifier  */
-#line 7137 "CParse/parser.y"
+#line 7141 "CParse/parser.y"
                                                                                             {
 		  (yyval.type) = (yyvsp[-1].type);
 	          SwigType_push((yyval.type),(yyvsp[0].str));
 	          SwigType_push((yyval.type),(yyvsp[-2].str));
 	       }
-#line 11801 "CParse/parser.c"
+#line 11805 "CParse/parser.c"
     break;
 
   case 402: /* rawtype: rawtype ELLIPSIS  */
-#line 7142 "CParse/parser.y"
+#line 7146 "CParse/parser.y"
                                       {
 		  (yyval.type) = (yyvsp[-1].type);
 		  SwigType_add_variadic((yyval.type));
 	       }
-#line 11810 "CParse/parser.c"
+#line 11814 "CParse/parser.c"
     break;
 
   case 406: /* type_right: c_enum_key idcolon  */
-#line 7151 "CParse/parser.y"
+#line 7155 "CParse/parser.y"
                                     { (yyval.type) = NewStringf("enum %s", (yyvsp[0].str)); }
-#line 11816 "CParse/parser.c"
+#line 11820 "CParse/parser.c"
     break;
 
   case 407: /* type_right: idcolon  */
-#line 7153 "CParse/parser.y"
+#line 7157 "CParse/parser.y"
                                    {
 		  (yyval.type) = (yyvsp[0].str);
                }
-#line 11824 "CParse/parser.c"
+#line 11828 "CParse/parser.c"
     break;
 
   case 408: /* type_right: cpptype idcolon  */
-#line 7156 "CParse/parser.y"
+#line 7160 "CParse/parser.y"
                                            {
 		 (yyval.type) = NewStringf("%s %s", (yyvsp[-1].type), (yyvsp[0].str));
                }
-#line 11832 "CParse/parser.c"
+#line 11836 "CParse/parser.c"
     break;
 
   case 410: /* @11: %empty  */
-#line 7162 "CParse/parser.y"
+#line 7166 "CParse/parser.y"
                                       {
 		 (yyval.str) = get_raw_text_balanced('(', ')');
 	       }
-#line 11840 "CParse/parser.c"
+#line 11844 "CParse/parser.c"
     break;
 
   case 411: /* decltype: DECLTYPE LPAREN @11 decltypeexpr  */
-#line 7164 "CParse/parser.y"
+#line 7168 "CParse/parser.y"
                                     {
 		 String *expr = (yyvsp[-1].str);
 		 if ((yyvsp[0].type)) {
@@ -11854,19 +11858,19 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		 }
 		 Delete(expr);
 	       }
-#line 11858 "CParse/parser.c"
+#line 11862 "CParse/parser.c"
     break;
 
   case 412: /* decltypeexpr: expr RPAREN  */
-#line 7179 "CParse/parser.y"
+#line 7183 "CParse/parser.y"
                              {
 		 (yyval.type) = deduce_type(&(yyvsp[-1].dtype));
 	       }
-#line 11866 "CParse/parser.c"
+#line 11870 "CParse/parser.c"
     break;
 
   case 413: /* decltypeexpr: error RPAREN  */
-#line 7182 "CParse/parser.y"
+#line 7186 "CParse/parser.y"
                               {
 		 /* Avoid a parse error if we can't parse the expression
 		  * decltype() is applied to.
@@ -11878,11 +11882,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		 if (skip_balanced('(',')') < 0) Exit(EXIT_FAILURE);
 		 Clear(scanner_ccode);
 	       }
-#line 11882 "CParse/parser.c"
+#line 11886 "CParse/parser.c"
     break;
 
   case 414: /* primitive_type: primitive_type_list  */
-#line 7195 "CParse/parser.y"
+#line 7199 "CParse/parser.y"
                                      {
 		 String *type = (yyvsp[0].ptype).type;
 		 if (!type) type = NewString("int");
@@ -11907,11 +11911,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		   (yyval.type) = NewString("long long");
 		 }
                }
-#line 11911 "CParse/parser.c"
+#line 11915 "CParse/parser.c"
     break;
 
   case 416: /* primitive_type_list: type_specifier primitive_type_list  */
-#line 7222 "CParse/parser.y"
+#line 7226 "CParse/parser.y"
                                                         {
                     if ((yyvsp[-1].ptype).us && (yyvsp[0].ptype).us) {
 		      Swig_error(cparse_file, cparse_line, "Extra %s specifier.\n", (yyvsp[0].ptype).us);
@@ -11963,193 +11967,193 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		      }
 		    }
                }
-#line 11967 "CParse/parser.c"
+#line 11971 "CParse/parser.c"
     break;
 
   case 417: /* type_specifier: TYPE_INT  */
-#line 7276 "CParse/parser.y"
+#line 7280 "CParse/parser.y"
                           { 
 		    (yyval.ptype).type = NewString("int");
                     (yyval.ptype).us = 0;
                }
-#line 11976 "CParse/parser.c"
+#line 11980 "CParse/parser.c"
     break;
 
   case 418: /* type_specifier: TYPE_SHORT  */
-#line 7280 "CParse/parser.y"
+#line 7284 "CParse/parser.y"
                             { 
                     (yyval.ptype).type = NewString("short");
                     (yyval.ptype).us = 0;
                 }
-#line 11985 "CParse/parser.c"
+#line 11989 "CParse/parser.c"
     break;
 
   case 419: /* type_specifier: TYPE_LONG  */
-#line 7284 "CParse/parser.y"
+#line 7288 "CParse/parser.y"
                            { 
                     (yyval.ptype).type = NewString("long");
                     (yyval.ptype).us = 0;
                 }
-#line 11994 "CParse/parser.c"
+#line 11998 "CParse/parser.c"
     break;
 
   case 420: /* type_specifier: TYPE_CHAR  */
-#line 7288 "CParse/parser.y"
+#line 7292 "CParse/parser.y"
                            { 
                     (yyval.ptype).type = NewString("char");
                     (yyval.ptype).us = 0;
                 }
-#line 12003 "CParse/parser.c"
+#line 12007 "CParse/parser.c"
     break;
 
   case 421: /* type_specifier: TYPE_WCHAR  */
-#line 7292 "CParse/parser.y"
+#line 7296 "CParse/parser.y"
                             { 
                     (yyval.ptype).type = NewString("wchar_t");
                     (yyval.ptype).us = 0;
                 }
-#line 12012 "CParse/parser.c"
+#line 12016 "CParse/parser.c"
     break;
 
   case 422: /* type_specifier: TYPE_FLOAT  */
-#line 7296 "CParse/parser.y"
+#line 7300 "CParse/parser.y"
                             { 
                     (yyval.ptype).type = NewString("float");
                     (yyval.ptype).us = 0;
                 }
-#line 12021 "CParse/parser.c"
+#line 12025 "CParse/parser.c"
     break;
 
   case 423: /* type_specifier: TYPE_DOUBLE  */
-#line 7300 "CParse/parser.y"
+#line 7304 "CParse/parser.y"
                              { 
                     (yyval.ptype).type = NewString("double");
                     (yyval.ptype).us = 0;
                 }
-#line 12030 "CParse/parser.c"
+#line 12034 "CParse/parser.c"
     break;
 
   case 424: /* type_specifier: TYPE_SIGNED  */
-#line 7304 "CParse/parser.y"
+#line 7308 "CParse/parser.y"
                              { 
                     (yyval.ptype).us = NewString("signed");
                     (yyval.ptype).type = 0;
                 }
-#line 12039 "CParse/parser.c"
+#line 12043 "CParse/parser.c"
     break;
 
   case 425: /* type_specifier: TYPE_UNSIGNED  */
-#line 7308 "CParse/parser.y"
+#line 7312 "CParse/parser.y"
                                { 
                     (yyval.ptype).us = NewString("unsigned");
                     (yyval.ptype).type = 0;
                 }
-#line 12048 "CParse/parser.c"
+#line 12052 "CParse/parser.c"
     break;
 
   case 426: /* type_specifier: TYPE_COMPLEX  */
-#line 7312 "CParse/parser.y"
+#line 7316 "CParse/parser.y"
                               { 
                     (yyval.ptype).type = NewString("_Complex");
                     (yyval.ptype).us = 0;
                 }
-#line 12057 "CParse/parser.c"
+#line 12061 "CParse/parser.c"
     break;
 
   case 427: /* type_specifier: TYPE_NON_ISO_INT8  */
-#line 7316 "CParse/parser.y"
+#line 7320 "CParse/parser.y"
                                    { 
                     (yyval.ptype).type = NewString("__int8");
                     (yyval.ptype).us = 0;
                 }
-#line 12066 "CParse/parser.c"
+#line 12070 "CParse/parser.c"
     break;
 
   case 428: /* type_specifier: TYPE_NON_ISO_INT16  */
-#line 7320 "CParse/parser.y"
+#line 7324 "CParse/parser.y"
                                     { 
                     (yyval.ptype).type = NewString("__int16");
                     (yyval.ptype).us = 0;
                 }
-#line 12075 "CParse/parser.c"
+#line 12079 "CParse/parser.c"
     break;
 
   case 429: /* type_specifier: TYPE_NON_ISO_INT32  */
-#line 7324 "CParse/parser.y"
+#line 7328 "CParse/parser.y"
                                     { 
                     (yyval.ptype).type = NewString("__int32");
                     (yyval.ptype).us = 0;
                 }
-#line 12084 "CParse/parser.c"
+#line 12088 "CParse/parser.c"
     break;
 
   case 430: /* type_specifier: TYPE_NON_ISO_INT64  */
-#line 7328 "CParse/parser.y"
+#line 7332 "CParse/parser.y"
                                     { 
                     (yyval.ptype).type = NewString("__int64");
                     (yyval.ptype).us = 0;
                 }
-#line 12093 "CParse/parser.c"
+#line 12097 "CParse/parser.c"
     break;
 
   case 435: /* deleted_definition: DELETE_KW  */
-#line 7343 "CParse/parser.y"
+#line 7347 "CParse/parser.y"
                                {
 		  (yyval.dtype) = default_dtype;
 		  (yyval.dtype).val = NewString("delete");
 		  (yyval.dtype).type = T_STRING;
 		}
-#line 12103 "CParse/parser.c"
+#line 12107 "CParse/parser.c"
     break;
 
   case 436: /* explicit_default: DEFAULT  */
-#line 7351 "CParse/parser.y"
+#line 7355 "CParse/parser.y"
                            {
 		  (yyval.dtype) = default_dtype;
 		  (yyval.dtype).val = NewString("default");
 		  (yyval.dtype).type = T_STRING;
 		}
-#line 12113 "CParse/parser.c"
+#line 12117 "CParse/parser.c"
     break;
 
   case 438: /* ename: %empty  */
-#line 7361 "CParse/parser.y"
+#line 7365 "CParse/parser.y"
                          { (yyval.id) = 0; }
-#line 12119 "CParse/parser.c"
+#line 12123 "CParse/parser.c"
     break;
 
   case 443: /* enumlist: enumlist_item  */
-#line 7380 "CParse/parser.y"
+#line 7384 "CParse/parser.y"
                                 {
 		  Setattr((yyvsp[0].node),"_last",(yyvsp[0].node));
 		  (yyval.node) = (yyvsp[0].node);
 		}
-#line 12128 "CParse/parser.c"
+#line 12132 "CParse/parser.c"
     break;
 
   case 444: /* enumlist: enumlist_item DOXYGENPOSTSTRING  */
-#line 7384 "CParse/parser.y"
+#line 7388 "CParse/parser.y"
                                                   {
 		  Setattr((yyvsp[-1].node),"_last",(yyvsp[-1].node));
 		  set_comment((yyvsp[-1].node), (yyvsp[0].str));
 		  (yyval.node) = (yyvsp[-1].node);
 		}
-#line 12138 "CParse/parser.c"
+#line 12142 "CParse/parser.c"
     break;
 
   case 445: /* enumlist: enumlist_item DOXYGENSTRING  */
-#line 7389 "CParse/parser.y"
+#line 7393 "CParse/parser.y"
                                               {
 		  Setattr((yyvsp[-1].node), "_last", (yyvsp[-1].node));
 		  /* Misplaced doxygen string, attach it to previous parameter, like Doxygen does */
 		  set_comment((yyvsp[-1].node), (yyvsp[0].str));
 		  (yyval.node) = (yyvsp[-1].node);
 		}
-#line 12149 "CParse/parser.c"
+#line 12153 "CParse/parser.c"
     break;
 
   case 446: /* enumlist: enumlist_item COMMA enumlist  */
-#line 7395 "CParse/parser.y"
+#line 7399 "CParse/parser.y"
                                                    {
 		  if ((yyvsp[0].node)) {
 		    set_nextSibling((yyvsp[-2].node), (yyvsp[0].node));
@@ -12160,11 +12164,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		  }
 		  (yyval.node) = (yyvsp[-2].node);
 		}
-#line 12164 "CParse/parser.c"
+#line 12168 "CParse/parser.c"
     break;
 
   case 447: /* enumlist: enumlist_item DOXYGENPOSTSTRING COMMA enumlist  */
-#line 7405 "CParse/parser.y"
+#line 7409 "CParse/parser.y"
                                                                      {
 		  if ((yyvsp[0].node)) {
 		    set_nextSibling((yyvsp[-3].node), (yyvsp[0].node));
@@ -12176,11 +12180,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		  set_comment((yyvsp[-3].node), (yyvsp[-2].str));
 		  (yyval.node) = (yyvsp[-3].node);
 		}
-#line 12180 "CParse/parser.c"
+#line 12184 "CParse/parser.c"
     break;
 
   case 448: /* enumlist: enumlist_item COMMA DOXYGENPOSTSTRING enumlist  */
-#line 7416 "CParse/parser.y"
+#line 7420 "CParse/parser.y"
                                                                      {
 		  if ((yyvsp[0].node)) {
 		    set_nextSibling((yyvsp[-3].node), (yyvsp[0].node));
@@ -12192,36 +12196,36 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		  set_comment((yyvsp[-3].node), (yyvsp[-1].str));
 		  (yyval.node) = (yyvsp[-3].node);
 		}
-#line 12196 "CParse/parser.c"
+#line 12200 "CParse/parser.c"
     break;
 
   case 449: /* enumlist: optional_ignored_defines  */
-#line 7427 "CParse/parser.y"
+#line 7431 "CParse/parser.y"
                                            {
 		  (yyval.node) = 0;
 		}
-#line 12204 "CParse/parser.c"
+#line 12208 "CParse/parser.c"
     break;
 
   case 450: /* enumlist_item: optional_ignored_defines edecl_with_dox optional_ignored_defines  */
-#line 7432 "CParse/parser.y"
+#line 7436 "CParse/parser.y"
                                                                                    {
 		  (yyval.node) = (yyvsp[-1].node);
 		}
-#line 12212 "CParse/parser.c"
+#line 12216 "CParse/parser.c"
     break;
 
   case 452: /* edecl_with_dox: DOXYGENSTRING edecl  */
-#line 7438 "CParse/parser.y"
+#line 7442 "CParse/parser.y"
                                       {
 		  (yyval.node) = (yyvsp[0].node);
 		  set_comment((yyvsp[0].node), (yyvsp[-1].str));
 		}
-#line 12221 "CParse/parser.c"
+#line 12225 "CParse/parser.c"
     break;
 
   case 453: /* edecl: identifier  */
-#line 7444 "CParse/parser.y"
+#line 7448 "CParse/parser.y"
                              {
 		   SwigType *type = NewSwigType(T_INT);
 		   (yyval.node) = new_node("enumitem");
@@ -12230,11 +12234,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		   SetFlag((yyval.node),"feature:immutable");
 		   Delete(type);
 		 }
-#line 12234 "CParse/parser.c"
+#line 12238 "CParse/parser.c"
     break;
 
   case 454: /* edecl: identifier EQUAL etype  */
-#line 7452 "CParse/parser.y"
+#line 7456 "CParse/parser.y"
                                           {
 		   SwigType *type = NewSwigType((yyvsp[0].dtype).type == T_BOOL ? T_BOOL : ((yyvsp[0].dtype).type == T_CHAR ? T_CHAR : T_INT));
 		   (yyval.node) = new_node("enumitem");
@@ -12251,11 +12255,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		   Setattr((yyval.node),"value",(yyvsp[-2].id));
 		   Delete(type);
                  }
-#line 12255 "CParse/parser.c"
+#line 12259 "CParse/parser.c"
     break;
 
   case 455: /* etype: expr  */
-#line 7470 "CParse/parser.y"
+#line 7474 "CParse/parser.y"
                         {
                    (yyval.dtype) = (yyvsp[0].dtype);
 		   /* We get T_USER here for a typedef - unfortunately we can't
@@ -12270,11 +12274,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		     Swig_error(cparse_file,cparse_line,"Type error. Expecting an integral type\n");
 		   }
                 }
-#line 12274 "CParse/parser.c"
+#line 12278 "CParse/parser.c"
     break;
 
   case 457: /* expr: type  */
-#line 7489 "CParse/parser.y"
+#line 7493 "CParse/parser.y"
                       {
 		 Node *n;
 		 (yyval.dtype) = default_dtype;
@@ -12299,57 +12303,57 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		   }
 		 }
                }
-#line 12303 "CParse/parser.c"
+#line 12307 "CParse/parser.c"
     break;
 
   case 458: /* exprmem: idcolon ARROW ID  */
-#line 7516 "CParse/parser.y"
+#line 7520 "CParse/parser.y"
                                   {
 		 (yyval.dtype) = default_dtype;
 		 (yyval.dtype).val = NewStringf("%s->%s", (yyvsp[-2].str), (yyvsp[0].id));
 	       }
-#line 12312 "CParse/parser.c"
+#line 12316 "CParse/parser.c"
     break;
 
   case 459: /* exprmem: exprmem ARROW ID  */
-#line 7520 "CParse/parser.y"
+#line 7524 "CParse/parser.y"
                                       {
 		 (yyval.dtype) = (yyvsp[-2].dtype);
 		 Printf((yyval.dtype).val, "->%s", (yyvsp[0].id));
 	       }
-#line 12321 "CParse/parser.c"
+#line 12325 "CParse/parser.c"
     break;
 
   case 460: /* exprmem: idcolon PERIOD ID  */
-#line 7524 "CParse/parser.y"
+#line 7528 "CParse/parser.y"
                                    {
 		 (yyval.dtype) = default_dtype;
 		 (yyval.dtype).val = NewStringf("%s.%s", (yyvsp[-2].str), (yyvsp[0].id));
 	       }
-#line 12330 "CParse/parser.c"
+#line 12334 "CParse/parser.c"
     break;
 
   case 461: /* exprmem: exprmem PERIOD ID  */
-#line 7528 "CParse/parser.y"
+#line 7532 "CParse/parser.y"
                                        {
 		 (yyval.dtype) = (yyvsp[-2].dtype);
 		 Printf((yyval.dtype).val, ".%s", (yyvsp[0].id));
 	       }
-#line 12339 "CParse/parser.c"
+#line 12343 "CParse/parser.c"
     break;
 
   case 462: /* exprmem: exprmem LPAREN  */
-#line 7532 "CParse/parser.y"
+#line 7536 "CParse/parser.y"
                                     {
 		 if (skip_balanced('(', ')') < 0) Exit(EXIT_FAILURE);
 		 (yyval.dtype) = (yyvsp[-1].dtype);
 		 append_expr_from_scanner((yyval.dtype).val);
 	       }
-#line 12349 "CParse/parser.c"
+#line 12353 "CParse/parser.c"
     break;
 
   case 463: /* exprmem: type LPAREN  */
-#line 7537 "CParse/parser.y"
+#line 7541 "CParse/parser.y"
                              {
 		 (yyval.dtype) = default_dtype;
 		 if (skip_balanced('(', ')') < 0) Exit(EXIT_FAILURE);
@@ -12375,38 +12379,38 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		 (yyval.dtype).val = qty;
 		 append_expr_from_scanner((yyval.dtype).val);
 	       }
-#line 12379 "CParse/parser.c"
+#line 12383 "CParse/parser.c"
     break;
 
   case 466: /* constraint_or: constraint_or LOR constraint_and  */
-#line 7589 "CParse/parser.y"
+#line 7593 "CParse/parser.y"
                                                   {
                     (yyval.node) = Constraint_combine("or", (yyvsp[-2].node), (yyvsp[0].node));
                  }
-#line 12387 "CParse/parser.c"
+#line 12391 "CParse/parser.c"
     break;
 
   case 468: /* constraint_and: constraint_and LAND constraint_primary  */
-#line 7595 "CParse/parser.y"
+#line 7599 "CParse/parser.y"
                                                         {
                     (yyval.node) = Constraint_combine("and", (yyvsp[-2].node), (yyvsp[0].node));
                  }
-#line 12395 "CParse/parser.c"
+#line 12399 "CParse/parser.c"
     break;
 
   case 469: /* constraint_primary: idcolon  */
-#line 7600 "CParse/parser.y"
+#line 7604 "CParse/parser.y"
                              {
                     /* idcolon's value is a SwigType encoded concept-id (e.g. 'AllNumeric<(T,v.Rest)>'),
                        so it lives on a "type" attribute, not "name". */
                     (yyval.node) = Constraint_new_atom("concept-id");
                     Setattr((yyval.node), "type", (yyvsp[0].str));
                  }
-#line 12406 "CParse/parser.c"
+#line 12410 "CParse/parser.c"
     break;
 
   case 470: /* @12: %empty  */
-#line 7606 "CParse/parser.y"
+#line 7610 "CParse/parser.y"
                               {
                     /* Parenthesised primary - opaque captured at the scanner
                      * level so the body can be any C++ expression, not only a
@@ -12422,28 +12426,28 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
                     Setattr((yyval.node), "value", captured);
                     Delete(captured);
                  }
-#line 12426 "CParse/parser.c"
+#line 12430 "CParse/parser.c"
     break;
 
   case 471: /* constraint_primary: LPAREN @12  */
-#line 7620 "CParse/parser.y"
+#line 7624 "CParse/parser.y"
                          {
                     (yyval.node) = (yyvsp[0].node);
                  }
-#line 12434 "CParse/parser.c"
+#line 12438 "CParse/parser.c"
     break;
 
   case 472: /* constraint_primary: requires_expression  */
-#line 7623 "CParse/parser.y"
+#line 7627 "CParse/parser.y"
                                      {
                     (yyval.node) = Constraint_new_atom("requires-expression");
                     appendChild((yyval.node), (yyvsp[0].node));
                  }
-#line 12443 "CParse/parser.c"
+#line 12447 "CParse/parser.c"
     break;
 
   case 473: /* requires_expression: REQUIRES requirement_parameter_list_opt requirement_body  */
-#line 7629 "CParse/parser.y"
+#line 7633 "CParse/parser.y"
                                                                                {
                     (yyval.node) = Constraint_new_requires_expression();
                     if ((yyvsp[-1].pl))
@@ -12459,58 +12463,58 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
                       }
                     }
                  }
-#line 12463 "CParse/parser.c"
+#line 12467 "CParse/parser.c"
     break;
 
   case 474: /* requirement_parameter_list_opt: LPAREN parms RPAREN  */
-#line 7646 "CParse/parser.y"
+#line 7650 "CParse/parser.y"
                                                      {
                     (yyval.pl) = (yyvsp[-1].pl);
                  }
-#line 12471 "CParse/parser.c"
+#line 12475 "CParse/parser.c"
     break;
 
   case 475: /* requirement_parameter_list_opt: %empty  */
-#line 7649 "CParse/parser.y"
+#line 7653 "CParse/parser.y"
                         {
                     (yyval.pl) = 0;
                  }
-#line 12479 "CParse/parser.c"
+#line 12483 "CParse/parser.c"
     break;
 
   case 476: /* requirement_body: LBRACE  */
-#line 7654 "CParse/parser.y"
+#line 7658 "CParse/parser.y"
                           {
                     if (skip_balanced('{', '}') < 0) Exit(EXIT_FAILURE);
                     (yyval.node) = parse_requirement_seq(scanner_ccode);
                  }
-#line 12488 "CParse/parser.c"
+#line 12492 "CParse/parser.c"
     break;
 
   case 479: /* exprsimple: string  */
-#line 7663 "CParse/parser.y"
+#line 7667 "CParse/parser.y"
                         {
 		  (yyval.dtype) = default_dtype;
 		  (yyval.dtype).stringval = (yyvsp[0].str);
 		  (yyval.dtype).val = NewStringf("\"%(escape)s\"", (yyvsp[0].str));
 		  (yyval.dtype).type = T_STRING;
 	       }
-#line 12499 "CParse/parser.c"
+#line 12503 "CParse/parser.c"
     break;
 
   case 480: /* exprsimple: wstring  */
-#line 7669 "CParse/parser.y"
+#line 7673 "CParse/parser.y"
                          {
 		  (yyval.dtype) = default_dtype;
 		  (yyval.dtype).stringval = (yyvsp[0].str);
 		  (yyval.dtype).val = NewStringf("L\"%(escape)s\"", (yyvsp[0].str));
 		  (yyval.dtype).type = T_WSTRING;
 	       }
-#line 12510 "CParse/parser.c"
+#line 12514 "CParse/parser.c"
     break;
 
   case 481: /* exprsimple: CHARCONST  */
-#line 7675 "CParse/parser.y"
+#line 7679 "CParse/parser.y"
                            {
 		  (yyval.dtype) = default_dtype;
 		  (yyval.dtype).val = NewStringf("'%(escape)s'", (yyvsp[0].str));
@@ -12524,22 +12528,22 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		    (yyval.dtype).type = T_CHAR;
 		  }
 	       }
-#line 12528 "CParse/parser.c"
+#line 12532 "CParse/parser.c"
     break;
 
   case 482: /* exprsimple: WCHARCONST  */
-#line 7688 "CParse/parser.y"
+#line 7692 "CParse/parser.y"
                             {
 		  (yyval.dtype) = default_dtype;
 		  (yyval.dtype).stringval = (yyvsp[0].str);
 		  (yyval.dtype).val = NewStringf("L'%(escape)s'", (yyvsp[0].str));
 		  (yyval.dtype).type = T_WCHAR;
 	       }
-#line 12539 "CParse/parser.c"
+#line 12543 "CParse/parser.c"
     break;
 
   case 483: /* exprsimple: SIZEOF LPAREN  */
-#line 7700 "CParse/parser.y"
+#line 7704 "CParse/parser.y"
                                {
 		  if (skip_balanced('(', ')') < 0) Exit(EXIT_FAILURE);
 		  (yyval.dtype) = default_dtype;
@@ -12547,11 +12551,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		  append_expr_from_scanner((yyval.dtype).val);
 		  (yyval.dtype).type = T_ULONG;
                }
-#line 12551 "CParse/parser.c"
+#line 12555 "CParse/parser.c"
     break;
 
   case 484: /* exprsimple: ALIGNOF LPAREN  */
-#line 7708 "CParse/parser.y"
+#line 7712 "CParse/parser.y"
                                 {
 		  if (skip_balanced('(', ')') < 0) Exit(EXIT_FAILURE);
 		  (yyval.dtype) = default_dtype;
@@ -12559,11 +12563,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		  append_expr_from_scanner((yyval.dtype).val);
 		  (yyval.dtype).type = T_ULONG;
 	       }
-#line 12563 "CParse/parser.c"
+#line 12567 "CParse/parser.c"
     break;
 
   case 485: /* exprsimple: NOEXCEPT LPAREN  */
-#line 7716 "CParse/parser.y"
+#line 7720 "CParse/parser.y"
                                  {
 		  if (skip_balanced('(', ')') < 0) Exit(EXIT_FAILURE);
 		  (yyval.dtype) = default_dtype;
@@ -12571,42 +12575,42 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		  append_expr_from_scanner((yyval.dtype).val);
 		  (yyval.dtype).type = T_BOOL;
 	       }
-#line 12575 "CParse/parser.c"
+#line 12579 "CParse/parser.c"
     break;
 
   case 486: /* exprsimple: SIZEOF ELLIPSIS LPAREN identifier RPAREN  */
-#line 7723 "CParse/parser.y"
+#line 7727 "CParse/parser.y"
                                                           {
 		  (yyval.dtype) = default_dtype;
 		  (yyval.dtype).val = NewStringf("sizeof...(%s)", (yyvsp[-1].id));
 		  (yyval.dtype).type = T_ULONG;
                }
-#line 12585 "CParse/parser.c"
+#line 12589 "CParse/parser.c"
     break;
 
   case 487: /* exprsimple: SIZEOF exprsimple  */
-#line 7733 "CParse/parser.y"
+#line 7737 "CParse/parser.y"
                                        {
 		  (yyval.dtype) = default_dtype;
 		  (yyval.dtype).val = NewStringf("sizeof(%s)", (yyvsp[0].dtype).val);
 		  (yyval.dtype).type = T_ULONG;
 	       }
-#line 12595 "CParse/parser.c"
+#line 12599 "CParse/parser.c"
     break;
 
   case 490: /* valexpr: requires_expression  */
-#line 7751 "CParse/parser.y"
+#line 7755 "CParse/parser.y"
                                      {
 		    (yyval.dtype) = default_dtype;
 		    (yyval.dtype).val = NewString("");
 		    (yyval.dtype).type = T_BOOL;
 		    Delete((yyvsp[0].node));
 	       }
-#line 12606 "CParse/parser.c"
+#line 12610 "CParse/parser.c"
     break;
 
   case 491: /* valexpr: LPAREN expr RPAREN  */
-#line 7759 "CParse/parser.y"
+#line 7763 "CParse/parser.y"
                                                 {
 	            (yyval.dtype) = default_dtype;
 		    (yyval.dtype).val = NewStringf("(%s)",(yyvsp[-1].dtype).val);
@@ -12614,11 +12618,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		    (yyval.dtype).numval = Copy((yyvsp[-1].dtype).numval);
 		    (yyval.dtype).type = (yyvsp[-1].dtype).type;
 	       }
-#line 12618 "CParse/parser.c"
+#line 12622 "CParse/parser.c"
     break;
 
   case 492: /* valexpr: LPAREN expr RPAREN expr  */
-#line 7769 "CParse/parser.y"
+#line 7773 "CParse/parser.y"
                                                               {
 		 int cast_type_code = SwigType_type((yyvsp[-2].dtype).val);
 		 (yyval.dtype) = (yyvsp[0].dtype);
@@ -12658,11 +12662,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		   (yyval.dtype).type = promote((yyvsp[-2].dtype).type, (yyvsp[0].dtype).unary_arg_type);
 		 }
  	       }
-#line 12662 "CParse/parser.c"
+#line 12666 "CParse/parser.c"
     break;
 
   case 493: /* valexpr: LPAREN expr pointer RPAREN expr  */
-#line 7808 "CParse/parser.y"
+#line 7812 "CParse/parser.y"
                                                                       {
                  (yyval.dtype) = (yyvsp[0].dtype);
 		 (yyval.dtype).unary_arg_type = 0;
@@ -12673,11 +12677,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		   (yyval.dtype).numval = 0;
 		 }
  	       }
-#line 12677 "CParse/parser.c"
+#line 12681 "CParse/parser.c"
     break;
 
   case 494: /* valexpr: LPAREN expr AND RPAREN expr  */
-#line 7818 "CParse/parser.y"
+#line 7822 "CParse/parser.y"
                                                                   {
                  (yyval.dtype) = (yyvsp[0].dtype);
 		 (yyval.dtype).unary_arg_type = 0;
@@ -12688,11 +12692,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		   (yyval.dtype).numval = 0;
 		 }
  	       }
-#line 12692 "CParse/parser.c"
+#line 12696 "CParse/parser.c"
     break;
 
   case 495: /* valexpr: LPAREN expr LAND RPAREN expr  */
-#line 7828 "CParse/parser.y"
+#line 7832 "CParse/parser.y"
                                                                    {
                  (yyval.dtype) = (yyvsp[0].dtype);
 		 (yyval.dtype).unary_arg_type = 0;
@@ -12703,11 +12707,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		   (yyval.dtype).numval = 0;
 		 }
  	       }
-#line 12707 "CParse/parser.c"
+#line 12711 "CParse/parser.c"
     break;
 
   case 496: /* valexpr: LPAREN expr pointer AND RPAREN expr  */
-#line 7838 "CParse/parser.y"
+#line 7842 "CParse/parser.y"
                                                                           {
                  (yyval.dtype) = (yyvsp[0].dtype);
 		 (yyval.dtype).unary_arg_type = 0;
@@ -12719,11 +12723,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		   (yyval.dtype).numval = 0;
 		 }
  	       }
-#line 12723 "CParse/parser.c"
+#line 12727 "CParse/parser.c"
     break;
 
   case 497: /* valexpr: LPAREN expr pointer LAND RPAREN expr  */
-#line 7849 "CParse/parser.y"
+#line 7853 "CParse/parser.y"
                                                                            {
                  (yyval.dtype) = (yyvsp[0].dtype);
 		 (yyval.dtype).unary_arg_type = 0;
@@ -12735,11 +12739,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		   (yyval.dtype).numval = 0;
 		 }
  	       }
-#line 12739 "CParse/parser.c"
+#line 12743 "CParse/parser.c"
     break;
 
   case 498: /* valexpr: AND expr  */
-#line 7860 "CParse/parser.y"
+#line 7864 "CParse/parser.y"
                           {
 		 (yyval.dtype) = (yyvsp[0].dtype);
 		 (yyval.dtype).val = NewStringf("&%s", (yyvsp[0].dtype).val);
@@ -12761,11 +12765,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		     (yyval.dtype).type = T_POINTER;
 		 }
 	       }
-#line 12765 "CParse/parser.c"
+#line 12769 "CParse/parser.c"
     break;
 
   case 499: /* valexpr: STAR expr  */
-#line 7881 "CParse/parser.y"
+#line 7885 "CParse/parser.y"
                            {
 		 (yyval.dtype) = (yyvsp[0].dtype);
 		 (yyval.dtype).val = NewStringf("*%s", (yyvsp[0].dtype).val);
@@ -12787,371 +12791,371 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		     (yyval.dtype).type = T_UNKNOWN;
 		 }
 	       }
-#line 12791 "CParse/parser.c"
+#line 12795 "CParse/parser.c"
     break;
 
   case 510: /* exprcompound: expr PLUS expr  */
-#line 7916 "CParse/parser.y"
+#line 7920 "CParse/parser.y"
                                           {
 		 (yyval.dtype) = default_dtype;
 		 (yyval.dtype).val = NewStringf("%s+%s", (yyvsp[-2].dtype).val, (yyvsp[0].dtype).val);
 		 (yyval.dtype).type = promote((yyvsp[-2].dtype).type,(yyvsp[0].dtype).type);
 	       }
-#line 12801 "CParse/parser.c"
+#line 12805 "CParse/parser.c"
     break;
 
   case 511: /* exprcompound: expr MINUS expr  */
-#line 7921 "CParse/parser.y"
+#line 7925 "CParse/parser.y"
                                            {
 		 (yyval.dtype) = default_dtype;
 		 (yyval.dtype).val = NewStringf("%s-%s", (yyvsp[-2].dtype).val, (yyvsp[0].dtype).val);
 		 (yyval.dtype).type = promote((yyvsp[-2].dtype).type,(yyvsp[0].dtype).type);
 	       }
-#line 12811 "CParse/parser.c"
+#line 12815 "CParse/parser.c"
     break;
 
   case 512: /* exprcompound: expr STAR expr  */
-#line 7926 "CParse/parser.y"
+#line 7930 "CParse/parser.y"
                                           {
 		 (yyval.dtype) = default_dtype;
 		 (yyval.dtype).val = NewStringf("%s*%s", (yyvsp[-2].dtype).val, (yyvsp[0].dtype).val);
 		 (yyval.dtype).type = promote((yyvsp[-2].dtype).type,(yyvsp[0].dtype).type);
 	       }
-#line 12821 "CParse/parser.c"
+#line 12825 "CParse/parser.c"
     break;
 
   case 513: /* exprcompound: expr SLASH expr  */
-#line 7931 "CParse/parser.y"
+#line 7935 "CParse/parser.y"
                                            {
 		 (yyval.dtype) = default_dtype;
 		 (yyval.dtype).val = NewStringf("%s/%s", (yyvsp[-2].dtype).val, (yyvsp[0].dtype).val);
 		 (yyval.dtype).type = promote((yyvsp[-2].dtype).type,(yyvsp[0].dtype).type);
 	       }
-#line 12831 "CParse/parser.c"
+#line 12835 "CParse/parser.c"
     break;
 
   case 514: /* exprcompound: expr MODULO expr  */
-#line 7936 "CParse/parser.y"
+#line 7940 "CParse/parser.y"
                                             {
 		 (yyval.dtype) = default_dtype;
 		 (yyval.dtype).val = NewStringf("%s%%%s", (yyvsp[-2].dtype).val, (yyvsp[0].dtype).val);
 		 (yyval.dtype).type = promote((yyvsp[-2].dtype).type,(yyvsp[0].dtype).type);
 	       }
-#line 12841 "CParse/parser.c"
+#line 12845 "CParse/parser.c"
     break;
 
   case 515: /* exprcompound: expr AND expr  */
-#line 7941 "CParse/parser.y"
+#line 7945 "CParse/parser.y"
                                          {
 		 (yyval.dtype) = default_dtype;
 		 (yyval.dtype).val = NewStringf("%s&%s", (yyvsp[-2].dtype).val, (yyvsp[0].dtype).val);
 		 (yyval.dtype).type = promote((yyvsp[-2].dtype).type,(yyvsp[0].dtype).type);
 	       }
-#line 12851 "CParse/parser.c"
+#line 12855 "CParse/parser.c"
     break;
 
   case 516: /* exprcompound: expr OR expr  */
-#line 7946 "CParse/parser.y"
+#line 7950 "CParse/parser.y"
                                         {
 		 (yyval.dtype) = default_dtype;
 		 (yyval.dtype).val = NewStringf("%s|%s", (yyvsp[-2].dtype).val, (yyvsp[0].dtype).val);
 		 (yyval.dtype).type = promote((yyvsp[-2].dtype).type,(yyvsp[0].dtype).type);
 	       }
-#line 12861 "CParse/parser.c"
+#line 12865 "CParse/parser.c"
     break;
 
   case 517: /* exprcompound: expr XOR expr  */
-#line 7951 "CParse/parser.y"
+#line 7955 "CParse/parser.y"
                                          {
 		 (yyval.dtype) = default_dtype;
 		 (yyval.dtype).val = NewStringf("%s^%s", (yyvsp[-2].dtype).val, (yyvsp[0].dtype).val);
 		 (yyval.dtype).type = promote((yyvsp[-2].dtype).type,(yyvsp[0].dtype).type);
 	       }
-#line 12871 "CParse/parser.c"
+#line 12875 "CParse/parser.c"
     break;
 
   case 518: /* exprcompound: expr LSHIFT expr  */
-#line 7956 "CParse/parser.y"
+#line 7960 "CParse/parser.y"
                                             {
 		 (yyval.dtype) = default_dtype;
 		 (yyval.dtype).val = NewStringf("%s << %s", (yyvsp[-2].dtype).val, (yyvsp[0].dtype).val);
 		 (yyval.dtype).type = promote_type((yyvsp[-2].dtype).type);
 	       }
-#line 12881 "CParse/parser.c"
+#line 12885 "CParse/parser.c"
     break;
 
   case 519: /* exprcompound: expr RSHIFT expr  */
-#line 7961 "CParse/parser.y"
+#line 7965 "CParse/parser.y"
                                             {
 		 (yyval.dtype) = default_dtype;
 		 (yyval.dtype).val = NewStringf("%s >> %s", (yyvsp[-2].dtype).val, (yyvsp[0].dtype).val);
 		 (yyval.dtype).type = promote_type((yyvsp[-2].dtype).type);
 	       }
-#line 12891 "CParse/parser.c"
+#line 12895 "CParse/parser.c"
     break;
 
   case 520: /* exprcompound: expr LAND expr  */
-#line 7966 "CParse/parser.y"
+#line 7970 "CParse/parser.y"
                                           {
 		 (yyval.dtype) = default_dtype;
 		 (yyval.dtype).val = NewStringf("%s&&%s", (yyvsp[-2].dtype).val, (yyvsp[0].dtype).val);
 		 (yyval.dtype).type = cparse_cplusplus ? T_BOOL : T_INT;
 	       }
-#line 12901 "CParse/parser.c"
+#line 12905 "CParse/parser.c"
     break;
 
   case 521: /* exprcompound: expr LOR expr  */
-#line 7971 "CParse/parser.y"
+#line 7975 "CParse/parser.y"
                                          {
 		 (yyval.dtype) = default_dtype;
 		 (yyval.dtype).val = NewStringf("%s||%s", (yyvsp[-2].dtype).val, (yyvsp[0].dtype).val);
 		 (yyval.dtype).type = cparse_cplusplus ? T_BOOL : T_INT;
 	       }
-#line 12911 "CParse/parser.c"
+#line 12915 "CParse/parser.c"
     break;
 
   case 522: /* exprcompound: expr EQUALTO expr  */
-#line 7976 "CParse/parser.y"
+#line 7980 "CParse/parser.y"
                                              {
 		 (yyval.dtype) = default_dtype;
 		 (yyval.dtype).val = NewStringf("%s==%s", (yyvsp[-2].dtype).val, (yyvsp[0].dtype).val);
 		 (yyval.dtype).type = cparse_cplusplus ? T_BOOL : T_INT;
 	       }
-#line 12921 "CParse/parser.c"
+#line 12925 "CParse/parser.c"
     break;
 
   case 523: /* exprcompound: expr NOTEQUALTO expr  */
-#line 7981 "CParse/parser.y"
+#line 7985 "CParse/parser.y"
                                                 {
 		 (yyval.dtype) = default_dtype;
 		 (yyval.dtype).val = NewStringf("%s!=%s", (yyvsp[-2].dtype).val, (yyvsp[0].dtype).val);
 		 (yyval.dtype).type = cparse_cplusplus ? T_BOOL : T_INT;
 	       }
-#line 12931 "CParse/parser.c"
+#line 12935 "CParse/parser.c"
     break;
 
   case 524: /* exprcompound: LPAREN expr GREATERTHAN expr RPAREN  */
-#line 7990 "CParse/parser.y"
+#line 7994 "CParse/parser.y"
                                                                {
 		 (yyval.dtype) = default_dtype;
 		 (yyval.dtype).val = NewStringf("(%s > %s)", (yyvsp[-3].dtype).val, (yyvsp[-1].dtype).val);
 		 (yyval.dtype).type = cparse_cplusplus ? T_BOOL : T_INT;
 	       }
-#line 12941 "CParse/parser.c"
+#line 12945 "CParse/parser.c"
     break;
 
   case 525: /* exprcompound: LPAREN exprsimple LESSTHAN expr RPAREN  */
-#line 8001 "CParse/parser.y"
+#line 8005 "CParse/parser.y"
                                                                   {
 		 (yyval.dtype) = default_dtype;
 		 (yyval.dtype).val = NewStringf("(%s < %s)", (yyvsp[-3].dtype).val, (yyvsp[-1].dtype).val);
 		 (yyval.dtype).type = cparse_cplusplus ? T_BOOL : T_INT;
 	       }
-#line 12951 "CParse/parser.c"
+#line 12955 "CParse/parser.c"
     break;
 
   case 526: /* exprcompound: expr GREATERTHANOREQUALTO expr  */
-#line 8006 "CParse/parser.y"
+#line 8010 "CParse/parser.y"
                                                           {
 		 (yyval.dtype) = default_dtype;
 		 (yyval.dtype).val = NewStringf("%s >= %s", (yyvsp[-2].dtype).val, (yyvsp[0].dtype).val);
 		 (yyval.dtype).type = cparse_cplusplus ? T_BOOL : T_INT;
 	       }
-#line 12961 "CParse/parser.c"
+#line 12965 "CParse/parser.c"
     break;
 
   case 527: /* exprcompound: expr LESSTHANOREQUALTO expr  */
-#line 8011 "CParse/parser.y"
+#line 8015 "CParse/parser.y"
                                                        {
 		 (yyval.dtype) = default_dtype;
 		 (yyval.dtype).val = NewStringf("%s <= %s", (yyvsp[-2].dtype).val, (yyvsp[0].dtype).val);
 		 (yyval.dtype).type = cparse_cplusplus ? T_BOOL : T_INT;
 	       }
-#line 12971 "CParse/parser.c"
+#line 12975 "CParse/parser.c"
     break;
 
   case 528: /* exprcompound: expr PLUS ELLIPSIS  */
-#line 8028 "CParse/parser.y"
+#line 8032 "CParse/parser.y"
                                          {
 		 (yyval.dtype) = default_dtype;
 		 (yyval.dtype).val = NewStringf("%s+...", (yyvsp[-2].dtype).val);
 		 (yyval.dtype).type = promote_type((yyvsp[-2].dtype).type);
 	       }
-#line 12981 "CParse/parser.c"
+#line 12985 "CParse/parser.c"
     break;
 
   case 529: /* exprcompound: expr MINUS ELLIPSIS  */
-#line 8033 "CParse/parser.y"
+#line 8037 "CParse/parser.y"
                                           {
 		 (yyval.dtype) = default_dtype;
 		 (yyval.dtype).val = NewStringf("%s-...", (yyvsp[-2].dtype).val);
 		 (yyval.dtype).type = promote_type((yyvsp[-2].dtype).type);
 	       }
-#line 12991 "CParse/parser.c"
+#line 12995 "CParse/parser.c"
     break;
 
   case 530: /* exprcompound: expr STAR ELLIPSIS  */
-#line 8038 "CParse/parser.y"
+#line 8042 "CParse/parser.y"
                                          {
 		 (yyval.dtype) = default_dtype;
 		 (yyval.dtype).val = NewStringf("%s*...", (yyvsp[-2].dtype).val);
 		 (yyval.dtype).type = promote_type((yyvsp[-2].dtype).type);
 	       }
-#line 13001 "CParse/parser.c"
+#line 13005 "CParse/parser.c"
     break;
 
   case 531: /* exprcompound: expr SLASH ELLIPSIS  */
-#line 8043 "CParse/parser.y"
+#line 8047 "CParse/parser.y"
                                           {
 		 (yyval.dtype) = default_dtype;
 		 (yyval.dtype).val = NewStringf("%s/...", (yyvsp[-2].dtype).val);
 		 (yyval.dtype).type = promote_type((yyvsp[-2].dtype).type);
 	       }
-#line 13011 "CParse/parser.c"
+#line 13015 "CParse/parser.c"
     break;
 
   case 532: /* exprcompound: expr MODULO ELLIPSIS  */
-#line 8048 "CParse/parser.y"
+#line 8052 "CParse/parser.y"
                                            {
 		 (yyval.dtype) = default_dtype;
 		 (yyval.dtype).val = NewStringf("%s%%...", (yyvsp[-2].dtype).val);
 		 (yyval.dtype).type = promote_type((yyvsp[-2].dtype).type);
 	       }
-#line 13021 "CParse/parser.c"
+#line 13025 "CParse/parser.c"
     break;
 
   case 533: /* exprcompound: expr AND ELLIPSIS  */
-#line 8053 "CParse/parser.y"
+#line 8057 "CParse/parser.y"
                                         {
 		 (yyval.dtype) = default_dtype;
 		 (yyval.dtype).val = NewStringf("%s&...", (yyvsp[-2].dtype).val);
 		 (yyval.dtype).type = promote_type((yyvsp[-2].dtype).type);
 	       }
-#line 13031 "CParse/parser.c"
+#line 13035 "CParse/parser.c"
     break;
 
   case 534: /* exprcompound: expr OR ELLIPSIS  */
-#line 8058 "CParse/parser.y"
+#line 8062 "CParse/parser.y"
                                        {
 		 (yyval.dtype) = default_dtype;
 		 (yyval.dtype).val = NewStringf("%s|...", (yyvsp[-2].dtype).val);
 		 (yyval.dtype).type = promote_type((yyvsp[-2].dtype).type);
 	       }
-#line 13041 "CParse/parser.c"
+#line 13045 "CParse/parser.c"
     break;
 
   case 535: /* exprcompound: expr XOR ELLIPSIS  */
-#line 8063 "CParse/parser.y"
+#line 8067 "CParse/parser.y"
                                         {
 		 (yyval.dtype) = default_dtype;
 		 (yyval.dtype).val = NewStringf("%s^...", (yyvsp[-2].dtype).val);
 		 (yyval.dtype).type = promote_type((yyvsp[-2].dtype).type);
 	       }
-#line 13051 "CParse/parser.c"
+#line 13055 "CParse/parser.c"
     break;
 
   case 536: /* exprcompound: expr LSHIFT ELLIPSIS  */
-#line 8068 "CParse/parser.y"
+#line 8072 "CParse/parser.y"
                                            {
 		 (yyval.dtype) = default_dtype;
 		 (yyval.dtype).val = NewStringf("%s << ...", (yyvsp[-2].dtype).val);
 		 (yyval.dtype).type = promote_type((yyvsp[-2].dtype).type);
 	       }
-#line 13061 "CParse/parser.c"
+#line 13065 "CParse/parser.c"
     break;
 
   case 537: /* exprcompound: expr RSHIFT ELLIPSIS  */
-#line 8073 "CParse/parser.y"
+#line 8077 "CParse/parser.y"
                                            {
 		 (yyval.dtype) = default_dtype;
 		 (yyval.dtype).val = NewStringf("%s >> ...", (yyvsp[-2].dtype).val);
 		 (yyval.dtype).type = promote_type((yyvsp[-2].dtype).type);
 	       }
-#line 13071 "CParse/parser.c"
+#line 13075 "CParse/parser.c"
     break;
 
   case 538: /* exprcompound: expr LAND ELLIPSIS  */
-#line 8078 "CParse/parser.y"
+#line 8082 "CParse/parser.y"
                                          {
 		 (yyval.dtype) = default_dtype;
 		 (yyval.dtype).val = NewStringf("%s&&...", (yyvsp[-2].dtype).val);
 		 (yyval.dtype).type = cparse_cplusplus ? T_BOOL : T_INT;
 	       }
-#line 13081 "CParse/parser.c"
+#line 13085 "CParse/parser.c"
     break;
 
   case 539: /* exprcompound: expr LOR ELLIPSIS  */
-#line 8083 "CParse/parser.y"
+#line 8087 "CParse/parser.y"
                                         {
 		 (yyval.dtype) = default_dtype;
 		 (yyval.dtype).val = NewStringf("%s||...", (yyvsp[-2].dtype).val);
 		 (yyval.dtype).type = cparse_cplusplus ? T_BOOL : T_INT;
 	       }
-#line 13091 "CParse/parser.c"
+#line 13095 "CParse/parser.c"
     break;
 
   case 540: /* exprcompound: expr EQUALTO ELLIPSIS  */
-#line 8088 "CParse/parser.y"
+#line 8092 "CParse/parser.y"
                                             {
 		 (yyval.dtype) = default_dtype;
 		 (yyval.dtype).val = NewStringf("%s==...", (yyvsp[-2].dtype).val);
 		 (yyval.dtype).type = cparse_cplusplus ? T_BOOL : T_INT;
 	       }
-#line 13101 "CParse/parser.c"
+#line 13105 "CParse/parser.c"
     break;
 
   case 541: /* exprcompound: expr NOTEQUALTO ELLIPSIS  */
-#line 8093 "CParse/parser.y"
+#line 8097 "CParse/parser.y"
                                                {
 		 (yyval.dtype) = default_dtype;
 		 (yyval.dtype).val = NewStringf("%s!=...", (yyvsp[-2].dtype).val);
 		 (yyval.dtype).type = cparse_cplusplus ? T_BOOL : T_INT;
 	       }
-#line 13111 "CParse/parser.c"
+#line 13115 "CParse/parser.c"
     break;
 
   case 542: /* exprcompound: LPAREN expr GREATERTHAN ELLIPSIS RPAREN  */
-#line 8102 "CParse/parser.y"
+#line 8106 "CParse/parser.y"
                                                               {
 		 (yyval.dtype) = default_dtype;
 		 (yyval.dtype).val = NewStringf("(%s > ...)", (yyvsp[-3].dtype).val);
 		 (yyval.dtype).type = cparse_cplusplus ? T_BOOL : T_INT;
 	       }
-#line 13121 "CParse/parser.c"
+#line 13125 "CParse/parser.c"
     break;
 
   case 543: /* exprcompound: LPAREN exprsimple LESSTHAN ELLIPSIS RPAREN  */
-#line 8112 "CParse/parser.y"
+#line 8116 "CParse/parser.y"
                                                                  {
 		 (yyval.dtype) = default_dtype;
 		 (yyval.dtype).val = NewStringf("(%s < %s)", (yyvsp[-3].dtype).val);
 		 (yyval.dtype).type = cparse_cplusplus ? T_BOOL : T_INT;
 	       }
-#line 13131 "CParse/parser.c"
+#line 13135 "CParse/parser.c"
     break;
 
   case 544: /* exprcompound: expr GREATERTHANOREQUALTO ELLIPSIS  */
-#line 8117 "CParse/parser.y"
+#line 8121 "CParse/parser.y"
                                                          {
 		 (yyval.dtype) = default_dtype;
 		 (yyval.dtype).val = NewStringf("%s >= ...", (yyvsp[-2].dtype).val);
 		 (yyval.dtype).type = cparse_cplusplus ? T_BOOL : T_INT;
 	       }
-#line 13141 "CParse/parser.c"
+#line 13145 "CParse/parser.c"
     break;
 
   case 545: /* exprcompound: expr LESSTHANOREQUALTO ELLIPSIS  */
-#line 8122 "CParse/parser.y"
+#line 8126 "CParse/parser.y"
                                                       {
 		 (yyval.dtype) = default_dtype;
 		 (yyval.dtype).val = NewStringf("%s <= ...", (yyvsp[-2].dtype).val);
 		 (yyval.dtype).type = cparse_cplusplus ? T_BOOL : T_INT;
 	       }
-#line 13151 "CParse/parser.c"
+#line 13155 "CParse/parser.c"
     break;
 
   case 546: /* exprcompound: expr LESSEQUALGREATER expr  */
-#line 8128 "CParse/parser.y"
+#line 8132 "CParse/parser.y"
                                                       {
 		 (yyval.dtype) = default_dtype;
 		 (yyval.dtype).val = NewStringf("%s <=> %s", (yyvsp[-2].dtype).val, (yyvsp[0].dtype).val);
@@ -13167,11 +13171,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		 (yyval.dtype).type = T_USER;
 		 (yyval.dtype).unary_arg_type = 0;
 	       }
-#line 13171 "CParse/parser.c"
+#line 13175 "CParse/parser.c"
     break;
 
   case 547: /* exprcompound: expr QUESTIONMARK expr COLON expr  */
-#line 8143 "CParse/parser.y"
+#line 8147 "CParse/parser.y"
                                                                                            {
 		 (yyval.dtype) = default_dtype;
 		 (yyval.dtype).val = NewStringf("%s?%s:%s", (yyvsp[-4].dtype).val, (yyvsp[-2].dtype).val, (yyvsp[0].dtype).val);
@@ -13179,11 +13183,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		  * for the purposes of parsing constant expressions. */
 		 (yyval.dtype).type = promote((yyvsp[-2].dtype).type, (yyvsp[0].dtype).type);
 	       }
-#line 13183 "CParse/parser.c"
+#line 13187 "CParse/parser.c"
     break;
 
   case 548: /* exprcompound: MINUS expr  */
-#line 8150 "CParse/parser.y"
+#line 8154 "CParse/parser.y"
                                              {
 		 (yyval.dtype) = default_dtype;
 		 (yyval.dtype).val = NewStringf("-%s",(yyvsp[0].dtype).val);
@@ -13210,11 +13214,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		  */
 		 (yyval.dtype).unary_arg_type = (yyvsp[0].dtype).type;
 	       }
-#line 13214 "CParse/parser.c"
+#line 13218 "CParse/parser.c"
     break;
 
   case 549: /* exprcompound: PLUS expr  */
-#line 8176 "CParse/parser.y"
+#line 8180 "CParse/parser.y"
                                             {
 		 (yyval.dtype) = default_dtype;
                  (yyval.dtype).val = NewStringf("+%s",(yyvsp[0].dtype).val);
@@ -13226,65 +13230,65 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		  */
 		 (yyval.dtype).unary_arg_type = (yyvsp[0].dtype).type;
 	       }
-#line 13230 "CParse/parser.c"
+#line 13234 "CParse/parser.c"
     break;
 
   case 550: /* exprcompound: NOT expr  */
-#line 8187 "CParse/parser.y"
+#line 8191 "CParse/parser.y"
                               {
 		 (yyval.dtype) = default_dtype;
 		 (yyval.dtype).val = NewStringf("~%s",(yyvsp[0].dtype).val);
 		 (yyval.dtype).type = promote_type((yyvsp[0].dtype).type);
 	       }
-#line 13240 "CParse/parser.c"
+#line 13244 "CParse/parser.c"
     break;
 
   case 551: /* exprcompound: LNOT expr  */
-#line 8192 "CParse/parser.y"
+#line 8196 "CParse/parser.y"
                                {
 		 (yyval.dtype) = default_dtype;
                  (yyval.dtype).val = NewStringf("!%s", (yyvsp[0].dtype).val);
 		 (yyval.dtype).type = cparse_cplusplus ? T_BOOL : T_INT;
 	       }
-#line 13250 "CParse/parser.c"
+#line 13254 "CParse/parser.c"
     break;
 
   case 552: /* variadic_opt: ELLIPSIS  */
-#line 8199 "CParse/parser.y"
+#line 8203 "CParse/parser.y"
                          {
 		(yyval.intvalue) = 1;
 	      }
-#line 13258 "CParse/parser.c"
+#line 13262 "CParse/parser.c"
     break;
 
   case 553: /* variadic_opt: %empty  */
-#line 8202 "CParse/parser.y"
+#line 8206 "CParse/parser.y"
                        {
 	        (yyval.intvalue) = 0;
 	      }
-#line 13266 "CParse/parser.c"
+#line 13270 "CParse/parser.c"
     break;
 
   case 555: /* $@13: %empty  */
-#line 8210 "CParse/parser.y"
+#line 8214 "CParse/parser.y"
                         { inherit_list = 1; }
-#line 13272 "CParse/parser.c"
+#line 13276 "CParse/parser.c"
     break;
 
   case 556: /* raw_inherit: COLON $@13 base_list  */
-#line 8210 "CParse/parser.y"
+#line 8214 "CParse/parser.y"
                                                         { (yyval.bases) = (yyvsp[0].bases); inherit_list = 0; }
-#line 13278 "CParse/parser.c"
+#line 13282 "CParse/parser.c"
     break;
 
   case 557: /* raw_inherit: %empty  */
-#line 8211 "CParse/parser.y"
+#line 8215 "CParse/parser.y"
                          { (yyval.bases) = 0; }
-#line 13284 "CParse/parser.c"
+#line 13288 "CParse/parser.c"
     break;
 
   case 558: /* base_list: base_specifier  */
-#line 8214 "CParse/parser.y"
+#line 8218 "CParse/parser.y"
                                 {
 		   Hash *list = NewHash();
 		   Node *base = (yyvsp[0].node);
@@ -13301,11 +13305,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		   Append(Getattr(list,Getattr(base,"access")),name);
 	           (yyval.bases) = list;
                }
-#line 13305 "CParse/parser.c"
+#line 13309 "CParse/parser.c"
     break;
 
   case 559: /* base_list: base_list COMMA base_specifier  */
-#line 8231 "CParse/parser.y"
+#line 8235 "CParse/parser.y"
                                                     {
 		   Hash *list = (yyvsp[-2].bases);
 		   Node *base = (yyvsp[0].node);
@@ -13313,19 +13317,19 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		   Append(Getattr(list,Getattr(base,"access")),name);
                    (yyval.bases) = list;
                }
-#line 13317 "CParse/parser.c"
+#line 13321 "CParse/parser.c"
     break;
 
   case 560: /* @14: %empty  */
-#line 8240 "CParse/parser.y"
+#line 8244 "CParse/parser.y"
                                        {
 		 (yyval.intvalue) = cparse_line;
 	       }
-#line 13325 "CParse/parser.c"
+#line 13329 "CParse/parser.c"
     break;
 
   case 561: /* base_specifier: opt_virtual @14 idcolon variadic_opt  */
-#line 8242 "CParse/parser.y"
+#line 8246 "CParse/parser.y"
                                             {
 		 (yyval.node) = NewHash();
 		 Setfile((yyval.node), cparse_file);
@@ -13343,19 +13347,19 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		   SwigType_add_variadic(Getattr((yyval.node), "name"));
 		 }
                }
-#line 13347 "CParse/parser.c"
+#line 13351 "CParse/parser.c"
     break;
 
   case 562: /* @15: %empty  */
-#line 8259 "CParse/parser.y"
+#line 8263 "CParse/parser.y"
                                                         {
 		 (yyval.intvalue) = cparse_line;
 	       }
-#line 13355 "CParse/parser.c"
+#line 13359 "CParse/parser.c"
     break;
 
   case 563: /* base_specifier: opt_virtual access_specifier @15 opt_virtual idcolon variadic_opt  */
-#line 8261 "CParse/parser.y"
+#line 8265 "CParse/parser.y"
                                                         {
 		 (yyval.node) = NewHash();
 		 Setfile((yyval.node), cparse_file);
@@ -13371,281 +13375,281 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		   SwigType_add_variadic(Getattr((yyval.node), "name"));
 		 }
                }
-#line 13375 "CParse/parser.c"
+#line 13379 "CParse/parser.c"
     break;
 
   case 564: /* access_specifier: PUBLIC  */
-#line 8278 "CParse/parser.y"
+#line 8282 "CParse/parser.y"
                            { (yyval.id) = "public"; }
-#line 13381 "CParse/parser.c"
+#line 13385 "CParse/parser.c"
     break;
 
   case 565: /* access_specifier: PRIVATE  */
-#line 8279 "CParse/parser.y"
+#line 8283 "CParse/parser.y"
                          { (yyval.id) = "private"; }
-#line 13387 "CParse/parser.c"
+#line 13391 "CParse/parser.c"
     break;
 
   case 566: /* access_specifier: PROTECTED  */
-#line 8280 "CParse/parser.y"
+#line 8284 "CParse/parser.y"
                            { (yyval.id) = "protected"; }
-#line 13393 "CParse/parser.c"
+#line 13397 "CParse/parser.c"
     break;
 
   case 567: /* templcpptype: CLASS variadic_opt  */
-#line 8283 "CParse/parser.y"
+#line 8287 "CParse/parser.y"
                                     {
                    (yyval.type) = NewString("class");
 		   if (!inherit_list) last_cpptype = (yyval.type);
 		   if ((yyvsp[0].intvalue)) SwigType_add_variadic((yyval.type));
                }
-#line 13403 "CParse/parser.c"
+#line 13407 "CParse/parser.c"
     break;
 
   case 568: /* templcpptype: TYPENAME variadic_opt  */
-#line 8288 "CParse/parser.y"
+#line 8292 "CParse/parser.y"
                                        {
                    (yyval.type) = NewString("typename");
 		   if (!inherit_list) last_cpptype = (yyval.type);
 		   if ((yyvsp[0].intvalue)) SwigType_add_variadic((yyval.type));
                }
-#line 13413 "CParse/parser.c"
+#line 13417 "CParse/parser.c"
     break;
 
   case 570: /* cpptype: STRUCT  */
-#line 8296 "CParse/parser.y"
+#line 8300 "CParse/parser.y"
                         {
                    (yyval.type) = NewString("struct");
 		   if (!inherit_list) last_cpptype = (yyval.type);
                }
-#line 13422 "CParse/parser.c"
+#line 13426 "CParse/parser.c"
     break;
 
   case 571: /* cpptype: UNION  */
-#line 8300 "CParse/parser.y"
+#line 8304 "CParse/parser.y"
                        {
                    (yyval.type) = NewString("union");
 		   if (!inherit_list) last_cpptype = (yyval.type);
                }
-#line 13431 "CParse/parser.c"
+#line 13435 "CParse/parser.c"
     break;
 
   case 572: /* classkey: CLASS  */
-#line 8306 "CParse/parser.y"
+#line 8310 "CParse/parser.y"
                        {
 		   if (!inherit_list) last_cpptype = NewString("class");
                }
-#line 13439 "CParse/parser.c"
+#line 13443 "CParse/parser.c"
     break;
 
   case 573: /* classkey: STRUCT  */
-#line 8309 "CParse/parser.y"
+#line 8313 "CParse/parser.y"
                         {
 		   if (!inherit_list) last_cpptype = NewString("struct");
                }
-#line 13447 "CParse/parser.c"
+#line 13451 "CParse/parser.c"
     break;
 
   case 574: /* classkey: UNION  */
-#line 8312 "CParse/parser.y"
+#line 8316 "CParse/parser.y"
                        {
 		   if (!inherit_list) last_cpptype = NewString("union");
                }
-#line 13455 "CParse/parser.c"
+#line 13459 "CParse/parser.c"
     break;
 
   case 577: /* opt_virtual: VIRTUAL  */
-#line 8321 "CParse/parser.y"
+#line 8325 "CParse/parser.y"
                          { virtual_base_seen = 1; }
-#line 13461 "CParse/parser.c"
+#line 13465 "CParse/parser.c"
     break;
 
   case 579: /* virt_specifier_seq: OVERRIDE  */
-#line 8325 "CParse/parser.y"
+#line 8329 "CParse/parser.y"
                               {
                    (yyval.str) = 0;
 	       }
-#line 13469 "CParse/parser.c"
+#line 13473 "CParse/parser.c"
     break;
 
   case 580: /* virt_specifier_seq: FINAL  */
-#line 8328 "CParse/parser.y"
+#line 8332 "CParse/parser.y"
                        {
                    (yyval.str) = NewString("1");
 	       }
-#line 13477 "CParse/parser.c"
+#line 13481 "CParse/parser.c"
     break;
 
   case 581: /* virt_specifier_seq: FINAL OVERRIDE  */
-#line 8331 "CParse/parser.y"
+#line 8335 "CParse/parser.y"
                                 {
                    (yyval.str) = NewString("1");
 	       }
-#line 13485 "CParse/parser.c"
+#line 13489 "CParse/parser.c"
     break;
 
   case 582: /* virt_specifier_seq: OVERRIDE FINAL  */
-#line 8334 "CParse/parser.y"
+#line 8338 "CParse/parser.y"
                                 {
                    (yyval.str) = NewString("1");
 	       }
-#line 13493 "CParse/parser.c"
+#line 13497 "CParse/parser.c"
     break;
 
   case 584: /* virt_specifier_seq_opt: %empty  */
-#line 8340 "CParse/parser.y"
+#line 8344 "CParse/parser.y"
                         {
                    (yyval.str) = 0;
                }
-#line 13501 "CParse/parser.c"
+#line 13505 "CParse/parser.c"
     break;
 
   case 585: /* requires_clause_opt: REQUIRES constraint  */
-#line 8352 "CParse/parser.y"
+#line 8356 "CParse/parser.y"
                                           {
                    (yyval.node) = (yyvsp[0].node);
                }
-#line 13509 "CParse/parser.c"
+#line 13513 "CParse/parser.c"
     break;
 
   case 586: /* requires_clause_opt: %empty  */
-#line 8355 "CParse/parser.y"
+#line 8359 "CParse/parser.y"
                         {
                    (yyval.node) = 0;
                }
-#line 13517 "CParse/parser.c"
+#line 13521 "CParse/parser.c"
     break;
 
   case 587: /* class_virt_specifier_opt: FINAL  */
-#line 8360 "CParse/parser.y"
+#line 8364 "CParse/parser.y"
                                  {
                    (yyval.str) = NewString("1");
                }
-#line 13525 "CParse/parser.c"
+#line 13529 "CParse/parser.c"
     break;
 
   case 588: /* class_virt_specifier_opt: %empty  */
-#line 8363 "CParse/parser.y"
+#line 8367 "CParse/parser.y"
                         {
                    (yyval.str) = 0;
                }
-#line 13533 "CParse/parser.c"
+#line 13537 "CParse/parser.c"
     break;
 
   case 589: /* exception_specification: THROW LPAREN parms RPAREN  */
-#line 8368 "CParse/parser.y"
+#line 8372 "CParse/parser.y"
                                                     {
 		    (yyval.dtype) = default_dtype;
                     (yyval.dtype).throws = (yyvsp[-1].pl);
                     (yyval.dtype).throwf = NewString("1");
 	       }
-#line 13543 "CParse/parser.c"
+#line 13547 "CParse/parser.c"
     break;
 
   case 590: /* exception_specification: NOEXCEPT  */
-#line 8373 "CParse/parser.y"
+#line 8377 "CParse/parser.y"
                           {
 		    (yyval.dtype) = default_dtype;
                     (yyval.dtype).nexcept = NewString("true");
 	       }
-#line 13552 "CParse/parser.c"
+#line 13556 "CParse/parser.c"
     break;
 
   case 591: /* exception_specification: virt_specifier_seq  */
-#line 8377 "CParse/parser.y"
+#line 8381 "CParse/parser.y"
                                     {
 		    (yyval.dtype) = default_dtype;
                     (yyval.dtype).final = (yyvsp[0].str);
 	       }
-#line 13561 "CParse/parser.c"
+#line 13565 "CParse/parser.c"
     break;
 
   case 592: /* exception_specification: THROW LPAREN parms RPAREN virt_specifier_seq  */
-#line 8381 "CParse/parser.y"
+#line 8385 "CParse/parser.y"
                                                               {
 		    (yyval.dtype) = default_dtype;
                     (yyval.dtype).throws = (yyvsp[-2].pl);
                     (yyval.dtype).throwf = NewString("1");
                     (yyval.dtype).final = (yyvsp[0].str);
 	       }
-#line 13572 "CParse/parser.c"
+#line 13576 "CParse/parser.c"
     break;
 
   case 593: /* exception_specification: NOEXCEPT virt_specifier_seq  */
-#line 8387 "CParse/parser.y"
+#line 8391 "CParse/parser.y"
                                              {
 		    (yyval.dtype) = default_dtype;
                     (yyval.dtype).nexcept = NewString("true");
 		    (yyval.dtype).final = (yyvsp[0].str);
 	       }
-#line 13582 "CParse/parser.c"
+#line 13586 "CParse/parser.c"
     break;
 
   case 594: /* exception_specification: NOEXCEPT LPAREN expr RPAREN  */
-#line 8392 "CParse/parser.y"
+#line 8396 "CParse/parser.y"
                                              {
 		    (yyval.dtype) = default_dtype;
                     (yyval.dtype).nexcept = (yyvsp[-1].dtype).val;
 	       }
-#line 13591 "CParse/parser.c"
+#line 13595 "CParse/parser.c"
     break;
 
   case 595: /* qualifiers_exception_specification: cv_ref_qualifier  */
-#line 8398 "CParse/parser.y"
+#line 8402 "CParse/parser.y"
                                                       {
 		    (yyval.dtype) = default_dtype;
                     (yyval.dtype).qualifier = (yyvsp[0].dtype).qualifier;
                     (yyval.dtype).refqualifier = (yyvsp[0].dtype).refqualifier;
                }
-#line 13601 "CParse/parser.c"
+#line 13605 "CParse/parser.c"
     break;
 
   case 596: /* qualifiers_exception_specification: exception_specification  */
-#line 8403 "CParse/parser.y"
+#line 8407 "CParse/parser.y"
                                          {
 		    (yyval.dtype) = (yyvsp[0].dtype);
                }
-#line 13609 "CParse/parser.c"
+#line 13613 "CParse/parser.c"
     break;
 
   case 597: /* qualifiers_exception_specification: cv_ref_qualifier exception_specification  */
-#line 8406 "CParse/parser.y"
+#line 8410 "CParse/parser.y"
                                                           {
 		    (yyval.dtype) = (yyvsp[0].dtype);
                     (yyval.dtype).qualifier = (yyvsp[-1].dtype).qualifier;
                     (yyval.dtype).refqualifier = (yyvsp[-1].dtype).refqualifier;
                }
-#line 13619 "CParse/parser.c"
+#line 13623 "CParse/parser.c"
     break;
 
   case 599: /* cpp_const: qualifiers_exception_specification REQUIRES constraint  */
-#line 8414 "CParse/parser.y"
+#line 8418 "CParse/parser.y"
                                                                         {
                  (yyval.dtype) = (yyvsp[-2].dtype);
                  (yyval.dtype).constraint_node = (yyvsp[0].node);
                }
-#line 13628 "CParse/parser.c"
+#line 13632 "CParse/parser.c"
     break;
 
   case 600: /* cpp_const: REQUIRES constraint  */
-#line 8418 "CParse/parser.y"
+#line 8422 "CParse/parser.y"
                                      {
                  (yyval.dtype) = default_dtype;
                  (yyval.dtype).constraint_node = (yyvsp[0].node);
                }
-#line 13637 "CParse/parser.c"
+#line 13641 "CParse/parser.c"
     break;
 
   case 601: /* cpp_const: %empty  */
-#line 8422 "CParse/parser.y"
+#line 8426 "CParse/parser.y"
                         {
                  (yyval.dtype) = default_dtype;
                }
-#line 13645 "CParse/parser.c"
+#line 13649 "CParse/parser.c"
     break;
 
   case 602: /* ctor_end: cpp_const ctor_initializer SEMI  */
-#line 8427 "CParse/parser.y"
+#line 8431 "CParse/parser.y"
                                                  {
                     Clear(scanner_ccode);
 		    (yyval.decl) = default_decl;
@@ -13657,11 +13661,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
                     if ((yyvsp[-2].dtype).qualifier)
                       Swig_error(cparse_file, cparse_line, "Constructor cannot have a qualifier.\n");
                }
-#line 13661 "CParse/parser.c"
+#line 13665 "CParse/parser.c"
     break;
 
   case 603: /* ctor_end: cpp_const ctor_initializer LBRACE  */
-#line 8438 "CParse/parser.y"
+#line 8442 "CParse/parser.y"
                                                    {
                     if ((yyvsp[-2].dtype).qualifier)
                       Swig_error(cparse_file, cparse_line, "Constructor cannot have a qualifier.\n");
@@ -13673,44 +13677,44 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
                     (yyval.decl).final = (yyvsp[-2].dtype).final;
 		    (yyval.decl).constraint_node = (yyvsp[-2].dtype).constraint_node;
                }
-#line 13677 "CParse/parser.c"
+#line 13681 "CParse/parser.c"
     break;
 
   case 604: /* ctor_end: LPAREN parms RPAREN SEMI  */
-#line 8449 "CParse/parser.y"
+#line 8453 "CParse/parser.y"
                                           { 
                     Clear(scanner_ccode); 
 		    (yyval.decl) = default_decl;
                     (yyval.decl).parms = (yyvsp[-2].pl); 
                     (yyval.decl).have_parms = 1; 
                }
-#line 13688 "CParse/parser.c"
+#line 13692 "CParse/parser.c"
     break;
 
   case 605: /* ctor_end: LPAREN parms RPAREN LBRACE  */
-#line 8455 "CParse/parser.y"
+#line 8459 "CParse/parser.y"
                                             {
                     if (skip_balanced('{','}') < 0) Exit(EXIT_FAILURE);
 		    (yyval.decl) = default_decl;
                     (yyval.decl).parms = (yyvsp[-2].pl); 
                     (yyval.decl).have_parms = 1; 
                }
-#line 13699 "CParse/parser.c"
+#line 13703 "CParse/parser.c"
     break;
 
   case 606: /* ctor_end: EQUAL definetype SEMI  */
-#line 8461 "CParse/parser.y"
+#line 8465 "CParse/parser.y"
                                        { 
 		    (yyval.decl) = default_decl;
                     (yyval.decl).defarg = (yyvsp[-1].dtype).val; 
 		    (yyval.decl).stringdefarg = (yyvsp[-1].dtype).stringval;
 		    (yyval.decl).numdefarg = (yyvsp[-1].dtype).numval;
                }
-#line 13710 "CParse/parser.c"
+#line 13714 "CParse/parser.c"
     break;
 
   case 607: /* ctor_end: exception_specification EQUAL default_delete SEMI  */
-#line 8467 "CParse/parser.y"
+#line 8471 "CParse/parser.y"
                                                                    {
 		    (yyval.decl) = default_decl;
                     (yyval.decl).defarg = (yyvsp[-1].dtype).val;
@@ -13723,330 +13727,330 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
                     if ((yyvsp[-3].dtype).qualifier)
                       Swig_error(cparse_file, cparse_line, "Constructor cannot have a qualifier.\n");
                }
-#line 13727 "CParse/parser.c"
+#line 13731 "CParse/parser.c"
     break;
 
   case 614: /* mem_initializer: idcolon LPAREN  */
-#line 8491 "CParse/parser.y"
+#line 8495 "CParse/parser.y"
                                  {
 		  if (skip_balanced('(',')') < 0) Exit(EXIT_FAILURE);
 		  Clear(scanner_ccode);
 		}
-#line 13736 "CParse/parser.c"
+#line 13740 "CParse/parser.c"
     break;
 
   case 615: /* mem_initializer: idcolon LBRACE  */
-#line 8503 "CParse/parser.y"
+#line 8507 "CParse/parser.y"
                                  {
 		  if (skip_balanced('{','}') < 0) Exit(EXIT_FAILURE);
 		  Clear(scanner_ccode);
 		}
-#line 13745 "CParse/parser.c"
+#line 13749 "CParse/parser.c"
     break;
 
   case 616: /* less_valparms_greater: LESSTHAN valparms GREATERTHAN  */
-#line 8509 "CParse/parser.y"
+#line 8513 "CParse/parser.y"
                                                       {
                      String *s = NewStringEmpty();
                      SwigType_add_template(s,(yyvsp[-1].p));
 		     (yyval.str) = s;
 		     scanner_last_id(1);
                 }
-#line 13756 "CParse/parser.c"
+#line 13760 "CParse/parser.c"
     break;
 
   case 618: /* identifier: OVERRIDE  */
-#line 8519 "CParse/parser.y"
+#line 8523 "CParse/parser.y"
                           { (yyval.id) = Swig_copy_string("override"); }
-#line 13762 "CParse/parser.c"
+#line 13766 "CParse/parser.c"
     break;
 
   case 619: /* identifier: FINAL  */
-#line 8520 "CParse/parser.y"
+#line 8524 "CParse/parser.y"
                        { (yyval.id) = Swig_copy_string("final"); }
-#line 13768 "CParse/parser.c"
+#line 13772 "CParse/parser.c"
     break;
 
   case 621: /* idstring: default_delete  */
-#line 8524 "CParse/parser.y"
+#line 8528 "CParse/parser.y"
                                 { (yyval.id) = Char((yyvsp[0].dtype).val); }
-#line 13774 "CParse/parser.c"
+#line 13778 "CParse/parser.c"
     break;
 
   case 622: /* idstring: string  */
-#line 8525 "CParse/parser.y"
+#line 8529 "CParse/parser.y"
                         { (yyval.id) = Char((yyvsp[0].str)); }
-#line 13780 "CParse/parser.c"
+#line 13784 "CParse/parser.c"
     break;
 
   case 624: /* idstringopt: %empty  */
-#line 8529 "CParse/parser.y"
+#line 8533 "CParse/parser.y"
                         { (yyval.id) = 0; }
-#line 13786 "CParse/parser.c"
+#line 13790 "CParse/parser.c"
     break;
 
   case 625: /* idcolon: idtemplate idcolontail  */
-#line 8532 "CParse/parser.y"
+#line 8536 "CParse/parser.y"
                                         { 
 		 (yyval.str) = NewStringf("%s%s", (yyvsp[-1].str), (yyvsp[0].str));
 		 Delete((yyvsp[0].str));
                }
-#line 13795 "CParse/parser.c"
+#line 13799 "CParse/parser.c"
     break;
 
   case 626: /* idcolon: NONID DCOLON idtemplatetemplate idcolontail  */
-#line 8536 "CParse/parser.y"
+#line 8540 "CParse/parser.y"
                                                              {
 		 (yyval.str) = NewStringf("::%s%s",(yyvsp[-1].str),(yyvsp[0].str));
                  Delete((yyvsp[0].str));
                }
-#line 13804 "CParse/parser.c"
+#line 13808 "CParse/parser.c"
     break;
 
   case 627: /* idcolon: idtemplate  */
-#line 8540 "CParse/parser.y"
+#line 8544 "CParse/parser.y"
                             {
 		 (yyval.str) = NewString((yyvsp[0].str));
    	       }
-#line 13812 "CParse/parser.c"
+#line 13816 "CParse/parser.c"
     break;
 
   case 628: /* idcolon: NONID DCOLON idtemplatetemplate  */
-#line 8543 "CParse/parser.y"
+#line 8547 "CParse/parser.y"
                                                  {
 		 (yyval.str) = NewStringf("::%s",(yyvsp[0].str));
                }
-#line 13820 "CParse/parser.c"
+#line 13824 "CParse/parser.c"
     break;
 
   case 629: /* idcolon: OPERATOR  */
-#line 8546 "CParse/parser.y"
+#line 8550 "CParse/parser.y"
                                     {
 		 (yyval.str) = (yyvsp[0].str);
 	       }
-#line 13828 "CParse/parser.c"
+#line 13832 "CParse/parser.c"
     break;
 
   case 630: /* idcolon: OPERATOR less_valparms_greater  */
-#line 8549 "CParse/parser.y"
+#line 8553 "CParse/parser.y"
                                                 {
 		 (yyval.str) = (yyvsp[-1].str);
 		 Append((yyval.str), (yyvsp[0].str));
 		 Delete((yyvsp[0].str));
 	       }
-#line 13838 "CParse/parser.c"
+#line 13842 "CParse/parser.c"
     break;
 
   case 631: /* idcolon: NONID DCOLON OPERATOR  */
-#line 8554 "CParse/parser.y"
+#line 8558 "CParse/parser.y"
                                        {
 		 (yyval.str) = (yyvsp[0].str);
 		 Insert((yyval.str), 0, "::");
                }
-#line 13847 "CParse/parser.c"
+#line 13851 "CParse/parser.c"
     break;
 
   case 632: /* idcolontail: DCOLON idtemplatetemplate idcolontail  */
-#line 8560 "CParse/parser.y"
+#line 8564 "CParse/parser.y"
                                                            {
                    (yyval.str) = NewStringf("::%s%s",(yyvsp[-1].str),(yyvsp[0].str));
 		   Delete((yyvsp[0].str));
                }
-#line 13856 "CParse/parser.c"
+#line 13860 "CParse/parser.c"
     break;
 
   case 633: /* idcolontail: DCOLON idtemplatetemplate  */
-#line 8564 "CParse/parser.y"
+#line 8568 "CParse/parser.y"
                                            {
                    (yyval.str) = NewStringf("::%s",(yyvsp[0].str));
                }
-#line 13864 "CParse/parser.c"
+#line 13868 "CParse/parser.c"
     break;
 
   case 634: /* idcolontail: DCOLON OPERATOR  */
-#line 8567 "CParse/parser.y"
+#line 8571 "CParse/parser.y"
                                  {
 		   (yyval.str) = (yyvsp[0].str);
 		   Insert((yyval.str), 0, "::");
                }
-#line 13873 "CParse/parser.c"
+#line 13877 "CParse/parser.c"
     break;
 
   case 635: /* idcolontail: DCNOT idtemplate  */
-#line 8571 "CParse/parser.y"
+#line 8575 "CParse/parser.y"
                                   {
 		 (yyval.str) = NewStringf("::~%s",(yyvsp[0].str));
                }
-#line 13881 "CParse/parser.c"
+#line 13885 "CParse/parser.c"
     break;
 
   case 636: /* idtemplate: identifier  */
-#line 8577 "CParse/parser.y"
+#line 8581 "CParse/parser.y"
                            {
 		(yyval.str) = NewString((yyvsp[0].id));
 	      }
-#line 13889 "CParse/parser.c"
+#line 13893 "CParse/parser.c"
     break;
 
   case 637: /* idtemplate: identifier less_valparms_greater  */
-#line 8580 "CParse/parser.y"
+#line 8584 "CParse/parser.y"
                                                  {
 		(yyval.str) = NewString((yyvsp[-1].id));
 		Append((yyval.str), (yyvsp[0].str));
 		Delete((yyvsp[0].str));
 	      }
-#line 13899 "CParse/parser.c"
+#line 13903 "CParse/parser.c"
     break;
 
   case 639: /* idtemplatetemplate: TEMPLATE identifier less_valparms_greater  */
-#line 8588 "CParse/parser.y"
+#line 8592 "CParse/parser.y"
                                                           {
 		(yyval.str) = NewString((yyvsp[-1].id));
 		Append((yyval.str), (yyvsp[0].str));
 		Delete((yyvsp[0].str));
 	      }
-#line 13909 "CParse/parser.c"
+#line 13913 "CParse/parser.c"
     break;
 
   case 640: /* idcolonnt: identifier idcolontailnt  */
-#line 8596 "CParse/parser.y"
+#line 8600 "CParse/parser.y"
                                          {
 		 (yyval.str) = NewStringf("%s%s", (yyvsp[-1].id), (yyvsp[0].str));
 		 Delete((yyvsp[0].str));
                }
-#line 13918 "CParse/parser.c"
+#line 13922 "CParse/parser.c"
     break;
 
   case 641: /* idcolonnt: NONID DCOLON identifier idcolontailnt  */
-#line 8600 "CParse/parser.y"
+#line 8604 "CParse/parser.y"
                                                        {
 		 (yyval.str) = NewStringf("::%s%s",(yyvsp[-1].id),(yyvsp[0].str));
                  Delete((yyvsp[0].str));
                }
-#line 13927 "CParse/parser.c"
+#line 13931 "CParse/parser.c"
     break;
 
   case 642: /* idcolonnt: identifier  */
-#line 8604 "CParse/parser.y"
+#line 8608 "CParse/parser.y"
                             {
 		 (yyval.str) = NewString((yyvsp[0].id));
    	       }
-#line 13935 "CParse/parser.c"
+#line 13939 "CParse/parser.c"
     break;
 
   case 643: /* idcolonnt: NONID DCOLON identifier  */
-#line 8607 "CParse/parser.y"
+#line 8611 "CParse/parser.y"
                                          {
 		 (yyval.str) = NewStringf("::%s",(yyvsp[0].id));
                }
-#line 13943 "CParse/parser.c"
+#line 13947 "CParse/parser.c"
     break;
 
   case 644: /* idcolonnt: OPERATOR  */
-#line 8610 "CParse/parser.y"
+#line 8614 "CParse/parser.y"
                           {
 		 (yyval.str) = (yyvsp[0].str);
 	       }
-#line 13951 "CParse/parser.c"
+#line 13955 "CParse/parser.c"
     break;
 
   case 645: /* idcolonnt: NONID DCOLON OPERATOR  */
-#line 8613 "CParse/parser.y"
+#line 8617 "CParse/parser.y"
                                        {
 		 (yyval.str) = (yyvsp[0].str);
 		 Insert((yyval.str), 0, "::");
                }
-#line 13960 "CParse/parser.c"
+#line 13964 "CParse/parser.c"
     break;
 
   case 646: /* idcolontailnt: DCOLON identifier idcolontailnt  */
-#line 8619 "CParse/parser.y"
+#line 8623 "CParse/parser.y"
                                                       {
                    (yyval.str) = NewStringf("::%s%s",(yyvsp[-1].id),(yyvsp[0].str));
 		   Delete((yyvsp[0].str));
                }
-#line 13969 "CParse/parser.c"
+#line 13973 "CParse/parser.c"
     break;
 
   case 647: /* idcolontailnt: DCOLON identifier  */
-#line 8623 "CParse/parser.y"
+#line 8627 "CParse/parser.y"
                                    {
                    (yyval.str) = NewStringf("::%s",(yyvsp[0].id));
                }
-#line 13977 "CParse/parser.c"
+#line 13981 "CParse/parser.c"
     break;
 
   case 648: /* idcolontailnt: DCOLON OPERATOR  */
-#line 8626 "CParse/parser.y"
+#line 8630 "CParse/parser.y"
                                  {
 		   (yyval.str) = (yyvsp[0].str);
 		   Insert((yyval.str), 0, "::");
                }
-#line 13986 "CParse/parser.c"
+#line 13990 "CParse/parser.c"
     break;
 
   case 649: /* idcolontailnt: DCNOT identifier  */
-#line 8630 "CParse/parser.y"
+#line 8634 "CParse/parser.y"
                                   {
 		 (yyval.str) = NewStringf("::~%s",(yyvsp[0].id));
                }
-#line 13994 "CParse/parser.c"
+#line 13998 "CParse/parser.c"
     break;
 
   case 650: /* string: string STRING  */
-#line 8636 "CParse/parser.y"
+#line 8640 "CParse/parser.y"
                                    { 
 		   (yyval.str) = (yyvsp[-1].str);
 		   Append((yyval.str), (yyvsp[0].str));
 		   Delete((yyvsp[0].str));
 	       }
-#line 14004 "CParse/parser.c"
+#line 14008 "CParse/parser.c"
     break;
 
   case 652: /* wstring: wstring WSTRING  */
-#line 8643 "CParse/parser.y"
+#line 8647 "CParse/parser.y"
                                      {
 		   // Concatenated wide strings: L"str1" L"str2"
 		   (yyval.str) = (yyvsp[-1].str);
 		   Append((yyval.str), (yyvsp[0].str));
 		   Delete((yyvsp[0].str));
 	       }
-#line 14015 "CParse/parser.c"
+#line 14019 "CParse/parser.c"
     break;
 
   case 653: /* wstring: wstring STRING  */
-#line 8649 "CParse/parser.y"
+#line 8653 "CParse/parser.y"
                                     {
 		   // Concatenated wide string and normal string literal: L"str1" "str2" (C++11).
 		   (yyval.str) = (yyvsp[-1].str);
 		   Append((yyval.str), (yyvsp[0].str));
 		   Delete((yyvsp[0].str));
 	       }
-#line 14026 "CParse/parser.c"
+#line 14030 "CParse/parser.c"
     break;
 
   case 654: /* wstring: string WSTRING  */
-#line 8655 "CParse/parser.y"
+#line 8659 "CParse/parser.y"
                                     {
 		   // Concatenated normal string and wide string literal: "str1" L"str2" (C++11).
 		   (yyval.str) = (yyvsp[-1].str);
 		   Append((yyval.str), (yyvsp[0].str));
 		   Delete((yyvsp[0].str));
 	       }
-#line 14037 "CParse/parser.c"
+#line 14041 "CParse/parser.c"
     break;
 
   case 657: /* stringbrace: LBRACE  */
-#line 8665 "CParse/parser.y"
+#line 8669 "CParse/parser.y"
                         {
 		  if (skip_balanced('{','}') < 0) Exit(EXIT_FAILURE);
 		  (yyval.str) = NewString(scanner_ccode);
                }
-#line 14046 "CParse/parser.c"
+#line 14050 "CParse/parser.c"
     break;
 
   case 659: /* options: LPAREN kwargs RPAREN  */
-#line 8672 "CParse/parser.y"
+#line 8676 "CParse/parser.y"
                                       {
                   Hash *n;
                   (yyval.node) = NewHash();
@@ -14060,25 +14064,25 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		     n = nextSibling(n);
 		  }
                }
-#line 14064 "CParse/parser.c"
+#line 14068 "CParse/parser.c"
     break;
 
   case 660: /* options: %empty  */
-#line 8685 "CParse/parser.y"
+#line 8689 "CParse/parser.y"
                         { (yyval.node) = 0; }
-#line 14070 "CParse/parser.c"
+#line 14074 "CParse/parser.c"
     break;
 
   case 661: /* kwargs: kwargs_builder  */
-#line 8689 "CParse/parser.y"
+#line 8693 "CParse/parser.y"
                                 {
 		 (yyval.node) = (yyvsp[0].nodebuilder).node;
 	       }
-#line 14078 "CParse/parser.c"
+#line 14082 "CParse/parser.c"
     break;
 
   case 662: /* kwargs_builder: idstring EQUAL stringnum  */
-#line 8694 "CParse/parser.y"
+#line 8698 "CParse/parser.y"
                                           {
 		 Node *n = NewHash();
 		 Setattr(n, "name", (yyvsp[-2].id));
@@ -14086,11 +14090,11 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		 Delete((yyvsp[0].str));
 		 (yyval.nodebuilder).node = (yyval.nodebuilder).last = n;
 	       }
-#line 14090 "CParse/parser.c"
+#line 14094 "CParse/parser.c"
     break;
 
   case 663: /* kwargs_builder: kwargs_builder COMMA idstring EQUAL stringnum  */
-#line 8701 "CParse/parser.y"
+#line 8705 "CParse/parser.y"
                                                                    {
 		 (yyval.nodebuilder) = (yyvsp[-4].nodebuilder);
 		 Node *n = NewHash();
@@ -14100,21 +14104,21 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		 set_nextSibling((yyval.nodebuilder).last, n);
 		 (yyval.nodebuilder).last = n;
 	       }
-#line 14104 "CParse/parser.c"
+#line 14108 "CParse/parser.c"
     break;
 
   case 664: /* kwargs_builder: idstring  */
-#line 8710 "CParse/parser.y"
+#line 8714 "CParse/parser.y"
                           {
 		 Node *n = NewHash();
 		 Setattr(n, "name", (yyvsp[0].id));
 		 (yyval.nodebuilder).node = (yyval.nodebuilder).last = n;
 	       }
-#line 14114 "CParse/parser.c"
+#line 14118 "CParse/parser.c"
     break;
 
   case 665: /* kwargs_builder: kwargs_builder COMMA idstring  */
-#line 8715 "CParse/parser.y"
+#line 8719 "CParse/parser.y"
                                                    {
 		 (yyval.nodebuilder) = (yyvsp[-2].nodebuilder);
 		 Node *n = NewHash();
@@ -14122,21 +14126,21 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		 set_nextSibling((yyval.nodebuilder).last, n);
 		 (yyval.nodebuilder).last = n;
 	       }
-#line 14126 "CParse/parser.c"
+#line 14130 "CParse/parser.c"
     break;
 
   case 666: /* kwargs_builder: idstring EQUAL stringtype  */
-#line 8722 "CParse/parser.y"
+#line 8726 "CParse/parser.y"
                                            {
 		 Node *n = (yyvsp[0].node);
 		 Setattr(n, "name", (yyvsp[-2].id));
 		 (yyval.nodebuilder).node = (yyval.nodebuilder).last = n;
 	       }
-#line 14136 "CParse/parser.c"
+#line 14140 "CParse/parser.c"
     break;
 
   case 667: /* kwargs_builder: kwargs_builder COMMA idstring EQUAL stringtype  */
-#line 8727 "CParse/parser.y"
+#line 8731 "CParse/parser.y"
                                                                     {
 		 (yyval.nodebuilder) = (yyvsp[-4].nodebuilder);
 		 Node *n = (yyvsp[0].node);
@@ -14144,19 +14148,19 @@ Printf(stdout, "  Scope %s [creating single scope C++17 style]\n", scopename);
 		 set_nextSibling((yyval.nodebuilder).last, n);
 		 (yyval.nodebuilder).last = n;
 	       }
-#line 14148 "CParse/parser.c"
+#line 14152 "CParse/parser.c"
     break;
 
   case 669: /* stringnum: exprnum  */
-#line 8737 "CParse/parser.y"
+#line 8741 "CParse/parser.y"
                          {
 		 (yyval.str) = (yyvsp[0].dtype).val;
                }
-#line 14156 "CParse/parser.c"
+#line 14160 "CParse/parser.c"
     break;
 
 
-#line 14160 "CParse/parser.c"
+#line 14164 "CParse/parser.c"
 
       default: break;
     }
@@ -14349,7 +14353,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 8742 "CParse/parser.y"
+#line 8746 "CParse/parser.y"
 
 
 SwigType *Swig_cparse_type(String *s) {

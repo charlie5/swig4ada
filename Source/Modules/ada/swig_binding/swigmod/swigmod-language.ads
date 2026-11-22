@@ -324,7 +324,7 @@ package swigmod.Language is
      External_Name      => "Ada_Language_unrollVirtualMethods__SWIG_0";
 
    function unrollVirtualMethods
-     (Self               :    access swigmod.Language.Item;
+     (Self               :    access swigmod.Language.Item'Class;
       n                  : in swig_Core.Pointers.Node_Pointer;
       parent             : in swig_Core.Pointers.Node_Pointer;
       vm                 : in swig_Core.Pointers.List_Pointer;
@@ -377,7 +377,7 @@ package swigmod.Language is
      External_Name      => "Ada_Language_addSymbol__SWIG_0";
 
    function addSymbol
-     (Self :    access swigmod.Language.Item;
+     (Self :    access swigmod.Language.Item'Class;
       s    : in swig_Core.Pointers.String_Pointer;
       n    : in swig_Core.Pointers.Node_Pointer) return Interfaces.C.int with
      Import, Convention => CPP,
@@ -393,7 +393,7 @@ package swigmod.Language is
      External_Name      => "Ada_Language_addInterfaceSymbol__SWIG_0";
 
    function addInterfaceSymbol
-     (Self           :    access swigmod.Language.Item;
+     (Self           :    access swigmod.Language.Item'Class;
       interface_name : in swig_Core.Pointers.String_Pointer;
       n : in swig_Core.Pointers.Node_Pointer) return Interfaces.C.int with
      Import, Convention => CPP,
@@ -410,7 +410,7 @@ package swigmod.Language is
      External_Name      => "Ada_Language_symbolLookup__SWIG_0";
 
    function symbolLookup
-     (Self :    access swigmod.Language.Item;
+     (Self :    access swigmod.Language.Item'Class;
       s    : in swig_Core.Pointers.String_Pointer)
       return swig_Core.Pointers.Node_Pointer with
      Import, Convention => CPP,
@@ -593,7 +593,7 @@ package swigmod.Language is
      External_Name      => "Ada_Language_makeParameterName__SWIG_0";
 
    function makeParameterName
-     (Self :    access swigmod.Language.Item;
+     (Self :    access swigmod.Language.Item'Class;
       n    : in swig_Core.Pointers.Node_Pointer;
       p    : in swig_Core.Pointers.Parm_Pointer; arg_num : in Interfaces.C.int)
       return swig_Core.Pointers.String_Pointer with

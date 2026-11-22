@@ -141,6 +141,12 @@ is
    function typemapDirective            (Self : access Item;
                                          n    : in     Node_Pointer) return C.int;
 
+   overriding
+   function nestedClassesSupport        (Self : access Item) return swigMod.Language.NestedClassSupport;
+   --
+   --  Ada has no class within a class, so the core moves each nested class out beside the class which holds
+   --  it, as it does for one which is marked '%feature ("flatnested")'. Without this it ignores them.
+
    ------------
    ---  Utility
    --

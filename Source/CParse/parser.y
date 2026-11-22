@@ -88,6 +88,10 @@ static int      cparse_externc = 0;
 int		ignore_nested_classes = 0;
 int		kwargs_supported = 0;
 
+/* swig4ada: a language module which binds a nested class with no name itself (see below) sets this, so that it is
+   kept for the module where nested classes are flattened for it by default, as where they are ignored. */
+int		cparse_keep_unnamed_nested = 0;
+
 /* -----------------------------------------------------------------------------
  *                            Doxygen Comment Globals
  * ----------------------------------------------------------------------------- */
@@ -4839,8 +4843,8 @@ cpp_class_decl: storage_class cpptype idcolon class_virt_specifier_opt inherit L
 	       /* swig4ada: a class with no name is dealt with here whether or not nested classes are flattened, as flattening
 		  loses the members which are declared with it, and takes the members of an anonymous union for members of the
 		  outer class. A typedef of such a class gives it a name, and is still flattened. */
-	       if (cparse_cplusplus && currentOuterClass && ignore_nested_classes
-		   && (!GetFlag($$, "feature:flatnested") || !($storage_class && Equal($storage_class, "typedef")))) {
+	       if (cparse_cplusplus && currentOuterClass && (ignore_nested_classes || cparse_keep_unnamed_nested)
+		   && (!(GetFlag($$, "feature:flatnested") || cparse_keep_unnamed_nested) || !($storage_class && Equal($storage_class, "typedef")))) {
 		 String *name;
 		 /* swig4ada: the class is kept on the node of the outer class, with its members and the names of the members
 		    which are declared with it, for a language module which lays the outer class out itself. */

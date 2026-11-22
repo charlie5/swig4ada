@@ -203,7 +203,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 1844 "CParse/parser.y"
+#line 1848 "CParse/parser.y"
 
   const char  *id;
   List  *bases;

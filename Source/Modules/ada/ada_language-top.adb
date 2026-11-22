@@ -1,3 +1,8 @@
+with
+     ada.Containers.indefinite_hashed_Maps,
+     ada.Strings.Hash,
+     ada.Characters.handling;
+
 separate (ada_Language)
 
 
@@ -7,6 +12,99 @@ function top (Self : access Item;
 is
    the_Node     :          Node_Pointer renames N;
    module_Name  : constant unbounded_String := +Attribute (the_Node, "name");
+
+
+   procedure name_the_nested_Classes
+   --
+   --  A class which is nested in another is moved out beside it by the core, under its own name. Two classes may
+   --  each have a nested class of one name ('Outer::Inner' and 'Other::Inner'), which cannot both be the package
+   --  'Inner'. So a nested class whose name is taken is named after the class which holds it as well ('Other_Inner').
+   --  This is done before the tree is walked, so that the functions of its wrapper are named after it too.
+   --
+   is
+      package name_Maps is new ada.Containers.indefinite_hashed_Maps (String, String, ada.Strings.Hash, "=");
+
+      bound_Names : name_Maps.Map;     -- The name which each class is bound by, by its name in C++.
+      taken_Names : name_Maps.Map;     -- The names which are taken, in lower case, as two packages may not differ in case alone.
+
+      function is_a_Class (the_Node : in Node_Pointer) return Boolean
+      is (Attribute (the_Node, "nodeType") = "class" and then Attribute (the_Node, "sym:name") /= "");
+
+      function is_Nested (the_Node : in Node_Pointer) return Boolean
+      is (Attribute (the_Node, "nested") /= "");
+
+      procedure note_the_Classes (Parent : in Node_Pointer)
+      is
+         the_Child : Node_Pointer := first_Child (Parent);
+      begin
+         while the_Child /= null
+         loop
+            if is_a_Class (the_Child)
+            then
+               bound_Names.include (Attribute (the_Child, "name"), Attribute (the_Child, "sym:name"));
+
+               if not is_Nested (the_Child)
+               then
+                  taken_Names.include (ada.Characters.handling.to_Lower (Attribute (the_Child, "sym:name")), "");
+               end if;
+            end if;
+
+            if Attribute (the_Child, "nodeType") /= "template"     -- A class within a template is seen again in each instance of it.
+            then
+               note_the_Classes (the_Child);
+            end if;
+
+            the_Child := next_Sibling (the_Child);
+         end loop;
+      end note_the_Classes;
+
+      procedure name_the_nested_Ones (Parent : in Node_Pointer)
+      is
+         the_Child : Node_Pointer := first_Child (Parent);
+      begin
+         while the_Child /= null
+         loop
+            if         is_a_Class (the_Child)
+              and then is_Nested  (the_Child)
+            then
+               declare
+                  its_Name : constant String  := Attribute (the_Child, "sym:name");
+                  cpp_Name : constant String  := Attribute (the_Child, "name");
+                  Colons   : constant Natural := ada.Strings.fixed.Index (cpp_Name, "::", Going => ada.Strings.Backward);
+               begin
+                  if taken_Names.contains (ada.Characters.handling.to_Lower (its_Name))
+                  then
+                     if         Colons > cpp_Name'First
+                       and then bound_Names.contains (cpp_Name (cpp_Name'First .. Colons - 1))
+                     then
+                        declare
+                           new_Name : constant String := bound_Names.Element (cpp_Name (cpp_Name'First .. Colons - 1)) & "_" & its_Name;
+                        begin
+                           set_Attribute (doh_Node (the_Child), "sym:name", new_Name);
+                           bound_Names.include (cpp_Name, new_Name);
+                           taken_Names.include (ada.Characters.handling.to_Lower (new_Name), "");
+                        end;
+                     end if;
+                  else
+                     taken_Names.include (ada.Characters.handling.to_Lower (its_Name), "");
+                  end if;
+               end;
+            end if;
+
+            if Attribute (the_Child, "nodeType") /= "template"
+            then
+               name_the_nested_Ones (the_Child);
+            end if;
+
+            the_Child := next_Sibling (the_Child);
+         end loop;
+      end name_the_nested_Ones;
+
+   begin
+      note_the_Classes     (the_Node);
+      name_the_nested_Ones (the_Node);
+   end name_the_nested_Classes;
+
 
 begin
    indent_Log;
@@ -82,6 +180,8 @@ begin
    print_to (Doh_Pointer (Self.f_Ada),     "#ifdef __cplusplus");
    print_to (Doh_Pointer (Self.f_Ada),     "extern ""C"" {");
    print_to (Doh_Pointer (Self.f_Ada),     "#endif");
+
+   name_the_nested_Classes;
 
    --   Do the base Language 'top' to recursively process all nodes.
    --   As each node is processed, the base 'top' will call the relevant
