@@ -238,7 +238,8 @@ is
    --  'c_Class' Attributes
    --
 
-   type record_Components is array (Positive range <>) of access c_Variable.item'Class;
+   type record_Components      is array (Positive range <>) of access c_Variable.item'Class;
+   type record_Components_view is access record_Components;
 
 
    function  use_type_Text                       (Self : access Item) return String;
@@ -352,7 +353,7 @@ private
             when c_Class =>
                base_Classes    : c_Type.Vector;
 
-               Components      : record_Components (1 .. 500);         -- C++ class member variables (todo: rename ?).
+               Components      : record_Components_view := new record_Components (1 .. 16);     -- The member variables, in storage which grows as they are added ('make_Room').
                component_Count : Natural := 0;
 
                is_Union                                  : Boolean := False;

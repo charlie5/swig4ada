@@ -33,7 +33,8 @@ is
    --  Attributes
    --
 
-   type record_Components is array (Positive range <>) of access ada_Variable.item'Class;
+   type record_Components      is array (Positive range <>) of access ada_Variable.item'Class;
+   type record_Components_view is access record_Components;
 
    function  use_type_Text  (Self : access Item) return String;
 
@@ -115,7 +116,7 @@ private
       record
          base_Classes    : ada_Type.Vector;
 
-         Components      : record_Components (1 .. 500);
+         Components      : record_Components_view := new record_Components (1 .. 16);     -- In storage which grows as components are added ('make_Room').
          component_Count : Natural := 0;
 
          is_Union                                  : Boolean := False;

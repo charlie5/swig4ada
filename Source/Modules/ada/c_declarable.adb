@@ -1,6 +1,20 @@
 package body c_Declarable
 is
 
+   function to_Views (Self : in Vector) return Views
+   is
+   begin
+      return Result : Views (1 .. Natural (Self.Length))
+      do
+         for Each in Result'Range
+         loop
+            Result (Each) := Self (Each);
+         end loop;
+      end return;
+   end to_Views;
+
+
+
    procedure warn (Self : access Item'Class;   Kind    : in Logger.warning_Kind;
                                                Message : in String)
    is

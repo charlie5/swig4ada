@@ -29,6 +29,8 @@ is
    subtype Vector is Vectors.Vector;
    subtype Cursor is Vectors.Cursor;
 
+   function to_Views (Self : in Vector) return Views;
+
 
    --------------
    --  Attributes

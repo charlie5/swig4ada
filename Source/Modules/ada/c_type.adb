@@ -28,6 +28,8 @@ is
    function "+" (Self : in String) return ada.Strings.unbounded.unbounded_String
      renames ada.Strings.unbounded.to_unbounded_String;
 
+   procedure make_Room (Self : access Item);
+
 
    ---------
    --  Forge
@@ -500,28 +502,23 @@ is
 
          when c_Class =>
             declare
-               the_Types : c_declarable.views (1 .. 500);
-               Count     : Natural := 0;
+               the_Types : c_Declarable.Vector;     -- Of any length: a class depends on what each of its members depends on.
             begin
                for Each in 1 .. Self.my.component_Count
                loop
                   if not (         Self.my.Components (Each).my_Type.c_type_Kind   = type_Pointer     -- Detect and ignore a Self-referential pointer.
                           and then Self.my.Components (Each).my_Type.accessed_Type = Self)            --
                   then
-                     declare
-                        my_type_Dependencies : constant c_Declarable.views := Self.my.Components (Each).my_Type.depended_on_Declarations;
-                     begin
-                        Count             := Count + 1;
-                        the_Types (Count) := Self.my.Components (Each).my_Type.all'Access;
+                     the_Types.append (Self.my.Components (Each).my_Type.all'Access);
 
-                        the_Types (Count + 1 .. Count + my_type_Dependencies'Length)
-                                          := my_type_Dependencies;
-                        Count             := Count + my_type_Dependencies'Length;
-                     end;
+                     for Dependency of Self.my.Components (Each).my_Type.depended_on_Declarations
+                     loop
+                        the_Types.append (Dependency);
+                     end loop;
                   end if;
                end loop;
 
-               return the_Types (1 .. Count);
+               return c_Declarable.to_Views (the_Types);
             end;
 
          when opaque_Struct
@@ -614,70 +611,10 @@ is
    is
       use type c_Declarable.view;
    begin
-      raise Program_Error with "Not yet implemented.";   -- todo: Resolve this.
-
-      case Self.my.c_type_Kind is
-
-         when array_Type =>
-
-            return    Self.my.element_Type.all'Access = a_Declarable
-              or else Self.my.element_Type.depends_on (a_Declarable);
-
-
-         when c_Class =>
-            declare
-               the_component_Type : c_Type.view;
-            begin
-               for Each in 1 .. Self.my.component_Count loop
-                  the_component_Type := Self.my.Components (Each).my_Type;
-
-                  if not (         the_component_Type.c_type_Kind   = type_Pointer     -- Detect and ignore a Self-referential pointer.
-                          and then the_component_Type.accessed_Type = Self)            --
-                  then
-                     if        the_component_Type.all'Access = a_Declarable
-                       or else the_component_Type.depends_on (a_Declarable)
-                     then
-                        return True;
-                     end if;
-                  end if;
-               end loop;
-
-               return False;
-            end;
-
-         when opaque_Struct
-            | incomplete_Class
-            | Enum
-            | standard_c_Type
-            | Unknown =>
-
-            return False;
-
-         when function_Pointer =>
-
-            return    Self.my.accessed_Function.all'Access = a_Declarable
-              or else Self.my.accessed_Function.depends_on (a_Declarable);
-
-         when typedef_Function =>
-
-            return    Self.my.typed_Function.all'Access = a_Declarable
-              or else Self.my.typed_Function.depends_on (a_Declarable);
-
-         when type_Pointer =>
-
-            return    Self.my.accessed_Type.all'Access = a_Declarable
-              or else Self.my.accessed_Type.depends_on (a_Declarable);
-
-         when Typedef =>
-
-            return    Self.my.base_Type.all'Access = a_Declarable
-              or else Self.my.base_Type.depends_on (a_Declarable);
-
-         when virtual_class_Pointer =>
-
-            return False;
-      end case;
-
+      --  By way of the declarations which the type depends on, which are gathered without
+      --  following a pointer of a class to itself, so that this ends for such a class too.
+      --
+      return (for some Each of Self.depended_on_Declarations => Each = a_Declarable);
    end depends_on;
 
 
@@ -829,6 +766,7 @@ is
                      delete   (Self.my.base_Classes, Cursor);
                      Cursor := Last (Self.my.base_Classes);
 
+                     make_Room (Self);
                      Self.my.component_Count                           := Self.my.component_Count + 1;                            -- Prepend the base type.
                      Self.my.Components (2 .. Self.my.component_Count) := Self.my.Components (1 .. Self.my.component_Count - 1);  --
                      Self.my.Components (1)                            := new_c_Variable (name => +"TODO55", -- the_Base.my.nameSpace.Name & "_base",
@@ -945,6 +883,12 @@ is
    procedure add_array_Dimension (Self : access Item;   upper_Bound : in Integer := unConstrained)
    is
    begin
+      if Self.my.array_dimension_Count = Self.my.array_Dimensions_upper_Bound'Last
+      then
+         raise Constraint_Error with   "The array type '" & to_String (Self.Name) & "' has more than"
+                                     & Natural'Image (Self.my.array_Dimensions_upper_Bound'Last) & " dimensions, which is the most that is allowed for.";
+      end if;
+
       Self.my.array_dimension_Count                                        := Self.my.array_dimension_Count + 1;
       Self.my.array_Dimensions_upper_Bound (Self.my.array_dimension_Count) := upper_Bound;
    end add_array_Dimension;
@@ -1145,10 +1089,30 @@ is
 
 
 
+   procedure make_Room (Self : access Item)
+   --
+   --  Makes room for one more component, where there is none. A class may have any number of members.
+   --
+   is
+   begin
+      if Self.my.component_Count = Self.my.Components'Last
+      then
+         declare
+            Larger : constant record_Components_view := new record_Components (1 .. 2 * Self.my.Components'Last);
+         begin
+            Larger (1 .. Self.my.component_Count) := Self.my.Components (1 .. Self.my.component_Count);
+            Self.my.Components                    := Larger;
+         end;
+      end if;
+   end make_Room;
+
+
+
    procedure add_Component (Self          : access Item;
                             new_Component : access c_Variable.item'Class)
    is
    begin
+      make_Room (Self);
       Self.my.component_Count                      := Self.my.component_Count + 1;
       Self.my.Components (Self.my.component_Count) := new_Component;
    end add_Component;
@@ -1159,6 +1123,8 @@ is
    is
       Place : Positive := Self.my.component_Count + 1;
    begin
+      make_Room (Self);
+
       if new_Component.Line > 0
       then
          while      Place > 1

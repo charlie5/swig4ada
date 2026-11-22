@@ -13,6 +13,25 @@ is
    --  Forge
    --
 
+   procedure make_Room (Self : access Item)
+   --
+   --  Makes room for one more component, where there is none. A record may have any number of components.
+   --
+   is
+   begin
+      if Self.component_Count = Self.Components'Last
+      then
+         declare
+            Larger : constant record_Components_view := new record_Components (1 .. 2 * Self.Components'Last);
+         begin
+            Larger (1 .. Self.component_Count) := Self.Components (1 .. Self.component_Count);
+            Self.Components                    := Larger;
+         end;
+      end if;
+   end make_Room;
+
+
+
    function new_Item (declaration_Package : access ada_Package.item'Class := null;
                       Name                : in     unbounded_String       := null_unbounded_String) return View
    is
@@ -164,6 +183,7 @@ is
 
                -- Prepend the base type.
                --
+               make_Room (Self);
                Self.component_Count                        := Self.component_Count + 1;
                Self.Components (2 .. Self.component_Count) := Self.Components (1 .. Self.component_Count - 1);
                Self.Components (1)                         := new_ada_Variable (the_name => the_Base.declaration_package.Name & "_base",
@@ -286,6 +306,7 @@ is
                             new_Component : access ada_Variable.item'Class)
    is
    begin
+      make_Room (Self);
       Self.component_Count                   := Self.component_Count + 1;
       Self.Components (Self.component_Count) := new_Component;
    end add_Component;

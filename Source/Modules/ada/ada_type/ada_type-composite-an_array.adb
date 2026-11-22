@@ -57,6 +57,12 @@ is
                                   upper_Bound : in     Integer := Unconstrained)
    is
    begin
+      if Self.array_dimension_Count = Self.array_Dimensions_upper_Bound'Last
+      then
+         raise Constraint_Error with   "An array type has more than" & Natural'Image (Self.array_Dimensions_upper_Bound'Last)
+                                     & " dimensions, which is the most that is allowed for.";
+      end if;
+
       Self.array_dimension_Count                                     := Self.array_dimension_Count + 1;
       Self.array_Dimensions_upper_Bound (Self.array_dimension_Count) := upper_Bound;
    end add_array_Dimension;

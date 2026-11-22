@@ -45,20 +45,17 @@ is
    function depended_on_Declarations (Self : in c_Parameter.Vector) return c_Declarable.views
    is
       use Vectors;
-      the_Declarations : c_Declarable.views (1 .. 500);
-      Count            : Natural := 0;
+      the_Declarations : c_Declarable.Vector;     -- Of any length.
    begin
       for Each in 1 .. Natural (Length (Self))
       loop
-         declare
-            my_type_Dependencies : constant c_Declarable.views := Element (Self, Each).my_Type.depended_on_Declarations;
-         begin
-            the_Declarations (Count + 1 .. Count + my_type_Dependencies'Length) := my_type_Dependencies;
-            Count := Count + my_type_Dependencies'Length;
-         end;
+         for Dependency of Element (Self, Each).my_Type.depended_on_Declarations
+         loop
+            the_Declarations.append (Dependency);
+         end loop;
       end loop;
 
-      return the_Declarations (1 .. Count);
+      return c_Declarable.to_Views (the_Declarations);
    end depended_on_Declarations;
 
 
