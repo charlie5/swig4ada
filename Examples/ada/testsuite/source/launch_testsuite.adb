@@ -1521,6 +1521,7 @@ begin
       run ("in_namespace",         -- The packages of a binding within another package.
            Options => "-namespace outer");
       run ("warnings");            -- The warnings of the Ada module, by number, place and filter.
+      run ("library");             -- Further classes of the standard library: a multiset, a multimap, a complex number, a wide string, the streams.
    end if;
 
 
@@ -1532,6 +1533,7 @@ begin
       new_Line;
       run_Unit ("layout");          -- The layout engine: the place of each member of a class or structure.
       run_Unit ("expressions");     -- The value of a C expression, against the value which a C compiler gives.
+      run_Unit ("mangling");        -- The symbol of a C++ entity, against the symbol which a C++ compiler gives.
 
       check_the_layout_Assertions;
       check_the_Bootstrap;

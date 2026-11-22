@@ -1,0 +1,20 @@
+project mangling_Test
+--
+-- A test of the C++ name mangler alone, against the symbols which a C++ compiler gives.
+--
+is
+   for Source_Dirs  use (".",
+                         "../../runtime/support");
+   for Source_Files use ("mangling_test.adb", "checks.ads", "checks.adb",
+                         "cpp_mangling.ads",  "cpp_mangling.adb");
+   for Source_Dirs  use Project'Source_Dirs & ("../../../../../Source/Modules/ada");
+
+   for Object_Dir   use "../../unit-build/mangling";
+   for Exec_Dir     use "../../unit-build/mangling";
+   for Main         use ("mangling_test.adb");
+
+   package Compiler is
+      for Default_Switches ("Ada") use ("-gnat2022", "-g");
+   end Compiler;
+
+end mangling_Test;
