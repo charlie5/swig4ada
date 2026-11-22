@@ -1681,6 +1681,14 @@ begin
       run_Upstream ("smart_pointer_member");      -- The members of a class, through a smart pointer.
       run_Upstream ("cpp_static");                -- Static member functions and variables.
       run_Upstream ("primitive_ref");             -- A reference to each primitive type.
+      run_Upstream ("virtual_poly");              -- Virtual functions whose result is covariant.
+      run_Upstream ("template_inherit");          -- A class template which is derived from another, with virtual functions.
+      run_Upstream ("typedef_inherit");           -- Classes derived from a base which a typedef names.
+      run_Upstream ("unions");                    -- A union which is a member of a structure.
+      run_Upstream ("varargs");                   -- Functions and constructors of a variable number of arguments.
+      run_Upstream ("operator_overload");         -- The operators of C++, as members and as friends.
+      run_Upstream ("cpp_namespace");             -- Namespaces, and 'using' declarations and directives.
+      run_Upstream ("voidtest");                  -- Functions which return nothing, and pointers to 'void'.
    end if;
 
 
