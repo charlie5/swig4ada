@@ -1,0 +1,237 @@
+#!/usr/bin/env python3
+#
+#  Checks, for each class with virtual functions which a case of the suite binds, that its Ada type has the
+#  virtual functions of the C++ class, in the order in which the compiler lays them out.
+#
+#  A tagged type of convention CPP has a place in its vtable for each of its primitive subprograms, in the
+#  order in which its spec declares them. That order must be the order of the C++ vtable: where it is not,
+#  nothing fails to compile or to link, and a dispatching call reaches another function than the one which
+#  is named. (On 2026-11-23 a virtual function with a default argument was found to have two places.)
+#
+#  The layout of each vtable is taken from the compiler ('g++ -fdump-lang-class', run on each wrapper), and
+#  the primitives from the generated specs.
+#
+#  Usage:  ./check_vtables [<generated folder>]        ('generated').
+#
+#  Writes what it finds to 'unit-build/vtables/report.txt'. The classes which differ must be the lines of the
+#  file 'expected-vtable-differences'; exits with a failure status if they are not.
+#
+
+import os, re, subprocess, sys
+from concurrent.futures import ThreadPoolExecutor
+
+Here      = os.path.dirname(os.path.abspath(__file__))
+Generated = os.path.abspath(sys.argv[1]) if len(sys.argv) > 1 else os.path.join(Here, "generated")
+Build     = os.path.join(Here, "unit-build", "vtables")
+Suite     = os.path.join(Here, "..", "..", "test-suite")
+
+os.makedirs(Build, exist_ok=True)
+
+
+def dump(Wrapper):
+    """Has the compiler write the classes of a wrapper, and their vtables, to a file."""
+    Case   = os.path.basename(Wrapper)[:-len("_wrap.cxx")]
+    Result = os.path.join(Build, Case + ".class")
+    subprocess.run(["g++", "-fsyntax-only", "-fno-access-control", "-w", "-I" + Suite, "-I" + Generated,
+                    "-fdump-lang-class=" + Result, Wrapper],
+                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    return Case, Result
+
+
+def cpp_vtables(Dump):
+    """The functions of the primary vtable of each class, by the name of the class with its spaces removed.
+       An entry is the name of a function, or '' for one which the compiler does not name (a pure virtual
+       function, or the destructor of an abstract class). A class with a virtual base is left out."""
+    Tables = {}
+
+    if not os.path.exists(Dump):
+        return Tables
+
+    Lines = open(Dump, errors="replace").read().split("\n")
+    Index = 0
+
+    while Index < len(Lines):
+        Match = re.match(r"Vtable for (.*)$", Lines[Index])
+
+        if not Match:
+            Index += 1
+            continue
+
+        Name    = Match.group(1).replace(" ", "")
+        Entries = []
+        Index  += 2
+
+        while Index < len(Lines) and Lines[Index].strip():
+            Entries.append(re.sub(r"^\d+\s+", "", Lines[Index]).strip())
+            Index += 1
+
+        if len(Entries) >= 2 and Entries[0] == "(int (*)(...))0" and Entries[1].startswith("(int (*)(...))(& _ZTI"):
+            Slots = []
+
+            for Each in Entries[2:]:
+                Function = re.match(r"\(int \(\*\)\(\.\.\.\)\)(.*)$", Each)
+
+                if Each == "0":
+                    Slots.append("")
+                elif not Function:
+                    break                                          # A number which begins the vtable of a further base class.
+                elif Function.group(1).startswith("(& _ZTI") or re.match(r"-?\d+$", Function.group(1)):
+                    break
+                elif Function.group(1) in ("__cxa_pure_virtual", "__cxa_deleted_virtual"):
+                    Slots.append("")
+                else:
+                    Slots.append(Function.group(1).split("::")[-1])
+
+            Tables[Name] = Slots
+
+    return Tables
+
+
+def ada_class(Spec):
+    """The parent of the type of a spec, and its primitive subprograms in the order of their declaration, each
+       with whether it overrides. None where the spec is not that of a tagged type."""
+    Text   = re.sub(r"--[^\n]*", "", open(Spec, errors="replace").read())
+    Public = re.split(r"\nprivate\n", Text)[0]
+    Header = re.search(r"\npackage\s+([\w.]+)\s+is", Public)
+    Type   = re.search(r"type Item is\s+(abstract\s+)?(tagged|new\s+([\w.]+)\.Item\s+with)", Public)
+
+    if not Header or not Type:
+        return None
+
+    Package    = Header.group(1)
+    Parent     = Type.group(3)
+    Primitives = []
+
+    for Match in re.finditer(r"\n   (?:(?:not\s+)?overriding\s+)?(?:function|procedure)\s+(\w+)\s*\(\s*Self\s*:\s*(?:access|in\s+out|in)\s+([\w.]+)\.Item\s*([;)'])",
+                             Public, re.I):
+        if Match.group(2).lower() == Package.lower() and Match.group(3) != "'":
+            #  The other parameters, by which an overload is told from another: a primitive of the name and
+            #  parameters of one of the parent overrides it, whether or not it is marked so.
+            #
+            Depth, Place = 1, Match.end()
+
+            while Place < len(Public) and Depth > 0 and Match.group(3) != ")":
+                Depth += {"(": 1, ")": -1}.get(Public[Place], 0)
+                Place += 1
+
+            Others = "" if Match.group(3) == ")" else Public[Match.end():Place - 1]
+            Types  = [re.sub(r"\s+", "", re.sub(r"^.*?:\s*(?:in\s+out|in|access)?", "", One, flags=re.S)).lower() for One in Others.split(";") if One.strip()]
+            Primitives.append((Match.group(1), tuple(Types)))
+
+    return Package, Parent, Primitives
+
+
+def cpp_names(Wrapper):
+    """The C++ name of each class of a wrapper, by the name which it is bound by: the wrapper of the
+       destructor of a class 'X' is 'Ada_delete_<name>', and declares its argument as 'X *arg1'."""
+    Text  = open(Wrapper, errors="replace").read()
+    Names = {}
+
+    for Match in re.finditer(r"Ada_delete_(\w+)\s*\(\s*void \* a_arg1\s*\)\s*\{\s*(.*?)\s*\*arg1 = ", Text, re.S):
+        Names[Match.group(1).lower()] = Match.group(2).replace(" ", "")
+
+    return Names
+
+
+Wrappers = sorted(os.path.join(Generated, Each) for Each in os.listdir(Generated) if Each.endswith("_wrap.cxx"))
+
+with ThreadPoolExecutor(max_workers=os.cpu_count()) as Pool:
+    Dumps = dict(Pool.map(dump, Wrappers))
+
+Specs = {}     # By the name of the package, in lower case.
+
+for Each in os.listdir(Generated):
+    if Each.endswith(".ads"):
+        Class = ada_class(os.path.join(Generated, Each))
+
+        if Class:
+            Specs[Class[0].lower()] = Class
+
+
+def slots(Package):
+    """The places of the vtable of a type, as Ada has them: those of its parent, with what it overrides in
+       the place of what is overridden, and then its own in the order of their declaration."""
+    Package, Parent, Primitives = Specs[Package.lower()]
+    Slots = list(slots(Parent)) if Parent and Parent.lower() in Specs else []
+
+    Inherited = len(Slots)
+    Taken     = set()
+
+    for Name, Types in Primitives:
+        #  A primitive overrides one of the parent which has its name and as many parameters: their types may be
+        #  written otherwise and be the same (a typedef of a class is a subtype of it), which Ada takes for
+        #  overriding too. An overload of the parent is taken once.
+        #
+        Place = next((Index for Index in range(Inherited)
+                      if Index not in Taken and Slots[Index][0].lower() == Name.lower() and Slots[Index][1] == Types), None)
+
+        if Place is None:
+            Place = next((Index for Index in range(Inherited)
+                          if Index not in Taken and Slots[Index][0].lower() == Name.lower() and len(Slots[Index][1]) == len(Types)), None)
+
+        if Place is None:
+            Slots.append((Name, Types))
+        else:
+            Taken.add(Place)
+
+    return Slots
+
+
+def same(Ada, Cpp):
+    """Whether a primitive of Ada may be the function of C++ in its place. Names are compared only where both are
+       plain: a destructor, a function with no name in the dump, a place holder and a renamed function all pass."""
+    if Cpp == "" or Cpp.startswith("~") or Cpp.startswith("operator"):
+        return True
+    if Ada.lower().startswith("unbound_virtual"):
+        return True                                           # It holds the place of whatever function is there.
+    if Ada.lower() in ("destruct_0", "destruct"):
+        return False                                          # The destructor of C++ is dealt with above.
+    Plain = Ada.lower()
+    return Plain == Cpp.lower() or Plain in ("the_" + Cpp.lower(), "c_" + Cpp.lower(), Cpp.lower() + "_")
+
+
+Checked, Differences, Report = 0, [], []
+
+for Wrapper in Wrappers:
+    Case   = os.path.basename(Wrapper)[:-len("_wrap.cxx")]
+    Tables = cpp_vtables(Dumps[Case])
+    Names  = cpp_names(Wrapper)
+
+    for Package in sorted(Specs):
+        Module, _, Class = Package.partition(".")
+
+        if Module != Case.lower() or "." in Class or Class not in Names or Names[Class] not in Tables:
+            continue
+
+        Cpp = Tables[Names[Class]]
+        Ada = [Each[0] for Each in slots(Package)]
+        Checked += 1
+
+        if len(Ada) != len(Cpp):
+            Differences.append(Package)
+            Report.append(f"{Package}: Ada has {len(Ada)} places and C++ has {len(Cpp)}\n      Ada: {' '.join(Ada)}\n      C++: {' '.join(Each or '?' for Each in Cpp)}")
+        else:
+            Wrong = [Place for Place in range(len(Ada)) if not same(Ada[Place], Cpp[Place])]
+
+            if Wrong:
+                Differences.append(Package)
+                Report.append(f"{Package}: place {Wrong[0] + 1} is '{Ada[Wrong[0]]}' in Ada and '{Cpp[Wrong[0]]}' in C++\n      Ada: {' '.join(Ada)}\n      C++: {' '.join(Each or '?' for Each in Cpp)}")
+
+open(os.path.join(Build, "report.txt"), "w").write("\n".join(Report) + ("\n" if Report else ""))
+
+Expected_file = os.path.join(Here, "expected-vtable-differences")
+Expected      = open(Expected_file).read().split() if os.path.exists(Expected_file) else []
+
+print(f"Classes with virtual functions which are checked: {Checked}, of which differ: {len(Differences)}.")
+
+New  = sorted(set(Differences) - set(Expected))
+Gone = sorted(set(Expected) - set(Differences))
+
+if New or Gone:
+    for Each in New:
+        print(f"   differs, and is not expected to: {Each}")
+        print("\n".join("   " + Line for Line in Report[Differences.index(Each)].split("\n")[1:]))
+    for Each in Gone:
+        print(f"   no longer differs: {Each}")
+    print("(see 'unit-build/vtables/report.txt')")
+    sys.exit(1)

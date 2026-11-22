@@ -82,3 +82,30 @@ inline int call_scaled (Scaler* s)   { return s->scaled (5); }
 inline int call_after  (Scaler* s)   { return s->after (); }
 inline int call_offset (Scaler* s)   { return s->offset (); }
 inline int call_last   (Scaler* s)   { return s->last (); }
+
+/* A virtual function which the interface file ignores, and a virtual destructor which is not public.
+   Each has its place in the vtable, though neither is bound. */
+
+class Guarded {
+public:
+  virtual int first  ()   { return 1; }
+  virtual int hidden ()   { return 2; }
+  virtual int third  ()   { return 3; }
+protected:
+  virtual ~Guarded ()     {}
+};
+
+class Opened : public Guarded {
+public:
+  virtual int first  ()   { return 10; }
+  virtual int hidden ()   { return 20; }
+  virtual int third  ()   { return 30; }
+  virtual int fourth ()   { return 40; }
+  virtual ~Opened ()      {}
+};
+
+inline Guarded* new_opened   ()             { return new Opened; }
+inline void     drop_opened  (Guarded* g)   { delete static_cast <Opened*> (g); }
+inline int      call_first   (Guarded* g)   { return g->first (); }
+inline int      call_third   (Guarded* g)   { return g->third (); }
+inline int      call_fourth  (Opened*  o)   { return o->fourth (); }

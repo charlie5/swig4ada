@@ -7,4 +7,6 @@
 int Shape::count = 0;
 %}
 
+%ignore Guarded::hidden;     // A virtual function which is not bound keeps its place among the others.
+
 %include "example.h"

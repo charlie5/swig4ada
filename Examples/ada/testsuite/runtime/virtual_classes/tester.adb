@@ -8,6 +8,8 @@ with
      virtual_classes.Grid,
      virtual_classes.Scaler,
      virtual_classes.Tripler,
+     virtual_classes.Guarded,
+     virtual_classes.Opened,
 
      swig.Pointers,
 
@@ -159,6 +161,27 @@ begin
       check (call_offset (as_Scaler) = 101,               "the pure one");
       check (call_last   (as_Scaler) = 90,                "and the last");
    end virtual_functions_with_a_default_Argument;
+
+   virtual_functions_which_are_not_bound :
+   declare
+      as_Guarded : constant Guarded.Pointer := new_opened;
+      an_Opened  : aliased  Opened.Item     := Opened.Item (Opened.construct);
+   begin
+      --  'Guarded::hidden' is ignored and the destructor of 'Guarded' is protected. Each keeps its place,
+      --  so the functions about them dispatch to their own.
+      --
+      check (as_Guarded.first = 10,                       "the virtual function before one which is ignored dispatches");
+      check (as_Guarded.third = 30,                       "and so does the one after it");
+      check (call_first (as_Guarded) = 10,                "as C++ finds");
+      check (call_third (as_Guarded) = 30,                "of each");
+
+      check (an_Opened.first = 10 and an_Opened.third = 30,   "an object which Ada makes has them in their places too");
+      check (an_Opened.fourth = 40,                       "a function which the derived class adds follows the destructor's places");
+      check (call_fourth (an_Opened'unchecked_Access) = 40,   "as C++ finds");
+
+      drop_opened (as_Guarded);
+      Opened.destruct_0 (an_Opened);
+   end virtual_functions_which_are_not_bound;
 
    finish;
 end Tester;

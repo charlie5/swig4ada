@@ -1719,6 +1719,12 @@ begin
          --  check above has made): whatever a spec refers to must then be there.
          --
          run_Step ("that the specs of each case build and link", "./check_links");
+
+         --  A tagged type of convention CPP has a place in its vtable for each primitive, in the order of the spec, which
+         --  must be the order of the C++ vtable. Where it is not, nothing fails to compile or to link: a dispatching call
+         --  reaches another function. './check_vtables' takes the layout of each vtable from the compiler and compares.
+         --
+         run_Step ("that the virtual functions of each class are in the order of C++", "./check_vtables");
       end if;
    end if;
 
