@@ -101,6 +101,11 @@ begin
       check (LETTER_SUM = 67,                                       "a character which is added to");
       check (COMPARED = True,                                       "a comparison");
       check (REMAINDER = 2,                                         "a remainder");
+
+      check (IN_ORDER    = 9  and c_in_order    = 9,                "operators of one level are applied from the left, as C applies them");
+      check (SUM_SHIFTED = 24 and c_sum_shifted = 24,               "a sum is made before it is shifted");
+      check (AND_THEN_OR = 10 and c_and_then_or = 10,               "'and' binds more tightly than 'or'");
+      check (TWICE_MINUS = 5  and c_twice_minus = 5,                "a sign is applied to a sign");
    end written_constants;
 
    character_enumerations :

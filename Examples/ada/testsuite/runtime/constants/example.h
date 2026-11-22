@@ -15,6 +15,10 @@
 #define LETTER_SUM  ('A' + 2)
 #define COMPARED    (COUNT > 10)
 #define REMAINDER   (COUNT % 5)
+#define IN_ORDER    (10 - 4 + 3)
+#define SUM_SHIFTED (1 + 2 << 3)
+#define AND_THEN_OR (6 & 3 | 8)
+#define TWICE_MINUS (- - 5)
 
 const int      limit   = 100;
 const double   epsilon = 0.25;
@@ -50,5 +54,9 @@ inline void  top_level    (Level& l)        { l = Top; }
 inline int   kind_number  (Limits::Kind k)  { return (int) k; }
 inline int   mark_number  (Marks m)         { return (int) m; }
 inline Marks mark_of      (char c)          { return (Marks) c; }
+inline int   c_in_order ()                  { return IN_ORDER; }
+inline int   c_sum_shifted ()               { return SUM_SHIFTED; }
+inline int   c_and_then_or ()               { return AND_THEN_OR; }
+inline int   c_twice_minus ()               { return TWICE_MINUS; }
 inline const char* quoted_text ()           { return QUOTED; }
 inline const char* tabbed_text ()           { return TABBED; }
