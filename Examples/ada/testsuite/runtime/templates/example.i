@@ -19,4 +19,6 @@
 
 %template (int_Source)     Source<int>;
 
+%template (whole_Tracked)  Tracked<Whole>;
+
 %include "derived.h"     // After the instance of the template which it uses as a base class.

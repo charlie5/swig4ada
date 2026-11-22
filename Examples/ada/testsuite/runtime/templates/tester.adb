@@ -8,6 +8,7 @@ with
      templates.int_Source.Guards,
      templates.Counter,
      templates.Counter.Guards,
+     templates.whole_Tracked,
 
      interfaces.C,
 
@@ -81,6 +82,22 @@ begin
    end a_virtual_template_instance;
 
    check (sources_alive = 0,                   "the guards have called the destructors of the template instance and of the derived class");
+
+   a_virtual_instance_which_is_not_named_as_Cpp_names_it :
+   declare
+      the_Tracked : aliased whole_Tracked.Item    := whole_Tracked.construct (5);
+      by_Cpp      : constant whole_Tracked.Pointer := new_tracked (8);
+   begin
+      check (tracked_count = 2,                              "an object is made by Ada, and one by C++");
+      check (whole_Tracked.get (the_Tracked'Access) = 5,     "its virtual function is called");
+      check (whole_Tracked.get (by_Cpp) = 8,                 "and that of the object which C++ made");
+
+      whole_Tracked.destruct_0 (the_Tracked);
+      check (tracked_count = 1,                              "its destructor is called, where its symbol cannot be made from its name");
+
+      whole_Tracked.destruct (by_Cpp.all);
+      check (tracked_count = 0,                              "and the destructor which frees an object made by C++");
+   end a_virtual_instance_which_is_not_named_as_Cpp_names_it;
 
    finish;
 end Tester;

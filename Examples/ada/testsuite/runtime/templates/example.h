@@ -32,3 +32,17 @@ public:
 };
 
 template <class T> int Source<T>::alive = 0;
+
+/* A virtual template whose instance is not named as C++ names it: it has a default argument, and an argument which is a typedef. */
+typedef int Whole;
+
+inline int& tracked_alive ()   { static int alive = 0;  return alive; }
+inline int  tracked_count ()   { return tracked_alive (); }
+
+template <class T, class Extra = long> class Tracked {
+public:
+  T value;
+  Tracked (T v) : value (v)    { tracked_alive ()++; }
+  virtual ~Tracked ()          { tracked_alive ()--; }
+  virtual T get ()             { return value; }
+};
