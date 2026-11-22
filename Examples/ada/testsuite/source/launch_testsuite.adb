@@ -44,6 +44,7 @@ is
    check_Baseline      : constant Boolean := True;     -- Say which of the generated specs differ from those of the baseline.
    do_Runtime          : constant Boolean := True;     -- Build and run the run-time cases.
    do_Examples         : constant Boolean := True;     -- Build each example of 'Examples/ada' and run its tester.
+   do_Units            : constant Boolean := True;     -- Build and run the tests of single units of the Ada module.
 
    Root                : constant String  := "../../../..";     -- The repository root, as seen from the 'generated' folder.
 
@@ -68,6 +69,8 @@ is
    runtime_Failures   : Natural := 0;
    example_Count      : Natural := 0;
    example_Failures   : Natural := 0;
+   unit_Count         : Natural := 0;
+   unit_Failures      : Natural := 0;
    unexpected_Passes  : Natural := 0;
    baseline_Changes   : Natural := 0;
    has_Baseline       : Boolean := False;
@@ -400,6 +403,32 @@ is
          put_Line ("   The example failed !");
       end if;
    end run_Example;
+
+
+
+   procedure run_Unit (the_Unit : in String)
+   --
+   --  Builds and runs the test of one unit of the Ada module, which is tested apart from the tool: 'unit/<unit>'
+   --  holds '<unit>_test.gpr' and its main program, which makes its checks through the 'Checks' package.
+   --
+   is
+      Log : constant String := "unit-build/" & the_Unit & ".log";
+   begin
+      put_Line ("Running the unit test '" & the_Unit & "'.");
+      unit_Count := unit_Count + 1;
+
+      ada.Directories.create_Path ("unit-build");     -- The log is written there.
+
+      if not run (  "gprbuild -q -p -P unit/" & the_Unit & "/" & the_Unit & "_test.gpr"
+                  & " && unit-build/" & the_Unit & "/" & the_Unit & "_test",
+                  Log)
+      then
+         ada.Directories.create_Path ("generated");
+         keep (Log, as_Log => "generated/" & the_Unit & "-unit.log");
+         unit_Failures := unit_Failures + 1;
+         put_Line ("   The unit test failed !");
+      end if;
+   end run_Unit;
 
 
 
@@ -1401,6 +1430,16 @@ begin
    end if;
 
 
+   --------------
+   --- Unit tests
+   --
+   if do_Units
+   then
+      new_Line;
+      run_Unit ("layout");     -- The layout engine: the place of each member of a class or structure.
+   end if;
+
+
    -------------
    --- Examples
    --
@@ -1451,12 +1490,14 @@ begin
 
    put_Line ("Run-time cases:               " & runtime_Cases   'Image);
    put_Line ("Run-time cases which fail:    " & runtime_Failures'Image);
+   put_Line ("Unit tests:                   " & unit_Count      'Image);
+   put_Line ("Unit tests which fail:        " & unit_Failures   'Image);
    put_Line ("Examples:                     " & example_Count   'Image);
    put_Line ("Examples which fail:          " & example_Failures'Image);
 
    new_Line;
 
-   if generator_Failures + syntax_Failures + wrapper_Failures + compile_Failures + runtime_Failures + example_Failures + baseline_Changes = 0
+   if generator_Failures + syntax_Failures + wrapper_Failures + compile_Failures + runtime_Failures + unit_Failures + example_Failures + baseline_Changes = 0
    then
       put_Line ("Complete.");
    else

@@ -37,6 +37,7 @@ Examples/ada/class
 Examples/ada/testsuite/generated
 Examples/ada/testsuite/baseline
 Examples/ada/testsuite/runtime-build
+Examples/ada/testsuite/unit-build
 ada/attic
 
 

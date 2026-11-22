@@ -1,0 +1,25 @@
+with
+     "gmp";
+
+project layout_Test
+--
+-- A test of the layout engine alone: records are made by hand, and their layout is checked.
+--
+is
+   for Source_Dirs use (".",
+                        "../../runtime/support",
+                        "../../../../../Source/Modules/ada",
+                        "../../../../../Source/Modules/ada/ada_type");
+   for Object_Dir  use "../../unit-build/layout";
+   for Exec_Dir    use "../../unit-build/layout";
+   for Main        use ("layout_test.adb");
+
+   package Compiler is
+      for Default_Switches ("Ada") use ("-gnat2022", "-g");
+   end Compiler;
+
+   package Linker is
+      for Default_Switches ("Ada") use ("-lgmp", "-lstdc++");     -- The Ada model uses the GMP binding, by way of its utilities.
+   end Linker;
+
+end layout_Test;
