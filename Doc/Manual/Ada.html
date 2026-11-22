@@ -794,6 +794,10 @@ SWIG warns as it does for other languages, and the later one is left out.
 Default arguments give one function for each number of arguments.
 Of a virtual function with a default argument, the function of all its arguments is the
 one which dispatches and may be overridden; the others call it.
+A virtual function which is not bound (one which the interface file ignores, say, or
+whose types are not known) still has its place among the others, as a procedure
+<tt>unbound_virtual_&lt;n&gt;</tt> which must not be called; so has a virtual destructor
+which is not public, as <tt>destruct_0</tt> and <tt>destruct</tt>.
 An operator is a function with a name: <tt>operator-&gt;</tt> is <tt>dereference</tt>,
 <tt>operator()</tt> is <tt>Functor</tt>, and where the interface file renames the others as
 upstream's examples do, <tt>operator+</tt> is <tt>Plus</tt> and <tt>operator==</tt> is
