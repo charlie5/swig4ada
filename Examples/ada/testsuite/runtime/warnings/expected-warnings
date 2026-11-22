@@ -1,0 +1,7 @@
+example.h:8: Warning 864: The class 'Derived' inherits a base class virtually, which is not supported. The layout of its record does not match that of the class.
+example.h:10: Warning 863: Unable to evaluate the value 'sizeof(Hidden*)*99%7?1:2' of the enumeration literal 'One', which is given the value 0.
+example.h:12: Warning 861: Unable to bind the constant 'ODD', as its value ((1?2:3)) is not one which Ada can state.
+example.h:14: Warning 861: Unable to bind the type 'Box<(int)>', which is not known.
+example.h:15: Warning 861: Unable to bind the function 'take', as the type 'Box<(int)>' of its parameter 'b' is not known.
+example.h:14: Warning 861: Unable to bind the function 'make_box', as its result type 'Box<(int)>' is not known.
+example.i:1: Warning 862: Unable to lay out 'warnings.Derived' as C++ does, as the size of one of its members is not known. Its record may not match the layout of its class.

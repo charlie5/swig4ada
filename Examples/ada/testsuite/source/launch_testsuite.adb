@@ -41,7 +41,7 @@ is
 
    check_Wrappers      : constant Boolean := True;     -- Compile each generated wrapper.
    check_Specs         : constant Boolean := True;     -- Compile each generated spec.
-   check_Baseline      : constant Boolean := True;     -- Say which of the generated specs differ from those of the baseline.
+   check_Baseline      : constant Boolean := True;     -- Say which of the generated specs and wrappers differ from those of the baseline.
    do_Runtime          : constant Boolean := True;     -- Build and run the run-time cases.
    do_Examples         : constant Boolean := True;     -- Build each example of 'Examples/ada' and run its tester.
    do_Units            : constant Boolean := True;     -- Build and run the tests of single units of the Ada module.
@@ -108,7 +108,7 @@ is
 
    procedure check_against_Baseline
    --
-   --  A spec may change and still compile, so the specs are compared with those which were last accepted as right.
+   --  A spec or a wrapper may change and still compile, so each is compared with the one which was last accepted as right.
    --
    --  'baseline.sha' holds a checksum of each spec of the baseline, and is kept with the sources. The specs themselves
    --  are kept in the 'baseline' folder, which is not: where it is present, 'generated/baseline-changes.log' shows how
@@ -118,7 +118,7 @@ is
    is
       Step_Log : constant String := "generated/baseline-step.log";
    begin
-      if not run ("cd generated && sha256sum *.ads > specs.sha", Step_Log)
+      if not run ("cd generated && sha256sum *.ads *_wrap.c *_wrap.cxx > specs.sha", Step_Log)
       then
          raise Program_Error with "Unable to take the checksums of the generated specs.";
       end if;
@@ -126,14 +126,14 @@ is
       if ada.Command_Line.Argument_Count = 1 and then ada.Command_Line.Argument (1) = "accept"
       then
          if not run (  "cp generated/specs.sha baseline.sha"
-                     & " && rm -rf baseline && mkdir baseline && cp generated/*.ads baseline/",
+                     & " && rm -rf baseline && mkdir baseline && cp generated/*.ads generated/*_wrap.c generated/*_wrap.cxx baseline/",
                      Step_Log)
          then
             raise Program_Error with "Unable to keep the generated specs as the baseline.";
          end if;
 
          new_Line;
-         put_Line ("The generated specs are now the baseline.");
+         put_Line ("The generated specs and wrappers are now the baseline.");
          return;
       end if;
 
@@ -180,7 +180,7 @@ is
       if baseline_Changes > 0
       then
          new_Line;
-         put_Line (baseline_Changes'Image & " specs differ from the baseline: see 'generated/baseline-changes.log'.");
+         put_Line (baseline_Changes'Image & " specs or wrappers differ from the baseline: see 'generated/baseline-changes.log'.");
          put_Line ("If they are as they should be, './launch_testsuite accept' makes them the baseline.");
       end if;
    end check_against_Baseline;
@@ -341,14 +341,20 @@ is
 
 
    procedure run (the_Case : in String;   use_CPP  : in Boolean := True;
-                                          Imported : in String  := "")
+                                          Imported : in String  := "";
+                                          Options  : in String  := "")
    --
    --  Generates the binding of a run-time case, builds its tester and runs it. 'Imported' names an
    --  interface file of the case ('base' for 'base.i') whose module the case imports, and which is
-   --  generated first.
+   --  generated first. 'Options' are further options of the generator.
+   --
+   --  The warnings which the Ada module gives (those numbered from 861) must be those of the file
+   --  'expected-warnings' of the case, each less the folder of its file. A case with no such file must give none.
    --
    is
-      Generator : constant String := "../../../../../ada-build/swig4ada -ada" & (if use_CPP then " -c++" else "") & " -outdir .";
+      Generator : constant String :=   "../../../../../ada-build/swig4ada -ada" & (if use_CPP then " -c++" else "")
+                                     & (if Options = "" then "" else " " & Options) & " -outdir .";
+      Expected  : constant String := "../../runtime/" & the_Case & "/expected-warnings";
       Extension : constant String := (if use_CPP then "cxx" else "c");
 
       Build : constant String := "runtime-build/" & the_Case;
@@ -363,11 +369,18 @@ is
                   & " && cd " & Build
                   & " && rm -rf obj tester *.ads *_wrap.cxx *_wrap.c"
                   & " && echo 'Generating.'"
+                  & " && { true"
                   & (if Imported = "" then ""
                      else   " && " & Generator & " -o ./" & Imported & "_wrap." & Extension
                           & " -I../../runtime/" & the_Case & " ../../runtime/" & the_Case & "/" & Imported & ".i")
                   & " && " & Generator & " -o ./example_wrap." & Extension
                   &          " -I../../runtime/" & the_Case & " ../../runtime/" & the_Case & "/example.i"
+                  & "; } > generate.log 2>&1 || { cat generate.log; false; }"
+                  & " && cat generate.log"
+                  & " && echo 'Checking the warnings.'"
+                  & " && { grep 'Warning 86' generate.log || true; } | sed 's|^[^ ]*/||' > warnings.txt"
+                  & " && if [ -f " & Expected & " ]; then diff " & Expected & " warnings.txt;"
+                  &    " elif [ -s warnings.txt ]; then echo 'These warnings are not expected:'; cat warnings.txt; false; fi"
                   & " && echo 'Building.'"
                   & " && gprbuild -q -p -P ../../runtime/runtime_test.gpr -XCASE=" & the_Case & (if use_CPP then "" else " -XBOUND_LANGUAGE=C")
                   & " && echo 'Running.'"
@@ -429,6 +442,84 @@ is
          put_Line ("   The unit test failed !");
       end if;
    end run_Unit;
+
+
+
+   procedure run_Step (Name : in String;   Command : in String)
+   --
+   --  Runs a check which is a command of its own, counted with the unit tests.
+   --
+   is
+      Log : constant String := "unit-build/" & Name & ".log";
+   begin
+      put_Line ("Checking " & Name & ".");
+      unit_Count := unit_Count + 1;
+
+      ada.Directories.create_Path ("unit-build");
+
+      if not run (Command, Log)
+      then
+         ada.Directories.create_Path ("generated");
+         keep (Log, as_Log => "generated/" & Name & "-check.log");
+         unit_Failures := unit_Failures + 1;
+         put_Line ("   The check failed !");
+      end if;
+   end run_Step;
+
+
+
+   procedure check_the_layout_Assertions
+   --
+   --  Every other case shows that the layout checks of a wrapper pass. This shows that they can fail: 'runtime/wrong_layout'
+   --  hides a member of a structure from SWIG, so the record does not match, and its wrapper must not compile. It must
+   --  compile once the checks are turned off.
+   --
+   is
+      Tool   : constant String := "../../../../../ada-build/swig4ada -ada -c++ -outdir . -o ./example_wrap.cxx";
+      Source : constant String := "../../runtime/wrong_layout";
+   begin
+      run_Step ("that a layout check can fail",
+                  "mkdir -p unit-build/wrong_layout && cd unit-build/wrong_layout"
+                & " && " & Tool & " -I" & Source & " " & Source & "/example.i"
+                & " && if g++ -fsyntax-only -I" & Source & " example_wrap.cxx > compile.log 2>&1;"
+                &    " then echo 'The wrapper of a record which does not match its structure compiles.'; false; fi"
+                & " && grep 'swig4ada: the Ada record' compile.log"
+                & " && grep ""swig4ada: the member 'last'"" compile.log"
+                & " && g++ -fsyntax-only -DSWIG_ADA_NO_LAYOUT_CHECKS -I" & Source & " example_wrap.cxx");
+   end check_the_layout_Assertions;
+
+
+
+   procedure check_the_Bootstrap
+   --
+   --  The tool is built with bindings to the swig core which it generated itself. This generates the
+   --  three of them again, apart, and requires each file to be as it is in the sources.
+   --
+   is
+      Source : constant String := "../../../../../../Source";     -- As seen from the folder of a binding which is generated again.
+      Paths  : constant String :=   " -I" & Source & "/Include -I" & Source & "/Swig -I" & Source & "/Modules"
+                                  & " -I" & Source & "/Preprocessor -I" & Source & "/DOH";
+
+      function Regenerated (the_Binding : in String;   use_CPP : in Boolean) return String
+      is
+         Wrapper : constant String := the_Binding & "_wrap." & (if use_CPP then "cxx" else "c");
+         Tracked : constant String := Source & "/Modules/ada/swig_binding/" & the_Binding;
+      begin
+         return   "mkdir -p unit-build/bootstrap/" & the_Binding & " && cd unit-build/bootstrap/" & the_Binding
+                & " && rm -f *.ads *_wrap.*"
+                & " && ../" & "../../../../../ada-build/swig4ada -ada" & (if use_CPP then " -c++" else "")
+                &    Paths & " -outdir . -o ./" & Wrapper & " " & Tracked & "/" & the_Binding & ".i > generate.log 2>&1"
+                & " && rm -f *-guards.ads"
+                & " && gnatpp -rnb -I" & Source & " *.ads > pretty_print.log 2>&1"
+                & " && for Each in " & Tracked & "/*.ads " & Tracked & "/*_wrap.*; do cmp $Each $(basename $Each) || exit 1; done"
+                & " && cd ../../..";
+      end Regenerated;
+   begin
+      run_Step ("that the tool regenerates its own bindings",
+                  Regenerated ("doh",       use_CPP => False)
+                & " && " & Regenerated ("swig_core", use_CPP => False)
+                & " && " & Regenerated ("swigmod",   use_CPP => True));
+   end check_the_Bootstrap;
 
 
 
@@ -1427,6 +1518,9 @@ begin
       run ("directives");          -- Directives which change a binding.
       run ("derived_layouts");     -- Classes whose members lie in the unused tail of a base class.
       run ("moves");               -- Objects which are moved and not copied, and a pointer which owns its object.
+      run ("in_namespace",         -- The packages of a binding within another package.
+           Options => "-namespace outer");
+      run ("warnings");            -- The warnings of the Ada module, by number, place and filter.
    end if;
 
 
@@ -1438,6 +1532,9 @@ begin
       new_Line;
       run_Unit ("layout");          -- The layout engine: the place of each member of a class or structure.
       run_Unit ("expressions");     -- The value of a C expression, against the value which a C compiler gives.
+
+      check_the_layout_Assertions;
+      check_the_Bootstrap;
    end if;
 
 
@@ -1486,7 +1583,7 @@ begin
 
    if has_Baseline
    then
-      put_Line ("Specs which differ from the baseline:" & baseline_Changes'Image);
+      put_Line ("Files which differ from the baseline:" & baseline_Changes'Image);
    end if;
 
    put_Line ("Run-time cases:               " & runtime_Cases   'Image);

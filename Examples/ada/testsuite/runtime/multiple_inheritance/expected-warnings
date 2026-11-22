@@ -1,0 +1,1 @@
+example.h:48: Warning 862: The base class 'Clickable' of class 'Button' is ignored, as multiple inheritance is not supported.

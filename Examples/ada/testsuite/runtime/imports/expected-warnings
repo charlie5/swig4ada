@@ -1,0 +1,1 @@
+example.i:1: Warning 862: Unable to lay out 'imports.Vec3' as C++ does, as the size of one of its members is not known. Its record may not match the layout of its class.
