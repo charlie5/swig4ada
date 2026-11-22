@@ -208,6 +208,21 @@ private
    subtype String_Vector  is String_Vectors.Vector;
 
 
+   -----------------
+   --- abstract_Shim
+   --
+   --  An abstract class cannot be constructed, so its constructors are those of a concrete class of the wrapper
+   --  which is derived from it (see 'bind_constructors_of_abstract_Class'). This holds the name of that class,
+   --  where one is being made, with its constructors and the functions which call them.
+   --
+   type abstract_Shim is
+      record
+         Name         : unbounded_String;
+         Constructors : unbounded_String;
+         Functions    : unbounded_String;
+      end record;
+
+
    ---------------------
    --- ada_Language Item
    --
@@ -277,22 +292,12 @@ private
          --
          in_cpp_Mode                   : Boolean := False;
          native_function_Flag          : Boolean := False;
-         enum_constant_Flag            : Boolean := False;       -- Flag for wrapping an enum or constant.
          static_flag                   : Boolean := False;       -- Flag for wrapping a static functions or member variables.
          wrapping_member_flag          : Boolean := False;       -- Flag for wrapping a member variable/enum/const.
-         is_anonymous_Enum             : Boolean := False;
-         --  An abstract class cannot be constructed, so its constructors are those of a concrete class of the wrapper
-         --  which is derived from it (see 'classHandler'). These hold the name of that class, where one is being made,
-         --  and its constructors and the functions which call them.
-         --
-         abstract_shim_Name            : unbounded_String;
-         abstract_shim_Constructors    : unbounded_String;
-         abstract_shim_Functions       : unbounded_String;
+         Shim                          : abstract_Shim;          -- The concrete class of the abstract class which is being bound, if any.
 
          accessor_member_Name          : unbounded_String;       -- The member variable whose 'get' and 'set' functions are being wrapped, if any.
          variable_wrapper_flag         : Boolean := False;       -- Flag for wrapping a nonstatic member variable. TODO: possibly oboslete.
-         have_default_constructor_flag : Boolean := False;       -- TODO: Possibly obsolete.
-         enum_rep_clause_required      : Boolean := False;       -- TODO: Possibly obsolete.
          doing_constructorDeclaration  : Boolean := False;
 
          --  C Runtime

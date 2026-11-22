@@ -38,6 +38,7 @@ is
          constructor_Symbol : unbounded_String;
          access_Mode        : ada_Subprogram.access_Mode := Unknown;
          link_Symbol        : unbounded_String;
+         is_in_Wrapper      : Boolean := False;     -- The link symbol is that of a function which the module adds to the wrapper file.
       end record;
 
    type View is access all item'Class;

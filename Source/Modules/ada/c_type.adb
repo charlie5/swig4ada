@@ -412,6 +412,33 @@ is
 
 
 
+   function is_a_standard_Integer (Self : access Item) return Boolean
+   is
+   begin
+      return to_String (Self.Name) in   "int"   | "unsigned int"   | "long"      | "unsigned long"
+                                      | "short" | "unsigned short" | "long long" | "unsigned long long";
+   end is_a_standard_Integer;
+
+
+
+   function is_a_standard_Real (Self : access Item) return Boolean
+   is
+   begin
+      return to_String (Self.Name) in "float" | "double";
+   end is_a_standard_Real;
+
+
+
+   function is_a_Number (Self : access Item) return Boolean
+   is
+   begin
+      return        Self.is_a_standard_Integer
+             or else Self.is_a_standard_Real
+             or else to_String (Self.Name) in "signed char" | "unsigned char" | "size_t" | "bool" | "long double";
+   end is_a_Number;
+
+
+
    procedure resolved_Type_is (Self : access Item;   Now : in c_Type.view)
    is
    begin

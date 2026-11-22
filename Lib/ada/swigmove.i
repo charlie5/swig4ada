@@ -9,7 +9,7 @@
  * wrapper has a pointer to it.
  * ----------------------------------------------------------------------------- */
 
-%typemap (in) SWIGTYPE MOVE
+%typemap (in, moves="1") SWIGTYPE MOVE     // 'moves' tells the Ada module that a construction function moves it, too.
 %{
   $1 = SWIG_STD_MOVE (*($&1_ltype) $input);
 %}

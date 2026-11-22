@@ -171,6 +171,10 @@ is
    function  ultimate_base_Type     (Self : access Item) return c_Type.view;
    function  is_ultimately_Unsigned (Self : access Item) return Boolean;
 
+   function  is_a_standard_Integer  (Self : access Item) return Boolean;     -- 'int', 'long', 'short', 'long long', or one of them unsigned.
+   function  is_a_standard_Real     (Self : access Item) return Boolean;     -- 'float' or 'double'.
+   function  is_a_Number            (Self : access Item) return Boolean;     -- Either of those, or a 'char' with a sign, 'size_t', 'bool' or 'long double'.
+
    procedure resolved_Type_is       (Self : access Item;   Now : in c_Type.view);
    function  resolved_Type          (Self : access Item)     return c_Type.view;
 

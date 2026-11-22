@@ -72,19 +72,12 @@ is
 
                                    in_CPP_mode              => False,
                                    native_function_Flag     => False,
-                                   enum_constant_Flag       => False,
-                                   have_default_constructor_flag
-                                                            => False,
                                    static_flag              => False,
-                                   abstract_shim_Name         => <>,
-                                   abstract_shim_Constructors => <>,
-                                   abstract_shim_Functions    => <>,
+                                   Shim                     => <>,
                                    accessor_member_Name     => <>,
                                    variable_wrapper_flag    => False,
                                    wrapping_member_flag     => False,
-                                   is_anonymous_Enum        => False,
 
-                                   enum_rep_clause_required => False,
                                    doing_constructorDeclaration => False,
 
                                    anonymous_enum_Count     => 0,

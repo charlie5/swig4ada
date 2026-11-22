@@ -1,5 +1,4 @@
 with
-     pointer_Hash,
      ada_Package,
      ada_type.a_subType,
      ada_type.elementary.an_access.to_type,

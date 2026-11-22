@@ -16,7 +16,7 @@
 // The generic 'unique_ptr.swg' is not included: it declares the class with no members, and this file must declare it.
 
 %define %unique_ptr(TYPE)
-%typemap (in) std::unique_ptr< TYPE >
+%typemap (in, moves="1") std::unique_ptr< TYPE >
 %{
   $1 = SWIG_STD_MOVE (*($&1_ltype) $input);
 %}

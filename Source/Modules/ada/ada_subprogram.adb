@@ -36,7 +36,8 @@ is
                    returns_an_Access  => False,
                    constructor_Symbol => null_unbounded_String,
                    access_mode        => Unknown,
-                   link_symbol        => <>);
+                   link_symbol        => <>,
+                   is_in_Wrapper      => False);
    end construct;
 
 
@@ -204,7 +205,7 @@ is
          --
          if Self.link_Symbol /= ""
          then
-            if Index (Self.link_Symbol, "ada_destruct_") = 1
+            if Self.is_in_Wrapper
             then   -- A function of the wrapper file.
                append (the_Source,   NL & "   pragma Import (C, "   & unique_function_Name & ", """ & Self.link_Symbol & """);");
             else   -- The C++ symbol of a virtual destructor, made from the full name of its class.

@@ -2691,12 +2691,6 @@ is
          loop
             the_Type := Element (ic_pointer_Types,  Each);
 
-            declare
-               subtype an_Array_view  is ada_Type.composite.an_array.view;
-               subtype an_Array_class is ada_Type.composite.an_array.item'Class;
-
-               subtype a_Record_view  is ada_Type.composite.a_record.view;
-               subtype a_Record_class is ada_Type.composite.a_record.item'Class;
             begin
                if not is_unusable_Array (the_Type)
                then
