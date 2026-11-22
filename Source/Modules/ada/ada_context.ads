@@ -30,6 +30,7 @@ is
                                              namespace_Prefix : in unbounded_String) return String;
 
    function limited_Withs (Self : in Item;   the_Package      : in ada_Package.view) return Boolean;
+   function Withs         (Self : in Item;   the_Package      : in ada_Package.view) return Boolean;     -- Once 'to_Source' has been called.
 
 
    --  Operations

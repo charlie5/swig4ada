@@ -108,6 +108,15 @@ begin
    log (+"Creating source for the main module.");
    ada_Language.source_Generator.generate (Self);
 
+   --  'std::string' is a type of the support package 'swig.std_Strings', which imports functions of the wrapper. They
+   --  are a fragment of the library ('ada.swg'), which 'std_string.i' asks for. A spec may need the package where
+   --  that file is not included (a class with a member which is a string, say), so it is asked for here too.
+   --
+   if Self.uses_std_Strings
+   then
+      Swig_fragment_emit (swig_Core.Pointers.String_Pointer (to_Doh ("SwigAdaStdString")));
+   end if;
+
    declare
       the_Checks : constant String := ada_Language.source_Generator.layout_Checks (Self);
    begin

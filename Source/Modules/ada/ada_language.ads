@@ -304,6 +304,7 @@ private
          f_Init     : swig_Core.Pointers.File_Pointer;
          f_Ada      : swig_Core.Pointers.File_Pointer;           -- Contains Ada specific C++ declarations and code.
 
+         uses_std_Strings  : Boolean := False;                      -- A spec of the module needs 'swig.std_Strings', whose functions the wrapper must then hold.
          all_layout_Checks : Boolean := True;                       -- Check the layout of every class in the wrapper file (unless '-no-check-layout').
 
          Package_namespace : ada_Package.view;                      -- The package which holds the packages of each module ('-namespace'), if any.

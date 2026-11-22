@@ -262,6 +262,14 @@ is
 
 
 
+   function Withs (Self : in Item;   the_Package : in ada_Package.view) return Boolean
+   is
+   begin
+      return Self.State.package_withing_requirements_Map.Contains (the_Package);
+   end Withs;
+
+
+
 
    --  Operations
    --

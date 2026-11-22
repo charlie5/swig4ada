@@ -1819,6 +1819,11 @@ is
                                          the_Package.all'Access,
                                          null_unbounded_String));
 
+         if the_Context.Withs (the_ada_Lang.Package_swig_std_strings)
+         then   -- The wrapper must then hold the functions which that package imports (see 'top').
+            the_ada_Lang.uses_std_Strings := True;
+         end if;
+
          if with_of_swig_Required
          then   -- Ensure Swig is with'ed in case of i.c.char_Array to Swig.indefinate_Arrsy transformation.
             append (spec_Source,   "with Swig;" &  NL);                          -- todo: May result in a redundant withing of 'Swig' package.

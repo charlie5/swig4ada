@@ -1233,3 +1233,36 @@
    which need one. Ada keeps them: a container which is given a size is then empty, and an exception is pending. */
 %define %std_nodefconst_type(Type...)
 %enddef
+
+
+/* -----------------------------------------------------------------------------
+ * The functions which the support package 'swig.std_Strings' imports. They are
+ * added to the wrapper where 'std_string.i' is included, or where a spec of the
+ * module needs that package (a class with a member which is a 'std::string').
+ * ----------------------------------------------------------------------------- */
+
+%fragment ("SwigAdaStdString", "header") %{
+#include <string>
+
+/* One copy of each function is shared by all of the wrapper files of a program. The two which construct a string
+   return it by value: C++ then takes the address of the new object as a hidden first argument, which is where a
+   constructor takes it, so Ada may import them as constructors. */
+
+#if defined(__GNUC__)
+#  define SWIG_ADA_STRING_SHARED __attribute__ ((weak))
+#else
+#  define SWIG_ADA_STRING_SHARED
+#endif
+
+extern "C" {
+
+SWIG_ADA_STRING_SHARED std::string  swig_ada_std_string_construct ()                         { return std::string ();           }
+SWIG_ADA_STRING_SHARED std::string  swig_ada_std_string_construct_from_chars (const char* s) { return std::string (s ? s : ""); }
+
+SWIG_ADA_STRING_SHARED const char*  swig_ada_std_string_c_str    (const std::string* s)          { return s->c_str ();    }
+SWIG_ADA_STRING_SHARED size_t       swig_ada_std_string_length   (const std::string* s)          { return s->length ();   }
+SWIG_ADA_STRING_SHARED void         swig_ada_std_string_assign   (std::string* s, const char* v) { s->assign (v ? v : ""); }
+SWIG_ADA_STRING_SHARED void         swig_ada_std_string_destruct (std::string* s)                { typedef std::string T;   s->~T (); }
+
+}
+%}
