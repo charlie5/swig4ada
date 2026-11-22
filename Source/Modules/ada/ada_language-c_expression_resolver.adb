@@ -141,232 +141,124 @@ is
 
 
 
-   procedure reduce_unary (the_Vector    : in out element_Vectors.Vector;
-                           for_Operation : in     String)
+   --  The value of an expression is worked out from its elements, which are values and operators in the order in which
+   --  they are written. An expression within brackets has been worked out already, and is one value here.
+   --
+   --  The operators are applied as C applies them: those of one sign first (which bind most tightly, and from the right),
+   --  and then each level of those of two operands in turn, from the left within a level.
+   --
+
+   function is_Unary (the_Vector : in element_Vectors.Vector;   Index : in Positive) return Boolean
+   --
+   --  True for an operator which has no value to its left, and so applies to the value which follows it.
+   --
    is
-      Cursor      : element_Vectors.Cursor := First (the_Vector);
-      the_Element : an_Element;
+      the_Element : constant an_Element := the_Vector (Index);
    begin
-      while has_Element (Cursor)
-      loop
-         the_Element := Element (Cursor);
-
-         if         the_Element.Kind = Operator
-           and then the_Element.Code = for_Operation
-         then
-            if        Cursor                           = First (the_Vector)
-              or else Element (Previous (Cursor)).Kind = Operator
-            then
-               if    for_Operation = "+"
-               then
-                  replace_Element (the_Vector, Cursor, (Kind           => Value,
-                                                        Value          => Element (Next (Cursor)).Value,
-                                                        type_Qualifier => Element (Next (Cursor)).type_Qualifier));
-                  delete (the_Vector, to_Index (Next (Cursor)));     -- nb: 'Cursor' is not ambiguous after this delete  (see RM A.18.2 219/2)
-
-               elsif for_Operation = "-"
-               then
-                  replace_Element (the_Vector, Cursor, (Kind           => Value,
-                                                        Value          => -Element (Next (Cursor)).Value,
-                                                        type_Qualifier => Element (Next (Cursor)).type_Qualifier));
-                  delete (the_Vector, to_Index (Next (Cursor)));     -- nb: 'Cursor' is not ambiguous after this delete  (see RM A.18.2 219/2)
-
-               elsif for_Operation = "!"
-               then
-                  replace_Element (the_Vector, Cursor, (Kind           => Value,
-                                                        Value          => (if Element (Next (Cursor)).Value = to_Integer (0)
-                                                                           then to_Integer (1)
-                                                                           else to_Integer (0)),
-                                                        type_Qualifier => Element (Next (Cursor)).type_Qualifier));
-                  delete (the_Vector, to_Index (Next (Cursor)));     -- nb: 'Cursor' is not ambiguous after this delete  (see RM A.18.2 219/2)
-
-               elsif for_Operation = "~"
-               then
-                  declare
-                     next_Element       :          an_Element       := Element (Next (Cursor));
-                     next_Element_value : constant discrete.Integer := next_Element.Value;
-
-                  begin
-                     next_Element.Value := not next_Element_Value;
-
-                     replace_Element (the_Vector, Cursor, (Kind           => Value,
-                                                           Value          => next_Element.Value,
-                                                           type_Qualifier => next_Element.type_Qualifier));
-                     delete (the_Vector, to_Index (Next (Cursor)));     -- nb: 'Cursor' is not ambiguous after this delete  (see RM A.18.2 219/2)
-                  end;
-               end if;
-            end if;
-         end if;
-
-         next (Cursor);
-      end loop;
-
-   end reduce_unary;
+      return          the_Element.Kind = Operator
+             and then (the_Element.Code in +"!" | +"~" | +"+" | +"-")
+             and then (       Index = the_Vector.first_Index
+                       or else the_Vector (Index - 1).Kind = Operator);
+   end is_Unary;
 
 
 
-
-
-   procedure reduce (the_Vector    : in out element_Vectors.Vector;
-                     for_Operation : in     String)
+   procedure reduce_Unaries (the_Vector : in out element_Vectors.Vector)
    is
-      Cursor      : element_Vectors.Cursor := First (the_Vector);
-      the_Element : an_Element;
+      Index : Natural := the_Vector.last_Index;
    begin
-      while has_Element (Cursor)
+      while Index >= the_Vector.first_Index     -- From the right, so that '-~1' applies '~' first.
       loop
-         the_Element := Element (Cursor);
-
-         if         the_Element.Kind = Operator
-           and then the_Element.Code = for_Operation
+         if         is_Unary (the_Vector, Index)
+           and then Index < the_Vector.last_Index
+           and then the_Vector (Index + 1).Kind = Value
          then
             declare
-               procedure cull_value_Elements_and_restart_Cursor
-               is
-               begin
-                  delete (the_Vector, to_Index (Next     (Cursor)));     -- nb: 'Cursor' is not ambiguous after this delete (see RM A.18.2 219/2)
-                  delete (the_Vector, to_Index (Previous (Cursor)));     --     'Cursor' is ambiguous after this delete
-
-                  Cursor := First (the_Vector);                          --      So we restart it.
-               end cull_value_Elements_and_restart_Cursor;
-
+               the_Code  : constant String     := to_String (the_Vector (Index).Code);
+               the_Value : constant an_Element := the_Vector (Index + 1);
             begin
-               if    for_Operation = "+"
-               then
-                  replace_Element (the_Vector, Cursor, (Kind           => Value,
-                                                        Value          => Element (Previous (Cursor)).Value + Element (Next (Cursor)).Value,
-                                                        type_Qualifier => Element (Next (Cursor)).type_Qualifier));  -- tbd: determine and use correct C type promotion.
-                  cull_value_Elements_and_restart_Cursor;
-
-               elsif for_Operation = "-"
-               then
-                  replace_Element (the_Vector, Cursor, (Kind           => Value,
-                                                        Value          => Element (Previous (Cursor)).Value - Element (Next (Cursor)).Value,
-                                                        type_Qualifier => Element (Next (Cursor)).type_Qualifier));
-
-                  cull_value_Elements_and_restart_Cursor;
-
-               elsif for_Operation = "*"
-               then
-                  replace_Element (the_Vector, Cursor, (Kind           => Value,
-                                                        Value          => Element (Previous (Cursor)).Value * Element (Next (Cursor)).Value,
-                                                        type_Qualifier => Element (Next (Cursor)).type_Qualifier));
-
-                  cull_value_Elements_and_restart_Cursor;
-
-               elsif for_Operation = "|"
-               then
-
-                  replace_Element (the_Vector, Cursor, (Kind           => Value,
-                                                        Value          => Element (Previous (Cursor)).Value  or  Element (Next (Cursor)).Value,
-                                                        type_Qualifier => Element (Next (Cursor)).type_Qualifier));
-                  cull_value_Elements_and_restart_Cursor;
-
-               elsif for_Operation = "&&"
-               then
-                  replace_Element (the_Vector, Cursor, (Kind           => Value,
-                                                        Value          => (if     Element (Previous (Cursor)).Value /= to_Integer (0)
-                                                                           and Element (Next     (Cursor)).Value /= to_Integer (0)
-                                                                           then to_Integer (1)
-                                                                           else to_Integer (0)),
-                                                        type_Qualifier => Element (Next (Cursor)).type_Qualifier));
-                  cull_value_Elements_and_restart_Cursor;
-               elsif for_Operation = "||"
-               then
-                  replace_Element (the_Vector, Cursor, (Kind           => Value,
-                                                        Value          => (if    Element (Previous (Cursor)).Value /= to_Integer (0)
-                                                                           or Element (Next     (Cursor)).Value /= to_Integer (0)
-                                                                           then to_Integer (1)
-                                                                           else to_Integer (0)),
-                                                        type_Qualifier => Element (Next (Cursor)).type_Qualifier));
-                  cull_value_Elements_and_restart_Cursor;
-
-               elsif for_Operation = "&"
-               then
-                  replace_Element (the_Vector, Cursor, (Kind           => Value,
-                                                        Value          => Element (Previous (Cursor)).Value  and  Element (Next (Cursor)).Value,
-                                                        type_Qualifier => Element (Next (Cursor)).type_Qualifier));
-                  cull_value_Elements_and_restart_Cursor;
-
-               elsif for_Operation = "^"
-               then
-                  replace_Element (the_Vector, Cursor, (Kind           => Value,
-                                                        Value          => Element (Previous (Cursor)).Value  xor  Element (Next (Cursor)).Value,
-                                                        type_Qualifier => Element (Previous (Cursor)).type_Qualifier));
-                  cull_value_Elements_and_restart_Cursor;
-
-               elsif for_Operation = "/"
-               then
-                  replace_Element (the_Vector, Cursor, (Kind           => Value,
-                                                        Value          => Element (Previous (Cursor)).Value / Element (Next (Cursor)).Value,
-                                                        type_Qualifier => Element (Next (Cursor)).type_Qualifier));
-
-                  cull_value_Elements_and_restart_Cursor;
-
-               elsif for_Operation = "%"
-               then   -- The remainder of a division which rounds towards zero, as '/' does.
-                  declare
-                     Left  : constant gmp.discrete.Integer := Element (Previous (Cursor)).Value;
-                     Right : constant gmp.discrete.Integer := Element (Next     (Cursor)).Value;
-                  begin
-                     replace_Element (the_Vector, Cursor, (Kind           => Value,
-                                                           Value          => Left - (Left / Right) * Right,
-                                                           type_Qualifier => Element (Next (Cursor)).type_Qualifier));
-                  end;
-
-                  cull_value_Elements_and_restart_Cursor;
-
-               elsif for_Operation in "<" | ">" | "<=" | ">=" | "==" | "!="
-               then   -- A comparison is 1 where it holds, and 0 where it does not.
-                  declare
-                     Left  : constant gmp.discrete.Integer := Element (Previous (Cursor)).Value;
-                     Right : constant gmp.discrete.Integer := Element (Next     (Cursor)).Value;
-                     Holds : constant Boolean              := (if    for_Operation = "<"  then Left < Right
-                                                               elsif for_Operation = ">"  then Right < Left
-                                                               elsif for_Operation = "<=" then not (Right < Left)
-                                                               elsif for_Operation = ">=" then not (Left < Right)
-                                                               elsif for_Operation = "==" then Left = Right
-                                                               else                            not (Left = Right));
-                  begin
-                     replace_Element (the_Vector, Cursor, (Kind           => Value,
-                                                           Value          => to_Integer (if Holds then 1 else 0),
-                                                           type_Qualifier => null_unbounded_String));
-                  end;
-
-                  cull_value_Elements_and_restart_Cursor;
-
-               elsif for_Operation = "<<"
-               then
-                  replace_Element (the_Vector, Cursor, (Kind           => Value,
-                                                        Value          => Element (Previous (Cursor)).Value  *  to_Integer (2) ** Value (Element (Next (Cursor)).Value),
-                                                        type_Qualifier => Element (Previous (Cursor)).type_Qualifier));
-                  cull_value_Elements_and_restart_Cursor;
-
-               elsif for_Operation = ">>"
-               then
-                  --  A right shift rounds down, where '/' rounds towards zero ('-9 >> 1' is -5).
-                  --
-                  replace_Element (the_Vector, Cursor, (Kind           => Value,
-                                                        Value          => div (Element (Previous (Cursor)).Value,
-                                                                               to_Integer (2) ** Value (Element (Next (Cursor)).Value),
-                                                                               Round => Down),
-                                                        type_Qualifier => Element (Previous (Cursor)).type_Qualifier));
-
-                  cull_value_Elements_and_restart_Cursor;
-
-               else
-                  next (Cursor);
-               end if;
+               the_Vector.replace_Element (Index, (Kind           => Value,
+                                                   Value          => (if    the_Code = "-" then -the_Value.Value
+                                                                      elsif the_Code = "~" then not the_Value.Value
+                                                                      elsif the_Code = "!" then (if the_Value.Value = to_Integer (0) then to_Integer (1)
+                                                                                                                                     else to_Integer (0))
+                                                                      else                      the_Value.Value),
+                                                   type_Qualifier => the_Value.type_Qualifier));
+               the_Vector.delete (Index + 1);
             end;
-
-         else
-            next (Cursor);
          end if;
 
+         Index := Index - 1;
+      end loop;
+   end reduce_Unaries;
+
+
+
+   function Applied (the_Code : in String;   Left, Right : in an_Element) return an_Element
+   --
+   --  The value of an operator of two operands.
+   --
+   is
+      function as_Truth (the_Truth : in Boolean) return discrete.Integer
+      is (if the_Truth then to_Integer (1) else to_Integer (0));
+
+      L    : discrete.Integer renames Left .Value;
+      R    : discrete.Integer renames Right.Value;
+      Zero : constant discrete.Integer := to_Integer (0);
+   begin
+      if    the_Code = "*"  then return (Value, L * R,                   Right.type_Qualifier);     -- tbd: determine and use correct C type promotion.
+      elsif the_Code = "/"  then return (Value, L / R,                   Right.type_Qualifier);
+      elsif the_Code = "%"  then return (Value, L - (L / R) * R,         Right.type_Qualifier);     -- The remainder of a division which rounds towards zero, as '/' does.
+      elsif the_Code = "+"  then return (Value, L + R,                   Right.type_Qualifier);
+      elsif the_Code = "-"  then return (Value, L - R,                   Right.type_Qualifier);
+      elsif the_Code = "<<" then return (Value, L * to_Integer (2) ** discrete.Value (R),   Left.type_Qualifier);
+      elsif the_Code = ">>" then return (Value, div (L,                  to_Integer (2) ** discrete.Value (R),     -- A right shift rounds down, where '/' rounds
+                                                     Round => Down),     Left.type_Qualifier);                     -- towards zero ('-9 >> 1' is -5).
+      elsif the_Code = "<"  then return (Value, as_Truth (L < R),        null_unbounded_String);     -- A comparison is 1 where it holds, and 0 where it does not.
+      elsif the_Code = ">"  then return (Value, as_Truth (R < L),        null_unbounded_String);
+      elsif the_Code = "<=" then return (Value, as_Truth (not (R < L)),  null_unbounded_String);
+      elsif the_Code = ">=" then return (Value, as_Truth (not (L < R)),  null_unbounded_String);
+      elsif the_Code = "==" then return (Value, as_Truth (L = R),        null_unbounded_String);
+      elsif the_Code = "!=" then return (Value, as_Truth (not (L = R)),  null_unbounded_String);
+      elsif the_Code = "&"  then return (Value, L and R,                 Right.type_Qualifier);
+      elsif the_Code = "^"  then return (Value, L xor R,                 Left .type_Qualifier);
+      elsif the_Code = "|"  then return (Value, L or  R,                 Right.type_Qualifier);
+      elsif the_Code = "&&" then return (Value, as_Truth (L /= Zero and R /= Zero),   Right.type_Qualifier);
+      elsif the_Code = "||" then return (Value, as_Truth (L /= Zero or  R /= Zero),   Right.type_Qualifier);
+      else
+         raise Constraint_Error with "'" & the_Code & "' is not an operator which is worked out.";
+      end if;
+   end Applied;
+
+
+
+   type Level is array (Positive range <>) of unbounded_String;     -- The operators of one level of precedence.
+
+   procedure reduce (the_Vector : in out element_Vectors.Vector;   the_Level : in Level)
+   --
+   --  Applies the operators of one level of precedence, from the left.
+   --
+   is
+      Index : Positive := the_Vector.first_Index;
+   begin
+      while Index <= the_Vector.last_Index
+      loop
+         if         the_Vector (Index).Kind = Operator
+           and then (for some Each of the_Level => the_Vector (Index).Code = Each)
+           and then Index > the_Vector.first_Index
+           and then Index < the_Vector.last_Index
+           and then the_Vector (Index - 1).Kind = Value
+           and then the_Vector (Index + 1).Kind = Value
+         then
+            the_Vector.replace_Element (Index - 1, Applied (to_String (the_Vector (Index).Code),
+                                                            Left  => the_Vector (Index - 1),
+                                                            Right => the_Vector (Index + 1)));
+            the_Vector.delete (Index, Count => 2);     -- The operator and its right operand: the next operator is now at 'Index'.
+         else
+            Index := Index + 1;
+         end if;
       end loop;
    end reduce;
-
-
 
 
 
@@ -374,32 +266,18 @@ is
    is
       Pad : element_Vectors.Vector renames the_Vector.all;
    begin
-      reduce_unary (Pad, for_operation => "!");    -- nb: These must be done in C's order of precedence (todo: check the order here is correct!)
-      reduce_unary (Pad, for_operation => "+");    -- nb: These must be done in C's order of precedence (todo: check the order here is correct!)
-      reduce_unary (Pad, for_operation => "-");
-      reduce_unary (Pad, for_operation => "~");
+      reduce_Unaries (Pad);
 
-      reduce       (Pad, for_operation => "<<");
-      reduce       (Pad, for_operation => ">>");
-
-      reduce       (Pad, for_operation => "|");
-      reduce       (Pad, for_operation => "&");
-      reduce       (Pad, for_operation => "&&");
-      reduce       (Pad, for_operation => "||");
-      reduce       (Pad, for_operation => "^");
-
-      reduce       (Pad, for_operation => "*");
-      reduce       (Pad, for_operation => "/");
-      reduce       (Pad, for_operation => "%");
-      reduce       (Pad, for_operation => "+");
-      reduce       (Pad, for_operation => "-");
-
-      reduce       (Pad, for_operation => "<");     -- The comparisons bind less tightly than the arithmetic.
-      reduce       (Pad, for_operation => ">");
-      reduce       (Pad, for_operation => "<=");
-      reduce       (Pad, for_operation => ">=");
-      reduce       (Pad, for_operation => "==");
-      reduce       (Pad, for_operation => "!=");
+      reduce (Pad, [+"*",  +"/",  +"%"]);     -- In C's order of precedence.
+      reduce (Pad, [+"+",  +"-"]);
+      reduce (Pad, [+"<<", +">>"]);
+      reduce (Pad, [+"<",  +"<=", +">", +">="]);
+      reduce (Pad, [+"==", +"!="]);
+      reduce (Pad, [1 => +"&"]);
+      reduce (Pad, [1 => +"^"]);
+      reduce (Pad, [1 => +"|"]);
+      reduce (Pad, [1 => +"&&"]);
+      reduce (Pad, [1 => +"||"]);
 
       if Length (Pad) = 1
       then
