@@ -104,10 +104,6 @@ cannot be overridden again in Ada.
 derived from directly in Ada.
 <li>A declaration which uses a type that SWIG has not been shown is left out of the
 binding, with a warning.
-<li>A class which is nested in another is bound only where the interface file asks for it
-with <tt>%feature ("flatnested");</tt>, and is then a package of its own beside that of the
-outer class. Without it SWIG ignores the nested class, and whatever uses it is left out
-with a warning; an outer class which has a member of its type is left out altogether.
 <li>A pointer to a class member is not supported: a typedef of one, and whatever takes or
 returns one, is left out with a warning.
 <li>A <tt>using</tt> declaration in a class (<tt>using Base::f;</tt>) is not followed: the
@@ -565,6 +561,13 @@ that value, as C++ need give it no symbol.
 </p>
 
 <p>
+A class which is nested in another is a class of the module, with a package of its own
+beside that of the class which holds it: <tt>Engine::Gauge</tt> is <tt>shapes.Gauge</tt>.
+Where two classes each have a nested class of one name, the later one is named after its
+class as well (<tt>shapes.Pump_Gauge</tt>).
+</p>
+
+<p>
 A friend function which is defined in a class is a function of
 <tt>shapes.Binding</tt>, like any function which is no member.
 A typedef which a class declares, of a number or an enumeration, is a subtype in the
@@ -789,6 +792,8 @@ Overloaded functions keep their one name in Ada, which overloads too.
 Of two functions which Ada cannot tell apart (which differ only in a <tt>const</tt>, say),
 SWIG warns as it does for other languages, and the later one is left out.
 Default arguments give one function for each number of arguments.
+Of a virtual function with a default argument, the function of all its arguments is the
+one which dispatches and may be overridden; the others call it.
 An operator is a function with a name: <tt>operator-&gt;</tt> is <tt>dereference</tt>,
 <tt>operator()</tt> is <tt>Functor</tt>, and where the interface file renames the others as
 upstream's examples do, <tt>operator+</tt> is <tt>Plus</tt> and <tt>operator==</tt> is
