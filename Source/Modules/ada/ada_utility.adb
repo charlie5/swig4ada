@@ -149,6 +149,28 @@ is
       Result      : discrete.Integer := to_Integer;
       is_Negative :          Boolean := False;
       hex_Index   : constant Natural := Index (Self, "0x");
+
+      function Base return Positive
+      --
+      --  A number of C which begins with a zero, and has more digits, is octal ('0755').
+      --
+      is
+      begin
+         for Each in Self'Range
+         loop
+            if Self (Each) in '0' .. '9'
+            then
+               return (if          Self (Each) = '0'
+                          and then Each < Self'Last
+                          and then Self (Each + 1) in '0' .. '9' then 8
+                                                                 else 10);
+            end if;
+         end loop;
+
+         return 10;
+      end Base;
+
+      the_Base : constant Positive := Base;
    begin
       if hex_Index = 0
       then
@@ -160,7 +182,14 @@ is
                when ' '        => null;                   -- Ignore spaces.
                when '('        => null;
                when ')'        => exit;
-               when '0' .. '9' => Result := Result * to_Integer (10)  +  to_Integer (Long_Long_Integer'Value (Self (Each .. Each)));
+               when '0' .. '9' =>
+                  if         the_Base = 8
+                    and then Self (Each) in '8' | '9'
+                  then
+                     raise Constraint_Error with "'" & Self (Each) & "' is no octal digit, in '" & Self & "'.";
+                  end if;
+
+                  Result := Result * to_Integer (Long_Long_Integer (the_Base))  +  to_Integer (Long_Long_Integer'Value (Self (Each .. Each)));
                when others     => dlog ("bad numeric character: '" & Self (Each) & "'   '" & Self & "'");
                   raise Constraint_Error with "Bad numeric character '" & Self (Each) & "' in '" & Self & "'.";
             end case;
