@@ -18,14 +18,14 @@ namespace std {
         size_t       impl_M_string_length;
         wchar_t      impl_M_local_buf[4];
 
-        typedef size_t size_type;
-
         wstring();
         wstring(const wchar_t* s);
         wstring(const wstring& other);
+        ~wstring();
 
-        size_type size() const;
-        size_type length() const;
+        // The types are named themselves, as a typedef nested in the class is not resolved.
+        size_t size() const;
+        size_t length() const;
         bool empty() const;
         void clear();
         const wchar_t* c_str() const;

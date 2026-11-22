@@ -16,8 +16,9 @@ namespace std {
         T            impl_M_real;
         T            impl_M_imag;
 
+        // Neither a copy constructor nor a destructor is declared: a complex number is trivial, and C++
+        // passes and returns it as it does a plain structure.
         complex(T re = T(), T im = T());
-        complex(const complex& other);
 
         T real() const;
         T imag() const;
