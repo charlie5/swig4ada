@@ -2162,7 +2162,7 @@ is
 
                elsif the_Variable.my_Type.qualified_Name = "swig.bool"
                then
-                  if the_Variable.Value = "false"
+                  if to_String (the_Variable.Value) in "false" | "0"
                   then
                      append (spec_Source,  " := 0");
                   else

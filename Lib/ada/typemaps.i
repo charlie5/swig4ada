@@ -66,7 +66,7 @@ In Ada you could then use it like this:
   %typemap (adatype)       TYPE  *INPUT,     TYPE  &INPUT               "ADATYPE"
   %typemap (adain)         TYPE  *INPUT,     TYPE  &INPUT               "$adainput"
 
-  %typemap (in)            TYPE  *INPUT,     TYPE  &INPUT               %{ $1 = ($1_ltype) &$input; %}
+  %typemap (in, byvalue="1")   TYPE  *INPUT,     TYPE  &INPUT           %{ $1 = ($1_ltype) &$input; %}     // The Ada parameter is the value itself.
 
   %typemap (typecheck)     TYPE  *INPUT = TYPE;
   %typemap (typecheck)     TYPE  &INPUT = TYPE;

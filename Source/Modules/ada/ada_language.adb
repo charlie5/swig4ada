@@ -147,6 +147,7 @@ is
    function  returns_a_cpp_constructed_Type (Self : access Item;   the_Node : in doh_Node) return Boolean;
    function  cpp_Symbol (qualified_Name : in String;   Suffix : in String) return String
      renames cpp_Mangling.Symbol;
+   function  variable_Suffix (swig_Type : in String) return String;
    procedure bind_constructors_of_abstract_Class (Self : access Item;   the_Class : in Node_Pointer);
    procedure bind_other_base_Classes             (Self : access Item;   the_Class : in Node_Pointer);
    procedure add_hidden_Members                  (Self : access Item;   Before    : in Node_Pointer;   of_Class : in Node_Pointer := null);
@@ -517,8 +518,10 @@ is
       is_Pointer    : constant Boolean :=  SwigType_isPointer (the_swig_Type) /= 0;
 
       full_Name     : constant String  :=  Attribute (the_Node, "name");                           -- With its namespaces.
-      is_Constant   : constant Boolean :=  SwigType_isConst (the_swig_Type) /= 0;
+      is_Constant   : constant Boolean :=          SwigType_isConst (the_swig_Type) /= 0
+                                           or else ada.Strings.fixed.Index (Attribute (the_Node, "storage"), "constexpr") /= 0;
       value_Text    : constant String  :=  Attribute (the_Node, "value");
+      type_Text     : constant String  := +DOH_Pointer (the_swig_Type);
    begin
       indent_Log;
       dlog (+"");
@@ -595,7 +598,12 @@ is
             if         new_Variable.Value = ""
               and then ada.Strings.fixed.Index (full_Name, "::") /= 0
             then
-               new_Variable.link_Symbol := +cpp_Symbol (full_Name, Suffix => "E");
+               new_Variable.link_Symbol := +cpp_Symbol (full_Name, Suffix => variable_Suffix (type_Text));
+
+            elsif      new_Variable.Value = ""
+              and then variable_Suffix (type_Text) /= "E"
+            then   -- A variable in no namespace is not mangled, but for the tag of a string.
+               new_Variable.link_Symbol := +("_Z" & ada.Strings.fixed.Trim (Natural'Image (full_Name'Length), ada.Strings.Left) & full_Name & "B5cxx11");
             end if;
          end if;
 
@@ -1112,15 +1120,29 @@ is
          return SWIG_OK;
       end if;
 
+      --  One which the interface file adds with '%extend' is not a variable: it is a pair of functions, and has no symbol.
+      --
+      if Attribute (the_Node, "feature:extend") /= ""
+      then
+         warn (not_Bound, "Unable to bind the static member variable '" & variable_Name & "', which is added by '%extend' and is no variable of C++.");
+         unindent_Log;
+         return SWIG_OK;
+      end if;
+
       declare
          use swigg.Utility;
          use type C.int;
 
          the_swig_Type :          SwigType_Pointer := SwigType_Pointer (doh_Copy (DOH_Pointer (the_swigType)));
-         is_Constant   : constant Boolean          := SwigType_isConst (the_swig_Type) /= 0;
+         is_Constant   : constant Boolean          :=         SwigType_isConst (the_swig_Type) /= 0
+                                                      or else ada.Strings.fixed.Index (Attribute (the_Node, "storage"), "constexpr") /= 0;
          value_Text    : constant String           := Attribute (the_Node, "value");
          class_Name    : constant String           := +DOH_Pointer (get_Attribute (Self.getCurrentClass, "name"));
-         the_Symbol    : constant String           := cpp_Symbol (class_Name & "::" & to_String (variable_Name), Suffix => "E");
+
+         --  The symbol is made from the name which C++ knows the variable by, which a '%rename' does not change.
+         --
+         the_Symbol    : constant String           := cpp_Symbol (class_Name & "::" & Attribute (the_Node, "name"),
+                                                                  Suffix => variable_Suffix (+DOH_Pointer (the_swigType)));
 
          new_Variable  : constant c_Variable.view  := c_Variable.new_c_Variable (Name    => variable_Name,
                                                                                  of_Type => null);
@@ -1146,11 +1168,20 @@ is
            and then new_Variable.array_Bounds.is_Empty
          then
             begin
-               if new_Variable.my_Type.is_a_standard_Integer
+               if        new_Variable.my_Type.is_a_standard_Integer
+                 or else to_String (new_Variable.my_Type.Name) = "bool"
                then
                   new_Variable.Value := +Image (resolved_c_integer_Expression (Self, +value_Text,
                                                                                      Self.integer_symbol_value_Map,
                                                                                      Self.current_class_namespace_Prefix));
+
+               elsif to_String (new_Variable.my_Type.Name) = "char"
+               then   -- A character is given by its position.
+                  new_Variable.Value := +(  "interfaces.c.char'Val ("
+                                          & Image (resolved_c_integer_Expression (Self, +value_Text,
+                                                                                        Self.integer_symbol_value_Map,
+                                                                                        Self.current_class_namespace_Prefix))
+                                          & ")");
 
                elsif new_Variable.my_Type.is_a_standard_Real
                then
@@ -1510,6 +1541,25 @@ is
 
    procedure bind_constructors_of_abstract_Class (Self : access Item;   the_Class : in Node_Pointer)
    is separate;
+
+
+
+   function variable_Suffix (swig_Type : in String) return String
+   --
+   --  The end of the C++ symbol of a variable of the given type. GNU libstdc++ marks its strings with an 'ABI tag',
+   --  which the symbol of a variable whose type has a string in it then bears ('_ZN9Structure4nameB5cxx11E').
+   --
+   is
+   begin
+      if        ada.Strings.fixed.Index (swig_Type, "std::string")       /= 0
+        or else ada.Strings.fixed.Index (swig_Type, "std::wstring")      /= 0
+        or else ada.Strings.fixed.Index (swig_Type, "std::basic_string") /= 0
+      then
+         return "B5cxx11E";
+      else
+         return "E";
+      end if;
+   end variable_Suffix;
 
 
 
@@ -2143,6 +2193,23 @@ is
                      param_swigType : SwigType_Pointer :=SwigType_Pointer (doh_Copy (doh_Item (get_Attribute (the_parameter, "type"))));
                   begin
                      strip_all_qualifiers (doh_Item (param_swigType));
+
+                     --  A pointer or reference whose typemap takes the value itself ('double *INPUT' of 'typemaps.i', which
+                     --  says so by the attribute 'byvalue') is a parameter of the type which is pointed to.
+                     --
+                     if Attribute (the_Parameter, "tmap:in:byvalue") /= ""
+                     then
+                        if SwigType_isreference (param_swigType) /= 0
+                        then
+                           param_swigType := SwigType_del_reference (param_swigType);
+
+                        elsif SwigType_ispointer (param_swigType) /= 0
+                        then
+                           param_swigType := SwigType_del_pointer (param_swigType);
+                        end if;
+
+                        strip_all_qualifiers (doh_Item (param_swigType));
+                     end if;
 
                      if not (String'(+doh_Item (param_swigType)) = "")     -- Guard against an empty parameter list.
                      then
