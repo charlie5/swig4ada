@@ -1362,13 +1362,17 @@ is
             return False;
          end if;
 
-         --  Likewise where the class of the other package is derived from, or has a member of, the class of this one
-         --  ('class Derived : public Base', where 'Base' has a function which returns a pointer to 'Derived').
+         --  Likewise where the class of the other package is derived from the class of this one ('class Derived :
+         --  public Base', where 'Base' has a function which returns a pointer to 'Derived'). Only a base class
+         --  which is declared here is looked for: a wider test takes for a cycle what is none.
          --
-         if the_other_Package.cpp_class_Type.depends_on (the_Package, Depth => 0)
-         then
-            return True;
-         end if;
+         for each_Base of the_other_Package.cpp_class_Type.base_Classes
+         loop
+            if ada_Package.view (each_Base.declaration_Package) = ada_Package.view (the_Package)
+            then
+               return True;
+            end if;
+         end loop;
 
          for each_Subprogram of the_other_Package.Subprograms
          loop
