@@ -2058,6 +2058,20 @@ is
             end if;
          end;
 
+         --  A name which the module has not been given may be a typedef which the core can follow: one which a
+         --  'using' declaration brings into another namespace ('using Foo::Integer;'), or one of a class template.
+         --  The type is then the one which the name stands for.
+         --
+         declare
+            Resolved : constant String := +doh_Item (SwigType_typedef_resolve_all (SwigType_Pointer (swig_Type)));
+         begin
+            if         Resolved /= String'(+swig_Type)
+              and then Self.swig_type_Map_of_c_type.contains (+Resolved)
+            then
+               return Self.swig_type_Map_of_c_type.Element (+Resolved);
+            end if;
+         end;
+
          if the_Type = null
          then   -- C type has not yet been declared, so create it as an 'unknown' C type.
             the_Type := c_type.new_unknown_Type;        -- 'Unknown' type is a mutable variant record, so it can be morphed.
