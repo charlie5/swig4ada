@@ -55,6 +55,12 @@ is
 
    -- Debug log.
    --
+   --  A record of what the module does, written to 'swig4ada-debug.log' in the current folder. It is written
+   --  only where it is asked for: by the option '-debug-log', or by the environment variable 'SWIG4ADA_DEBUG'
+   --  (of any value), which also catches what is done before the options are read.
+   --
+   procedure open_debug_Log;
+
    procedure   indent_Log;
    procedure unindent_Log;
 

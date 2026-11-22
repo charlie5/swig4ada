@@ -1,6 +1,7 @@
 with
      ada.Text_IO,
      ada.Strings.fixed,
+     ada.Environment_Variables,
      ada.Finalization;
 
 package body Logger
@@ -152,6 +153,16 @@ is
    log_Depth : Natural  := 0;
 
 
+   procedure open_debug_Log
+   is
+   begin
+      if not is_Open (debug_Log)
+      then
+         create (debug_Log, out_File, "swig4ada-debug.log");
+      end if;
+   end open_debug_Log;
+
+
    procedure indent_Log
    is
    begin
@@ -178,7 +189,11 @@ is
    is
       Indent : constant String (1 .. 3 * log_Depth) := [others => ' '];
    begin
-      put_Line (debug_Log, Indent & Message);
+      if is_Open (debug_Log)
+      then
+         put_Line (debug_Log, Indent & Message);
+      end if;
+
       return True;
    end dlog;
 
@@ -208,12 +223,18 @@ is
    procedure Finalize (Object : in out Closure)
    is
    begin
-      close (debug_Log);
+      if is_Open (debug_Log)
+      then
+         close (debug_Log);
+      end if;
    end Finalize;
 
    Closer : Closure with unreferenced;
 
 
 begin
-   create (debug_Log, out_File, "swig4ada-debug.log");
+   if ada.Environment_Variables.exists ("SWIG4ADA_DEBUG")
+   then
+      open_debug_Log;
+   end if;
 end Logger;
