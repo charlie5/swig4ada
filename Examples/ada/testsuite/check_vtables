@@ -11,10 +11,14 @@
 #  The layout of each vtable is taken from the compiler ('g++ -fdump-lang-class', run on each wrapper), and
 #  the primitives from the generated specs.
 #
-#  Usage:  ./check_vtables [<generated folder>]        ('generated').
+#  Usage:  ./check_vtables [<folder> [<option of the compiler> ...]]        ('generated').
 #
 #  Writes what it finds to 'unit-build/vtables/report.txt'. The classes which differ must be the lines of the
 #  file 'expected-vtable-differences'; exits with a failure status if they are not.
+#
+#  A folder other than 'generated' is that of another binding (one of the tool's own, say), whose wrapper is
+#  compiled with the options which are given. Its report is 'unit-build/vtables-<folder>/report.txt', and
+#  it is expected to have no differences.
 #
 
 import os, re, subprocess, sys
@@ -22,7 +26,9 @@ from concurrent.futures import ThreadPoolExecutor
 
 Here      = os.path.dirname(os.path.abspath(__file__))
 Generated = os.path.abspath(sys.argv[1]) if len(sys.argv) > 1 else os.path.join(Here, "generated")
-Build     = os.path.join(Here, "unit-build", "vtables")
+Options   = sys.argv[2:]
+is_Suite  = len(sys.argv) <= 1
+Build     = os.path.join(Here, "unit-build", "vtables" if is_Suite else "vtables-" + os.path.basename(Generated))
 Suite     = os.path.join(Here, "..", "..", "test-suite")
 
 os.makedirs(Build, exist_ok=True)
@@ -32,8 +38,8 @@ def dump(Wrapper):
     """Has the compiler write the classes of a wrapper, and their vtables, to a file."""
     Case   = os.path.basename(Wrapper)[:-len("_wrap.cxx")]
     Result = os.path.join(Build, Case + ".class")
-    subprocess.run(["g++", "-fsyntax-only", "-fno-access-control", "-w", "-I" + Suite, "-I" + Generated,
-                    "-fdump-lang-class=" + Result, Wrapper],
+    subprocess.run(["g++", "-fsyntax-only", "-fno-access-control", "-w", "-I" + Suite, "-I" + Generated] + Options
+                   + ["-fdump-lang-class=" + Result, Wrapper],
                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     return Case, Result
 
@@ -220,7 +226,7 @@ for Wrapper in Wrappers:
 open(os.path.join(Build, "report.txt"), "w").write("\n".join(Report) + ("\n" if Report else ""))
 
 Expected_file = os.path.join(Here, "expected-vtable-differences")
-Expected      = open(Expected_file).read().split() if os.path.exists(Expected_file) else []
+Expected      = open(Expected_file).read().split() if is_Suite and os.path.exists(Expected_file) else []
 
 print(f"Classes with virtual functions which are checked: {Checked}, of which differ: {len(Differences)}.")
 
@@ -233,5 +239,5 @@ if New or Gone:
         print("\n".join("   " + Line for Line in Report[Differences.index(Each)].split("\n")[1:]))
     for Each in Gone:
         print(f"   no longer differs: {Each}")
-    print("(see 'unit-build/vtables/report.txt')")
+    print(f"(see '{os.path.relpath(os.path.join(Build, 'report.txt'), Here)}')")
     sys.exit(1)

@@ -1710,6 +1710,15 @@ begin
       check_the_layout_Assertions;
       check_the_Bootstrap;
 
+      --  The tool is itself a class of Ada which is derived from one of C++ ('Language'), by a binding which it made.
+      --  The order of the virtual functions of that binding is checked as that of any other is (see './check_vtables'):
+      --  where it is wrong the core calls another function of the module than the one which it means to.
+      --
+      run_Step ("that the tool's own binding has its virtual functions in the order of C++",
+                  "./check_vtables ../../../Source/Modules/ada/swig_binding/swigmod"
+                & " -I../../../Source/Include -I../../../Source/Swig  -I../../../Source/Modules"
+                & " -I../../../Source/Preprocessor -I../../../Source/DOH -I../../../Source/CParse");
+
       if do_C and do_Cxx     -- The symbols are those of the wrappers of the cases.
       then
          check_the_imported_Symbols;
