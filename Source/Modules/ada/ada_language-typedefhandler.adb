@@ -7,6 +7,32 @@ function typedefHandler (Self : access Item;
 is
    the_Node          :          doh_Node renames N;
    the_doh_type_Name : constant doh_String    := doh_String (get_Attribute (the_Node, "name"));
+
+   --  A typedef of a class is known by its name within the class ('Bar::FooType'), so one of the same name
+   --  which is declared outside ('typedef char * FooType;') does not stand in its way.
+   --
+   known_Name : constant unbounded_String := (if Self.c_class_Stack.is_Empty then +the_doh_type_Name
+                                                                             else Self.current_c_Class.Name & "::" & String'(+the_doh_type_Name));
+
+   function hides_another_Type return Boolean
+   --
+   --  True for a typedef of a class which is not to be made although its name within its class is free: its name is
+   --  that of a type which is known already, and either that is a typedef of another class (the instances of a template
+   --  each have the typedefs of the template, of which the first is made) or this one is of a class or a pointer, which
+   --  could not be told from the other later. One of a number or an enumeration, with the name of a type declared
+   --  outside any class, is made: it is a subtype in the package of its class.
+   --
+   is
+      use type c_Type.a_c_type_Kind;
+      the_Base : constant unbounded_String := +Attribute (the_Node, "type");
+   begin
+      return          not Self.c_class_Stack.is_Empty
+             and then Self.swig_type_Map_of_c_type.contains (+the_doh_type_Name)
+             and then (        Self.class_typedef_Names.contains (String'(+the_doh_type_Name))
+                       or else not (         Self.swig_type_Map_of_c_type.contains (the_Base)
+                                    and then Self.swig_type_Map_of_c_type.Element (the_Base).c_type_Kind in c_Type.standard_c_Type | c_Type.Enum));
+   end hides_another_Type;
+
 begin
    indent_Log;
    dlog (+"");
@@ -16,12 +42,22 @@ begin
    locate (doh_Node (the_Node));
 
    if        (         Self.prior_c_Declaration     /= null
-              and then Self.prior_c_Declaration.Name = String'(+the_doh_type_Name))
+              and then Self.prior_c_Declaration.Name = String'(+the_doh_type_Name)
+              and then not (         not Self.c_class_Stack.is_Empty                                     -- The declaration before is one of
+                            and then Self.swig_type_Map_of_c_type.contains (+the_doh_type_Name)          -- that name outside the class, and
+                            and then not Self.swig_type_Map_of_c_type.contains (known_Name)))            -- not this one made already.
 
-     or else Self.swig_type_Map_of_c_type.contains (+the_doh_type_Name)
+     or else Self.swig_type_Map_of_c_type.contains (known_Name)
+     or else hides_another_Type
    then
       dlog (+"Skipping typedef.");
    else
+      if         not Self.c_class_Stack.is_Empty
+        and then not Self.class_typedef_Names.contains (String'(+the_doh_type_Name))
+      then
+         Self.class_typedef_Names.append (String'(+the_doh_type_Name));
+      end if;
+
       declare
          Name             : constant unbounded_String := +Attribute (the_Node, "name");
          the_type_Name    : constant unbounded_String :=  Name;

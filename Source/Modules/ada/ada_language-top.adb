@@ -114,7 +114,7 @@ begin
    --
    if Self.uses_std_Strings
    then
-      Swig_fragment_emit (swig_Core.Pointers.String_Pointer (to_Doh ("SwigAdaStdString")));
+      Swig_fragment_emit (to_Doh ("SwigAdaStdString"));
    end if;
 
    declare

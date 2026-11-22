@@ -45,6 +45,7 @@ is
                                    Package_swig          => <>,
                                    Package_swig_pointers => <>,
                                    Package_swig_std_strings => <>,
+                                   class_typedef_Names      => <>,
                                    template_full_Forms      => <>,
                                    template_plain_Forms     => <>,
 

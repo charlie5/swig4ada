@@ -91,6 +91,13 @@ begin
          begin
             if c_return_Type /= ""
             then
+               if result_by_Parameter
+               then   -- The object of the caller is replaced, so a result which is constant ('const Foo f ();') is taken as one which is not.
+                  replace_All (c_return_Type,
+                               "$c_classname",
+                               +doh_Item (SwigType_str (SwigType_Pointer (to_Doh (without_leading_Qualifiers (+swig_Type))), null)));
+               end if;
+
                replace_All (c_return_Type, "$c_classname", +doh_Item (SwigType_str (SwigType_Pointer (swig_Type), null)));     -- As C++ source, not as swig holds it.
             else
                dlog (+"No ctype typemap defined for " & String'(+swig_Type));

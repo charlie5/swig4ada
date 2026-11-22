@@ -46,6 +46,7 @@ begin
      and then     Self.c_class_Stack.last_Element.Name /= "std"
      and then not Self.static_Flag
      and then not is_Constructor
+     and then ada.Strings.fixed.Index (Attribute (the_Node, "storage"), "friend") = 0     -- A friend which is defined in a class is no member of it.
    then -- Add the class 'Self' controlling parameter.
       declare
          self_Parameter : constant c_Parameter.view := new_c_Parameter (the_name => to_unbounded_String ("Self"),

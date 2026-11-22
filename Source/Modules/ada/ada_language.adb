@@ -149,6 +149,7 @@ is
      renames cpp_Mangling.Symbol;
    function  variable_Suffix (swig_Type : in String) return String;
    function  character_Value (Position  : in String) return String;
+   function  without_leading_Qualifiers (swig_Type : in String) return String;
    procedure bind_constructors_of_abstract_Class (Self : access Item;   the_Class : in Node_Pointer);
    procedure bind_other_base_Classes             (Self : access Item;   the_Class : in Node_Pointer);
    procedure add_hidden_Members                  (Self : access Item;   Before    : in Node_Pointer;   of_Class : in Node_Pointer := null);
@@ -1657,6 +1658,28 @@ is
 
 
 
+   function without_leading_Qualifiers (swig_Type : in String) return String
+   --
+   --  The swig type less the qualifiers which it begins with ('q(const).Foo' is 'Foo'), and no others.
+   --
+   is
+      First : Positive := swig_Type'First;
+   begin
+      while First + 1 <= swig_Type'Last and then swig_Type (First .. First + 1) = "q("
+      loop
+         declare
+            Close : constant Natural := ada.Strings.fixed.Index (swig_Type, ").", From => First);
+         begin
+            exit when Close = 0;
+            First := Close + 2;
+         end;
+      end loop;
+
+      return swig_Type (First .. swig_Type'Last);
+   end without_leading_Qualifiers;
+
+
+
    function character_Value (Position : in String) return String
    --
    --  A constant of type 'char' as Ada states it, given the number which C gives it. A negative
@@ -1686,21 +1709,23 @@ is
       end if;
 
       declare
-         Pad : doh_swigType := doh_Item (the_swig_Type);
+         --  The type less the qualifiers of the result itself, which make no difference ('const Foo f ();'). Those within
+         --  it are part of the type ('vector<shared_ptr<const Foo>>' is another type than one of 'Foo'). Until
+         --  2026-11-22 the type was looked up with its qualifiers, and a constant result was missed.
+         --
+         Pad : constant doh_swigType := doh_swigType (to_Doh (without_leading_Qualifiers (+doh_Item (the_swig_Type))));
       begin
-         strip_all_Qualifiers (Pad);
+         if        SwigType_isPointer          (SwigType_Pointer (Pad)) /= 0
+           or else SwigType_isReference        (SwigType_Pointer (Pad)) /= 0
+           or else SwigType_isrvalue_reference (SwigType_Pointer (Pad)) /= 0
+           or else SwigType_isArray            (SwigType_Pointer (Pad)) /= 0
+           or else not Self.swig_type_Map_of_c_type.contains (+Pad)
+         then
+            return False;
+         end if;
+
+         return Self.swig_type_Map_of_c_type.Element (+Pad).is_constructed_by_Cpp;
       end;
-
-      if        SwigType_isPointer   (the_swig_Type) /= 0
-        or else SwigType_isReference        (the_swig_Type) /= 0
-        or else SwigType_isrvalue_reference (the_swig_Type) /= 0
-        or else SwigType_isArray     (the_swig_Type) /= 0
-        or else not Self.swig_type_Map_of_c_type.contains (+doh_Item (the_swig_Type))
-      then
-         return False;
-      end if;
-
-      return Self.swig_type_Map_of_c_type.Element (+doh_Item (the_swig_Type)).is_constructed_by_Cpp;
    end returns_a_cpp_constructed_Type;
 
 
@@ -1974,6 +1999,21 @@ is
                   end if;
                end;
             end loop;
+         end;
+
+         --  A name which is written from the outermost scope ('::FooType') is that of the type with no such mark.
+         --
+         declare
+            the_Name : constant String  := +swig_Type;
+            Colons   : constant Natural := ada.Strings.fixed.Index (the_Name, "::");
+         begin
+            if         Colons /= 0
+              and then (        Colons = the_Name'First
+                        or else the_Name (Colons - 1) = '.')
+              and then Self.swig_type_Map_of_c_type.contains (+(the_Name (the_Name'First .. Colons - 1) & the_Name (Colons + 2 .. the_Name'Last)))
+            then
+               return Self.swig_type_Map_of_c_type.Element (+(the_Name (the_Name'First .. Colons - 1) & the_Name (Colons + 2 .. the_Name'Last)));
+            end if;
          end;
 
          --  A pointer or reference to, or an array of, a type which is not known yet (a class which is used ahead

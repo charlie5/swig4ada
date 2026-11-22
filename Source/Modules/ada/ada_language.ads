@@ -253,6 +253,7 @@ private
          --  ('std::set<(int)>') and that with the defaults given ('std::set<(int,std::less<(int)>)>'), which is how the core
          --  writes it as the type of a parameter. Each pair is held here, the form with the defaults first.
          --
+         class_typedef_Names  : String_Vectors.Vector;     -- The names of the typedefs which are declared in classes.
          template_full_Forms  : String_Vectors.Vector;
          template_plain_Forms : String_Vectors.Vector;
 
