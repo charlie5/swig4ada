@@ -1689,6 +1689,11 @@ begin
       run_Upstream ("operator_overload");         -- The operators of C++, as members and as friends.
       run_Upstream ("cpp_namespace");             -- Namespaces, and 'using' declarations and directives.
       run_Upstream ("voidtest");                  -- Functions which return nothing, and pointers to 'void'.
+      run_Upstream ("friends");                   -- Friend functions, of a class, of a template and of a class in a namespace.
+      run_Upstream ("li_std_pair");               -- A pair of the standard library, by value, pointer and reference.
+      run_Upstream ("member_pointer");            -- Pointers to member functions, which are left out with a warning.
+      run_Upstream ("namespace_class");           -- Classes and class templates in namespaces.
+      run_Upstream ("overload_simple");           -- Functions and constructors which are overloaded on the type of a parameter.
    end if;
 
 
