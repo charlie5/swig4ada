@@ -1,5 +1,3 @@
-allprotected.allprotectedbottom
-class_ignore.bar
 cpp11_ref_qualifiers.conversionoperators
 cpp11_ref_qualifiers.conversionoperators2
 director_basic.a
@@ -8,13 +6,6 @@ director_property.a
 director_property.a1
 extend.base
 extend.derived
-inherit_target_language.multiplederived2
-inherit_target_language.multiplederived3
-li_boost_shared_ptr.klass3rdderived
-li_boost_shared_ptr.klassderived
-multiple_inheritance.ignorederived1
-multiple_inheritance.ignorederived2
-multiple_inheritance.ignorederived3
 multiple_inheritance_overload.base
 multiple_inheritance_overload.derived
 multiple_inheritance_overload.morederived

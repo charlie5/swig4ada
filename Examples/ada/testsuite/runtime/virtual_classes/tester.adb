@@ -10,6 +10,7 @@ with
      virtual_classes.Tripler,
      virtual_classes.Guarded,
      virtual_classes.Opened,
+     virtual_classes.Shown,
 
      swig.Pointers,
 
@@ -182,6 +183,27 @@ begin
       drop_opened (as_Guarded);
       Opened.destruct_0 (an_Opened);
    end virtual_functions_which_are_not_bound;
+
+   a_class_whose_base_class_is_ignored :
+   declare
+      the_Shown : aliased Shown.Item := Shown.Item (Shown.construct);
+   begin
+      --  'Hidden' is ignored, and is bound for its shape alone: 'Shown' has its storage and its virtual functions.
+      --
+      check (the_Shown.mine = 7,                          "its own member is where C++ has it, after those of its base");
+
+      the_Shown.set_mine (8);
+      check (mine_of (the_Shown'unchecked_Access) = 8,    "and C++ reads what Ada sets there");
+      check (secret_of (the_Shown'unchecked_Access) = 41, "and C++ finds the member of the base in an object which Ada made");
+
+      check (the_Shown.first  = 1,                        "a virtual function of the ignored base is called");
+      check (the_Shown.second = 20,                       "one which the class overrides dispatches to its own");
+      check (the_Shown.third  = 30,                       "and one which it adds follows those of its base");
+      check (call_second (the_Shown'unchecked_Access) = 20,   "as C++ finds");
+      check (call_third  (the_Shown'unchecked_Access) = 30,   "of each");
+
+      Shown.destruct_0 (the_Shown);
+   end a_class_whose_base_class_is_ignored;
 
    finish;
 end Tester;

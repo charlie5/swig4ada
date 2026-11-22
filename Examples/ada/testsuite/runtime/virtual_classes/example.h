@@ -109,3 +109,30 @@ inline void     drop_opened  (Guarded* g)   { delete static_cast <Opened*> (g); 
 inline int      call_first   (Guarded* g)   { return g->first (); }
 inline int      call_third   (Guarded* g)   { return g->third (); }
 inline int      call_fourth  (Opened*  o)   { return o->fourth (); }
+
+/* A base class which the interface file ignores. A class which is derived from it has its members and its
+   virtual functions all the same. */
+
+class Hidden {
+public:
+  int    secret;
+  double weight;
+  Hidden () : secret (41), weight (2.5) {}
+  virtual ~Hidden () {}
+  virtual int first  ()   { return 1; }
+  virtual int second ()   { return 2; }
+  int plain ()            { return 99; }
+};
+
+class Shown : public Hidden {
+public:
+  int mine;
+  Shown () : mine (7) {}
+  virtual int second ()   { return 20; }
+  virtual int third  ()   { return 30; }
+};
+
+inline int call_second (Shown* s)   { return s->second (); }
+inline int call_third  (Shown* s)   { return s->third (); }
+inline int secret_of   (Shown* s)   { return s->secret; }
+inline int mine_of     (Shown* s)   { return s->mine; }

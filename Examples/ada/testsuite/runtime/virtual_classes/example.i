@@ -9,4 +9,6 @@ int Shape::count = 0;
 
 %ignore Guarded::hidden;     // A virtual function which is not bound keeps its place among the others.
 
+%ignore Hidden;              // A base class which is ignored is still there in the classes which are derived from it.
+
 %include "example.h"
