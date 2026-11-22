@@ -719,6 +719,13 @@ The functions of such a base are therefore called on the base:
 </p>
 
 <p>
+A base class which the interface file ignores (<tt>%ignore Base;</tt>) is still part of
+each class which is derived from it, so it is bound for its shape alone: its data members
+are storage (<tt>&lt;member&gt;_storage</tt>), its virtual functions are bound, as they
+may be overridden, and nothing else of it is.
+</p>
+
+<p>
 A base class may have a function which takes or returns a pointer to a class that is
 derived from it.
 The package of the base then has only a limited view of that of the derived class, and
