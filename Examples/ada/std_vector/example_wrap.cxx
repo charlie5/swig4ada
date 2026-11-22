@@ -468,11 +468,11 @@ DllExport void SWIGSTDCALL Ada_int_vector_reserve (
 
 
 
-DllExport unsigned int SWIGSTDCALL Ada_int_vector_isEmpty (
+DllExport unsigned char SWIGSTDCALL Ada_int_vector_isEmpty (
   void * a_arg1
   )
 {
-  unsigned int jresult ;
+  unsigned char jresult ;
   std::vector< int > *arg1 = 0 ;
   bool result;
   

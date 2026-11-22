@@ -75,7 +75,7 @@ In Ada you could then use it like this:
 
 
 
-INPUT_TYPEMAP (bool,               unsigned int,         swig.bool_Pointer)
+INPUT_TYPEMAP (bool,               unsigned char,        swig.bool_Pointer)
 //INPUT_TYPEMAP (char,               char,                 char)                          // tbd
 INPUT_TYPEMAP (signed char,        signed char,          swig.signed_char_Pointer)
 INPUT_TYPEMAP (unsigned char,      unsigned char,        swig.unsigned_char_Pointer)
@@ -162,7 +162,7 @@ value returned in the second output parameter. In Ada you would use it like this
 %enddef
 
 
-OUTPUT_TYPEMAP (bool,               unsigned int,         swig.bool_Pointer,               BOOL_PTR)
+OUTPUT_TYPEMAP (bool,               unsigned char,        swig.bool_Pointer,               BOOL_PTR)
 //OUTPUT_TYPEMAP(char,               char,                 char,     CHAR_PTR)                            // tbd
 OUTPUT_TYPEMAP (signed char,        signed char,          swig.signed_char_Pointer,           INT8_PTR)
 OUTPUT_TYPEMAP (unsigned char,      unsigned char,        swig.unsigned_char_Pointer,         UINT8_PTR)
@@ -255,7 +255,7 @@ of the function return value.
 %enddef
 
  
-INOUT_TYPEMAP (bool,               unsigned int,         swig.bool_Pointer,               BOOL_PTR)
+INOUT_TYPEMAP (bool,               unsigned char,        swig.bool_Pointer,               BOOL_PTR)
 //INOUT_TYPEMAP(char,               char,                 char,     CHAR_PTR)                              // tbd
 INOUT_TYPEMAP (signed char,        signed char,          swig.signed_char_Pointer,           INT8_PTR)
 INOUT_TYPEMAP (unsigned char,      unsigned char,        swig.unsigned_char_Pointer,         UINT8_PTR)

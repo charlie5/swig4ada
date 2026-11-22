@@ -338,6 +338,15 @@ begin
       --
       is
       begin
+         --  A class whose destructor is hidden has no construction function (see 'keep_the_Function'), so it has
+         --  no constructor to import it.
+         --
+         if         not for_abstract_Class
+           and then has_hidden_Destructor
+         then
+            return;
+         end if;
+
          declare
             the_Constructor : constant c_Function.view := Self.new_c_Function (doh_Node (the_Node),
                                                                                to_unbounded_String ("construct"),

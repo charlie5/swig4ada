@@ -119,7 +119,8 @@ package swig_Core is
      Interfaces.C.Strings.New_String ("swig 4.5.1");
    PACKAGE_TARNAME   : aliased constant Interfaces.C.Strings.chars_ptr :=
      Interfaces.C.Strings.New_String ("swig");
-   PACKAGE_URL       : aliased Interfaces.C.Strings.chars_ptr;
+   PACKAGE_URL       : aliased constant Interfaces.C.Strings.chars_ptr :=
+     Interfaces.C.Strings.New_String ("");
    PACKAGE_VERSION   : aliased constant Interfaces.C.Strings.chars_ptr :=
      Interfaces.C.Strings.New_String ("4.5.1");
    STDC_HEADERS      : constant                                        := 1;
@@ -127,7 +128,8 @@ package swig_Core is
      Interfaces.C.Strings.New_String ("g++");
    SWIG_LIB          : aliased constant Interfaces.C.Strings.chars_ptr :=
      Interfaces.C.Strings.New_String ("/usr/local/share/swig/4.5.1");
-   SWIG_LIB_WIN_UNIX : aliased Interfaces.C.Strings.chars_ptr;
+   SWIG_LIB_WIN_UNIX : aliased constant Interfaces.C.Strings.chars_ptr :=
+     Interfaces.C.Strings.New_String ("");
    SWIG_PLATFORM     : aliased constant Interfaces.C.Strings.chars_ptr :=
      Interfaces.C.Strings.New_String ("x86_64-pc-linux-gnu");
    VERSION           : aliased constant Interfaces.C.Strings.chars_ptr :=
@@ -395,10 +397,5 @@ package swig_Core is
    CWRAP_SMART_POINTER_OVERLOAD : constant := 16#40#;
    SWIG_FILE_DELIMITER : aliased constant Interfaces.C.Strings.chars_ptr :=
      Interfaces.C.Strings.New_String ("/");
-
-private
-
-   pragma Import (C, PACKAGE_URL, "PACKAGE_URL");
-   pragma Import (C, SWIG_LIB_WIN_UNIX, "SWIG_LIB_WIN_UNIX");
 
 end swig_Core;

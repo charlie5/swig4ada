@@ -15,6 +15,7 @@ is
                    Name             => Name,
                    my_Type          => of_Type,
                    Value            => <>,
+                   is_empty_String  => False,
                    link_Symbol      => <>,
                    owner_Class      => null,
                    is_anonymous_Bits => False,

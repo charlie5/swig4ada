@@ -450,7 +450,8 @@ begin
          end if;
       end if;
 
-      new_c_Constant.Value := value_Text;
+      new_c_Constant.Value           := value_Text;
+      new_c_Constant.is_empty_String := value_Text = "" and then not is_Numeric;     -- '#define EMPTY ""'.
       Self.current_Module.C.new_c_Variables   .append (new_c_Constant);
       Self.current_Module.C.new_c_Declarations.append (new_c_Constant.all'Access);
    end;

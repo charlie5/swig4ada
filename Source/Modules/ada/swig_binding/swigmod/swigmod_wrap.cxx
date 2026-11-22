@@ -4175,7 +4175,7 @@ DllExport void* SWIGSTDCALL Ada_Language_makeParameterName__SWIG_0 (
   int a_arg4
   ,
   
-  unsigned int a_arg5
+  unsigned char a_arg5
   )
 {
   void* jresult ;
@@ -4252,11 +4252,11 @@ DllExport void* SWIGSTDCALL Ada_Language_makeParameterName__SWIG_1 (
 
 
 
-DllExport unsigned int SWIGSTDCALL Ada_Language_extraDirectorProtectedCPPMethodsRequired (
+DllExport unsigned char SWIGSTDCALL Ada_Language_extraDirectorProtectedCPPMethodsRequired (
   void * a_arg1
   )
 {
-  unsigned int jresult ;
+  unsigned char jresult ;
   Language *arg1 = 0 ;
   bool result;
   
@@ -4294,11 +4294,11 @@ DllExport int SWIGSTDCALL Ada_Language_nestedClassesSupport (
 
 
 
-DllExport unsigned int SWIGSTDCALL Ada_Language_kwargsSupport (
+DllExport unsigned char SWIGSTDCALL Ada_Language_kwargsSupport (
   void * a_arg1
   )
 {
-  unsigned int jresult ;
+  unsigned char jresult ;
   Language *arg1 = 0 ;
   bool result;
   
@@ -4315,14 +4315,14 @@ DllExport unsigned int SWIGSTDCALL Ada_Language_kwargsSupport (
 
 
 
-DllExport unsigned int SWIGSTDCALL Ada_Language_isNonVirtualProtectedAccess (
+DllExport unsigned char SWIGSTDCALL Ada_Language_isNonVirtualProtectedAccess (
   void * a_arg1
   ,
   
   void* a_arg2
   )
 {
-  unsigned int jresult ;
+  unsigned char jresult ;
   Language *arg1 = 0 ;
   Node *arg2 = 0 ;
   bool result;
@@ -4792,11 +4792,11 @@ DllExport int SWIGSTDCALL Ada_emit_isvarargs (
 
 
 
-DllExport unsigned int SWIGSTDCALL Ada_emit_isvarargs_function (
+DllExport unsigned char SWIGSTDCALL Ada_emit_isvarargs_function (
   void* a_arg1
   )
 {
-  unsigned int jresult ;
+  unsigned char jresult ;
   Node *arg1 = 0 ;
   bool result;
   
@@ -5057,7 +5057,7 @@ DllExport void* SWIGSTDCALL Ada_Swig_overload_rank (
   void* a_arg1
   ,
   
-  unsigned int a_arg2
+  unsigned char a_arg2
   )
 {
   void* jresult ;
@@ -5296,14 +5296,14 @@ DllExport void* SWIGSTDCALL Ada_Swig_director_declaration (
 
 
 
-DllExport unsigned int SWIGSTDCALL Ada_Swig_director_emit_dynamic_cast (
+DllExport unsigned char SWIGSTDCALL Ada_Swig_director_emit_dynamic_cast (
   void* a_arg1
   ,
   
   void * a_arg2
   )
 {
-  unsigned int jresult ;
+  unsigned char jresult ;
   Node *arg1 = 0 ;
   Wrapper *arg2 = 0 ;
   bool result;
@@ -5338,11 +5338,11 @@ DllExport void SWIGSTDCALL Ada_Swig_director_parms_fixup (
 
 
 
-DllExport unsigned int SWIGSTDCALL Ada_Swig_director_can_unwrap (
+DllExport unsigned char SWIGSTDCALL Ada_Swig_director_can_unwrap (
   void* a_arg1
   )
 {
-  unsigned int jresult ;
+  unsigned char jresult ;
   Node *arg1 = 0 ;
   bool result;
   

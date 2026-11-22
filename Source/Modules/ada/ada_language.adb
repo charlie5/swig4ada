@@ -148,6 +148,7 @@ is
    function  cpp_Symbol (qualified_Name : in String;   Suffix : in String) return String
      renames cpp_Mangling.Symbol;
    function  variable_Suffix (swig_Type : in String) return String;
+   function  character_Value (Position  : in String) return String;
    procedure bind_constructors_of_abstract_Class (Self : access Item;   the_Class : in Node_Pointer);
    procedure bind_other_base_Classes             (Self : access Item;   the_Class : in Node_Pointer);
    procedure add_hidden_Members                  (Self : access Item;   Before    : in Node_Pointer;   of_Class : in Node_Pointer := null);
@@ -522,6 +523,18 @@ is
                                            or else ada.Strings.fixed.Index (Attribute (the_Node, "storage"), "constexpr") /= 0;
       value_Text    : constant String  :=  Attribute (the_Node, "value");
       type_Text     : constant String  := +DOH_Pointer (the_swig_Type);
+      Storage       : constant String  :=  Attribute (the_Node, "storage");
+
+      --  An array of constants is constant too ('const char name [8]', which swig writes 'a(8).q(const).char').
+      --
+      is_constant_Array : constant Boolean :=          type_Text'Length > 2
+                                              and then type_Text (type_Text'First .. type_Text'First + 1) = "a("
+                                              and then ada.Strings.fixed.Index (type_Text, ").q(const).") /= 0;
+
+      has_no_Symbol : constant Boolean :=         ada.Strings.fixed.Index (Storage, "static") /= 0
+                                          or else (         Self.in_cpp_Mode
+                                                   and then (is_Constant or is_constant_Array)
+                                                   and then ada.Strings.fixed.Index (Storage, "extern") = 0);
    begin
       indent_Log;
       dlog (+"");
@@ -569,7 +582,8 @@ is
             if         is_Constant
               and then value_Text /= ""
               and then new_Variable.array_Bounds.is_Empty
-              and then new_Variable.my_Type.is_a_standard_Integer
+              and then (        new_Variable.my_Type.is_a_standard_Integer
+                        or else to_String (new_Variable.my_Type.Name) = "bool")
             then
                begin
                   new_Variable.Value := +Image (resolved_c_integer_Expression (Self, +value_Text,
@@ -578,6 +592,20 @@ is
                exception
                   when others =>
                      null;     -- The value is not an integer expression, so the constant is imported.
+               end;
+
+            elsif      is_Constant
+              and then value_Text /= ""
+              and then new_Variable.array_Bounds.is_Empty
+              and then to_String (new_Variable.my_Type.Name) = "char"
+            then   -- A character is given by its position.
+               begin
+                  new_Variable.Value := +character_Value (Image (resolved_c_integer_Expression (Self, +value_Text,
+                                                                                                          Self.integer_symbol_value_Map,
+                                                                                                          Self.current_class_namespace_Prefix)));
+               exception
+                  when others =>
+                     null;
                end;
 
             elsif      is_Constant
@@ -593,6 +621,17 @@ is
                end;
             end if;
 
+            --  A variable which is 'static', or constant and not 'extern', has no symbol outside its own file,
+            --  so it cannot be imported. Where it has no value which is worked out, it is left out.
+            --
+            if         new_Variable.Value = ""
+              and then has_no_Symbol
+            then
+               warn (not_Bound, "Unable to bind the variable '" & to_String (the_Name) & "', which has no symbol outside its file, being 'static' or constant, and no value which can be worked out.");
+               unindent_Log;
+               return SWIG_OK;
+            end if;
+
             --  A variable in a namespace is imported by its C++ symbol.
             --
             if         new_Variable.Value = ""
@@ -600,11 +639,37 @@ is
             then
                new_Variable.link_Symbol := +cpp_Symbol (full_Name, Suffix => variable_Suffix (type_Text));
 
+               --  A variable of the standard library ('std::cout'), whose namespace is abbreviated.
+               --
+               if         new_Variable.link_Symbol = ""
+                 and then full_Name'Length > 5
+                 and then full_Name (full_Name'First .. full_Name'First + 4) = "std::"
+                 and then ada.Strings.fixed.Index (full_Name, "::", From => full_Name'First + 5) = 0
+               then
+                  new_Variable.link_Symbol := +(  "_ZSt" & ada.Strings.fixed.Trim (Natural'Image (full_Name'Length - 5), ada.Strings.Left)
+                                                & full_Name (full_Name'First + 5 .. full_Name'Last));
+               end if;
+
             elsif      new_Variable.Value = ""
               and then variable_Suffix (type_Text) /= "E"
             then   -- A variable in no namespace is not mangled, but for the tag of a string.
                new_Variable.link_Symbol := +("_Z" & ada.Strings.fixed.Trim (Natural'Image (full_Name'Length), ada.Strings.Left) & full_Name & "B5cxx11");
+
+            elsif      new_Variable.Value = ""
+              and then full_Name /= to_String (the_Name)
+            then   -- The symbol is the name which the library knows the variable by, which a '%rename' does not change.
+               new_Variable.link_Symbol := +full_Name;
             end if;
+
+         elsif has_no_Symbol
+         then   -- In C a constant has a symbol, and a 'static' variable has none.
+            warn (not_Bound, "Unable to bind the variable '" & to_String (the_Name) & "', which is 'static' and so has no symbol outside its file.");
+            unindent_Log;
+            return SWIG_OK;
+
+         elsif full_Name /= to_String (the_Name)
+         then
+            new_Variable.link_Symbol := +full_Name;
          end if;
 
          Self.Module_top.C.new_c_Variables.append (new_Variable);
@@ -1177,11 +1242,9 @@ is
 
                elsif to_String (new_Variable.my_Type.Name) = "char"
                then   -- A character is given by its position.
-                  new_Variable.Value := +(  "interfaces.c.char'Val ("
-                                          & Image (resolved_c_integer_Expression (Self, +value_Text,
-                                                                                        Self.integer_symbol_value_Map,
-                                                                                        Self.current_class_namespace_Prefix))
-                                          & ")");
+                  new_Variable.Value := +character_Value (Image (resolved_c_integer_Expression (Self, +value_Text,
+                                                                                                          Self.integer_symbol_value_Map,
+                                                                                                          Self.current_class_namespace_Prefix)));
 
                elsif new_Variable.my_Type.is_a_standard_Real
                then
@@ -1563,6 +1626,19 @@ is
 
 
 
+   function character_Value (Position : in String) return String
+   --
+   --  A constant of type 'char' as Ada states it, given the number which C gives it. A negative
+   --  number ('const char c = -110;') is the character which has its bits.
+   --
+   is
+      the_Position : constant Long_Long_Integer := Long_Long_Integer'Value (Position) mod 256;
+   begin
+      return "interfaces.c.char'Val (" & ada.Strings.fixed.Trim (the_Position'Image, ada.Strings.Left) & ")";
+   end character_Value;
+
+
+
    function returns_a_cpp_constructed_Type (Self : access Item;   the_Node : in doh_Node) return Boolean
    --
    --  True when the function of the node returns, by value, a type which C++ constructs.
@@ -1845,7 +1921,70 @@ is
                      end;
                   end if;
                end;
+
+               --  Likewise the other way about: an instance which was first used by its full name is known by that.
+               --
+               declare
+                  plain_Form : constant String  := Self.template_plain_Forms.Element (Each);
+                  First      : constant Natural := ada.Strings.fixed.Index (the_Name, plain_Form);
+               begin
+                  if First /= 0
+                  then
+                     declare
+                        full_Name : constant unbounded_String := +(  the_Name (the_Name'First .. First - 1)
+                                                                   & Self.template_full_Forms.Element (Each)
+                                                                   & the_Name (First + plain_Form'Length .. the_Name'Last));
+                     begin
+                        if Self.swig_type_Map_of_c_type.contains (full_Name)
+                        then
+                           return Self.swig_type_Map_of_c_type.Element (full_Name);
+                        end if;
+                     end;
+                  end if;
+               end;
             end loop;
+         end;
+
+         --  A pointer or reference to, or an array of, a type which is not known yet (a class which is used ahead
+         --  of its declaration): the type itself is made, not known, with its pointer and array types, so that
+         --  they are those of the class once it is declared. Without this the pointer alone was made, and stayed
+         --  unknown when the class came.
+         --
+         declare
+            the_Name : constant String  := +swig_Type;
+            First    :          Natural := the_Name'First;
+         begin
+            loop
+               if    First + 1 <= the_Name'Last and then the_Name (First .. First + 1) in "p." | "r." | "z."
+               then
+                  First := First + 2;
+
+               elsif First + 1 <= the_Name'Last and then the_Name (First .. First + 1) = "q("
+               then
+                  declare
+                     Close : constant Natural := ada.Strings.fixed.Index (the_Name, ").", From => First);
+                  begin
+                     exit when Close = 0;
+                     First := Close + 2;
+                  end;
+               else
+                  exit;
+               end if;
+            end loop;
+
+            if         First > the_Name'First
+              and then First <= the_Name'Last
+              and then ada.Strings.fixed.Index (the_Name (First .. the_Name'Last), "(") /= First + 1     -- Not a function, an array or a member pointer.
+            then
+               declare
+                  the_Base : constant c_Type.view := Self.demand_c_Type_for (doh_swigType (to_Doh (the_Name (First .. the_Name'Last)))) with Unreferenced;
+               begin
+                  if Self.swig_type_Map_of_c_type.contains (+swig_Type)
+                  then
+                     return Self.swig_type_Map_of_c_type.Element (+swig_Type);
+                  end if;
+               end;
+            end if;
          end;
 
          if the_Type = null
@@ -2088,6 +2227,7 @@ is
       the_ada_Variable.bit_Field         := the_c_Variable.bit_Field;
       the_ada_Variable.member_Name       := the_c_Variable.member_Name;
       the_ada_Variable.is_anonymous_Bits := the_c_Variable.is_anonymous_Bits;
+      the_ada_Variable.is_empty_String   := the_c_Variable.is_empty_String;
 
       the_ada_Variable.link_Symbol := (if the_c_Variable.link_Symbol /= "" then the_c_Variable.link_Symbol
                                                                            else the_c_Variable.Name);

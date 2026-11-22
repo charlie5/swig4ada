@@ -17,6 +17,7 @@ is
       return Item' (Name      => the_Name,
                     my_Type   => the_Type,
                     Value     => Value,
+                    is_empty_String => False,
                     link_Symbol => <>,
                     is_raw_Storage => False,
 
@@ -47,7 +48,8 @@ is
    function is_Constant (Self : in Item'Class) return Boolean
    is
    begin
-      return Self.Value /= null_unbounded_String;
+      return        Self.Value /= null_unbounded_String
+             or else Self.is_empty_String;
    end is_Constant;
 
 

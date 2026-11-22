@@ -222,7 +222,7 @@
 %typemap (ctype)      void *                                                        "void*"
 
 
-%typemap (ctype)      bool                                                          "unsigned int"
+%typemap (ctype)      bool                                                          "unsigned char"
 %typemap (ctype)      bool *,          const bool *                                 "bool*"
 %typemap (ctype)      bool &,          const bool &                                 "bool*"
 %typemap (ctype)      bool [],         bool [ANY]                                   "bool*"
