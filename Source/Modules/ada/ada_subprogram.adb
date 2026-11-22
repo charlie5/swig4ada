@@ -205,10 +205,12 @@ is
          --
          if Self.link_Symbol /= ""
          then
-            if Self.is_in_Wrapper
+            if         Self.is_in_Wrapper
+              and then not declaration_Package.models_a_virtual_cpp_Class
             then   -- A function of the wrapper file.
                append (the_Source,   NL & "   pragma Import (C, "   & unique_function_Name & ", """ & Self.link_Symbol & """);");
-            else   -- The C++ symbol of a virtual destructor, made from the full name of its class.
+            else   -- The C++ symbol of a virtual destructor, made from the full name of its class, or a function of the wrapper
+                   -- file for one of a template instance: a primitive of a type of convention CPP has that convention.
                append (the_Source,   NL & "   pragma Import (CPP, " & unique_function_Name & ", """ & Self.link_Symbol & """);");
             end if;
 

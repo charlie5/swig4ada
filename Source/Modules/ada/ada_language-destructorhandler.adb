@@ -13,6 +13,7 @@ is
    is_Overriding :          Boolean := False;
 
    destruct_Symbol : unbounded_String;     -- The function of the wrapper which destructs an object, where there is one.
+   delete_Symbol   : unbounded_String;     -- The function of the wrapper which destructs an object and frees it, likewise.
    class_cpp_Name  : constant String := (if Self.in_cpp_Mode then +DOH_Pointer (get_Attribute (Self.getCurrentClass, "name")) else "");
 begin
    if not Self.in_cpp_Mode
@@ -91,11 +92,41 @@ begin
          the_Class : constant String := +doh_Item (SwigType_namestr (SwigType_Pointer (get_Attribute (Self.getCurrentClass, "name"))));
       begin
          destruct_Symbol := wrapper_Symbol (Self, "ada_destruct_" & String'(+DOH_Pointer (get_Attribute (Self.getCurrentClass, "name"))));
+         delete_Symbol   := destruct_Symbol;     -- There is no deleting variant.
 
          print_to (DOH_Pointer (Self.f_Ada),   "extern ""C"" void " & to_String (destruct_Symbol) & " (" & the_Class & " * self)" & NL
                                              & "{"                                                                              & NL
                                              & "  typedef " & the_Class & " swig_ada_class;"                                    & NL
                                              & "  self->~swig_ada_class ();"                                                    & NL
+                                             & "}"                                                                              & NL & NL);
+      end;
+
+   --  The symbol of a virtual destructor cannot be made from the name of a template instance, which need not be
+   --  the name by which C++ knows it: an argument may be a typedef, a default argument is left out, and the
+   --  arguments of a variadic template are a pack. Such a destructor is two functions of the wrapper too. Each
+   --  names the destructor of its own class, so that it is not a virtual call: the function is itself what the
+   --  vtable of a type which is derived in Ada holds.
+   --
+   elsif      ada.Strings.fixed.Index (class_cpp_Name, "<") /= 0
+     and then not (   check_Attribute (the_Node, "access", "protected")
+                   or check_Attribute (the_Node, "access", "private"))
+   then
+      declare
+         the_Class : constant String := +doh_Item (SwigType_namestr (SwigType_Pointer (get_Attribute (Self.getCurrentClass, "name"))));
+      begin
+         destruct_Symbol := wrapper_Symbol (Self, "ada_destruct_" & class_cpp_Name);
+         delete_Symbol   := wrapper_Symbol (Self, "ada_delete_"   & class_cpp_Name);
+
+         print_to (DOH_Pointer (Self.f_Ada),   "extern ""C"" void " & to_String (destruct_Symbol) & " (" & the_Class & " * self)" & NL
+                                             & "{"                                                                              & NL
+                                             & "  typedef " & the_Class & " swig_ada_class;"                                    & NL
+                                             & "  self->swig_ada_class::~swig_ada_class ();"                                    & NL
+                                             & "}"                                                                              & NL & NL
+                                             & "extern ""C"" void " & to_String (delete_Symbol) & " (" & the_Class & " * self)"   & NL
+                                             & "{"                                                                              & NL
+                                             & "  typedef " & the_Class & " swig_ada_class;"                                    & NL
+                                             & "  self->swig_ada_class::~swig_ada_class ();"                                    & NL
+                                             & "  ::operator delete (self);"                                                    & NL
                                              & "}"                                                                              & NL & NL);
       end;
    end if;
@@ -125,7 +156,7 @@ begin
    begin
       the_Destructor.is_Static   := False;
       the_Destructor.is_Virtual  := the_Destructor.is_Virtual or is_Overriding;     -- An implicit destructor is virtual when a base class destructor is.
-      the_Destructor.link_Symbol   := (if destruct_Symbol /= "" then destruct_Symbol
+      the_Destructor.link_Symbol   := (if destruct_Symbol /= "" then delete_Symbol
                                        else +cpp_Symbol (class_cpp_Name, Suffix => (if the_Destructor.is_Virtual then "D0Ev"      -- The deleting destructor.
                                                                                                                  else "D1Ev")));
       the_Destructor.is_in_Wrapper := destruct_Symbol /= "";
