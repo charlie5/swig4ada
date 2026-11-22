@@ -1436,7 +1436,8 @@ begin
    if do_Units
    then
       new_Line;
-      run_Unit ("layout");     -- The layout engine: the place of each member of a class or structure.
+      run_Unit ("layout");          -- The layout engine: the place of each member of a class or structure.
+      run_Unit ("expressions");     -- The value of a C expression, against the value which a C compiler gives.
    end if;
 
 

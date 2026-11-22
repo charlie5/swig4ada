@@ -19,6 +19,8 @@
 #define SUM_SHIFTED (1 + 2 << 3)
 #define AND_THEN_OR (6 & 3 | 8)
 #define TWICE_MINUS (- - 5)
+#define OCTAL       0755
+#define OCTAL_SUM   (010 + 1)
 
 const int      limit   = 100;
 const double   epsilon = 0.25;
@@ -28,6 +30,7 @@ enum              { anonymous_one = 1, anonymous_five = 5 };
 enum Flags        { None = 0, Read = 1, Write = 2, Execute = 4, All = Read | Write | Execute };
 enum class Mode   { Off, On, Automatic = 7 };
 enum Small : unsigned char  { Tiny = 1, Huge = 200 };
+enum Octals       { Eighth = 010, Ninth, Sixteenth = 020 };                                           // values which are octal
 enum Marks        { Comma = ',', Newline = '\n', Capital = 'A', After, Escaped = '\x43' + 1 };     // values which are characters
 
 struct Limits {
@@ -58,5 +61,8 @@ inline int   c_in_order ()                  { return IN_ORDER; }
 inline int   c_sum_shifted ()               { return SUM_SHIFTED; }
 inline int   c_and_then_or ()               { return AND_THEN_OR; }
 inline int   c_twice_minus ()               { return TWICE_MINUS; }
+inline int   c_octal ()                     { return OCTAL; }
+inline int   c_octal_sum ()                 { return OCTAL_SUM; }
+inline int   octal_mark ()                  { return (int) Eighth; }
 inline const char* quoted_text ()           { return QUOTED; }
 inline const char* tabbed_text ()           { return TABBED; }

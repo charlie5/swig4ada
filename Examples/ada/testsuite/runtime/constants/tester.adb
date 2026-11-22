@@ -106,6 +106,11 @@ begin
       check (SUM_SHIFTED = 24 and c_sum_shifted = 24,               "a sum is made before it is shifted");
       check (AND_THEN_OR = 10 and c_and_then_or = 10,               "'and' binds more tightly than 'or'");
       check (TWICE_MINUS = 5  and c_twice_minus = 5,                "a sign is applied to a sign");
+
+      check (OCTAL       = 493 and c_octal     = 493,               "a number which begins with a zero is octal");
+      check (OCTAL_SUM   = 9   and c_octal_sum = 9,                 "within an expression too");
+      check (Octals'Enum_Rep (Eighth) = 8 and octal_mark = 8,       "and as the value of an enumeration");
+      check (Octals'Enum_Rep (Ninth) = 9 and Octals'Enum_Rep (Sixteenth) = 16,   "whose next literal follows it");
    end written_constants;
 
    character_enumerations :
