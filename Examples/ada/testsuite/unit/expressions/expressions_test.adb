@@ -80,7 +80,19 @@ is
       (+"sizeof(int)",                                            4),
       (+"sizeof(char)",                                           1),
       (+"sizeof(short) + sizeof(long)",                          10),
-      (+"sizeof(double) * 2",                                    16)
+      (+"sizeof(double) * 2",                                    16),
+
+      --  Casts, which do not change a value that is worked out here.
+      --
+      (+"(mytype) 10",                                           10),
+      (+"(unsigned char) 'A'",                                   65),
+      (+"(ns::mytype) (3 + 4)",                                   7),
+      (+"static_cast< mytype >(10)",                             10),
+      (+"static_cast< std::pair< int, int > >(2) + 1",            3),
+      (+"int (7) * 2",                                           14),
+      (+"unsigned long (1) << 4",                                16),
+      (+"(1 + 2) * 3",                                            9),     -- Brackets which are no cast.
+      (+"sizeof (int) * 2",                                       8)      -- Nor is the operand of 'sizeof'.
         ];
 
    No_Symbols : symbol_value_Maps.Map;
@@ -148,6 +160,7 @@ begin
       check (is_Refused ("UNKNOWN + 1"),                                          "a name which is not known is refused");
       check (is_Refused ("x"),                                                    "as is a lone letter, which is a name and no character");
       check (is_Refused ("4 <=> 2"),                                              "a three way comparison is refused");
+      check (is_Refused ("factorial (5)"),                                        "the call of a function is no cast, and is refused");
       check (is_Refused ("1 ? 2 : 3"),                                            "as is a conditional expression");
       check (is_Refused ("1.5 + 2"),                                              "and a real number");
    end refusals;

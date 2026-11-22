@@ -295,6 +295,181 @@ is
 
 
 
+   function without_Casts (the_Expression : in String;
+                           known_Symbols  : in symbol_value_Maps.Map;
+                           Namespace      : in unbounded_String) return String
+   --
+   --  The expression less its casts, which do not change the value of a constant that is worked out here:
+   --  '(mytype) 10', 'static_cast< mytype >(10)' and 'int (10)' are each '10' (the last within its brackets).
+   --  A name which is followed by brackets is taken for a cast only where it is a standard type: 'factorial (5)'
+   --  is a call, whose value is not known, and stays as it is.
+   --
+   is
+      type Names is array (Positive range <>) of unbounded_String;
+
+      named_Casts    : constant Names := [+"static_cast", +"reinterpret_cast", +"const_cast"];
+      standard_Types : constant Names := [+"unsigned long long", +"unsigned long", +"unsigned short", +"unsigned char",     -- The longer names first.
+                                          +"unsigned int",       +"long long",     +"signed char",
+                                          +"unsigned",           +"long",          +"short",          +"int",
+                                          +"char",               +"bool",          +"size_t"];
+
+      Pad : unbounded_String := +the_Expression;
+
+      function is_name_Character (the_Character : in Character) return Boolean
+      is (the_Character in 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_');
+
+      function next_Significant (From : in Positive) return Natural
+      --
+      --  The place of the first character at or after 'From' which is no space, or 0.
+      --
+      is
+      begin
+         for Each in From .. Length (Pad)
+         loop
+            if Element (Pad, Each) /= ' '
+            then
+               return Each;
+            end if;
+         end loop;
+
+         return 0;
+      end next_Significant;
+
+      function follows_sizeof (Place : in Positive) return Boolean
+      --
+      --  The bracket at 'Place' is that of 'sizeof', whose operand is a type and no cast.
+      --
+      is
+         Before : Natural := Place - 1;
+      begin
+         while Before >= 1 and then Element (Pad, Before) = ' '
+         loop
+            Before := Before - 1;
+         end loop;
+
+         return Before >= 6 and then Slice (Pad, Before - 5, Before) = "sizeof";
+      end follows_sizeof;
+
+   begin
+      --  The named casts: the name and its type are removed, which leaves the operand in its brackets.
+      --
+      for Each of named_Casts
+      loop
+         loop
+            declare
+               First : constant Natural := Index (Pad, to_String (Each));
+               Open  :          Natural;
+               Depth :          Natural := 0;
+               Close :          Natural := 0;
+            begin
+               exit when First = 0;
+
+               Open := next_Significant (First + Length (Each));
+               exit when Open = 0 or else Element (Pad, Open) /= '<';
+
+               for Place in Open .. Length (Pad)
+               loop
+                  if    Element (Pad, Place) = '<' then   Depth := Depth + 1;
+                  elsif Element (Pad, Place) = '>' then   Depth := Depth - 1;
+                  end if;
+
+                  if Depth = 0
+                  then
+                     Close := Place;
+                     exit;
+                  end if;
+               end loop;
+
+               exit when Close = 0;
+               delete (Pad, First, Close);
+            end;
+         end loop;
+      end loop;
+
+      --  A standard type which is followed by brackets ('int (10)'): the name is removed.
+      --
+      for Each of standard_Types
+      loop
+         declare
+            From : Positive := 1;
+         begin
+            loop
+               declare
+                  First : constant Natural := (if From > Length (Pad) then 0 else Index (Pad, to_String (Each), From));
+                  After :          Natural;
+               begin
+                  exit when First = 0;
+
+                  After := next_Significant (First + Length (Each));
+
+                  if         After /= 0
+                    and then Element (Pad, After) = '('
+                    and then (First = 1 or else not is_name_Character (Element (Pad, First - 1)))
+                  then
+                     delete (Pad, First, After - 1);
+                  else
+                     From := First + 1;
+                  end if;
+               end;
+            end loop;
+         end;
+      end loop;
+
+      --  A type in brackets which is followed by an operand ('(mytype) 10'). A name which is a known constant is no type.
+      --
+      declare
+         From : Positive := 1;
+      begin
+         loop
+            declare
+               Open  : constant Natural := (if From > Length (Pad) then 0 else Index (Pad, "(", From));
+               Close :          Natural;
+               After :          Natural;
+            begin
+               exit when Open = 0;
+
+               Close := Index (Pad, ")", Open);
+               exit when Close = 0;
+
+               After := (if Close = Length (Pad) then 0 else next_Significant (Close + 1));
+
+               declare
+                  the_Name : constant String := to_String (Trim (unbounded_Slice (Pad, Open + 1, Close - 1), ada.Strings.Both));
+               begin
+                  if         the_Name /= ""
+                    and then the_Name (the_Name'First) in 'a' .. 'z' | 'A' .. 'Z' | '_'
+                    and then (for all Char of the_Name => is_name_Character (Char) or else Char in ' ' | ':')
+                    and then After /= 0
+                    and then (is_name_Character (Element (Pad, After)) or else Element (Pad, After) in '(' | ''')
+                    and then not known_Symbols.contains (+the_Name)
+                    and then not known_Symbols.contains (Namespace & the_Name)
+                    and then not follows_sizeof (Open)
+                  then
+                     delete (Pad, Open, Close);
+                  else
+                     From := Open + 1;
+                  end if;
+               end;
+            end;
+         end loop;
+      end;
+
+      --  'sizeof' may be written with a space before its bracket.
+      --
+      loop
+         declare
+            Place : constant Natural := Index (Pad, "sizeof (");
+         begin
+            exit when Place = 0;
+            delete (Pad, Place + 6, Place + 6);
+         end;
+      end loop;
+
+      return to_String (Pad);
+   end without_Casts;
+
+
+
    function Value_of (the_Expression : in unbounded_String;
                       known_Symbols  : in symbol_value_Maps.Map;
                       Namespace      : in unbounded_String) return discrete.Integer
@@ -686,7 +861,7 @@ is
       end resolve_c_integer_Expression_recursive;
 
 
-      the_expression_Pad   : aliased  unbounded_String := the_Expression;
+      the_expression_Pad   : aliased  unbounded_String := +without_Casts (to_String (the_Expression), known_Symbols, Namespace);
       is_Single            : constant Boolean          := Length (the_Expression) = 1;
 
       the_expression_Value :          discrete.Integer;
