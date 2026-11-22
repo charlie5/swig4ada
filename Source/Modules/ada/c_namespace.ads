@@ -6,7 +6,7 @@ with
      ada.Strings.unbounded,
      ada.Containers.Vectors,
      ada.Containers.hashed_Sets,
-     ada.unchecked_Conversion;
+     pointer_Hash;
 
 
 package c_Namespace
@@ -34,7 +34,7 @@ is
 
    --  Set
 
-   function to_Hash is new ada.unchecked_Conversion (View, ada.Containers.Hash_type);
+   function to_Hash is new pointer_Hash (View);
    function equivalent_Views (L : View;   Right : View) return Boolean renames "=";
 
    package Sets is new ada.Containers.hashed_Sets (View, to_Hash, equivalent_Views);

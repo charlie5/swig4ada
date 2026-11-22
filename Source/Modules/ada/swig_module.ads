@@ -12,7 +12,7 @@ with
      ada.Strings.unbounded.Hash,
      ada.containers.hashed_maps,
      ada.Containers.Vectors,
-     ada.Unchecked_Conversion;
+     pointer_Hash;
 
 
 package swig_Module
@@ -50,7 +50,7 @@ is
 
 
 
-   function Hashed is new ada.Unchecked_Conversion (c_Type.view,  ada.Containers.Hash_Type);
+   function Hashed is new pointer_Hash (c_Type.view);
    use type   c_Type.view,
             ada_Type.view;
    package c_type_Maps_of_ada_type is new ada.containers.hashed_maps (c_Type  .view,
@@ -61,7 +61,7 @@ is
                                                                             ada_Subprogram.view,
                                                                             Hashed, "=");
 
-   function Hashed is new ada.Unchecked_Conversion (ada_subProgram.view, ada.Containers.Hash_Type);
+   function Hashed is new pointer_Hash (ada_subProgram.view);
    use type c_Function.view;
 
    package ada_subprogram_Maps_of_c_function is new ada.containers.hashed_maps (ada_subProgram.view,
@@ -69,7 +69,7 @@ is
                                                                                 Hashed, "=");
 
    use type ada_Package.view,  c_Namespace.view;
-   function Hashed is new ada.Unchecked_Conversion (c_Namespace.view,  ada.Containers.Hash_Type);
+   function Hashed is new pointer_Hash (c_Namespace.view);
 
    package c_namespace_Maps_of_ada_Package is new ada.containers.hashed_maps (c_Namespace.view,
                                                                               ada_Package.view,

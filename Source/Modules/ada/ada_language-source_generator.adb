@@ -26,7 +26,7 @@ with a_Namespace,
      ada.Strings.unbounded.Hash,
      ada.Exceptions,
      ada.Text_IO,
-     ada.unchecked_Conversion;
+     pointer_Hash;
 
 
 package body ada_Language.source_Generator
@@ -2306,7 +2306,7 @@ is
 
             function Hashed (the_Pair : swap_Pair) return ada.Containers.Hash_Type
             is
-               function to_Hash is new ada.Unchecked_Conversion (ada_Type.view, ada.Containers.Hash_Type);
+               function to_Hash is new pointer_Hash (ada_Type.view);
             begin
                return to_Hash (the_Pair.Type_1) + to_Hash (the_Pair.Type_2);
             end Hashed;

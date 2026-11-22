@@ -8,7 +8,7 @@ with
      ada.Strings.unbounded,
      ada.containers.Vectors,
      ada.containers.hashed_Sets,
-     ada.unchecked_Conversion;
+     pointer_Hash;
 
 
 package ada_Package
@@ -34,7 +34,7 @@ is
 
    --  Set
 
-   function to_Hash is new ada.unchecked_Conversion (View, ada.containers.Hash_type);
+   function to_Hash is new pointer_Hash (View);
    function equivalent_Views (Left : View;   Right : View) return Boolean renames "=";
 
    package Sets is new ada.containers.hashed_Sets (View, to_Hash, equivalent_Views);

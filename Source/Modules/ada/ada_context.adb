@@ -1,4 +1,5 @@
 with
+     pointer_Hash,
      ada_Package,
      ada_type.a_subType,
      ada_type.elementary.an_access.to_type,
@@ -32,7 +33,7 @@ is
 
 
 
-   function to_Hash is new ada.unchecked_Conversion (ada_Package.view, ada.containers.Hash_type);
+   function to_Hash is new pointer_Hash (ada_Package.view);
 
    package package_to_withing_requirements_Maps is new ada.containers.hashed_Maps (ada_Package.view,  a_packages_withing_Requirements,
                                                                                    to_Hash,           ada_Package."=");
@@ -408,8 +409,7 @@ is
 
    function to_Hash (Self : in type_Info) return ada.containers.Hash_type
    is
-      function Hash_it is new ada.unchecked_Conversion (ada_Type.view,
-                                                        ada.containers.Hash_type);
+      function Hash_it is new pointer_Hash (ada_Type.view);
    begin
       return Hash_it (Self.my_Type);
    end to_Hash;

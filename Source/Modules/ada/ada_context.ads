@@ -3,7 +3,7 @@ with
 
      ada.Strings.unbounded,
      ada.Containers.hashed_Maps,
-     ada.unchecked_Conversion;
+     pointer_Hash;
 
 limited
 with
@@ -50,7 +50,7 @@ private
       end record;
 
 
-   function to_Hash is new ada.unchecked_Conversion (ada_Type.view, ada.Containers.Hash_type);
+   function to_Hash is new pointer_Hash (ada_Type.view);
 
    function to_Hash         (Self : in type_Info) return ada.Containers.Hash_type;
 
