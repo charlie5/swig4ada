@@ -51,6 +51,14 @@ begin
      or else hides_another_Type
    then
       dlog (+"Skipping typedef.");
+
+   elsif C."/=" (SwigType_ismemberpointer (SwigType_Pointer (get_Attribute (the_Node, "type"))), 0)
+   then
+      --  A pointer to a class member is no address: one to a function is two words, which the wrapper has
+      --  no type to pass. Until 2026-11-22 such a typedef was an opaque type, and a function which took or
+      --  returned one passed it as an 'int', into which the wrapper wrote the whole of it.
+      --
+      warn (Unsupported, "Unable to bind the type '" & String'(+the_doh_type_Name) & "', as a pointer to a class member is not supported.");
    else
       if         not Self.c_class_Stack.is_Empty
         and then not Self.class_typedef_Names.contains (String'(+the_doh_type_Name))
