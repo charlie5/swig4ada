@@ -104,6 +104,17 @@ cannot be overridden again in Ada.
 derived from directly in Ada.
 <li>A declaration which uses a type that SWIG has not been shown is left out of the
 binding, with a warning.
+<li>A class which is nested in another is bound only where the interface file asks for it
+with <tt>%feature ("flatnested");</tt>, and is then a package of its own beside that of the
+outer class. Without it SWIG ignores the nested class, and whatever uses it is left out
+with a warning; an outer class which has a member of its type is left out altogether.
+<li>A pointer to a class member is not supported: a typedef of one, and whatever takes or
+returns one, is left out with a warning.
+<li>A <tt>using</tt> declaration in a class (<tt>using Base::f;</tt>) is not followed: the
+functions of a base class with no virtual function are reached through the base
+(see <a href="#Ada_inheritance">Inheritance</a>).
+<li>An object which C++ has made cannot be converted to a derived type in Ada, nor tested
+for membership of one (see <a href="#Ada_inheritance">Inheritance</a>).
 <li><tt>std::auto_ptr</tt> is not bound, and <tt>std::unique_ptr</tt> only where an
 instance of it is named with <tt>%template</tt>.
 <li>A binding is generated for one machine. The wrapper file checks the layout of
@@ -316,6 +327,32 @@ A parameter which has no name in the header is called <tt>arg_1</tt>, or
 <tt>arg_&lt;n&gt;</tt> by its place where there are several.
 </p>
 
+<p>
+A function of a variable number of arguments (<tt>int log (const char* fmt, ...);</tt>) is
+bound with the arguments which are named, and with those which <tt>%varargs</tt> names.
+</p>
+
+<p>
+With <tt>%include &lt;typemaps.i&gt;</tt>, a pointer or reference which is marked as an input
+is passed by value, and one which is an output or both stays a pointer:
+</p>
+
+<div class="code"><pre>
+%apply double *INPUT  { double *a, double *b };
+%apply int    *OUTPUT { int *whole };
+
+double add   (double *a, double *b);
+void   split (double x, int *whole);
+</pre></div>
+
+<div class="targetlang"><pre>
+function  add   (a : in Interfaces.C.double;
+                 b : in Interfaces.C.double) return Interfaces.C.double;
+
+procedure split (x     : in Interfaces.C.double;
+                 whole : in swig.Pointers.int_Pointer);
+</pre></div>
+
 <H3><a name="Ada_variables">41.4.2 Variables and constants</a></H3>
 
 
@@ -344,6 +381,17 @@ shape_count : aliased Interfaces.C.int;
 <p>
 A constant whose value cannot be worked out, and cannot be written as an Ada
 expression (one which uses <tt>?:</tt>, say), is left out with a warning.
+A cast does not stand in the way: <tt>(size_t) 10</tt>, <tt>size_t (10)</tt> and
+<tt>static_cast&lt;size_t&gt; (10)</tt> are each 10.
+</p>
+
+<p>
+A variable is imported by the name which the library knows it by, whatever <tt>%rename</tt>
+calls it in Ada.
+A variable which has no symbol outside its own file cannot be imported: one which is
+<tt>static</tt> and, in C++, one which is constant and not <tt>extern</tt>.
+Where its value is worked out it is a constant of that value (a number, a
+<tt>bool</tt>, a <tt>char</tt>), and otherwise it is left out with a warning.
 </p>
 
 <H3><a name="Ada_enums">41.4.3 Enumerations</a></H3>
@@ -510,6 +558,17 @@ Protected members are bound too, and private data members are present as compone
 that the record has its right size.
 A static member function is a function of the package with no <tt>Self</tt>, and a
 static member variable is a variable of the package.
+A static member which is constant and has its value in the class
+(<tt>static const int limit = 16;</tt>, and likewise one of a <tt>bool</tt>, a
+<tt>char</tt> or an enumeration, or one which is <tt>constexpr</tt>) is a constant with
+that value, as C++ need give it no symbol.
+</p>
+
+<p>
+A friend function which is defined in a class is a function of
+<tt>shapes.Binding</tt>, like any function which is no member.
+A typedef which a class declares, of a number or an enumeration, is a subtype in the
+package of the class.
 </p>
 
 <H3><a name="Ada_constructors">41.5.2 Constructors and destructors</a></H3>
@@ -596,6 +655,8 @@ end;
 </pre></div>
 
 <p>
+This is so whether or not the result is declared constant
+(<tt>const Label make_label ();</tt>).
 A class which is a plain record is returned as an ordinary function result.
 </p>
 
@@ -650,6 +711,26 @@ A base class which is not the parent of the Ada type (a base with no virtual fun
 or a second base with them) is reached through a function <tt>as_&lt;base&gt;</tt>,
 which returns a pointer to that part of the object.
 A class with no virtual function has each base class as a component, named after it.
+The functions of such a base are therefore called on the base:
+<tt>Base.width (Derived.as_Base (the_Object).all)</tt>.
+</p>
+
+<p>
+A base class may have a function which takes or returns a pointer to a class that is
+derived from it.
+The package of the base then has only a limited view of that of the derived class, and
+names the pointer as <tt>access shapes.Circle.Item'Class</tt>.
+</p>
+
+<p>
+An object which C++ has made (one which a function of the library returns by pointer) is
+used through the class-wide type, or through a pointer of its own class which the library
+gives.
+It cannot be converted to a derived type in Ada
+(<tt>Circle.Item (the_Shape.all)</tt>), nor tested for membership of one: GNAT checks
+a tag which such an object has not, and raises <tt>Constraint_Error</tt>.
+Where the library has a function which narrows a pointer (a <tt>dynamic_cast</tt>),
+that is the way to reach the derived class.
 </p>
 
 <H3><a name="Ada_deriving">41.5.5 Deriving from a C++ class in Ada</a></H3>
@@ -708,15 +789,24 @@ Overloaded functions keep their one name in Ada, which overloads too.
 Of two functions which Ada cannot tell apart (which differ only in a <tt>const</tt>, say),
 SWIG warns as it does for other languages, and the later one is left out.
 Default arguments give one function for each number of arguments.
-An operator is a function with a name (<tt>operator-&gt;</tt> is <tt>dereference</tt>).
+An operator is a function with a name: <tt>operator-&gt;</tt> is <tt>dereference</tt>,
+<tt>operator()</tt> is <tt>Functor</tt>, and where the interface file renames the others as
+upstream's examples do, <tt>operator+</tt> is <tt>Plus</tt> and <tt>operator==</tt> is
+<tt>EqualEqual</tt>.
+One which is a friend of its class is a function of <tt>shapes.Binding</tt> with both
+operands as parameters, and one which returns an object gives it through <tt>Result</tt>.
 </p>
 
 <p>
 A template is bound once an instance of it is named with <tt>%template</tt>; the
-instance is then a class like any other.
+instance is then a class like any other, with the name which <tt>%template</tt> gives it.
+The <tt>%template</tt> line may follow the functions which use the instance, as it does
+where a header is included first.
 Namespaces are not reflected in the package names: a class <tt>geometry::Box</tt> is
 the package <tt>shapes.Box</tt>.
 The names which are imported from C++ take account of them.
+A typedef which a <tt>using</tt> declaration brings into another namespace, or which a class
+template declares, is followed to the type which it stands for.
 </p>
 
 <H3><a name="Ada_references">41.5.7 References</a></H3>
@@ -737,6 +827,8 @@ its class leaves an object which has been moved from, and must still be destruct
 with the layout of the GNU libstdc++ string, with functions to make one from a
 <tt>char_array</tt> and to read it (<tt>to_std_String</tt>, <tt>to_Ada</tt>,
 <tt>c_str</tt>, <tt>Length</tt>, <tt>assign</tt>, <tt>destruct</tt>).
+The functions which that package needs are added to the wrapper wherever a binding uses
+a string, whether or not the interface file includes <tt>std_string.i</tt>.
 </p>
 
 <p>
@@ -749,6 +841,13 @@ any other class template, so an instance must be named:
 %include &lt;std_vector.i&gt;
 %template (int_Vector) std::vector&lt;int&gt;;
 </pre></div>
+
+<p>
+A container is a class which C++ constructs, so it is a limited record.
+<tt>std::pair</tt> and <tt>std::complex</tt> are plain records, which may be assigned and
+are returned as function results.
+The streams (<tt>std_iostream.i</tt>, <tt>std_sstream.i</tt>) are used by pointer only.
+</p>
 
 <p>
 <tt>swigmove.i</tt> and <tt>std_unique_ptr.i</tt> are provided for objects which can be
