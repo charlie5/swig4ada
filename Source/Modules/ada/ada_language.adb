@@ -6,6 +6,7 @@ with
      ada_Language.Forge,
 
      ada_Utility,
+     cpp_Mangling,
      Logger,
 
      swig_Core.Binding,
@@ -144,7 +145,8 @@ is
 
    function  is_a_function_Pointer (swig_Type : in doh_swigType) return Boolean;
    function  returns_a_cpp_constructed_Type (Self : access Item;   the_Node : in doh_Node) return Boolean;
-   function  cpp_Symbol (qualified_Name : in String;   Suffix : in String) return String;
+   function  cpp_Symbol (qualified_Name : in String;   Suffix : in String) return String
+     renames cpp_Mangling.Symbol;
    procedure bind_constructors_of_abstract_Class (Self : access Item;   the_Class : in Node_Pointer);
    procedure bind_other_base_Classes             (Self : access Item;   the_Class : in Node_Pointer);
    procedure add_hidden_Members                  (Self : access Item;   Before    : in Node_Pointer;   of_Class : in Node_Pointer := null);
@@ -1507,11 +1509,6 @@ is
 
 
    procedure bind_constructors_of_abstract_Class (Self : access Item;   the_Class : in Node_Pointer)
-   is separate;
-
-
-
-   function cpp_Symbol (qualified_Name : in String;   Suffix : in String) return String
    is separate;
 
 
