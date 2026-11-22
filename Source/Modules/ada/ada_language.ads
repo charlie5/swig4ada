@@ -311,6 +311,8 @@ private
          f_Init     : swig_Core.Pointers.File_Pointer;
          f_Ada      : swig_Core.Pointers.File_Pointer;           -- Contains Ada specific C++ declarations and code.
 
+         virtuals_placed_upto : Node_Pointer;                       -- The member of the current class up to which its hidden virtual functions have been given a place.
+         destructor_is_Bound  : Boolean := False;                   -- The destructor of the current class has been handled, or given its places.
          uses_std_Strings  : Boolean := False;                      -- A spec of the module needs 'swig.std_Strings', whose functions the wrapper must then hold.
          all_layout_Checks : Boolean := True;                       -- Check the layout of every class in the wrapper file (unless '-no-check-layout').
 

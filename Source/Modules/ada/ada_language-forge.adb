@@ -22,6 +22,8 @@ is
         := new ada_Language.item' (swigMod.Language.construct with
 
                                    new_Modules           => <>,
+                                   virtuals_placed_upto  => null,
+                                   destructor_is_Bound   => False,
                                    uses_std_Strings      => False,
                                    all_layout_Checks     => True,
                                    Package_namespace     => null,

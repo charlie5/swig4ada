@@ -1092,7 +1092,36 @@ is
                         begin
                            while has_Element (Cursor)
                            loop
-                              if is_Bindable (Element (Cursor))
+                              if Element (Cursor).is_Placeholder
+                              then
+                                 --  A virtual function which the core does not hand on (one which is ignored or deleted, or a
+                                 --  destructor which is not public) has its place in the vtable all the same.
+                                 --
+                                 declare
+                                    the_c_Function     : constant c_Function.view := Element (Cursor);
+                                    the_ada_subProgram :          ada_subProgram.view;
+                                 begin
+                                    if to_String (the_c_Function.Name) in "destruct_0" | "destruct"
+                                    then   -- The places of a destructor which is not public keep the names of a destructor.
+                                       the_ada_subProgram := ada_subProgram.new_ada_subProgram
+                                                               (the_c_Function.Name,
+                                                                c_type_Map_of_ada_type.Element (fetch_c_Type (+"void")));
+                                    else
+                                       unbound_Count      := unbound_Count + 1;
+                                       the_ada_subProgram := ada_subProgram.new_ada_subProgram
+                                                               (+("unbound_virtual_" & ada.Strings.fixed.Trim (unbound_Count'Image, ada.Strings.Left)),
+                                                                c_type_Map_of_ada_type.Element (fetch_c_Type (+"void")));
+                                    end if;
+
+                                    the_ada_subProgram.Parameters  := Self.to_ada_Parameters (the_c_Function.Parameters);
+                                    the_ada_subProgram.is_Virtual  := True;
+                                    the_ada_subProgram.is_Abstract := the_c_Function.is_Abstract;
+                                    the_ada_subProgram.link_Symbol := +"unbound";
+
+                                    the_ada_Record.declaration_Package.add (the_ada_subProgram);
+                                 end;
+
+                              elsif is_Bindable (Element (Cursor))
                               then
                                  declare
                                     the_c_Function     : constant c_Function.view     := Element (Cursor);

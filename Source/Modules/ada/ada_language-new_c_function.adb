@@ -173,7 +173,8 @@ begin
             new_Function.is_Virtual  :=          check_Attribute (the_Node, "storage",  "virtual")
                                         and then C."=" (Self.is_smart_Pointer, 0)      -- A function of the class which a smart pointer points to
                                                                                        -- is no virtual function of the smart pointer.
-                                        and then get_Attribute (the_Node, "defaultargs") = null;
+                                        and then get_Attribute (the_Node, "defaultargs") = null
+                                        and then Attribute (the_Node, "feature:extend") = "";     -- A function which '%extend' adds is no member, virtual or not.
 
             new_Function.is_Abstract :=          check_Attribute (the_Node, "abstract", "1")
                                         and then get_Attribute (the_Node, "defaultargs") = null;

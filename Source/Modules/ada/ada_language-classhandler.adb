@@ -422,7 +422,12 @@ begin
 
    add_its_base_Classes;
 
+   Self.virtuals_placed_upto := null;
+   Self.destructor_is_Bound  := False;
+
    Status := swigMod.Language.item (Self.all).classHandler (the_Node);     -- Process all class members.
+
+   add_hidden_Virtuals (Self, before => null);                             -- Those which follow the last member function.
 
    add_hidden_Members (Self, before => null);                              -- Those which follow the last member.
 

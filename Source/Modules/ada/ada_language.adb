@@ -153,6 +153,7 @@ is
    procedure bind_constructors_of_abstract_Class (Self : access Item;   the_Class : in Node_Pointer);
    procedure bind_other_base_Classes             (Self : access Item;   the_Class : in Node_Pointer);
    procedure add_hidden_Members                  (Self : access Item;   Before    : in Node_Pointer;   of_Class : in Node_Pointer := null);
+   procedure add_hidden_Virtuals                 (Self : access Item;   Before    : in Node_Pointer);
    function  wrapper_Symbol                      (Self : access Item;   From      : in String) return unbounded_String;
    procedure bind_unnamed_nested_Classes         (Self : access Item;   the_Class : in Node_Pointer;   outer_Name : in String;   cpp_Name : in String);
    function  member_Variable                     (Self : access Item;   the_Node  : in Node_Pointer;   the_Name   : in String) return c_Variable.view;
@@ -970,6 +971,8 @@ is
       Self.current_c_Node := doh_Node (the_Node);
       locate (doh_Node (the_Node));
 
+      add_hidden_Virtuals (Self, before => the_Node);
+
       set_Attribute (the_Node, "name", Namespace & function_Name);
 
       Status := swigMod.Language.item (Self.all).memberFunctionHandler (the_Node);
@@ -982,11 +985,33 @@ is
                                                   Self.current_c_Class.nameSpace.all'Access,
                                                   is_Destructor => False,
                                                   is_Overriding =>          is_Overriding
-                                                                   and then get_Attribute (the_Node, "defaultargs") = null);     -- Only the form of all its arguments is virtual.
+                                                                   and then get_Attribute (the_Node, "defaultargs") = null     -- Only the form of all its arguments is virtual.
+                                                                   and then Attribute (the_Node, "feature:extend") = ""        -- A function which '%extend' adds is no member, and
+                                                                   and then Attribute (overriding_Value, "feature:extend") = "");     -- neither overrides nor is overridden.
 
          if c_Function."/=" (the_new_Function, null)     -- No function is made for an overload which cannot be told apart in Ada.
          then
             Self.prior_c_Declaration := the_new_Function.all'Access;
+
+         elsif      check_Attribute (the_Node, "storage", "virtual")
+           and then get_Attribute (the_Node, "override")    = null
+           and then get_Attribute (the_Node, "defaultargs") = null
+           and then Attribute (the_Node, "feature:extend")  = ""
+         then
+            --  Such an overload is a virtual function of C++ all the same, and has its place in the vtable.
+            --
+            declare
+               the_Placeholder : constant c_Function.view := c_Function.new_c_Function (+function_Name,
+                                                                                        Self.name_Map_of_c_type.Element (+"void"));
+            begin
+               the_Placeholder.Parameters.append (c_Parameter.new_c_Parameter (the_Name => +"Self",
+                                                                               the_Type => Self.current_c_Class.all'Access));
+               the_Placeholder.is_Virtual     := True;
+               the_Placeholder.is_Abstract    := is_pure_Virtual;
+               the_Placeholder.is_Placeholder := True;
+
+               Self.current_c_Class.nameSpace.add (the_Placeholder.all'Access);
+            end;
          end if;
       end;
 
@@ -1656,6 +1681,115 @@ is
 
    procedure bind_constructors_of_abstract_Class (Self : access Item;   the_Class : in Node_Pointer)
    is separate;
+
+
+
+   procedure add_hidden_Virtuals (Self : access Item;   Before : in Node_Pointer)
+   --
+   --  A tagged type of convention CPP has a place in its vtable for each of its primitive subprograms, in the order
+   --  of their declaration, and that order must be the one in which C++ lays out the virtual functions of the class.
+   --  So a virtual function which the core does not hand on must still have a place: one which the interface file
+   --  ignores, one which is deleted, and a virtual destructor which is not public. For each of those of the current
+   --  class which come before the given member (or all that remain, when it is null), a function is added which only
+   --  holds the place ('is_Placeholder'), and which the transformer makes a primitive 'unbound_virtual_<n>'.
+   --
+   --  A function which overrides takes the place of the one which it overrides, and needs none.
+   --
+   is
+      use type C.int;
+
+      the_Class : constant Node_Pointer := Self.getCurrentClass;
+      the_Child :          Node_Pointer;
+
+      procedure hold_a_Place (For_the : in String;   is_Abstract : in Boolean)
+      is
+         the_Function : constant c_Function.view := c_Function.new_c_Function (+For_the,
+                                                                               Self.name_Map_of_c_type.Element (+"void"));
+      begin
+         the_Function.Parameters.append (c_Parameter.new_c_Parameter (the_Name => +"Self",
+                                                                      the_Type => Self.current_c_Class.all'Access));
+         the_Function.is_Virtual     := True;
+         the_Function.is_Abstract    := is_Abstract;
+         the_Function.is_Placeholder := True;
+
+         Self.current_c_Class.nameSpace.add (the_Function.all'Access);
+      end hold_a_Place;
+
+      function a_Base_has_a_virtual_Destructor return Boolean
+      is
+      begin
+         for Each of Self.current_c_Class.base_Classes
+         loop
+            if Each.is_Virtual     -- Only the first virtual base class is the parent.
+            then
+               return Each.has_virtual_Destructor;
+            end if;
+         end loop;
+
+         return False;
+      end a_Base_has_a_virtual_Destructor;
+
+   begin
+      if        the_Class = null
+        or else not Self.in_cpp_Mode
+        or else Self.c_class_Stack.is_Empty
+      then
+         return;
+      end if;
+
+      --  Begin after the member up to which this has been done already.
+      --
+      the_Child := (if Self.virtuals_placed_upto = null then first_Child (the_Class)
+                                                        else next_Sibling (Self.virtuals_placed_upto));
+
+      if         Self.virtuals_placed_upto /= null
+        and then Self.virtuals_placed_upto = Before
+      then
+         return;
+      end if;
+
+      while the_Child /= null
+        and then the_Child /= Before
+      loop
+         declare
+            Kind       : constant String  := Attribute (the_Child, "nodeType");
+            is_Virtual : constant Boolean := ada.Strings.fixed.Index (Attribute (the_Child, "storage"), "virtual") /= 0;
+            is_Hidden  : constant Boolean :=        Attribute (the_Child, "feature:ignore") /= ""
+                                            or else Attribute (the_Child, "delete")         /= "";
+         begin
+            if         Kind = "cdecl"
+              and then is_Virtual
+              and then is_Hidden
+              and then get_Attribute (the_Child, "override") = null
+              and then get_Attribute (the_Child, "defaultargs") = null
+            then
+               hold_a_Place (Attribute (the_Child, "name"), is_Abstract => Attribute (the_Child, "abstract") /= "");
+
+            elsif      Kind = "destructor"
+              and then is_Virtual
+              and then (is_Hidden or else Attribute (the_Child, "access") in "protected" | "private")
+              and then not Self.destructor_is_Bound
+              and then not a_Base_has_a_virtual_Destructor
+            then
+               Self.current_c_Class.has_virtual_Destructor;
+               --  They have the names of a destructor which is bound, so that the destructor of a derived class,
+               --  which may be public, overrides them. They are not to be called, as no place holder is.
+               --
+               hold_a_Place ("destruct_0", is_Abstract => False);     -- The destructor of the complete object,
+               hold_a_Place ("destruct",   is_Abstract => False);     -- and the one which frees it too.
+               Self.destructor_is_Bound := True;
+            end if;
+         end;
+
+         Self.virtuals_placed_upto := the_Child;
+         the_Child                 := next_Sibling (the_Child);
+      end loop;
+
+      if Before /= null
+      then
+         Self.virtuals_placed_upto := Before;
+      end if;
+   end add_hidden_Virtuals;
 
 
 

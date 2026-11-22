@@ -30,6 +30,7 @@ is
          is_Virtual    : Boolean := False;
          is_Abstract   : Boolean := False;
          is_Overriding : Boolean := False;
+         is_Placeholder : Boolean := False;     -- A virtual function which is not bound, and only holds its place in the vtable.
 
          is_Constructor    : Boolean := False;
          is_Destructor     : Boolean := False;

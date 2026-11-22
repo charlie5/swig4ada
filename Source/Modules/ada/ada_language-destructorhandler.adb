@@ -51,6 +51,16 @@ begin
    dlog (+"");
    dlog (+"'destructorHandler':");
 
+   add_hidden_Virtuals (Self, before => the_Node);
+
+   if Self.destructor_is_Bound
+   then   -- Its places are held already (a virtual destructor which is not public, then the one which the core adds).
+      unindent_Log;
+      return SWIG_OK;
+   end if;
+
+   Self.destructor_is_Bound := True;
+
    if is_Virtual
    then
       Self.current_c_Class.has_virtual_Destructor;
