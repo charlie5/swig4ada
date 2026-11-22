@@ -1,0 +1,73 @@
+#!/bin/bash
+#
+#  Builds, links and runs, for each case of the suite, a program which does no more than 'with' every spec
+#  of the case. The cases are otherwise only compiled, and a spec is then only checked for its meaning:
+#  here its code is generated, its packages are elaborated, and whatever it refers to (the constructor
+#  which the initialisation of an imported C++ type calls, the functions of a support package) must be
+#  in the wrapper of the case or in the C++ library.
+#
+#  The objects of the wrappers are those which the check of the imported symbols has made
+#  ('unit-build/symbols'), so that check is run first.
+#
+#  Usage:  ./check_links
+#
+#  The cases which fail must be the lines of the file 'expected-link-failures': a case which imports
+#  another module (whose wrapper is not linked with it), and one whose input declares what it does not define.
+#  Exits with a failure status if they are not.
+#
+
+Here=$(cd "$(dirname "$0")" && pwd)
+Repository=$(cd "$Here/../../.." && pwd)
+Objects=$Here/unit-build/symbols
+Build=$Here/unit-build/links
+
+export LC_ALL=C
+
+rm -rf "$Build"
+mkdir -p "$Build"
+
+link_one ()     # <object of a wrapper>
+{
+   Case=$(basename "$1" | sed 's/_wrap\.c.*//')
+   Module=$(echo "$Case" | tr 'A-Z' 'a-z')
+
+   [ -f "$Generated/$Module.ads" ] || return 0     # The module of the case is named otherwise, and is that of another case.
+
+   mkdir -p "$Build/$Case"
+   cd "$Build/$Case" || return 1
+
+   {
+      for Each in "$Generated/$Module.ads" "$Generated/$Module"-*.ads
+      do
+         [ -f "$Each" ] && echo "with $(basename "$Each" .ads | sed 's/-/./g');"
+      done
+
+      echo "procedure Main is begin null; end Main;"
+   } > main.adb
+
+   if gnatmake -q -gnat2022 -gnatws -I"$Generated" -I"$Repository" main.adb -largs "$1" -lstdc++ -lm > log.txt 2>&1 && ./main >> log.txt 2>&1
+   then
+      rm -rf "$Build/$Case"     # Only what fails is kept.
+   else
+      echo "$Case"
+   fi
+}
+
+export -f link_one
+export Generated=$Here/generated Build Repository
+
+ls "$Objects"/*.o | xargs -P "$(nproc)" -I{} bash -c 'link_one {}' | sort > "$Build/failures.txt"
+
+echo "Cases linked: $(ls "$Objects"/*.o | wc -l), of which fail: $(wc -l < "$Build/failures.txt")."
+echo "Differences from the cases which are expected to fail (<), if any:"
+
+if ! diff "$Here/expected-link-failures" "$Build/failures.txt"
+then
+   for Each in $(comm -13 "$Here/expected-link-failures" "$Build/failures.txt")
+   do
+      echo "--- $Each"
+      grep -h "error\|undefined\|raised" "$Build/$Each/log.txt" | head -6 | cut -c1-200
+   done
+
+   exit 1
+fi

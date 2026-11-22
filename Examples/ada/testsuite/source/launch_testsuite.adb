@@ -110,6 +110,77 @@ is
    function Contents (of_File : in String) return String;
 
 
+   --  What the tool is made of when a run is made: a checksum of the tool and of each file of its library.
+   --
+   Tool_checksum : constant String :=   "{ sha256sum ../../../ada-build/swig4ada;"
+                                      & " find ""$(../../../ada-build/swig4ada -swiglib)"" -type f | sort | xargs sha256sum; }"
+                                      & " | sha256sum | cut -d' ' -f1";
+
+
+   procedure note_the_Run (Failures : in Natural;   is_Whole : in Boolean)
+   --
+   --  Notes how a run ended, and with which tool, so that its specs and wrappers may be accepted as the baseline.
+   --
+   is
+      the_Note : File_Type;
+   begin
+      create   (the_Note, out_File, "generated/last-run");
+      put_Line (the_Note, (if not is_Whole then "partial" elsif Failures = 0 then "passed" else "failed"));
+      close    (the_Note);
+
+      if not run (Tool_checksum & " > generated/last-run.tool", "/dev/null")
+      then
+         raise Program_Error with "Unable to take the checksum of the tool.";
+      end if;
+   end note_the_Run;
+
+
+
+   procedure accept_the_Baseline
+   --
+   --  Makes the specs and wrappers of the last run the baseline ('./launch_testsuite accept'), without running the suite
+   --  again. The run must have been of the whole suite, must have failed in nothing but its differences from the
+   --  baseline, and must have been made with the tool and library as they are now.
+   --
+   is
+      procedure refuse (Reason : in String)
+      is
+      begin
+         put_Line ("The baseline is not changed: " & Reason);
+         ada.Command_Line.set_exit_Status (ada.Command_Line.Failure);
+      end refuse;
+
+   begin
+      if        not ada.Directories.exists ("generated/last-run")
+        or else not ada.Directories.exists ("generated/last-run.tool")
+        or else not ada.Directories.exists ("generated/specs.sha")
+      then
+         refuse ("there is no run of the suite to accept. Run './launch_testsuite' first.");
+
+      elsif Index (Contents ("generated/last-run"), "partial") /= 0
+      then
+         refuse ("the last run was of a part of the suite.");
+
+      elsif Index (Contents ("generated/last-run"), "passed") = 0
+      then
+         refuse ("the last run failed in more than its differences from the baseline.");
+
+      elsif not run ("[ ""$(" & Tool_checksum & ")"" = ""$(cat generated/last-run.tool)"" ]", "/dev/null")
+      then
+         refuse ("the tool or its library has changed since the last run (or 'SWIG_LIB' names another library). Run './launch_testsuite' again.");
+
+      elsif not run (  "cp generated/specs.sha baseline.sha"
+                     & " && rm -rf baseline && mkdir baseline && cp generated/*.ads generated/*_wrap.c generated/*_wrap.cxx baseline/",
+                     "/dev/null")
+      then
+         refuse ("the generated specs could not be copied.");
+
+      else
+         put_Line ("The specs and wrappers of the last run are now the baseline.");
+      end if;
+   end accept_the_Baseline;
+
+
 
    procedure check_against_Baseline
    --
@@ -117,8 +188,9 @@ is
    --
    --  'baseline.sha' holds a checksum of each spec of the baseline, and is kept with the sources. The specs themselves
    --  are kept in the 'baseline' folder, which is not: where it is present, 'generated/baseline-changes.log' shows how
-   --  each changed spec differs. Both are made anew by './launch_testsuite accept', once the changes have been looked
-   --  at and are as they should be. (The specs are pretty printed, so another version of 'gnatpp' may change them all.)
+   --  each changed spec differs. Both are made anew by './launch_testsuite accept' ('accept_the_Baseline'), once the
+   --  changes have been looked at and are as they should be. (The specs are pretty printed, so another version of
+   --  'gnatpp' may change them all.)
    --
    is
       Step_Log : constant String := "generated/baseline-step.log";
@@ -126,20 +198,6 @@ is
       if not run ("cd generated && sha256sum *.ads *_wrap.c *_wrap.cxx > specs.sha", Step_Log)
       then
          raise Program_Error with "Unable to take the checksums of the generated specs.";
-      end if;
-
-      if ada.Command_Line.Argument_Count = 1 and then ada.Command_Line.Argument (1) = "accept"
-      then
-         if not run (  "cp generated/specs.sha baseline.sha"
-                     & " && rm -rf baseline && mkdir baseline && cp generated/*.ads generated/*_wrap.c generated/*_wrap.cxx baseline/",
-                     Step_Log)
-         then
-            raise Program_Error with "Unable to keep the generated specs as the baseline.";
-         end if;
-
-         new_Line;
-         put_Line ("The generated specs and wrappers are now the baseline.");
-         return;
       end if;
 
       if not ada.Directories.exists ("baseline.sha")
@@ -598,6 +656,12 @@ is
 
 
 begin
+   if ada.Command_Line.Argument_Count = 1 and then ada.Command_Line.Argument (1) = "accept"
+   then
+      accept_the_Baseline;
+      return;
+   end if;
+
    --  The specs and wrappers of an earlier run are removed, so that one which is no longer generated is seen
    --  to be gone, and is neither compiled nor counted. A run of a part of the suite leaves them.
    --
@@ -1604,6 +1668,12 @@ begin
       if do_C and do_Cxx     -- The symbols are those of the wrappers of the cases.
       then
          check_the_imported_Symbols;
+
+         --  The cases are compiled, and so a spec is only checked for its meaning. './check_links' builds, links and
+         --  runs a program for each case which 'with's every spec of it, with the object of its wrapper (which the
+         --  check above has made): whatever a spec refers to must then be there.
+         --
+         run_Step ("that the specs of each case build and link", "./check_links");
       end if;
    end if;
 
@@ -1688,6 +1758,9 @@ begin
    put_Line ("Examples which fail:          " & example_Failures'Image);
 
    new_Line;
+
+   note_the_Run (Failures => generator_Failures + syntax_Failures + wrapper_Failures + compile_Failures + runtime_Failures + unit_Failures + example_Failures,
+                 is_Whole => do_C and do_Cxx and do_Newer and do_Older and do_Units and do_Examples and check_Baseline);
 
    if generator_Failures + syntax_Failures + wrapper_Failures + compile_Failures + runtime_Failures + unit_Failures + example_Failures + baseline_Changes = 0
    then
