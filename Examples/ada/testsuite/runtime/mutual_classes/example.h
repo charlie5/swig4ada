@@ -21,3 +21,25 @@ public:
   int  pet_age   ()              { return pet ? pet->age : -1; }
   Pet  first_pet ()              { return *pet; }     // Returns the other class by value.
 };
+
+/* A base class which knows of the class that is derived from it. */
+
+class Leaf;
+
+class Node {
+public:
+  int depth;
+  Node () : depth (1) {}
+  virtual ~Node () {}
+  virtual int weight ()   { return 1; }
+  Leaf* as_leaf ();                         // Returns a pointer to the derived class.
+};
+
+class Leaf : public Node {
+public:
+  int value;
+  Leaf () : value (9) {}
+  virtual int weight ()   { return 5; }
+};
+
+inline Leaf* Node::as_leaf ()   { return dynamic_cast <Leaf*> (this); }

@@ -11,6 +11,3 @@ public:
 
 inline int drain  (Source<int>* s, int count)   { int total = 0;  for (int i = 0; i < count; i++) total += s->next ();  return total; }
 inline int sources_alive ()                     { return Source<int>::alive; }
-
-/* Made by C++, and freed by the destructor which Ada calls. */
-inline Tracked<Whole>* new_tracked (int v)   { return new Tracked<Whole> (v); }

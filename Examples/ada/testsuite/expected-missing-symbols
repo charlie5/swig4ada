@@ -1,13 +1,9 @@
-_Z17ConstGlobalStringB5cxx11
-_Z18g_last_constructedB5cxx11
-_Z7aStringB5cxx11
+Ada_do_test
 _ZN13module_traits8categoryE
 _ZN16interface_traits12polarizationE
 _ZN1B16should_be_stringE
 _ZN3fooIdE4testE
 _ZN3fooIiE4testE
-_ZN3ns13ns23oneE
-_ZN3ns13ns23twoE
 _ZN3ns16Traits1cE
 _ZN3oss6ModuleINS_7etraitsEE1PE
 _ZN3oss6traits5pmodeE
@@ -25,3 +21,7 @@ _ZN6SizeOfIiE4sizeE
 _ZN6SizeOfIiiE4sizeE
 _ZN6SizeOfIiiiE4sizeE
 _ZN7etraits5pmodeE
+_ZSt3cin
+_ZSt4cerr
+_ZSt4clog
+unbound

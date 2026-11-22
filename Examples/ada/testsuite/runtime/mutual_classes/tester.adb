@@ -1,6 +1,8 @@
 with
      mutual_classes.Owner,
      mutual_classes.Pet,
+     mutual_classes.Node,
+     mutual_classes.Leaf,
 
      interfaces.C,
 
@@ -33,6 +35,20 @@ begin
    the_Pet.age := 4;
    check (Owner.get_pet (the_Owner).age = 4,      "a change to the pet is seen through the owner");
    check (Owner.first_pet (the_Owner).age = 4,    "the other class is returned by value");
+
+   a_base_class_which_knows_its_derived_Class :
+   declare
+      the_Node : aliased Node.Item := Node.construct;
+      the_Leaf : aliased Leaf.Item := Leaf.construct;
+   begin
+      check (Node.as_leaf (the_Node'Access) = null,          "a base class returns a pointer to its derived class, which is null for a plain object");
+      check (Node.as_leaf (the_Leaf'Access) /= null,         "and points to the object where it is of the derived class");
+      check (Leaf.Item (Node.as_leaf (the_Leaf'Access).all).value = 9,   "whose members are read through it");
+      check (Node.as_leaf (the_Leaf'Access).weight = 5,      "and whose function dispatches");
+
+      Leaf.destruct_0 (the_Leaf);
+      Node.destruct_0 (the_Node);
+   end a_base_class_which_knows_its_derived_Class;
 
    finish;
 end Tester;

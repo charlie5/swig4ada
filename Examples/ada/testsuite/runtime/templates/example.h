@@ -46,3 +46,9 @@ public:
   virtual ~Tracked ()          { tracked_alive ()--; }
   virtual T get ()             { return value; }
 };
+
+/* Functions which use instances ahead of the '%template' lines which name them, as a header does. */
+inline Tracked<Whole>* new_tracked (int v)                  { return new Tracked<Whole> (v); }     // Made by C++, and freed by the destructor which Ada calls.
+inline Pair<int>       pair_of     (int a, int b)           { Pair<int> p;  p.first = a;  p.second = b;  return p; }
+inline int             difference  (const Pair<int>& p)     { return p.first - p.second; }
+inline long            first_of    (Ring<long, 8>* r)       { return r->get (0); }

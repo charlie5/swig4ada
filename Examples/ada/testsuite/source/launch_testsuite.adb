@@ -525,24 +525,28 @@ is
 
    procedure check_the_imported_Symbols
    --
-   --  A spec imports some entities by their C++ symbol (a virtual destructor, a static member variable, a variable in
-   --  a namespace), which the tool makes itself. A symbol which is wrong is found only when a program is linked, and the
-   --  cases are not. So each C++ wrapper is compiled to an object, with every inline function kept, and each symbol
-   --  which a spec imports must be one which some object defines or refers to.
+   --  A spec imports each entity by a symbol: a function of the wrapper file, a variable of the library, or the C++
+   --  symbol of a virtual destructor, a static member variable or a variable in a namespace, which the tool makes
+   --  itself. A symbol which is wrong is found only when a program is linked, and the cases are not. So each wrapper
+   --  is compiled to an object (a C++ one with every inline function kept), and each symbol which a spec imports
+   --  must be one which some object defines or refers to.
    --
    --  Those which are in none are compared with the file 'expected-missing-symbols': they are entities which the
    --  test inputs declare and do not define, or whose symbol cannot be told from what swig knows (see CLAUDE.md).
    --
    is
-      Build : constant String := "../unit-build/symbols";
+      Build    : constant String := "../unit-build/symbols";
+      Includes : constant String := " -w -I../../../test-suite -I. {} -o " & Build & "/{}.o 2> /dev/null || true'";
+      Imports  : constant String :=   "while (/pragma\s+(?:Import|CPP_Constructor)\s*\([^;]*?""([A-Za-z_]\w*)""\s*\)\s*;/gsi) { print ""$1\n"" }"
+                                    & " while (/External_Name\s*=>\s*""([A-Za-z_]\w*)""/gs) { print ""$1\n"" }";
    begin
-      run_Step ("that the C++ symbols which the specs import exist",
+      run_Step ("that the symbols which the specs import exist",
                   "cd generated && rm -rf " & Build & " && mkdir -p " & Build
                 & " && export LC_ALL=C"
-                & " && ls *_wrap.cxx | xargs -P $(nproc) -I{} sh -c"
-                &    " 'g++ -c -fno-access-control -fkeep-inline-functions -w -I../../../test-suite -I. {} -o " & Build & "/{}.o 2> /dev/null || true'"
-                & " && for Each in " & Build & "/*.o; do nm $Each; done | awk '{print $NF}' | grep '^_Z' | sort -u > " & Build & "/emitted.txt"
-                & " && grep -ho '""_Z[A-Za-z0-9_]*""' *.ads | tr -d '""' | sort -u > " & Build & "/imported.txt"
+                & " && ls *_wrap.cxx | xargs -P $(nproc) -I{} sh -c 'g++ -c -fno-access-control -fkeep-inline-functions" & Includes
+                & " && ls *_wrap.c   | xargs -P $(nproc) -I{} sh -c 'gcc -c -std=gnu17" & Includes
+                & " && for Each in " & Build & "/*.o; do nm $Each; done | awk '{print $NF}' | sort -u > " & Build & "/emitted.txt"
+                & " && perl -0ne '" & Imports & "' *.ads | sort -u > " & Build & "/imported.txt"
                 & " && comm -23 " & Build & "/imported.txt " & Build & "/emitted.txt > " & Build & "/missing.txt"
                 & " && echo ""Imported: $(wc -l < " & Build & "/imported.txt), of which missing: $(wc -l < " & Build & "/missing.txt)."""
                 & " && echo 'Differences from the symbols which are expected to be missing (<), if any:'"
@@ -578,6 +582,19 @@ is
 
 
 begin
+   --  The specs and wrappers of an earlier run are removed, so that one which is no longer generated is seen
+   --  to be gone, and is neither compiled nor counted. A run of a part of the suite leaves them.
+   --
+   if do_C and do_Cxx and do_Newer and do_Older
+   then
+      ada.Directories.create_Path ("generated");
+
+      if not run ("rm -f generated/*.ads generated/*_wrap.c generated/*_wrap.cxx", "/dev/null")
+      then
+         put_Line ("Unable to clear the 'generated' folder.");
+      end if;
+   end if;
+
    --------------
    --- Compilable
    --
@@ -1568,7 +1585,7 @@ begin
       check_the_layout_Assertions;
       check_the_Bootstrap;
 
-      if do_Cxx     -- The symbols are those of the wrappers of the C++ cases.
+      if do_C and do_Cxx     -- The symbols are those of the wrappers of the cases.
       then
          check_the_imported_Symbols;
       end if;

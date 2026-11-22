@@ -1,0 +1,1 @@
+example.h:12: Warning 861: Unable to bind the variable 'the_title', which has no symbol outside its file, being 'static' or constant, and no value which can be worked out.

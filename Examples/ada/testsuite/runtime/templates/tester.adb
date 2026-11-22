@@ -99,5 +99,18 @@ begin
       check (tracked_count = 0,                              "and the destructor which frees an object made by C++");
    end a_virtual_instance_which_is_not_named_as_Cpp_names_it;
 
+   instances_used_ahead_of_their_template_lines :
+   declare
+      the_Pair : aliased int_Pair.Item := pair_of (9, 4);
+      the_Ring : aliased long_Ring_8.Item;
+      Value    : aliased long := 77;
+   begin
+      check (the_Pair.first = 9 and the_Pair.second = 4,     "an instance is returned by a function which is declared ahead of its '%template'");
+      check (difference (the_Pair'unchecked_Access) = 5,     "and is taken by reference");
+
+      long_Ring_8.put (the_Ring, Value'unchecked_Access);
+      check (first_of (the_Ring'unchecked_Access) = 77,      "an instance with a default argument is taken by pointer");
+   end instances_used_ahead_of_their_template_lines;
+
    finish;
 end Tester;
