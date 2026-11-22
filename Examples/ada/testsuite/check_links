@@ -11,8 +11,10 @@
 #
 #  Usage:  ./check_links
 #
-#  The cases which fail must be the lines of the file 'expected-link-failures': a case which imports
-#  another module (whose wrapper is not linked with it), and one whose input declares what it does not define.
+#  A case which imports another module is linked with the wrapper of that module too.
+#
+#  The cases which fail must be the lines of the file 'expected-link-failures': one whose input declares
+#  what it does not define.
 #  Exits with a failure status if they are not.
 #
 
@@ -45,7 +47,41 @@ link_one ()     # <object of a wrapper>
       echo "procedure Main is begin null; end Main;"
    } > main.adb
 
-   if gnatmake -q -gnat2022 -gnatws -I"$Generated" -I"$Repository" main.adb -largs "$1" -lstdc++ -lm > log.txt 2>&1 && ./main >> log.txt 2>&1
+   #  A case which imports another module needs the wrapper of that module too, and of those which it imports
+   #  in its turn. They are the modules, other than its own, which the specs to be linked name in their context.
+   #
+   Wrappers=$1
+   Modules=" $Module "
+   Pending=$Module
+
+   while [ -n "$Pending" ]
+   do
+      Next=
+
+      for Each in $(cat $(for One in $Pending; do ls "$Generated/$One.ads" "$Generated/$One"-*.ads 2> /dev/null; done) \
+                    | grep -i '^\(limited \)\?with ' | sed 's/^limited //I; s/^with *//I; s/[.;].*//' | tr 'A-Z' 'a-z' | sort -u)
+      do
+         case "$Modules" in *" $Each "*) continue ;; esac
+
+         Modules="$Modules$Each "
+         Theirs=$(ls "$Objects/${Each}"_wrap.c*.o 2> /dev/null | head -1)
+
+         if [ -n "$Theirs" ]
+         then
+            Wrappers="$Wrappers $Theirs"
+            Next="$Next $Each"
+         fi
+      done
+
+      Pending=$Next
+   done
+
+   #  They are linked only where the wrapper of the case does not serve alone: two modules whose inputs
+   #  include one header may each define what it holds, and cannot then be linked together.
+   #
+   if {    gnatmake -q -gnat2022 -gnatws -I"$Generated" -I"$Repository" main.adb -largs "$1"      -lstdc++ -lm > log.txt 2>&1 \
+        || gnatmake -q -gnat2022 -gnatws -I"$Generated" -I"$Repository" main.adb -largs $Wrappers -lstdc++ -lm > log.txt 2>&1; } \
+      && ./main >> log.txt 2>&1
    then
       rm -rf "$Build/$Case"     # Only what fails is kept.
    else
@@ -54,7 +90,7 @@ link_one ()     # <object of a wrapper>
 }
 
 export -f link_one
-export Generated=$Here/generated Build Repository
+export Generated=$Here/generated Build Repository Objects
 
 ls "$Objects"/*.o | xargs -P "$(nproc)" -I{} bash -c 'link_one {}' | sort > "$Build/failures.txt"
 

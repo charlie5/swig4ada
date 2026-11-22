@@ -416,11 +416,13 @@ is
 
    procedure run (the_Case : in String;   use_CPP  : in Boolean := True;
                                           Imported : in String  := "";
-                                          Options  : in String  := "")
+                                          Options  : in String  := "";
+                                          Input    : in String  := "")
    --
    --  Generates the binding of a run-time case, builds its tester and runs it. 'Imported' names an
    --  interface file of the case ('base' for 'base.i') whose module the case imports, and which is
-   --  generated first. 'Options' are further options of the generator.
+   --  generated first. 'Options' are further options of the generator. 'Input' is the interface file, as it is
+   --  named from the folder in which the case is built, where it is not the 'example.i' of the case.
    --
    --  The warnings which the Ada module gives (those numbered from 861) must be those of the file
    --  'expected-warnings' of the case, each less the folder of its file. A case with no such file must give none.
@@ -448,7 +450,7 @@ is
                      else   " && " & Generator & " -o ./" & Imported & "_wrap." & Extension
                           & " -I../../runtime/" & the_Case & " ../../runtime/" & the_Case & "/" & Imported & ".i")
                   & " && " & Generator & " -o ./example_wrap." & Extension
-                  &          " -I../../runtime/" & the_Case & " ../../runtime/" & the_Case & "/example.i"
+                  &          " -I../../runtime/" & the_Case & " " & (if Input = "" then "../../runtime/" & the_Case & "/example.i" else Input)
                   & "; } > generate.log 2>&1 || { cat generate.log; false; }"
                   & " && cat generate.log"
                   & " && echo 'Checking the warnings.'"
@@ -467,6 +469,21 @@ is
          put_Line ("   The run-time case failed !");
       end if;
    end run;
+
+
+
+   procedure run_Upstream (the_Case : in String;   use_CPP : in Boolean := True)
+   --
+   --  Runs a case of upstream's suite as a run-time case. Its input is 'Examples/test-suite/<case>.i', and its
+   --  tester, which is written after the test which upstream has for another language, is in 'runtime/up_<case>'.
+   --
+   is
+   begin
+      run ("up_" & the_Case,
+           use_CPP => use_CPP,
+           Options => "-I../../../../test-suite",
+           Input   => "../../../../test-suite/" & the_Case & ".i");
+   end run_Upstream;
 
 
 
@@ -1649,6 +1666,21 @@ begin
       run ("library");             -- Further classes of the standard library: a multiset, a multimap, a complex number, a wide string, the streams.
       run ("library_c",            -- Further library files, in C: parameters which are input or output, the arguments of a program, a file, raw data.
            use_CPP => False);
+
+      --  Cases of upstream's suite, each with a tester written after upstream's test of it for Python.
+      --
+      new_Line;
+      run_Upstream ("using_inherit");             -- Overloads which a derived class redefines, and those of its base.
+      run_Upstream ("ret_by_value");              -- A structure which is returned by value.
+      run_Upstream ("return_const_value");        -- A smart pointer which is returned by value, and as a constant.
+      run_Upstream ("typedef_scope");             -- A typedef of a class with the name of one outside it.
+      run_Upstream ("struct_initialization");     -- Variables which are declared with their structure.
+      run_Upstream ("constover");                 -- Functions which are overloaded on what is constant.
+      run_Upstream ("global_vars");               -- Global variables: a string, a reference, a pointer.
+      run_Upstream ("cpp_enum");                  -- Enumerations of no name, and values which are casts.
+      run_Upstream ("smart_pointer_member");      -- The members of a class, through a smart pointer.
+      run_Upstream ("cpp_static");                -- Static member functions and variables.
+      run_Upstream ("primitive_ref");             -- A reference to each primitive type.
    end if;
 
 

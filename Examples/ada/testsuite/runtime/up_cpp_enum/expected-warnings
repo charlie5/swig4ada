@@ -1,0 +1,2 @@
+cpp_enum.i:92: Warning 863: Unable to evaluate the value 'mytype2(10)' of the enumeration literal 'CASE2B', which is given the value 11.
+cpp_enum.i:92: Warning 863: Unable to evaluate the value 'unknown_to_swig_type(10)' of the enumeration literal 'CASE3B', which is given the value 11.

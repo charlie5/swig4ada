@@ -31,9 +31,11 @@ project Runtime_Test is
    package Compiler is
       for Default_Switches ("ada") use ("-g", "-gnat2022", "-gnata", "-fsanitize=address");
       for Default_Switches ("c++") use ("-g", "-fno-access-control", "-fsanitize=address", "-fno-omit-frame-pointer",
-                                        "-I" & Runtime_Test'Project_Dir & the_Case);
+                                        "-I" & Runtime_Test'Project_Dir & the_Case,
+                                        "-I" & Runtime_Test'Project_Dir & "../../../test-suite");     -- For a case of upstream's suite.
       for Default_Switches ("c")   use ("-g", "-std=gnu17", "-fsanitize=address", "-fno-omit-frame-pointer",
-                                        "-I" & Runtime_Test'Project_Dir & the_Case);
+                                        "-I" & Runtime_Test'Project_Dir & the_Case,
+                                        "-I" & Runtime_Test'Project_Dir & "../../../test-suite");
    end Compiler;
 
    package Linker is
