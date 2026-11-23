@@ -817,6 +817,9 @@ virtual call, and <tt>unbound_virtual_&lt;n&gt;</tt> has its place; it cannot be
 in Ada.
 A member whose type SWIG is never shown is left out, with a warning, and the class is
 still bound: it is then used through a pointer to an object which C++ makes.
+Likewise the virtual functions of a class with a base class which SWIG is never shown
+(<tt>class E : public std::exception</tt>, with no library file for the base) are each
+called through the wrapper, as their places among those of the base are not known.
 An operator is a function with a name: <tt>operator-&gt;</tt> is <tt>dereference</tt>,
 <tt>operator()</tt> is <tt>Functor</tt>, and where the interface file renames the others as
 upstream's examples do, <tt>operator+</tt> is <tt>Plus</tt> and <tt>operator==</tt> is
