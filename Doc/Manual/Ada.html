@@ -502,7 +502,8 @@ C++ treats its objects:
 <li>A class with no virtual function, which declares neither a destructor nor a copy
 constructor (and has no base class or member which does), is a plain record, as a
 structure is. Ada may copy and assign it.
-<li>A class which declares a destructor or a copy constructor is passed and returned by
+<li>A class which declares a destructor, or a copy or move constructor (one which is not
+defaulted), is passed and returned by
 C++ through a hidden pointer. It is a <em>limited</em> record of convention <tt>CPP</tt>:
 Ada can neither copy nor assign it.
 <li>A class with a virtual function is a <em>tagged</em> limited record of convention
