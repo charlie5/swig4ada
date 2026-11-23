@@ -61,7 +61,7 @@ In Ada you could then use it like this:
 
 %define INPUT_TYPEMAP(TYPE, CTYPE, ADATYPE)
 
-  %typemap (ctype)         TYPE  *INPUT,     TYPE  &INPUT               "CTYPE"
+  %typemap (ctype, out="CTYPE *")   TYPE  *INPUT,     TYPE  &INPUT      "CTYPE"     // 'out' is the type of a result, to which the typemap may be applied too.
   %typemap (imtype)        TYPE  *INPUT,     TYPE  &INPUT               "ADATYPE"
   %typemap (adatype)       TYPE  *INPUT,     TYPE  &INPUT               "ADATYPE"
   %typemap (adain)         TYPE  *INPUT,     TYPE  &INPUT               "$adainput"

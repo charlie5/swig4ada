@@ -16,7 +16,15 @@ namespace std {
     
     template<class T> class vector {
       public:
-        
+        // The typedefs of the class, by which a header may name its types ('std::vector<int*>::const_reference').
+        // The members below are declared with the types themselves.
+        typedef size_t        size_type;
+        typedef T             value_type;
+        typedef T*            pointer;
+        typedef const T*      const_pointer;
+        typedef T&            reference;
+        typedef const T&      const_reference;
+
         void*           impl_M_start;
 	void*           impl_M_finish;
 	void*           impl_M_end_of_storage;
