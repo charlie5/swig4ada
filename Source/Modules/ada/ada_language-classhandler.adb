@@ -114,7 +114,7 @@ is
       begin
          while the_Child /= null
          loop
-            if check_Attribute (the_Child, "storage", "virtual")
+            if is_declared_Virtual (the_Child)
             then
                new_c_Class.has_virtual_Members;
                exit;
@@ -141,7 +141,7 @@ is
          while the_Child /= null
          loop
             if         Attribute (the_Child, "nodeType") = "destructor"
-              and then check_Attribute (the_Child, "storage", "virtual")
+              and then is_declared_Virtual (the_Child)
             then
                new_c_Class.has_virtual_Destructor;
                exit;
@@ -179,63 +179,101 @@ is
 
    procedure note_its_nontrivial_Members
    --
-   --  Whether C++ constructs the class.
+   --  Whether C++ constructs the class: whether it is 'not trivial for the purposes of calls', as the Itanium C++
+   --  ABI has it. Such a class is passed and returned through a hidden pointer, and cannot be bound as a plain
+   --  record; any other is passed and returned as a C structure is, in registers where it fits. A class is so
+   --  where its destructor, or its copy or move constructor, is not trivial, or where it can be neither copied
+   --  nor moved. (A base class or a member which is so makes it so too, which 'c_Type.is_constructed_by_Cpp'
+   --  follows.)
+   --
+   --  The class is told by its own declarations. The core's notes ('allocate:has_destructor' and
+   --  'allocate:has_copy_constructor') are wider, for the languages which call through them: they count a
+   --  destructor or a constructor which '%extend' adds, one which is defaulted ('= default', which is trivial),
+   --  a constructor which takes a pointer to the class ('X (X*)') and an instance of a constructor template.
+   --  A class which was taken for the other kind had a constructor which left the object of the caller as it
+   --  was (found by the case 'template_ns' of upstream's suite, and then by './check_calls', 2026-11-23).
    --
    is
-      function declares_a_copy_Constructor return Boolean
-      --
-      --  True where the class declares a copy or a move constructor, as C++ means one: a constructor which takes a
-      --  reference to its own class. The core's note of a copy constructor ('allocate:has_copy_constructor') is
-      --  wider, for the languages which copy through it: it counts a constructor which takes a pointer to the class
-      --  ('X (X*)') and an instance of a constructor template ('template <class U> X (const X<U>&)', named by
-      --  '%template' in an '%extend'), neither of which C++ takes for one. A class with such a constructor alone is
-      --  returned in registers, and a constructor which took it for a class that C++ constructs left the object
-      --  as it was (found by the case 'template_ns' of upstream's suite, 2026-11-23).
-      --
-      is
-         the_Child : Node_Pointer := first_Child (the_Node);
-      begin
-         while the_Child /= null
-         loop
-            if         Attribute (the_Child, "nodeType") = "constructor"
-              and then get_Attribute (the_Child, "template")       = null
-              and then Attribute (the_Child, "feature:extend")     = ""
-              and then get_Attribute (the_Child, "parms")         /= null
-              and then Attribute (the_Child, "value") not in "default" | "delete"     -- One which is defaulted is trivial, and one which is deleted is none.
+      the_Name   : constant String := Attribute (the_Node, "name");
+      the_Child  : Node_Pointer    := first_Child (the_Node);
+
+      declares_a_Destructor : Boolean := False;     -- One which is not defaulted.
+      declares_a_Copy       : Boolean := False;     -- A copy constructor which is neither defaulted nor deleted.
+      declares_a_Move       : Boolean := False;     -- A move constructor, likewise.
+      has_a_usable_Copy     : Boolean := False;     -- One which is declared and not deleted, defaulted or not.
+      has_a_usable_Move     : Boolean := False;
+      deletes_its_Copy      : Boolean := False;
+      deletes_its_Move      : Boolean := False;
+   begin
+      if not Self.in_cpp_Mode
+      then
+         return;     -- In C, a destructor can only be one which the interface file adds.
+      end if;
+
+      while the_Child /= null
+      loop
+         declare
+            Kind   : constant String := Attribute (the_Child, "nodeType");
+            Value  : constant String := Attribute (the_Child, "value");
+         begin
+            if         Kind = "destructor"
+              and then Attribute (the_Child, "feature:extend") = ""
+              and then get_Attribute (the_Node, "allocate:implicit_destructor") = null     -- Not one which the core adds.
+              and then Value /= "delete"                             -- An object of such a class is never passed or returned by value.
+              and then (        Value /= "default"
+                        or else is_declared_Virtual (the_Child))     -- A virtual one is never trivial.
+            then
+               declares_a_Destructor := True;
+
+            elsif      Kind = "constructor"
+              and then get_Attribute (the_Child, "template")     = null
+              and then Attribute (the_Child, "feature:extend")   = ""
+              and then get_Attribute (the_Child, "parms")       /= null
+              and then next_Sibling (Node_Pointer (get_Attribute (the_Child, "parms"))) = null
             then
                declare
-                  the_Type : constant String := Attribute (Node_Pointer (get_Attribute (the_Child, "parms")), "type");
+                  the_Type : constant String  := Attribute (Node_Pointer (get_Attribute (the_Child, "parms")), "type");
+                  is_Copy  : constant Boolean :=          Attribute (the_Child, "copy_constructor") /= ""
+                                                 and then get_Attribute (the_Node, "allocate:has_copy_constructor") /= null     -- Not one which the core adds ('%copyctor').
+                                                 and then the_Type'Length >= 2
+                                                 and then the_Type (the_Type'First .. the_Type'First + 1) = "r.";
+                  is_deleted_Copy : constant Boolean :=          Value = "delete"
+                                                        and then the_Type in "r.q(const)." & the_Name | "r." & the_Name;
+                  is_Move  : constant Boolean := the_Type in "z." & the_Name | "z.q(const)." & the_Name;
                begin
-                  if        (         Attribute (the_Child, "copy_constructor") /= ""
-                             and then get_Attribute (the_Node, "allocate:has_copy_constructor") /= null     -- Not one which the core adds ('%copyctor').
-                             and then the_Type'Length >= 2
-                             and then the_Type (the_Type'First .. the_Type'First + 1) = "r.")
-                    or else (         the_Type'Length >= 2
-                             and then the_Type (the_Type'First .. the_Type'First + 1) = "z."
-                             and then (   the_Type = "z." & Attribute (the_Node, "name")
-                                       or the_Type = "z.q(const)." & Attribute (the_Node, "name"))
-                             and then next_Sibling (Node_Pointer (get_Attribute (the_Child, "parms"))) = null)
+                  if is_Copy or is_deleted_Copy
                   then
-                     return True;
+                     if    Value = "delete"  then deletes_its_Copy  := True;
+                     elsif Value = "default" then has_a_usable_Copy := True;
+                     else                         has_a_usable_Copy := True;
+                                                  declares_a_Copy   := True;
+                     end if;
+
+                  elsif is_Move
+                  then
+                     if    Value = "delete"  then deletes_its_Move  := True;
+                     elsif Value = "default" then has_a_usable_Move := True;
+                     else                         has_a_usable_Move := True;
+                                                  declares_a_Move   := True;
+                     end if;
                   end if;
                end;
             end if;
+         end;
 
-            the_Child := next_Sibling (the_Child);
-         end loop;
+         the_Child := next_Sibling (the_Child);
+      end loop;
 
-         return False;
-      end declares_a_copy_Constructor;
-
-   begin
-      --  Note whether the class declares a destructor or a copy constructor. C++ passes and returns such a
-      --  class by reference, so it cannot be bound as a plain record. (The core notes a destructor on the class. It
-      --  adds one to a class which declares none, and then notes that too, as 'allocate:implicit_destructor'.)
+      --  A class which deletes its copy constructor has no move constructor unless it declares one, and one which
+      --  deletes its move constructor has no copy constructor unless it declares one: it can then be neither
+      --  copied nor moved.
       --
-      if         Self.in_cpp_Mode     -- In C, a destructor can only be one which the interface file adds.
-        and then (        (         get_Attribute (the_Node, "allocate:has_destructor")      /= null
-                           and then get_Attribute (the_Node, "allocate:implicit_destructor")  = null)
-                  or else declares_a_copy_Constructor)
+      if        declares_a_Destructor
+        or else declares_a_Copy
+        or else declares_a_Move
+        or else get_Attribute (the_Node, "has_virtual_base") /= null     -- Whose place the constructors of the class must set.
+        or else (deletes_its_Copy and not has_a_usable_Move)
+        or else (deletes_its_Move and not has_a_usable_Copy)
       then
          new_c_Class.has_nontrivial_Members;
       end if;
@@ -361,7 +399,7 @@ is
                                    or else Attribute (the_Child, "hasvalue") /= ""))
 
                      or (         the_Kind = "cdecl"                                      -- A virtual function.
-                         and then Attribute (the_Child, "storage") = "virtual")
+                         and then is_declared_Virtual (the_Child))
                   then
                      new_c_Class.is_not_layout_Pod;
                   end if;
@@ -479,7 +517,7 @@ is
                         Unused := DohSetattr (DOH_Pointer (the_Member), DOH_Pointer (to_Doh ("decl")), the_Decl);
                      end if;
 
-                  elsif ada.Strings.fixed.Index (Storage, "virtual") /= 0
+                  elsif is_declared_Virtual (the_Member)
                   then
                      --  A virtual function is collected too, with no function of the wrapper: a function of this module
                      --  which overrides it must have its parameter and result types, which may be written otherwise in

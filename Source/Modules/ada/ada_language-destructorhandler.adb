@@ -8,8 +8,7 @@ is
    the_Node : doh_Node renames N;
 
    Status        :          C.int with Unreferenced;
-   Storage       : constant String  := Attribute (the_Node, "storage");
-   is_Virtual    : constant Boolean := Storage = "virtual";
+   is_Virtual    : constant Boolean := is_declared_Virtual (the_Node);
    is_Overriding :          Boolean := False;
 
    destruct_Symbol : unbounded_String;     -- The function of the wrapper which destructs an object, where there is one.

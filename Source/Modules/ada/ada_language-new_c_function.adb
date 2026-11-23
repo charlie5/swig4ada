@@ -170,7 +170,7 @@ begin
             --  that of all its arguments. The others are not virtual in Ada either: each would be a primitive with a
             --  place of its own in the vtable, and every virtual function after it would then be out of its place.
             --
-            new_Function.is_Virtual  :=          check_Attribute (the_Node, "storage",  "virtual")
+            new_Function.is_Virtual  :=          is_declared_Virtual (the_Node)
                                         and then C."=" (Self.is_smart_Pointer, 0)      -- A function of the class which a smart pointer points to
                                                                                        -- is no virtual function of the smart pointer.
                                         and then get_Attribute (the_Node, "defaultargs") = null

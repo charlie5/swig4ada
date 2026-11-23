@@ -145,6 +145,14 @@ is
 
    function  is_a_function_Pointer (swig_Type : in doh_swigType) return Boolean;
    function  returns_a_cpp_constructed_Type (Self : access Item;   the_Node : in doh_Node) return Boolean;
+
+   function is_declared_Virtual (the_Node : in Node_Pointer) return Boolean
+   is (ada.Strings.fixed.Index (Attribute (the_Node, "storage"), "virtual") /= 0);
+   --
+   --  True for a member which is declared virtual. Its storage may name more than that ('virtual constexpr', of
+   --  C++20), so it is not compared with the one word. (Until 2026-11-23 it was, and a class whose one virtual
+   --  function was such a destructor was bound as a record with no tag, smaller than its class.)
+
    function  cpp_Symbol (qualified_Name : in String;   Suffix : in String) return String
      renames cpp_Mangling.Symbol;
    function  variable_Suffix (swig_Type : in String) return String;
@@ -895,9 +903,8 @@ is
       Status          :          C.int with Unreferenced;
       function_Name   : constant String  := Attribute (the_Node, "name");
 
-      Storage         : constant String  := Attribute (the_Node, "storage");
       Value           : constant String  := Attribute (the_Node, "value");
-      is_Virtual      : constant Boolean := Storage = "virtual";
+      is_Virtual      : constant Boolean := is_declared_Virtual (the_Node);
       is_Pure         : constant Boolean := Value   = "0";
       is_pure_Virtual : constant Boolean := is_Pure and is_Virtual;
 
@@ -954,7 +961,7 @@ is
            or else C."/=" (Self.is_smart_Pointer, 0)               -- The function of the pointee has its class name already.
            or else Attribute (the_Node, "feature:extend") /= ""    -- A function added by '%extend' is not a member, and is called by a name which the core makes.
            or else Self.following_a_using_Declaration              -- A function of a base class is called as one of this class, which dispatches where it is virtual.
-           or else (         check_Attribute (the_Node, "storage", "virtual")     -- The form of a virtual function with a default argument left out is
+           or else (         is_declared_Virtual (the_Node)     -- The form of a virtual function with a default argument left out is
                     and then get_Attribute (the_Node, "defaultargs") /= null)     -- not virtual in Ada, so the wrapper makes the virtual call.
          then
             return "";
@@ -1004,7 +1011,7 @@ is
                   if         Attribute (the_Member, "nodeType") = "cdecl"
                     and then plain (Attribute (the_Member, "name")) = plain (function_Name)     -- The name of a member which has been dealt with is qualified.
                     and then resolved (the_Member)              = resolved (the_Node)     -- A parameter may be named by a typedef in one of them.
-                    and then check_Attribute (the_Member, "storage", "virtual")
+                    and then is_declared_Virtual (the_Member)
                   then
                      return the_Member;
                   end if;
@@ -1055,7 +1062,7 @@ is
          --
          --  The core does not say of a private function that it overrides, so the base classes are looked through.
          --
-         if         check_Attribute (the_Node, "storage", "virtual")
+         if         is_declared_Virtual (the_Node)
            and then get_Attribute (the_Node, "defaultargs") = null
            and then Attribute (the_Node, "feature:extend")  = ""
          then
@@ -1118,7 +1125,7 @@ is
          then
             Self.prior_c_Declaration := the_new_Function.all'Access;
 
-         elsif      check_Attribute (the_Node, "storage", "virtual")
+         elsif      is_declared_Virtual (the_Node)
            and then get_Attribute (the_Node, "override")    = null
            and then get_Attribute (the_Node, "defaultargs") = null
            and then Attribute (the_Node, "feature:extend")  = ""
