@@ -1078,7 +1078,8 @@ is
                      Self.current_c_Class.nameSpace.add (the_Placeholder.all'Access);
                   end;
 
-               elsif Attribute (Overridden, "abstract") /= ""
+               elsif      Attribute (Overridden, "abstract") /= ""
+                 and then not check_Attribute (Overridden, "access", "private")     -- One which is private is not declared, and so not abstract in Ada.
                then
                   declare
                      the_new_Function : constant c_Function.view := Self.new_c_Function (doh_Node (the_Node),

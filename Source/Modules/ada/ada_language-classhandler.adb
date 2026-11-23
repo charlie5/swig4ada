@@ -182,15 +182,60 @@ is
    --  Whether C++ constructs the class.
    --
    is
+      function declares_a_copy_Constructor return Boolean
+      --
+      --  True where the class declares a copy or a move constructor, as C++ means one: a constructor which takes a
+      --  reference to its own class. The core's note of a copy constructor ('allocate:has_copy_constructor') is
+      --  wider, for the languages which copy through it: it counts a constructor which takes a pointer to the class
+      --  ('X (X*)') and an instance of a constructor template ('template <class U> X (const X<U>&)', named by
+      --  '%template' in an '%extend'), neither of which C++ takes for one. A class with such a constructor alone is
+      --  returned in registers, and a constructor which took it for a class that C++ constructs left the object
+      --  as it was (found by the case 'template_ns' of upstream's suite, 2026-11-23).
+      --
+      is
+         the_Child : Node_Pointer := first_Child (the_Node);
+      begin
+         while the_Child /= null
+         loop
+            if         Attribute (the_Child, "nodeType") = "constructor"
+              and then get_Attribute (the_Child, "template")       = null
+              and then Attribute (the_Child, "feature:extend")     = ""
+              and then get_Attribute (the_Child, "parms")         /= null
+              and then Attribute (the_Child, "value") not in "default" | "delete"     -- One which is defaulted is trivial, and one which is deleted is none.
+            then
+               declare
+                  the_Type : constant String := Attribute (Node_Pointer (get_Attribute (the_Child, "parms")), "type");
+               begin
+                  if        (         Attribute (the_Child, "copy_constructor") /= ""
+                             and then get_Attribute (the_Node, "allocate:has_copy_constructor") /= null     -- Not one which the core adds ('%copyctor').
+                             and then the_Type'Length >= 2
+                             and then the_Type (the_Type'First .. the_Type'First + 1) = "r.")
+                    or else (         the_Type'Length >= 2
+                             and then the_Type (the_Type'First .. the_Type'First + 1) = "z."
+                             and then (   the_Type = "z." & Attribute (the_Node, "name")
+                                       or the_Type = "z.q(const)." & Attribute (the_Node, "name"))
+                             and then next_Sibling (Node_Pointer (get_Attribute (the_Child, "parms"))) = null)
+                  then
+                     return True;
+                  end if;
+               end;
+            end if;
+
+            the_Child := next_Sibling (the_Child);
+         end loop;
+
+         return False;
+      end declares_a_copy_Constructor;
+
    begin
       --  Note whether the class declares a destructor or a copy constructor. C++ passes and returns such a
-      --  class by reference, so it cannot be bound as a plain record. (The core notes both on the class. It adds
-      --  a destructor to a class which declares none, and then notes that too, as 'allocate:implicit_destructor'.)
+      --  class by reference, so it cannot be bound as a plain record. (The core notes a destructor on the class. It
+      --  adds one to a class which declares none, and then notes that too, as 'allocate:implicit_destructor'.)
       --
       if         Self.in_cpp_Mode     -- In C, a destructor can only be one which the interface file adds.
         and then (        (         get_Attribute (the_Node, "allocate:has_destructor")      /= null
                            and then get_Attribute (the_Node, "allocate:implicit_destructor")  = null)
-                  or else get_Attribute (the_Node, "allocate:has_copy_constructor") /= null)
+                  or else declares_a_copy_Constructor)
       then
          new_c_Class.has_nontrivial_Members;
       end if;

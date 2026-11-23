@@ -79,6 +79,16 @@ begin
       end loop;
    end;
 
+   if is_Overriding
+   then
+      --  The destructor of a class whose base has a virtual one is virtual, declared so or not, and so is that
+      --  of a class which is derived from this one in turn. (Until 2026-11-23 this was noted of a destructor
+      --  which is declared virtual alone, so a class two or more below one with a virtual destructor, with no
+      --  destructor of its own, was given one which is not virtual, and which did not free the object.)
+      --
+      Self.current_c_Class.has_virtual_Destructor;
+   end if;
+
    Self.current_c_Node := doh_Node (the_Node);
    locate (doh_Node (the_Node));
 
