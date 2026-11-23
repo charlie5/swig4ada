@@ -1278,7 +1278,10 @@ is
                                              end;
                                           end loop;
 
-                                          is_Overridable := is_Found or is_Unknown;
+                                          --  The destructor of a class of an imported module is not collected, though its virtual
+                                          --  functions are: that it is virtual is noted on the class, by which this one overrides.
+                                          --
+                                          is_Overridable := is_Found or is_Unknown or the_c_Function.is_Destructor;
                                        end;
                                     end if;
 

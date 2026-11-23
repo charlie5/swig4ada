@@ -12,13 +12,25 @@ function functionWrapper (Self : access Item;
 is
    the_Node : Node_Pointer renames N;
    use type C.int;
+   use type swig_Module.swig_Module_view;
 begin
+   Self.current_c_Node := doh_Node (the_Node);     -- By which the current module is known.
+
+   if         Self.current_Module /= null
+     and then Self.current_Module /= Self.Module_top'Access
+     and then Self.current_Module /= Self.Module_core'Access
+   then
+      --  Nothing of an imported module is wrapped here. The virtual functions of its classes are given to their
+      --  handler all the same, for the model (see the class handler), which brings them to this point.
+      --
+      return SWIG_OK;
+   end if;
+
    indent_Log;
    log  ("");
    log  (+"Binding function: '" & Attribute (the_Node, "sym:name") & "'");
    dlog (+"functionWrapper:  '" & Attribute (the_Node, "sym:name") & "'");
 
-   Self.current_c_Node := doh_Node (the_Node);
    locate (doh_Node (the_Node));
 
    freshen_current_module_Package (Self, the_Node);

@@ -377,28 +377,90 @@ is
    --  The core hands on no member of a class of an imported module, as nothing of that module is wrapped here.
    --  Its member variables are needed all the same: a class of this module which is derived from it, or has a
    --  member of it, is laid out by the place and size of each. They are taken from the nodes of the class, as
-   --  'memberVariableHandler' takes one which the core hands on. (Until 2026-11-23 such a class was taken to
+   --  'memberVariableHandler' takes one which the core hands on. So are its virtual functions (below). (Until 2026-11-23 such a class was taken to
    --  have a layout which is not known, and a class derived from it was laid out as GNAT would.)
    --
+   --
+   --  A node which the core has not handed on is as the parser left it: its type is that of the declaration
+   --  ('int', of 'int *p;' and of 'int f ();'), and its declarator is apart ('p.', 'f().'). The core joins
+   --  them before it calls a handler, and so it is done here, for the time of the call.
+   --
    is
+      use type DOH_Pointer;
+
       the_Member : Node_Pointer := first_Child (the_Node);
       Status     : C.int with Unreferenced;
+      Unused     : C.int with Unreferenced;
    begin
       while the_Member /= null
       loop
          declare
-            Storage : constant String := Attribute (the_Member, "storage");
+            Storage     : constant String      := Attribute (the_Member, "storage");
+            the_Type    : constant DOH_Pointer := DOH_Pointer (get_Attribute (the_Member, "type"));
+            the_Decl    : constant DOH_Pointer := DOH_Pointer (get_Attribute (the_Member, "decl"));
+            is_Function : constant Boolean     :=          the_Decl /= null
+                                                  and then SwigType_isFunction (SwigType_Pointer (the_Decl)) /= 0;
          begin
             if         Attribute (the_Member, "nodeType") = "cdecl"
               and then Attribute (the_Member, "sym:name") /= ""
               and then Attribute (the_Member, "feature:ignore") = ""     -- An ignored member is added with the hidden ones.
               and then Attribute (the_Member, "feature:extend") = ""
-              and then get_Attribute (the_Member, "type") /= null
-              and then Storage not in "static" | "typedef" | "friend" | "extern"
-              and then ada.Strings.fixed.Index (Storage, "static") = 0
-              and then SwigType_isFunction (SwigType_Pointer (get_Attribute (the_Member, "decl"))) = 0
+              and then the_Type /= null
+              and then ada.Strings.fixed.Index (Storage, "static")  = 0
+              and then ada.Strings.fixed.Index (Storage, "typedef") = 0
+              and then ada.Strings.fixed.Index (Storage, "friend")  = 0
+              and then ada.Strings.fixed.Index (Storage, "extern")  = 0
             then
-               Status := Self.memberVariableHandler (the_Member);
+               declare
+                  the_whole_Type : constant SwigType_Pointer := SwigType_Pointer (doh_Copy (the_Type));
+               begin
+                  if the_Decl /= null
+                  then
+                     DohIncref (the_Decl);                                   -- It is taken from the node below, and put back.
+                     SwigType_push (the_whole_Type, String_Pointer (the_Decl));
+                  end if;
+
+                  DohIncref (the_Type);
+
+                  if not is_Function
+                  then
+                     Unused := DohSetattr (DOH_Pointer (the_Member), DOH_Pointer (to_Doh ("type")), DOH_Pointer (the_whole_Type));
+                     Unused := DohDelattr (DOH_Pointer (the_Member), DOH_Pointer (to_Doh ("decl")));
+
+                     Status := Self.memberVariableHandler (the_Member);
+
+                     if the_Decl /= null
+                     then
+                        Unused := DohSetattr (DOH_Pointer (the_Member), DOH_Pointer (to_Doh ("decl")), the_Decl);
+                     end if;
+
+                  elsif ada.Strings.fixed.Index (Storage, "virtual") /= 0
+                  then
+                     --  A virtual function is collected too, with no function of the wrapper: a function of this module
+                     --  which overrides it must have its parameter and result types, which may be written otherwise in
+                     --  C++ and be the same (see the transformer). The other member functions are not needed here.
+                     --
+                     if SwigType_isqualifier (the_whole_Type) /= 0
+                     then
+                        declare
+                           Qualifier : constant String_Pointer := SwigType_pop (the_whole_Type) with Unreferenced;
+                        begin
+                           null;
+                        end;
+                     end if;
+
+                     declare
+                        the_Function : constant SwigType_Pointer := SwigType_pop_function (the_whole_Type) with Unreferenced;
+                     begin
+                        null;
+                     end;
+
+                     Unused := DohSetattr (DOH_Pointer (the_Member), DOH_Pointer (to_Doh ("type")), DOH_Pointer (the_whole_Type));
+                     Status := Self.memberFunctionHandler (the_Member);
+                  end if;
+
+                  Unused := DohSetattr (DOH_Pointer (the_Member), DOH_Pointer (to_Doh ("type")), the_Type);
+               end;
             end if;
          end;
 
