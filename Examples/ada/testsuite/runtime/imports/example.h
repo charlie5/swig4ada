@@ -8,6 +8,8 @@ public:
   Tag    tag;
   Horse (Colour c) : Animal (4), coat (c), tag (17)   {}
   virtual int speed ()        { return 60; }
+  virtual int stride (const int& p)   { return p * 2; }     /* The parameter is written otherwise than in the base, and is the same. */
+  virtual Horse* self ()      { return this; }              /* The result is of the derived class, which C++ allows. */
   Colour      get_coat ()     { return coat; }
 };
 
@@ -42,3 +44,16 @@ struct Panel {
 
 inline void fill_panel  (Panel* p)   { p->kind = 'p';  p->flags.ready = 1;  p->flags.level = 9;  p->flags.count = 44;  p->after = 55; }
 inline int  after_of    (Panel* p)   { return p->after; }
+
+inline int stride_of (Animal* a)   { return a->stride (3); }
+inline int legs_of_self (Animal* a)   { return a->self ()->legs; }
+
+/* A class which is derived from one of the imported module with a pointer and an array: 'extra' is at 22. */
+struct Wider : Mixed {
+  char extra;
+  Wider () : extra ('w')   {}
+};
+
+inline int  size_of_wider ()           { return (int) sizeof (Wider); }
+inline char extra_of      (Wider* w)   { return w->extra; }
+inline int  codes_of      (Wider* w)   { return w->codes [0] + w->codes [1] + w->codes [2]; }

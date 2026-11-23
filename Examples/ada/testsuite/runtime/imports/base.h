@@ -9,12 +9,16 @@ struct Vec { double x; double y; };
 
 inline double dot (Vec a, Vec b)   { return a.x * b.x + a.y * b.y; }
 
+typedef int Paces;
+
 class Animal {
 public:
   int legs;
   Animal (int l) : legs (l)   {}
   virtual ~Animal ()          {}
   virtual int  speed ()       { return legs; }
+  virtual int  stride (const Paces& p)   { return p; }
+  virtual Animal* self ()     { return this; }
   int          get_legs ()    { return legs; }
 };
 
@@ -38,6 +42,14 @@ struct Flags {
   unsigned ready : 1;
   unsigned level : 4;
   int      count;
+};
+
+/* A class with a member which is a pointer and one which is an array, and a tail of two bytes. */
+struct Mixed {
+  char  tag;
+  int*  link;
+  short codes [3];
+  Mixed () : tag ('m'), link (0)   { codes [0] = 1;  codes [1] = 2;  codes [2] = 3; }
 };
 
 #endif

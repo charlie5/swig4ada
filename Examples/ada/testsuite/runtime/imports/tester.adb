@@ -5,6 +5,7 @@ with
      imports.Vec3,
      imports.More,
      imports.Panel,
+     imports.Wider,
 
      imports_base.Binding,
      imports_base.Animal,
@@ -135,6 +136,38 @@ begin
       the_Panel.after := 66;
       check (after_of (the_Panel'unchecked_Access) = 66,  "C++ reads what Ada writes after the imported structure");
    end a_member_of_an_imported_structure_with_bit_Fields;
+
+   functions_which_override_those_of_an_imported_Class :
+   declare
+      the_Horse : aliased  Horse.Item      := Horse.construct (Green);
+      an_Animal : constant Animal.Pointer  := the_Horse'unchecked_Access;
+      Three     : aliased  Paces           := 3;
+   begin
+      --  The virtual functions of 'Animal' are known here though its module is imported, so one of 'Horse' which
+      --  overrides has the types of the one which it overrides: 'stride' takes a 'const int&' where that of
+      --  'Animal' takes a 'const Paces&', and 'self' returns a 'Horse*' where that of 'Animal' returns an 'Animal*'.
+      --
+      check (an_Animal.stride (Three'unchecked_Access) = 6,   "a function whose parameter is written otherwise than in the imported base overrides it");
+      check (stride_of (an_Animal) = 6,                       "as C++ finds");
+      check (an_Animal.self.legs = 4,                         "a function whose result is of the derived class overrides one of the imported base");
+      check (legs_of_self (an_Animal) = 4,                    "as C++ finds");
+
+      Horse.destruct_0 (the_Horse);
+   end functions_which_override_those_of_an_imported_Class;
+
+   a_class_derived_from_an_imported_class_with_a_pointer_and_an_Array :
+   declare
+      the_Wider : aliased Wider.Item := Wider.construct;
+   begin
+      --  'Mixed' is a 'char', a pointer and three 'short's: 24 bytes of which two are unused, where C++ has 'extra'.
+      --
+      check (Wider.Item'Size / 8 = size_of_wider,             "the size of the imported base is worked out from a pointer and an array");
+      check (the_Wider.extra = 'w',                           "and the member which is added is in its tail");
+
+      the_Wider.extra := 'x';
+      check (extra_of (the_Wider'unchecked_Access) = 'x',     "C++ reads what Ada writes there");
+      check (codes_of (the_Wider'unchecked_Access) = 6,       "which has not lain over the array of the base");
+   end a_class_derived_from_an_imported_class_with_a_pointer_and_an_Array;
 
    finish;
 end Tester;
