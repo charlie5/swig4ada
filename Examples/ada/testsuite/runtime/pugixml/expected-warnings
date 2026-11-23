@@ -1,0 +1,69 @@
+pugixml.hpp:379: Warning 862: The member 'wide_stream' of class 'xml_writer_stream' has a type which is not known, so it is left out. The layout of the record does not match that of the class.
+pugixml.hpp:379: Warning 862: The member 'narrow_stream' of class 'xml_writer_stream' has a type which is not known, so it is left out. The layout of the record does not match that of the class.
+pugixml.hpp:1531: Warning 861: Unable to bind the type 'std::basic_string<(wchar_t)>', which is not known.
+pugixml.hpp:802: Warning 861: Unable to bind the type 'pugi::xml_object_range<(pugi::xml_attribute_iterator)>', which is not known.
+pugixml.hpp:801: Warning 861: Unable to bind the type 'pugi::xml_object_range<(pugi::xml_node_iterator)>', which is not known.
+pugixml.hpp:382: Warning 861: Unable to bind the type 'std::basic_ostream<(char)>', which is not known.
+pugixml.hpp:402: Warning 861: Unable to bind the type 'p.p.p.pugi::xml_attribute', which is not known.
+pugixml.hpp:383: Warning 861: Unable to bind the type 'std::basic_ostream<(wchar_t)>', which is not known.
+pugixml.hpp:1164: Warning 861: Unable to bind the type 'std::basic_istream<(wchar_t)>', which is not known.
+pugixml.hpp:1163: Warning 861: Unable to bind the type 'std::basic_istream<(char)>', which is not known.
+pugixml.hpp:806: Warning 861: Unable to bind the type 'pugi::xml_object_range<(pugi::xml_named_node_iterator)>', which is not known.
+pugixml.hpp:1535: Warning 861: Unable to bind the function 'as_wide', as its result type 'std::basic_string<(wchar_t)>' is not known.
+pugixml.hpp:1534: Warning 861: Unable to bind the function 'as_wide', as its result type 'std::basic_string<(wchar_t)>' is not known.
+pugixml.hpp:1531: Warning 861: Unable to bind the function 'as_utf8', as the type 'std::basic_string<(wchar_t)>*' of its parameter 'str' is not known.
+pugixml.hpp:402: Warning 861: Unable to bind the function pointer type 'unspecified_bool_type', as one of its types has no Ada type.
+pugixml.hpp:402: Warning 861: Unable to bind the array type 'unspecified_bool_type[]', as its element type is not known.
+pugixml.hpp:402: Warning 861: Unable to bind the pointer type 'unspecified_bool_type*', as the type it points to is not known.
+pugixml.hpp:402: Warning 861: Unable to bind the array type 'unspecified_bool_type*[]', as its element type is not known.
+pugixml.hpp:402: Warning 861: Unable to bind the pointer type 'unspecified_bool_type**', as the type it points to is not known.
+pugixml.hpp:784: Warning 861: Unable to bind the function 'print' of class 'xml_node_iterator', as one of its types is not known.
+pugixml.hpp:784: Warning 861: Unable to bind the function 'print' of class 'xml_node_iterator', as one of its types is not known.
+pugixml.hpp:784: Warning 861: Unable to bind the function 'print' of class 'xml_node_iterator', as one of its types is not known.
+pugixml.hpp:784: Warning 861: Unable to bind the function 'print' of class 'xml_node_iterator', as one of its types is not known.
+pugixml.hpp:784: Warning 861: Unable to bind the function 'print' of class 'xml_node_iterator', as one of its types is not known.
+pugixml.hpp:785: Warning 861: Unable to bind the function 'print' of class 'xml_node_iterator', as one of its types is not known.
+pugixml.hpp:785: Warning 861: Unable to bind the function 'print' of class 'xml_node_iterator', as one of its types is not known.
+pugixml.hpp:785: Warning 861: Unable to bind the function 'print' of class 'xml_node_iterator', as one of its types is not known.
+pugixml.hpp:785: Warning 861: Unable to bind the function 'print' of class 'xml_node_iterator', as one of its types is not known.
+pugixml.hpp:801: Warning 861: Unable to bind the function 'children' of class 'xml_node_iterator', as one of its types is not known.
+pugixml.hpp:806: Warning 861: Unable to bind the function 'children' of class 'xml_node_iterator', as one of its types is not known.
+pugixml.hpp:802: Warning 861: Unable to bind the function 'attributes' of class 'xml_node_iterator', as one of its types is not known.
+pugixml.hpp:784: Warning 861: Unable to bind the function 'print' of class 'xml_named_node_iterator', as one of its types is not known.
+pugixml.hpp:784: Warning 861: Unable to bind the function 'print' of class 'xml_named_node_iterator', as one of its types is not known.
+pugixml.hpp:784: Warning 861: Unable to bind the function 'print' of class 'xml_named_node_iterator', as one of its types is not known.
+pugixml.hpp:784: Warning 861: Unable to bind the function 'print' of class 'xml_named_node_iterator', as one of its types is not known.
+pugixml.hpp:784: Warning 861: Unable to bind the function 'print' of class 'xml_named_node_iterator', as one of its types is not known.
+pugixml.hpp:785: Warning 861: Unable to bind the function 'print' of class 'xml_named_node_iterator', as one of its types is not known.
+pugixml.hpp:785: Warning 861: Unable to bind the function 'print' of class 'xml_named_node_iterator', as one of its types is not known.
+pugixml.hpp:785: Warning 861: Unable to bind the function 'print' of class 'xml_named_node_iterator', as one of its types is not known.
+pugixml.hpp:785: Warning 861: Unable to bind the function 'print' of class 'xml_named_node_iterator', as one of its types is not known.
+pugixml.hpp:801: Warning 861: Unable to bind the function 'children' of class 'xml_named_node_iterator', as one of its types is not known.
+pugixml.hpp:806: Warning 861: Unable to bind the function 'children' of class 'xml_named_node_iterator', as one of its types is not known.
+pugixml.hpp:802: Warning 861: Unable to bind the function 'attributes' of class 'xml_named_node_iterator', as one of its types is not known.
+pugixml.hpp:784: Warning 861: Unable to bind the function 'print' of class 'xml_node', as one of its types is not known.
+pugixml.hpp:784: Warning 861: Unable to bind the function 'print' of class 'xml_node', as one of its types is not known.
+pugixml.hpp:784: Warning 861: Unable to bind the function 'print' of class 'xml_node', as one of its types is not known.
+pugixml.hpp:784: Warning 861: Unable to bind the function 'print' of class 'xml_node', as one of its types is not known.
+pugixml.hpp:784: Warning 861: Unable to bind the function 'print' of class 'xml_node', as one of its types is not known.
+pugixml.hpp:785: Warning 861: Unable to bind the function 'print' of class 'xml_node', as one of its types is not known.
+pugixml.hpp:785: Warning 861: Unable to bind the function 'print' of class 'xml_node', as one of its types is not known.
+pugixml.hpp:785: Warning 861: Unable to bind the function 'print' of class 'xml_node', as one of its types is not known.
+pugixml.hpp:785: Warning 861: Unable to bind the function 'print' of class 'xml_node', as one of its types is not known.
+pugixml.hpp:801: Warning 861: Unable to bind the function 'children' of class 'xml_node', as one of its types is not known.
+pugixml.hpp:802: Warning 861: Unable to bind the function 'attributes' of class 'xml_node', as one of its types is not known.
+pugixml.hpp:806: Warning 861: Unable to bind the function 'children' of class 'xml_node', as one of its types is not known.
+pugixml.hpp:382: Warning 861: Unable to bind the function 'construct' of class 'xml_writer_stream', as one of its types is not known.
+pugixml.hpp:383: Warning 861: Unable to bind the function 'construct' of class 'xml_writer_stream', as one of its types is not known.
+pugixml.hpp:1163: Warning 861: Unable to bind the function 'load' of class 'xml_document', as one of its types is not known.
+pugixml.hpp:1163: Warning 861: Unable to bind the function 'load' of class 'xml_document', as one of its types is not known.
+pugixml.hpp:1163: Warning 861: Unable to bind the function 'load' of class 'xml_document', as one of its types is not known.
+pugixml.hpp:1164: Warning 861: Unable to bind the function 'load' of class 'xml_document', as one of its types is not known.
+pugixml.hpp:1164: Warning 861: Unable to bind the function 'load' of class 'xml_document', as one of its types is not known.
+pugixml.hpp:1193: Warning 861: Unable to bind the function 'save' of class 'xml_document', as one of its types is not known.
+pugixml.hpp:1193: Warning 861: Unable to bind the function 'save' of class 'xml_document', as one of its types is not known.
+pugixml.hpp:1193: Warning 861: Unable to bind the function 'save' of class 'xml_document', as one of its types is not known.
+pugixml.hpp:1193: Warning 861: Unable to bind the function 'save' of class 'xml_document', as one of its types is not known.
+pugixml.hpp:1194: Warning 861: Unable to bind the function 'save' of class 'xml_document', as one of its types is not known.
+pugixml.hpp:1194: Warning 861: Unable to bind the function 'save' of class 'xml_document', as one of its types is not known.
+pugixml.hpp:1194: Warning 861: Unable to bind the function 'save' of class 'xml_document', as one of its types is not known.

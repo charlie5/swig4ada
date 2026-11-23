@@ -1682,6 +1682,19 @@ begin
          put_Line ("LevelDB is not installed, so the run-time case 'leveldb' is passed over.");
       end if;
 
+      --  Likewise pugixml, from its one header: small classes which are handles, passed and returned by value,
+      --  some of which use each other in a ring. Its tester reads, searches and changes a document, and has it
+      --  walked and written out by classes which are declared in Ada.
+      --
+      if ada.Directories.exists ("/usr/include/pugixml.hpp")
+      then
+         run ("pugixml",
+              Options => "-I/usr/include",
+              Library => "pugixml");
+      else
+         put_Line ("pugixml is not installed, so the run-time case 'pugixml' is passed over.");
+      end if;
+
       --  Cases of upstream's suite, each with a tester written after upstream's test of it for Python.
       --
       new_Line;

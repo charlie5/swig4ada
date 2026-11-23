@@ -104,6 +104,9 @@ def ada_class(Spec):
     if not Header or not Type:
         return None
 
+    if "A base class of this class is not known" in open(Spec, errors="replace").read():
+        return None     # The binding makes no claim of the order of its virtual functions, each of which the wrapper calls.
+
     Package    = Header.group(1)
     Parent     = Type.group(3)
     Primitives = []
@@ -204,7 +207,7 @@ def same(Ada, Cpp):
     if Ada.lower() in ("destruct_0", "destruct"):
         return False                                          # The destructor of C++ is dealt with above.
     Plain = Ada.lower()
-    return Plain == Cpp.lower() or Plain in ("the_" + Cpp.lower(), "c_" + Cpp.lower(), Cpp.lower() + "_")
+    return Plain == Cpp.lower() or Plain in ("the_" + Cpp.lower(), "a_" + Cpp.lower(), "c_" + Cpp.lower(), Cpp.lower() + "_")
 
 
 Checked, Differences, Report = 0, [], []
