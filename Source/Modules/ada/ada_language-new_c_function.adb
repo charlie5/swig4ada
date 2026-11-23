@@ -174,10 +174,12 @@ begin
                                         and then C."=" (Self.is_smart_Pointer, 0)      -- A function of the class which a smart pointer points to
                                                                                        -- is no virtual function of the smart pointer.
                                         and then get_Attribute (the_Node, "defaultargs") = null
-                                        and then Attribute (the_Node, "feature:extend") = "";     -- A function which '%extend' adds is no member, virtual or not.
+                                        and then Attribute (the_Node, "feature:extend") = ""      -- A function which '%extend' adds is no member, virtual or not.
+                                        and then not Self.following_a_using_Declaration;          -- Nor has one which a 'using' declaration names a place in the vtable.
 
             new_Function.is_Abstract :=          check_Attribute (the_Node, "abstract", "1")
-                                        and then get_Attribute (the_Node, "defaultargs") = null;
+                                        and then get_Attribute (the_Node, "defaultargs") = null
+                                        and then not Self.following_a_using_Declaration;
          end if;
 
          nameSpace.add (new_Function.all'Access);

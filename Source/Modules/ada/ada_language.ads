@@ -313,6 +313,7 @@ private
 
          virtuals_placed_upto : Node_Pointer;                       -- The member of the current class up to which its hidden virtual functions have been given a place.
          destructor_is_Bound  : Boolean := False;                   -- The destructor of the current class has been handled, or given its places.
+         following_a_using_Declaration : Boolean := False;          -- The functions of a 'using' declaration of the current class are being handed on.
          uses_std_Strings  : Boolean := False;                      -- A spec of the module needs 'swig.std_Strings', whose functions the wrapper must then hold.
          all_layout_Checks : Boolean := True;                       -- Check the layout of every class in the wrapper file (unless '-no-check-layout').
 

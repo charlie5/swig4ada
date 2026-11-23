@@ -953,6 +953,7 @@ is
          if        is_pure_Virtual
            or else C."/=" (Self.is_smart_Pointer, 0)               -- The function of the pointee has its class name already.
            or else Attribute (the_Node, "feature:extend") /= ""    -- A function added by '%extend' is not a member, and is called by a name which the core makes.
+           or else Self.following_a_using_Declaration              -- A function of a base class is called as one of this class, which dispatches where it is virtual.
            or else (         check_Attribute (the_Node, "storage", "virtual")     -- The form of a virtual function with a default argument left out is
                     and then get_Attribute (the_Node, "defaultargs") /= null)     -- not virtual in Ada, so the wrapper makes the virtual call.
          then
@@ -971,7 +972,10 @@ is
       Self.current_c_Node := doh_Node (the_Node);
       locate (doh_Node (the_Node));
 
-      add_hidden_Virtuals (Self, before => the_Node);
+      if not Self.following_a_using_Declaration     -- Whose functions are no members of the class, and have no place among them.
+      then
+         add_hidden_Virtuals (Self, before => the_Node);
+      end if;
 
       set_Attribute (the_Node, "name", Namespace & function_Name);
 
@@ -986,6 +990,7 @@ is
                                                   is_Destructor => False,
                                                   is_Overriding =>          is_Overriding
                                                                    and then get_Attribute (the_Node, "defaultargs") = null     -- Only the form of all its arguments is virtual.
+                                                                   and then not Self.following_a_using_Declaration             -- Nor is a function which a 'using' declaration names.
                                                                    and then Attribute (the_Node, "feature:extend") = ""        -- A function which '%extend' adds is no member, and
                                                                    and then Attribute (overriding_Value, "feature:extend") = "");     -- neither overrides nor is overridden.
 
@@ -1403,11 +1408,146 @@ is
    overriding
    function usingDeclaration (Self : access Item;
                               N    : in     Node_Pointer) return C.int
+   --
+   --  A 'using' declaration in a class names a function of a base class as one of the class itself ('using
+   --  Foo::test;'), and the core gives the function with it, once for each overload which the class does not hide.
+   --
+   --  Where the base is the parent of the Ada type, or a parent of that, the function is there already: a virtual
+   --  one is inherited, and any other takes an object of the class as it takes one of its base. Nothing is done.
+   --
+   --  Any other base is a part of the record (a base with no virtual function, or a second base with them), whose
+   --  functions are reached through 'as_<base>'. The function is then bound as one of the class, as C++ has it.
+   --  It is never virtual in Ada, as it has no place in the vtable of the class: its wrapper makes the call, which
+   --  dispatches where the function is virtual in C++.
+   --
    is
-      pragma Unreferenced (Self, N);
+      use type C.int;
+      use type c_Type.view;
+
+      the_Node : Node_Pointer renames N;
+
+      function Owner return c_Type.view
+      --
+      --  The class which the function is of, where it is known.
+      --
+      is
+         used_Name : constant String  := Attribute (the_Node, "uname");
+         Colons    : constant Natural := ada.Strings.fixed.Index (used_Name, "::", Going => ada.Strings.Backward);
+      begin
+         if Colons <= used_Name'First
+         then
+            return null;
+         end if;
+
+         declare
+            class_Name : constant unbounded_String := +used_Name (used_Name'First .. Colons - 1);
+         begin
+            if Self.swig_type_Map_of_c_type.contains (class_Name)
+            then
+               return Self.swig_type_Map_of_c_type.Element (class_Name);
+
+            elsif Self.name_Map_of_c_type.contains (class_Name)
+            then
+               return Self.name_Map_of_c_type.Element (class_Name);
+            else
+               return null;
+            end if;
+         end;
+      end Owner;
+
+      function is_reached_by_Parents (the_Owner : in c_Type.view) return Boolean
+      --
+      --  True where the owner is the parent of the Ada type of the current class, or a parent of that. The
+      --  parent of a class with virtual functions is its first base class which has them.
+      --
+      is
+         the_Class : c_Type.view := Self.current_c_Class;
+      begin
+         loop
+            declare
+               the_Parent : c_Type.view;
+            begin
+               if the_Class.is_Virtual
+               then
+                  for Each of the_Class.base_Classes
+                  loop
+                     if Each.is_Virtual
+                     then
+                        the_Parent := Each;
+                        exit;
+                     end if;
+                  end loop;
+               end if;
+
+               if the_Parent = null
+               then
+                  return False;
+
+               elsif the_Parent = the_Owner
+               then
+                  return True;
+               end if;
+
+               the_Class := the_Parent;
+            end;
+         end loop;
+      end is_reached_by_Parents;
+
+      the_Owner : c_Type.view;
+      the_Child : Node_Pointer;
+      Status    : C.int with Unreferenced;
+
    begin
-      return SWIG_OK;     -- Do nothing, since public/protected/private is ignored in Ada,
-                          -- so 'using::' clauses are irrelevant (ie the 'used' members are already available).
+      if        not Self.in_cpp_Mode
+        or else Self.c_class_Stack.is_Empty
+        or else Self.getCurrentClass = null
+        or else Attribute (the_Node, "access") in "private" | "protected"
+      then
+         return SWIG_OK;
+      end if;
+
+      the_Owner := Owner;
+
+      if        the_Owner = null
+        or else the_Owner.c_type_Kind not in c_Type.c_Class
+        or else is_reached_by_Parents (the_Owner)
+      then
+         return SWIG_OK;
+      end if;
+
+      add_hidden_Virtuals (Self, before => the_Node);
+
+      Self.following_a_using_Declaration := True;
+      the_Child                          := first_Child (the_Node);
+
+      while the_Child /= null
+      loop
+         declare
+            the_Declarator : constant String := Attribute (the_Child, "decl");
+         begin
+            --  Only a function is followed: a member variable which is named so is in the base, where it is.
+            --
+            if         Attribute (the_Child, "nodeType") = "cdecl"
+              and then the_Declarator'Length > 1
+              and then the_Declarator (the_Declarator'First .. the_Declarator'First + 1) = "f("
+              and then Attribute (the_Child, "feature:ignore") = ""
+            then
+               declare
+                  the_Copy : constant DOH_Pointer := doh_Copy (DOH_Pointer (the_Child));     -- As the core does: the function becomes one of this class.
+                  Unused   : C.int with Unreferenced;
+               begin
+                  Unused := DohSetattr (the_Copy, DOH_Pointer (to_Doh ("parentNode")), DOH_Pointer (Self.getCurrentClass));
+                  Status := Self.emit_one (Node_Pointer (the_Copy));
+               end;
+            end if;
+         end;
+
+         the_Child := next_Sibling (the_Child);
+      end loop;
+
+      Self.following_a_using_Declaration := False;
+
+      return SWIG_OK;
    end usingDeclaration;
 
 

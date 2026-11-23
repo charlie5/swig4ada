@@ -24,6 +24,7 @@ is
                                    new_Modules           => <>,
                                    virtuals_placed_upto  => null,
                                    destructor_is_Bound   => False,
+                                   following_a_using_Declaration => False,
                                    uses_std_Strings      => False,
                                    all_layout_Checks     => True,
                                    Package_namespace     => null,
