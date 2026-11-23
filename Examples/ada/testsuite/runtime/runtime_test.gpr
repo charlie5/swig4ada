@@ -2,12 +2,14 @@
 --
 --  The launcher generates the binding of the case into 'runtime-build/<case>' and then
 --  builds this project with '-XCASE=<case>', and with '-XBOUND_LANGUAGE=C' for a case which binds C.
+--  A case which binds a library of the system names it by '-XLIBRARY=<name>', and is linked with it.
 --
 project Runtime_Test is
 
    the_Case := external ("CASE");
    Lang     := external ("BOUND_LANGUAGE", "C++");
    Build    := "../runtime-build/" & the_Case;
+   Library  := external ("LIBRARY", "");
 
    for Languages   use ("Ada", Lang);
    for Main        use ("tester.adb");
@@ -39,7 +41,10 @@ project Runtime_Test is
    end Compiler;
 
    package Linker is
-      for Default_Switches ("ada") use ("-fsanitize=address");
+      case Library is
+         when ""     => for Default_Switches ("ada") use ("-fsanitize=address");
+         when others => for Default_Switches ("ada") use ("-fsanitize=address", "-l" & Library);
+      end case;
    end Linker;
 
 end Runtime_Test;

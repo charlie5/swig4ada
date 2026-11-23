@@ -15,6 +15,8 @@ with
      virtual_classes.Vault,
      virtual_classes.Keeper,
      virtual_classes.Filter,
+     virtual_classes.Maker,
+     virtual_classes.Token,
 
      swig.Pointers,
 
@@ -275,6 +277,33 @@ begin
 
       Filter.destruct_0 (Filter.Item (the_Sieve));
    end an_abstract_class_with_an_inherited_pure_virtual_Function;
+
+   virtual_functions_which_are_called_through_the_Wrapper :
+   declare
+      the_Doubler : constant Maker.Pointer := new_doubler;
+      a_Maker     : aliased  Maker.Item    := Maker.Item (Maker.construct);
+      the_Token   : aliased  Token.Item    := Token.construct (0);
+   begin
+      --  'make' returns a 'Token', which C++ constructs, and 'total' takes a 'Couple' by value. A call of either
+      --  through the vtable would give C++ its arguments in the wrong places, so each is a function of the
+      --  class-wide type whose function of the wrapper makes the virtual call.
+      --
+      Maker.make (a_Maker, 3, the_Token'unchecked_Access);
+      check (the_Token.id = 3,                            "a virtual function which returns a class that C++ constructs gives its result");
+
+      Maker.make (the_Doubler.all, 3, the_Token'unchecked_Access);
+      check (the_Token.id = 6,                            "and reaches the function of the derived class");
+
+      check (Maker.total (a_Maker'Access, (a => 1, b => 2)) = 3,   "a virtual function which takes a plain structure by value is given it");
+      check (Maker.total (the_Doubler, (a => 1, b => 2)) = 6,      "and reaches the function of the derived class");
+
+      check (a_Maker.after = 7,                           "the virtual function after them is in its own place");
+      check (the_Doubler.after = 70,                      "and dispatches");
+
+      Token.destruct (the_Token);
+      Maker.destruct_0 (a_Maker);
+      drop_maker (the_Doubler);
+   end virtual_functions_which_are_called_through_the_Wrapper;
 
    finish;
 end Tester;

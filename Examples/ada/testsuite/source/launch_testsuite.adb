@@ -417,12 +417,14 @@ is
    procedure run (the_Case : in String;   use_CPP  : in Boolean := True;
                                           Imported : in String  := "";
                                           Options  : in String  := "";
-                                          Input    : in String  := "")
+                                          Input    : in String  := "";
+                                          Library  : in String  := "")
    --
    --  Generates the binding of a run-time case, builds its tester and runs it. 'Imported' names an
    --  interface file of the case ('base' for 'base.i') whose module the case imports, and which is
    --  generated first. 'Options' are further options of the generator. 'Input' is the interface file, as it is
    --  named from the folder in which the case is built, where it is not the 'example.i' of the case.
+   --  'Library' names a library of the system which the case binds, and with which its tester is linked.
    --
    --  The warnings which the Ada module gives (those numbered from 861) must be those of the file
    --  'expected-warnings' of the case, each less the folder of its file. A case with no such file must give none.
@@ -459,6 +461,7 @@ is
                   &    " elif [ -s warnings.txt ]; then echo 'These warnings are not expected:'; cat warnings.txt; false; fi"
                   & " && echo 'Building.'"
                   & " && gprbuild -q -p -P ../../runtime/runtime_test.gpr -XCASE=" & the_Case & (if use_CPP then "" else " -XBOUND_LANGUAGE=C")
+                  &          (if Library = "" then "" else " -XLIBRARY=" & Library)
                   & " && echo 'Running.'"
                   & " && ./tester",
                   Log)
@@ -1666,6 +1669,18 @@ begin
       run ("library");             -- Further classes of the standard library: a multiset, a multimap, a complex number, a wide string, the streams.
       run ("library_c",            -- Further library files, in C: parameters which are input or output, the arguments of a program, a file, raw data.
            use_CPP => False);
+
+      --  A class library which nobody wrote as a test, bound from its own headers: LevelDB, where it is installed.
+      --  Its tester writes, reads and walks a database, and gives it a comparator which is declared in Ada.
+      --
+      if ada.Directories.exists ("/usr/include/leveldb/db.h")
+      then
+         run ("leveldb",
+              Options => "-I/usr/include",
+              Library => "leveldb");
+      else
+         put_Line ("LevelDB is not installed, so the run-time case 'leveldb' is passed over.");
+      end if;
 
       --  Cases of upstream's suite, each with a tester written after upstream's test of it for Python.
       --

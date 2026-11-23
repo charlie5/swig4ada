@@ -218,3 +218,34 @@ public:
 
 inline int call_produce (Source* s)   { return s->produce (); }
 inline int call_refine  (Filter* f)   { return f->refine (); }
+
+/* Virtual functions which Ada cannot call through the vtable: one which returns, by value, a class that C++
+   constructs, and one which takes a plain structure by value. Each is called through its function of the
+   wrapper, and a place holder has its place, so that the virtual function after them is in its own. */
+
+struct Couple { int a; int b; };
+
+class Token {
+public:
+  int id;
+  Token (int i) : id (i)   {}
+  ~Token ()                {}
+};
+
+class Maker {
+public:
+  virtual ~Maker ()                 {}
+  virtual Token make  (int i)       { return Token (i); }
+  virtual int   total (Couple c)    { return c.a + c.b; }
+  virtual int   after ()            { return 7; }
+};
+
+class Doubler : public Maker {
+public:
+  virtual Token make  (int i)       { return Token (i * 2); }
+  virtual int   total (Couple c)    { return 2 * (c.a + c.b); }
+  virtual int   after ()            { return 70; }
+};
+
+inline Maker* new_doubler ()            { return new Doubler; }
+inline void   drop_maker  (Maker* m)    { delete m; }

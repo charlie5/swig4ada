@@ -217,7 +217,7 @@ for Wrapper in Wrappers:
     for Package in sorted(Specs):
         Module, _, Class = Package.partition(".")
 
-        if Module != Case.lower() or "." in Class or Class not in Names or Names[Class] not in Tables:
+        if (is_Suite and Module != Case.lower()) or "." in Class or Class not in Names or Names[Class] not in Tables:     # The specs of another binding need not be named after its wrapper.
             continue
 
         Cpp = Tables[Names[Class]]
