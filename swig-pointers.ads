@@ -377,6 +377,271 @@ is
 
 
 
+   ---------------------------------------
+   --  The pointers which were not declared
+   --
+   --  Those of 'intptr_t', 'uintptr_t' and 'ptrdiff_t', and a pointer to the pointer of each type which had none
+   --  ('unsigned**', 'unsigned char**', 'size_t**' ...). The generator has always named them.
+   --
+
+   --  intptr_t*
+   --
+   package c_intptr_t_Pointers is new C.Pointers (Index              => C.size_t,
+                                                  Element            => swig.intptr_t,
+                                                  element_Array      => swig.intptr_t_Array,
+                                                  default_Terminator => 0);
+   subtype intptr_t_Pointer    is c_intptr_t_Pointers.Pointer;
+
+
+   --  uintptr_t*
+   --
+   package c_uintptr_t_Pointers is new C.Pointers (Index              => C.size_t,
+                                                   Element            => swig.uintptr_t,
+                                                   element_Array      => swig.uintptr_t_Array,
+                                                   default_Terminator => 0);
+   subtype uintptr_t_Pointer    is c_uintptr_t_Pointers.Pointer;
+
+
+   --  ptrdiff_t*
+   --
+   package c_ptrdiff_t_Pointers is new C.Pointers (Index              => C.size_t,
+                                                   Element            => C.ptrdiff_t,
+                                                   element_Array      => swig.ptrdiff_t_Array,
+                                                   default_Terminator => 0);
+   subtype ptrdiff_t_Pointer    is c_ptrdiff_t_Pointers.Pointer;
+
+
+   --  signed_char**
+   --
+   type signed_char_pointer_Array is array (C.size_t range <>) of aliased signed_char_Pointer;
+
+   package c_signed_char_pointer_Pointers is new C.Pointers (Index              => C.size_t,
+                                                             Element            => signed_char_Pointer,
+                                                             element_Array      => signed_char_pointer_Array,
+                                                             default_Terminator => null);
+   subtype signed_char_pointer_Pointer    is c_signed_char_pointer_Pointers.Pointer;
+
+
+   --  unsigned_char**
+   --
+   type unsigned_char_pointer_Array is array (C.size_t range <>) of aliased unsigned_char_Pointer;
+
+   package c_unsigned_char_pointer_Pointers is new C.Pointers (Index              => C.size_t,
+                                                               Element            => unsigned_char_Pointer,
+                                                               element_Array      => unsigned_char_pointer_Array,
+                                                               default_Terminator => null);
+   subtype unsigned_char_pointer_Pointer    is c_unsigned_char_pointer_Pointers.Pointer;
+
+
+   --  wchar_t**
+   --
+   type wchar_t_pointer_Array is array (C.size_t range <>) of aliased wchar_t_Pointer;
+
+   package c_wchar_t_pointer_Pointers is new C.Pointers (Index              => C.size_t,
+                                                         Element            => wchar_t_Pointer,
+                                                         element_Array      => wchar_t_pointer_Array,
+                                                         default_Terminator => null);
+   subtype wchar_t_pointer_Pointer    is c_wchar_t_pointer_Pointers.Pointer;
+
+
+   --  short**
+   --
+   type short_pointer_Array is array (C.size_t range <>) of aliased short_Pointer;
+
+   package c_short_pointer_Pointers is new C.Pointers (Index              => C.size_t,
+                                                       Element            => short_Pointer,
+                                                       element_Array      => short_pointer_Array,
+                                                       default_Terminator => null);
+   subtype short_pointer_Pointer    is c_short_pointer_Pointers.Pointer;
+
+
+   --  unsigned_short**
+   --
+   type unsigned_short_pointer_Array is array (C.size_t range <>) of aliased unsigned_short_Pointer;
+
+   package c_unsigned_short_pointer_Pointers is new C.Pointers (Index              => C.size_t,
+                                                                Element            => unsigned_short_Pointer,
+                                                                element_Array      => unsigned_short_pointer_Array,
+                                                                default_Terminator => null);
+   subtype unsigned_short_pointer_Pointer    is c_unsigned_short_pointer_Pointers.Pointer;
+
+
+   --  unsigned**
+   --
+   type unsigned_pointer_Array is array (C.size_t range <>) of aliased unsigned_Pointer;
+
+   package c_unsigned_pointer_Pointers is new C.Pointers (Index              => C.size_t,
+                                                          Element            => unsigned_Pointer,
+                                                          element_Array      => unsigned_pointer_Array,
+                                                          default_Terminator => null);
+   subtype unsigned_pointer_Pointer    is c_unsigned_pointer_Pointers.Pointer;
+
+
+   --  long**
+   --
+   type long_pointer_Array is array (C.size_t range <>) of aliased long_Pointer;
+
+   package c_long_pointer_Pointers is new C.Pointers (Index              => C.size_t,
+                                                      Element            => long_Pointer,
+                                                      element_Array      => long_pointer_Array,
+                                                      default_Terminator => null);
+   subtype long_pointer_Pointer    is c_long_pointer_Pointers.Pointer;
+
+
+   --  unsigned_long**
+   --
+   type unsigned_long_pointer_Array is array (C.size_t range <>) of aliased unsigned_long_Pointer;
+
+   package c_unsigned_long_pointer_Pointers is new C.Pointers (Index              => C.size_t,
+                                                               Element            => unsigned_long_Pointer,
+                                                               element_Array      => unsigned_long_pointer_Array,
+                                                               default_Terminator => null);
+   subtype unsigned_long_pointer_Pointer    is c_unsigned_long_pointer_Pointers.Pointer;
+
+
+   --  long_long**
+   --
+   type long_long_pointer_Array is array (C.size_t range <>) of aliased long_long_Pointer;
+
+   package c_long_long_pointer_Pointers is new C.Pointers (Index              => C.size_t,
+                                                           Element            => long_long_Pointer,
+                                                           element_Array      => long_long_pointer_Array,
+                                                           default_Terminator => null);
+   subtype long_long_pointer_Pointer    is c_long_long_pointer_Pointers.Pointer;
+
+
+   --  unsigned_long_long**
+   --
+   type unsigned_long_long_pointer_Array is array (C.size_t range <>) of aliased unsigned_long_long_Pointer;
+
+   package c_unsigned_long_long_pointer_Pointers is new C.Pointers (Index              => C.size_t,
+                                                                    Element            => unsigned_long_long_Pointer,
+                                                                    element_Array      => unsigned_long_long_pointer_Array,
+                                                                    default_Terminator => null);
+   subtype unsigned_long_long_pointer_Pointer    is c_unsigned_long_long_pointer_Pointers.Pointer;
+
+
+   --  size_t**
+   --
+   type size_t_pointer_Array is array (C.size_t range <>) of aliased size_t_Pointer;
+
+   package c_size_t_pointer_Pointers is new C.Pointers (Index              => C.size_t,
+                                                        Element            => size_t_Pointer,
+                                                        element_Array      => size_t_pointer_Array,
+                                                        default_Terminator => null);
+   subtype size_t_pointer_Pointer    is c_size_t_pointer_Pointers.Pointer;
+
+
+   --  ptrdiff_t**
+   --
+   type ptrdiff_t_pointer_Array is array (C.size_t range <>) of aliased ptrdiff_t_Pointer;
+
+   package c_ptrdiff_t_pointer_Pointers is new C.Pointers (Index              => C.size_t,
+                                                           Element            => ptrdiff_t_Pointer,
+                                                           element_Array      => ptrdiff_t_pointer_Array,
+                                                           default_Terminator => null);
+   subtype ptrdiff_t_pointer_Pointer    is c_ptrdiff_t_pointer_Pointers.Pointer;
+
+
+   --  intptr_t**
+   --
+   type intptr_t_pointer_Array is array (C.size_t range <>) of aliased intptr_t_Pointer;
+
+   package c_intptr_t_pointer_Pointers is new C.Pointers (Index              => C.size_t,
+                                                          Element            => intptr_t_Pointer,
+                                                          element_Array      => intptr_t_pointer_Array,
+                                                          default_Terminator => null);
+   subtype intptr_t_pointer_Pointer    is c_intptr_t_pointer_Pointers.Pointer;
+
+
+   --  uintptr_t**
+   --
+   type uintptr_t_pointer_Array is array (C.size_t range <>) of aliased uintptr_t_Pointer;
+
+   package c_uintptr_t_pointer_Pointers is new C.Pointers (Index              => C.size_t,
+                                                           Element            => uintptr_t_Pointer,
+                                                           element_Array      => uintptr_t_pointer_Array,
+                                                           default_Terminator => null);
+   subtype uintptr_t_pointer_Pointer    is c_uintptr_t_pointer_Pointers.Pointer;
+
+
+   --  int8_t**
+   --
+   type int8_t_pointer_Array is array (C.size_t range <>) of aliased int8_t_Pointer;
+
+   package c_int8_t_pointer_Pointers is new C.Pointers (Index              => C.size_t,
+                                                        Element            => int8_t_Pointer,
+                                                        element_Array      => int8_t_pointer_Array,
+                                                        default_Terminator => null);
+   subtype int8_t_pointer_Pointer    is c_int8_t_pointer_Pointers.Pointer;
+
+
+   --  int16_t**
+   --
+   type int16_t_pointer_Array is array (C.size_t range <>) of aliased int16_t_Pointer;
+
+   package c_int16_t_pointer_Pointers is new C.Pointers (Index              => C.size_t,
+                                                         Element            => int16_t_Pointer,
+                                                         element_Array      => int16_t_pointer_Array,
+                                                         default_Terminator => null);
+   subtype int16_t_pointer_Pointer    is c_int16_t_pointer_Pointers.Pointer;
+
+
+   --  int32_t**
+   --
+   type int32_t_pointer_Array is array (C.size_t range <>) of aliased int32_t_Pointer;
+
+   package c_int32_t_pointer_Pointers is new C.Pointers (Index              => C.size_t,
+                                                         Element            => int32_t_Pointer,
+                                                         element_Array      => int32_t_pointer_Array,
+                                                         default_Terminator => null);
+   subtype int32_t_pointer_Pointer    is c_int32_t_pointer_Pointers.Pointer;
+
+
+   --  uint8_t**
+   --
+   type uint8_t_pointer_Array is array (C.size_t range <>) of aliased uint8_t_Pointer;
+
+   package c_uint8_t_pointer_Pointers is new C.Pointers (Index              => C.size_t,
+                                                         Element            => uint8_t_Pointer,
+                                                         element_Array      => uint8_t_pointer_Array,
+                                                         default_Terminator => null);
+   subtype uint8_t_pointer_Pointer    is c_uint8_t_pointer_Pointers.Pointer;
+
+
+   --  uint16_t**
+   --
+   type uint16_t_pointer_Array is array (C.size_t range <>) of aliased uint16_t_Pointer;
+
+   package c_uint16_t_pointer_Pointers is new C.Pointers (Index              => C.size_t,
+                                                          Element            => uint16_t_Pointer,
+                                                          element_Array      => uint16_t_pointer_Array,
+                                                          default_Terminator => null);
+   subtype uint16_t_pointer_Pointer    is c_uint16_t_pointer_Pointers.Pointer;
+
+
+   --  uint32_t**
+   --
+   type uint32_t_pointer_Array is array (C.size_t range <>) of aliased uint32_t_Pointer;
+
+   package c_uint32_t_pointer_Pointers is new C.Pointers (Index              => C.size_t,
+                                                          Element            => uint32_t_Pointer,
+                                                          element_Array      => uint32_t_pointer_Array,
+                                                          default_Terminator => null);
+   subtype uint32_t_pointer_Pointer    is c_uint32_t_pointer_Pointers.Pointer;
+
+
+   --  uint64_t**
+   --
+   type uint64_t_pointer_Array is array (C.size_t range <>) of aliased uint64_t_Pointer;
+
+   package c_uint64_t_pointer_Pointers is new C.Pointers (Index              => C.size_t,
+                                                          Element            => uint64_t_Pointer,
+                                                          element_Array      => uint64_t_pointer_Array,
+                                                          default_Terminator => null);
+   subtype uint64_t_pointer_Pointer    is c_uint64_t_pointer_Pointers.Pointer;
+
+
 
    -----------
    --  Utility

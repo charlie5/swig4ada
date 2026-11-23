@@ -76,6 +76,10 @@ is
    type uint32_t_Array           is array (C.size_t range <>) of aliased swig.uint32_t;
    type uint64_t_Array           is array (C.size_t range <>) of aliased swig.uint64_t;
 
+   type intptr_t_Array           is array (C.size_t range <>) of aliased swig.intptr_t;
+   type uintptr_t_Array          is array (C.size_t range <>) of aliased swig.uintptr_t;
+   type ptrdiff_t_Array          is array (C.size_t range <>) of aliased C.ptrdiff_t;
+
 
    type float_Array              is array (C.size_t range <>) of aliased C.c_Float;
    type double_Array             is array (C.size_t range <>) of aliased C.Double;
