@@ -66,8 +66,6 @@ is
    Size, Alignment, data_Size : Natural;
 
 begin
-   main_Module_is ("shapes");
-
    a_plain_structure :     -- struct { char c; int i; double d; }
    declare
       the_Record : constant Records.view := new_Record ("Plain");
@@ -160,7 +158,10 @@ begin
    begin
       add (the_Record, "i", Int);
 
-      check (not laid_Out (the_Record, the_Places, Size, Alignment, data_Size),   "the layout of a class of an imported module is not known");
+      --  The members of a class of an imported module are collected, so it is laid out as any other is.
+      --
+      check (laid_Out (the_Record, the_Places, Size, Alignment, data_Size),   "a class of an imported module is laid out");
+      check (the_Places (1).First = 0 and Size = 32,                          "by the place and size of its members");
    end a_class_of_another_module;
 
    finish;

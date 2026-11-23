@@ -22,3 +22,23 @@ inline Colour brightest  (Colour a, Colour b)  { return a > b ? a : b; }
 inline int    speed_of   (Animal* a)         { return a->speed (); }
 inline int    id_of      (Tag t)             { return t.id; }
 inline Tag    make_tag   (int id)            { return Tag (id); }
+
+/* A class which is derived from a class of the imported module whose tail it uses: 'd' is at 5, not at 8. */
+struct More : Odd {
+  char d;
+  More () : d ('z')   {}
+};
+
+inline int  size_of_more ()          { return (int) sizeof (More); }
+inline char d_of         (More* m)   { return m->d; }
+inline int  i_of         (More* m)   { return m->i; }
+
+/* A structure with a member of a structure of the imported module, which has bit-fields. */
+struct Panel {
+  char  kind;
+  Flags flags;
+  int   after;
+};
+
+inline void fill_panel  (Panel* p)   { p->kind = 'p';  p->flags.ready = 1;  p->flags.level = 9;  p->flags.count = 44;  p->after = 55; }
+inline int  after_of    (Panel* p)   { return p->after; }

@@ -26,4 +26,18 @@ public:
   ~Tag ()      {}
 };
 
+/* A class whose unused tail a class which is derived from it uses: it is no plain structure, as it has a constructor. */
+struct Odd {
+  int  i;
+  char c;
+  Odd () : i (7), c ('a')   {}
+};
+
+/* A structure with bit-fields, which another module has as a member. */
+struct Flags {
+  unsigned ready : 1;
+  unsigned level : 4;
+  int      count;
+};
+
 #endif

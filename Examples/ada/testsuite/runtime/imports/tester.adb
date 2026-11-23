@@ -3,6 +3,8 @@ with
      imports.Horse,
      imports.Horse.Guards,
      imports.Vec3,
+     imports.More,
+     imports.Panel,
 
      imports_base.Binding,
      imports_base.Animal,
@@ -101,6 +103,38 @@ begin
       the_Vec.z     := 30.0;
       check (sum3 (the_Vec'unchecked_Access) = 51.0,      "C++ reads what Ada wrote to both");
    end a_structure_derived_from_an_imported_structure;
+
+   a_class_which_uses_the_tail_of_an_imported_Base :
+   declare
+      the_More : aliased More.Item := More.construct;
+   begin
+      --  'Odd' is an 'int' and a 'char', and no plain structure, so C++ has the 'char' which 'More' adds at 5,
+      --  within the size of 'Odd'. The members of 'Odd' are known here though its module is imported.
+      --
+      check (More.Item'Size / 8 = size_of_more,           "a class derived from an imported class has the size which C++ gives it");
+      check (the_More.d = 'z',                            "the member which it adds is where C++ has it, in the tail of its base");
+      check (More.as_Odd (the_More).i = 7,                "the imported base is reached");
+      check (More.as_Odd (the_More).c = 'a',              "with each of its members");
+
+      the_More.d := 'q';
+      check (d_of (the_More'unchecked_Access) = 'q',      "C++ reads what Ada writes to the member");
+      check (i_of (the_More'unchecked_Access) = 7,        "which has not lain over the base");
+   end a_class_which_uses_the_tail_of_an_imported_Base;
+
+   a_member_of_an_imported_structure_with_bit_Fields :
+   declare
+      the_Panel : aliased Panel.Item;
+   begin
+      fill_panel (the_Panel'unchecked_Access);
+
+      check (the_Panel.kind = 'p',                        "the member before one of an imported structure");
+      check (the_Panel.flags.ready = 1 and the_Panel.flags.level = 9,   "the bit-fields of the imported structure");
+      check (the_Panel.flags.count = 44,                  "and its member after them");
+      check (the_Panel.after = 55,                        "and the member which follows it");
+
+      the_Panel.after := 66;
+      check (after_of (the_Panel'unchecked_Access) = 66,  "C++ reads what Ada writes after the imported structure");
+   end a_member_of_an_imported_structure_with_bit_Fields;
 
    finish;
 end Tester;
