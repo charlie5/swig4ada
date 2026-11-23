@@ -1730,6 +1730,13 @@ begin
                 & " -I../../../Source/Include -I../../../Source/Swig  -I../../../Source/Modules"
                 & " -I../../../Source/Preprocessor -I../../../Source/DOH -I../../../Source/CParse");
 
+      --  Likewise whether C++ constructs each class of that binding (see './check_calls').
+      --
+      run_Step ("that each class of the tool's own binding is of the kind which C++ takes it for",
+                  "./check_calls ../../../Source/Modules/ada/swig_binding/swigmod"
+                & " -I../../../Source/Include -I../../../Source/Swig  -I../../../Source/Modules"
+                & " -I../../../Source/Preprocessor -I../../../Source/DOH -I../../../Source/CParse");
+
       if do_C and do_Cxx     -- The symbols are those of the wrappers of the cases.
       then
          check_the_imported_Symbols;

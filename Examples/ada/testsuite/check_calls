@@ -15,18 +15,24 @@
 #  its destructor, or the constructor by which it is copied or moved, is not trivial, or where it can be neither
 #  copied nor moved.
 #
-#  Usage:  ./check_calls
+#  Usage:  ./check_calls [<folder> [<option of the compiler> ...]]        ('generated').
 #
 #  Writes what it finds to 'unit-build/calls/report.txt'. The classes which differ must be the lines of the file
 #  'expected-call-differences'; exits with a failure status if they are not.
+#
+#  A folder other than 'generated' is that of another binding (one of the tool's own, say), whose wrapper is
+#  compiled with the options which are given. Its report is 'unit-build/calls-<folder>/report.txt', and it is
+#  expected to have no differences. The specs of such a binding need not be named after its wrapper.
 #
 
 import os, re, subprocess, sys
 from concurrent.futures import ThreadPoolExecutor
 
 Here      = os.path.dirname(os.path.abspath(__file__))
-Generated = os.path.join(Here, "generated")
-Build     = os.path.join(Here, "unit-build", "calls")
+Generated = os.path.abspath(sys.argv[1]) if len(sys.argv) > 1 else os.path.join(Here, "generated")
+Options   = sys.argv[2:]
+is_Suite  = len(sys.argv) <= 1
+Build     = os.path.join(Here, "unit-build", "calls" if is_Suite else "calls-" + os.path.basename(Generated))
 Suite     = os.path.join(Here, "..", "..", "test-suite")
 
 os.makedirs(Build, exist_ok=True)
@@ -88,7 +94,8 @@ def check(Wrapper):
         Spec = os.path.join(Generated, f"{Case}-{Name}.ads")
 
         if not os.path.exists(Spec):
-            Found = [Each for Each in os.listdir(Generated) if Each.lower() == f"{Case}-{Name}.ads".lower()]
+            Found = [Each for Each in os.listdir(Generated)
+                     if Each.lower() == f"{Case}-{Name}.ads".lower() or (not is_Suite and Each.lower().endswith(f"-{Name}.ads".lower()))]
             Spec  = os.path.join(Generated, Found[0]) if Found else None
 
         Kind = ada_kind(Spec) if Spec else None
@@ -106,7 +113,7 @@ def check(Wrapper):
     Source = os.path.join(Build, Case + ".cxx")
     open(Source, "w").write("\n".join(Lines) + "\n")
 
-    Result = subprocess.run(["g++", "-fsyntax-only", "-fno-access-control", "-w", "-fmax-errors=0", "-I" + Suite, "-I" + Generated, Source],
+    Result = subprocess.run(["g++", "-fsyntax-only", "-fno-access-control", "-w", "-fmax-errors=0", "-I" + Suite, "-I" + Generated] + Options + [Source],
                             stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True, errors="replace")
     Wrong  = re.findall(r"SWIG_ADA_CALLS (\S+) is bound as ([^\"\n]*?)[\"’']?\s*$", Result.stderr, re.M)
     Wrong  = sorted(set(Wrong))
@@ -136,7 +143,7 @@ for Case, Asked, Wrong, Answered in Results:
 open(os.path.join(Build, "report.txt"), "w").write("\n".join(Report + [f"{Each}: the compiler could not be asked" for Each in Unanswered]) + "\n")
 
 Expected_file = os.path.join(Here, "expected-call-differences")
-Expected      = open(Expected_file).read().split() if os.path.exists(Expected_file) else []
+Expected      = open(Expected_file).read().split() if is_Suite and os.path.exists(Expected_file) else []
 
 New  = [Each for Each in Differences if Each not in Expected]
 Gone = [Each for Each in Expected    if Each not in Differences]
