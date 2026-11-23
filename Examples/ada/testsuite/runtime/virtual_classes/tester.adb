@@ -11,6 +11,7 @@ with
      virtual_classes.Guarded,
      virtual_classes.Opened,
      virtual_classes.Shown,
+     virtual_classes.Worded,
 
      swig.Pointers,
 
@@ -204,6 +205,28 @@ begin
 
       Shown.destruct_0 (the_Shown);
    end a_class_whose_base_class_is_ignored;
+
+   a_virtual_function_which_is_overloaded_in_a_derived_Class :
+   declare
+      the_Longer : constant Worded.Pointer := new_longer;
+      a_Worded   : aliased  Worded.Item    := Worded.Item (Worded.construct);
+   begin
+      --  'Worded' adds 'label (double)' to the 'label (int)' of its base, which it names by 'using'. The new
+      --  function is no override: it has a place of its own, and 'tail' the place after it.
+      --
+      check (the_Longer.label (int'(1))    =   21,        "the virtual function of the base dispatches");
+      check (the_Longer.label (double'(1.5)) = 2000,      "its overload in the derived class dispatches to its own place");
+      check (the_Longer.tail               =   50,        "and the function which follows the overload to its own");
+
+      check (a_Worded.label (int'(1))      =   11,        "an object which Ada makes has the function of its base");
+      check (a_Worded.label (double'(1.5)) = 1000,        "the overload");
+      check (a_Worded.tail                 =    5,        "and the function after it");
+      check (call_label (a_Worded'unchecked_Access) = 1000,   "as C++ finds");
+      check (call_tail  (a_Worded'unchecked_Access) =    5,   "of each");
+
+      drop_worded (the_Longer);
+      Worded.destruct_0 (a_Worded);
+   end a_virtual_function_which_is_overloaded_in_a_derived_Class;
 
    finish;
 end Tester;

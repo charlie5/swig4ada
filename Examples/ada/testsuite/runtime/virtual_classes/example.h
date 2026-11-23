@@ -136,3 +136,38 @@ inline int call_second (Shown* s)   { return s->second (); }
 inline int call_third  (Shown* s)   { return s->third (); }
 inline int secret_of   (Shown* s)   { return s->secret; }
 inline int mine_of     (Shown* s)   { return s->mine; }
+
+/* A virtual function which a derived class overloads, beside a 'using' declaration of the one of its base.
+   The overload has a place of its own, after those of the destructor, and the function after it follows. */
+
+class Named {
+public:
+  virtual int label (int i)      { return i; }
+  virtual ~Named ()              {}
+};
+
+class Renamed : public Named {
+public:
+  virtual int label (int i)      { return i + 10; }
+  virtual ~Renamed ()            {}
+};
+
+class Worded : public Renamed {
+public:
+  virtual ~Worded ()             {}
+  using Renamed::label;
+  virtual int label (double d)   { return 1000; }
+  virtual int tail  ()           { return 5; }
+};
+
+class Longer : public Worded {
+public:
+  virtual int label (int i)      { return i + 20; }
+  virtual int label (double d)   { return 2000; }
+  virtual int tail  ()           { return 50; }
+};
+
+inline Worded* new_longer  ()            { return new Longer; }
+inline void    drop_worded (Worded* w)   { delete w; }
+inline int     call_label  (Worded* w)   { return w->label (1.5); }
+inline int     call_tail   (Worded* w)   { return w->tail (); }

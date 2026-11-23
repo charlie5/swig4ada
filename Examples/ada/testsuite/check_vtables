@@ -154,6 +154,17 @@ for Each in os.listdir(Generated):
             Specs[Class[0].lower()] = Class
 
 
+def may_be_same(Theirs, Ours):
+    """Whether the parameters of two primitives of one name may be of the same types, though they are written
+       otherwise. Two types of 'interfaces.C' which are named differently are different types ('int' and
+       'chars_ptr'), so a function of them is an overload with a place of its own, and no override."""
+    if len(Theirs) != len(Ours):
+        return False
+
+    return not any(One != Other and One.startswith("interfaces.c.") and Other.startswith("interfaces.c.")
+                   for One, Other in zip(Theirs, Ours))
+
+
 def slots(Package):
     """The places of the vtable of a type, as Ada has them: those of its parent, with what it overrides in
        the place of what is overridden, and then its own in the order of their declaration."""
@@ -173,7 +184,7 @@ def slots(Package):
 
         if Place is None:
             Place = next((Index for Index in range(Inherited)
-                          if Index not in Taken and Slots[Index][0].lower() == Name.lower() and len(Slots[Index][1]) == len(Types)), None)
+                          if Index not in Taken and Slots[Index][0].lower() == Name.lower() and may_be_same(Slots[Index][1], Types)), None)
 
         if Place is None:
             Slots.append((Name, Types))
