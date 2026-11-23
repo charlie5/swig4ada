@@ -657,15 +657,6 @@ package swigmod.Language is
      (Self : access swigmod.Language.Item'Class)
       return swigmod.Pointers.DoxygenTranslator_Pointer;
 
-   procedure unrollOneVirtualMethod
-     (Self               : in out swigmod.Language.Item'Class;
-      classname          : in     swig_Core.Pointers.String_Pointer;
-      n                  : in     swig_Core.Pointers.Node_Pointer;
-      parent             : in     swig_Core.Pointers.Node_Pointer;
-      vm                 : in     swig_Core.Pointers.List_Pointer;
-      virtual_destructor : in     swig.pointers.int_Pointer;
-      protectedbase      : in     Interfaces.C.int);
-
 private
 
    pragma CPP_Constructor (construct, "ada_new_Language_Language");
@@ -834,8 +825,6 @@ private
      (CPP, set_doxygenTranslator, "Ada_set_Language_doxygenTranslator");
    pragma Import
      (CPP, doxygenTranslator, "Ada_get_Language_doxygenTranslator");
-   pragma Import
-     (CPP, unrollOneVirtualMethod, "Ada_get_Language_doxygenTranslator");
 
    package conversions is new System.Address_To_Access_Conversions (Item);
 
