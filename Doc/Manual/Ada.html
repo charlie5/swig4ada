@@ -809,6 +809,14 @@ A virtual function which is not bound (one which the interface file ignores, say
 whose types are not known) still has its place among the others, as a procedure
 <tt>unbound_virtual_&lt;n&gt;</tt> which must not be called; so has a virtual destructor
 which is not public, as <tt>destruct_0</tt> and <tt>destruct</tt>.
+A virtual function which returns, by value, a class that C++ constructs
+(<tt>virtual Status Put (...)</tt>), or which takes a plain structure by value, cannot be
+called through the table of virtual functions from Ada, as C++ takes its arguments
+otherwise than Ada gives them. It is a function of the class-wide type, which makes the
+virtual call, and <tt>unbound_virtual_&lt;n&gt;</tt> has its place; it cannot be overridden
+in Ada.
+A member whose type SWIG is never shown is left out, with a warning, and the class is
+still bound: it is then used through a pointer to an object which C++ makes.
 An operator is a function with a name: <tt>operator-&gt;</tt> is <tt>dereference</tt>,
 <tt>operator()</tt> is <tt>Functor</tt>, and where the interface file renames the others as
 upstream's examples do, <tt>operator+</tt> is <tt>Plus</tt> and <tt>operator==</tt> is
