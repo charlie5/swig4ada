@@ -199,7 +199,8 @@ begin
       then
          has_Constructor := True;
 
-         if not check_Attribute (the_Child, "access", "private")
+         if         not check_Attribute (the_Child, "access", "private")
+           and then Attribute (the_Child, "value") /= "delete"     -- A deleted constructor ('T (const T&) = delete;') is none which can be called.
          then
             Status := Self.constructorHandler (the_Child);
          end if;

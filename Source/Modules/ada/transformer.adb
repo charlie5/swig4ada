@@ -105,6 +105,43 @@ is
 
 
 
+      function is_already_Declared (the_Package    : access ada_Package.item'Class;
+                                    the_subProgram : in     ada_subProgram.view) return Boolean
+      --
+      --  True where the package has a subprogram of the name of this one which Ada cannot tell from it: one of
+      --  the same parameter and result types, two types being the same where one is a subtype of the other.
+      --  C++ may tell such functions apart: 'f (bool)' and 'f (unsigned char)' are overloads there, and are one
+      --  profile here, as 'swig.bool' is a subtype of the unsigned character of C.
+      --
+      is
+         use ada.Characters.handling;
+         use type ada.Containers.Count_type;
+
+         function Key (the_Type : in ada_Type.view) return String
+         is
+            Name : constant String := to_Lower (to_String (the_Type.resolved_Type.qualified_Name));
+         begin
+            return (if Name = "interfaces.c.plain_char" then "interfaces.c.unsigned_char" else Name);
+         end Key;
+
+      begin
+         for Each of the_Package.Subprograms
+         loop
+            if         to_Lower (to_String (Each.Name)) = to_Lower (to_String (the_subProgram.Name))
+              and then Each.Parameters.Length = the_subProgram.Parameters.Length
+              and then Key (Each.return_Type) = Key (the_subProgram.return_Type)
+              and then (for all Place in 1 .. Natural (Each.Parameters.Length)
+                        =>         Key (Each.Parameters.Element (Place).my_Type) = Key (the_subProgram.Parameters.Element (Place).my_Type)
+                          and then Each.Parameters.Element (Place).is_Pointer   = the_subProgram.Parameters.Element (Place).is_Pointer)
+            then
+               return True;
+            end if;
+         end loop;
+
+         return False;
+      end is_already_Declared;
+
+
       function unique_type_Name (the_Package : in ada_Package.view;   Name : in unbounded_String) return unbounded_String
       --
       --  C is case sensitive, so two types of a package may have names which differ only in case (such as 'uint64'
@@ -1150,7 +1187,43 @@ is
                            use c_function.Vectors;
                            the_c_Functions  : constant c_Function.Vector := the_c_Type.nameSpace.Subprograms;
                            Cursor           :          c_function.Cursor := the_c_Functions.First;
-                           unbound_Count    :          Natural           := 0;
+
+                           function place_Holders_of_the_Parents return Natural
+                           --
+                           --  The highest number of a place holder of a class which this one is derived from. Those of
+                           --  this class are numbered after it: one of a name which a parent has would override that one,
+                           --  and take its place in the vtable for a place of its own.
+                           --
+                           is
+                              use ada_Type.Vectors;
+
+                              Prefix    : constant String                           := "unbound_virtual_";
+                              the_Class :          ada_Type.composite.a_record.view := the_ada_Record;
+                              Highest   :          Natural                          := 0;
+                           begin
+                              while not the_Class.base_Classes.is_Empty
+                              loop
+                                 the_Class := ada_Type.composite.a_record.view (the_Class.base_Classes.first_Element);
+
+                                 for Each of the_Class.declaration_Package.Subprograms
+                                 loop
+                                    declare
+                                       Name : constant String := to_String (Each.Name);
+                                    begin
+                                       if         Name'Length > Prefix'Length
+                                         and then Name (Name'First .. Name'First + Prefix'Length - 1) = Prefix
+                                         and then (for all Digit of Name (Name'First + Prefix'Length .. Name'Last) => Digit in '0' .. '9')
+                                       then
+                                          Highest := Natural'Max (Highest, Natural'Value (Name (Name'First + Prefix'Length .. Name'Last)));
+                                       end if;
+                                    end;
+                                 end loop;
+                              end loop;
+
+                              return Highest;
+                           end place_Holders_of_the_Parents;
+
+                           unbound_Count    :          Natural           := place_Holders_of_the_Parents;
                         begin
                            while has_Element (Cursor)
                            loop
@@ -1216,6 +1289,11 @@ is
                                           is_Found   : Boolean                          := False;
                                           is_Unknown : Boolean                          := False;     -- The functions of a class in an imported
                                        begin                                                          -- module are not collected.
+                                          --  The function which is overridden is the one of the same parameter types, in the nearest
+                                          --  class of the parents which has one. The parents are all looked through for it first, as a
+                                          --  nearer class may have an overload of other types (a class which adds 'label (double)' to
+                                          --  the 'label (int)' of its base, where this one overrides them both).
+                                          --
                                           while    not is_Found
                                             and then not the_Class.base_Classes.is_Empty
                                           loop
@@ -1226,14 +1304,34 @@ is
                                                 is_Unknown := True;
                                              end if;
 
-                                             --  The function which is overridden is the one of the same parameter types, where there
-                                             --  is one. Otherwise it is the first of as many parameters, whose types may be written
-                                             --  otherwise in C++ and be the same ('const Int&' and 'const int&', where 'Int' is a
-                                             --  typedef of 'int'): in Ada the two pointer types are not one type, so the function
-                                             --  takes the parameter types of the one which it overrides, where that is the only one
-                                             --  of its name and as many parameters. (Until 2026-11-23 it kept its own, and was
-                                             --  marked as overriding a function which it did not.)
-                                             --
+                                             for Each of the_Class.declaration_Package.Subprograms
+                                             loop
+                                                if         Each.Name              = the_ada_subProgram.Name
+                                                  and then Each.Parameters.Length = the_ada_subProgram.Parameters.Length
+                                                  and then (for all Place in 2 .. Natural (Each.Parameters.Length)
+                                                            => Each.Parameters.Element (Place).my_Type = the_ada_subProgram.Parameters.Element (Place).my_Type)
+                                                then
+                                                   the_ada_subProgram.return_Type := Each.return_Type;
+                                                   is_Found                       := True;
+                                                   exit;
+                                                end if;
+                                             end loop;
+                                          end loop;
+
+                                          --  Otherwise it is one of as many parameters, whose types may be written otherwise in C++
+                                          --  and be the same ('const Int&' and 'const int&', where 'Int' is a typedef of 'int'): in
+                                          --  Ada the two pointer types are not one type, so the function takes the parameter types
+                                          --  of the one which it overrides, where that is the only one of its name and as many
+                                          --  parameters in its class. (Until 2026-11-23 it kept its own, and was marked as
+                                          --  overriding a function which it did not.)
+                                          --
+                                          the_Class := the_ada_Record;
+
+                                          while    not is_Found
+                                            and then not the_Class.base_Classes.is_Empty
+                                          loop
+                                             the_Class := ada_Type.composite.a_record.view (the_Class.base_Classes.first_Element);
+
                                              declare
                                                 use type ada_subProgram.view;
 
@@ -1250,14 +1348,6 @@ is
                                                       if Candidate = null
                                                       then
                                                          Candidate := Each;
-                                                      end if;
-
-                                                      if (for all Place in 2 .. Natural (Each.Parameters.Length)
-                                                          => Each.Parameters.Element (Place).my_Type = the_ada_subProgram.Parameters.Element (Place).my_Type)
-                                                      then
-                                                         Candidate  := Each;
-                                                         Candidates := 1;
-                                                         exit;
                                                       end if;
                                                    end if;
                                                 end loop;
@@ -1285,7 +1375,38 @@ is
                                        end;
                                     end if;
 
-                                    if is_Overridable
+                                    if         is_Overridable
+                                      and then is_already_Declared (the_ada_Record.declaration_Package, the_ada_subProgram)
+                                    then
+                                       if         the_c_Function.is_Virtual
+                                         and then not the_c_Function.is_Overriding
+                                       then   -- It has its place in the vtable all the same.
+                                          declare
+                                             use c_Parameter.Vectors;
+                                             the_self_Parameter :          c_Parameter.Vector;
+                                             the_Placeholder    :          ada_subProgram.view;
+                                          begin
+                                             unbound_Count   := unbound_Count + 1;
+                                             the_Placeholder := ada_subProgram.new_ada_subProgram
+                                                                  (+("unbound_virtual_" & ada.Strings.fixed.Trim (unbound_Count'Image, ada.Strings.Left)),
+                                                                   c_type_Map_of_ada_type.Element (fetch_c_Type (+"void")));
+
+                                             the_self_Parameter.append (the_c_Function.Parameters.first_Element);
+
+                                             the_Placeholder.Parameters  := Self.to_ada_Parameters (the_self_Parameter);
+                                             the_Placeholder.is_Virtual  := True;
+                                             the_Placeholder.link_Symbol := +"unbound";
+
+                                             the_ada_Record.declaration_Package.add (the_Placeholder);
+
+                                             c_Declarable.warn (the_c_Function, not_Bound, "Unable to bind the virtual function '" & the_c_Function.Name & "' of class '" & the_c_Type.Name
+                                                                                         & "', as Ada cannot tell it from another of its name. '" & the_Placeholder.Name & "' holds its place.");
+                                          end;
+                                       else
+                                          c_Declarable.warn (the_c_Function, not_Bound, "Unable to bind the function '" & the_c_Function.Name & "' of class '" & the_c_Type.Name
+                                                                                      & "', as Ada cannot tell it from another of its name.");
+                                       end if;
+                                    elsif is_Overridable
                                     then
                                        the_ada_Record.declaration_Package.add (the_ada_subProgram);
                                     else

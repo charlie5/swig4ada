@@ -153,6 +153,8 @@ is
    --  C++20), so it is not compared with the one word. (Until 2026-11-23 it was, and a class whose one virtual
    --  function was such a destructor was bound as a record with no tag, smaller than its class.)
 
+   function  is_called_through_its_Wrapper (Self : access Item;   the_Node : in Node_Pointer) return Boolean;
+
    function  cpp_Symbol (qualified_Name : in String;   Suffix : in String) return String
      renames cpp_Mangling.Symbol;
    function  variable_Suffix (swig_Type : in String) return String;
@@ -600,7 +602,7 @@ is
               and then value_Text /= ""
               and then new_Variable.array_Bounds.is_Empty
               and then (        new_Variable.my_Type.is_a_standard_Integer
-                        or else to_String (new_Variable.my_Type.Name) = "bool")
+                        or else to_String (new_Variable.my_Type.Name) in "bool" | "signed char" | "unsigned char")     -- Which are numbers too.
             then
                begin
                   new_Variable.Value := +Image (resolved_c_integer_Expression (Self, +value_Text,
@@ -910,35 +912,36 @@ is
 
       overriding_Value : constant Node_Pointer := get_Attribute (the_Node, "override");
 
+      function owner_is_among_Bases (the_Class : in c_Type.view;   Owner        : in String;
+                                                                   parents_only : in Boolean) return Boolean
+      is
+         Bases : constant c_Type.Vector := the_Class.base_Classes;
+      begin
+         for Each of Bases
+         loop
+            if        not parents_only
+              or else Each.is_Virtual
+            then
+               if        Each.Name = Owner
+                 or else owner_is_among_Bases (Each, Owner, parents_only)
+               then
+                  return True;
+               end if;
+
+               exit when parents_only;     -- Only the first virtual base class is the parent.
+            end if;
+         end loop;
+
+         return False;
+      end owner_is_among_Bases;
+
+
       function is_Overriding return Boolean
       --
       --  Only the first virtual base class of a class is kept as its parent, so a function which overrides
       --  one from another base class has nothing to override in the Ada binding.
       --
       is
-         function owner_is_among_Bases (the_Class : in c_Type.view;   Owner        : in String;
-                                                                      parents_only : in Boolean) return Boolean
-         is
-            Bases : constant c_Type.Vector := the_Class.base_Classes;
-         begin
-            for Each of Bases
-            loop
-               if        not parents_only
-                 or else Each.is_Virtual
-               then
-                  if        Each.Name = Owner
-                    or else owner_is_among_Bases (Each, Owner, parents_only)
-                  then
-                     return True;
-                  end if;
-
-                  exit when parents_only;     -- Only the first virtual base class is the parent.
-               end if;
-            end loop;
-
-            return False;
-         end owner_is_among_Bases;
-
       begin
          if        overriding_Value = null
            or else Self.current_c_Class.base_Classes.is_Empty     -- Such as a smart pointer, which is given the functions of the class it points to.
@@ -961,6 +964,7 @@ is
            or else C."/=" (Self.is_smart_Pointer, 0)               -- The function of the pointee has its class name already.
            or else Attribute (the_Node, "feature:extend") /= ""    -- A function added by '%extend' is not a member, and is called by a name which the core makes.
            or else Self.following_a_using_Declaration              -- A function of a base class is called as one of this class, which dispatches where it is virtual.
+           or else is_called_through_its_Wrapper (Self, the_Node)  -- Whose function of the wrapper makes the virtual call.
            or else (         is_declared_Virtual (the_Node)     -- The form of a virtual function with a default argument left out is
                     and then get_Attribute (the_Node, "defaultargs") /= null)     -- not virtual in Ada, so the wrapper makes the virtual call.
          then
@@ -1029,7 +1033,22 @@ is
          return null;
       end virtual_in_a_Base;
 
-      Namespace : constant String := get_Namespace;
+      function overrides_in_the_Parents return Boolean
+      --
+      --  True where a class which the Ada type is derived from has a virtual function of the name and the
+      --  parameters of this one, whether or not the core says that this one overrides.
+      --
+      is
+         Overridden : constant Node_Pointer := virtual_in_a_Base (Self.getCurrentClass);
+      begin
+         return          Overridden /= null
+                and then owner_is_among_Bases (Self.current_c_Class,
+                                               Attribute (parent_Node (Overridden), "sym:name"),
+                                               parents_only => True);
+      end overrides_in_the_Parents;
+
+      through_its_Wrapper : constant Boolean := is_called_through_its_Wrapper (Self, the_Node);
+      Namespace           : constant String  := get_Namespace;
    begin
       indent_Log;
       dlog (+"");
@@ -1118,8 +1137,31 @@ is
                                                   is_Overriding =>          is_Overriding
                                                                    and then get_Attribute (the_Node, "defaultargs") = null     -- Only the form of all its arguments is virtual.
                                                                    and then not Self.following_a_using_Declaration             -- Nor is a function which a 'using' declaration names.
+                                                                   and then not through_its_Wrapper                            -- Nor one which Ada cannot call through the vtable.
                                                                    and then Attribute (the_Node, "feature:extend") = ""        -- A function which '%extend' adds is no member, and
                                                                    and then Attribute (overriding_Value, "feature:extend") = "");     -- neither overrides nor is overridden.
+
+         if         through_its_Wrapper
+           and then not is_Overriding                                 -- One which overrides a function of the parent of the Ada type has its place.
+           and then not overrides_in_the_Parents                      -- The core does not say so of a function which is not public.
+           and then get_Attribute (the_Node, "defaultargs") = null     -- C++ has one virtual function, that of all its arguments.
+           and then Attribute (the_Node, "feature:extend")  = ""
+         then
+            --  The function is no primitive, and its place in the vtable is held. The place holder is not abstract:
+            --  a class which defines the function adds no primitive either, and would else be abstract in Ada.
+            --
+            declare
+               the_Placeholder : constant c_Function.view := c_Function.new_c_Function (+function_Name,
+                                                                                        Self.name_Map_of_c_type.Element (+"void"));
+            begin
+               the_Placeholder.Parameters.append (c_Parameter.new_c_Parameter (the_Name => +"Self",
+                                                                               the_Type => Self.current_c_Class.all'Access));
+               the_Placeholder.is_Virtual     := True;
+               the_Placeholder.is_Placeholder := True;
+
+               Self.current_c_Class.nameSpace.add (the_Placeholder.all'Access);
+            end;
+         end if;
 
          if c_Function."/=" (the_new_Function, null)     -- No function is made for an overload which cannot be told apart in Ada.
          then
@@ -1414,7 +1456,7 @@ is
          then
             begin
                if        new_Variable.my_Type.is_a_standard_Integer
-                 or else to_String (new_Variable.my_Type.Name) = "bool"
+                 or else to_String (new_Variable.my_Type.Name) in "bool" | "signed char" | "unsigned char"     -- Which are numbers too.
                then
                   new_Variable.Value := +Image (resolved_c_integer_Expression (Self, +value_Text,
                                                                                      Self.integer_symbol_value_Map,
@@ -2159,6 +2201,81 @@ is
          end;
       end;
    end returns_a_cpp_constructed_Type;
+
+
+
+   function is_called_through_its_Wrapper (Self : access Item;   the_Node : in Node_Pointer) return Boolean
+   --
+   --  True for a virtual function which Ada cannot call through the vtable, as a dispatching call does: the
+   --  arguments of such a call go to the C++ function as Ada passes them, and C++ takes them otherwise.
+   --
+   --  - A function which returns, by value, a class that C++ constructs takes a hidden pointer to the result
+   --    ahead of 'this', where the binding has its 'Result' parameter last.
+   --  - A function which takes a plain structure by value takes the structure itself, where Ada passes a
+   --    record by reference.
+   --
+   --  Such a function is no primitive of the Ada type. It is a function of the class-wide type, whose function
+   --  of the wrapper makes the virtual call, and a place holder has its place in the vtable (as for the forms of
+   --  a function with a default argument). It cannot be overridden in Ada. (Until 2026-11-23 it was a primitive:
+   --  LevelDB's 'DB::Put', which returns a 'Status', was called with its arguments each in the place of another.)
+   --
+   is
+      use type C.int;
+      the_Parameter : Node_Pointer := get_Attribute (the_Node, "parms");
+   begin
+      if not is_declared_Virtual (the_Node)
+      then
+         return False;
+      end if;
+
+      if returns_a_cpp_constructed_Type (Self, doh_Node (the_Node))
+      then
+         return True;
+      end if;
+
+      while the_Parameter /= null
+      loop
+         if get_Attribute (the_Parameter, "type") /= null
+         then
+            declare
+               the_Type : constant String           := without_leading_Qualifiers (Attribute (the_Parameter, "type"));
+               Pad      : constant SwigType_Pointer := SwigType_Pointer (to_Doh (the_Type));
+            begin
+               if         SwigType_isPointer          (Pad) = 0
+                 and then SwigType_isReference        (Pad) = 0
+                 and then SwigType_isrvalue_reference (Pad) = 0
+                 and then SwigType_isArray            (Pad) = 0
+               then
+                  declare
+                     use type c_Type.a_c_type_Kind;
+
+                     Resolved : constant unbounded_String := +doh_Item (SwigType_typedef_resolve_all (Pad));
+                     Found    :          c_Type.view      := (if    Self.swig_type_Map_of_c_type.contains (+the_Type) then Self.swig_type_Map_of_c_type.Element (+the_Type)
+                                                              elsif Self.swig_type_Map_of_c_type.contains (Resolved)  then Self.swig_type_Map_of_c_type.Element (Resolved)
+                                                              else  null);
+                  begin
+                     while Found /= null
+                       and then Found.c_type_Kind = c_Type.Typedef
+                     loop
+                        Found := Found.base_Type;
+                     end loop;
+
+                     if         Found /= null
+                       and then Found.c_type_Kind = c_Type.c_Class
+                       and then not Found.is_constructed_by_Cpp
+                     then
+                        return True;
+                     end if;
+                  end;
+               end if;
+            end;
+         end if;
+
+         the_Parameter := next_Sibling (the_Parameter);
+      end loop;
+
+      return False;
+   end is_called_through_its_Wrapper;
 
 
 

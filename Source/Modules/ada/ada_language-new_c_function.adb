@@ -175,11 +175,13 @@ begin
                                                                                        -- is no virtual function of the smart pointer.
                                         and then get_Attribute (the_Node, "defaultargs") = null
                                         and then Attribute (the_Node, "feature:extend") = ""      -- A function which '%extend' adds is no member, virtual or not.
-                                        and then not Self.following_a_using_Declaration;          -- Nor has one which a 'using' declaration names a place in the vtable.
+                                        and then not Self.following_a_using_Declaration           -- Nor has one which a 'using' declaration names a place in the vtable.
+                                        and then not is_called_through_its_Wrapper (Self, Node_Pointer (the_Node));     -- One which Ada cannot call through the vtable is no primitive.
 
             new_Function.is_Abstract :=          check_Attribute (the_Node, "abstract", "1")
                                         and then get_Attribute (the_Node, "defaultargs") = null
-                                        and then not Self.following_a_using_Declaration;
+                                        and then not Self.following_a_using_Declaration
+                                        and then not is_called_through_its_Wrapper (Self, Node_Pointer (the_Node));
          end if;
 
          nameSpace.add (new_Function.all'Access);

@@ -165,6 +165,31 @@ begin
 
                Self.register (new_c_function_Pointer, the_doh_type_Name);
                Self.prior_c_Declaration  := new_c_function_Pointer.all'Access;
+
+               --  One which is declared in a class ('using CleanupFunction = void (*) (void*, void*);') is named with
+               --  its scope where it is used ('leveldb::Iterator::CleanupFunction'), so it is known by that name too.
+               --  The core cannot be asked what such a name stands for, as it can of another typedef: it gives the
+               --  function pointer type, which has no name here.
+               --
+               if not Self.c_class_Stack.is_Empty
+               then
+                  declare
+                     use type DOHs.Pointers.DOH_Pointer;
+                     the_Scope : constant DOH_Pointer := DOH_Pointer (Swig_symbol_qualified (the_Node));
+                  begin
+                     if the_Scope /= null
+                     then
+                        declare
+                           full_Name : constant unbounded_String := +(String'(+the_Scope) & "::" & to_String (the_type_Name));
+                        begin
+                           if not Self.swig_type_Map_of_c_type.contains (full_Name)
+                           then
+                              Self.swig_type_Map_of_c_type.insert (full_Name, new_c_function_Pointer);
+                           end if;
+                        end;
+                     end if;
+                  end;
+               end if;
             end;
 
          elsif Swigtype_isFunction (the_doh_swigType) /= 0

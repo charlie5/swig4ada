@@ -46,9 +46,12 @@ is
 begin
    find_the_not_fully_known_Types;
 
-   --  A member which the interface file ignores only reserves its storage. Where its type is not known, the
-   --  storage is given up, so that the class itself is still bound (the member may well have been ignored
-   --  because its type cannot be bound).
+   --  A member whose type is not known is left out, so that the class itself is still bound: its record then
+   --  does not match the class, which is warned of, but its functions are there, and an object which C++ makes
+   --  is used through a pointer as before. (A member which the interface file ignores only reserves its
+   --  storage, and may well have been ignored because its type cannot be bound. Until 2026-11-23 only such a
+   --  member was left out: any other took its class with it, and every function which used the class. LevelDB's
+   --  'Iterator', which has a member of a private nested structure, was not bound at all.)
    --
    declare
       Dropped : Boolean := False;
@@ -59,11 +62,15 @@ begin
          then
             for i in reverse 1 .. Each.component_Count
             loop
-               if         Each.Components (i).is_ignored_Member
-                 and then not_fully_known_Types.contains (Each.Components (i).my_Type)
+               if         not_fully_known_Types.contains (Each.Components (i).my_Type)
+                 and then Each.Components (i).my_Type /= Each     -- Not the class itself, where that is what is not known.
                then
-                  c_Declarable.warn (Each, Layout, "The ignored member '" & Each.Components (i).Name & "' of class '" & Each.Name
-                                                 & "' has a type which is not known, so its storage is left out. The layout of the record does not match that of the class.");
+                  c_Declarable.warn (Each, Layout,   (if Each.Components (i).is_ignored_Member
+                                                      then "The ignored member '" & Each.Components (i).Name & "' of class '" & Each.Name
+                                                         & "' has a type which is not known, so its storage is left out."
+                                                      else "The member '" & Each.Components (i).Name & "' of class '" & Each.Name
+                                                         & "' has a type which is not known, so it is left out.")
+                                                   & " The layout of the record does not match that of the class.");
                   Each.lose_Layout;
                   Each.remove_Component (i);
                   Dropped := True;
