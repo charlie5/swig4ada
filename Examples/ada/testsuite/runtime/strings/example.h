@@ -28,3 +28,10 @@ public:
 };
 
 inline int   total_length (Person* p)                     { return (int) (p->name.size () + p->city.size ()); }
+
+/* A string which is named through a 'using' declaration and through a typedef is the same type. */
+using std::string;
+typedef std::string Label;
+
+inline string shout   (const string& text)   { return text + "!"; }
+inline Label  labelled (int number)          { return "label " + std::to_string (number); }

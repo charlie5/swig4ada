@@ -91,5 +91,23 @@ begin
       destruct (Name);
    end members;
 
+   a_string_by_another_Name :
+   declare
+      Text   : aliased std_String := to_std_String (to_C ("loud"));
+      Result : aliased std_String;
+   begin
+      --  'string' (by 'using std::string;') and a typedef of 'std::string' are that type, so a function which
+      --  returns one gives its result to an object of the caller, as one which returns a 'std::string' does.
+      --
+      shout (Text'unchecked_Access, Result'unchecked_Access);
+      check (to_Ada (Result) = "loud!",                             "a string which is named through a 'using' declaration is returned by value");
+
+      labelled (7, Result'unchecked_Access);
+      check (to_Ada (Result) = "label 7",                           "and one which is named through a typedef");
+
+      destruct (Result);
+      destruct (Text);
+   end a_string_by_another_Name;
+
    finish;
 end Tester;

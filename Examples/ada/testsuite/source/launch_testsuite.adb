@@ -1438,7 +1438,7 @@ begin
       generate ("director_pass_by_value.i",                   use_CPP => True);
       generate ("director_primitives.i",                      use_CPP => True);
       generate ("director_property.i",                        use_CPP => True,   check_Layout => False);     -- A class hides a member from SWIG.
-      --  generate ("director_protected.i",                   use_CPP => True);     -- Generator: a name is defined twice ('Foo_s').
+      generate ("director_protected.i",                       use_CPP => True);
       generate ("director_protected_overloaded.i",            use_CPP => True);
       --  generate ("director_redefined.i",                   use_CPP => True);     -- Spec: a function is marked as overriding, and does not.
       generate ("director_ref.i",                             use_CPP => True);
@@ -1488,7 +1488,7 @@ begin
       --  generate ("li_std_auto_ptr.i",                      use_CPP => True);     -- 'std::auto_ptr', which C++17 removed, is not bound: it has neither a move constructor nor a copy constructor of a constant.
       generate ("li_std_combinations.i",                      use_CPP => True);
       generate ("li_std_except_as_class.i",                   use_CPP => True);
-      --  generate ("li_std_pair_using.i",                    use_CPP => True);     -- Generator: the template 'pair' is not found through a using declaration.
+      generate ("li_std_pair_using.i",                        use_CPP => True);
       generate ("li_std_vector_back_reference.i",             use_CPP => True);
       --  generate ("li_std_vector_enum.i",                   use_CPP => True);     -- Spec: the packages of a vector and of its enumeration depend on each other.
       generate ("li_std_vector_member_var.i",                 use_CPP => True);
@@ -1511,7 +1511,7 @@ begin
       generate ("nested_directors.i",                         use_CPP => True);
       generate ("nested_ignore.i",                            use_CPP => True);
       generate ("nested_in_template.i",                       use_CPP => True);
-      --  generate ("nested_scope.i",                         use_CPP => True);     -- Generator: an array type is added twice to the map of Ada types.
+      generate ("nested_scope.i",                             use_CPP => True);
       generate ("nested_template_base.i",                     use_CPP => True);
       generate ("nested_workaround.i",                        use_CPP => True);
       generate ("newobject3.i",                               use_CPP => True);
@@ -1552,7 +1552,7 @@ begin
       generate ("template_default_arg_overloaded.i",          use_CPP => True);
       generate ("template_default_arg_overloaded_extend.i",   use_CPP => True);
       generate ("template_default_arg_virtual_destructor.i",  use_CPP => True);
-      --  generate ("template_default_cache.i",               use_CPP => True);     -- Generator: a name is added twice to the map of Ada types.
+      generate ("template_default_cache.i",                   use_CPP => True);
       generate ("template_default_class_parms_typedef.i",     use_CPP => True);
       generate ("template_empty_inherit.i",                   use_CPP => True);
       generate ("template_keyword_in_type.i",                 use_CPP => True);
@@ -1567,14 +1567,14 @@ begin
       generate ("template_typedef_class_template.i",          use_CPP => True);
       generate ("template_typedef_inherit.i",                 use_CPP => True);
       generate ("template_typedef_typedef.i",                 use_CPP => True);
-      --  generate ("template_typemaps_typedef.i",            use_CPP => True);     -- Generator: an array type is added twice to the map of Ada types.
-      --  generate ("template_typemaps_typedef2.i",           use_CPP => True);     -- Generator: an array type is added twice to the map of Ada types.
+      generate ("template_typemaps_typedef.i",                use_CPP => True);
+      generate ("template_typemaps_typedef2.i",               use_CPP => True);
       generate ("template_using_directive_and_declaration_forward.i",use_CPP => True);
       generate ("template_using_directive_typedef.i",         use_CPP => True);
       generate ("threads_exception.i",                        use_CPP => True);
       generate ("typedef_struct_cpp.i",                       use_CPP => True,   check_Layout => False);     -- A structure hides a member from SWIG ('#ifndef SWIG').
       generate ("typedef_typedef.i",                          use_CPP => True);
-      --  generate ("typemap_array_qualifiers.i",             use_CPP => True);     -- Generator: a type is sought which is not in the map of C types.
+      generate ("typemap_array_qualifiers.i",                 use_CPP => True);
       generate ("typemap_arrays.i",                           use_CPP => True);
       generate ("typemap_delete.i",                           use_CPP => True);
       --  generate ("typemap_directorout.i",                  use_CPP => True);     -- Wrapper: a typemap of the input converts from 'void*'.
