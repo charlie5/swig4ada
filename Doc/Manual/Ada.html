@@ -549,6 +549,8 @@ package shapes.Shape is
 Public data members are components of the record.
 Protected members are bound too, and private data members are present as components so
 that the record has its right size.
+A private member function is not bound: where it is virtual its place among the virtual
+functions is kept, and a call of the function which it overrides dispatches to it.
 A static member function is a function of the package with no <tt>Self</tt>, and a
 static member variable is a variable of the package.
 A static member which is constant and has its value in the class
