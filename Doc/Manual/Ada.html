@@ -106,9 +106,6 @@ derived from directly in Ada.
 binding, with a warning.
 <li>A pointer to a class member is not supported: a typedef of one, and whatever takes or
 returns one, is left out with a warning.
-<li>A <tt>using</tt> declaration in a class (<tt>using Base::f;</tt>) is not followed: the
-functions of a base class with no virtual function are reached through the base
-(see <a href="#Ada_inheritance">Inheritance</a>).
 <li>An object which C++ has made cannot be converted to a derived type in Ada, nor tested
 for membership of one (see <a href="#Ada_inheritance">Inheritance</a>).
 <li><tt>std::auto_ptr</tt> is not bound, and <tt>std::unique_ptr</tt> only where an
@@ -716,6 +713,9 @@ which returns a pointer to that part of the object.
 A class with no virtual function has each base class as a component, named after it.
 The functions of such a base are therefore called on the base:
 <tt>Base.width (Derived.as_Base (the_Object).all)</tt>.
+One which the derived class names with a <tt>using</tt> declaration
+(<tt>using Base::width;</tt>) is a function of the derived class as well, as it is in C++:
+<tt>Derived.width (the_Object)</tt>.
 </p>
 
 <p>
