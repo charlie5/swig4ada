@@ -1694,6 +1694,17 @@ begin
       run_Upstream ("member_pointer");            -- Pointers to member functions, which are left out with a warning.
       run_Upstream ("namespace_class");           -- Classes and class templates in namespaces.
       run_Upstream ("overload_simple");           -- Functions and constructors which are overloaded on the type of a parameter.
+      run_Upstream ("overload_subtype");          -- A function which is overloaded on a class and on one derived from it.
+      run_Upstream ("smart_pointer_simple");      -- A member and a function reached through a smart pointer.
+      run_Upstream ("smart_pointer_overload");    -- The overloads of a function reached through a smart pointer.
+      run_Upstream ("using_extend");              -- 'using' declarations which name functions of two bases, some added by '%extend'.
+      run_Upstream ("using_private");             -- Members of a private base which are made public by 'using' declarations.
+      run_Upstream ("using_protected");           -- Protected members of a base which are made public by 'using' declarations.
+      run_Upstream ("abstract_access");           -- A pure virtual function which is private, defined through a chain of classes.
+      run_Upstream ("array_member");              -- Array members, one with the length of an enumeration value of its class.
+      run_Upstream ("template_ns");               -- Instances of a class template with a constructor template.
+      run_Upstream ("inherit_missing");           -- A class whose base class is declared and never defined.
+      run_Upstream ("constructor_copy");          -- Copy constructors, declared and added by '%copyctor'.
    end if;
 
 
