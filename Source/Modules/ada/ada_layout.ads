@@ -12,12 +12,6 @@ package ada_Layout
 -- those of the machine which generates the binding.
 --
 is
-   procedure main_Module_is (Name : in String);
-   --
-   -- Names the module whose specs are being written. The members of a class of any other module (one which is
-   -- imported) are not collected, so the layout of such a class is not known here.
-
-
    type component_Place is
       record
          First : Natural := 0;     -- In bits, from the start of the record.

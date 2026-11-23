@@ -372,6 +372,42 @@ is
 
 
 
+   procedure collect_the_Members_of_an_imported_Class
+   --
+   --  The core hands on no member of a class of an imported module, as nothing of that module is wrapped here.
+   --  Its member variables are needed all the same: a class of this module which is derived from it, or has a
+   --  member of it, is laid out by the place and size of each. They are taken from the nodes of the class, as
+   --  'memberVariableHandler' takes one which the core hands on. (Until 2026-11-23 such a class was taken to
+   --  have a layout which is not known, and a class derived from it was laid out as GNAT would.)
+   --
+   is
+      the_Member : Node_Pointer := first_Child (the_Node);
+      Status     : C.int with Unreferenced;
+   begin
+      while the_Member /= null
+      loop
+         declare
+            Storage : constant String := Attribute (the_Member, "storage");
+         begin
+            if         Attribute (the_Member, "nodeType") = "cdecl"
+              and then Attribute (the_Member, "sym:name") /= ""
+              and then Attribute (the_Member, "feature:ignore") = ""     -- An ignored member is added with the hidden ones.
+              and then Attribute (the_Member, "feature:extend") = ""
+              and then get_Attribute (the_Member, "type") /= null
+              and then Storage not in "static" | "typedef" | "friend" | "extern"
+              and then ada.Strings.fixed.Index (Storage, "static") = 0
+              and then SwigType_isFunction (SwigType_Pointer (get_Attribute (the_Member, "decl"))) = 0
+            then
+               Status := Self.memberVariableHandler (the_Member);
+            end if;
+         end;
+
+         the_Member := next_Sibling (the_Member);
+      end loop;
+   end collect_the_Members_of_an_imported_Class;
+
+
+
 begin
    indent_Log;
    dlog (+"");
@@ -426,6 +462,15 @@ begin
    Self.destructor_is_Bound  := False;
 
    Status := swigMod.Language.item (Self.all).classHandler (the_Node);     -- Process all class members.
+
+   declare
+      use type swig_Module.swig_Module_view;
+   begin
+      if Self.current_Module /= Self.Module_top'Access
+      then
+         collect_the_Members_of_an_imported_Class;
+      end if;
+   end;
 
    add_hidden_Virtuals (Self, before => null);                             -- Those which follow the last member function.
 

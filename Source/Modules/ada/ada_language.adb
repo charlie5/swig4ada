@@ -1211,6 +1211,7 @@ is
    is
       use swigg.Utility;
       use type C.int;
+      use type swig_Module.swig_Module_view;
       the_Node : doh_Node renames N;
 
       swig_Type          :          SwigType_Pointer := SwigType_Pointer (doh_Copy (doh_Item (get_Attribute (the_Node, "type"))));
@@ -1294,7 +1295,8 @@ is
          --
          if         Self.in_cpp_Mode
            and then has_virtual_Base
-           and then not check_Attribute (the_Node, "access", "private")     -- No wrapper is made for a private member.
+           and then not check_Attribute (the_Node, "access", "private")     -- No wrapper is made for a private member,
+           and then Self.current_Module = Self.Module_top'Access            -- nor for one of a class of an imported module.
          then
             declare
                Status : C.int with Unreferenced;

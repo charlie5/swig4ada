@@ -2649,8 +2649,6 @@ is
    procedure generate (Self : access ada_Language.item)
    is
    begin
-      ada_Layout.main_Module_is (to_String (Self.Module_top.Ada.Package_top.qualified_Name));
-
       emit_Spec (Self.Module_top.Ada.Package_top,              Self.in_cpp_Mode,  with_IC_Pointers => False, the_ada_Lang => Self);
       emit_Spec (Self.Module_top.Ada.Package_binding,          Self.in_cpp_Mode,  with_IC_Pointers => False, the_ada_Lang => Self);
       emit_Spec (Self.Module_top.Ada.Package_pointers,         Self.in_cpp_Mode,  with_IC_Pointers => True,  the_ada_Lang => Self);
