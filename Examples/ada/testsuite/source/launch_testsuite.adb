@@ -1705,6 +1705,16 @@ begin
       run_Upstream ("template_ns");               -- Instances of a class template with a constructor template.
       run_Upstream ("inherit_missing");           -- A class whose base class is declared and never defined.
       run_Upstream ("constructor_copy");          -- Copy constructors, declared and added by '%copyctor'.
+      run_Upstream ("enum_template");             -- An enumeration which is also the argument of a template instance.
+      run_Upstream ("typedef_class");             -- A typedef of a class which is declared in another class.
+      run_Upstream ("extend_template");           -- Functions which '%extend' adds to a class template.
+      run_Upstream ("smart_pointer_rename");      -- Renamed functions reached through a smart pointer.
+      run_Upstream ("static_const_member_2");     -- Static members: constants, a variable, a reference and objects of their class.
+      run_Upstream ("template_extend1");          -- A function which '%extend' adds to each instance of a template.
+      run_Upstream ("template_rename");           -- Functions of a class template which are renamed, in every instance or in one.
+      run_Upstream ("enums",                      use_CPP => False);     -- Enumerations of C with a name, a typedef or neither.
+      run_Upstream ("cpp11_alternate_function_syntax");     -- Member functions with a trailing return type.
+      run_Upstream ("template_default_arg");      -- Templates and functions with default arguments.
    end if;
 
 

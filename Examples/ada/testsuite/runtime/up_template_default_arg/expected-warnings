@@ -1,0 +1,7 @@
+template_default_arg.i:38: Warning 861: Unable to bind the type 'Foo<(Foo<(int)>)>', which is not known.
+template_default_arg.i:38: Warning 861: Unable to bind the function 'construct' of class 'X_Foo_Foo_int', as one of its types is not known.
+template_default_arg.i:39: Warning 861: Unable to bind the function 'construct' of class 'X_Foo_Foo_int', as one of its types is not known.
+template_default_arg.i:40: Warning 861: Unable to bind the function 'meth' of class 'X_Foo_Foo_int', as one of its types is not known.
+template_default_arg.i:40: Warning 861: Unable to bind the function 'meth' of class 'X_Foo_Foo_int', as one of its types is not known.
+template_default_arg.i:41: Warning 861: Unable to bind the function 'meth' of class 'X_Foo_Foo_int', as one of its types is not known.
+template_default_arg.i:41: Warning 861: Unable to bind the function 'meth' of class 'X_Foo_Foo_int', as one of its types is not known.
