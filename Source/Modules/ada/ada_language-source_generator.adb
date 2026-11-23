@@ -249,6 +249,13 @@ is
 
 
       record_Start := Length (the_Source) + 1;
+      if Self.has_an_unknown_Base
+      then
+         append (the_Source,  NL & "   --  A base class of this class is not known, so the places of its virtual functions are not either:"
+                            & NL & "   --  each is called through the wrapper, and none can be overridden in Ada."
+                            & NL & "   --");
+      end if;
+
       append (the_Source,  NL  &  "type "  &  Self.Name);
 
       if is_a_Union
@@ -1344,6 +1351,123 @@ is
 
 
 
+      function leads_to_this_Package (the_other_Package : in ada_Package.view) return Boolean
+      --
+      --  True where another package needs the whole of this one, itself or through the packages of the classes which
+      --  it needs the whole of in turn: the specifications of a ring of packages cannot each 'with' the next, so this
+      --  package must then make do with a limited view of the other.
+      --
+      --  A package needs the whole of another where its record has a member of a class of that one, where a
+      --  subprogram of it takes or returns such a class by value, or where one takes or returns a pointer to it,
+      --  unless the two name each other directly: the one then has a limited view of the other already (see
+      --  'is_mutually_dependent'), and is no part of a ring. A package which the other only points to is so left with
+      --  the whole of it, and the named pointer type of its class, as it was before rings were looked for.
+      --
+      is
+         Visited : ada_Package.Vector;
+
+         function package_of (the_other_Type : in ada_Type.view) return ada_Package.view
+         --
+         --  The package of a class which a parameter or result is of, or points to. Null where it is of none.
+         --
+         is
+         begin
+            if the_other_Type = null
+            then
+               return null;
+
+            elsif accessed_Package (the_other_Type) /= null
+            then
+               return accessed_Package (the_other_Type);
+
+            elsif      the_other_Type.resolved_Type /= null
+              and then the_other_Type.resolved_Type.all in ada_Type.composite.a_record.item'Class
+            then
+               return ada_Package.view (the_other_Type.resolved_Type.declaration_Package);
+            else
+               return null;
+            end if;
+         end package_of;
+
+         function names (the_Package : in ada_Package.view;   Another : in ada_Package.view) return Boolean
+         --
+         --  True where a subprogram of a package takes or returns a class of another, or a pointer to it.
+         --
+         is
+         begin
+            return (for some each_Subprogram of the_Package.Subprograms
+                    =>        package_of (each_Subprogram.return_Type) = Another
+                      or else (for some each_Parameter of each_Subprogram.Parameters
+                               =>         each_Parameter.Name /= "Self"
+                                 and then package_of (each_Parameter.my_Type) = Another));
+         end names;
+
+         function leads_here (From : in ada_Package.view) return Boolean
+         is
+            function leads_here_by (the_other_Type : in ada_Type.view;   is_a_Member : in Boolean := False) return Boolean
+            is
+               Next       : constant ada_Package.view := package_of (the_other_Type);
+               is_Pointer : constant Boolean          := the_other_Type /= null and then accessed_Package (the_other_Type) /= null;
+            begin
+               if        Next = null
+                 or else Next = From
+                 or else Next.cpp_class_Type = null
+               then
+                  return False;
+               end if;
+
+               if is_Pointer
+               then
+                  if        is_a_Member            -- A member which is a pointer needs no more than a limited view.
+                    or else names (Next, From)     -- The two name each other, so this one has a limited view already.
+                  then
+                     return False;
+                  end if;
+               end if;
+
+               return        Next = ada_Package.view (the_Package)
+                     or else leads_here (Next);
+            end leads_here_by;
+
+         begin
+            if Visited.contains (From)
+            then
+               return False;
+            end if;
+
+            Visited.append (From);
+
+            if From.cpp_class_Type /= null
+            then
+               for Each of From.cpp_class_Type.Components
+               loop
+                  if leads_here_by (Each.my_Type, is_a_Member => True)
+                  then
+                     return True;
+                  end if;
+               end loop;
+            end if;
+
+            for each_Subprogram of From.Subprograms
+            loop
+               if        leads_here_by (each_Subprogram.return_Type)
+                 or else (for some each_Parameter of each_Subprogram.Parameters
+                          =>         each_Parameter.Name /= "Self"
+                            and then leads_here_by (each_Parameter.my_Type))
+               then
+                  return True;
+               end if;
+            end loop;
+
+            return False;
+         end leads_here;
+
+      begin
+         return leads_here (the_other_Package);
+      end leads_to_this_Package;
+
+
+
       function is_mutually_dependent (the_Type : in ada_Type.view) return Boolean
       --
       --  True when 'the_Type' is a pointer to a type of another package, a subprogram of which has a parameter or result
@@ -1380,6 +1504,14 @@ is
                return True;
             end if;
          end loop;
+
+         --  Or where it leads back here through other classes ('xml_node' takes a pointer to an 'xpath_query', which
+         --  takes one to an 'xpath_node', which returns an 'xml_node').
+         --
+         if leads_to_this_Package (the_other_Package)
+         then
+            return True;
+         end if;
 
          for each_Subprogram of the_other_Package.Subprograms
          loop
@@ -1431,6 +1563,17 @@ is
                   end if;
                end;
             end loop;
+
+            --  Likewise where a subprogram of that package takes or returns a type of this one: two classes each
+            --  of which has a function that returns the other by value ('xml_node::text' gives an 'xml_text', and
+            --  'xml_text::data' an 'xml_node'), or a longer ring of them ('xml_node' gives an 'xpath_node_set', that
+            --  an 'xpath_node', and that an 'xml_node'). Each package then has a limited view of the next. (Until
+            --  2026-11-24 each had the whole of the next, and none compiled.)
+            --
+            if leads_to_this_Package (ada_Package.view (the_Type.declaration_Package))
+            then
+               return True;
+            end if;
          end if;
 
          return False;
@@ -2364,9 +2507,26 @@ is
                      --  a slot of its own in the C++ vtable. An import pragma cannot be used either, as it applies to all
                      --  prior overloads. An aspect applies to its own declaration only.
                      --
-                     imported_by_Aspect   : constant Boolean               :=          is_overloaded
-                                                                              and then the_Package.models_a_virtual_cpp_Class
-                                                                              and then not the_Subprogram.is_Constructor;
+                     --  Nor can an overload be renamed where it takes or returns, by value, a class of which this package
+                     --  has only a limited view (one of a ring of classes which use each other): the renaming would
+                     --  need the whole of that class.
+                     --
+                     function is_seen_through_a_limited_View (the_Type : in ada_Type.view) return Boolean
+                     is (         the_Type /= null
+                         and then the_Type.all in ada_Type.composite.a_record.item'Class
+                         and then ada_Package.view (the_Type.declaration_Package) /= ada_Package.view (the_Package)
+                         and then the_Package.Context.limited_Withs (ada_Package.view (the_Type.declaration_Package)));
+
+                     uses_a_limited_View  : constant Boolean               :=          is_overloaded
+                                                                              and then not the_Subprogram.is_Constructor
+                                                                              and then (        is_seen_through_a_limited_View (the_Subprogram.return_Type)
+                                                                                        or else (for some Each of the_Subprogram.Parameters
+                                                                                                 => is_seen_through_a_limited_View (Each.my_Type)));
+
+                     imported_by_Aspect   : constant Boolean               :=        (         is_overloaded
+                                                                                      and then the_Package.models_a_virtual_cpp_Class
+                                                                                      and then not the_Subprogram.is_Constructor)
+                                                                              or else uses_a_limited_View;
                   begin
                      if         the_Subprogram.access_Mode /= ada_subProgram.private_Access
                        and not (         the_Subprogram.is_Destructor
@@ -2391,7 +2551,8 @@ is
                            then
                               append (spec_Source,  NL & "     with Convention => CPP");
                            else
-                              append (spec_Source,  NL & "     with Import, Convention => CPP, External_Name => """
+                              append (spec_Source,  NL & "     with Import, Convention => " & (if the_Package.models_a_virtual_cpp_Class then "CPP" else "C")
+                                                       & ", External_Name => """
                                                        & the_Subprogram.member_function_link_Symbol_for (in_cpp_Mode) & """");
                            end if;
                         end if;

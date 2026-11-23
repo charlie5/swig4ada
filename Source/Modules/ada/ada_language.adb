@@ -604,10 +604,22 @@ is
               and then (        new_Variable.my_Type.is_a_standard_Integer
                         or else to_String (new_Variable.my_Type.Name) in "bool" | "signed char" | "unsigned char")     -- Which are numbers too.
             then
+               declare
+                  the_Value : gmp.discrete.Integer;
                begin
-                  new_Variable.Value := +Image (resolved_c_integer_Expression (Self, +value_Text,
-                                                                                     Self.integer_symbol_value_Map,
-                                                                                     Self.current_class_namespace_Prefix));
+                  the_Value          := resolved_c_integer_Expression (Self, +value_Text,
+                                                                             Self.integer_symbol_value_Map,
+                                                                             Self.current_class_namespace_Prefix);     -- Which may raise.
+                  new_Variable.Value := +Image (the_Value);
+
+                  --  For a later constant whose value names this one ('const unsigned parse_default = parse_cdata |
+                  --  parse_escapes;'), as the value of a '#define' is kept. (Until 2026-11-24 it was not, and such a
+                  --  constant was left out.)
+                  --
+                  if not Self.integer_symbol_value_Map.contains (new_Variable.Name)
+                  then
+                     Self.integer_symbol_value_Map.insert (new_Variable.Name, the_Value);
+                  end if;
                exception
                   when others =>
                      null;     -- The value is not an integer expression, so the constant is imported.
@@ -1142,6 +1154,7 @@ is
                                                                    and then Attribute (overriding_Value, "feature:extend") = "");     -- neither overrides nor is overridden.
 
          if         through_its_Wrapper
+           and then not Self.current_c_Class.has_an_unknown_Base      -- Whose places are not known, so none can be held.
            and then not is_Overriding                                 -- One which overrides a function of the parent of the Ada type has its place.
            and then not overrides_in_the_Parents                      -- The core does not say so of a function which is not public.
            and then get_Attribute (the_Node, "defaultargs") = null     -- C++ has one virtual function, that of all its arguments.
@@ -2223,12 +2236,23 @@ is
       use type C.int;
       the_Parameter : Node_Pointer := get_Attribute (the_Node, "parms");
    begin
-      if not is_declared_Virtual (the_Node)
+      if        not is_declared_Virtual (the_Node)
+        or else Attribute (the_Node, "nodeType") = "destructor"     -- Which is bound by its symbols, and is no function of the wrapper.
       then
          return False;
       end if;
 
       if returns_a_cpp_constructed_Type (Self, doh_Node (the_Node))
+      then
+         return True;
+      end if;
+
+      --  Nor can Ada call through the vtable a function of a class with a base class which SWIG was never shown
+      --  ('class xpath_exception : public std::exception'): the places which the virtual functions of that base
+      --  take are not known, so neither is the place of this one.
+      --
+      if         not Self.c_class_Stack.is_Empty
+        and then Self.current_c_Class.has_an_unknown_Base
       then
          return True;
       end if;

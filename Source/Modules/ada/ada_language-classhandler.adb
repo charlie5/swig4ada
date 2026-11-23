@@ -447,9 +447,29 @@ is
                else   -- Such as a base class which is ignored, or is a template which has not been instantiated.
                   warn (Layout, "The base class '" & base_Name & "' of class '" & class_Name & "' is not known, and is ignored.");
                   new_c_Class.lose_Layout;
+                  new_c_Class.has_an_unknown_Base;
                end if;
             end;
          end loop;
+
+         --  A base class which SWIG was never shown ('std::exception', with no library file for it) is not among
+         --  those which the core gives, though it is among those which the class names.
+         --
+         declare
+            use type DOH_Pointer;
+
+            function named_Bases (Access_of : in String) return C.int
+            is
+               the_Names : constant DOH_Pointer := DOH_Pointer (get_Attribute (the_Node, Access_of & "baselist"));
+            begin
+               return (if the_Names = null then 0 else DohLen (the_Names));
+            end named_Bases;
+         begin
+            if named_Bases ("") + named_Bases ("protected") + named_Bases ("private") > (if DOH_Pointer (base_List) = null then 0 else Length)
+            then
+               new_c_Class.has_an_unknown_Base;
+            end if;
+         end;
       end;
    end add_its_base_Classes;
 

@@ -703,6 +703,11 @@ is
                               new_ada_Record.lose_Layout;
                            end if;
 
+                           if the_c_Type.has_an_unknown_Base
+                           then
+                              new_ada_Record.has_an_unknown_Base;
+                           end if;
+
                            new_ada_Package.add                   (new_ada_Record.all'Access);
                            new_ada_Package.models_cpp_class_Type (new_ada_Record.all'Access);
 

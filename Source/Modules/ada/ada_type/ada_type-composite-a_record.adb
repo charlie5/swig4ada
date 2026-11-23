@@ -388,6 +388,22 @@ is
 
 
 
+   procedure has_an_unknown_Base (Self : access Item)
+   is
+   begin
+      Self.has_an_unknown_Base := True;
+   end has_an_unknown_Base;
+
+
+
+   function has_an_unknown_Base (Self : access Item) return Boolean
+   is
+   begin
+      return Self.has_an_unknown_Base;
+   end has_an_unknown_Base;
+
+
+
    procedure layout_Name_is (Self : access Item;   Now : in unbounded_String)
    is
    begin

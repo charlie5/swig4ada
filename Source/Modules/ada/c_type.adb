@@ -1245,6 +1245,31 @@ is
 
 
 
+   procedure has_an_unknown_Base (Self : access Item)
+   is
+   begin
+      if Self.my.c_type_Kind = c_Class
+      then
+         Self.my.has_an_unknown_Base := True;
+      end if;
+   end has_an_unknown_Base;
+
+
+
+   function has_an_unknown_Base (Self : access Item) return Boolean
+   is
+   begin
+      if Self.my.c_type_Kind /= c_Class
+      then
+         return False;
+      end if;
+
+      return        Self.my.has_an_unknown_Base
+            or else (for some Each of Self.base_Classes => Each.has_an_unknown_Base);
+   end has_an_unknown_Base;
+
+
+
    procedure layout_Name_is (Self : access Item;   Now : in unbounded_String)
    is
    begin
