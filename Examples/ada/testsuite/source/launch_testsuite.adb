@@ -1352,7 +1352,7 @@ begin
       generate ("char_binary.i",                              use_CPP => True);
       generate ("chartest.i",                                 use_CPP => True);
       generate ("class_forward.i",                            use_CPP => True);
-      --  generate ("class_scope_namespace.i",                use_CPP => True);     -- Spec: a class has the name of an opaque type of the top package.
+      generate ("class_scope_namespace.i",                    use_CPP => True);
       generate ("constant_directive.i",                       use_CPP => True);
       generate ("constant_expr.i",                            use_CPP => True);
       generate ("constructor_rename.i",                       use_CPP => True);
@@ -1398,7 +1398,7 @@ begin
       generate ("cpp11_thread_local.i",                       use_CPP => True);
       generate ("cpp11_type_aliasing.i",                      use_CPP => True);
       generate ("cpp11_type_traits.i",                        use_CPP => True);
-      --  generate ("cpp11_uniform_initialization.i",         use_CPP => True);     -- Spec: an array variable of two dimensions, the first unknown.
+      generate ("cpp11_uniform_initialization.i",             use_CPP => True);
       generate ("cpp11_unrestricted_unions.i",                use_CPP => True);
       generate ("cpp11_userdefined_literals.i",               use_CPP => True);
       generate ("cpp11_variadic_templates.i",                 use_CPP => True);
@@ -1440,12 +1440,12 @@ begin
       generate ("director_property.i",                        use_CPP => True,   check_Layout => False);     -- A class hides a member from SWIG.
       generate ("director_protected.i",                       use_CPP => True);
       generate ("director_protected_overloaded.i",            use_CPP => True);
-      --  generate ("director_redefined.i",                   use_CPP => True);     -- Spec: a function is marked as overriding, and does not.
+      generate ("director_redefined.i",                       use_CPP => True);
       generate ("director_ref.i",                             use_CPP => True);
       generate ("director_string.i",                          use_CPP => True);
       generate ("director_thread.i",                          use_CPP => True);
       generate ("director_unroll.i",                          use_CPP => True);
-      --  generate ("director_using.i",                       use_CPP => True);     -- Wrapper: the concrete class of an abstract template instance is still abstract.
+      generate ("director_using.i",                           use_CPP => True);
       generate ("director_void.i",                            use_CPP => True);
       generate ("director_wombat.i",                          use_CPP => True);
       generate ("doxygen_alias.i",                            use_CPP => True);
@@ -1490,11 +1490,11 @@ begin
       generate ("li_std_except_as_class.i",                   use_CPP => True);
       generate ("li_std_pair_using.i",                        use_CPP => True);
       generate ("li_std_vector_back_reference.i",             use_CPP => True);
-      --  generate ("li_std_vector_enum.i",                   use_CPP => True);     -- Spec: the packages of a vector and of its enumeration depend on each other.
+      generate ("li_std_vector_enum.i",                       use_CPP => True);
       generate ("li_std_vector_member_var.i",                 use_CPP => True);
-      --  generate ("li_std_vector_ptr.i",                    use_CPP => True);     -- Wrapper: a pointer to a reference, for a vector of pointers.
+      generate ("li_std_vector_ptr.i",                        use_CPP => True);
       generate ("li_swigtype_inout.i",                        use_CPP => True);
-      --  generate ("li_typemaps_apply.i",                    use_CPP => True);     -- Wrapper: the typemaps of 'typemaps.i' are applied to a reference to a bool.
+      generate ("li_typemaps_apply.i",                        use_CPP => True);
       generate ("member_funcptr_galore.i",                    use_CPP => True);
       generate ("member_pointer_const.i",                     use_CPP => True);
       generate ("memberin_extend.i",                          use_CPP => True);
@@ -1541,7 +1541,7 @@ begin
       generate ("smart_pointer_template_const_overload.i",    use_CPP => True);
       generate ("smart_pointer_template_defaults_overload.i", use_CPP => True);
       generate ("special_variable_attributes.i",              use_CPP => True);
-      --  generate ("special_variable_macros.i",              use_CPP => True);     -- Wrapper: a typemap of the input assigns a string to a class result.
+      --  generate ("special_variable_macros.i",              use_CPP => True);     -- Wrapper: a typemap of the input gives a class result the value of one of its members, and names the types for that in each typed language but Ada.
       generate ("stl_no_default_constructor.i",               use_CPP => True);
       generate ("string_constants.i",                         use_CPP => True);
       generate ("struct_initialization_cpp.i",                use_CPP => True);
@@ -1561,7 +1561,7 @@ begin
       generate ("template_nested_typemaps.i",                 use_CPP => True);
       generate ("template_parameters_global_scope.i",         use_CPP => True);
       generate ("template_partial_specialization.i",          use_CPP => True);
-      --  generate ("template_partial_specialization_typedef.i",use_CPP => True);     -- Spec: a pointer to a pointer to 'unsigned' is not declared.
+      generate ("template_partial_specialization_typedef.i",    use_CPP => True);
       generate ("template_private_assignment.i",              use_CPP => True);
       generate ("template_templated_constructors.i",          use_CPP => True);
       generate ("template_typedef_class_template.i",          use_CPP => True);
@@ -1577,7 +1577,7 @@ begin
       generate ("typemap_array_qualifiers.i",                 use_CPP => True);
       generate ("typemap_arrays.i",                           use_CPP => True);
       generate ("typemap_delete.i",                           use_CPP => True);
-      --  generate ("typemap_directorout.i",                  use_CPP => True);     -- Wrapper: a typemap of the input converts from 'void*'.
+      generate ("typemap_directorout.i",                      use_CPP => True);
       generate ("typemap_documentation.i",                    use_CPP => True);
       generate ("typemap_global_scope.i",                     use_CPP => True);
       generate ("typemap_manyargs.i",                         use_CPP => True);
