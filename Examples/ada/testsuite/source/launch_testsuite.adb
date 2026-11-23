@@ -1745,6 +1745,12 @@ begin
          --  reaches another function. './check_vtables' takes the layout of each vtable from the compiler and compares.
          --
          run_Step ("that the virtual functions of each class are in the order of C++", "./check_vtables");
+
+         --  Whether C++ constructs a class decides how it is passed and returned, and so how it is bound. Where the
+         --  tool takes a class for the other kind, nothing fails to compile or to link: a constructor leaves the object
+         --  as it was. './check_calls' has the compiler say of each class, and compares.
+         --
+         run_Step ("that each class is of the kind which C++ takes it for", "./check_calls");
       end if;
    end if;
 

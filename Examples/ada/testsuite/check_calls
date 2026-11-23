@@ -1,0 +1,152 @@
+#!/usr/bin/env python3
+#
+#  Checks, for each class which a C++ case of the suite binds, that the binding and the compiler agree on whether
+#  C++ constructs the class.
+#
+#  A class which C++ constructs (one with a destructor, or a copy or move constructor, which is not trivial) is
+#  passed and returned through a hidden pointer, and is bound as a limited record of convention CPP. Any other is
+#  passed and returned as a C structure is, in registers where it fits, and is bound as a plain record. Where the
+#  tool takes a class for the other kind, nothing fails to compile or to link: a constructor leaves the object of
+#  the caller as it was, or a result is sought where C++ has not put it. (On 2026-11-23 a class with a constructor
+#  template, which the core takes for a copy constructor, was found to be bound as one which C++ constructs.)
+#
+#  The kind of each class is taken from its spec, and the compiler is asked by an assertion which is compiled
+#  after the wrapper of the case: a class is not trivial 'for the purposes of calls' (the Itanium C++ ABI) where
+#  its destructor, or the constructor by which it is copied or moved, is not trivial, or where it can be neither
+#  copied nor moved.
+#
+#  Usage:  ./check_calls
+#
+#  Writes what it finds to 'unit-build/calls/report.txt'. The classes which differ must be the lines of the file
+#  'expected-call-differences'; exits with a failure status if they are not.
+#
+
+import os, re, subprocess, sys
+from concurrent.futures import ThreadPoolExecutor
+
+Here      = os.path.dirname(os.path.abspath(__file__))
+Generated = os.path.join(Here, "generated")
+Build     = os.path.join(Here, "unit-build", "calls")
+Suite     = os.path.join(Here, "..", "..", "test-suite")
+
+os.makedirs(Build, exist_ok=True)
+
+Traits = r'''
+#include <type_traits>
+
+template <class T, class = void> struct swig_ada_is_complete : std::false_type {};
+template <class T>               struct swig_ada_is_complete <T, std::void_t <decltype (sizeof (T))>> : std::true_type {};
+
+template <class T, bool = swig_ada_is_complete <T>::value> struct swig_ada_is_constructed
+{
+  static const int value = 2;     // Not known, for a class which is declared and never defined.
+};
+
+template <class T> struct swig_ada_is_constructed <T, true>
+{
+  static const int value =    !std::is_trivially_destructible <T>::value
+                           || ( std::is_copy_constructible <T>::value && !std::is_trivially_copy_constructible <T>::value)
+                           || ( std::is_move_constructible <T>::value && !std::is_trivially_move_constructible <T>::value)
+                           || (!std::is_copy_constructible <T>::value && !std::is_move_constructible <T>::value);
+};
+'''
+
+
+def cpp_names(Wrapper):
+    """The C++ name of each class of a wrapper, by the name which it is bound by: the wrapper of the
+       destructor of a class 'X' is 'Ada_delete_<name>', and declares its argument as 'X *arg1'."""
+    Text  = open(Wrapper, errors="replace").read()
+    Names = {}
+
+    for Match in re.finditer(r"Ada_delete_(\w+)\s*\(\s*void \* a_arg1\s*\)\s*\{\s*(.*?)\s*\*arg1 = ", Text, re.S):
+        Names[Match.group(1).lower()] = Match.group(2).strip()
+
+    return Names
+
+
+def ada_kind(Spec):
+    """Whether the record of a spec is one which C++ constructs (limited, or tagged), or None where the spec
+       is not that of a class."""
+    Text  = re.sub(r"--[^\n]*", "", open(Spec, errors="replace").read())
+    Match = re.search(r"type Item is\s+((?:abstract\s+|tagged\s+|limited\s+|new\s+[\w.]+\s+with\s+|null\s+)*)record", Text)
+
+    if not Match:
+        return None
+
+    return bool(re.search(r"limited|tagged|new", Match.group(1)))
+
+
+def check(Wrapper):
+    """Compiles the assertions of one case. Gives the classes which were asked of, those of which the compiler
+       says otherwise than the binding, and whether the compiler could answer at all."""
+    Case  = os.path.basename(Wrapper)[:-len("_wrap.cxx")]
+    Names = cpp_names(Wrapper)
+    Asked = []
+    Lines = [f'#include "{Wrapper}"', Traits]
+
+    for Name, Cpp in sorted(Names.items()):
+        Spec = os.path.join(Generated, f"{Case}-{Name}.ads")
+
+        if not os.path.exists(Spec):
+            Found = [Each for Each in os.listdir(Generated) if Each.lower() == f"{Case}-{Name}.ads".lower()]
+            Spec  = os.path.join(Generated, Found[0]) if Found else None
+
+        Kind = ada_kind(Spec) if Spec else None
+
+        if Kind is None:
+            continue
+
+        Asked.append(f"{Case}.{Name}")
+        Lines.append(f'static_assert (swig_ada_is_constructed < {Cpp} >::value == 2 || swig_ada_is_constructed < {Cpp} >::value == {1 if Kind else 0}, '
+                     f'"SWIG_ADA_CALLS {Case}.{Name} is bound as {"one which C++ constructs" if Kind else "a plain record"}");')
+
+    if not Asked:
+        return Case, [], [], True
+
+    Source = os.path.join(Build, Case + ".cxx")
+    open(Source, "w").write("\n".join(Lines) + "\n")
+
+    Result = subprocess.run(["g++", "-fsyntax-only", "-fno-access-control", "-w", "-fmax-errors=0", "-I" + Suite, "-I" + Generated, Source],
+                            stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True, errors="replace")
+    Wrong  = re.findall(r"SWIG_ADA_CALLS (\S+) is bound as ([^\"\n]*?)[\"’']?\s*$", Result.stderr, re.M)
+    Wrong  = sorted(set(Wrong))
+    Others = [Line for Line in Result.stderr.split("\n") if " error: " in Line and "SWIG_ADA_CALLS" not in Line and "static assertion failed" not in Line]
+
+    return Case, Asked, Wrong, not Others
+
+
+Wrappers = sorted(os.path.join(Generated, Each) for Each in os.listdir(Generated) if Each.endswith("_wrap.cxx"))
+
+with ThreadPoolExecutor(max_workers=os.cpu_count()) as Pool:
+    Results = list(Pool.map(check, Wrappers))
+
+Checked, Differences, Report, Unanswered = 0, [], [], []
+
+for Case, Asked, Wrong, Answered in Results:
+    if not Answered:
+        Unanswered.append(Case)
+        continue
+
+    Checked += len(Asked)
+
+    for Name, Kind in Wrong:
+        Differences.append(Name)
+        Report.append(f"{Name}: is bound as {Kind}, and the compiler says otherwise")
+
+open(os.path.join(Build, "report.txt"), "w").write("\n".join(Report + [f"{Each}: the compiler could not be asked" for Each in Unanswered]) + "\n")
+
+Expected_file = os.path.join(Here, "expected-call-differences")
+Expected      = open(Expected_file).read().split() if os.path.exists(Expected_file) else []
+
+New  = [Each for Each in Differences if Each not in Expected]
+Gone = [Each for Each in Expected    if Each not in Differences]
+
+print(f"Classes which are checked: {Checked}, of which differ: {len(Differences)}. Cases which the compiler could not be asked of: {len(Unanswered)}.")
+
+if New or Gone:
+    for Each in New:
+        print(f"   differs, and is not expected to: {Report[Differences.index(Each)]}")
+    for Each in Gone:
+        print(f"   no longer differs: {Each}")
+    print(f"(see '{os.path.relpath(os.path.join(Build, 'report.txt'), Here)}')")
+    sys.exit(1)
