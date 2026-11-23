@@ -73,10 +73,23 @@ begin
 
          the_Parameters       : constant ParmList_Pointer := ParmList_Pointer (get_Attribute (the_Node, "parms"));
 
-         c_return_Type        :          unbounded_String := +doh_Item (Swig_typemap_lookup (const_String (-"ctype"),
-                                                                                             the_Node,
-                                                                                             const_String (-""),
-                                                                                             null));
+         function result_c_Type return unbounded_String
+         --
+         --  The type which the wrapper returns. A 'ctype' typemap may be for a parameter alone, and be found for a
+         --  result of the same type all the same ('%apply bool *INPUT { bool * }', where a function returns a
+         --  'bool *'): it then gives the type of a result by its attribute 'out', as the typemaps of C# do.
+         --
+         is
+            Found : constant unbounded_String := +doh_Item (Swig_typemap_lookup (const_String (-"ctype"),
+                                                                                 the_Node,
+                                                                                 const_String (-""),
+                                                                                 null));
+         begin
+            return (if Attribute (the_Node, "tmap:ctype:out") /= "" then +Attribute (the_Node, "tmap:ctype:out")
+                                                                    else Found);
+         end result_c_Type;
+
+         c_return_Type        :          unbounded_String := result_c_Type;
          --  A type which C++ constructs (a class which is virtual or not trivial, or a 'std::string') cannot be the result
          --  of an Ada function, as Ada takes the result of such a function to be a reference to an existing object, where
          --  C++ builds a new one in storage given by the caller. The wrapper therefore takes a pointer to an object of the
@@ -463,18 +476,23 @@ begin
                      if         Length (c_return_Type) > 0
                        and then Element (Trim (c_return_Type, ada.Strings.Both), Length (Trim (c_return_Type, ada.Strings.Both))) = '*'
                      then
+                        --  The assignment is sought within the code, as a typemap of the input may be made of that of the
+                        --  library with other text about it ('/* special start */ $typemap(out, MyType &USEME) /* special end */').
+                        --
                         declare
                            White    : constant ada.Strings.Maps.Character_Set := ada.Strings.Maps.to_Set (' ' & ASCII.LF & ASCII.CR & ASCII.HT);
-                           the_Code : constant String := ada.Strings.fixed.Trim (to_String (the_typeMap), Left => White, Right => White);
-                           Head     : constant String := "jresult = ";
-                           Tail     : constant String := "result;";
+                           the_Code : constant String  := to_String (the_typeMap);
+                           Head     : constant String  := "jresult = ";
+                           Tail     : constant String  := "result;";
+                           First    : constant Natural := ada.Strings.fixed.Index (the_Code, Head);
+                           Last     : constant Natural := (if First = 0 then 0
+                                                           else ada.Strings.fixed.Index (the_Code, Tail, From => First + Head'Length));
                         begin
-                           if         the_Code'Length >= Head'Length + Tail'Length
-                             and then the_Code (the_Code'First .. the_Code'First + Head'Length - 1) = Head
-                             and then the_Code (the_Code'Last - Tail'Length + 1 .. the_Code'Last)   = Tail
+                           if         First /= 0
+                             and then Last  /= 0
                            then
                               declare
-                                 its_Cast : constant String := ada.Strings.fixed.Trim (the_Code (the_Code'First + Head'Length .. the_Code'Last - Tail'Length),
+                                 its_Cast : constant String := ada.Strings.fixed.Trim (the_Code (First + Head'Length .. Last - 1),
                                                                                        ada.Strings.Both);
                               begin
                                  if        its_Cast = ""
@@ -482,7 +500,15 @@ begin
                                             and then its_Cast (its_Cast'Last)  = ')'
                                             and then ada.Strings.fixed.Index (its_Cast, ";") = 0)
                                  then
-                                    the_typeMap := +("  jresult = (" & to_String (c_return_Type) & ") result;");
+                                    if         ada.Strings.fixed.Trim (the_Code (the_Code'First .. First - 1),          White, White) = ""
+                                      and then ada.Strings.fixed.Trim (the_Code (Last + Tail'Length .. the_Code'Last),  White, White) = ""
+                                    then   -- The assignment is the whole of the code.
+                                       the_typeMap := +("  jresult = (" & to_String (c_return_Type) & ") result;");
+                                    else
+                                       the_typeMap := +(  the_Code (the_Code'First .. First - 1)
+                                                        & "jresult = (" & to_String (c_return_Type) & ") result;"
+                                                        & the_Code (Last + Tail'Length .. the_Code'Last));
+                                    end if;
                                  end if;
                               end;
                            end if;

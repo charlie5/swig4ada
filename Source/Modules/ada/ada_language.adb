@@ -963,6 +963,65 @@ is
          end if;
       end get_Namespace;
 
+      function virtual_in_a_Base (the_Class : in Node_Pointer) return Node_Pointer
+      --
+      --  The virtual function of the name and the parameters of this one which a base class of the class, or
+      --  one of those, has. Null where there is none.
+      --
+      is
+         use type DOH_Pointer;
+         use type C.int;
+
+         function plain (Name : in String) return String
+         is
+            Colons : constant Natural := ada.Strings.fixed.Index (Name, "::", Going => ada.Strings.Backward);
+         begin
+            return (if Colons = 0 then Name else Name (Colons + 2 .. Name'Last));
+         end plain;
+
+         function resolved (the_Function : in Node_Pointer) return String
+         is
+         begin
+            return (if get_Attribute (the_Function, "decl") = null then ""
+                    else +doh_Item (SwigType_typedef_resolve_all (SwigType_Pointer (get_Attribute (the_Function, "decl")))));
+         end resolved;
+
+         Bases : constant DOH_Pointer := DOH_Pointer (get_Attribute (the_Class, "allbases"));
+      begin
+         if Bases = null
+         then
+            return null;
+         end if;
+
+         for Each in 0 .. DohLen (Bases) - 1
+         loop
+            declare
+               the_Base   : constant Node_Pointer := Node_Pointer (DohGetitem (Bases, Each));
+               the_Member :          Node_Pointer := first_Child (the_Base);
+            begin
+               while the_Member /= null
+               loop
+                  if         Attribute (the_Member, "nodeType") = "cdecl"
+                    and then plain (Attribute (the_Member, "name")) = plain (function_Name)     -- The name of a member which has been dealt with is qualified.
+                    and then resolved (the_Member)              = resolved (the_Node)     -- A parameter may be named by a typedef in one of them.
+                    and then check_Attribute (the_Member, "storage", "virtual")
+                  then
+                     return the_Member;
+                  end if;
+
+                  the_Member := next_Sibling (the_Member);
+               end loop;
+
+               if virtual_in_a_Base (the_Base) /= null
+               then
+                  return virtual_in_a_Base (the_Base);
+               end if;
+            end;
+         end loop;
+
+         return null;
+      end virtual_in_a_Base;
+
       Namespace : constant String := get_Namespace;
    begin
       indent_Log;
@@ -980,6 +1039,66 @@ is
       set_Attribute (the_Node, "name", Namespace & function_Name);
 
       Status := swigMod.Language.item (Self.all).memberFunctionHandler (the_Node);
+
+      if check_Attribute (the_Node, "access", "private")
+      then
+         --  No wrapper is made for a private function, so it cannot be called from Ada. (Until 2026-11-23 it was
+         --  declared all the same, and imported the function of the wrapper which happened to be made before it.)
+         --  What is done depends on its place in the vtable:
+         --
+         --  - One which is not virtual has none, and is left out.
+         --  - A virtual one which overrides nothing has a place of its own, which is held.
+         --  - One which overrides a function that is not pure needs nothing: that function has the place, and a
+         --    call of it dispatches here.
+         --  - One which overrides a pure virtual function is declared, as the Ada type would else be abstract, and
+         --    imports no function. It is reached by a dispatching call alone.
+         --
+         --  The core does not say of a private function that it overrides, so the base classes are looked through.
+         --
+         if         check_Attribute (the_Node, "storage", "virtual")
+           and then get_Attribute (the_Node, "defaultargs") = null
+           and then Attribute (the_Node, "feature:extend")  = ""
+         then
+            declare
+               Overridden : constant Node_Pointer := (if is_Overriding then overriding_Value
+                                                                       else virtual_in_a_Base (Self.getCurrentClass));
+            begin
+               if Overridden = null
+               then
+                  declare
+                     the_Placeholder : constant c_Function.view := c_Function.new_c_Function (+function_Name,
+                                                                                              Self.name_Map_of_c_type.Element (+"void"));
+                  begin
+                     the_Placeholder.Parameters.append (c_Parameter.new_c_Parameter (the_Name => +"Self",
+                                                                                     the_Type => Self.current_c_Class.all'Access));
+                     the_Placeholder.is_Virtual     := True;
+                     the_Placeholder.is_Abstract    := False;     -- A class which defines it does so privately too, as a rule, which adds
+                     the_Placeholder.is_Placeholder := True;      -- nothing to the binding: were this abstract, that class would be so in Ada.
+
+                     Self.current_c_Class.nameSpace.add (the_Placeholder.all'Access);
+                  end;
+
+               elsif Attribute (Overridden, "abstract") /= ""
+               then
+                  declare
+                     the_new_Function : constant c_Function.view := Self.new_c_Function (doh_Node (the_Node),
+                                                                                         +Attribute (the_Node, "sym:name"),
+                                                                                         Self.current_c_Class.nameSpace.all'Access,
+                                                                                         is_Destructor => False,
+                                                                                         is_Overriding => True);
+                  begin
+                     if c_Function."/=" (the_new_Function, null)
+                     then
+                        the_new_Function.link_Symbol := +"unbound";
+                     end if;
+                  end;
+               end if;
+            end;
+         end if;
+
+         unindent_Log;
+         return SWIG_OK;
+      end if;
 
       declare
          the_new_Function : c_Function.view;

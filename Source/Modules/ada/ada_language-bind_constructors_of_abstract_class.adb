@@ -16,6 +16,83 @@ is
    use type DOH_Pointer;
    use type swig_Module.swig_Module_view;
 
+   package node_Vectors is new ada.Containers.Vectors (Positive, Node_Pointer);
+
+   function plain_Name (the_Function : in Node_Pointer) return String
+   is
+      Name : unbounded_String := +Attribute (the_Function, "name");
+   begin
+      strip_Namespaces (Name);
+      return to_String (Name);
+   end plain_Name;
+
+   function all_Abstracts (of_Class : in Node_Pointer) return node_Vectors.Vector
+   --
+   --  The pure virtual functions which a class has not defined: its own, and those of its base classes which
+   --  neither it nor a class between has defined. The core's list ('abstracts') holds those of the base classes
+   --  only where the class has none of its own, so the concrete class of a class with both was still abstract.
+   --
+   is
+      Own    : constant DOH_Pointer := DOH_Pointer (get_Attribute (of_Class, "abstracts"));
+      Bases  : constant DOH_Pointer := DOH_Pointer (get_Attribute (of_Class, "allbases"));
+      Result : node_Vectors.Vector;
+
+      function is_Listed (the_Function : in Node_Pointer) return Boolean
+      is (for some Each of Result =>          Each = the_Function
+                                     or else (         plain_Name (Each)        = plain_Name (the_Function)
+                                              and then Attribute (Each, "decl") = Attribute (the_Function, "decl")));
+
+      function is_Defined (the_Function : in Node_Pointer) return Boolean
+      is
+         the_Member : Node_Pointer := first_Child (of_Class);
+      begin
+         while the_Member /= null
+         loop
+            if         Attribute (the_Member, "nodeType") = "cdecl"
+              and then get_Attribute (the_Member, "abstract") = null
+              and then plain_Name (the_Member)       = plain_Name (the_Function)
+              and then Attribute (the_Member, "decl") = Attribute (the_Function, "decl")
+            then
+               return True;
+            end if;
+
+            the_Member := next_Sibling (the_Member);
+         end loop;
+
+         return False;
+      end is_Defined;
+
+   begin
+      if Own /= null
+      then
+         for Each in 0 .. DohLen (Own) - 1
+         loop
+            if not is_Listed (Node_Pointer (DohGetitem (Own, Each)))
+            then
+               Result.append (Node_Pointer (DohGetitem (Own, Each)));
+            end if;
+         end loop;
+      end if;
+
+      if Bases /= null
+      then
+         for Each in 0 .. DohLen (Bases) - 1
+         loop
+            for the_Function of all_Abstracts (Node_Pointer (DohGetitem (Bases, Each)))
+            loop
+               if         Attribute (the_Function, "nodeType") /= "destructor"
+                 and then not is_Listed  (the_Function)
+                 and then not is_Defined (the_Function)
+               then
+                  Result.append (the_Function);
+               end if;
+            end loop;
+         end loop;
+      end if;
+
+      return Result;
+   end all_Abstracts;
+
    the_Abstracts : constant DOH_Pointer := DOH_Pointer (get_Attribute (the_Class, "abstracts"));
    the_Name      : unbounded_String     := +("ada_concrete_" & String'(+DOH_Pointer (get_Attribute (the_Class, "name"))));
    the_cpp_Class : constant String      := (if get_Attribute (the_Class, "name") = null then ""
@@ -46,10 +123,8 @@ begin
 
    --  A definition of each pure virtual function.
    --
-   for Each in 0 .. DohLen (the_Abstracts) - 1
+   for the_Function of all_Abstracts (the_Class)
    loop
-      declare
-         the_Function : constant Node_Pointer := Node_Pointer (DohGetitem (the_Abstracts, Each));
       begin
          if Attribute (the_Function, "nodeType") = "destructor"
          then

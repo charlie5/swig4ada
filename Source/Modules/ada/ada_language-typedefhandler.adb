@@ -33,6 +33,21 @@ is
                                     and then Self.swig_type_Map_of_c_type.Element (the_Base).c_type_Kind in c_Type.standard_c_Type | c_Type.Enum));
    end hides_another_Type;
 
+   function is_of_a_standard_Class return Boolean
+   --
+   --  True for a typedef of a class of the C++ standard library ('std::vector<T>::const_reference'). The core must
+   --  know of it, as a header may name a type by it, and it is found through the core where it is used (see
+   --  'demand_c_Type_for'). It is given no type of its own: each instance has the typedefs of its template, and
+   --  those of the first would be types of the module ('const_pointer', 'reference') which mean nothing there.
+   --
+   is
+      the_Class : constant Node_Pointer := parent_Node (the_Node);     -- An instance with no name ('%template () std::vector<double>;')
+   begin                                                               -- is not bound, and its typedefs are met outside any class.
+      return          the_Class /= null
+             and then Attribute (the_Class, "nodeType") = "class"
+             and then ada.Strings.fixed.Index (Attribute (the_Class, "name"), "std::") = 1;
+   end is_of_a_standard_Class;
+
 begin
    indent_Log;
    dlog (+"");
@@ -49,6 +64,7 @@ begin
 
      or else Self.swig_type_Map_of_c_type.contains (known_Name)
      or else hides_another_Type
+     or else is_of_a_standard_Class
    then
       dlog (+"Skipping typedef.");
 

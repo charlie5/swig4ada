@@ -729,6 +729,22 @@ is
                               return the_Type;
                            end value_Type;
 
+                           function named_Type (the_Type : in c_Type.view) return c_Type.view
+                           --
+                           --  The type which a parameter or result is of, or is a pointer or reference to.
+                           --
+                           is
+                              Result : c_Type.view := the_Type;
+                           begin
+                              while Result /= null
+                                and then Result.c_type_Kind = c_Type.type_Pointer
+                              loop
+                                 Result := Result.accessed_Type;
+                              end loop;
+
+                              return Result;
+                           end named_Type;
+
                            function is_in_a_Cycle return Boolean
                            is
                               the_Member_Type : c_Type.view;
@@ -749,6 +765,18 @@ is
                                     for Inner of the_Member_Type.Components
                                     loop
                                        if value_Type (Inner) = the_c_Type
+                                       then
+                                          return True;
+                                       end if;
+                                    end loop;
+
+                                    --  Likewise where a function of that class takes or returns the enumeration, or a pointer or
+                                    --  reference to it (a member which is a vector of the enumeration: 'std::vector<numbers> nums;').
+                                    --
+                                    for Inner of the_Member_Type.nameSpace.Subprograms
+                                    loop
+                                       if        named_Type (Inner.return_Type) = the_c_Type
+                                         or else (for some Parameter of Inner.Parameters => named_Type (Parameter.my_Type) = the_c_Type)
                                        then
                                           return True;
                                        end if;
@@ -1198,16 +1226,56 @@ is
                                                 is_Unknown := True;
                                              end if;
 
-                                             for Each of the_Class.declaration_Package.Subprograms
-                                             loop
-                                                if         Each.Name              = the_ada_subProgram.Name
-                                                  and then Each.Parameters.Length = the_ada_subProgram.Parameters.Length
+                                             --  The function which is overridden is the one of the same parameter types, where there
+                                             --  is one. Otherwise it is the first of as many parameters, whose types may be written
+                                             --  otherwise in C++ and be the same ('const Int&' and 'const int&', where 'Int' is a
+                                             --  typedef of 'int'): in Ada the two pointer types are not one type, so the function
+                                             --  takes the parameter types of the one which it overrides, where that is the only one
+                                             --  of its name and as many parameters. (Until 2026-11-23 it kept its own, and was
+                                             --  marked as overriding a function which it did not.)
+                                             --
+                                             declare
+                                                use type ada_subProgram.view;
+
+                                                Candidate  : ada_subProgram.view;
+                                                Candidates : Natural := 0;
+                                             begin
+                                                for Each of the_Class.declaration_Package.Subprograms
+                                                loop
+                                                   if         Each.Name              = the_ada_subProgram.Name
+                                                     and then Each.Parameters.Length = the_ada_subProgram.Parameters.Length
+                                                   then
+                                                      Candidates := Candidates + 1;
+
+                                                      if Candidate = null
+                                                      then
+                                                         Candidate := Each;
+                                                      end if;
+
+                                                      if (for all Place in 2 .. Natural (Each.Parameters.Length)
+                                                          => Each.Parameters.Element (Place).my_Type = the_ada_subProgram.Parameters.Element (Place).my_Type)
+                                                      then
+                                                         Candidate  := Each;
+                                                         Candidates := 1;
+                                                         exit;
+                                                      end if;
+                                                   end if;
+                                                end loop;
+
+                                                if Candidate /= null
                                                 then
-                                                   the_ada_subProgram.return_Type := Each.return_Type;
+                                                   the_ada_subProgram.return_Type := Candidate.return_Type;
                                                    is_Found                       := True;
-                                                   exit;
+
+                                                   if Candidates = 1
+                                                   then
+                                                      for Place in 2 .. Natural (Candidate.Parameters.Length)
+                                                      loop
+                                                         the_ada_subProgram.Parameters.Element (Place).my_Type := Candidate.Parameters.Element (Place).my_Type;
+                                                      end loop;
+                                                   end if;
                                                 end if;
-                                             end loop;
+                                             end;
                                           end loop;
 
                                           is_Overridable := is_Found or is_Unknown;
