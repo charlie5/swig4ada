@@ -463,8 +463,12 @@ is
                         declare
                            new_ada_Type : ada_Type.view;
                         begin
+                           --  Two classes of one name may each be declared and never defined (a 'class iterator;' in
+                           --  each of two template instances), so the later one is suffixed.
+                           --
                            new_ada_Type := ada_type.a_subtype.new_Subtype (Result.Package_top,
-                                                                           ada_Utility.to_ada_Identifier (the_c_Type.Name),
+                                                                           unique_type_Name (Result.Package_top,
+                                                                                             ada_Utility.to_ada_Identifier (the_c_Type.Name)),
                                                                            name_Map_of_ada_type.Element (+"swig.opaque_structure")).all'Access;
 
                            dlog ("adding opaque struct'" & the_c_Type.Name & "'");
@@ -478,8 +482,12 @@ is
                         declare
                            new_ada_Type : ada_Type.view;
                         begin
+                           --  Two classes of one name may each be declared and never defined (a 'class iterator;' in
+                           --  each of two template instances), so the later one is suffixed.
+                           --
                            new_ada_Type := ada_type.a_subtype.new_Subtype (Result.Package_top,
-                                                                           ada_Utility.to_ada_Identifier (the_c_Type.Name),
+                                                                           unique_type_Name (Result.Package_top,
+                                                                                             ada_Utility.to_ada_Identifier (the_c_Type.Name)),
                                                                            name_Map_of_ada_type.Element (+"swig.incomplete_class")).all'Access;
                            dlog ("adding incomplete class '" & the_c_Type.Name & "'");
 
@@ -502,13 +510,34 @@ is
                         then
                            declare
                               use swig_Module.c_type_Maps_of_ada_subprogram;
+                              use type ada_Package.view;
                               the_ada_subProgram : constant ada_subProgram.view := c_type_Map_of_ada_subprogram.Element (the_c_type.accessed_Type);
                               the_type_Name      : constant unbounded_String    := ada_Utility.to_ada_Identifier        (the_c_type.Name); --  & "_Pointer";
                               new_ada_Type       :          ada_Type.view;
                            begin
-                              new_ada_Type := ada_Type.elementary.an_access.to_subProgram.new_Item (Result.Package_top,
-                                                                                                    the_type_Name,
-                                                                                                    accessed_subProgram => the_ada_subProgram).all'Access;
+                              --  As for a function pointer type (below): where the function has a parameter or result which
+                              --  is declared in a child package (a class), the top package cannot declare the pointer, as
+                              --  it cannot see its own children. The pointer then has a child package of its own.
+                              --
+                              if (for some Each of the_ada_subProgram.required_Types
+                                  =>       ada_Package.view (Each.declaration_Package)        /= Result.Package_top
+                                  and then ada_Package.view (Each.declaration_Package).Parent  = Result.Package_top)
+                              then
+                                 declare
+                                    new_ada_Package : constant ada_package.view := ada_Package.new_ada_Package (name   => to_String (the_type_Name),
+                                                                                                                parent => Result.Package_top);
+                                 begin
+                                    new_ada_Type := ada_Type.elementary.an_access.to_subProgram.new_Item (new_ada_Package,
+                                                                                                          +"Item",
+                                                                                                          accessed_subProgram => the_ada_subProgram).all'Access;
+                                    make_Unique (new_ada_Package);
+                                    Result.new_Packages.append (new_ada_Package);
+                                 end;
+                              else
+                                 new_ada_Type := ada_Type.elementary.an_access.to_subProgram.new_Item (Result.Package_top,
+                                                                                                       the_type_Name,
+                                                                                                       accessed_subProgram => the_ada_subProgram).all'Access;
+                              end if;
 
                               new_ada_Type.declaration_Package.add (new_ada_Type);   -- todo: Generalise this (ie move it out).
 
@@ -642,10 +671,15 @@ is
 
                            c_namespace_Map_of_ada_Package.insert (c_nameSpace.view (the_c_Type.Namespace), new_ada_Package);
 
+                           --  The package is named before the types which are named after it are added: two classes of
+                           --  one name (a typedef 'ModelPtr' in each of two namespaces) would else have one name for
+                           --  their arrays and pointers, which the map of the Ada types refuses.
+                           --
+                           make_Unique (new_ada_Package);
+
                            add_array_Type_for   (new_ada_Record.all'Access, the_c_Type);
                            add_type_Pointer_for (new_ada_Record.all'Access, the_c_Type);
 
-                           make_Unique (new_ada_Package);
                            Result.new_Packages   .append (new_ada_Package);
                            c_type_Map_of_ada_type.insert (the_c_Type, new_ada_Record.all'Access);
                         end;

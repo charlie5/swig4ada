@@ -130,14 +130,18 @@ begin
             declare
                raw_swigType         : constant SwigType_Pointer := SwigType_Pointer (doh_Copy (doh_Item (the_doh_swigType)));
                the_Function         : constant SwigType_Pointer := SwigType_pop_Function (raw_swigType);
-               function_return_Type : constant SwigType_Pointer := SwigType_Pointer (doh_Copy (doh_Item (raw_swigType)));
+               the_return_Type      :          doh_Item         := doh_Copy (doh_Item (raw_swigType));
                function_Parameters  : constant doh_ParmList     := doh_ParmList (SwigType_function_parms (the_Function, the_Node));
 
                new_c_Function         : c_Function.view;
                new_c_function_Pointer : c_Type.view;
             begin
+               --  The result is sought less its qualifiers, as that of a function typedef is (below).
+               --
+               swigg.Utility.strip_all_Qualifiers (the_return_Type);
+
                new_c_Function            := c_function.new_c_Function   (to_unbounded_String ("anonymous"),
-                                                                         Self.swig_type_Map_of_c_type.Element (+doh_Item (function_return_Type)));
+                                                                         Self.demand_c_Type_for (doh_swigType (the_return_Type)));
                new_c_function_Pointer    := c_type.new_function_Pointer (Namespace         => Self.current_c_Namespace,
                                                                          Name              => the_type_Name,
                                                                          accessed_Function => new_c_Function);
@@ -155,8 +159,21 @@ begin
                function_return_Type  : constant unbounded_String := +doh_Copy (doh_Item   (the_doh_swigType));
                function_Parameters   : constant doh_ParmList     := doh_ParmList (SwigType_function_Parms (the_Function, the_Node));
 
+               --  The result is sought as that of any function is: less its qualifiers ('volatile SomeType'), and
+               --  made a type which is not known where it is not found. (Until 2026-11-23 it was taken from the
+               --  map as it is written, and a result with a qualifier ended the run.)
+               --
+               the_return_Type       :          doh_Item         := doh_Copy (doh_Item (the_doh_swigType));
+
+               function demanded_return_Type return c_Type.view
+               is
+               begin
+                  swigg.Utility.strip_all_Qualifiers (the_return_Type);
+                  return Self.demand_c_Type_for (doh_swigType (the_return_Type));
+               end demanded_return_Type;
+
                new_c_Function        : constant c_Function.view  := c_Function.new_c_Function (to_unbounded_String ("anonymous"),
-                                                                                               Self.swig_type_Map_of_c_type.Element (function_return_Type));
+                                                                                               demanded_return_Type);
                new_c_typdef_Function :          c_Type.view;
             begin
                dlog ("function_return_Type: '" & function_return_Type & "'");

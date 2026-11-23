@@ -36,6 +36,22 @@ begin
    begin
       if get_Attribute (the_Node, "sym:overloaded") = null
       then
+         --  The name may be taken by another declaration: a protected member is bound, which no other language
+         --  binds, so a '%rename' may give a public member the name of one ('%rename (s) Foo::p;' where 'Foo' has
+         --  a protected 's'). The later of the two is left out. (Until 2026-11-23 the core's error ended the run.)
+         --
+         declare
+            Other : constant Node_Pointer := Self.symbolLookup (String_Pointer (get_Attribute (the_Node, "sym:name")));
+         begin
+            if         Other /= null
+              and then Other /= the_Node
+            then
+               warn (not_Bound, "Unable to bind the function '" & sym_Name & "', as another declaration is bound by that name.");
+               unindent_Log;
+               return SWIG_OK;
+            end if;
+         end;
+
          if Self.addSymbol (String_Pointer (get_Attribute (the_Node, "sym:name")),
                             the_Node) = 0
          then

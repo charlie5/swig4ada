@@ -1422,7 +1422,6 @@ is
    --
    is
       use type C.int;
-      use type c_Type.view;
 
       the_Node : Node_Pointer renames N;
 
@@ -1836,8 +1835,6 @@ is
    --  A function which overrides takes the place of the one which it overrides, and needs none.
    --
    is
-      use type C.int;
-
       the_Class : constant Node_Pointer := Self.getCurrentClass;
       the_Child :          Node_Pointer;
 
@@ -1992,7 +1989,6 @@ is
    --  True when the function of the node returns, by value, a type which C++ constructs.
    --
    is
-      use swigg.Utility;
       use type C.int;
 
       the_swig_Type : constant SwigType_Pointer := SwigType_Pointer (doh_Copy (doh_Item (get_Attribute (the_Node, "type"))));
@@ -2013,12 +2009,25 @@ is
            or else SwigType_isReference        (SwigType_Pointer (Pad)) /= 0
            or else SwigType_isrvalue_reference (SwigType_Pointer (Pad)) /= 0
            or else SwigType_isArray            (SwigType_Pointer (Pad)) /= 0
-           or else not Self.swig_type_Map_of_c_type.contains (+Pad)
          then
             return False;
          end if;
 
-         return Self.swig_type_Map_of_c_type.Element (+Pad).is_constructed_by_Cpp;
+         if Self.swig_type_Map_of_c_type.contains (+Pad)
+         then
+            return Self.swig_type_Map_of_c_type.Element (+Pad).is_constructed_by_Cpp;
+         end if;
+
+         --  The type may be named through a typedef which the module has not been given ('std::pair<String,Streeng>',
+         --  where each is a typedef of 'std::string'), as 'demand_c_Type_for' allows. Until 2026-11-23 such a result
+         --  was missed, and the function was bound as an Ada function.
+         --
+         declare
+            Resolved : constant unbounded_String := +doh_Item (SwigType_typedef_resolve_all (SwigType_Pointer (Pad)));
+         begin
+            return          Self.swig_type_Map_of_c_type.contains (Resolved)
+                   and then Self.swig_type_Map_of_c_type.Element  (Resolved).is_constructed_by_Cpp;
+         end;
       end;
    end returns_a_cpp_constructed_Type;
 
