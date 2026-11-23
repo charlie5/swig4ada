@@ -929,7 +929,9 @@ reserved.
 A module which uses the types of another imports it with <tt>%import</tt>.
 Only the specifications of the importing module are written; those of the imported
 module come from its own run of SWIG, and are named in <tt>with</tt> clauses.
-A class of one module may be derived from a class of another.
+A class of one module may be derived from a class of another, or have a member of one:
+the member variables of the imported class are read, so the record is laid out as C++
+has the class, and that is checked when the wrapper is compiled.
 </p>
 
 <H2><a name="Ada_warnings">41.10 Warnings</a></H2>
