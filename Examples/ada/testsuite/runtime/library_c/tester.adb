@@ -90,5 +90,12 @@ begin
       check (Copy (1) = 1 and Copy (2) = 2 and Copy (3) = 3,     "and are copied");
    end raw_Data;
 
+   a_parameter_typemap_which_a_result_matches :
+   begin
+      --  'long *INPUT' is applied to every 'long *'. The parameter is the value itself; the result is still a pointer.
+      --
+      check (kept (7).all = 7,                                   "a result of the type of an input parameter is a pointer");
+   end a_parameter_typemap_which_a_result_matches;
+
    finish;
 end Tester;

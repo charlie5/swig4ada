@@ -6,6 +6,8 @@ with
      containers.int_Set,
      containers.int_double_Map,
      containers.int_double_Pair,
+     containers.colour_Vector,
+     containers.Palette,
 
      swig,
      interfaces.C,
@@ -168,6 +170,25 @@ begin
       check (P.first = 3 and P.second = 4.5,      "a pair made by its constructor");
       check (Q.first = 8 and Q.second = 1.25,     "a pair returned by a function");
    end pair;
+
+   a_vector_of_an_enumeration_of_its_Class :
+   declare
+      use type Palette.colour;
+      the_Palette : aliased Palette.Item;
+   begin
+      --  'Palette' has a vector of its own 'colour', so the enumeration is declared in the top package, and
+      --  the package of the class has a subtype of it with its literals.
+      --
+      check (Palette.count (the_Palette) = 2,                                  "a class with a vector of its own enumeration is constructed");
+      check (colour_Vector.size (the_Palette.colours) = 2,           "its member is the vector");
+      check (colour_Vector.get (the_Palette.colours, 0).all = Palette.green,   "whose elements are of the enumeration");
+      check (Palette.pick (the_Palette, 1) = Palette.blue,                    "a function of the class returns one");
+
+      Palette.add (the_Palette, Palette.red);
+      check (colour_Vector.get (the_Palette.colours, 2).all = Palette.red,     "and takes one");
+
+      Palette.destruct (the_Palette);
+   end a_vector_of_an_enumeration_of_its_Class;
 
    finish;
 end Tester;

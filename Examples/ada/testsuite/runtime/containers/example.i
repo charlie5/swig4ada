@@ -21,3 +21,5 @@
 %template (int_double_Pair) std::pair<int, double>;
 
 %include "example.h"
+
+%template (colour_Vector)  std::vector<Palette::colour>;

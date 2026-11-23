@@ -12,11 +12,15 @@ with
      virtual_classes.Opened,
      virtual_classes.Shown,
      virtual_classes.Worded,
+     virtual_classes.Vault,
+     virtual_classes.Keeper,
+     virtual_classes.Filter,
 
      swig.Pointers,
 
      Triangles,
      Hexagons,
+     Sieves,
 
      interfaces.C,
 
@@ -227,6 +231,50 @@ begin
       drop_worded (the_Longer);
       Worded.destruct_0 (a_Worded);
    end a_virtual_function_which_is_overloaded_in_a_derived_Class;
+
+   private_virtual_Functions :
+   declare
+      the_Keeper : aliased  Keeper.Item   := Keeper.Item (Keeper.construct);
+      as_Vault   : constant Vault.Pointer := the_Keeper'unchecked_Access;
+      a_Vault    : aliased  Vault.Item    := Vault.Item (Vault.construct);
+      Five       : aliased  Count         := 5;
+   begin
+      --  'Vault::hidden' is private and virtual: it is not bound, and has its place between 'shown' and 'last'.
+      --  'Keeper' overrides it and 'shown' privately, which adds nothing to its type: the functions of 'Vault'
+      --  have the places, and a call of one dispatches.
+      --
+      check (a_Vault.shown = 10 and a_Vault.last = 30,    "the virtual functions about a private one are in their places");
+      check (a_Vault.through_hidden = 20,                 "and the private one is reached by C++");
+
+      check (as_Vault.shown = 1000,                       "a function which a derived class overrides privately is dispatched to");
+      check (as_Vault.through_hidden = 2000,              "as is a private one which it overrides privately");
+      check (as_Vault.last = 300,                         "the function after the private one dispatches to its own override");
+      check (the_Keeper.more = 400,                       "and one which the derived class adds follows them all");
+      check (call_last (as_Vault) = 300,                  "as C++ finds");
+      check (call_more (the_Keeper'unchecked_Access) = 400,   "of each");
+
+      --  'Vault::open' takes a 'const Count&' and 'Keeper::open' a 'const int&', which is the same type.
+      --
+      check (a_Vault.open (Five'unchecked_Access) = 6,    "a function with a parameter which is named by a typedef");
+      check (as_Vault.open (Five'unchecked_Access) = 105, "is overridden by one which names the type itself");
+      check (call_open (as_Vault) = 105,                  "as C++ finds");
+
+      Keeper.destruct_0 (the_Keeper);
+      Vault.destruct_0 (a_Vault);
+   end private_virtual_Functions;
+
+   an_abstract_class_with_an_inherited_pure_virtual_Function :
+   declare
+      the_Sieve : aliased Sieves.Item;     -- Its abstract parent is constructed by C++.
+   begin
+      --  'Filter' has 'refine' of its own and 'produce' of 'Source'. Its constructor is that of a concrete class
+      --  of the wrapper, which must define both.
+      --
+      check (call_produce (the_Sieve'unchecked_Access) = 77,   "C++ dispatches to the pure virtual function of the base's base, overridden in Ada");
+      check (call_refine  (the_Sieve'unchecked_Access) = 88,   "and to that of the base");
+
+      Filter.destruct_0 (Filter.Item (the_Sieve));
+   end an_abstract_class_with_an_inherited_pure_virtual_Function;
 
    finish;
 end Tester;

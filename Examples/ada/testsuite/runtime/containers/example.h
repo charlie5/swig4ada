@@ -27,3 +27,16 @@ inline void   fill   (std::map<int, double>& m, int count) { for (int i = 1; i <
 inline double lookup (std::map<int, double>& m, int key)   { return m [key]; }
 
 inline std::pair<int, double> make_pair_of (int i, double d) { return std::pair<int, double> (i, d); }
+
+/* A class with a vector of an enumeration of its own. */
+class Palette {
+public:
+  enum colour { red = 1, green = 5, blue = 9 };
+
+  std::vector<colour> colours;
+
+  Palette ()                { colours.push_back (green);  colours.push_back (blue); }
+  int    count  () const    { return (int) colours.size (); }
+  colour pick   (int i)     { return colours [i]; }
+  void   add    (colour c)  { colours.push_back (c); }
+};

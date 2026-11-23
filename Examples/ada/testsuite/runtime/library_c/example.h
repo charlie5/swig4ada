@@ -21,3 +21,6 @@ static inline int   close_file   (FILE *f)                      { return fclose 
 
 /* Raw data ('cdata.i'). */
 static inline int sum_of_bytes (const char *data, size_t len)   { int s = 0;  for (size_t i = 0; i < len; i++) s += (unsigned char) data [i];  return s; }
+
+/* A typemap for a parameter which is applied to every pointer of its type, and so to a result too. */
+static inline long *kept (long *value)   { static long the_kept;  the_kept = *value;  return &the_kept; }

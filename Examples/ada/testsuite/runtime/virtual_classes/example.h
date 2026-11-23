@@ -171,3 +171,50 @@ inline Worded* new_longer  ()            { return new Longer; }
 inline void    drop_worded (Worded* w)   { delete w; }
 inline int     call_label  (Worded* w)   { return w->label (1.5); }
 inline int     call_tail   (Worded* w)   { return w->tail (); }
+
+/* Private virtual functions. None is bound, and each has its place among the others: one which overrides
+   nothing a place of its own, and one which overrides the place of the function which it overrides. */
+
+typedef int Count;
+
+class Vault {
+public:
+  virtual ~Vault ()                    {}
+  virtual int open  (const Count& c)   { return c + 1; }
+  virtual int shown ()                 { return 10; }
+  int through_hidden ()                { return hidden (); }
+private:
+  virtual int hidden ()                { return 20; }
+public:
+  virtual int last  ()                 { return 30; }
+};
+
+class Keeper : public Vault {
+public:
+  virtual int open  (const int& c)     { return c + 100; }     /* The parameter is written otherwise, and is the same. */
+  virtual int last  ()                 { return 300; }
+  virtual int more  ()                 { return 400; }
+private:
+  virtual int shown  ()                { return 1000; }
+  virtual int hidden ()                { return 2000; }
+};
+
+inline int call_open (Vault*  v)   { return v->open (5); }
+inline int call_last (Vault*  v)   { return v->last (); }
+inline int call_more (Keeper* k)   { return k->more (); }
+
+/* An abstract class with a pure virtual function of its own and one of its base class. */
+
+class Source {
+public:
+  virtual ~Source ()        {}
+  virtual int produce ()    = 0;
+};
+
+class Filter : public Source {
+public:
+  virtual int refine ()     = 0;
+};
+
+inline int call_produce (Source* s)   { return s->produce (); }
+inline int call_refine  (Filter* f)   { return f->refine (); }
