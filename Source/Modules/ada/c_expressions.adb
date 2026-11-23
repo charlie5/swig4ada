@@ -825,7 +825,10 @@ is
                   Last       : Natural;
                   the_Symbol : unbounded_String;
                begin
-                  find_Token (Expression_pad.all, to_Set ("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789"), Inside,  First, Last);
+                  --  A name may be given with its scope ('RayPacketData::Size', as the core writes the dimension of an
+                  --  array which is a member of the class), so the scope operator is part of it.
+                  --
+                  find_Token (Expression_pad.all, to_Set ("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789:"), Inside,  First, Last);
                   the_Symbol := unbounded_Slice (Expression_pad.all,  First, Last);
 
                   if        the_Symbol = "true"
@@ -835,15 +838,21 @@ is
                                                         Value  => to_Integer (if the_Symbol = "true" then 1 else 0),
                                                         others => <>));
                   else
+                     declare
+                        --  The name is sought within the namespace, then as it is written, and then by its last part,
+                        --  as a literal of an enumeration is known by its own name whatever scope it is named with.
+                        --
+                        Colons : constant Natural          := Index (the_Symbol, "::", Going => ada.Strings.Backward);
+                        Plain  : constant unbounded_String := (if Colons = 0 then the_Symbol
+                                                               else unbounded_Slice (the_Symbol, Colons + 2, Length (the_Symbol)));
+                        Key    : constant unbounded_String := (if    known_Symbols.contains (Namespace & the_Symbol) then Namespace & the_Symbol
+                                                               elsif known_Symbols.contains (the_Symbol)             then the_Symbol
+                                                               elsif known_Symbols.contains (Namespace & Plain)      then Namespace & Plain
+                                                               else  Plain);
                      begin
                         append (the_Elements,  an_Element'(kind  => Value,
-                                                           value => Element (known_Symbols,  Namespace & the_Symbol),
+                                                           value => Element (known_Symbols, Key),     -- Raises where the name is not known.
                                                            others => <>));
-                     exception
-                        when Constraint_Error => -- Key not found, so try without namespace.
-                           append (the_Elements,  an_Element'(kind  => Value,
-                                                              value => Element (known_Symbols,  the_Symbol),
-                                                              others => <>));
                      end;
                   end if;
 

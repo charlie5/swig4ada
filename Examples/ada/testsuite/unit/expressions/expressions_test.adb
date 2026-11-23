@@ -153,6 +153,9 @@ begin
       check (Value_of ("MAX", the_Symbols, Namespace => "geometry::") = 64,       "a name is sought within its namespace first");
       check (Value_of ("COUNT", the_Symbols, Namespace => "geometry::") = 12,     "and then as it is written");
       check (Value_of ("MAX", the_Symbols) = 8,                                   "a name with no namespace is its own");
+      check (Value_of ("geometry::MAX * 2", the_Symbols) = 128,                   "a name which is given with its scope is sought as it is written");
+      check (Value_of ("Shape::COUNT + 1", the_Symbols) = 13,                     "and then by its last part, as a literal is known by its own name");
+      check (Value_of ("Shape::COUNT", the_Symbols, Namespace => "Shape::") = 12, "within its own class too");
    end names;
 
    refusals :
