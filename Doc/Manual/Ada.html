@@ -95,9 +95,11 @@ standard library, GNU libstdc++).
 
 
 <ul>
-<li>A class with virtual functions which inherits a base class <em>virtually</em> is bound
-with a warning, and its record does not have the layout of the class. One with no virtual
-function has it (see <a href="#Ada_layout">Layout</a>).
+<li>A class with virtual functions which inherits a base class <em>virtually</em>, and also
+has a base with virtual functions which it does not inherit virtually, is bound with a
+warning, and its record does not have the layout of the class. Any other class with a
+virtual base has it (see <a href="#Ada_layout">Layout</a>), but no type may be derived in Ada
+from one with virtual functions.
 <li>Of several base classes which have virtual functions, the first is the parent of
 the Ada type. The others are reached through a function (see
 <a href="#Ada_inheritance">Inheritance</a>), and a function which overrides one of theirs
@@ -1053,6 +1055,18 @@ component of the virtual base (<tt>the_W.V</tt>) is that base; a base class whic
 virtual base is storage for its own part alone (<tt>W_storage</tt>), and is reached by
 <tt>as_W</tt>, as the place of its virtual base depends on the class which is derived from
 it. Ada cannot derive a type from such a class.
+</p>
+
+<p>
+A class with virtual functions and a virtual base is a tagged type with no parent where it
+has no other base with virtual functions: its virtual base is last, and its primitives are
+its own virtual functions, one which overrides a function of the virtual base among them,
+as C++ lists them in its table. Where its virtual base has nothing but a pointer to a table
+(<tt>struct Named { virtual int name (); };</tt>), C++ shares that pointer, and the base is
+the parent of the type, as for single inheritance. C++ finds the virtual base through the
+table of the object, which an object that Ada declares has from C++; a type derived from the
+class in Ada would have a table which GNAT makes, in which C++ does not find it, so the spec
+says ahead of the type that none may be derived, and no director is made for it.
 </p>
 
 <p>
