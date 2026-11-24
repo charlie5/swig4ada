@@ -36,6 +36,7 @@ is
 
                        Context          => ada_Context.to_Context,
                        a_Subprograms    => ada_subprogram.vectors.empty_Vector,
+                       a_Directed       => ada_subprogram.vectors.empty_Vector,
                        a_Variables      => ada_variable.Vectors.empty_Vector,
                        a_Types          => ada_type.vectors.empty_Vector,
                        a_cpp_class_Type => null);
@@ -285,6 +286,22 @@ is
    begin
       return Self.a_Subprograms;
    end Subprograms;
+
+
+
+   procedure add_director_Subprogram (Self : access Item;   the_Subprogram : in ada_Subprogram.view)
+   is
+   begin
+      Self.a_Directed.append (the_Subprogram);
+   end add_director_Subprogram;
+
+
+
+   function director_Subprograms (Self : access Item) return ada_subprogram.Vector
+   is
+   begin
+      return Self.a_Directed;
+   end director_Subprograms;
 
 
 

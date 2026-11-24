@@ -111,6 +111,12 @@ is
 
    function Context                     (Self : access Item) return ada_Context.view;
    function Subprograms                 (Self : access Item) return ada_subprogram.Vector;
+
+   procedure add_director_Subprogram     (Self : access Item;   the_Subprogram : in ada_Subprogram.view);
+   function  director_Subprograms        (Self : access Item) return ada_subprogram.Vector;
+   --
+   --  The functions which the class inherits and which its director lets Ada override (see 'bind_the_Director').
+   --  They are declared by the director of the class alone, not by its package.
    function Variables                   (Self : access Item) return ada_variable.Vector;
    function Types                       (Self : access Item) return ada_type.Vector;
 
@@ -146,6 +152,7 @@ private
          Context               : aliased ada_Context.item;
 
          a_Subprograms         : ada_Subprogram.Vector;
+         a_Directed            : ada_Subprogram.Vector;
          a_Variables           : ada_Variable  .Vector;
          a_Types               : ada_Type      .Vector;
 

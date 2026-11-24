@@ -31,6 +31,7 @@ is
                        a_is_Unknown    => False,
 
                        a_Subprograms     => <>,
+                       a_Directed        => <>,
                        a_Variables       => <>,
                        a_Types           => <>,
                        a_cpp_class_Type  => null);
@@ -211,6 +212,22 @@ is
    begin
       return Self.a_Subprograms;
    end Subprograms;
+
+
+
+   procedure add_director_Function (Self : access Item;   the_Function : in c_Function.view)
+   is
+   begin
+      Self.a_Directed.append (the_Function);
+   end add_director_Function;
+
+
+
+   function director_Functions (Self : access Item) return c_Function.Vector
+   is
+   begin
+      return Self.a_Directed;
+   end director_Functions;
 
 
 

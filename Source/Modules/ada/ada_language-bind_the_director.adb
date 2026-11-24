@@ -159,15 +159,30 @@ is
    end has_a_default_Constructor;
 
 
-   function the_c_Function (link_Symbol : in String) return c_Function.view
+   function the_c_Function (link_Symbol : in String;   of_Class : in c_Type.view := the_c_Class) return c_Function.view
+   --
+   --  The function of the C model, of the class or of one of its bases, whose function of the wrapper is named so.
+   --
    is
    begin
-      for Each of c_nameSpace.view (the_c_Class.nameSpace).Subprograms
+      for Each of c_nameSpace.view (of_Class.nameSpace).Subprograms
       loop
          if Each.link_Symbol = link_Symbol
          then
             return Each;
          end if;
+      end loop;
+
+      for Each of of_Class.base_Classes
+      loop
+         declare
+            Found : constant c_Function.view := the_c_Function (link_Symbol, Each);
+         begin
+            if Found /= null
+            then
+               return Found;
+            end if;
+         end;
       end loop;
 
       return null;
@@ -249,9 +264,11 @@ is
 
 
 
-   procedure direct (the_Function : in Node_Pointer)
+   procedure direct (the_Function : in Node_Pointer;   is_Inherited : in Boolean)
    --
-   --  Adds the override of the function, and the virtual function which it calls, to the director.
+   --  Adds the override of the function, and the virtual function which it calls, to the director. Of a function
+   --  which the class inherits, the function of the C model is that of the base: a copy of it, whose 'Self' is of
+   --  this class, is the one which the director declares, so that the base may have its own director.
    --
    is
       the_Decl  :          unbounded_String := +Attribute (the_Function, "decl");
@@ -446,8 +463,21 @@ is
          end if;
       end;
 
-      the_Model.director_Symbol      := the_Symbol;
-      the_Model.director_is_Abstract := is_Pure;
+      if is_Inherited
+      then
+         declare
+            the_Copy : constant c_Function.view := new c_Function.item'Class'(the_Model.all);
+         begin
+            the_Copy.Parameters.replace_Element (1, c_Parameter.new_c_Parameter (the_Name => +"Self",
+                                                                                the_Type => the_c_Class));
+            the_Copy.director_Symbol      := the_Symbol;
+            the_Copy.director_is_Abstract := is_Pure;
+            c_nameSpace.view (the_c_Class.nameSpace).add_director_Function (the_Copy);
+         end;
+      else
+         the_Model.director_Symbol      := the_Symbol;
+         the_Model.director_is_Abstract := is_Pure;
+      end if;
    end direct;
 
 
@@ -476,8 +506,6 @@ is
    end construct;
 
 
-
-   the_Child : Node_Pointer;
 
 begin
    Self.current_c_Node := doh_Node (the_Class);     -- Of which 'current_Module' is worked out. That of the concrete class of
@@ -512,35 +540,71 @@ begin
 
    --  The functions which Ada cannot call through the vtable.
    --
-   the_Child := first_Child (the_Class);
+   --  Those of the class, and then those which it inherits from its bases, nearest first, of which those which it
+   --  or a nearer base declares again are passed over.
+   --
+   declare
+      Seen  : String_Vectors.Vector;     -- The name and parameters of each function which is followed, or hidden.
+      Bases : constant DOH_Pointer := DOH_Pointer (get_Attribute (the_Class, "allbases"));
 
-   while the_Child /= null
-   loop
-      if         Attribute (the_Child, "nodeType") = "cdecl"
-        and then is_declared_Virtual (the_Child)
-        and then not check_Attribute (the_Child, "access", "private")
-        and then get_Attribute (the_Child, "defaultargs") = null           -- A form of a function with a default argument left out.
-        and then Attribute (the_Child, "final") = ""
-        and then Attribute (the_Child, "wrap:name") /= ""
-        and then ada.Strings.fixed.Index (Attribute (the_Child, "name"), "operator ") = 0
-      then
-         declare
-            its_Type : DOH_Pointer;
-            Unused   : C.int with Unreferenced;
-         begin
-            join_the_Declarator (the_Child, its_Type);
+      function Signature (the_Function : in Node_Pointer) return String
+      is
+         Name : unbounded_String := +Attribute (the_Function, "name");
+      begin
+         strip_Namespaces (Name);
+         return to_String (Name) & "|" & (if get_Attribute (the_Function, "decl") = null then ""
+                                          else +doh_Item (SwigType_typedef_resolve_all (SwigType_Pointer (get_Attribute (the_Function, "decl")))));
+      end Signature;
 
-            if is_called_through_its_Wrapper (Self, the_Child)
+      procedure follow (of_Class : in Node_Pointer;   is_Inherited : in Boolean)
+      is
+         the_Child : Node_Pointer := first_Child (of_Class);
+      begin
+         while the_Child /= null
+         loop
+            if         Attribute (the_Child, "nodeType") = "cdecl"
+              and then not Seen.contains (Signature (the_Child))
             then
-               direct (the_Child);
+               Seen.append (Signature (the_Child));
+
+               if         is_declared_Virtual (the_Child)
+                 and then not check_Attribute (the_Child, "access", "private")
+                 and then get_Attribute (the_Child, "defaultargs") = null           -- A form of a function with a default argument left out.
+                 and then Attribute (the_Child, "final") = ""
+                 and then Attribute (the_Child, "wrap:name") /= ""
+                 and then ada.Strings.fixed.Index (Attribute (the_Child, "name"), "operator ") = 0
+               then
+                  declare
+                     its_Type : DOH_Pointer;
+                     Unused   : C.int with Unreferenced;
+                  begin
+                     join_the_Declarator (the_Child, its_Type);
+
+                     if is_called_through_its_Wrapper (Self, the_Child)
+                     then
+                        direct (the_Child, is_Inherited);
+                     end if;
+
+                     Unused := DohSetattr (DOH_Pointer (the_Child), DOH_Pointer (to_Doh ("type")), its_Type);
+                  end;
+               end if;
             end if;
 
-            Unused := DohSetattr (DOH_Pointer (the_Child), DOH_Pointer (to_Doh ("type")), its_Type);
-         end;
-      end if;
+            the_Child := next_Sibling (the_Child);
+         end loop;
+      end follow;
 
-      the_Child := next_Sibling (the_Child);
-   end loop;
+   begin
+      follow (the_Class, is_Inherited => False);
+
+      if Bases /= null
+      then
+         for Each in 0 .. DohLen (Bases) - 1
+         loop
+            follow (Node_Pointer (DohGetitem (Bases, Each)), is_Inherited => True);
+         end loop;
+      end if;
+   end;
 
    if Count = 0
    then

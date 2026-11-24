@@ -2817,6 +2817,8 @@ is
          end if;
       end loop;
 
+      Count := Count + Natural (the_Package.director_Subprograms.Length);     -- Those which the class inherits.
+
       if Count = 0
       then
          return;
@@ -2824,7 +2826,7 @@ is
 
       is_Abstract := the_Package.cpp_class_Type.is_Abstract;
 
-      for Each of the_Package.Subprograms
+      for Each of ada_Subprogram.Vectors."&" (the_Package.Subprograms, the_Package.director_Subprograms)
       loop
          if Each.director_Symbol /= ""
          then

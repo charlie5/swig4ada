@@ -1650,6 +1650,23 @@ is
                               next (Cursor);
                            end loop;
                         end add_Functions;
+
+
+                        add_director_Functions :
+                        begin
+                           --  The functions which the class inherits and which its director lets Ada override: they are
+                           --  declared by the director alone (see 'bind_the_Director').
+                           --
+                           for Each of the_c_Type.nameSpace.director_Functions
+                           loop
+                              declare
+                                 the_ada_subProgram : constant ada_subProgram.view := Self.to_ada_subProgram (Each);
+                              begin
+                                 the_ada_subProgram.Parameters := Self.to_ada_Parameters (Each.Parameters);
+                                 the_ada_Record.declaration_Package.add_director_Subprogram (the_ada_subProgram);
+                              end;
+                           end loop;
+                        end add_director_Functions;
                      end;
 
                   when others =>

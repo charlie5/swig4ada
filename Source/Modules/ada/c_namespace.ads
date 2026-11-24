@@ -93,6 +93,12 @@ is
    --  Returns 'null' when 'Self' does not model a c++ class.
 
    function Subprograms (Self : access Item) return c_Function.Vector;   -- todo: rename to 'Functions'
+
+   procedure add_director_Function (Self : access Item;   the_Function : in c_Function.view);
+   function  director_Functions    (Self : access Item) return c_Function.Vector;
+   --
+   --  Of a class whose director lets Ada override a function which it inherits: a copy of the function of the base,
+   --  whose 'Self' is of this class, which the director alone declares (see 'bind_the_Director').
    function Variables   (Self : access Item) return c_variable.Vector;
    function Types       (Self : access Item) return c_type.Vector;
 
@@ -122,6 +128,7 @@ private
          a_is_Unknown          : Boolean := False;
 
          a_Subprograms : c_Function.Vector;
+         a_Directed    : c_Function.Vector;
          a_Variables   : c_variable.Vector;
          a_Types       : c_type.Vector;
 
