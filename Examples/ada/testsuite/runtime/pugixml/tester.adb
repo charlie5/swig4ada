@@ -1,5 +1,4 @@
 with
-     pugixml.Pointers,
      pugixml.xml_document,
      pugixml.xml_parse_result,
      pugixml.xml_node,
@@ -27,28 +26,29 @@ procedure Tester
 --
 is
    use pugixml,
-       pugixml.Pointers,
        interfaces.C,
        Checks;
 
    use type swig.bool;
 
-   function "+" (the_Text : in char_t_Pointer) return String
-   is (to_Ada (char_array (C_char_t_Pointers.Value (the_Text))));
+   --  A string of pugixml ('const char_t*', where 'typedef char char_t;') is a 'chars_ptr'.
+   --
+   function "+" (the_Text : in interfaces.C.Strings.chars_ptr) return String
+   is (interfaces.C.Strings.Value (the_Text));
 
-   function "+" (the_Text : access constant char_array) return char_t_Pointer
-   is (the_Text (the_Text'First)'unrestricted_Access);
+   function "+" (the_Text : access char_array) return interfaces.C.Strings.chars_ptr
+   is (interfaces.C.Strings.to_chars_ptr (the_Text.all'unrestricted_Access));
 
-   Source    : aliased constant char_array := to_C (  "<library>"
-                                                    &   "<book year=""1999""><title>Ada</title></book>"
-                                                    &   "<book year=""2012""><title>Rust</title></book>"
-                                                    & "</library>");
-   Book      : aliased constant char_array := to_C ("book");
-   Title     : aliased constant char_array := to_C ("title");
-   Year      : aliased constant char_array := to_C ("year");
-   Pages     : aliased constant char_array := to_C ("pages");
-   Newer     : aliased constant char_array := to_C ("book[@year>2000]/title");
-   Nothing   : aliased constant char_array := to_C ("");
+   Source    : aliased char_array := to_C (  "<library>"
+                                           &   "<book year=""1999""><title>Ada</title></book>"
+                                           &   "<book year=""2012""><title>Rust</title></book>"
+                                           & "</library>");
+   Book      : aliased char_array := to_C ("book");
+   Title     : aliased char_array := to_C ("title");
+   Year      : aliased char_array := to_C ("year");
+   Pages     : aliased char_array := to_C ("pages");
+   Newer     : aliased char_array := to_C ("book[@year>2000]/title");
+   Nothing   : aliased char_array := to_C ("");
 
    the_Document : aliased xml_document.Item;     -- Which C++ constructs.
 begin

@@ -14,6 +14,23 @@ is
    the_c_type_Pointer         : c_Type.view;
    the_c_type_pointer_Pointer : c_Type.view;
 
+
+   function is_a_Typedef_of_char return Boolean
+   --
+   --  Whether the type is a typedef of plain 'char' ('typedef char char_t;'). A pointer to it is a C string, as one
+   --  to 'char' is, so it is given the pointer types of 'char' (and is 'interfaces.C.Strings.chars_ptr' in Ada),
+   --  and none of its own. A typedef of a 'signed char' or an 'unsigned char' is a byte, and keeps its own.
+   --
+   is
+      use type c_Type.a_c_type_Kind;
+   begin
+      return     the_c_Type.c_type_Kind = c_Type.Typedef
+        and then Self.name_Map_of_c_type.contains (+"char")
+        and then the_c_Type.ultimate_base_Type = Self.fetch_c_Type (+"char");
+   end is_a_Typedef_of_char;
+
+   of_char : constant Boolean := is_a_Typedef_of_char;
+
    --  A type is known by its swig type and also, for convenience, by its unqualified name and the names of its
    --  array, pointer and reference types. Two types of different scopes may share such a name (an enumeration
    --  of the same name in each of two classes, say), in which case the name remains that of the first.
@@ -110,9 +127,14 @@ is
       declare   -- Add associated pointer.
          pointer_swigType : constant doh_swigType := doh_swigType (swigtype_add_Pointer (SwigType_Pointer (doh_copy (the_swig_Type))));
       begin
-         the_c_type_Pointer := c_type.new_type_Pointer (the_c_Type.nameSpace,
-                                                        the_c_Type.Name & "*",
-                                                        accessed_Type => the_c_Type);
+         if of_char
+         then
+            the_c_type_Pointer := Self.fetch_c_Type (+"char*");
+         else
+            the_c_type_Pointer := c_type.new_type_Pointer (the_c_Type.nameSpace,
+                                                           the_c_Type.Name & "*",
+                                                           accessed_Type => the_c_Type);
+         end if;
 
          --  dlog ("Adding C pointer type for swig type '" &  to_String (pointer_swigType) & "'    C pointer name is '" & (+the_c_type_Pointer.qualified_Name) & "'");
 
@@ -123,7 +145,7 @@ is
             enter_swig_Type ("p." & the_c_Type.Name, the_c_Type_Pointer);
          end if;
 
-         enter_Name (the_c_type_Pointer.Name, the_c_type_Pointer);
+         enter_Name (the_c_Type.Name & "*", the_c_type_Pointer);
 
          declare   -- Register pointer to 'const'.
             the_pointer_to_const_swigType : constant doh_swigType
@@ -142,6 +164,7 @@ is
          end;
 
          if is_a_new_Type
+           and not of_char
          then
             Self.add_new_c_Type (the_c_type_Pointer);
          end if;
@@ -206,10 +229,15 @@ is
               := doh_SwigType (to_DOH ("a." & (+doh_Item (swigtype_add_Pointer (SwigType_Pointer (doh_copy (the_swig_Type)))))));
             the_c_type_pointer_Array   : c_Type.view;
          begin
-            the_c_type_pointer_Array := c_type.new_array_Type (the_c_Type.nameSpace,
-                                                               the_c_Type.Name & "*[]",
-                                                               element_Type => the_c_type_Pointer);
-            the_c_type_pointer_Array.add_array_Dimension;
+            if of_char
+            then
+               the_c_type_pointer_Array := Self.fetch_c_Type (+"char*[]");
+            else
+               the_c_type_pointer_Array := c_type.new_array_Type (the_c_Type.nameSpace,
+                                                                  the_c_Type.Name & "*[]",
+                                                                  element_Type => the_c_type_Pointer);
+               the_c_type_pointer_Array.add_array_Dimension;
+            end if;
 
             enter_swig_Type (+array_of_pointers_swigType, the_c_type_pointer_Array);
 
@@ -218,17 +246,23 @@ is
                enter_swig_Type ("a.p." & the_c_Type.Name, the_c_type_pointer_Array);
             end if;
 
-            enter_Name (the_c_type_pointer_Array.Name, the_c_type_pointer_Array);
+            enter_Name (the_c_Type.Name & "*[]", the_c_type_pointer_Array);
 
             if is_a_new_Type
+              and not of_char
             then
                Self.add_new_c_Type (the_c_type_pointer_Array);
             end if;
          end;
 
-         the_c_type_pointer_Pointer := c_type.new_type_Pointer (the_c_Type.nameSpace,
-                                                                the_c_Type.Name & "**",
-                                                                accessed_Type => the_c_type_Pointer);
+         if of_char
+         then
+            the_c_type_pointer_Pointer := Self.fetch_c_Type (+"char**");
+         else
+            the_c_type_pointer_Pointer := c_type.new_type_Pointer (the_c_Type.nameSpace,
+                                                                   the_c_Type.Name & "**",
+                                                                   accessed_Type => the_c_type_Pointer);
+         end if;
 
          declare   -- Add pointer pointer.
             pointer_to_pointer_swigType : constant doh_swigType
@@ -243,7 +277,7 @@ is
 
             enter_swig_Type ("r.p." & the_c_Type.Name, the_c_type_pointer_Pointer);     -- A reference to a pointer is passed as a pointer to it.
 
-            enter_Name (the_c_type_pointer_Pointer.Name, the_c_type_pointer_Pointer);
+            enter_Name (the_c_Type.Name & "**", the_c_type_pointer_Pointer);
          end;
 
 
@@ -264,6 +298,7 @@ is
          end;
 
          if is_a_new_Type
+           and not of_char
          then
             Self.add_new_c_Type (the_c_type_pointer_Pointer);
          end if;

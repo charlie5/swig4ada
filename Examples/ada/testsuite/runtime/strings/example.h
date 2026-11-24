@@ -35,3 +35,12 @@ typedef std::string Label;
 
 inline string shout   (const string& text)   { return text + "!"; }
 inline Label  labelled (int number)          { return "label " + std::to_string (number); }
+
+/* A pointer to a typedef of 'char' is a C string, as a 'char*' is. One to a typedef of 'unsigned char' is a
+   pointer to bytes. */
+typedef char          text_t;
+typedef unsigned char byte_t;
+
+inline const text_t* motto      ()                      { return "ada"; }
+inline int           count_of   (const text_t* text)    { return (int) std::char_traits<char>::length (text); }
+inline int           first_byte (const byte_t* bytes)   { return bytes [0]; }

@@ -1,9 +1,10 @@
 with
      strings.Binding,
      strings.Person,
+     strings.Pointers,
 
      swig.std_Strings,
-     interfaces.C,
+     interfaces.C.Strings,
 
      Checks;
 
@@ -108,6 +109,19 @@ begin
       destruct (Result);
       destruct (Text);
    end a_string_by_another_Name;
+
+   a_C_string_of_a_typedef_of_char :
+   declare
+      use interfaces.C.Strings;
+      Text  : chars_ptr               := new_String ("four");
+      Bytes : aliased   byte_t_Array  := [65, 66];
+   begin
+      check (String'(Value (motto)) = "ada",                        "a pointer to a typedef of 'char' is a 'chars_ptr', returned");
+      check (count_of (Text) = 4,                                   "and passed");
+      check (first_byte (strings.Pointers.byte_t_Pointer'(Bytes (0)'unchecked_Access)) = 65,
+             "and one to a typedef of 'unsigned char' is a pointer to bytes");
+      free (Text);
+   end a_C_string_of_a_typedef_of_char;
 
    finish;
 end Tester;
