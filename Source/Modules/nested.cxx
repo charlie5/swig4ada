@@ -14,6 +14,10 @@
 #include "swigmod.h"
 #include "cparse.h"
 
+/* swig4ada: set by a language module which binds a nested class that is not public for its shape alone (see the
+   parser), which then keeps it in the tree, ignored, where the class would otherwise be dropped. */
+extern "C" int cparse_keep_private_nested;
+
 // Nested classes processing section
 static Hash *classhash = 0;
 
@@ -389,9 +393,11 @@ void Swig_nested_process_classes(Node *n) {
     if (!Getattr(c, "templatetype")) {
       if (GetFlag(c, "nested") && (GetFlag(c, "feature:flatnested") || Language::instance()->nestedClassesSupport() == Language::NCS_None)) {
         removeNode(c);
-        if (!checkAttribute(c, "access", "public"))
+        if (!checkAttribute(c, "access", "public")) {
           SetFlag(c, "feature:ignore");
-        else if (Strcmp(nodeType(n), "extend") == 0 && Strcmp(nodeType(parentNode(n)), "class") == 0)
+          if (cparse_keep_private_nested)     /* swig4ada */
+            insertNodeAfter(n, c);
+        } else if (Strcmp(nodeType(n), "extend") == 0 && Strcmp(nodeType(parentNode(n)), "class") == 0)
           insertNodeAfter(parentNode(n), c);
         else
           insertNodeAfter(n, c);

@@ -96,6 +96,11 @@ int		kwargs_supported = 0;
    kept for the module where nested classes are flattened for it by default, as where they are ignored. */
 int		cparse_keep_unnamed_nested = 0;
 
+/* swig4ada: a language module which binds a private nested class for its shape alone (so that a member of the outer
+   class whose type it is takes its place in the layout) sets this, so that such a class is kept as a protected one is,
+   to be flattened and ignored by the core as any nested class which is not public is. */
+int		cparse_keep_private_nested = 0;
+
 /* -----------------------------------------------------------------------------
  *                            Doxygen Comment Globals
  * ----------------------------------------------------------------------------- */
@@ -4688,7 +4693,7 @@ cpp_class_decl: storage_class cpptype idcolon class_virt_specifier_opt inherit L
 		   Delattr($$, "Classprefix");
 		   Delete(Namespaceprefix);
 		   Namespaceprefix = Swig_symbol_qualifiedscopename(0);
-		   if (cplus_mode == CPLUS_PRIVATE) {
+		   if (cplus_mode == CPLUS_PRIVATE && !cparse_keep_private_nested) {     /* swig4ada: unless it is kept. */
 		     $$ = 0; /* skip private nested classes */
 		   } else if (cparse_cplusplus && currentOuterClass && ignore_nested_classes && !GetFlag($$, "feature:flatnested")) {
 		     /* Nested classes are not supported by this target language. Keep the fully parsed
