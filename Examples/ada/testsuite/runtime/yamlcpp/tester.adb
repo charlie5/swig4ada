@@ -29,7 +29,8 @@ is
             interfaces.C.double,
             interfaces.C.size_t,
             swig.bool,
-            Emitter.Pointer;
+            Emitter.Pointer,
+            Node.Pointer;
 
    subtype chars_ptr is interfaces.C.Strings.chars_ptr;
 
@@ -105,6 +106,38 @@ begin
       Node.push_back (List, Four'unchecked_Access);
       Node.child (Document, List_Key'unchecked_Access, Again'unchecked_Access);
       check (Node.size (Again) = 4,                  "a value is appended to a sequence, which is a part of its document");
+
+      assigning_through_an_Element :
+      declare
+         --  The overload of 'operator[]' which is not 'const' ('element') gives a node which is a part of its
+         --  document, so that a value which is assigned to it ('assign', of 'operator=') changes the document.
+         --
+         Rust     : aliased std_String       := to_std_String (interfaces.C.to_C ("rust"));
+         Year_Key : aliased std_String       := to_std_String (interfaces.C.to_C ("year"));
+         Year     : aliased interfaces.C.int := 1983;
+         Slot     : aliased Node.Item;
+         New_Slot : aliased Node.Item;
+         Read     : aliased Node.Item;
+         Same     :         Node.Pointer;
+      begin
+         Node.element (Document, Name_Key'unchecked_Access, Slot'unchecked_Access);
+         Same := Node.assign (Slot, Rust'unchecked_Access);
+         check (Same = Slot'unchecked_Access,         "a value is assigned to the node which an element gives, which gives itself back");
+
+         Node.child     (Document, Name_Key'unchecked_Access, Read'unchecked_Access);
+         Node.as_string (Read, Its_Text'unchecked_Access);
+         check (to_Ada (Its_Text) = "rust",           "and the document has it");
+
+         Node.element (Document, Year_Key'unchecked_Access, New_Slot'unchecked_Access);
+         Same := Node.assign (New_Slot, Year'unchecked_Access);
+         check (Node.size (Document) = 4,             "an element of a key which the map has not is added to it");
+
+         Node.destruct_0 (Read);
+         Node.destruct_0 (New_Slot);
+         Node.destruct_0 (Slot);
+         destruct (Year_Key);
+         destruct (Rust);
+      end assigning_through_an_Element;
 
       destruct (Its_Text);
       destruct (Pi_Key);

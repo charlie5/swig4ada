@@ -45,6 +45,14 @@
 //  from a value, a value is read from it ('as'), a child is found by its key ('operator[]'), and values are appended
 //  to a sequence ('push_back').
 //
+//
+//  'operator[]' has a 'const' overload and one which is not, which are one profile in Ada, so that the core would keep the
+//  first alone ('child'), which gives a copy of the child. The other is named apart ('element'): the node which it gives is a
+//  part of its document, and a value which is assigned to it ('assign', of 'operator=') changes the document.
+//
+%rename (element) YAML::Node::operator[] (std::string const &);
+%rename (element) YAML::Node::operator[] (int const &);
+
 %extend YAML::Node {
   %template (Node)        Node<int>;
   %template (Node)        Node<std::string>;
@@ -55,6 +63,8 @@
   %template (child)       operator[]<int>;
   %template (push_back)   push_back<int>;
   %template (push_back)   push_back<std::string>;
+  %template (assign)      operator=<int>;
+  %template (assign)      operator=<std::string>;
 }
 
 //  The documents which 'LoadAll' gives.

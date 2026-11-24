@@ -979,6 +979,13 @@ same way, by naming its instances within an <tt>%extend</tt> of the class:
 </pre></div>
 
 <p>
+Where a function has a <tt>const</tt> overload and one which is not, the two have one
+profile in Ada, and SWIG keeps the <tt>const</tt> one (warning 516).
+The other is bound by a name of its own, given before the class by its parameters
+(<tt>%rename (element) YAML::Node::operator[] (std::string const &amp;);</tt>).
+</p>
+
+<p>
 Namespaces are not reflected in the package names: a class <tt>geometry::Box</tt> is
 the package <tt>shapes.Box</tt>.
 The names which are imported from C++ take account of them.
