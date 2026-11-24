@@ -97,9 +97,11 @@ standard library, GNU libstdc++).
 <ul>
 <li>A class with virtual functions which inherits a base class <em>virtually</em>, and also
 has a base with virtual functions which it does not inherit virtually, is bound with a
-warning, and its record does not have the layout of the class. Any other class with a
-virtual base has it (see <a href="#Ada_layout">Layout</a>), but no type may be derived in Ada
-from one with virtual functions.
+warning: its record is a type extension, which GNAT lays out, with storage for its virtual
+base which is no smaller than C++ takes, and the base is reached by <tt>as_&lt;base&gt;</tt>
+alone. Any other class with a virtual base has the layout of its class (see
+<a href="#Ada_layout">Layout</a>), but no type may be derived in Ada from one with virtual
+functions.
 <li>Of several base classes which have virtual functions, the first is the parent of
 the Ada type. The others are reached through a function (see
 <a href="#Ada_inheritance">Inheritance</a>), and a function which overrides one of theirs
@@ -1131,8 +1133,9 @@ value, the length of an array).</td>
 <tr>
 <td>864</td>
 <td><tt>SWIGWARN_ADA_UNSUPPORTED</tt></td>
-<td>A construct of C++ for which the module has no counterpart is bound only in part
-(virtual inheritance).</td>
+<td>A construct of C++ for which the module has no counterpart is bound only in part. It
+is no longer given: its uses, pointers to class members and virtual inheritance, are now
+bound.</td>
 </tr>
 
 </table>
