@@ -504,8 +504,8 @@ its place in the table of virtual functions, and the adjustment of <tt>this</tt>
 pointer to a member variable is <tt>swig.member_data_Pointer</tt> (its offset). A typedef of
 one is a subtype of it. Ada takes such a pointer from C++, as the result of a function, a
 variable or a constant, and gives it back, as C++ alone can call through it. A constant
-(<tt>%constant double (Shape::*AREAPT) (void) = &amp;Shape::area;</tt>) is an object which the
-wrapper defines, and is bound as a variable.
+(<tt>%constant double (Shape::*AREAPT) (void) = &amp;Shape::area;</tt>) is a constant object
+which the wrapper defines, and is bound as a constant which imports it.
 </p>
 
 <div class="code"><pre>
