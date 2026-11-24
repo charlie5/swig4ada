@@ -57,3 +57,12 @@ struct Wider : Mixed {
 inline int  size_of_wider ()           { return (int) sizeof (Wider); }
 inline char extra_of      (Wider* w)   { return w->extra; }
 inline int  codes_of      (Wider* w)   { return w->codes [0] + w->codes [1] + w->codes [2]; }
+
+/* A class derived from one of the imported module which has no virtual function: the functions which its 'using'
+   declarations name are functions of this class, as C++ has them, beside one which it adds. */
+class Tally : public Counter {
+public:
+  using Counter::add;
+  using Counter::total;
+  int add (double d)   { n += (int) (d * 10);  return n; }
+};

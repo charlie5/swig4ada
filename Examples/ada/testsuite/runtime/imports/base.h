@@ -52,4 +52,15 @@ struct Mixed {
   Mixed () : tag ('m'), link (0)   { codes [0] = 1;  codes [1] = 2;  codes [2] = 3; }
 };
 
+/* A class with no virtual function, which is a part of the record of a class derived from it. Its functions are
+   named by 'using' declarations of such a class in the other module. */
+class Counter {
+public:
+  int n;
+  Counter () : n (0)            {}
+  int  add   (int k)            { n += k;      return n; }
+  int  add   (int a, int b)     { n += a + b;  return n; }
+  int  total () const           { return n; }
+};
+
 #endif

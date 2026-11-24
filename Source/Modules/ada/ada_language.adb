@@ -1707,14 +1707,14 @@ is
 
       while the_Child /= null
       loop
-         declare
-            the_Declarator : constant String := Attribute (the_Child, "decl");
          begin
-            --  Only a function is followed: a member variable which is named so is in the base, where it is.
+            --  Only a function is followed: a member variable which is named so is in the base, where it is. The
+            --  declarator of a function begins with its qualifier where it has one ('q(const).f().'), so it is asked
+            --  of the core. (Until 2026-11-24 it was taken to begin 'f(', and a constant function was passed over.)
             --
             if         Attribute (the_Child, "nodeType") = "cdecl"
-              and then the_Declarator'Length > 1
-              and then the_Declarator (the_Declarator'First .. the_Declarator'First + 1) = "f("
+              and then get_Attribute (the_Child, "decl") /= null
+              and then SwigType_isfunction (SwigType_Pointer (get_Attribute (the_Child, "decl"))) /= 0
               and then Attribute (the_Child, "feature:ignore") = ""
             then
                declare

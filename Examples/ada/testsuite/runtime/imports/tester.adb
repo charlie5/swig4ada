@@ -6,6 +6,7 @@ with
      imports.More,
      imports.Panel,
      imports.Wider,
+     imports.Tally,
 
      imports_base.Binding,
      imports_base.Animal,
@@ -168,6 +169,16 @@ begin
       check (extra_of (the_Wider'unchecked_Access) = 'x',     "C++ reads what Ada writes there");
       check (codes_of (the_Wider'unchecked_Access) = 6,       "which has not lain over the array of the base");
    end a_class_derived_from_an_imported_class_with_a_pointer_and_an_Array;
+
+   functions_which_using_Declarations_name :
+   declare
+      the_Tally : aliased Tally.Item := Tally.construct;
+   begin
+      check (Tally.add (the_Tally, 3) = 3,                    "a function of an imported base which a 'using' declaration names is one of the class");
+      check (Tally.add (the_Tally, 1, 2) = 6,                 "and so is each of its overloads");
+      check (Tally.add (the_Tally, 0.5) = 11,                 "beside one which the class adds");
+      check (Tally.total (the_Tally) = 11,                    "and a constant function which a 'using' declaration names");
+   end functions_which_using_Declarations_name;
 
    finish;
 end Tester;
