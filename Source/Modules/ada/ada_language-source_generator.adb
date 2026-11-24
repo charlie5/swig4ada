@@ -1842,7 +1842,8 @@ is
                   elsif is_a_Class_of_another_Package (the_Parameter.my_Type)
                   then
                      the_Context.add (the_Parameter.my_Type,
-                                      is_access => True);
+                                      is_access => True,
+                                      in_a_Ring => True);     -- As the context itself looks only at what the other names directly.
                   else
                      the_Context.add (the_Parameter.my_Type,
                                       is_access => False);
@@ -1872,7 +1873,10 @@ is
                   elsif is_a_Class_of_another_Package (the_return_Type)
                   then
                      the_Context.add (the_return_Type,
-                                      is_access => True);
+                                      is_access => True,
+                                      in_a_Ring => True);     -- A ring of four through a function ('xml_node_iterator::children' gives an
+                                                              -- 'xml_named_node_range', which holds 'xml_named_node_iterator's, whose
+                                                              -- 'children' gives an 'xml_node_range', which holds 'xml_node_iterator's).
                   else
                      the_Context.add (the_Subprogram.return_Type,
                                       is_access => False);

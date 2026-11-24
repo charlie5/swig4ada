@@ -25,9 +25,46 @@ is
       its_Form  : constant String := +DOH_Pointer (node_Type);
       full_Form : constant String := +doh_Item (Swig_symbol_template_deftype (node_Type, null));
 
+      function resolved_Name return String
+      --
+      --  The name of a type which is not known and which the core now takes for the class: a type which was named, before
+      --  the class was declared, through a typedef of a template instance which did not yet exist (jsoncpp's
+      --  'Json::Value::ObjectValues::iterator', a typedef of the map which the interface names after the header, as its
+      --  arguments are declared in it). The core could not say then what it stood for. Only a type which is not known
+      --  is asked of, and its pointer and array forms are passed over, as they are named after it.
+      --
+      is
+      begin
+         for Cursor in Self.swig_type_Map_of_c_type.Iterate
+         loop
+            declare
+               use swig_type_Maps_of_c_type;
+               the_Key : constant String := to_String (Key (Cursor));
+            begin
+               if         Element (Cursor).c_type_Kind = c_Type.Unknown
+                 and then ada.Strings.fixed.Index (the_Key, "::") /= 0
+                 and then not (the_Key'Length > 2 and then the_Key (the_Key'First + 1) = '.')     -- 'p.', 'a.', 'r.' ...
+               then
+                  declare
+                     Resolved : constant String := +doh_Item (SwigType_typedef_resolve_all (SwigType_Pointer (to_Doh (the_Key))));
+                  begin
+                     if    Resolved = its_Form
+                       or else Resolved = full_Form
+                     then
+                        return the_Key;
+                     end if;
+                  end;
+               end if;
+            end;
+         end loop;
+
+         return "";
+      end resolved_Name;
+
+
       Known_as  : constant String := (if    Self.swig_type_Map_of_c_type.contains (+its_Form)  then its_Form
                                       elsif Self.swig_type_Map_of_c_type.contains (+full_Form) then full_Form
-                                      else  "");
+                                      else  resolved_Name);
 
 
       procedure name_after_the_Class (Prefix : in String;   Suffix : in String)
@@ -64,6 +101,26 @@ is
          name_after_the_Class ("p.",   "*");
          name_after_the_Class ("a.p.", "*[]");
          name_after_the_Class ("p.p.", "**");
+
+         --  A type which was found through the core ('resolved_Name') is known by another name: the class is known
+         --  by its own as well, and so are the types which were made with it, which are those of the class.
+         --
+         if Known_as not in its_Form | full_Form
+         then
+            declare
+               type Prefix_array is array (Positive range <>) of unbounded_String;
+               Prefixes : constant Prefix_array := [+"", +"a.", +"p.", +"a.p.", +"p.p.", +"r.", +"r.q(const).", +"p.q(const).", +"z."];
+            begin
+               for Prefix of Prefixes
+               loop
+                  if         Self.swig_type_Map_of_c_type.contains (Prefix & Known_as)
+                    and then not Self.swig_type_Map_of_c_type.contains (Prefix & its_Form)
+                  then
+                     Self.swig_type_Map_of_c_type.insert (Prefix & its_Form, Self.swig_type_Map_of_c_type.Element (Prefix & Known_as));
+                  end if;
+               end loop;
+            end;
+         end if;
 
          if not Self.name_Map_of_c_type.contains (+class_Name)
          then

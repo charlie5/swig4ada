@@ -23,9 +23,22 @@
 
 namespace std {
 
+    // The iterators of a map, as GNU libstdc++ has them: a pointer to a node of its tree. A header may name one
+    // ('std::map<K, T>::iterator', as a member of a class), and an instance must then be named with '%template'.
+    //
+    template<class V> struct _Rb_tree_iterator {
+        void*        _M_node;
+    };
+
+    template<class V> struct _Rb_tree_const_iterator {
+        void*        _M_node;
+    };
+
     template<class K, class T, class Compare = std::less<K> > class map {
         // add typemaps here
       public:
+        typedef _Rb_tree_iterator<std::pair<const K, T> >        iterator;
+        typedef _Rb_tree_const_iterator<std::pair<const K, T> >  const_iterator;
 
         void*        _M_t__M_impl__M_key_compare;
         int          _M_t__M_impl__M_header__M_color;
