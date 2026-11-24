@@ -608,6 +608,9 @@ A class which is nested in another is a class of the module, with a package of i
 beside that of the class which holds it: <tt>Engine::Gauge</tt> is <tt>shapes.Gauge</tt>.
 Where two classes each have a nested class of one name, the later one is named after its
 class as well (<tt>shapes.Pump_Gauge</tt>).
+A nested class which is private or protected is bound for its shape alone: its package has
+its record, whose members are storage, and nothing else, so that a member of the outer class
+of its type takes its place, and the outer class has its whole layout.
 </p>
 
 <p>
