@@ -122,7 +122,8 @@ is
 --                    log (+Boolean'Image (the_type_Info.my_Type.declaration_Package.depends_on (own_Package, depth => 0)));
 
                   if        not the_type_Info.is_accessed
-                    or else not the_type_Info.my_Type.declaration_Package.depends_on (own_Package, depth => 0)
+                    or else (    not the_type_Info.in_a_Ring
+                             and not the_type_Info.my_Type.declaration_Package.depends_on (own_Package, depth => 0))
                     or else (for some Each of own_Package.Types =>                                   -- A subtype of the type is declared here
                                         Each.all in ada_type.a_subType.item'Class                   -- ('typedef Element* element_ptr_t;'),
                                and then subType_view (Each).base_Type = the_type_Info.my_Type)      -- which a limited view does not allow.
@@ -322,12 +323,14 @@ is
                     and not is_access
                   then
                      Self.a_required_Types.include (the_required_Type, (the_required_type,
-                                                                        is_accessed => False));
+                                                                        is_accessed => False,
+                                                                        in_a_Ring   => False));
                   end if;
 
                else   -- Does not already exist.
                   Self.a_required_Types.insert (the_required_Type, (the_required_type,
-                                                                    is_accessed => is_access));
+                                                                    is_accessed => is_access,
+                                                                    in_a_Ring   => False));
                end if;
             end;
          end;
@@ -338,7 +341,8 @@ is
 
 
    procedure add (Self : in out Item;   required_Type : in ada_Type.view;
-                                        is_access     : in Boolean)
+                                        is_access     : in Boolean;
+                                        in_a_Ring     : in Boolean := False)
    is
       use ada_Type,
           ada_type_Maps;
@@ -378,12 +382,20 @@ is
                     and not is_access
                   then
                      Self.a_required_Types.include (required_Type, (required_type,
-                                                                    is_accessed => False));
+                                                                    is_accessed => False,
+                                                                    in_a_Ring   => False));
+
+                  elsif in_a_Ring
+                  then
+                     Self.a_required_Types.include (required_Type, (required_type,
+                                                                    is_accessed => the_type_Info.is_accessed,
+                                                                    in_a_Ring   => True));
                   end if;
 
                else   -- Does not already exist.
                   Self.a_required_Types.insert (required_Type, (required_type,
-                                                                is_accessed => is_access));
+                                                                is_accessed => is_access,
+                                                                in_a_Ring   => in_a_Ring));
                end if;
             end;
          end;

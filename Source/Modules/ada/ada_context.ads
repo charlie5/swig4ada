@@ -38,7 +38,12 @@ is
    procedure add (Self : in out Item;   required_Type  : in ada_Type.view);
    procedure add (Self : in out Item;   required_Types : in ada_Type.views);
    procedure add (Self : in out Item;   required_Type  : in ada_Type.view;
-                                        is_access      : in Boolean);
+                                        is_access      : in Boolean;
+                                        in_a_Ring      : in Boolean := False);
+   --
+   --  'in_a_Ring' says that the package of the type leads back to the package of the context, through others (see
+   --  'leads_to_this_Package' of the source generator), so that a limited view of it is taken where it is only used
+   --  as an access, though it does not depend on this one directly.
 
 
 
@@ -48,6 +53,7 @@ private
       record
          my_Type     : ada_Type.view;
          is_accessed : Boolean;           -- Will be true if the type is only used as an 'access'.
+         in_a_Ring   : Boolean := False;  -- Its package leads back to that of the context.
       end record;
 
 

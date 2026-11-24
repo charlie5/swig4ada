@@ -226,8 +226,8 @@ package swigmod.Dispatcher is
 
 private
 
-   pragma Import (CPP, destruct_0, "_ZN10DispatcherD1Ev");
-   pragma Import (CPP, destruct, "_ZN10DispatcherD0Ev");
+   pragma Import (CPP, destruct_0, "ada_destruct_Dispatcher");
+   pragma Import (CPP, destruct, "ada_delete_Dispatcher");
    pragma Import (CPP, emit_one, "Ada_Dispatcher_emit_one");
    pragma Import (CPP, emit_children, "Ada_Dispatcher_emit_children");
    pragma Import (CPP, defaultHandler, "Ada_Dispatcher_defaultHandler");

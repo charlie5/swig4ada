@@ -133,6 +133,18 @@ begin
                Each.lose_Layout;
             end if;
 
+         end if;
+      end loop;
+
+      --  A member which is a smart pointer is kept as storage, in every class, before any member is left out: a class
+      --  which has such a member is then known, and so is a member of another class which is of that class (jsoncpp's
+      --  'Value' has one of its 'Comments', which has a 'std::unique_ptr'). Until 2026-11-24 the two were done in one
+      --  pass over the classes, and such a member was left out where its class came first.
+      --
+      for Each of Self.name_Map_of_c_type
+      loop
+         if Each.c_type_Kind = c_Class
+         then
             for i in reverse 1 .. Each.component_Count
             loop
                if         not_fully_known_Types.contains (Each.Components (i).my_Type)
@@ -141,9 +153,26 @@ begin
                then
                   keep_the_Storage (Each, i, smart_Pointer_Words (to_String (Each.Components (i).my_Type.Name)));
                   Dropped := True;     -- The class may now be known.
+               end if;
+            end loop;
+         end if;
+      end loop;
 
-               elsif      not_fully_known_Types.contains (Each.Components (i).my_Type)
-                 and then Each.Components (i).my_Type /= Each
+      if Dropped
+      then
+         not_fully_known_Types.clear;
+         find_the_not_fully_known_Types;
+         Dropped := False;
+      end if;
+
+      for Each of Self.name_Map_of_c_type
+      loop
+         if Each.c_type_Kind = c_Class
+         then
+            for i in reverse 1 .. Each.component_Count
+            loop
+               if         not_fully_known_Types.contains (Each.Components (i).my_Type)
+                 and then Each.Components (i).my_Type /= Each     -- Not the class itself, where that is what is not known.
                then
                   c_Declarable.warn (Each, Layout,   (if Each.Components (i).is_ignored_Member
                                                       then "The ignored member '" & Each.Components (i).Name & "' of class '" & Each.Name

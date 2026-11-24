@@ -127,7 +127,15 @@ begin
    --  names the destructor of its own class, so that it is not a virtual call: the function is itself what the
    --  vtable of a type which is derived in Ada holds.
    --
-   elsif      ada.Strings.fixed.Index (class_cpp_Name, "<") /= 0
+   --  So is a destructor which is defined in its class ('virtual ~X () {}', '~X () override = default;') or which
+   --  C++ gives the class: it is inline, and a library need have no symbol for it, as C++ makes it wherever it is
+   --  used (jsoncpp's 'FastWriter', whose destructor the library does not export, so that a tester which declared one
+   --  did not link). The wrapper's function makes it. A destructor which is declared alone is defined in the library.
+   --
+   elsif      (        ada.Strings.fixed.Index (class_cpp_Name, "<") /= 0
+               or else get_Attribute (the_Node, "code") /= null
+               or else Attribute (the_Node, "value") = "default"
+               or else Attribute (Self.getCurrentClass, "allocate:implicit_destructor") /= "")
      and then not (   check_Attribute (the_Node, "access", "protected")
                    or check_Attribute (the_Node, "access", "private"))
    then

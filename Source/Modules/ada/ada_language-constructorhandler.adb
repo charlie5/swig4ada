@@ -93,12 +93,77 @@ is
 
 
 
+   function is_deleted_by_a_Member return Boolean
+   --
+   --  Whether C++ deletes the default constructor which the core gives a class with none of its own: it does where
+   --  the class has a member which is a reference, or a constant of a type which is no class, with no initial value
+   --  (jsoncpp's 'MemberProxy', with a 'Value&'). The core does not tell, and the wrapper of the constructor did not
+   --  compile.
+   --
+   is
+      the_Child : Node_Pointer := first_Child (Self.getCurrentClass);
+   begin
+      while the_Child /= null
+      loop
+         if         Attribute (the_Child, "nodeType") = "cdecl"
+           and then Attribute (the_Child, "storage") /= "static"
+           and then Attribute (the_Child, "value") = ""
+           and then (get_Attribute (the_Child, "decl") = null
+                     or else C."=" (SwigType_isfunction (SwigType_Pointer (get_Attribute (the_Child, "decl"))), 0))
+         then
+            declare
+               the_Decl : constant String := Attribute (the_Child, "decl");
+               the_Type : constant String := Attribute (the_Child, "type");
+            begin
+               if        ada.Strings.fixed.Index (the_Decl, "r.") = 1
+                 or else ada.Strings.fixed.Index (the_Decl, "z.") = 1
+                 or else ada.Strings.fixed.Index (the_Decl, "q(const).") = 1     -- A constant pointer.
+               then
+                  return True;
+               end if;
+
+               if         the_Decl = ""
+                 and then ada.Strings.fixed.Index (the_Type, "q(const).") = 1
+               then
+                  declare
+                     Plain : constant String := the_Type (the_Type'First + 9 .. the_Type'Last);
+                     Found : constant c_Type.view := (if Self.swig_type_Map_of_c_type.contains (+Plain) then Self.swig_type_Map_of_c_type.Element (+Plain)
+                                                      else null);
+                     use type c_Type.view;
+                     use type c_Type.a_c_type_Kind;
+                  begin
+                     if        Found = null
+                       or else Found.c_type_Kind /= c_Type.c_Class
+                     then
+                        if C."/=" (SwigType_type (SwigType_typedef_resolve_all (SwigType_Pointer (to_Doh (Plain)))), T_USER)     -- Such as a 'std::string'.
+                        then
+                           return True;
+                        end if;
+                     end if;
+                  end;
+               end if;
+            end;
+         end if;
+
+         the_Child := next_Sibling (the_Child);
+      end loop;
+
+      return False;
+   end is_deleted_by_a_Member;
+
+
 begin
    if not Self.in_cpp_Mode
    then
       bind_the_C_Function;
 
       return SWIG_OK;
+   end if;
+
+   if         Attribute (the_Node, "default_constructor") /= ""
+     and then is_deleted_by_a_Member
+   then
+      return SWIG_OK;     -- It is no constructor which can be called, and the class has none.
    end if;
 
    indent_Log;

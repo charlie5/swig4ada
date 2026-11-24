@@ -1969,7 +1969,23 @@ is
                              and then subType_view (the_component_Type).base_Type.all in Access_to_Type_class
                            then
                               the_Context.add (Access_to_Type_view (subType_view (the_component_Type).base_Type).accessed_Type,
-                                               is_access => True);
+                                               is_access => True,
+                                               in_a_Ring => leads_to_this_Package (ada_Package.view (Access_to_Type_view (subType_view (the_component_Type).base_Type)
+                                                                                                       .accessed_Type.declaration_Package)));
+
+                           elsif      the_component_Type.resolved_Type /= null
+                             and then the_component_Type.resolved_Type.all in Access_to_Type_class
+                             and then Access_to_Type_view (the_component_Type.resolved_Type).accessed_Type.qualified_Name /= "Character"
+                           then
+                              --  A member which is a pointer to a class of another package is written as an anonymous access to
+                              --  the class ('value : access jsoncpp.Value.Item'), for which a limited view suffices. Where that
+                              --  package needs this one, the two then do not need each other's whole (jsoncpp's 'MemberProxy',
+                              --  with a 'Value&', and 'Value', whose 'members ()' returns a view whose iterator has a 'MemberProxy').
+                              --
+                              the_Context.add (Access_to_Type_view (the_component_Type.resolved_Type).accessed_Type,
+                                               is_access => True,
+                                               in_a_Ring => leads_to_this_Package (ada_Package.view (Access_to_Type_view (the_component_Type.resolved_Type)
+                                                                                                       .accessed_Type.declaration_Package)));
                            else
                               the_Context.add (the_component_Type);
                            end if;
@@ -2230,7 +2246,47 @@ is
       end emit_main_Types;
 
 
-      --  Emit variables.
+
+
+      emit_ic_pointer_Types :
+      declare
+         the_Type : ada_Type.view;
+      begin
+         for Each in 1 .. Natural (Length (ic_pointer_Types))
+         loop
+            the_Type := Element (ic_pointer_Types,  Each);
+
+            begin
+               if not is_unusable_Array (the_Type)
+               then
+                  if not (        Tail (the_Type.Name, 5) = "_view"
+                          or else Tail (the_Type.Name, 6) = "_array"
+                          or else the_Type.all in ic_Pointer_Class)
+                  then
+                     append (spec_Source, "   -- " & the_Type.Name & NL);
+                     append (spec_Source, "   -- "                 & NL);
+                  end if;
+
+                  append (spec_Source,  declaration_Text (the_Type, the_ada_Lang) & NL & NL);
+
+                  declare
+                     the_representation_Text : constant String := representation_Text (the_Type);
+                  begin
+                     if the_representation_Text /= ""
+                     then
+                        append (spec_Source_private,  the_representation_Text & NL & NL & NL);
+                     end if;
+                  end;
+               end if;
+            end;
+
+         end loop;
+      end emit_ic_pointer_Types;
+
+
+      --  Emit variables, after the types, the pointer types among them: a static member which is a reference to its own
+      --  class ('static const Value& null;', of jsoncpp) is of the 'Pointer' of the class. (Until 2026-11-24 they came
+      --  before the pointer types, and such a spec did not compile.)
       --
       append (spec_Source,  NL & NL & NL);
 
@@ -2474,42 +2530,6 @@ is
 
          <<next_Variable>>
       end loop;
-
-
-      emit_ic_pointer_Types :
-      declare
-         the_Type : ada_Type.view;
-      begin
-         for Each in 1 .. Natural (Length (ic_pointer_Types))
-         loop
-            the_Type := Element (ic_pointer_Types,  Each);
-
-            begin
-               if not is_unusable_Array (the_Type)
-               then
-                  if not (        Tail (the_Type.Name, 5) = "_view"
-                          or else Tail (the_Type.Name, 6) = "_array"
-                          or else the_Type.all in ic_Pointer_Class)
-                  then
-                     append (spec_Source, "   -- " & the_Type.Name & NL);
-                     append (spec_Source, "   -- "                 & NL);
-                  end if;
-
-                  append (spec_Source,  declaration_Text (the_Type, the_ada_Lang) & NL & NL);
-
-                  declare
-                     the_representation_Text : constant String := representation_Text (the_Type);
-                  begin
-                     if the_representation_Text /= ""
-                     then
-                        append (spec_Source_private,  the_representation_Text & NL & NL & NL);
-                     end if;
-                  end;
-               end if;
-            end;
-
-         end loop;
-      end emit_ic_pointer_Types;
 
 
       emit_Subprograms :

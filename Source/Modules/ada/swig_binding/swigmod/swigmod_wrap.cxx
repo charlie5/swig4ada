@@ -5824,6 +5824,20 @@ DllExport void SWIGSTDCALL Ada_do_base_top (
 #ifdef __cplusplus
 extern "C" {
 #endif
+extern "C" void ada_destruct_Dispatcher (Dispatcher * self)
+{
+  typedef Dispatcher swig_ada_class;
+  self->swig_ada_class::~swig_ada_class ();
+}
+
+extern "C" void ada_delete_Dispatcher (Dispatcher * self)
+{
+  typedef Dispatcher swig_ada_class;
+  self->swig_ada_class::~swig_ada_class ();
+  ::operator delete (self);
+}
+
+
 class ada_concrete_Dispatcher : public Dispatcher
 {
 public:

@@ -105,6 +105,91 @@ is
       name_the_nested_Ones (the_Node);
    end name_the_nested_Classes;
 
+   procedure keep_the_Shape (of_Class : in Node_Pointer)
+   --
+   --  Binds a class which the core does not hand on for its shape alone: it is no longer ignored, and each of its
+   --  members is, but for its virtual functions. A member variable which is ignored is storage ('<member>_storage',
+   --  see 'add_hidden_Members'), a virtual function has its place and may be overridden, and nothing else of the class
+   --  is bound.
+   --
+   is
+      the_Child : Node_Pointer := first_Child (of_Class);
+      Unused    : C.int with Unreferenced;
+   begin
+      Unused := DohDelattr (DOH_Pointer (of_Class), DOH_Pointer (to_Doh ("feature:ignore")));
+      set_Attribute (doh_Node (of_Class), "ada:shape_only", "1");
+
+      while the_Child /= null
+      loop
+         declare
+            Kind       : constant String  := Attribute (the_Child, "nodeType");
+            is_Virtual : constant Boolean := ada.Strings.fixed.Index (Attribute (the_Child, "storage"), "virtual") /= 0;
+         begin
+            if        (Kind in "cdecl" | "destructor" and then not is_Virtual)
+              or else  Kind in "constructor" | "using" | "template"
+            then
+               set_Attribute (doh_Node (the_Child), "feature:ignore", "1");
+            end if;
+         end;
+
+         the_Child := next_Sibling (the_Child);
+      end loop;
+   end keep_the_Shape;
+
+
+
+   procedure keep_the_shape_of_hidden_nested_Classes
+   --
+   --  A class which is nested in another, and is not public, is ignored by the core when it moves it out of the class
+   --  (nested classes being flattened for Ada). A member of the outer class whose type it is was then of a type which
+   --  is not known, and was left out: the record of the outer class was smaller than its class (jsoncpp's 'Value',
+   --  with a member of its private 'Comments'), so that its constructor wrote beyond an object which Ada declared. Such
+   --  a class is bound for its shape alone, as an ignored base class is. This is done before the tree is walked.
+   --
+   is
+      procedure walk (Parent : in Node_Pointer)
+      is
+         the_Child : Node_Pointer := first_Child (Parent);
+      begin
+         while the_Child /= null
+         loop
+            if         Attribute (the_Child, "nodeType") = "class"
+              and then Attribute (the_Child, "nested") /= ""
+              and then Attribute (the_Child, "feature:ignore") /= ""
+              and then Attribute (the_Child, "access") in "private" | "protected"
+              and then Attribute (the_Child, "templatetype") = ""
+            then
+               if Attribute (the_Child, "sym:name") = ""
+               then   -- A class which is ignored is given no name to be bound by: it takes its own, less its scope.
+                  declare
+                     its_Name : constant String  := Attribute (the_Child, "name");
+                     Colons   : constant Natural := ada.Strings.fixed.Index (its_Name, "::", Going => ada.Strings.Backward);
+                  begin
+                     set_Attribute (doh_Node (the_Child), "sym:name", (if Colons = 0 then its_Name else its_Name (Colons + 2 .. its_Name'Last)));
+                  end;
+               end if;
+
+               keep_the_Shape (the_Child);
+            end if;
+
+            if Attribute (the_Child, "nodeType") /= "template"
+            then
+               walk (the_Child);
+            end if;
+
+            the_Child := next_Sibling (the_Child);
+         end loop;
+      end walk;
+
+   begin
+      if Self.in_cpp_Mode
+      then
+         walk (the_Node);
+      end if;
+   end keep_the_shape_of_hidden_nested_Classes;
+
+
+
    procedure keep_the_shape_of_ignored_Bases
    --
    --  A class which the interface file ignores ('%ignore Base;') is not handed on by the core. Where a class which is
@@ -120,30 +205,6 @@ is
       function is_Ignored (the_Node : in Node_Pointer) return Boolean
       is (Attribute (the_Node, "feature:ignore") /= "");
 
-      procedure keep_the_Shape (of_Class : in Node_Pointer)
-      is
-         the_Child : Node_Pointer := first_Child (of_Class);
-         Unused    : C.int with Unreferenced;
-      begin
-         Unused := DohDelattr (DOH_Pointer (of_Class), DOH_Pointer (to_Doh ("feature:ignore")));
-         set_Attribute (doh_Node (of_Class), "ada:shape_only", "1");
-
-         while the_Child /= null
-         loop
-            declare
-               Kind       : constant String  := Attribute (the_Child, "nodeType");
-               is_Virtual : constant Boolean := ada.Strings.fixed.Index (Attribute (the_Child, "storage"), "virtual") /= 0;
-            begin
-               if        (Kind in "cdecl" | "destructor" and then not is_Virtual)
-                 or else  Kind in "constructor" | "using" | "template"
-               then
-                  set_Attribute (doh_Node (the_Child), "feature:ignore", "1");
-               end if;
-            end;
-
-            the_Child := next_Sibling (the_Child);
-         end loop;
-      end keep_the_Shape;
 
       procedure look_at (the_Class : in Node_Pointer)
       --
@@ -290,6 +351,7 @@ begin
    print_to (Doh_Pointer (Self.f_Ada),     "#endif");
 
    keep_the_shape_of_ignored_Bases;
+   keep_the_shape_of_hidden_nested_Classes;
    name_the_nested_Classes;
 
    --   Do the base Language 'top' to recursively process all nodes.

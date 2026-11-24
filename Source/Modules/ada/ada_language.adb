@@ -195,8 +195,13 @@ is
       --  'bind_unnamed_nested_Classes'), though the other nested classes are moved out beside their class.
       --
       keep_unnamed_nested_Classes : C.int with Import, Convention => C, External_Name => "cparse_keep_unnamed_nested";
+
+      --  And a private nested class, which is bound for its shape (see 'keep_the_shape_of_hidden_nested_Classes').
+      --
+      keep_private_nested_Classes : C.int with Import, Convention => C, External_Name => "cparse_keep_private_nested";
    begin
       keep_unnamed_nested_Classes := 1;
+      keep_private_nested_Classes := 1;
 
       indent_Log;
       log ("");
