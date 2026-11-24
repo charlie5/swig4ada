@@ -5,6 +5,8 @@ with
      nested.Reading,
      nested.Pump,
      nested.Pump_Gauge,
+     nested.Lexeme,
+     nested.Holder,
 
      interfaces.C,
 
@@ -80,6 +82,24 @@ begin
       check (the_Pump.gauge.pressure = 2.5,                        "and is the type of a member of the class which holds it");
       check (pressure_of (its_Gauge'unchecked_Access) = 2.5,       "and of a parameter");
    end a_nested_class_of_a_name_which_is_taken;
+
+   private_nested_Types :
+   declare
+      the_Lexeme : aliased Lexeme.Item := Lexeme.construct;
+      the_Holder : aliased Holder.Item := Holder.construct;
+   begin
+      --  A member whose type is a private enumeration of its class, and an anonymous union one of whose members names a
+      --  private structure of the class by its plain name: neither was bound, and each record lost the member.
+      --
+      check (Lexeme.Item'Size / 8 = size_of_lexeme,                "a class with a member of a private enumeration has the size of its class");
+      check (Lexeme.size (the_Lexeme) = 3,                         "and C++ finds the member after it");
+      Lexeme.make_number (the_Lexeme);
+      check (Lexeme.kind_of (the_Lexeme) = 1,                      "and the member itself");
+
+      check (Holder.Item'Size / 8 = size_of_holder,                "a class with an anonymous union of a private structure has the size of its class");
+      check (Holder.policy (the_Holder) = 4,                       "and C++ finds the structure");
+      check (Holder.count_of (the_Holder) = 9,                     "and the member after the union");
+   end private_nested_Types;
 
    finish;
 end Tester;

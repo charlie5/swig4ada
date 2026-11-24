@@ -610,7 +610,8 @@ Where two classes each have a nested class of one name, the later one is named a
 class as well (<tt>shapes.Pump_Gauge</tt>).
 A nested class which is private or protected is bound for its shape alone: its package has
 its record, whose members are storage, and nothing else, so that a member of the outer class
-of its type takes its place, and the outer class has its whole layout.
+of its type takes its place, and the outer class has its whole layout. A nested enumeration
+which is private or protected is declared in the package of its class, for the same reason.
 </p>
 
 <p>

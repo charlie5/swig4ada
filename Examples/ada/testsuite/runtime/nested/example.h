@@ -55,3 +55,35 @@ public:
 };
 
 inline double pressure_of (Pump::Gauge* g)   { return g->pressure; }
+
+/* Nested declarations which are private, and are the types of members: an enumeration, and a structure which a member
+   of an anonymous union names by its plain name. The core binds neither, and the records lost those members. */
+
+class Lexeme {
+public:
+  Lexeme () : kind (word), length (3) {}
+  int  size () const    { return length; }
+  int  kind_of () const { return (int) kind; }
+  void make_number ()   { kind = number; }
+private:
+  enum Kind { word, number, symbol };
+  Kind kind;
+  int  length;
+};
+
+class Holder {
+public:
+  Holder () : count (9) { storage.policy = 4;  storage.length = 6; }
+  int policy () const { return (int) storage.policy; }
+  int count_of () const { return count; }
+private:
+  struct Storage { unsigned policy; unsigned length; };
+  union {
+    Storage  storage;
+    unsigned index;
+  };
+  int count;
+};
+
+inline int size_of_lexeme ()   { return sizeof (Lexeme); }
+inline int size_of_holder ()   { return sizeof (Holder); }
