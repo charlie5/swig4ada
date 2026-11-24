@@ -86,6 +86,32 @@ is
    type long_double_Array        is array (C.size_t range <>) of aliased C.long_Double;
 
 
+   ------------------------------
+   --  Pointers to class members.
+   --
+   --  As the Itanium C++ ABI lays them out (GCC and Clang, on each machine but Windows): a pointer to a member
+   --  function is the address of the function, or one more than the place of a virtual function in the vtable,
+   --  and the adjustment of 'this'; a pointer to a member variable is its offset in the object, or -1 for none.
+   --  Neither is of use in Ada but to be given back to C++.
+   --
+
+   type member_function_Pointer is
+      record
+         Code       : System.Address;
+         Adjustment : C.ptrdiff_t;
+      end record;
+
+   pragma Convention (C, member_function_Pointer);
+
+
+   type member_data_Pointer is
+      record
+         Offset : C.ptrdiff_t;
+      end record;
+
+   pragma Convention (C, member_data_Pointer);
+
+
 
 
 end Swig;

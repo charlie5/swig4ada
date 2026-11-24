@@ -2282,7 +2282,7 @@ is
    --  - A function which returns, by value, a class that C++ constructs takes a hidden pointer to the result
    --    ahead of 'this', where the binding has its 'Result' parameter last.
    --  - A function which takes a plain structure by value takes the structure itself, where Ada passes a
-   --    record by reference.
+   --    record by reference. So does one which takes a pointer to a class member, which Ada takes for a record.
    --
    --  Such a function is no primitive of the Ada type. It is a function of the class-wide type, whose function
    --  of the wrapper makes the virtual call, and a place holder has its place in the vtable (as for the forms of
@@ -2322,6 +2322,11 @@ is
                the_Type : constant String           := without_leading_Qualifiers (Attribute (the_Parameter, "type"));
                Pad      : constant SwigType_Pointer := SwigType_Pointer (to_Doh (the_Type));
             begin
+               if SwigType_ismemberpointer (SwigType_typedef_resolve_all (Pad)) /= 0     -- A typedef of one too.
+               then
+                  return True;     -- A pointer to a class member, which C++ takes by value and Ada passes as a record, by reference.
+               end if;
+
                if         SwigType_isPointer          (Pad) = 0
                  and then SwigType_isReference        (Pad) = 0
                  and then SwigType_isrvalue_reference (Pad) = 0
@@ -2574,9 +2579,26 @@ is
 
    function demand_c_Type_for (Self : access Item;   swig_Type : in doh_swigType) return c_Type.view
    is
+      use type C.int;
       the_Type : c_Type.view;
 
    begin
+      --  A pointer to a class member ('m(Shape).f(void).double', 'm(Shape).int') is one of the two types of 'swig'
+      --  for them, by whether its member is a function.
+      --
+      declare
+         Plain : constant SwigType_Pointer := SwigType_Pointer (doh_Copy (doh_Item (to_Doh (without_leading_Qualifiers (+swig_Type)))));
+      begin
+         if SwigType_ismemberpointer (Plain) /= 0
+         then
+            declare
+               Member : constant String_Pointer := SwigType_pop (Plain) with Unreferenced;     -- 'm(Shape).'.
+            begin
+               return Self.fetch_c_Type (+(if SwigType_isfunction (Plain) /= 0 then "member_function_Pointer" else "member_data_Pointer"));
+            end;
+         end if;
+      end;
+
       the_Type := Self.swig_type_Map_of_c_type.Element (+swig_Type);
       return the_Type;
 

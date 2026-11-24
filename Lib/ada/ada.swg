@@ -664,7 +664,8 @@
 
 // pointer to a class member
 
-%typemap (ctype)               SWIGTYPE (CLASS::*)         "int"
+%typemap (ctype, out="swig_ada_member< $1_ltype >")         // Ada passes the record of 'swig' which it takes the pointer for
+                               SWIGTYPE (CLASS::*)         "void *"     // by reference, and takes it as a result as C returns a structure.
 //%typemap (adatype)             SWIGTYPE (CLASS::*)         "$adaclassname"
 
 
@@ -911,7 +912,7 @@
 // generic pointers and references 
 
 %typemap (in)                                   SWIGTYPE *                 %{ $1 = ($1_ltype)$input; %}
-%typemap (in)                                   SWIGTYPE (CLASS::*)        %{ $1 = *($&1_ltype)&$input; %}
+%typemap (in)                                   SWIGTYPE (CLASS::*)        %{ $1 = *($&1_ltype) $input; %}
 
 %typemap (in)                                   SWIGTYPE & 
 %{ 
@@ -1009,7 +1010,7 @@
 
 
 %typemap (out)               SWIGTYPE *,  SWIGTYPE &,  SWIGTYPE &&      %{ $result = (void *) $1;      %} 
-%typemap (out)               SWIGTYPE (CLASS::*)          %{ *($&1_ltype) &$result = $1; %} 
+%typemap (out)               SWIGTYPE (CLASS::*)          %{ $result.value = $1; %} 
 
 
 

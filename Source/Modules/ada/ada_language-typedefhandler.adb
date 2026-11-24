@@ -70,11 +70,19 @@ begin
 
    elsif C."/=" (SwigType_ismemberpointer (SwigType_Pointer (get_Attribute (the_Node, "type"))), 0)
    then
-      --  A pointer to a class member is no address: one to a function is two words, which the wrapper has
-      --  no type to pass. Until 2026-11-22 such a typedef was an opaque type, and a function which took or
-      --  returned one passed it as an 'int', into which the wrapper wrote the whole of it.
+      --  A pointer to a class member is no address: one to a function is two words. Such a typedef is a subtype of
+      --  the type of 'swig' for it (see 'demand_c_Type_for'). Until 2026-11-22 it was an opaque type, and a
+      --  function which took or returned one passed it as an 'int', into which the wrapper wrote the whole of it;
+      --  until 2026-11-24 it was left out, with whatever used it.
       --
-      warn (Unsupported, "Unable to bind the type '" & String'(+the_doh_type_Name) & "', as a pointer to a class member is not supported.");
+      declare
+         new_c_typeDef : constant c_Type.view := c_Type.new_Typedef (Namespace => Self.current_c_Namespace,
+                                                                     Name      => +Attribute (the_Node, "name"),
+                                                                     base_Type => Self.demand_c_Type_for (doh_swigType (get_Attribute (the_Node, "type"))));
+      begin
+         Self.register (new_c_typeDef, the_doh_type_Name);
+         Self.prior_c_Declaration := new_c_typeDef.all'Access;
+      end;
    else
       if         not Self.c_class_Stack.is_Empty
         and then not Self.class_typedef_Names.contains (String'(+the_doh_type_Name))

@@ -406,54 +406,72 @@ begin
    begin
       dlog ("value_Text => '" & value_Text & "'");
 
-      if the_Reason /= ""
+      if         C."/=" (SwigType_ismemberpointer (the_swigType), 0)
+        and then Self.in_cpp_Mode
+      then
+         --  A pointer to a class member ('%constant double (Shape::*AREAPT) (void) = &Shape::area;') has no value
+         --  which Ada can state. The wrapper defines it, as an object of C linkage, which Ada imports as a variable
+         --  of the type of 'swig' for it (until 2026-11-24 it was left out).
+         --
+         declare
+            the_Symbol : constant unbounded_String := wrapper_Symbol (Self, "swig_ada_" & to_String (the_Name));
+         begin
+            print_to (DOH_Pointer (Self.f_Ada),   String'(+doh_Item (SwigType_str (the_swigType, const_String (-to_String (the_Symbol)))))
+                                                & " = " & to_String (value_Text) & ";" & NL & NL);
+            new_c_Constant.link_Symbol := the_Symbol;
+            Self.current_Module.C.new_c_Variables   .append (new_c_Constant);
+            Self.current_Module.C.new_c_Declarations.append (new_c_Constant.all'Access);
+         end;
+
+      elsif the_Reason /= ""
       then
          return left_Out (the_Reason);
-      end if;
 
-      if         is_Numeric
-        and then the_Type.Name /= "char"                -- A character is given as it is written, or by its position.
-        and then Evaluated (value_Text, the_Value)
-      then
-         value_Text := as_written_in_Ada (value_Text, the_Value);
-         Self.integer_symbol_value_Map.include (the_Name, the_Value);     -- For a later constant whose value names this one.
-
-      elsif is_Numeric
-      then   -- The value is given as it is written, where that can be made an expression of Ada.
-         strip_c_integer_literal_qualifiers_in (value_Text);
-
-         if Index (value_Text, "<=>") /= 0
-         then   -- Whose result is no number.
-            return left_Out ("its value is a three way comparison");
-         end if;
-
-         if        the_Type.Name = "float"
-           or else the_Type.Name = "double"
+      else
+         if         is_Numeric
+           and then the_Type.Name /= "char"                -- A character is given as it is written, or by its position.
+           and then Evaluated (value_Text, the_Value)
          then
-            make_Real (value_Text);
+            value_Text := as_written_in_Ada (value_Text, the_Value);
+            Self.integer_symbol_value_Map.include (the_Name, the_Value);     -- For a later constant whose value names this one.
 
-            if is_beyond_its_Type (value_Text)
-            then
-               return left_Out ("its value (" & to_String (value_Text) & ") is beyond the range of its type");
+         elsif is_Numeric
+         then   -- The value is given as it is written, where that can be made an expression of Ada.
+            strip_c_integer_literal_qualifiers_in (value_Text);
+
+            if Index (value_Text, "<=>") /= 0
+            then   -- Whose result is no number.
+               return left_Out ("its value is a three way comparison");
             end if;
 
-         elsif the_Type.Name = "char"
-         then
-            make_Character (value_Text);
+            if        the_Type.Name = "float"
+              or else the_Type.Name = "double"
+            then
+               make_Real (value_Text);
+
+               if is_beyond_its_Type (value_Text)
+               then
+                  return left_Out ("its value (" & to_String (value_Text) & ") is beyond the range of its type");
+               end if;
+
+            elsif the_Type.Name = "char"
+            then
+               make_Character (value_Text);
+            end if;
+
+            if         the_Type.is_a_Number
+              and then Index (value_Text, "interfaces.c.") = 0
+              and then not is_plain_Expression (to_String (value_Text))
+            then
+               return left_Out ("its value (" & to_String (value_Text) & ") is not one which Ada can state");
+            end if;
          end if;
 
-         if         the_Type.is_a_Number
-           and then Index (value_Text, "interfaces.c.") = 0
-           and then not is_plain_Expression (to_String (value_Text))
-         then
-            return left_Out ("its value (" & to_String (value_Text) & ") is not one which Ada can state");
-         end if;
+         new_c_Constant.Value           := value_Text;
+         new_c_Constant.is_empty_String := value_Text = "" and then not is_Numeric;     -- '#define EMPTY ""'.
+         Self.current_Module.C.new_c_Variables   .append (new_c_Constant);
+         Self.current_Module.C.new_c_Declarations.append (new_c_Constant.all'Access);
       end if;
-
-      new_c_Constant.Value           := value_Text;
-      new_c_Constant.is_empty_String := value_Text = "" and then not is_Numeric;     -- '#define EMPTY ""'.
-      Self.current_Module.C.new_c_Variables   .append (new_c_Constant);
-      Self.current_Module.C.new_c_Declarations.append (new_c_Constant.all'Access);
    end;
 
    --  old ...

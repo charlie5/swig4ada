@@ -135,6 +135,14 @@ is
          the_c_Type := c_type.new_standard_c_Type (Self.nameSpace_std,  +"ptrdiff_t");
          Self.register (the_c_Type,  doh_SwigType (-"ptrdiff_t"), is_core_C_type => True);
 
+         --  Pointers to class members, which 'demand_c_Type_for' gives each such type (see 'swig.ads').
+         --
+         the_c_Type := c_type.new_standard_c_Type (Self.nameSpace_std,  +"member_function_Pointer");
+         Self.register (the_c_Type,  doh_SwigType (-"member_function_Pointer"), is_core_C_type => True);
+
+         the_c_Type := c_type.new_standard_c_Type (Self.nameSpace_std,  +"member_data_Pointer");
+         Self.register (the_c_Type,  doh_SwigType (-"member_data_Pointer"), is_core_C_type => True);
+
          the_c_Type := c_type.new_standard_c_Type (Self.nameSpace_std,  +"size_t");
          Self.register (the_c_Type,  doh_SwigType (-"size_t"), is_core_C_type => True);
 
@@ -501,6 +509,14 @@ is
 
             Self.name_Map_of_ada_type.insert (the_ada_Type.qualified_Name, the_ada_Type);
 
+            --  Pointers to class members.
+            --
+            the_ada_Type := ada_type.composite.a_record.new_Item (Self.Package_swig,  +"member_function_Pointer").all'Access;
+            Self.name_Map_of_ada_type.insert (the_ada_Type.qualified_Name, the_ada_Type);
+
+            the_ada_Type := ada_type.composite.a_record.new_Item (Self.Package_swig,  +"member_data_Pointer").all'Access;
+            Self.name_Map_of_ada_type.insert (the_ada_Type.qualified_Name, the_ada_Type);
+
             --  std::string
             --
             the_ada_Type := ada_type.composite.a_record.new_Item (Self.Package_swig_std_strings,  +"std_String").all'Access;     -- With its array and pointers, in a package of its own.
@@ -716,6 +732,9 @@ is
          -- C 'void_ptr'
          --
          Self.associate (Self.fetch_ada_Type (+"swig.void_ptr"),                   Self.fetch_c_Type (+"void*"));
+
+         Self.associate (Self.fetch_ada_Type (+"swig.member_function_Pointer"),    Self.fetch_c_Type (+"member_function_Pointer"));
+         Self.associate (Self.fetch_ada_Type (+"swig.member_data_Pointer"),        Self.fetch_c_Type (+"member_data_Pointer"));
 
          Self.associate (Self.fetch_ada_Type (+"swig.void_ptr_Array"),             Self.fetch_c_Type (+"void*[]"));
          Self.associate (Self.fetch_ada_Type (+"swig.pointers.void_ptr_Pointer"),  Self.fetch_c_Type (+"void**" ));

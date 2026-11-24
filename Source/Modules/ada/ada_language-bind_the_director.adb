@@ -75,8 +75,8 @@ is
 
    function is_passed_by_Address (the_Type : in String) return Boolean
    --
-   --  Whether the function of the wrapper takes a pointer to an argument of this type: a reference does, and so does
-   --  a class or structure which is passed by value. A pointer, an array, a number and an enumeration are taken as
+   --  Whether the function of the wrapper takes a pointer to an argument of this type: a reference does, and so do
+   --  a class or structure which is passed by value and a pointer to a class member. A pointer, an array, a number and an enumeration are taken as
    --  they are.
    --
    is
@@ -84,6 +84,7 @@ is
    begin
       if        SwigType_isReference        (Pad) /= 0
         or else SwigType_isrvalue_reference (Pad) /= 0
+        or else SwigType_ismemberpointer    (SwigType_typedef_resolve_all (Pad)) /= 0     -- Which Ada takes for a record of 'swig'.
       then
          return True;
       end if;
