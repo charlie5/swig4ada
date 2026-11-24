@@ -5,6 +5,8 @@
 %include <std_string.i>
 %include <std_iostream.i>
 %include <std_vector.i>
+%include <std_deque.i>
+%include <std_stack.i>
 
 %{
 #include <json/json.h>
@@ -29,6 +31,15 @@ namespace Json { typedef std::string String; }
 %template (Strings)       std::vector<std::string>;
 %template (PathArguments) std::vector<Json::PathArgument>;
 %include <json/reader.h>
+
+//  The containers of a reader: its stack of the values which it is reading ('Reader::Nodes'), its errors
+//  ('Reader::Errors', of its private 'ErrorInfo'), and the errors which it gives.
+//
+%template (ValueStack)       std::stack<Json::Value*>;
+%template (ErrorInfoDeque)   std::deque<Json::Reader::ErrorInfo>;
+%template (ReaderErrors)     std::vector<Json::Reader::StructuredError>;
+%template (CharReaderErrors) std::vector<Json::CharReader::StructuredError>;
+
 %include <json/writer.h>
 
 %include "example.h"

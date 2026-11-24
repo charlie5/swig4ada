@@ -1,20 +1,13 @@
 value.h:81: Warning 862: The base class 'std::exception' of class 'Exception' is not known, and is ignored. The layout of the record does not match that of the class.
 value.h:869: Warning 862: The member 'current_' of class 'ValueIteratorBase' has a type which is not known, so it is left out. The layout of the record does not match that of the class. Nothing else of the class says that C++ constructs it, so it is bound as a plain record, which is passed and returned as a C structure is; where what is not known has a destructor or a copy constructor of its own, C++ constructs the class, and its functions are bound wrongly.
-reader.h:133: Warning 861: Unable to bind the type 'std::vector<(Json::Reader::StructuredError)>', which is not known.
 value.h:660: Warning 861: Unable to bind the type 'Json::Value::Members', which is not known.
 value.h:929: Warning 861: Unable to bind the type 'Json::Value::ObjectValues::iterator', which is not known.
-reader.h:279: Warning 861: Unable to bind the type 'std::vector<(Json::CharReader::StructuredError)>', which is not known.
 value.h:872: Warning 861: Unable to bind the array type 'size_t*[]', as its element type is not known.
 value.h:872: Warning 861: Unable to bind the pointer type 'size_t**', as the type it points to is not known.
-reader.h:37: Warning 862: The member 'nodes_' of class 'Reader' is of a class which is not defined, so its size is not known. The layout of the record does not match that of the class.
-reader.h:37: Warning 862: The member 'errors_' of class 'Reader' is of a class which is not defined, so its size is not known. The layout of the record does not match that of the class.
-reader.h:133: Warning 861: Unable to bind the function 'getStructuredErrors' of class 'Reader', as one of its types is not known.
-reader.h:279: Warning 861: Unable to bind the function 'getStructuredErrors' of class 'CharReader', as one of its types is not known.
 value.h:660: Warning 861: Unable to bind the function 'getMemberNames' of class 'Value', as one of its types is not known.
 value.h:937: Warning 861: Unable to bind the function 'construct' of class 'ValueIteratorBase', as one of its types is not known.
 value.h:660: Warning 861: Unable to bind the function 'getMemberNames' of class 'ValueIterator', as one of its types is not known.
 value.h:660: Warning 861: Unable to bind the function 'getMemberNames' of class 'ValueConstIterator', as one of its types is not known.
-reader.h:296: Warning 861: Unable to bind the virtual function 'getStructuredErrors' of class 'Impl', as one of its types is not known. 'unbound_virtual_1' holds its place.
 example.i:1: Warning 862: Unable to lay out 'jsoncpp.StyledStreamWriter' as C++ does, as the size of one of its members is not known. Its record may not match the layout of its class.
 example.i:1: Warning 862: Unable to lay out 'jsoncpp.ValueIterator' as C++ does, as the size of one of its members is not known. Its record may not match the layout of its class.
 example.i:1: Warning 862: Unable to lay out 'jsoncpp.ValueConstIterator' as C++ does, as the size of one of its members is not known. Its record may not match the layout of its class.

@@ -5,6 +5,9 @@ with
      jsoncpp.CharReader,
      jsoncpp.StreamWriterBuilder,
      jsoncpp.FastWriter,
+     jsoncpp.Reader,
+     jsoncpp.ReaderErrors,
+     jsoncpp.StructuredError,
 
      swig.std_Strings,
      interfaces.C.Strings,
@@ -30,6 +33,8 @@ is
    use type interfaces.C.int,
             interfaces.C.unsigned,
             interfaces.C.double,
+            interfaces.C.size_t,
+            interfaces.C.ptrdiff_t,
             swig.bool,
             System.Storage_Elements.Storage_Offset;
 
@@ -122,6 +127,49 @@ begin
       Value.destruct (Member);
       Value.destruct (Root);
    end parsing_and_writing;
+
+
+   reading_with_a_Reader :
+   declare
+      --  A reader which Ada declares, whose stack of values and whose errors are containers of the library
+      --  ('std::stack' and 'std::deque'), and which gives its errors as a vector, by value.
+      --
+      the_Reader : aliased Reader.Item := Reader.construct;
+      Good       : aliased interfaces.C.char_array := interfaces.C.to_C ("[1, [2, [3]], {""four"": 4}]", Append_Nul => False);
+      Bad        : aliased interfaces.C.char_array := interfaces.C.to_C ("{""one"": 1,, }",               Append_Nul => False);
+      Root       : aliased Value.Item;
+      Errors     : aliased ReaderErrors.Item;
+      Messages   : aliased jsoncpp.String;
+   begin
+      check (Reader.Item'Size / 8 = size_of_reader,              "a reader has the size of its class, its stack and its errors among its members");
+
+      check (Reader.parse (the_Reader,
+                           to_chars_ptr (Good (Good'First)'Address),
+                           to_chars_ptr (Good (Good'Last)'Address + 1),
+                           Root'unchecked_Access) /= 0,          "a document is parsed by a reader which Ada declared");
+      check (Value.size (Root) = 3,                              "into an array of three elements");
+      check (Reader.good (the_Reader) /= 0,                      "with no error");
+
+      check (Reader.parse (the_Reader,
+                           to_chars_ptr (Bad (Bad'First)'Address),
+                           to_chars_ptr (Bad (Bad'Last)'Address + 1),
+                           Root'unchecked_Access) = 0,           "a document which is not well formed is refused");
+      check (Reader.good (the_Reader) = 0,                       "and the reader has an error");
+
+      Reader.getStructuredErrors (the_Reader, Errors'unchecked_Access);
+      check (ReaderErrors.size (Errors) >= 1,                    "which it gives in a vector, returned by value");
+      check (ReaderErrors.get (Errors, 0).offset_start > 0,      "with the place of the error");
+      check (to_Ada (ReaderErrors.get (Errors, 0).message) /= "", "and its message: " & to_Ada (ReaderErrors.get (Errors, 0).message));
+
+      Reader.getFormattedErrorMessages (the_Reader, Messages'unchecked_Access);
+      check (ada.Strings.fixed.Index (to_Ada (Messages), "Line 1") /= 0,
+             "and as text, returned by value");
+
+      destruct (Messages);
+      ReaderErrors.destruct_0 (Errors);
+      Value.destruct (Root);
+      Reader.destruct_0 (the_Reader);
+   end reading_with_a_Reader;
 
    destruct (Text);
    finish;

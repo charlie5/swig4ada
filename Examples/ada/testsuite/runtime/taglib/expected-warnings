@@ -62,9 +62,9 @@ tmap.h:121: Warning 861: Unable to bind the function 'cend' of class 'SimpleProp
 tmap.h:152: Warning 861: Unable to bind the function 'find' of class 'SimplePropertyMap', as one of its types is not known.
 tmap.h:171: Warning 861: Unable to bind the function 'erase' of class 'SimplePropertyMap', as one of its types is not known.
 tpropertymap.h:170: Warning 861: Unable to bind the function 'find' of class 'PropertyMap', as one of its types is not known.
-tag.h:117: Warning 861: Unable to bind the virtual function 'complexProperties' of class 'Tag', as one of its types is not known. 'unbound_virtual_4' holds its place.
+tag.h:117: Warning 861: Unable to bind the function 'complexProperties' of class 'Tag', as one of its types is not known.
 tag.h:124: Warning 861: Unable to bind the virtual function 'setComplexProperties' of class 'Tag', as one of its types is not known. 'unbound_virtual_5' holds its place.
-tfile.h:149: Warning 861: Unable to bind the virtual function 'complexProperties' of class 'File', as one of its types is not known. 'unbound_virtual_4' holds its place.
+tfile.h:149: Warning 861: Unable to bind the function 'complexProperties' of class 'File', as one of its types is not known.
 tfile.h:156: Warning 861: Unable to bind the virtual function 'setComplexProperties' of class 'File', as one of its types is not known. 'unbound_virtual_5' holds its place.
 fileref.h:306: Warning 861: Unable to bind the function 'complexProperties' of class 'FileRef', as one of its types is not known.
 fileref.h:313: Warning 861: Unable to bind the function 'setComplexProperties' of class 'FileRef', as one of its types is not known.
