@@ -139,6 +139,18 @@ def cpp_names(Wrapper):
     for Match in re.finditer(r"Ada_delete_(\w+)\s*\(\s*void \* a_arg1\s*\)\s*\{\s*(.*?)\s*\*arg1 = ", Text, re.S):
         Names[Match.group(1).lower()] = Match.group(2).replace(" ", "")
 
+    #  The director of a class (the package 'Director' of that of the class) is the class which the wrapper declares
+    #  after a comment which names the class.
+    #
+    Directors = {}
+
+    for Match in re.finditer(r"/\* The director of '([^']+)'.*?\*/\s*class (\w+) :", Text, re.S):
+        Directors[Match.group(1).replace(" ", "")] = Match.group(2)
+
+    for Bound, Cpp in list(Names.items()):
+        if Cpp in Directors:
+            Names[Bound + ".director"] = Directors[Cpp]
+
     return Names
 
 
@@ -207,7 +219,10 @@ def same(Ada, Cpp):
     if Ada.lower() in ("destruct_0", "destruct"):
         return False                                          # The destructor of C++ is dealt with above.
     Plain = Ada.lower()
-    return Plain == Cpp.lower() or Plain in ("the_" + Cpp.lower(), "a_" + Cpp.lower(), "c_" + Cpp.lower(), Cpp.lower() + "_")
+    if Cpp.lower().startswith("swig_ada_"):            # The function of a director for one which Ada cannot call through the vtable,
+        Cpp = re.sub(r"_\d+$", "", Cpp[9:])            # which is given a number where the name is taken.
+    Cpp = Cpp.lower()
+    return Plain == Cpp or Plain in ("the_" + Cpp, "a_" + Cpp, "c_" + Cpp, Cpp + "_")
 
 
 Checked, Differences, Report = 0, [], []
@@ -220,7 +235,7 @@ for Wrapper in Wrappers:
     for Package in sorted(Specs):
         Module, _, Class = Package.partition(".")
 
-        if (is_Suite and Module != Case.lower()) or "." in Class or Class not in Names or Names[Class] not in Tables:     # The specs of another binding need not be named after its wrapper.
+        if (is_Suite and Module != Case.lower()) or ("." in Class and not Class.endswith(".director")) or Class not in Names or Names[Class] not in Tables:     # The specs of another binding need not be named after its wrapper.
             continue
 
         Cpp = Tables[Names[Class]]

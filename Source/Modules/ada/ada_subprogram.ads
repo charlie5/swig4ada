@@ -39,6 +39,9 @@ is
          access_Mode        : ada_Subprogram.access_Mode := Unknown;
          link_Symbol        : unbounded_String;
          is_in_Wrapper      : Boolean := False;     -- The link symbol is that of a function which the module adds to the wrapper file.
+
+         director_Symbol      : unbounded_String;   -- That which the director of the class imports for this one (see 'c_Function').
+         director_is_Abstract : Boolean := False;
       end record;
 
    type View is access all item'Class;

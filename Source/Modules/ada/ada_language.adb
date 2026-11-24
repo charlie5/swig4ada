@@ -162,6 +162,7 @@ is
    function  without_leading_Qualifiers (swig_Type : in String) return String;
    function  smart_Pointer_Words (type_Name : in String) return Natural;
    procedure bind_constructors_of_abstract_Class (Self : access Item;   the_Class : in Node_Pointer);
+   procedure bind_the_Director                   (Self : access Item;   the_Class : in Node_Pointer);
    procedure bind_other_base_Classes             (Self : access Item;   the_Class : in Node_Pointer);
    procedure add_hidden_Members                  (Self : access Item;   Before    : in Node_Pointer;   of_Class : in Node_Pointer := null);
    procedure add_hidden_Virtuals                 (Self : access Item;   Before    : in Node_Pointer);
@@ -2006,6 +2007,9 @@ is
    procedure bind_constructors_of_abstract_Class (Self : access Item;   the_Class : in Node_Pointer)
    is separate;
 
+   procedure bind_the_Director (Self : access Item;   the_Class : in Node_Pointer)
+   is separate;
+
 
 
    procedure add_hidden_Virtuals (Self : access Item;   Before : in Node_Pointer)
@@ -2282,7 +2286,7 @@ is
    --
    --  Such a function is no primitive of the Ada type. It is a function of the class-wide type, whose function
    --  of the wrapper makes the virtual call, and a place holder has its place in the vtable (as for the forms of
-   --  a function with a default argument). It cannot be overridden in Ada. (Until 2026-11-23 it was a primitive:
+   --  a function with a default argument). Ada overrides it through a director alone (see 'bind_the_Director'). (Until 2026-11-23 it was a primitive:
    --  LevelDB's 'DB::Put', which returns a 'Status', was called with its arguments each in the place of another.)
    --
    is
@@ -2899,6 +2903,9 @@ is
       the_ada_subProgram.is_Overriding      := the_c_Function.is_Overriding;
       the_ada_subProgram.is_Constructor     := the_c_Function.is_Constructor;
       the_ada_subProgram.is_Destructor      := the_c_Function.is_Destructor;
+
+      the_ada_subProgram.director_Symbol      := the_c_Function.director_Symbol;
+      the_ada_subProgram.director_is_Abstract := the_c_Function.director_is_Abstract;
 
       return the_ada_subProgram;
 

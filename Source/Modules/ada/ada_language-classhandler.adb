@@ -651,6 +651,7 @@ begin
    add_hidden_Members (Self, before => null);                              -- Those which follow the last member.
 
    bind_constructors_of_abstract_Class (Self, the_Node);
+   bind_the_Director                   (Self, the_Node);
    bind_other_base_Classes             (Self, the_Node);
 
    --  new ...

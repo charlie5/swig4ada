@@ -215,13 +215,15 @@ private
    --
    --  An abstract class cannot be constructed, so its constructors are those of a concrete class of the wrapper
    --  which is derived from it (see 'bind_constructors_of_abstract_Class'). This holds the name of that class,
-   --  where one is being made, with its constructors and the functions which call them.
+   --  where one is being made, with its constructors and the functions which call them, and the name of the one
+   --  which was made last, of the class which is being bound, if one was (from which its director is derived).
    --
    type abstract_Shim is
       record
          Name         : unbounded_String;
          Constructors : unbounded_String;
          Functions    : unbounded_String;
+         Made         : unbounded_String;
       end record;
 
 

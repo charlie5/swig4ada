@@ -146,6 +146,7 @@ begin
       genComma       : Boolean      := False;
 
       parameters_First : Positive;     -- Where the parameters begin in 'construct_Call'.
+      the_Parameters   : unbounded_String;     -- The parameters, as the construction function takes them.
 
       ignored_Code     : unbounded_String;   -- The code which gives a value to each parameter which the caller does not give.
       any_Argument     : Boolean := False;   -- The call of the constructor has an argument so far.
@@ -356,6 +357,13 @@ begin
          begin
             the_Constructor.is_Static          := True;
             the_Constructor.constructor_Symbol := constructor_Symbol;
+
+            --  From which the construction function of the director of the class is made (see 'bind_the_Director').
+            --
+            the_Constructor.construction_Parameters := the_Parameters;
+            the_Constructor.construction_Arguments  := construct_call_Args;
+            the_Constructor.construction_Names      := plain_call_Args;
+            the_Constructor.construction_Code       := ignored_Code;
          end;
       end add_to_the_Model;
 
@@ -404,6 +412,8 @@ begin
       emit_mark_varArgs (parameter_List);
 
       write_the_Parameters;
+
+      the_Parameters := unbounded_Slice (construct_Call, parameters_First, Length (construct_Call));
 
       write_the_Body;
 

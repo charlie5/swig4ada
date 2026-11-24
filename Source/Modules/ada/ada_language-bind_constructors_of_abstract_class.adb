@@ -102,6 +102,8 @@ is
    the_Child       : Node_Pointer;
    Status          : C.int with Unreferenced;
 begin
+   Self.Shim.Made := null_unbounded_String;
+
    if        not Self.in_cpp_Mode
      or else the_Abstracts = null
      or else DohLen (the_Abstracts) = 0
@@ -232,6 +234,7 @@ begin
                                           & to_String (the_Functions)
                                           & "};"                                                          & NL & NL
                                           & to_String (Self.Shim.Functions));
+      Self.Shim.Made := the_Name;
    end if;
 
    Self.Shim.Name := null_unbounded_String;

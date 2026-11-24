@@ -2686,6 +2686,158 @@ is
 
 
 
+   procedure emit_director_Spec (the_Package : access ada_Package.item'Class;
+                                 the_ada_Lang : access ada_Language.item)
+   --
+   --  Emits a 'Director' child package for a C++ class which the interface file marks '%feature ("director")', and
+   --  which has a virtual function that Ada cannot call through the vtable (see 'bind_the_Director'). Its 'Item' is
+   --  derived from that of the class, and has a primitive for each such function, which a type derived from it in
+   --  Ada overrides. Each takes what the function of the class-wide type of the class does.
+   --
+   is
+      the_Name    : constant String := to_String (the_Package.qualified_Name);
+      the_Item    : constant String := the_Name & ".Item";
+      Withs       : String_Vectors.Vector;
+      Body_Source : unbounded_String;
+      Source      : unbounded_String;
+      is_Abstract : Boolean := False;
+      Count       : Natural := 0;
+
+      procedure need (the_Type : in ada_Type.view)
+      is
+      begin
+         if         the_Type /= null
+           and then the_Type.declaration_Package /= null
+           and then ada_Package.view (the_Type.declaration_Package) /= ada_Package.view (the_Package)
+         then
+            declare
+               Named : constant String := to_String (the_Type.declaration_Package.qualified_Name);
+            begin
+               if         Named /= ""
+                 and then not Withs.contains (Named)
+               then
+                  Withs.append (Named);
+               end if;
+            end;
+         end if;
+      end need;
+
+      function directed (Text : in String) return String
+      --
+      --  The text, with the type of the class named as the type of the director where it is that of 'Self' or of
+      --  the result of a constructor.
+      --
+      is
+         Self_At   : constant Natural := ada.Strings.fixed.Index (Text, "Self : ");
+         Return_At : constant Natural := ada.Strings.fixed.Index (Text, " return " & the_Item);
+         At_Item   :          Natural := 0;
+      begin
+         if Self_At /= 0
+         then
+            At_Item := ada.Strings.fixed.Index (Text, the_Item, from => Self_At);
+         elsif Return_At /= 0
+         then
+            At_Item := Return_At + 8;
+         end if;
+
+         if At_Item = 0
+         then
+            return Text;
+         end if;
+
+         return   Text (Text'First .. At_Item - 1) & the_Name & ".Director.Item"
+                & Text (At_Item + the_Item'Length .. Text'Last);
+      end directed;
+
+   begin
+      if         the_Package.cpp_class_Type = null
+        or else not the_Package.models_a_virtual_cpp_Class
+      then
+         return;
+      end if;
+
+      for Each of the_Package.Subprograms
+      loop
+         if         Each.director_Symbol /= ""
+           and then not Each.is_Constructor
+         then
+            Count := Count + 1;
+         end if;
+      end loop;
+
+      if Count = 0
+      then
+         return;
+      end if;
+
+      is_Abstract := the_Package.cpp_class_Type.is_Abstract;
+
+      for Each of the_Package.Subprograms
+      loop
+         if Each.director_Symbol /= ""
+         then
+            declare
+               the_Copy : constant ada_Subprogram.view := new ada_Subprogram.item'Class'(Each.all);
+            begin
+               for the_Type of Each.required_Types
+               loop
+                  need (the_Type);
+               end loop;
+
+               if Each.is_Constructor
+               then
+                  append (Body_Source,   directed (to_String (specification_Source (Self                => the_Copy,
+                                                                                     declaration_Package => the_Package,
+                                                                                     using_Name          => the_Copy.Name,
+                                                                                     namespace_Prefix    => null_unbounded_String,
+                                                                                     the_ada_Lang        => the_ada_Lang)))
+                                       & ";" & NL
+                                       & "   pragma cpp_Constructor (" & the_Copy.Name & ", """ & Each.director_Symbol & """);" & NL);
+               else
+                  the_Copy.is_Virtual    := True;     -- A primitive of the director.
+                  the_Copy.is_Overriding := False;
+                  the_Copy.is_Abstract   := Each.director_is_Abstract;
+                  is_Abstract            := is_Abstract or Each.director_is_Abstract;
+
+                  append (Body_Source,   directed (to_String (specification_Source (Self                => the_Copy,
+                                                                                     declaration_Package => the_Package,
+                                                                                     using_Name          => the_Copy.Name,
+                                                                                     namespace_Prefix    => null_unbounded_String,
+                                                                                     the_ada_Lang        => the_ada_Lang)))
+                                       & (if Each.director_is_Abstract then ""
+                                          else NL & "     with Import, Convention => CPP, External_Name => """ & to_String (Each.director_Symbol) & """")
+                                       & ";" & NL);
+               end if;
+            end;
+         end if;
+      end loop;
+
+      append (Source,  "-- This file is generated by SWIG. Please do not modify by hand." & NL &
+                       "--"                                                               & NL);
+
+      for Each of Withs
+      loop
+         append (Source,  "with " & Each & ";" & NL);
+      end loop;
+
+      append (Source,   NL
+                      & "package " & the_Name & ".Director" & NL
+                      & "--" & NL
+                      & "--  The director of the class: a type derived from it in Ada may override each function which Ada cannot" & NL
+                      & "--  call through the vtable of the class, and which C++ calls through the director." & NL
+                      & "--" & NL
+                      & "is" & NL
+                      & "   type Item is " & (if is_Abstract then "abstract " else "") & "new " & the_Item & " with null record;" & NL
+                      & "   pragma Import (CPP, Entity => Item);" & NL
+                      & Body_Source & NL
+                      & "end " & the_Name & ".Director;" & NL);
+
+      write_Spec (for_Package => the_Package.qualified_Name & ".Director",
+                  Source      => Source);
+   end emit_director_Spec;
+
+
+
    function layout_Checks (Self : access ada_Language.item) return String
    --
    --  Gives, for the wrapper file, a check of the layout which each class is taken to have: its size, and the place
@@ -2821,8 +2973,9 @@ is
       begin
          while has_Element (Cursor)
          loop
-            emit_Spec       (Element (Cursor),  Self.in_cpp_Mode,  with_IC_Pointers => True, the_ada_Lang => Self);
-            emit_guard_Spec (Element (Cursor));
+            emit_Spec          (Element (Cursor),  Self.in_cpp_Mode,  with_IC_Pointers => True, the_ada_Lang => Self);
+            emit_guard_Spec    (Element (Cursor));
+            emit_director_Spec (Element (Cursor),  the_ada_Lang => Self);
             next (Cursor);
          end loop;
       end;
@@ -2832,8 +2985,9 @@ is
          declare
             the_Package : constant ada_Package.view := Self.c_namespace_Map_of_ada_Package.Element (Each.nameSpace.all'Access);
          begin
-            emit_Spec       (the_Package,  Self.in_cpp_Mode,  with_IC_Pointers => True, the_ada_Lang => Self);
-            emit_guard_Spec (the_Package);
+            emit_Spec          (the_Package,  Self.in_cpp_Mode,  with_IC_Pointers => True, the_ada_Lang => Self);
+            emit_guard_Spec    (the_Package);
+            emit_director_Spec (the_Package,  the_ada_Lang => Self);
          end;
       end loop;
    end generate;

@@ -37,7 +37,8 @@ is
                    constructor_Symbol => null_unbounded_String,
                    access_mode        => Unknown,
                    link_symbol        => <>,
-                   is_in_Wrapper      => False);
+                   is_in_Wrapper      => False,
+                   others             => <>);
    end construct;
 
 

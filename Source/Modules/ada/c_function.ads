@@ -44,6 +44,23 @@ is
          constructor_Symbol : unbounded_String;
          link_Symbol        : unbounded_String;
          is_in_Wrapper      : Boolean := False;     -- The link symbol is that of a function which the module adds to the wrapper file.
+
+         --  The parts of the construction function of a constructor, from which that of the director of its class is
+         --  made (see 'bind_the_Director'): its parameters as the wrapper takes them, the arguments of the call of the
+         --  constructor (from those parameters), the parameters by their names alone, and the code which gives each
+         --  parameter which the caller does not give its value.
+         --
+         construction_Parameters : unbounded_String;
+         construction_Arguments  : unbounded_String;
+         construction_Names      : unbounded_String;
+         construction_Code       : unbounded_String;
+
+         --  Of a class which the interface file marks '%feature ("director")': the function of the wrapper which the
+         --  director of the class imports for this one (a constructor, or a virtual function which Ada cannot call
+         --  through the vtable), and whether the director leaves the function to be defined (one which is pure).
+         --
+         director_Symbol      : unbounded_String;
+         director_is_Abstract : Boolean := False;
       end record;
 
    type View is access all item'Class;
