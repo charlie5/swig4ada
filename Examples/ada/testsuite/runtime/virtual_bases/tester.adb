@@ -9,6 +9,8 @@ with
      virtual_bases.Square,
      virtual_bases.Label,
      virtual_bases.Shape,
+     virtual_bases.Cable,
+     virtual_bases.Port,
 
      interfaces.C,
 
@@ -117,6 +119,22 @@ begin
       check (Label.text (the_Label'unchecked_Access) = 9,    "which Ada calls through the table");
       Label.destruct_0 (the_Label);
    end a_nearly_empty_virtual_Parent;
+
+   a_Parent_and_a_virtual_Base :
+   declare
+      the_Cable : aliased Cable.Item;     -- C++ constructs it in the record, which is no smaller than the class.
+   begin
+      check (Cable.length (the_Cable'unchecked_Access) = 30,     "a class with a parent and a virtual base: its own member, through its function");
+      check (length_of (the_Cable'unchecked_Access) = 30,        "as C++ has it");
+      check (port_of (the_Cable'unchecked_Access) = 10,          "C++ finds the virtual base of an object which Ada declared");
+      check (Cable.fit (the_Cable'unchecked_Access) = 22,        "Ada calls an override of a function of the parent through the table");
+      check (Cable.open (the_Cable'unchecked_Access) = 11,       "and the override of one of the virtual base, which has a place of its own");
+      check (Cable.signal (the_Cable'unchecked_Access) = 33,     "and a function of its own");
+      check (open_of (the_Cable'unchecked_Access) = 11,          "and C++ likewise");
+      check (open_port (Cable.as_Port (the_Cable'unchecked_Access)) = 11,   "and through the virtual base, which 'as_Port' reaches");
+      check (Port.open (Cable.as_Port (the_Cable'unchecked_Access)) = 11,   "and Ada so");
+      Cable.destruct_0 (the_Cable);
+   end a_Parent_and_a_virtual_Base;
 
    finish;
 end Tester;

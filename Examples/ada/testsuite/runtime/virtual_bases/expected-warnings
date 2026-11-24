@@ -1,0 +1,1 @@
+example.h:66: Warning 862: The class 'Cable' has virtual functions, a base class which it does not inherit virtually and one which it does, or a base which does: its record is a type extension which GNAT lays out, with storage for each virtual base which is no less than C++ takes, and each is reached by 'as_<base>' alone. The layout of its record does not match that of the class.

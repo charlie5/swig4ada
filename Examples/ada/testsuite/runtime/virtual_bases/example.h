@@ -57,3 +57,22 @@ inline int area_of_shape  (Shape* s)    { return s->area (); }
 inline int corners_of     (Square* s)   { return s->corners (); }
 inline int name_of        (Label* l)    { return l->name (); }
 inline int text_of        (Label* l)    { return l->text (); }
+
+/* A class with virtual functions whose parent is a base which it does not inherit virtually, and which has a
+   virtual base too. GNAT lays its record out, as a type extension, so the virtual base is storage, which is no
+   smaller than C++ takes for it, and is reached by 'as_Port'. */
+struct Port  { int port;   Port  () : port (10)  {}  virtual ~Port  () {}  virtual int open  () { return 1; } };
+struct Plug  { int plug;   Plug  () : plug (20)  {}  virtual ~Plug  () {}  virtual int fit   () { return 2; } };
+struct Cable : Plug, virtual Port {
+  int length;
+  Cable () : length (30) {}
+  virtual int open   () { return 11; }      /* Overrides that of the virtual base, and has a place of its own. */
+  virtual int fit    () { return 22; }      /* Overrides that of the parent. */
+  virtual int signal () { return 33; }
+};
+
+inline int port_of   (Cable* c)  { return c->port; }
+inline int length_of (Cable* c)  { return c->length; }
+inline int open_of   (Cable* c)  { return c->open (); }
+inline int fit_of    (Plug*  p)  { return p->fit (); }
+inline int open_port (Port*  p)  { return p->open (); }

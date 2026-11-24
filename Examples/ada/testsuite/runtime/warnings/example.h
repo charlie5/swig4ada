@@ -6,7 +6,7 @@ template <class T> struct Box { T item; };
 
 struct Base    { int b; };
 struct Poly    { virtual ~Poly () {} };
-struct Derived : Poly, virtual Base { int d; };            // 864: a parent of the tagged type, and a virtual base
+struct Derived : Poly, virtual Base { int d; };            // 862: a parent of the tagged type, and a virtual base
 
 enum Marks { One = sizeof (Hidden*) * 99 % 7 ? 1 : 2 };    // 863: a value which is not worked out
 
