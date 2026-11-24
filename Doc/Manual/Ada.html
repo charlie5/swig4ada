@@ -518,6 +518,15 @@ Ada can neither copy nor assign it.
 Its <tt>Pointer</tt> is class-wide, and a call through it dispatches.
 </ul>
 
+<p>
+The kind is told from what SWIG is shown of the class. Where a base class or a member is
+of a type which SWIG has not been shown, a class which nothing else marks as one which
+C++ constructs is taken for a plain record, and the warning (862) of that base or member
+says so: should what is not known have a destructor or a copy constructor of its own,
+C++ constructs the class, and the functions which pass or return it by value are bound
+wrongly. Showing SWIG the type, or a library file for it, settles it.
+</p>
+
 <div class="code"><pre>
 class Shape {
 public:
