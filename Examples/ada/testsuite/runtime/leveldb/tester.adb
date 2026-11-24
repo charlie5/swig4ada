@@ -11,6 +11,7 @@ with
      leveldb.DB,
 
      Reversed,
+     Notebooks,
 
      swig.std_Strings,
      interfaces.C.Strings,
@@ -250,6 +251,34 @@ begin
       Status.destruct (Outcome);
       Comparator.destruct_0 (Comparator.Item (the_Order));
    end a_comparator_declared_in_Ada;
+
+   a_database_declared_in_Ada :
+   declare
+      the_Notebook : aliased Notebooks.Item;     -- Its 'DB' is constructed by C++, through the director.
+      Key          : aliased std_String := to_std_String (to_C ("fruit"));
+      Value        : aliased std_String := to_std_String (to_C ("apple"));
+      Other        : aliased std_String := to_std_String (to_C ("tree"));
+      Said         : aliased std_String;
+   begin
+      put_into (the_Notebook'unchecked_Access, Key'unchecked_Access, Value'unchecked_Access, Said'unchecked_Access);
+      check (to_Ada (Said) = "OK",                                    "C++ puts a value into a database which is declared in Ada, through its director");
+
+      get_from (the_Notebook'unchecked_Access, Key'unchecked_Access, Said'unchecked_Access);
+      check (to_Ada (Said) = "apple",                                 "and gets it back, with the status which Ada gives");
+
+      get_from (the_Notebook'unchecked_Access, Other'unchecked_Access, Said'unchecked_Access);
+      check (to_Ada (Said) = "NotFound: no such page",                "and the status of a key which is not there: " & to_Ada (Said));
+
+      delete_from (the_Notebook'unchecked_Access, Key'unchecked_Access, Said'unchecked_Access);
+      get_from    (the_Notebook'unchecked_Access, Key'unchecked_Access, Said'unchecked_Access);
+      check (to_Ada (Said) = "NotFound: no such page",                "and deletes it");
+
+      destruct (Said);
+      destruct (Other);
+      destruct (Value);
+      destruct (Key);
+      DB.destruct_0 (DB.Item (the_Notebook));
+   end a_database_declared_in_Ada;
 
    remove_folder (Folder'unchecked_Access);
    destruct (Folder);

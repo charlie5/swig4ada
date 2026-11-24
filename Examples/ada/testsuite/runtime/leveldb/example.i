@@ -22,6 +22,8 @@
 %include <leveldb/iterator.h>
 %include <leveldb/options.h>
 %include <leveldb/write_batch.h>
+%feature ("director") leveldb::DB;     // So that Ada may implement a database, which C++ uses.
+
 %include <leveldb/db.h>
 
 %include "example.h"
