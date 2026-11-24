@@ -2171,6 +2171,43 @@ is
          end sort_types_by_dependence;
 
 
+         --  An array follows its element type. The sort above swaps a pair of types once at most, so a chain of three
+         --  may be left out of order: 'Item_Array' ahead of 'Item', where 'Item' needs an enumeration which the sort
+         --  then moved ahead of it (allprotected's 'ProtectedBase', once its private enumeration was bound).
+         --
+         place_each_array_after_its_Element :
+         declare
+            Index : Positive := 1;
+         begin
+            while Index <= Natural (Length (main_Types))
+            loop
+               declare
+                  the_Array : constant ada_Type.view := Element (main_Types, Index);
+                  Moved     :          Boolean       := False;
+               begin
+                  if the_Array.all in an_Array_class
+                  then
+                     for Later in reverse Index + 1 .. Natural (Length (main_Types))
+                     loop
+                        if Element (main_Types, Later) = an_Array_view (the_Array).element_Type
+                        then
+                           delete (main_Types, Index);
+                           insert (main_Types, Before => Later, new_Item => the_Array);     -- Just after the element, which is now at 'Later - 1'.
+                           Moved := True;
+                           exit;
+                        end if;
+                     end loop;
+                  end if;
+
+                  if not Moved
+                  then
+                     Index := Index + 1;
+                  end if;
+               end;
+            end loop;
+         end place_each_array_after_its_Element;
+
+
          --  A pointer type is an instance of 'interfaces.C.Pointers', which takes the array type of what it points
          --  to. The sort above does not know of that, and in a class which refers to itself (a list node, say) can
          --  leave the pointer ahead of the array.

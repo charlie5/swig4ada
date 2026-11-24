@@ -168,7 +168,8 @@ is
    procedure add_hidden_Virtuals                 (Self : access Item;   Before    : in Node_Pointer);
    function  wrapper_Symbol                      (Self : access Item;   From      : in String) return unbounded_String;
    procedure bind_unnamed_nested_Classes         (Self : access Item;   the_Class : in Node_Pointer;   outer_Name : in String;   cpp_Name : in String);
-   function  member_Variable                     (Self : access Item;   the_Node  : in Node_Pointer;   the_Name   : in String) return c_Variable.view;
+   function  member_Variable                     (Self : access Item;   the_Node  : in Node_Pointer;   the_Name   : in String;
+                                                                         in_Scope  : in Node_Pointer := null) return c_Variable.view;
 
    procedure register_Mirror (Self : access Item;   proxy_Name              : in unbounded_String;
                                                     the_c_Type              : in c_Type.view;
@@ -732,12 +733,11 @@ is
       dlog (+"");
       dlog (+"enumDeclaration - '" & String' (+DOH_Pointer (doh_swig_Type)) & "'");
 
-      if    Self.getCurrentClass /= null
-        and Self.cplus_Mode      /= swigMod.Dispatcher.Public
-      then
-         return SWIG_NOWRAP;
-      end if;
-
+      --  An enumeration of a class which is not public is bound all the same (until 2026-11-24 it was passed over): a
+      --  member of the class of its type was then of a type which is not known, and was left out, so that the record
+      --  was smaller than its class (jsoncpp's 'Reader::Token', with a member of its private 'TokenType'). It declares
+      --  nothing which can be called.
+      --
       Self.current_c_Node := doh_Node (the_Node);
       locate (doh_Node (the_Node));
 
@@ -746,6 +746,18 @@ is
          the_doh_swig_Type : SwigType_Pointer := SwigType_Pointer (doh_Copy (DOH_Pointer (doh_swig_Type)));
       begin
          dlog ("the_Name: '" & the_Name & "'");
+
+         --  The core gives an enumeration of a class which is not public no 'sym:name', as it is not wrapped: it is
+         --  named by its own name, and is no anonymous enumeration.
+         --
+         if         the_Name = ""
+           and then Self.getCurrentClass /= null
+           and then Self.cplus_Mode      /= swigMod.Dispatcher.Public
+           and then Attribute (the_Node, "name") /= ""
+           and then Attribute (the_Node, "unnamed") = ""
+         then
+            the_Name := +Attribute (the_Node, "name");
+         end if;
 
          if the_Name = ""
          then
@@ -813,7 +825,28 @@ is
          end;
       end if;
 
-      Status := swigMod.Language.item (Self.all).enumDeclaration (the_Node);     -- Process each enum element (ie the enum literals).
+      --  The core's handler passes over an enumeration of a class which is not public, so its literals are given to
+      --  the module's handler here.
+      --
+      if         Self.getCurrentClass /= null
+        and then Self.cplus_Mode      /= swigMod.Dispatcher.Public
+      then
+         declare
+            the_Literal : Node_Pointer := first_Child (the_Node);
+         begin
+            while the_Literal /= null
+            loop
+               if Attribute (the_Literal, "nodeType") = "enumitem"
+               then
+                  Status := Self.enumvalueDeclaration (the_Literal);
+               end if;
+
+               the_Literal := next_Sibling (the_Literal);
+            end loop;
+         end;
+      else
+         Status := swigMod.Language.item (Self.all).enumDeclaration (the_Node);     -- Process each enum element (ie the enum literals).
+      end if;
 
       --  new ...
       --
@@ -831,7 +864,9 @@ is
                                   N    : in     Node_Pointer) return C.int
    is
       the_Node : Node_Pointer         renames N;
-      symName  : constant unbounded_String := +Attribute (the_Node, "sym:name");
+      symName  : constant unbounded_String := (if Attribute (the_Node, "sym:name") /= ""      -- A literal of an enumeration which
+                                               then +Attribute (the_Node, "sym:name")          -- is not public has no 'sym:name'.
+                                               else +Attribute (the_Node, "name"));
 
       --  old ...
       --
@@ -1783,9 +1818,12 @@ is
 
 
 
-   function member_Variable (Self : access Item;   the_Node : in Node_Pointer;   the_Name : in String) return c_Variable.view
+   function member_Variable (Self : access Item;   the_Node : in Node_Pointer;   the_Name : in String;
+                                                   in_Scope : in Node_Pointer := null) return c_Variable.view
    --
-   --  Makes a member variable from the node of its declaration, for a member which the core does not hand on.
+   --  Makes a member variable from the node of its declaration, for a member which the core does not hand on. Its type
+   --  is as it is written, which the core has not qualified: where that is not known, it is qualified in the scope of
+   --  the class which is given ('Storage' of an anonymous union of 'Holder', which is 'Holder::Storage').
    --
    is
       use swigg.Utility;
@@ -1802,6 +1840,23 @@ is
       end if;
 
       strip_all_qualifiers (DOH_Pointer (the_swig_Type));
+
+      if         in_Scope /= null
+        and then get_Attribute (in_Scope, "symtab") /= null
+        and then not Self.swig_type_Map_of_c_type.contains (+doh_Item (SwigType_base (the_swig_Type)))
+      then
+         declare
+            Qualified : constant SwigType_Pointer := Swig_symbol_type_qualify (the_swig_Type, Symtab_Pointer (get_Attribute (in_Scope, "symtab")));
+         begin
+            --  The class may be declared after the one which holds it, as the core moves a nested class out after
+            --  its outer class: the type which is made for it here is then the one which the class becomes.
+            --
+            if +doh_Item (SwigType_base (Qualified)) /= +doh_Item (SwigType_base (the_swig_Type))
+            then
+               the_swig_Type := Qualified;
+            end if;
+         end;
+      end if;
 
       if SwigType_isArray (the_swig_Type) /= 0
       then
@@ -1901,7 +1956,8 @@ is
                                  or else SwigType_isfunction (SwigType_Pointer (get_Attribute (the_Child, "decl"))) = 0)
                      then
                         declare
-                           the_Member : constant c_Variable.view := member_Variable (Self, the_Child, Attribute (the_Child, "name"));
+                           the_Member : constant c_Variable.view := member_Variable (Self, the_Child, Attribute (the_Child, "name"),
+                                                                                    in_Scope => the_Class);
                         begin
                            if Attribute (the_Child, "bitfield") = ""
                            then
