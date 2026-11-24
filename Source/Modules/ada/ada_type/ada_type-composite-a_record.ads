@@ -53,6 +53,8 @@ is
    function  has_lost_Layout        (Self : access Item) return Boolean;              -- It has lost a base class or a member, and does not match its class.
    procedure has_an_unknown_Base    (Self : access Item);
    function  has_an_unknown_Base    (Self : access Item) return Boolean;              -- A base class of its class, or of one of those, was never shown to SWIG.
+   procedure has_virtual_Bases      (Self : access Item);
+   function  has_virtual_Bases      (Self : access Item) return Boolean;              -- Its class, or a base of it, inherits a base class virtually.
    procedure layout_Name_is         (Self : access Item;   Now : in unbounded_String);
    function  layout_Name            (Self : access Item) return unbounded_String;     -- The name of the class in the wrapper file, or null.
    function  is_layout_Pod          (Self : access Item) return Boolean;
@@ -128,6 +130,7 @@ private
          layout_Name                               : unbounded_String;
          has_lost_Layout                           : Boolean := False;
          has_an_unknown_Base                       : Boolean := False;
+         has_virtual_Bases                         : Boolean := False;
          requires_Interfaces_C_Int_use             : Boolean := False;
          requires_Interfaces_C_Unsigned_use        : Boolean := False;
          requires_Interfaces_C_Unsigned_Char_use   : Boolean := False;

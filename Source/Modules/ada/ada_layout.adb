@@ -200,20 +200,62 @@ is
 
 
 
-   function laid_Out (the_Record : in     ada_Type.composite.a_record.view;
-                      Places     :    out component_Places;
-                      Size       :    out Natural;
-                      Alignment  :    out Natural;
-                      data_Size  :    out Natural) return Boolean
+   function is_Dynamic (the_Record : in ada_Type.composite.a_record.view) return Boolean
+   --
+   --  Whether the object has a pointer to a table of virtual functions: a class with virtual functions has, and so
+   --  has one with a virtual base, as the table holds the place of the base.
+   --
+   is
+   begin
+      return the_Record.is_Virtual or else the_Record.has_virtual_Bases;
+   end is_Dynamic;
+
+
+
+   function laid_Out_in_Parts (the_Record : in     ada_Type.composite.a_record.view;
+                               Places     :    out component_Places;
+                               Size       :    out Natural;
+                               Alignment  :    out Natural;
+                               data_Size  :    out Natural;
+                               own_Size   :    out Natural;
+                               own_Align  :    out Natural) return Boolean
+   --
+   --  As 'laid_Out', and with the size and alignment of the part of the object which is not its virtual bases (its
+   --  'nvsize' and 'nvalign', as the Itanium C++ ABI names them): what it takes as a base of another class, which has
+   --  the virtual bases after all else. Of a class with no virtual base, they are 'data_Size' and 'Alignment'.
+   --
    is
       the_Component   : access ada_Variable.item'Class;
       Position        :        Natural := 0;     -- The next free bit.
       component_Size  :        Natural;
       component_Align :        Natural;
+      in_own_Part     :        Boolean := True;  -- No virtual base has been placed yet.
+      shared_Base     :        Natural := 0;     -- A virtual base which is the primary base, and so is at the start.
+
+      function is_nearly_Empty (the_Base : in ada_Type.composite.a_record.view) return Boolean
+      --
+      --  Whether the class has nothing but the pointer to its table: a virtual base which is so may share the place of
+      --  that of the class.
+      --
+      is
+         base_Places : component_Places (1 .. the_Base.component_Count);
+         base_Size   : Natural;
+         base_Align  : Natural;
+         base_Data   : Natural;
+         base_Own    : Natural;
+         own_Align   : Natural;
+      begin
+         return          is_Dynamic (the_Base)
+                and then laid_Out_in_Parts (the_Base, base_Places, base_Size, base_Align, base_Data, base_Own, own_Align)
+                and then base_Own = Standard'Address_Size;
+      end is_nearly_Empty;
+
    begin
       Size      := 0;
       Alignment := 8;
       data_Size := 0;
+      own_Size  := 0;
+      own_Align := 8;
       Places    := [others => <>];
 
       if not the_Record.base_Classes.is_Empty
@@ -233,6 +275,54 @@ is
       then   -- The pointer to the table of virtual functions comes first.
          Position  := Standard'Address_Size;
          Alignment := Standard'Address_Size;
+
+      elsif the_Record.has_virtual_Bases
+      then
+         --  So it does for a class with a virtual base, unless its first base which has one (its primary base, which
+         --  is the first that is not virtual) has it already. A primary base after another base is placed first by C++,
+         --  which is not followed.
+         --
+         declare
+            Primary : Natural := 0;
+         begin
+            for Each in 1 .. the_Record.component_Count
+            loop
+               if         the_Record.Components (Each).is_base_Class
+                 and then not the_Record.Components (Each).is_virtual_Base
+                 and then the_Record.Components (Each).my_Type.all in ada_Type.composite.a_record.item'Class
+                 and then is_Dynamic (ada_Type.composite.a_record.view (the_Record.Components (Each).my_Type))
+               then
+                  Primary := Each;
+                  exit;
+               end if;
+            end loop;
+
+            if Primary = 0
+            then
+               Position  := Standard'Address_Size;
+               Alignment := Standard'Address_Size;
+
+               --  With no base which is not virtual and has a pointer to a table, the first virtual base which has
+               --  nothing else (a 'nearly empty' one, as the Itanium C++ ABI has it) is the primary base: it shares the
+               --  place of that pointer, at the start of the object.
+               --
+               for Each in 1 .. the_Record.component_Count
+               loop
+                  if         the_Record.Components (Each).is_virtual_Base
+                    and then the_Record.Components (Each).my_Type.all in ada_Type.composite.a_record.item'Class
+                    and then is_nearly_Empty (ada_Type.composite.a_record.view (the_Record.Components (Each).my_Type))
+                  then
+                     shared_Base := Each;
+                     exit;
+                  end if;
+               end loop;
+
+            elsif Primary /= 1
+            then
+               dlog ("The primary base of '" & the_Record.declaration_Package.qualified_Name & "' is not its first base.");
+               return False;
+            end if;
+         end;
       end if;
 
       for Each in 1 .. the_Record.component_Count
@@ -246,29 +336,50 @@ is
             return False;
          end if;
 
+         if         the_Component.is_virtual_Base
+           and then in_own_Part
+         then   -- The first virtual base: what has been placed is the part of the object which is not its virtual bases.
+            own_Size    := rounded_Up (Position, 8);
+            own_Align   := Alignment;
+            in_own_Part := False;
+         end if;
+
          if         the_Component.is_base_Class
            and then the_Component.my_Type.all in ada_Type.composite.a_record.item'Class
          then   -- A base class takes less than its size, where C++ uses its tail: all but the tail, or nothing if it has no members.
-            declare
+            declare  -- One with virtual bases takes the part of it which is not those, whose places are its own class's.
                the_Base    : constant ada_Type.composite.a_record.view := ada_Type.composite.a_record.view (the_Component.my_Type);
                base_Places :          component_Places (1 .. the_Base.component_Count);
                base_Size   :          Natural;
                base_Align  :          Natural;
                base_Data   :          Natural;
+               base_Own    :          Natural;
+               own_Aligned :          Natural;
             begin
-               if not laid_Out (the_Base, base_Places, base_Size, base_Align, base_Data)
+               if not laid_Out_in_Parts (the_Base, base_Places, base_Size, base_Align, base_Data, base_Own, own_Aligned)
                then
                   return False;
                end if;
 
                if         the_Base.component_Count = 0
-                 and then not the_Base.is_Virtual
+                 and then not is_Dynamic (the_Base)
                then
                   component_Size := 0;
+
+               elsif the_Base.has_virtual_Bases
+               then
+                  component_Size  := base_Own;
+                  component_Align := own_Aligned;
 
                elsif not is_plain_Structure (the_Base)
                then
                   component_Size := base_Data;
+               end if;
+
+               if Each = shared_Base
+               then   -- At the start of the object, where it shares the place of the pointer to the table.
+                  Places (Each) := (First => 0, Size => component_Size);
+                  goto next_Component;
                end if;
 
                Position      := rounded_Up (Position, component_Align);
@@ -308,6 +419,8 @@ is
             Position      := Position + component_Size;
             Alignment     := Natural'Max (Alignment, component_Align);
          end if;
+
+         <<next_Component>>
       end loop;
 
       if not the_Record.is_Union
@@ -321,8 +434,29 @@ is
       end if;
 
       data_Size := rounded_Up (Size, 8);
-      Size      := rounded_Up (Size, Alignment);
+
+      if in_own_Part
+      then
+         own_Size  := data_Size;
+         own_Align := Alignment;
+      end if;
+
+      Size := rounded_Up (Size, Alignment);
       return True;
+   end laid_Out_in_Parts;
+
+
+
+   function laid_Out (the_Record : in     ada_Type.composite.a_record.view;
+                      Places     :    out component_Places;
+                      Size       :    out Natural;
+                      Alignment  :    out Natural;
+                      data_Size  :    out Natural) return Boolean
+   is
+      own_Size  : Natural;
+      own_Align : Natural;
+   begin
+      return laid_Out_in_Parts (the_Record, Places, Size, Alignment, data_Size, own_Size, own_Align);
    end laid_Out;
 
 
@@ -349,6 +483,12 @@ is
       if the_Record.contains_bit_Fields
       then
          return True;
+      end if;
+
+      if         the_Record.has_virtual_Bases
+        and then not the_Record.is_Virtual
+      then
+         return True;     -- It has a pointer to a table of virtual functions, which GNAT does not give a record which is not tagged.
       end if;
 
       if not laid_Out (the_Record, the_Places, the_Size, the_Alignment, data_Size)

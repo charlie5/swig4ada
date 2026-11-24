@@ -297,6 +297,14 @@ is
    --  a sentence which says so, or nothing where it is sure. (To take such a class for one which C++ constructs was
    --  tried, and was wrong of 18 classes of the suite and right of 2.)
    --
+   procedure add_virtual_Base                    (Self : access Item;   the_Base : in c_Type.view);
+   function  is_a_virtual_Base                   (Self : access Item;   the_Base : in c_Type.view) return Boolean;
+   function  has_virtual_Bases                   (Self : access Item) return Boolean;
+   --
+   --  A base class which the class inherits virtually, which is also among its base classes. Such a base is not
+   --  laid out with the other bases, but after all of the members, once for each of the classes which inherit it
+   --  (see 'ada_Layout'). 'has_virtual_Bases' is true of a class with such a base, or with a base which has one.
+   --
    procedure add_unknown_Base                    (Self : access Item;   Name : in String);
    function  unknown_Bases                       (Self : access Item) return name_Vector;
    procedure forget_unknown_Bases                (Self : access Item);
@@ -395,6 +403,7 @@ private
                has_lost_Layout                           : Boolean := False;
                has_an_unknown_Base                       : Boolean := False;
                unknown_Bases                             : name_Vector;
+               virtual_Bases                             : c_Type.Vector;
                requires_Interfaces_C_Int_use             : Boolean := False;
                requires_Interfaces_C_Unsigned_use        : Boolean := False;
                requires_Interfaces_C_Unsigned_Char_use   : Boolean := False;

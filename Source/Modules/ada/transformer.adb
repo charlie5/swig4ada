@@ -728,6 +728,11 @@ is
                               new_ada_Record.has_an_unknown_Base;
                            end if;
 
+                           if the_c_Type.has_virtual_Bases
+                           then
+                              new_ada_Record.has_virtual_Bases;
+                           end if;
+
                            new_ada_Package.add                   (new_ada_Record.all'Access);
                            new_ada_Package.models_cpp_class_Type (new_ada_Record.all'Access);
 
@@ -1150,7 +1155,11 @@ is
                            begin
                               while has_Element (Cursor)
                               loop
-                                 if c_type_Map_of_ada_type.contains (Element (Cursor))
+                                 if the_c_Type.is_a_virtual_Base (Element (Cursor))
+                                 then
+                                    null;     -- Laid out after the members (see 'add_virtual_Bases').
+
+                                 elsif c_type_Map_of_ada_type.contains (Element (Cursor))
                                  then
                                     declare
                                        never_Constructed : constant Boolean := is_never_constructed_in_Ada (Element (Cursor));
@@ -1280,6 +1289,63 @@ is
                               end if;
                            end loop;
                         end add_Components;
+
+
+                        add_virtual_Bases :
+                        declare
+                           --  Each base class which the class, or a base class of it, inherits virtually. C++ lays them out
+                           --  after all of the rest of the object, once each, in the order in which a walk of the base
+                           --  classes, depth first and from the left, first meets them ('struct U : virtual W' with 'struct W :
+                           --  virtual V' has 'W' and then 'V'). Each takes the part of it which is not its own virtual bases
+                           --  (see 'ada_Layout'). A class with virtual functions is not laid out so, and is warned of.
+                           --
+                           Seen : c_Type.Vector;
+
+                           procedure walk (the_Class : in c_Type.view)
+                           is
+                           begin
+                              for Each of the_Class.base_Classes
+                              loop
+                                 if         the_Class.is_a_virtual_Base (Each)
+                                   and then not Seen.contains (Each)
+                                 then
+                                    Seen.append (Each);
+                                 end if;
+
+                                 walk (Each);
+                              end loop;
+                           end walk;
+
+                        begin
+                           if         the_c_Type.has_virtual_Bases
+                             and then not the_c_Type.nameSpace.models_a_virtual_cpp_Class
+                           then
+                              walk (the_c_Type);
+
+                              for Each of Seen
+                              loop
+                                 if c_type_Map_of_ada_type.contains (Each)
+                                 then
+                                    declare
+                                       never_Constructed : constant Boolean := is_never_constructed_in_Ada (Each);
+                                       the_Base          : constant ada_Variable.view
+                                         := ada_Variable.new_ada_Variable (  to_ada_Identifier (Each.Name)
+                                                                           & (if never_Constructed then "_storage" else ""),
+                                                                           c_type_Map_of_ada_type.Element (Each));
+                                    begin
+                                       the_Base.is_base_Class   := True;
+                                       the_Base.is_virtual_Base := True;
+                                       the_Base.is_raw_Storage  := never_Constructed;     -- It is reached by 'as_<base>'.
+                                       the_ada_Record.add_Component (the_Base);
+                                    end;
+                                 else
+                                    c_Declarable.warn (the_c_Type, Layout, "The virtual base class '" & Each.Name & "' of class '" & the_c_Type.Name
+                                                                         & "' has no Ada type, and is left out. The layout of the record does not match that of the class.");
+                                    the_ada_Record.lose_Layout;
+                                 end if;
+                              end loop;
+                           end if;
+                        end add_virtual_Bases;
 
 
                         add_Functions :

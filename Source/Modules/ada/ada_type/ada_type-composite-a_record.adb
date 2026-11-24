@@ -396,6 +396,22 @@ is
 
 
 
+   procedure has_virtual_Bases (Self : access Item)
+   is
+   begin
+      Self.has_virtual_Bases := True;
+   end has_virtual_Bases;
+
+
+
+   function has_virtual_Bases (Self : access Item) return Boolean
+   is
+   begin
+      return Self.has_virtual_Bases;
+   end has_virtual_Bases;
+
+
+
    function has_an_unknown_Base (Self : access Item) return Boolean
    is
    begin

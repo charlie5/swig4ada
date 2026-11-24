@@ -100,6 +100,7 @@ begin
    --
    declare
       Dropped : Boolean := False;
+      Warned  : c_Type.Vector;     -- The classes with virtual bases which have been warned of.
    begin
       for Each of Self.name_Map_of_c_type
       loop
@@ -113,6 +114,20 @@ begin
             end loop;
 
             Each.forget_unknown_Bases;     -- A class is in the map once for each of its names.
+
+            --  A class with virtual functions and a base class which is inherited virtually is a tagged type, whose
+            --  vtable GNAT makes without the offsets of the virtual bases, and whose parent C++ does not place first.
+            --  Such a class is not laid out as C++ has it. (One with no virtual function is: see 'ada_Layout'.)
+            --
+            if         Each.has_virtual_Bases
+              and then Each.is_Virtual
+              and then not Warned.contains (Each)
+            then
+               Warned.append (Each);
+               c_Declarable.warn (Each, Unsupported,   "The class '" & Each.Name & "' has virtual functions and inherits a base class"
+                                                     & " virtually, which is not supported. The layout of its record does not match that of the class.");
+               Each.lose_Layout;
+            end if;
 
             for i in reverse 1 .. Each.component_Count
             loop

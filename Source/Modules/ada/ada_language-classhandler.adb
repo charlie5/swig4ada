@@ -296,16 +296,10 @@ is
    --
    is
    begin
-      --  A base class which is inherited virtually, or a member whose type is a nested class with no name (which the
-      --  core leaves out), changes the layout of the class in a way which is not followed here. The parser notes both.
+      --  A member whose type is a nested class with no name (which the core leaves out) changes the layout of the
+      --  class in a way which is not followed here. The parser notes it. (A base class which is inherited virtually
+      --  is warned of by the prune step, where it is not followed.)
       --
-      if Attribute (the_Node, "has_virtual_base") /= ""
-      then
-         warn (Unsupported, "The class '" & class_Name & "' inherits a base class virtually, which is not supported."
-                          & " The layout of its record does not match that of the class.");
-         new_c_Class.lose_Layout;
-      end if;
-
       if         Attribute (the_Node, "has_unnamed_member") /= ""
         and then (        get_Attribute (the_Node, "unnamed_nested") = null
                   or else not Self.in_cpp_Mode)
@@ -434,6 +428,48 @@ is
          base_List : constant doh_List   := doh_List (get_Attribute (the_Node, "allbases"));
          Length    : constant C.int      := DohLen (base_List);
          the_Item  :          DOH_Pointer;
+
+         function is_inherited_virtually (the_Base : in Node_Pointer) return Boolean
+         --
+         --  Whether the class names the base among those which it inherits virtually ('virtualbaselist', of the
+         --  parser: 'struct W : virtual V').
+         --
+         is
+            use type DOH_Pointer;
+            the_Names : constant DOH_Pointer := DOH_Pointer (get_Attribute (the_Node, "virtualbaselist"));
+         begin
+            if the_Names /= null
+            then
+               for Each in 0 .. DohLen (the_Names) - 1
+               loop
+                  declare
+                     Named : constant String := +DohGetitem (the_Names, Each);
+                     Plain : constant String := (if Named'Length > 2 and then Named (Named'First .. Named'First + 1) = "::"
+                                                 then Named (Named'First + 2 .. Named'Last) else Named);
+                  begin
+                     if        Plain = Attribute (the_Base, "name")
+                       or else Plain = Attribute (the_Base, "sym:name")
+                     then
+                        return True;
+                     end if;
+                  end;
+               end loop;
+            end if;
+
+            return False;
+         end is_inherited_virtually;
+
+         procedure add (the_Base : in c_Type.view)
+         is
+         begin
+            Self.current_c_Class.add_Base (the_Base);
+
+            if is_inherited_virtually (Node_Pointer (the_Item))
+            then
+               Self.current_c_Class.add_virtual_Base (the_Base);
+            end if;
+         end add;
+
       begin
          for i in 1 .. Length
          loop
@@ -448,11 +484,11 @@ is
                if         Self.swig_type_Map_of_c_type.contains (+Attribute (Node_Pointer (the_Item), "name"))
                  and then Self.swig_type_Map_of_c_type.Element  (+Attribute (Node_Pointer (the_Item), "name")).c_type_Kind in c_Type.c_Class
                then
-                  Self.current_c_Class.add_Base (Self.swig_type_Map_of_c_type.Element (+Attribute (Node_Pointer (the_Item), "name")));
+                  add (Self.swig_type_Map_of_c_type.Element (+Attribute (Node_Pointer (the_Item), "name")));
 
                elsif Self.name_Map_of_c_type.contains (+base_Name)
                then
-                  Self.current_c_Class.add_Base (Self.name_Map_of_c_type.Element (+base_Name));
+                  add (Self.name_Map_of_c_type.Element (+base_Name));
                else   -- Such as a base class which is ignored, or is a template which has not been instantiated.
                   new_c_Class.add_unknown_Base (base_Name);     -- Warned of by the prune step, once all of the class is known.
                   new_c_Class.lose_Layout;

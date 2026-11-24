@@ -24,6 +24,7 @@ is
                     bit_Field        => -1,
                     is_anonymous_Bits => False,
                     is_base_Class     => False,
+                    is_virtual_Base   => False,
                     member_Name       => <>,
                     array_Bounds     => <>,
                     is_Pointer       => False,

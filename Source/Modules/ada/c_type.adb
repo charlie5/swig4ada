@@ -1299,6 +1299,40 @@ is
 
 
 
+   procedure add_virtual_Base (Self : access Item;   the_Base : in c_Type.view)
+   is
+   begin
+      if Self.my.c_type_Kind = c_Class
+      then
+         Self.my.virtual_Bases.append (the_Base);
+      end if;
+   end add_virtual_Base;
+
+
+
+   function is_a_virtual_Base (Self : access Item;   the_Base : in c_Type.view) return Boolean
+   is
+   begin
+      return          Self.my.c_type_Kind = c_Class
+             and then Self.my.virtual_Bases.contains (the_Base);
+   end is_a_virtual_Base;
+
+
+
+   function has_virtual_Bases (Self : access Item) return Boolean
+   is
+   begin
+      if Self.my.c_type_Kind /= c_Class
+      then
+         return False;
+      end if;
+
+      return        not Self.my.virtual_Bases.is_Empty
+            or else (for some Each of Self.base_Classes => Each.has_virtual_Bases);
+   end has_virtual_Bases;
+
+
+
    procedure add_unknown_Base (Self : access Item;   Name : in String)
    is
    begin
