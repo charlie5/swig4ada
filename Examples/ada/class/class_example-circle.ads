@@ -35,9 +35,6 @@ type Item is new class_example.Shape.item with
 
 
 
-
-
-
    -- Pointer
    -- 
    type Pointer is access all class_example.Circle.Item'Class;
@@ -56,6 +53,9 @@ type Item is new class_example.Shape.item with
                                                                     default_Terminator => null);
 
 subtype Pointer_Pointer is C_Pointer_Pointers.Pointer;
+
+
+
 
 
 
@@ -97,8 +97,8 @@ private
    pragma Import (CPP, area0, "Ada_Circle_area0");
    pragma Import (CPP, area, "Ada_Circle_area");
    pragma Import (CPP, perimeter, "Ada_Circle_perimeter");
-   pragma Import (CPP, destruct_0, "_ZN6CircleD1Ev");
-   pragma Import (CPP, destruct, "_ZN6CircleD0Ev");
+   pragma Import (CPP, destruct_0, "ada_destruct_Circle");
+   pragma Import (CPP, destruct, "ada_delete_Circle");
 
 
    package conversions is new System.Address_To_Access_Conversions (Item);

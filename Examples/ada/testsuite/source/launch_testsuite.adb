@@ -1710,6 +1710,18 @@ begin
          put_Line ("TagLib is not installed, so the run-time case 'taglib' is passed over.");
       end if;
 
+      --  Likewise jsoncpp: a value whose private members are of classes nested in it, read from a document by a reader
+      --  which a builder makes, and written out again.
+      --
+      if ada.Directories.exists ("/usr/include/json/json.h")
+      then
+         run ("jsoncpp",
+              Options => "-I/usr/include",
+              Library => "jsoncpp");
+      else
+         put_Line ("jsoncpp is not installed, so the run-time case 'jsoncpp' is passed over.");
+      end if;
+
       --  Cases of upstream's suite, each with a tester written after upstream's test of it for Python.
       --
       new_Line;

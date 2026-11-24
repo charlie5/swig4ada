@@ -35,9 +35,6 @@ type Item is new class_example.Shape.item with
 
 
 
-
-
-
    -- Pointer
    -- 
    type Pointer is access all class_example.Square.Item'Class;
@@ -56,6 +53,9 @@ type Item is new class_example.Shape.item with
                                                                     default_Terminator => null);
 
 subtype Pointer_Pointer is C_Pointer_Pointers.Pointer;
+
+
+
 
 
 
@@ -93,8 +93,8 @@ private
 
    pragma Import (CPP, area, "Ada_Square_area");
    pragma Import (CPP, perimeter, "Ada_Square_perimeter");
-   pragma Import (CPP, destruct_0, "_ZN6SquareD1Ev");
-   pragma Import (CPP, destruct, "_ZN6SquareD0Ev");
+   pragma Import (CPP, destruct_0, "ada_destruct_Square");
+   pragma Import (CPP, destruct, "ada_delete_Square");
 
 
    package conversions is new System.Address_To_Access_Conversions (Item);

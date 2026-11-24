@@ -35,10 +35,6 @@ type Item is  tagged limited
 
 
 
-
-
-   nshapes : aliased interfaces.c.int;
-
    -- Pointer
    -- 
    type Pointer is access all class_example.Shape.Item'Class;
@@ -59,6 +55,10 @@ type Item is  tagged limited
 subtype Pointer_Pointer is C_Pointer_Pointers.Pointer;
 
 
+
+
+
+   nshapes : aliased interfaces.c.int;
 
    function  construct  return class_example.Shape.Item'Class;
 
@@ -91,8 +91,8 @@ private
    pragma import (CPP, nshapes, "_ZN5Shape7nshapesE");
 
    pragma cpp_Constructor (construct, "ada_new_Shape_Shape");
-   pragma Import (CPP, destruct_0, "_ZN5ShapeD1Ev");
-   pragma Import (CPP, destruct, "_ZN5ShapeD0Ev");
+   pragma Import (CPP, destruct_0, "ada_destruct_Shape");
+   pragma Import (CPP, destruct, "ada_delete_Shape");
    pragma Import (CPP, move, "Ada_Shape_move");
    pragma Import (CPP, area0, "Ada_Shape_area0");
    pragma Import (CPP, area, "Ada_Shape_area");

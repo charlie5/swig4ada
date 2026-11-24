@@ -1,2 +1,0 @@
-iterator.h:24: Warning 862: The member 'cleanup_head_' of class 'Iterator' has a type which is not known, so it is left out. The layout of the record does not match that of the class.
-iterator.h:101: Warning 861: Unable to bind the type 'CleanupNode', which is not known.
