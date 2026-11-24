@@ -454,7 +454,7 @@ is
                then
                   Self.current_c_Class.add_Base (Self.name_Map_of_c_type.Element (+base_Name));
                else   -- Such as a base class which is ignored, or is a template which has not been instantiated.
-                  warn (Layout, "The base class '" & base_Name & "' of class '" & class_Name & "' is not known, and is ignored.");
+                  new_c_Class.add_unknown_Base (base_Name);     -- Warned of by the prune step, once all of the class is known.
                   new_c_Class.lose_Layout;
                   new_c_Class.has_an_unknown_Base;
                end if;
@@ -473,10 +473,46 @@ is
             begin
                return (if the_Names = null then 0 else DohLen (the_Names));
             end named_Bases;
+
+            procedure note_those_never_shown (Access_of : in String)
+            --
+            --  Each base class which the class names, and which is none of those which the core gives.
+            --
+            is
+               the_Names : constant DOH_Pointer := DOH_Pointer (get_Attribute (the_Node, Access_of & "baselist"));
+            begin
+               if the_Names /= null
+               then
+                  for Each in 0 .. DohLen (the_Names) - 1
+                  loop
+                     declare
+                        Named : constant String := +DohGetitem (the_Names, Each);
+                        Given : Boolean         := False;
+                     begin
+                        for i in 1 .. Length
+                        loop
+                           Given := Given or else Attribute (Node_Pointer (DohGetitem (base_List, i - 1)), "name") = Named
+                                          or else Attribute (Node_Pointer (DohGetitem (base_List, i - 1)), "sym:name") = Named;
+                        end loop;
+
+                        if not Given
+                        then
+                           new_c_Class.add_unknown_Base (Named);
+                        end if;
+                     end;
+                  end loop;
+               end if;
+            end note_those_never_shown;
+
          begin
             if named_Bases ("") + named_Bases ("protected") + named_Bases ("private") > (if DOH_Pointer (base_List) = null then 0 else Length)
             then
                new_c_Class.has_an_unknown_Base;
+               new_c_Class.lose_Layout;     -- The record has no storage for the base. (Until 2026-11-24 its layout was checked
+                                            -- all the same, and the wrapper of a class with such a base which has members did not compile.)
+               note_those_never_shown ("");
+               note_those_never_shown ("protected");
+               note_those_never_shown ("private");
             end if;
          end;
       end;

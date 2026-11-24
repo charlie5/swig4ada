@@ -43,6 +43,9 @@ is
                                                                   c_Type.view,
                                                                   ada.Strings.Unbounded.Hash, "=");
 
+   package name_Vectors is new ada.Containers.Vectors (Positive, unbounded_String);
+   subtype name_Vector  is name_Vectors.Vector;
+
    --  Core Types
    --
    type a_c_type_Kind is (Unknown,
@@ -286,6 +289,21 @@ is
    -- True for a class which has a base class that SWIG was never shown, or is derived from one which has. Where
    -- such a base has virtual functions, the places of those of the class in the vtable are not known.
    --
+   function  kind_is_a_Guess                     (Self : access Item) return String;
+   --
+   --  Whether C++ constructs a class decides how it is passed and returned (see 'is_constructed_by_Cpp'). For a
+   --  class with a base class or a member which is not known, it can be told only from the rest of the class: that
+   --  it is one is then sure, but that it is not is a guess. This gives, for the warning of such a base or member,
+   --  a sentence which says so, or nothing where it is sure. (To take such a class for one which C++ constructs was
+   --  tried, and was wrong of 18 classes of the suite and right of 2.)
+   --
+   procedure add_unknown_Base                    (Self : access Item;   Name : in String);
+   function  unknown_Bases                       (Self : access Item) return name_Vector;
+   procedure forget_unknown_Bases                (Self : access Item);
+   --
+   -- The names of the base classes of a class which are not known, which the prune step warns of once all of the
+   -- class is known (see 'prune_unknown_C_Types'), and then forgets.
+   --
    --  A class which has lost a base class or a member which could not be bound, so that its record does not match it.
 
    procedure layout_Name_is                      (Self : access Item;   Now : in unbounded_String);
@@ -376,6 +394,7 @@ private
                layout_Name                               : unbounded_String;
                has_lost_Layout                           : Boolean := False;
                has_an_unknown_Base                       : Boolean := False;
+               unknown_Bases                             : name_Vector;
                requires_Interfaces_C_Int_use             : Boolean := False;
                requires_Interfaces_C_Unsigned_use        : Boolean := False;
                requires_Interfaces_C_Unsigned_Char_use   : Boolean := False;

@@ -1,0 +1,1 @@
+inherit_missing.i:25: Warning 862: The base class 'Foo' of class 'Bar' is not known, and is ignored. The layout of the record does not match that of the class.

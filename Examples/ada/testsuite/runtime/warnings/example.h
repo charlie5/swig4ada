@@ -16,3 +16,7 @@ int       take     (Box<int> b);                           //      ... and the f
 int       quiet    (Box<int> b);                           //      (this one is turned off in the interface file)
 
 inline int kept (int x)   { return x + 1; }                // A function with nothing to warn of.
+
+struct Boxed  { Box<int> box;  int n; };                   // 862: a member of a type which is not known, and the kind of the class a guess
+struct Holder : Box<int> { int h; };                       // 862: a base class which is not known, likewise
+struct Owner  { Box<int> box;  ~Owner () {} };             // 862: its destructor says that C++ constructs it, so nothing is a guess

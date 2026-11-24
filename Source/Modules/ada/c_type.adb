@@ -1284,6 +1284,56 @@ is
 
 
 
+   function kind_is_a_Guess (Self : access Item) return String
+   is
+   begin
+      if Self.is_constructed_by_Cpp
+      then
+         return "";
+      end if;
+
+      return " Nothing else of the class says that C++ constructs it, so it is bound as a plain record, which is passed"
+           & " and returned as a C structure is; where what is not known has a destructor or a copy constructor of its"
+           & " own, C++ constructs the class, and its functions are bound wrongly.";
+   end kind_is_a_Guess;
+
+
+
+   procedure add_unknown_Base (Self : access Item;   Name : in String)
+   is
+   begin
+      if Self.my.c_type_Kind = c_Class
+      then
+         Self.my.unknown_Bases.append (to_unbounded_String (Name));
+      end if;
+   end add_unknown_Base;
+
+
+
+   function unknown_Bases (Self : access Item) return name_Vector
+   is
+   begin
+      if Self.my.c_type_Kind /= c_Class
+      then
+         return name_Vectors.empty_Vector;
+      end if;
+
+      return Self.my.unknown_Bases;
+   end unknown_Bases;
+
+
+
+   procedure forget_unknown_Bases (Self : access Item)
+   is
+   begin
+      if Self.my.c_type_Kind = c_Class
+      then
+         Self.my.unknown_Bases.clear;
+      end if;
+   end forget_unknown_Bases;
+
+
+
    procedure layout_Name_is (Self : access Item;   Now : in unbounded_String)
    is
    begin

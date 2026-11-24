@@ -1165,7 +1165,8 @@ is
                                     end;
                                  else
                                     c_Declarable.warn (the_c_Type, Layout, "The base class '" & Element (Cursor).Name & "' of class '" & the_c_Type.Name
-                                                                         & "' has no Ada type, and is left out. The layout of the record does not match that of the class.");
+                                                                         & "' has no Ada type, and is left out. The layout of the record does not match that of the class."
+                                                                         & the_c_Type.kind_is_a_Guess);
                                     the_ada_Record.lose_Layout;
                                  end if;
 
@@ -1273,7 +1274,8 @@ is
                                  end;
                               else
                                  c_Declarable.warn (the_c_Type, Layout, "The member '" & the_c_Components (Each).Name & "' of class '" & the_c_Type.Name
-                                                                      & "' has a type which is not known, and is left out. The layout of the record does not match that of the class.");
+                                                                      & "' has a type which is not known, and is left out. The layout of the record does not match that of the class."
+                                                                      & the_c_Type.kind_is_a_Guess);
                                  the_ada_Record.lose_Layout;
                               end if;
                            end loop;

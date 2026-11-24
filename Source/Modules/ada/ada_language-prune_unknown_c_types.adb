@@ -105,6 +105,15 @@ begin
       loop
          if Each.c_type_Kind = c_Class
          then
+            for the_Base of Each.unknown_Bases
+            loop
+               c_Declarable.warn (Each, Layout,   "The base class '" & the_Base & "' of class '" & Each.Name & "' is not known, and is ignored."
+                                                & " The layout of the record does not match that of the class."
+                                                & Each.kind_is_a_Guess);
+            end loop;
+
+            Each.forget_unknown_Bases;     -- A class is in the map once for each of its names.
+
             for i in reverse 1 .. Each.component_Count
             loop
                if         not_fully_known_Types.contains (Each.Components (i).my_Type)
@@ -122,7 +131,8 @@ begin
                                                          & "' has a type which is not known, so its storage is left out."
                                                       else "The member '" & Each.Components (i).Name & "' of class '" & Each.Name
                                                          & "' has a type which is not known, so it is left out.")
-                                                   & " The layout of the record does not match that of the class.");
+                                                   & " The layout of the record does not match that of the class."
+                                                   & Each.kind_is_a_Guess);
                   Each.lose_Layout;
                   Each.remove_Component (i);
                   Dropped := True;
