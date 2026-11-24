@@ -1,9 +1,9 @@
-example.h:10: Warning 863: Unable to evaluate the value 'sizeof(Hidden*)*99%7?1:2' of the enumeration literal 'One', which is given the value 0.
-example.h:12: Warning 861: Unable to bind the constant 'ODD', as its value ((1?2:3)) is not one which Ada can state.
-example.h:8: Warning 864: The class 'Derived' has virtual functions and inherits a base class virtually, which is not supported. The layout of its record does not match that of the class.
-example.h:22: Warning 862: The member 'box' of class 'Owner' has a type which is not known, so it is left out. The layout of the record does not match that of the class.
-example.h:21: Warning 862: The base class 'Box<(int)>' of class 'Holder' is not known, and is ignored. The layout of the record does not match that of the class. Nothing else of the class says that C++ constructs it, so it is bound as a plain record, which is passed and returned as a C structure is; where what is not known has a destructor or a copy constructor of its own, C++ constructs the class, and its functions are bound wrongly.
-example.h:20: Warning 862: The member 'box' of class 'Boxed' has a type which is not known, so it is left out. The layout of the record does not match that of the class. Nothing else of the class says that C++ constructs it, so it is bound as a plain record, which is passed and returned as a C structure is; where what is not known has a destructor or a copy constructor of its own, C++ constructs the class, and its functions are bound wrongly.
-example.h:14: Warning 861: Unable to bind the type 'Box<(int)>', which is not known.
-example.h:15: Warning 861: Unable to bind the function 'take', as the type 'Box<(int)>' of its parameter 'b' is not known.
-example.h:14: Warning 861: Unable to bind the function 'make_box', as its result type 'Box<(int)>' is not known.
+example.h:11: Warning 863: Unable to evaluate the value 'sizeof(Hidden*)*99%7?1:2' of the enumeration literal 'One', which is given the value 0.
+example.h:13: Warning 861: Unable to bind the constant 'ODD', as its value ((1?2:3)) is not one which Ada can state.
+example.h:9: Warning 864: The class 'Derived' has virtual functions, a base class which it does not inherit virtually and one which it does, or a base which does, which is not supported. The layout of its record does not match that of the class.
+example.h:23: Warning 862: The member 'box' of class 'Owner' has a type which is not known, so it is left out. The layout of the record does not match that of the class.
+example.h:22: Warning 862: The base class 'Box<(int)>' of class 'Holder' is not known, and is ignored. The layout of the record does not match that of the class. Nothing else of the class says that C++ constructs it, so it is bound as a plain record, which is passed and returned as a C structure is; where what is not known has a destructor or a copy constructor of its own, C++ constructs the class, and its functions are bound wrongly.
+example.h:21: Warning 862: The member 'box' of class 'Boxed' has a type which is not known, so it is left out. The layout of the record does not match that of the class. Nothing else of the class says that C++ constructs it, so it is bound as a plain record, which is passed and returned as a C structure is; where what is not known has a destructor or a copy constructor of its own, C++ constructs the class, and its functions are bound wrongly.
+example.h:15: Warning 861: Unable to bind the type 'Box<(int)>', which is not known.
+example.h:16: Warning 861: Unable to bind the function 'take', as the type 'Box<(int)>' of its parameter 'b' is not known.
+example.h:15: Warning 861: Unable to bind the function 'make_box', as its result type 'Box<(int)>' is not known.

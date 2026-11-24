@@ -30,3 +30,30 @@ struct M  : virtual N { int m;  M () : m (7) {} };
 inline int size_of_m () { return sizeof (M); }
 inline int m_of      (M* p) { return p->m; }
 inline int v_of_m    (M* p) { return p->v; }
+
+/* Classes with virtual functions which inherit a base class virtually. One with no other base: its tagged type has
+   no parent, and its virtual base is last, as for a class with no virtual function. Its own table lists its own
+   virtual functions, one of which overrides that of the virtual base. */
+struct Shape {
+  int sides;
+  Shape () : sides (3) {}
+  virtual ~Shape () {}
+  virtual int area () { return 1; }
+};
+struct Square : virtual Shape {
+  int side;
+  Square () : side (4) { sides = 4; }
+  virtual int area ()   { return side * side; }      /* Overrides that of the virtual base. */
+  virtual int corners () { return 4; }
+};
+
+/* And one whose virtual base has nothing but its pointer: that base is its parent, and shares the pointer. */
+struct Named { virtual ~Named () {}  virtual int name () { return 7; } };
+struct Label : virtual Named { int label;  Label () : label (8) {}  virtual int text () { return 9; } };
+
+inline int sides_of       (Square* s)   { return s->sides; }      /* Through the offset of the virtual base, in the table. */
+inline int area_of        (Square* s)   { return s->area (); }
+inline int area_of_shape  (Shape* s)    { return s->area (); }
+inline int corners_of     (Square* s)   { return s->corners (); }
+inline int name_of        (Label* l)    { return l->name (); }
+inline int text_of        (Label* l)    { return l->text (); }

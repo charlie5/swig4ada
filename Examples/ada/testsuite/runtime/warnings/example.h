@@ -5,7 +5,8 @@ struct Hidden;
 template <class T> struct Box { T item; };
 
 struct Base    { int b; };
-struct Derived : virtual Base { int d;  virtual ~Derived () {} };     // 864: virtual inheritance, with virtual functions
+struct Poly    { virtual ~Poly () {} };
+struct Derived : Poly, virtual Base { int d; };            // 864: a parent of the tagged type, and a virtual base
 
 enum Marks { One = sizeof (Hidden*) * 99 % 7 ? 1 : 2 };    // 863: a value which is not worked out
 

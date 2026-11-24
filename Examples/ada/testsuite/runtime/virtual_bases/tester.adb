@@ -6,6 +6,9 @@ with
      virtual_bases.Z,
      virtual_bases.U,
      virtual_bases.M,
+     virtual_bases.Square,
+     virtual_bases.Label,
+     virtual_bases.Shape,
 
      interfaces.C,
 
@@ -88,6 +91,32 @@ begin
       check (the_M.V.v = 10,                                 "and the virtual base of its virtual base is last");
       check (v_of_m (the_M'unchecked_Access) = 10,           "where C++ finds it");
    end a_nearly_empty_virtual_Base;
+
+   a_virtual_Base_of_a_tagged_Type :
+   declare
+      the_Square : aliased Square.Item;
+   begin
+      check (the_Square.side = 4,                            "a class with virtual functions and a virtual base, whose tagged type has no parent: its own member is after its tag");
+      check (sides_of (the_Square'unchecked_Access) = 4,     "C++ finds the virtual base through the table of an object which Ada declared");
+      check (area_of (the_Square'unchecked_Access) = 16,     "a virtual function of the class, which overrides that of the virtual base");
+      check (corners_of (the_Square'unchecked_Access) = 4,   "and one of its own");
+      check (Square.area (the_Square'unchecked_Access) = 16,      "which Ada calls through the table");
+      check (Square.corners (the_Square'unchecked_Access) = 4,    "and the other");
+      check (area_of_shape (Square.as_Shape (the_Square'unchecked_Access)) = 16,   "and C++ through the virtual base, which 'as_Shape' reaches");
+      check (Shape.area (Square.as_Shape (the_Square'unchecked_Access)) = 16,      "and Ada likewise");
+      Square.destruct_0 (the_Square);
+   end a_virtual_Base_of_a_tagged_Type;
+
+   a_nearly_empty_virtual_Parent :
+   declare
+      the_Label : aliased Label.Item;
+   begin
+      check (Label.label (the_Label'unchecked_Access) = 8,   "a class whose virtual base has nothing but its pointer, which is its parent: its own member");
+      check (name_of (the_Label'unchecked_Access) = 7,       "a virtual function of the parent");
+      check (text_of (the_Label'unchecked_Access) = 9,       "and one of its own");
+      check (Label.text (the_Label'unchecked_Access) = 9,    "which Ada calls through the table");
+      Label.destruct_0 (the_Label);
+   end a_nearly_empty_virtual_Parent;
 
    finish;
 end Tester;
