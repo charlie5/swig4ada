@@ -17,6 +17,7 @@ is
    the_return_Type : c_Type.view;
 
    use type C.int;
+   use type c_Type.a_c_type_Kind;
    return_by_Reference : constant Boolean :=        SwigType_isReference        (the_swigType) /= 0
                                              or else SwigType_isrvalue_reference (the_swigType) /= 0;
    return_by_Pointer   : constant Boolean := SwigType_isPointer   (the_swigType) /= 0;
@@ -104,15 +105,23 @@ begin
 
    --  A type which C++ constructs is not returned, but replaces an object of the caller (see 'functionWrapper').
    --
+   --  The type of the result may not be known yet (an instance which '%template' names after the function), and then
+   --  has no pointer type: it is made with one, as 'demand_c_Type_for' makes a type which a pointer names, and the
+   --  class takes that type over when it is declared.
+   --
    if         Self.in_cpp_Mode
      and then not is_Constructor
      and then not is_Destructor
      and then returns_a_cpp_constructed_Type (Self, the_Node)
-     and then Self.name_Map_of_c_type.contains (the_return_Type.Name & "*")
+     and then (        Self.name_Map_of_c_type.contains (the_return_Type.Name & "*")
+               or else the_return_Type.c_type_Kind = c_Type.Unknown)
    then
       declare
+         the_Pointer      : constant c_Type.view      := (if Self.name_Map_of_c_type.contains (the_return_Type.Name & "*")
+                                                          then Self.name_Map_of_c_type.Element (the_return_Type.Name & "*")
+                                                          else Self.demand_c_Type_for (doh_swigType (to_Doh ("p." & String'(+doh_Item (the_swigType))))));
          result_Parameter : constant c_Parameter.view := new_c_Parameter (the_Name => to_unbounded_String ("Result"),
-                                                                          the_Type => Self.name_Map_of_c_type.Element (the_return_Type.Name & "*"));
+                                                                          the_Type => the_Pointer);
       begin
          result_Parameter.is_Pointer := True;
          append (the_Parameters, result_Parameter);

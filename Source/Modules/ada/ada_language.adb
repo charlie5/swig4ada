@@ -18,6 +18,7 @@ with
 
      DOHs.Binding,
      DOHs.Pointers,
+     DOHs.const_String_or_char_ptr,
 
      ada.Containers.Vectors,
      ada.Strings.fixed,
@@ -2288,6 +2289,7 @@ is
    --
    is
       use type C.int;
+      use type c_Type.a_c_type_Kind;
 
       the_swig_Type : constant SwigType_Pointer := SwigType_Pointer (doh_Copy (doh_Item (get_Attribute (the_Node, "type"))));
    begin
@@ -2311,7 +2313,11 @@ is
             return False;
          end if;
 
-         if Self.swig_type_Map_of_c_type.contains (+Pad)
+         --  A type which is found and is not known (as 'demand_c_Type_for' makes one) says nothing: it is sought as
+         --  below.
+         --
+         if         Self.swig_type_Map_of_c_type.contains (+Pad)
+           and then Self.swig_type_Map_of_c_type.Element  (+Pad).c_type_Kind /= c_Type.Unknown
          then
             return Self.swig_type_Map_of_c_type.Element (+Pad).is_constructed_by_Cpp;
          end if;
@@ -2323,8 +2329,52 @@ is
          declare
             Resolved : constant unbounded_String := +doh_Item (SwigType_typedef_resolve_all (SwigType_Pointer (Pad)));
          begin
-            return          Self.swig_type_Map_of_c_type.contains (Resolved)
-                   and then Self.swig_type_Map_of_c_type.Element  (Resolved).is_constructed_by_Cpp;
+            if         Self.swig_type_Map_of_c_type.contains (Resolved)
+              and then Self.swig_type_Map_of_c_type.Element  (Resolved).c_type_Kind /= c_Type.Unknown
+            then
+               return Self.swig_type_Map_of_c_type.Element (Resolved).is_constructed_by_Cpp;
+            end if;
+
+            --  An instance of a class template which is named by '%template' after the function (a 'std::vector' of a
+            --  structure of the class, which can only be named once the class is declared: jsoncpp's
+            --  'getStructuredErrors') is not yet known. The template tells where it declares a destructor which is not
+            --  defaulted, as then each of its instances is a class which C++ constructs (a container of the library).
+            --  Until 2026-11-24 such a function was bound as an Ada function which returned the limited type.
+            --
+            if SwigType_istemplate (SwigType_Pointer (to_Doh (to_String (Resolved)))) /= 0
+            then
+               declare
+                  Prefix       : constant String       := +doh_Item (SwigType_templateprefix (SwigType_Pointer (to_Doh (to_String (Resolved)))));
+                  the_Name     : constant String       := (if         Prefix'Length > 0
+                                                             and then Prefix (Prefix'Last) = '<'
+                                                           then Prefix (Prefix'First .. Prefix'Last - 1)
+                                                           else Prefix);
+                  the_Template : constant Node_Pointer := Swig_symbol_clookup (DOHs.const_String_or_char_ptr.Item (to_Doh (the_Name)), null);
+                  the_Child    :          Node_Pointer;
+               begin
+                  if         the_Template /= null
+                    and then Attribute (the_Template, "nodeType")     = "template"
+                    and then Attribute (the_Template, "templatetype") = "class"
+                  then
+                     the_Child := first_Child (the_Template);
+
+                     while the_Child /= null
+                     loop
+                        if         Attribute (the_Child, "nodeType")       = "destructor"
+                          and then Attribute (the_Child, "value")         /= "default"
+                          and then Attribute (the_Child, "value")         /= "delete"
+                          and then Attribute (the_Child, "feature:extend")  = ""
+                        then
+                           return True;
+                        end if;
+
+                        the_Child := next_Sibling (the_Child);
+                     end loop;
+                  end if;
+               end;
+            end if;
+
+            return False;
          end;
       end;
    end returns_a_cpp_constructed_Type;

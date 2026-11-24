@@ -813,34 +813,54 @@ is
                            end named_Type;
 
                            function is_in_a_Cycle return Boolean
+                           --
+                           --  Whether a class which the class holds (a member of its type, or a member of that type in turn) has
+                           --  a member of the enumeration, or a function of the enumeration, so that its package needs that of the
+                           --  class. The classes which a function of such a class names are followed too: a member which is a
+                           --  container of the library names its element only in its functions (jsoncpp's 'Reader' holds a
+                           --  'std::deque<ErrorInfo>', whose 'ErrorInfo' has a 'Token', which has a member of the private
+                           --  enumeration 'Reader::TokenType'). Until 2026-11-24 only a class which the class itself holds was
+                           --  looked at, and the specs of such a ring did not compile.
+                           --
                            is
-                              the_Member_Type : c_Type.view;
-                           begin
-                              if the_Class = null
-                              then
-                                 return False;
-                              end if;
+                              Visited : c_Type.Vectors.Vector;
 
-                              for Each of the_Class.Components
-                              loop
-                                 the_Member_Type := value_Type (Each);
+                              function leads_to_the_Enumeration (the_Holder : in c_Type.view) return Boolean
+                              is
+                                 the_Member_Type : c_Type.view;
 
-                                 if         the_Member_Type /= null
-                                   and then the_Member_Type /= the_Class
-                                   and then the_Member_Type.c_type_Kind = c_Type.c_Class
+                                 function follows (the_Type : in c_Type.view) return Boolean
+                                 is
+                                 begin
+                                    return          the_Type /= null
+                                           and then the_Type /= the_Class
+                                           and then the_Type.c_type_Kind = c_Type.c_Class
+                                           and then not Visited.contains (the_Type)
+                                           and then leads_to_the_Enumeration (the_Type);
+                                 end follows;
+
+                              begin
+                                 Visited.append (the_Holder);
+
+                                 if the_Holder /= the_Class     -- The class itself may have a member of its enumeration.
                                  then
-                                    for Inner of the_Member_Type.Components
+                                    for Each of the_Holder.Components
                                     loop
-                                       if value_Type (Inner) = the_c_Type
+                                       the_Member_Type := value_Type (Each);
+
+                                       if the_Member_Type = the_c_Type
                                        then
                                           return True;
                                        end if;
                                     end loop;
+                                 end if;
 
-                                    --  Likewise where a function of that class takes or returns the enumeration, or a pointer or
-                                    --  reference to it (a member which is a vector of the enumeration: 'std::vector<numbers> nums;').
+                                 if the_Holder /= the_Class
+                                 then
+                                    --  A function of the class which takes or returns the enumeration, or a pointer or reference
+                                    --  to it (a member which is a vector of the enumeration: 'std::vector<numbers> nums;').
                                     --
-                                    for Inner of the_Member_Type.nameSpace.Subprograms
+                                    for Inner of the_Holder.nameSpace.Subprograms
                                     loop
                                        if        named_Type (Inner.return_Type) = the_c_Type
                                          or else (for some Parameter of Inner.Parameters => named_Type (Parameter.my_Type) = the_c_Type)
@@ -849,9 +869,37 @@ is
                                        end if;
                                     end loop;
                                  end if;
-                              end loop;
 
-                              return False;
+                                 for Each of the_Holder.Components
+                                 loop
+                                    if follows (value_Type (Each))
+                                    then
+                                       return True;
+                                    end if;
+                                 end loop;
+
+                                 if the_Holder /= the_Class
+                                 then
+                                    for Inner of the_Holder.nameSpace.Subprograms
+                                    loop
+                                       if        follows (named_Type (Inner.return_Type))
+                                         or else (for some Parameter of Inner.Parameters => follows (named_Type (Parameter.my_Type)))
+                                       then
+                                          return True;
+                                       end if;
+                                    end loop;
+                                 end if;
+
+                                 return False;
+                              end leads_to_the_Enumeration;
+
+                           begin
+                              if the_Class = null
+                              then
+                                 return False;
+                              end if;
+
+                              return leads_to_the_Enumeration (the_Class);
                            end is_in_a_Cycle;
 
                            is_moved_Out            : constant Boolean := is_in_a_Cycle;

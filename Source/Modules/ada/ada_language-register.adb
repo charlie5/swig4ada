@@ -277,6 +277,11 @@ is
 
             enter_swig_Type ("r.p." & the_c_Type.Name, the_c_type_pointer_Pointer);     -- A reference to a pointer is passed as a pointer to it.
 
+            if unbounded_String' (+the_swig_Type) /= the_c_Type.Name
+            then
+               enter_swig_Type ("r.p." & (+the_swig_Type), the_c_type_pointer_Pointer);   -- And by its swig type, as the others are
+            end if;                                                                       -- ('r.p.Json::Value', of a 'std::stack<Value*>').
+
             enter_Name (the_c_Type.Name & "**", the_c_type_pointer_Pointer);
          end;
 
