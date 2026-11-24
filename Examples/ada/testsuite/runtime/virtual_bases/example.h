@@ -1,0 +1,32 @@
+/* Classes with no virtual function which inherit a base class virtually: C++ lays each virtual base out after all
+   of the rest of the object, once, and reaches it through a pointer to a table which the object holds. */
+
+struct V  { int  v;   V () : v (10)  {} };
+struct W  : virtual V { int  w;   W () : w (20)  {} };          /* 'V' in the tail of 'W'. */
+struct X  : virtual V { char x;   X () : x ('x') {} };
+struct Y  : W, X      { int  y;   Y () : y (40)  {} };          /* A diamond: one 'V', which 'W' and 'X' share. */
+struct Z  : W         { short z;  Z () : z (5)   {} };          /* The part of 'W' which is not 'V', and then 'V'. */
+struct U  : virtual W { int  u;   U () : u (6)   {} };          /* 'W', and then 'V', after 'u'. */
+
+inline int size_of_w () { return sizeof (W); }
+inline int size_of_y () { return sizeof (Y); }
+inline int size_of_z () { return sizeof (Z); }
+inline int size_of_u () { return sizeof (U); }
+
+inline int  w_of        (W* p)          { return p->w; }
+inline int  v_of        (W* p)          { return p->v; }
+inline int  v_through_x (Y* p)          { return static_cast<X*> (p)->v; }
+inline int  v_through_w (Y* p)          { return static_cast<W*> (p)->v; }
+inline void set_v       (V* p, int n)   { p->v = n; }
+inline int  w_of_u      (U* p)          { return p->w; }
+inline int  v_of_u      (U* p)          { return p->v; }
+inline int  z_of        (Z* p)          { return p->z; }
+
+/* A virtual base which has nothing but its pointer to the table (one which is 'nearly empty'): the class which
+   inherits it virtually, with no other base, shares that pointer with it at the start of the object. */
+struct N  : virtual V {};
+struct M  : virtual N { int m;  M () : m (7) {} };
+
+inline int size_of_m () { return sizeof (M); }
+inline int m_of      (M* p) { return p->m; }
+inline int v_of_m    (M* p) { return p->v; }

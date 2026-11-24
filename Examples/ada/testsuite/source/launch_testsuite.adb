@@ -1670,6 +1670,7 @@ begin
       run ("library_c",            -- Further library files, in C: parameters which are input or output, the arguments of a program, a file, raw data.
            use_CPP => False);
       run ("directors");           -- Virtual functions which Ada cannot call through the vtable, overridden in Ada through a director.
+      run ("virtual_bases");       -- Classes with no virtual function which inherit a base class virtually.
 
       --  A class library which nobody wrote as a test, bound from its own headers: LevelDB, where it is installed.
       --  Its tester writes, reads and walks a database, and gives it a comparator which is declared in Ada.
