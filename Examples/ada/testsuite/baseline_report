@@ -59,8 +59,13 @@ def declarations(Text):
     for Match in re.finditer(r"^   (\w+)\s*:\s*([^;]*);", Text, re.M):
         add("object", Match.group(1), Match.group(0))
 
-    for Match in re.finditer(r"^      (\w+)\s*:\s*([^;]*);", Text, re.M):     # Of a record. Those of two records of a spec are taken together.
-        add("component", Match.group(1), Match.group(0))
+    #  The components of a record, from within it alone: the parameters of a subprogram which the pretty printer lays out
+    #  one to a line are indented as components are. (Until 2026-11-24 they were taken for components.) Those of two
+    #  records of a spec are taken together.
+    #
+    for Record in re.finditer(r"\brecord\b(.*?)\bend\s+record\b", Text, re.S | re.I):
+        for Match in re.finditer(r"^\s+(\w+)\s*:\s*([^;]*);", Record.group(1), re.M):
+            add("component", Match.group(1), Match.group(0))
 
     for Match in re.finditer(r"^   (?:sub)?type\s+(\w+)\s+is\b([^;]*)", Text, re.M | re.I):
         add("type", Match.group(1), Match.group(0))
