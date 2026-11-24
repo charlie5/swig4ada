@@ -4,6 +4,5 @@ cpp11_assign_rvalue_reference.assignpublicderivedsettable
 cpp11_assign_rvalue_reference.inheritedmembervars
 cpp11_director_using_constructor.hiddenderived1
 cpp11_using_constructor.hiddenderived1
-li_std_except.e1
 memberin1.person
 template_empty_inherit.squarefunctor
