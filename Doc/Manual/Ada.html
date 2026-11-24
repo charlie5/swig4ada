@@ -108,8 +108,7 @@ the Ada type. The others are reached through a function (see
 cannot be overridden again in Ada.
 <li>Directors are not needed for most virtual functions: a C++ class with virtual
 functions is derived from directly in Ada. A director is made only for a function which
-Ada cannot override so (see <a href="#Ada_directors">Directors</a>), and only of a function
-of the class itself, not one which it inherits.
+Ada cannot override so (see <a href="#Ada_directors">Directors</a>).
 <li>A declaration which uses a type that SWIG has not been shown is left out of the
 binding, with a warning.
 <li>A pointer to a class member is laid out as the Itanium C++ ABI has it (GCC and Clang,
@@ -911,9 +910,11 @@ as the procedures of a binding do (<tt>assign</tt>, of a string). That object is
 the default constructor of the class of the result, so a function whose result has no
 constructor which takes nothing cannot be overridden, and is warned of. The director has
 the constructors of the class, and a type derived from it is constructed by them, as from
-any class. A class which is not so marked, and the other virtual functions of one which
-is, are overridden in Ada as before; so are a class whose base SWIG has never been shown,
-and a function which the class inherits, which have no director.
+any class. A function which the class inherits from a base is in its director too, so that a class
+derived from one with a director may have one of its own. A class which is not so marked,
+and the other virtual functions of one which is, are overridden in Ada as before; so are a
+class whose base SWIG has never been shown, and one with a virtual base, which have no
+director.
 </p>
 
 <H3><a name="Ada_overloading">41.5.7 Overloaded functions, templates and namespaces</a></H3>
