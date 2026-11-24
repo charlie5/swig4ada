@@ -730,6 +730,23 @@ may be overridden, and nothing else of it is.
 </p>
 
 <p>
+A member whose type is not known is left out, and its record no longer matches its class
+(warning 862), unless it is a smart pointer of the standard library
+(<tt>std::unique_ptr</tt>, <tt>std::shared_ptr</tt> or <tt>std::weak_ptr</tt>), as the
+pointer to the implementation of a class most often is
+(<tt>std::unique_ptr&lt;FilePrivate&gt; d;</tt>).
+Such a member is storage of its size (<tt>d_storage</tt>, and <tt>d_storage_2</tt> for a
+<tt>std::shared_ptr</tt>), which must not be used, and its class is one which C++
+constructs.
+Where a class of that kind has no constructor in the binding, as each of its
+constructors takes a type which is not known, a base class or member of its type is
+storage too (<tt>Base_storage</tt>), and a base is reached through
+<tt>as_&lt;base&gt;</tt>.
+A component which has the name of one of a parent of the Ada type is given a number
+(<tt>d_storage_3</tt>).
+</p>
+
+<p>
 A base class may have a function which takes or returns a pointer to a class that is
 derived from it.
 The package of the base then has only a limited view of that of the derived class, and
