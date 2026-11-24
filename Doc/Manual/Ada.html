@@ -95,8 +95,9 @@ standard library, GNU libstdc++).
 
 
 <ul>
-<li>A class which inherits a base class <em>virtually</em> is bound with a warning, and its
-record does not have the layout of the class.
+<li>A class with virtual functions which inherits a base class <em>virtually</em> is bound
+with a warning, and its record does not have the layout of the class. One with no virtual
+function has it (see <a href="#Ada_layout">Layout</a>).
 <li>Of several base classes which have virtual functions, the first is the parent of
 the Ada type. The others are reached through a function (see
 <a href="#Ada_inheritance">Inheritance</a>), and a function which overrides one of theirs
@@ -1041,6 +1042,17 @@ the wrapper file is compiled if the record does not match.
 The checks are left out for a class whose layout cannot be worked out (the reason is
 given in a warning), and altogether where the wrapper file is compiled with
 <tt>SWIG_ADA_NO_LAYOUT_CHECKS</tt> defined.
+</p>
+
+<p>
+A class which inherits a base class virtually (<tt>struct W : virtual V</tt>), and has no
+virtual function, is laid out as C++ lays it out: the record begins after the place of the
+pointer to the table through which C++ finds the virtual base, and has the virtual base
+last, once however many of its bases inherit it. For an object of the class itself, the
+component of the virtual base (<tt>the_W.V</tt>) is that base; a base class which has a
+virtual base is storage for its own part alone (<tt>W_storage</tt>), and is reached by
+<tt>as_W</tt>, as the place of its virtual base depends on the class which is derived from
+it. Ada cannot derive a type from such a class.
 </p>
 
 <p>
