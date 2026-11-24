@@ -46,3 +46,26 @@ private:
   Visitor on_press;
   void*   context;
 };
+
+/* Pointers to class members: one to a member variable, which is its offset, and one to a member function, which is
+   two words. Ada takes them from C++ and gives them back. */
+struct Pair {
+  int first;
+  int second;
+  int sum () const   { return first + second; }
+};
+
+typedef int Pair::* PairMember;
+
+inline PairMember pick      (bool second)                { return second ? &Pair::second : &Pair::first; }
+inline int        read      (const Pair* p, PairMember m) { return p->*m; }
+inline int        (Pair::*  summer ()) () const           { return &Pair::sum; }
+inline int        call_on   (const Pair* p, int (Pair::*f) () const)   { return (p->*f) (); }
+
+/* A virtual function which takes a pointer to a class member, which C++ takes by value: Ada calls it through its
+   function of the wrapper, as it cannot through the vtable. */
+class Reader {
+public:
+  virtual ~Reader () {}
+  virtual int apply (const Pair* p, PairMember m)   { return (p->*m) * 10; }
+};

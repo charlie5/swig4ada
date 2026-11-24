@@ -197,6 +197,10 @@ template <typename T> static void swig_ada_replace (T* target, T& value)
   new (target) T (value);
 #  endif
 }
+
+/* A pointer to a class member, as a result: a structure which holds it, which C returns as it returns the record
+   of 'swig' which Ada takes it for ('member_function_Pointer', of two words, or 'member_data_Pointer', of one). */
+template <typename T> struct swig_ada_member { T value; };
 #endif
 
 

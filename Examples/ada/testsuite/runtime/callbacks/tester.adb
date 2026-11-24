@@ -5,6 +5,8 @@ with
      callbacks.Handlers,
      callbacks.Button,
      callbacks.Measure,
+     callbacks.Pair,
+     callbacks.Reader,
 
      ada_Functions,
 
@@ -86,6 +88,22 @@ begin
       check (the_Total = 5,                                         "a class calls the function which it has kept");
       check (the_Button.presses = 3,                                "and its own member is kept up");
    end kept_by_a_class;
+
+   pointers_to_Members :
+   declare
+      the_Pair : aliased Pair.Item := (first => 3, second => 4);
+   begin
+      check (read (the_Pair'unchecked_Access, pick (1)) = 4,      "a pointer to a member variable, from C++ and given back");
+      check (read (the_Pair'unchecked_Access, pick (0)) = 3,      "and another");
+      check (call_on (the_Pair'unchecked_Access, summer) = 7,     "a pointer to a constant member function");
+
+      declare
+         the_Reader : aliased Reader.Item;
+      begin
+         check (Reader.apply (the_Reader'unchecked_Access, the_Pair'unchecked_Access, pick (1)) = 40,   "given to a virtual function, which is called through the wrapper");
+         Reader.destruct_0 (the_Reader);
+      end;
+   end pointers_to_Members;
 
    finish;
 end Tester;
