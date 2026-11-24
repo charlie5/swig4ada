@@ -460,7 +460,10 @@ An array member or variable is an Ada array with the bounds of the C array, inde
 </p>
 
 <p>
-A <tt>char*</tt> is <tt>Interfaces.C.Strings.chars_ptr</tt>.
+A <tt>char*</tt> is <tt>Interfaces.C.Strings.chars_ptr</tt>, and so is a pointer to a typedef of
+<tt>char</tt> (<tt>const char_t*</tt>, where <tt>typedef char char_t;</tt>, or the <tt>LPSTR</tt>
+of Windows). A pointer to a typedef of <tt>signed char</tt> or <tt>unsigned char</tt> is taken
+for a pointer to bytes, and has a pointer type of its own.
 The binding does not convert strings: the caller makes one with <tt>New_String</tt> and
 frees it, and reads one with <tt>Value</tt>.
 </p>
