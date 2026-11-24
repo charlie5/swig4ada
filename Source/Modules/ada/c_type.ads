@@ -305,6 +305,21 @@ is
    --  laid out with the other bases, but after all of the members, once for each of the classes which inherit it
    --  (see 'ada_Layout'). 'has_virtual_Bases' is true of a class with such a base, or with a base which has one.
    --
+   function  ada_Parent                          (Self : access Item) return c_Type.view;
+   --
+   --  The base class which is the parent of the tagged type of a class with virtual functions, or null where it has
+   --  none: its first base class with virtual functions which it does not inherit virtually, as C++ places that one
+   --  at the start of the object, and shares the pointer to its table (its primary base). Where it has none, the
+   --  first which it inherits virtually and which has nothing but that pointer (a 'nearly empty' one) is so placed.
+   --  Any other virtual base is laid out after all else (see 'ada_Layout').
+
+   function  virtual_Bases_are_followed          (Self : access Item) return Boolean;
+   --
+   --  Whether the virtual bases of a class with virtual functions are laid out as C++ lays them out: where its type
+   --  has no parent, they come after its members, as for a class with no virtual function; where its parent is a
+   --  nearly empty virtual base, that is its only virtual base. Where its parent is a base which it does not inherit
+   --  virtually, the parent's type is laid out by GNAT, which is not followed.
+
    procedure add_unknown_Base                    (Self : access Item;   Name : in String);
    function  unknown_Bases                       (Self : access Item) return name_Vector;
    procedure forget_unknown_Bases                (Self : access Item);

@@ -1333,6 +1333,59 @@ is
 
 
 
+   function ada_Parent (Self : access Item) return c_Type.view
+   is
+   begin
+      if Self.my.c_type_Kind /= c_Class
+      then
+         return null;
+      end if;
+
+      for Each of Self.base_Classes
+      loop
+         if         Each.is_Virtual
+           and then not Self.is_a_virtual_Base (Each)
+         then
+            return Each;
+         end if;
+      end loop;
+
+      for Each of Self.base_Classes
+      loop
+         if         Self.is_a_virtual_Base (Each)
+           and then Each.is_Virtual
+           and then Each.component_Count = 0
+           and then Each.base_Classes.is_Empty
+         then
+            return Each;     -- A nearly empty virtual base.
+         end if;
+      end loop;
+
+      return null;
+   end ada_Parent;
+
+
+
+   function virtual_Bases_are_followed (Self : access Item) return Boolean
+   is
+      the_Parent : constant c_Type.view := Self.ada_Parent;
+   begin
+      if the_Parent = null
+      then
+         return True;
+      end if;
+
+      if not Self.is_a_virtual_Base (the_Parent)
+      then
+         return not Self.has_virtual_Bases;
+      end if;
+
+      return          Natural (Self.my.virtual_Bases.Length) = 1
+             and then (for all Each of Self.base_Classes => Each = the_Parent or else not Each.has_virtual_Bases);
+   end virtual_Bases_are_followed;
+
+
+
    procedure add_unknown_Base (Self : access Item;   Name : in String)
    is
    begin

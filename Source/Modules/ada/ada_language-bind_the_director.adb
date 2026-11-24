@@ -487,6 +487,7 @@ begin
      or else Self.current_Module /= Self.Module_top'Access                 -- The wrapper of an imported module is not written here.
      or else not is_a_Director
      or else the_c_Class.has_an_unknown_Base                               -- The places of its virtual functions are not known.
+     or else the_c_Class.has_virtual_Bases                                 -- A type derived in Ada from it would not find its virtual bases.
      or else get_Attribute (the_Class, "allocate:private_destructor") /= null
      or else get_Attribute (the_Class, "allocate:deleted_default_destructor") /= null
      or else Attribute (the_Class, "final") /= ""

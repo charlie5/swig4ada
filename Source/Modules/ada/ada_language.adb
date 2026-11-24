@@ -931,18 +931,23 @@ is
       is
          Bases : constant c_Type.Vector := the_Class.base_Classes;
       begin
+         if parents_only
+         then   -- The parent of the Ada type, and the parents of that.
+            declare
+               the_Parent : constant c_Type.view := the_Class.ada_Parent;
+            begin
+               return          the_Parent /= null
+                      and then (        the_Parent.Name = Owner
+                                or else owner_is_among_Bases (the_Parent, Owner, parents_only));
+            end;
+         end if;
+
          for Each of Bases
          loop
-            if        not parents_only
-              or else Each.is_Virtual
+            if        Each.Name = Owner
+              or else owner_is_among_Bases (Each, Owner, parents_only)
             then
-               if        Each.Name = Owner
-                 or else owner_is_among_Bases (Each, Owner, parents_only)
-               then
-                  return True;
-               end if;
-
-               exit when parents_only;     -- Only the first virtual base class is the parent.
+               return True;
             end if;
          end loop;
 
@@ -1285,10 +1290,13 @@ is
       variable_Name      : constant unbounded_String := +Attribute (the_Node, "sym:name");
 
       function has_virtual_Base return Boolean
+      --
+      --  Whether the Ada type of the class has a parent, so that the record is a type extension.
+      --
       is
-         Bases : constant c_Type.Vector := Self.current_c_Class.base_Classes;
+         use type c_Type.view;
       begin
-         return (for some Each of Bases => Each.is_Virtual);
+         return Self.current_c_Class.ada_Parent /= null;
       end has_virtual_Base;
 
    begin
@@ -1642,27 +1650,16 @@ is
 
       function is_reached_by_Parents (the_Owner : in c_Type.view) return Boolean
       --
-      --  True where the owner is the parent of the Ada type of the current class, or a parent of that. The
-      --  parent of a class with virtual functions is its first base class which has them.
+      --  True where the owner is the parent of the Ada type of the current class, or a parent of that (see
+      --  'c_Type.ada_Parent').
       --
       is
          the_Class : c_Type.view := Self.current_c_Class;
       begin
          loop
             declare
-               the_Parent : c_Type.view;
+               the_Parent : constant c_Type.view := (if the_Class.is_Virtual then the_Class.ada_Parent else null);
             begin
-               if the_Class.is_Virtual
-               then
-                  for Each of the_Class.base_Classes
-                  loop
-                     if Each.is_Virtual
-                     then
-                        the_Parent := Each;
-                        exit;
-                     end if;
-                  end loop;
-               end if;
 
                if the_Parent = null
                then
@@ -1932,8 +1929,8 @@ is
 
    procedure bind_other_base_Classes (Self : access Item;   the_Class : in Node_Pointer)
    --
-   --  The first base class of a class which has virtual functions becomes the parent of its Ada type. Any
-   --  other base class is a component of the Ada record, which may be storage alone: where the Ada type has a
+   --  A base class of a class which has virtual functions becomes the parent of its Ada type (see 'c_Type.ada_Parent').
+   --  Any other base class is a component of the Ada record, which may be storage alone: where the Ada type has a
    --  parent, or where C++ places members in the unused tail of the base class.
    --
    --  Each such base class is given a function, 'as_<base>', which returns a pointer to the part of the object
@@ -1967,10 +1964,11 @@ is
                  and then the_Bases.contains (Self.name_Map_of_c_type.Element (+base_Name))
                  and then Self.name_Map_of_c_type.contains (+base_Name & "*")
                then
-                  if         Self.name_Map_of_c_type.Element (+base_Name).is_Virtual
+                  if         Self.name_Map_of_c_type.Element (+base_Name) = Self.current_c_Class.ada_Parent
                     and then not parent_Found
                   then
-                     parent_Found := True;     -- The parent, which Ada reaches by a view conversion.
+                     parent_Found := True;     -- The parent, which Ada reaches by a view conversion. (A base which the class
+                                               -- inherits virtually is none, unless it is nearly empty: see 'c_Type.ada_Parent'.)
                   else
                      declare
                         the_cpp_Base : constant String  := +doh_Item (SwigType_namestr (SwigType_Pointer (get_Attribute (the_Base, "name"))));
@@ -2042,17 +2040,15 @@ is
       end hold_a_Place;
 
       function a_Base_has_a_virtual_Destructor return Boolean
+      --
+      --  Whether the parent of the Ada type has a virtual destructor, whose places a destructor here overrides.
+      --
       is
+         use type c_Type.view;
+         the_Parent : constant c_Type.view := Self.current_c_Class.ada_Parent;
       begin
-         for Each of Self.current_c_Class.base_Classes
-         loop
-            if Each.is_Virtual     -- Only the first virtual base class is the parent.
-            then
-               return Each.has_virtual_Destructor;
-            end if;
-         end loop;
-
-         return False;
+         return          the_Parent /= null
+                and then the_Parent.has_virtual_Destructor;
       end a_Base_has_a_virtual_Destructor;
 
    begin

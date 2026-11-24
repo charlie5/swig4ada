@@ -256,6 +256,15 @@ is
                             & NL & "   --");
       end if;
 
+      if         Self.has_virtual_Bases
+        and then Self.is_Virtual
+      then
+         append (the_Source,  NL & "   --  The class inherits a base class virtually, which C++ finds through its table of virtual functions."
+                            & NL & "   --  A type derived from it in Ada has a table which GNAT makes, which does not have the place of that"
+                            & NL & "   --  base, so no type may be derived from this one in Ada."
+                            & NL & "   --");
+      end if;
+
       append (the_Source,  NL  &  "type "  &  Self.Name);
 
       if is_a_Union

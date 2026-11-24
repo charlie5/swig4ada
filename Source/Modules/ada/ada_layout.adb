@@ -485,10 +485,9 @@ is
          return True;
       end if;
 
-      if         the_Record.has_virtual_Bases
-        and then not the_Record.is_Virtual
-      then
-         return True;     -- It has a pointer to a table of virtual functions, which GNAT does not give a record which is not tagged.
+      if the_Record.has_virtual_Bases
+      then   -- It has its virtual bases last, and, where it is not tagged, a pointer to a table, which GNAT does not give it.
+         return True;
       end if;
 
       if not laid_Out (the_Record, the_Places, the_Size, the_Alignment, data_Size)

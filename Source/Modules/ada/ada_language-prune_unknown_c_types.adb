@@ -115,17 +115,19 @@ begin
 
             Each.forget_unknown_Bases;     -- A class is in the map once for each of its names.
 
-            --  A class with virtual functions and a base class which is inherited virtually is a tagged type, whose
-            --  vtable GNAT makes without the offsets of the virtual bases, and whose parent C++ does not place first.
-            --  Such a class is not laid out as C++ has it. (One with no virtual function is: see 'ada_Layout'.)
+            --  A class with virtual functions and a base class which is inherited virtually is a tagged type. Where
+            --  its parent is a base which it does not inherit virtually, GNAT lays the parent out, and the virtual
+            --  bases cannot be placed as C++ has them (see 'c_Type.virtual_Bases_are_followed').
             --
             if         Each.has_virtual_Bases
               and then Each.is_Virtual
+              and then not Each.virtual_Bases_are_followed
               and then not Warned.contains (Each)
             then
                Warned.append (Each);
-               c_Declarable.warn (Each, Unsupported,   "The class '" & Each.Name & "' has virtual functions and inherits a base class"
-                                                     & " virtually, which is not supported. The layout of its record does not match that of the class.");
+               c_Declarable.warn (Each, Unsupported,   "The class '" & Each.Name & "' has virtual functions, a base class which it does not"
+                                                     & " inherit virtually and one which it does, or a base which does, which is not supported."
+                                                     & " The layout of its record does not match that of the class.");
                Each.lose_Layout;
             end if;
 

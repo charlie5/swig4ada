@@ -1098,16 +1098,26 @@ is
                            declare
                               the_c_Bases : constant c_Type.Vector := the_c_Type.base_Classes;
                               Cursor      :          c_Type.Cursor := the_c_Bases.First;
-                              has_Parent  : constant Boolean       := (for some Each of the_c_Bases => Each.is_Virtual);
+                              the_Parent  : constant c_Type.view   := the_c_Type.ada_Parent;
+                              has_Parent  : constant Boolean       := the_Parent /= null;
                            begin
-                              --  A tagged type has a single parent, which must itself be tagged. The first base class which
-                              --  is virtual becomes the parent, as C++ places it first in the object. A base class which is not
-                              --  virtual becomes a component, as it does for a class which is not virtual. Any further virtual
-                              --  base class is ignored.
+                              --  A tagged type has a single parent, which must itself be tagged: the base which C++ places
+                              --  first in the object (see 'c_Type.ada_Parent'). A base class which is not virtual becomes a
+                              --  component, as it does for a class which is not virtual. A base which the class inherits
+                              --  virtually, and which is not the parent, is laid out after the members ('add_virtual_Bases').
+                              --  Any further virtual base class is ignored.
                               --
                               while has_Element (Cursor)
                               loop
-                                 if not Element (Cursor).is_Virtual
+                                 if Element (Cursor) = the_Parent
+                                 then
+                                    the_ada_Record.add_Base (c_type_Map_of_ada_type.Element (Element (Cursor)));
+
+                                 elsif the_c_Type.is_a_virtual_Base (Element (Cursor))
+                                 then
+                                    null;
+
+                                 elsif not Element (Cursor).is_Virtual
                                  then
                                     --  In a type extension the component may not be where C++ has the base class (see the members
                                     --  which a derived class adds), so it only reserves storage, and 'as_<base>' reaches the base.
@@ -1122,9 +1132,6 @@ is
                                        the_Base.is_raw_Storage := never_Constructed;
                                        the_ada_Record.add_Component (the_Base);
                                     end;
-                                 elsif the_ada_Record.base_Classes.is_Empty
-                                 then
-                                    the_ada_Record.add_Base (c_type_Map_of_ada_type.Element (Element (Cursor)));
                                  else
                                     c_Declarable.warn (the_c_Type, Layout, "The base class '" & Element (Cursor).Name & "' of class '" & the_c_Type.Name
                                                                          & "' is ignored, as multiple inheritance is not supported.");
@@ -1297,7 +1304,8 @@ is
                            --  after all of the rest of the object, once each, in the order in which a walk of the base
                            --  classes, depth first and from the left, first meets them ('struct U : virtual W' with 'struct W :
                            --  virtual V' has 'W' and then 'V'). Each takes the part of it which is not its own virtual bases
-                           --  (see 'ada_Layout'). A class with virtual functions is not laid out so, and is warned of.
+                           --  (see 'ada_Layout'). Of a class with virtual functions, only one whose tagged type has no parent is
+                           --  laid out so; one whose parent is a nearly empty virtual base has no other, and any other is warned of.
                            --
                            Seen : c_Type.Vector;
 
@@ -1318,7 +1326,8 @@ is
 
                         begin
                            if         the_c_Type.has_virtual_Bases
-                             and then not the_c_Type.nameSpace.models_a_virtual_cpp_Class
+                             and then (        not the_c_Type.nameSpace.models_a_virtual_cpp_Class
+                                       or else the_c_Type.ada_Parent = null)     -- A tagged type with no parent, laid out as one with no tag is.
                            then
                               walk (the_c_Type);
 

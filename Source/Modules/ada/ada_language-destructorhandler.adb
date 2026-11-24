@@ -9,7 +9,8 @@ is
 
    Status        :          C.int with Unreferenced;
    is_Virtual    : constant Boolean := is_declared_Virtual (the_Node);
-   is_Overriding :          Boolean := False;
+   is_Overriding :          Boolean := False;     -- It overrides that of the parent of the Ada type.
+   by_a_Base     :          Boolean := False;     -- That of a base class is virtual, so it is.
 
    destruct_Symbol : unbounded_String;     -- The function of the wrapper which destructs an object, where there is one.
    delete_Symbol   : unbounded_String;     -- The function of the wrapper which destructs an object and frees it, likewise.
@@ -66,19 +67,19 @@ begin
    end if;
 
    declare
-      Bases : constant c_Type.Vector := Self.current_c_Class.base_Classes;
+      use type c_Type.view;
+      the_Parent : constant c_Type.view := Self.current_c_Class.ada_Parent;     -- That of the Ada type.
    begin
-      for Each of Bases
-      loop
-         if Each.is_Virtual     -- Only the first virtual base class is the parent.
-         then
-            is_Overriding := Each.has_virtual_Destructor;
-            exit;
-         end if;
-      end loop;
+      is_Overriding :=          the_Parent /= null
+                       and then the_Parent.has_virtual_Destructor;
+
+      --  The destructor is virtual where that of any base is, which need not be the parent of the Ada type (a base
+      --  which the class inherits virtually is none), and then it has its place in the vtable of the class.
+      --
+      by_a_Base := (for some Each of Self.current_c_Class.base_Classes => Each.has_virtual_Destructor);
    end;
 
-   if is_Overriding
+   if by_a_Base
    then
       --  The destructor of a class whose base has a virtual one is virtual, declared so or not, and so is that
       --  of a class which is derived from this one in turn. (Until 2026-11-23 this was noted of a destructor
@@ -103,7 +104,7 @@ begin
    --
    if         not Self.current_c_Class.is_Virtual
      and then not is_Virtual
-     and then not is_Overriding
+     and then not by_a_Base
      and then not (   check_Attribute (the_Node, "access", "protected")
                    or check_Attribute (the_Node, "access", "private"))
    then
@@ -160,7 +161,7 @@ begin
                                                                         is_Overriding => is_Overriding);
    begin
       the_Destructor.is_Static   := False;
-      the_Destructor.is_Virtual  := the_Destructor.is_Virtual or is_Overriding;     -- An implicit destructor is virtual when a base class destructor is.
+      the_Destructor.is_Virtual  := the_Destructor.is_Virtual or by_a_Base;     -- An implicit destructor is virtual when a base class destructor is.
       the_Destructor.link_Symbol   := (if destruct_Symbol /= "" then destruct_Symbol
                                                                 else +cpp_Symbol (class_cpp_Name, Suffix => "D1Ev"));     -- The complete object destructor.
       the_Destructor.is_in_Wrapper := destruct_Symbol /= "";
@@ -174,7 +175,7 @@ begin
                                                                         is_Overriding => is_Overriding);
    begin
       the_Destructor.is_Static   := False;
-      the_Destructor.is_Virtual  := the_Destructor.is_Virtual or is_Overriding;     -- An implicit destructor is virtual when a base class destructor is.
+      the_Destructor.is_Virtual  := the_Destructor.is_Virtual or by_a_Base;     -- An implicit destructor is virtual when a base class destructor is.
       the_Destructor.link_Symbol   := (if destruct_Symbol /= "" then delete_Symbol
                                        else +cpp_Symbol (class_cpp_Name, Suffix => (if the_Destructor.is_Virtual then "D0Ev"      -- The deleting destructor.
                                                                                                                  else "D1Ev")));
