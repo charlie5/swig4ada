@@ -1304,39 +1304,55 @@ is
                            --  after all of the rest of the object, once each, in the order in which a walk of the base
                            --  classes, depth first and from the left, first meets them ('struct U : virtual W' with 'struct W :
                            --  virtual V' has 'W' and then 'V'). Each takes the part of it which is not its own virtual bases
-                           --  (see 'ada_Layout'). Of a class with virtual functions, only one whose tagged type has no parent is
-                           --  laid out so; one whose parent is a nearly empty virtual base has no other, and any other is warned of.
+                           --  (see 'ada_Layout'). Of a class with virtual functions whose tagged type has a parent, GNAT lays the
+                           --  record out, as a type extension, and each such base only reserves no less than C++ takes for it.
                            --
-                           Seen : c_Type.Vector;
+                           Seen      : c_Type.Vector;
+                           Inherited : c_Type.Vector;     -- Those which the record of the parent of a type extension has already.
 
-                           procedure walk (the_Class : in c_Type.view)
+                           procedure walk (the_Class : in c_Type.view;   Into : in out c_Type.Vector)
                            is
                            begin
                               for Each of the_Class.base_Classes
                               loop
                                  if         the_Class.is_a_virtual_Base (Each)
-                                   and then not Seen.contains (Each)
+                                   and then not Into.contains (Each)
                                  then
-                                    Seen.append (Each);
+                                    Into.append (Each);
                                  end if;
 
-                                 walk (Each);
+                                 walk (Each, Into);
                               end loop;
                            end walk;
 
                         begin
-                           if         the_c_Type.has_virtual_Bases
-                             and then (        not the_c_Type.nameSpace.models_a_virtual_cpp_Class
-                                       or else the_c_Type.ada_Parent = null)     -- A tagged type with no parent, laid out as one with no tag is.
+                           if the_c_Type.has_virtual_Bases
                            then
-                              walk (the_c_Type);
+                              walk (the_c_Type, Seen);
+
+                              if the_c_Type.ada_Parent /= null
+                              then
+                                 walk (the_c_Type.ada_Parent, Inherited);
+                              end if;
 
                               for Each of Seen
                               loop
-                                 if c_type_Map_of_ada_type.contains (Each)
+                                 if Each = the_c_Type.ada_Parent
+                                 then
+                                    null;     -- A nearly empty virtual base, which shares the pointer of the class, at its start.
+
+                                 elsif Inherited.contains (Each)
+                                 then
+                                    null;     -- The parent has storage for it, which is no less than C++ takes in this class too.
+
+                                 elsif c_type_Map_of_ada_type.contains (Each)
                                  then
                                     declare
-                                       never_Constructed : constant Boolean := is_never_constructed_in_Ada (Each);
+                                       --  Of a tagged type, the component is storage alone: a class which is derived from
+                                       --  this one in C++ has the base elsewhere, and it is reached by 'as_<base>'.
+                                       --
+                                       never_Constructed : constant Boolean :=        is_never_constructed_in_Ada (Each)
+                                                                               or else the_c_Type.nameSpace.models_a_virtual_cpp_Class;
                                        the_Base          : constant ada_Variable.view
                                          := ada_Variable.new_ada_Variable (  to_ada_Identifier (Each.Name)
                                                                            & (if never_Constructed then "_storage" else ""),

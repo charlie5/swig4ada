@@ -537,8 +537,10 @@ is
    --
    is
       the_Name : constant String := to_String (the_Record.Components (Index).Name);
+      is_Named : constant Boolean :=          the_Name'Length > 8
+                                     and then the_Name (the_Name'Last - 7 .. the_Name'Last) = "_storage";     -- Storage already.
    begin
-      return the_Name & (if is_reduced_Base (the_Record, Index, Places) then "_storage" else "");
+      return the_Name & (if is_reduced_Base (the_Record, Index, Places) and not is_Named then "_storage" else "");
    end placed_Name;
 
 end ada_Layout;

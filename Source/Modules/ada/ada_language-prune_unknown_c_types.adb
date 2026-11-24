@@ -116,8 +116,9 @@ begin
             Each.forget_unknown_Bases;     -- A class is in the map once for each of its names.
 
             --  A class with virtual functions and a base class which is inherited virtually is a tagged type. Where
-            --  its parent is a base which it does not inherit virtually, GNAT lays the parent out, and the virtual
-            --  bases cannot be placed as C++ has them (see 'c_Type.virtual_Bases_are_followed').
+            --  its parent is a base which it does not inherit virtually, GNAT lays the record out, and the virtual
+            --  bases cannot be placed as C++ has them (see 'c_Type.virtual_Bases_are_followed'): each has storage of
+            --  its size and alignment, so that the object is no smaller than the class.
             --
             if         Each.has_virtual_Bases
               and then Each.is_Virtual
@@ -125,9 +126,10 @@ begin
               and then not Warned.contains (Each)
             then
                Warned.append (Each);
-               c_Declarable.warn (Each, Unsupported,   "The class '" & Each.Name & "' has virtual functions, a base class which it does not"
-                                                     & " inherit virtually and one which it does, or a base which does, which is not supported."
-                                                     & " The layout of its record does not match that of the class.");
+               c_Declarable.warn (Each, Layout,   "The class '" & Each.Name & "' has virtual functions, a base class which it does not"
+                                                & " inherit virtually and one which it does, or a base which does: its record is a type extension which"
+                                                & " GNAT lays out, with storage for each virtual base which is no less than C++ takes, and each is reached by"
+                                                & " 'as_<base>' alone. The layout of its record does not match that of the class.");
                Each.lose_Layout;
             end if;
 

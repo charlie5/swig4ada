@@ -75,6 +75,43 @@ is
 
 
 
+   function virtual_base_Storage (the_Type        : in ada_Type.view;
+                                  in_an_Extension : in Boolean) return String
+   --
+   --  The type of the storage of a virtual base, which is no smaller than C++ takes for it. Of a tagged type, whose
+   --  size Ada may not ask for ('Size of a type of convention CPP), it is the size which the base is laid out with.
+   --  In a type extension, which GNAT lays out, C++ may place the base further on, at the next place of its alignment,
+   --  so the storage has that much more.
+   --
+   is
+      the_Name : constant String := to_String (the_Type.qualified_Name);
+   begin
+      if         the_Type.all in ada_Type.composite.a_record.item'Class
+        and then ada_Type.composite.a_record.view (the_Type).is_Virtual
+      then
+         declare
+            the_Record    : constant ada_Type.composite.a_record.view := ada_Type.composite.a_record.view (the_Type);
+            the_Places    :          component_Places (1 .. the_Record.component_Count);
+            the_Size      :          Natural;
+            the_Alignment :          Natural;
+            data_Size     :          Natural;
+         begin
+            if laid_Out (the_Record, the_Places, the_Size, the_Alignment, data_Size)
+            then
+               return   "interfaces.C.char_array (1 .."
+                      & Natural'Image ((the_Size + (if in_an_Extension then the_Alignment else 0)) / 8) & ")";
+            end if;
+
+            warn (Layout, "Unable to work out the size of the virtual base '" & the_Name & "', for its storage.");
+         end;
+      end if;
+
+      return   "interfaces.C.char_array (1 .. Standard." & the_Name & "'Object_Size / interfaces.C.char'Size"
+             & (if in_an_Extension then " + Standard." & the_Name & "'Alignment" else "") & ")";
+   end virtual_base_Storage;
+
+
+
    function depends_on (Self         : access ada_Type.Item'Class;
                         a_Type       : in     ada_Type.view;
                         the_ada_Lang : access ada_Language.item)    return Boolean
@@ -453,6 +490,12 @@ is
                         type_Modifier := to_unbounded_String ("aliased");
                         type_Name     :=   "interfaces.C.char_array (1 .. Standard." & the_Component.my_type.qualified_Name     -- From 'Standard', as a component which the
                                          & "'Object_Size / interfaces.C.char'Size)";                                           -- record inherits may have the name of the module.
+
+                        if the_Component.is_virtual_Base
+                        then
+                           type_Name := to_unbounded_String (virtual_base_Storage (the_Component.my_Type,
+                                                                                   in_an_Extension => not Self.base_Classes.is_Empty));
+                        end if;
                      end if;
 
                      if Natural (Length (the_Component.array_Bounds)) > 1
