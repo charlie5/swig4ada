@@ -2964,6 +2964,7 @@ is
       the_ada_Variable.member_Name       := the_c_Variable.member_Name;
       the_ada_Variable.is_anonymous_Bits := the_c_Variable.is_anonymous_Bits;
       the_ada_Variable.is_empty_String   := the_c_Variable.is_empty_String;
+      the_ada_Variable.from_Wrapper      := the_c_Variable.from_Wrapper;
 
       the_ada_Variable.link_Symbol := (if the_c_Variable.link_Symbol /= "" then the_c_Variable.link_Symbol
                                                                            else the_c_Variable.Name);

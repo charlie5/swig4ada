@@ -24,6 +24,7 @@ is
          my_Type          : c_Type.view;
          Value            : unbounded_String;
          is_empty_String  : Boolean := False;     -- A constant whose value is a string of no characters, which 'Value' cannot tell from no value.
+         from_Wrapper     : Boolean := False;     -- A constant with no value which Ada can state, which the wrapper defines and Ada imports.
          link_Symbol      : unbounded_String;     -- The C++ symbol of a variable which is declared in a namespace.
          owner_Class      : c_Type.view;          -- The class of a static member variable.
 

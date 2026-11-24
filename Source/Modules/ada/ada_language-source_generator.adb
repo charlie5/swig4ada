@@ -2278,7 +2278,8 @@ is
             else
                append (spec_Source,  "aliased ");
 
-               if the_Variable.is_Constant
+               if        the_Variable.is_Constant
+                 or else the_Variable.from_Wrapper     -- A deferred constant, which its import completes.
                then
                   append (spec_Source,  "constant ");
                end if;

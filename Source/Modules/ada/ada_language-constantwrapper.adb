@@ -410,15 +410,20 @@ begin
         and then Self.in_cpp_Mode
       then
          --  A pointer to a class member ('%constant double (Shape::*AREAPT) (void) = &Shape::area;') has no value
-         --  which Ada can state. The wrapper defines it, as an object of C linkage, which Ada imports as a variable
-         --  of the type of 'swig' for it (until 2026-11-24 it was left out).
+         --  which Ada can state. The wrapper defines it, as a constant object of C linkage, which Ada imports as a
+         --  constant of the type of 'swig' for it (until 2026-11-24 it was left out, and then it was a variable).
          --
          declare
             the_Symbol : constant unbounded_String := wrapper_Symbol (Self, "swig_ada_" & to_String (the_Name));
+            the_Type   : constant SwigType_Pointer := SwigType_Pointer (doh_Copy (doh_Item (the_swigType)));
+            Unused     :          SwigType_Pointer with Unreferenced;
          begin
-            print_to (DOH_Pointer (Self.f_Ada),   String'(+doh_Item (SwigType_str (the_swigType, const_String (-to_String (the_Symbol)))))
-                                                & " = " & to_String (value_Text) & ";" & NL & NL);
-            new_c_Constant.link_Symbol := the_Symbol;
+            Unused := SwigType_add_qualifier (the_Type, const_String (-"const"));     -- The pointer itself is constant.
+
+            print_to (DOH_Pointer (Self.f_Ada),   "extern " & String'(+doh_Item (SwigType_str (the_Type, const_String (-to_String (the_Symbol)))))
+                                                & " = " & to_String (value_Text) & ";" & NL & NL);     -- 'extern', as a constant has no linkage else.
+            new_c_Constant.link_Symbol  := the_Symbol;
+            new_c_Constant.from_Wrapper := True;
             Self.current_Module.C.new_c_Variables   .append (new_c_Constant);
             Self.current_Module.C.new_c_Declarations.append (new_c_Constant.all'Access);
          end;

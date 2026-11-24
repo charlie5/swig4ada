@@ -16,6 +16,7 @@ is
                    my_Type          => of_Type,
                    Value            => <>,
                    is_empty_String  => False,
+                   from_Wrapper     => False,
                    link_Symbol      => <>,
                    owner_Class      => null,
                    is_anonymous_Bits => False,
