@@ -64,25 +64,7 @@ is
                     and then get_Attribute (the_Node, "stringval") /= null
                     and then Each = First     -- Not a wide string (L"..."), which is left as it is written.
                   then
-                     declare
-                        the_String : constant String := Attribute (the_Node, "stringval");
-                        Result     : unbounded_String;
-                     begin
-                        for Each of the_String
-                        loop
-                           if Each = '"'
-                           then
-                              append (Result, """""");
-                           elsif Each < ' ' or else Each >= Character'Val (127)
-                           then
-                              append (Result, """ & Character'Val (" & ada.Strings.fixed.Trim (Natural'Image (Character'Pos (Each)), ada.Strings.Left) & ") & """);
-                           else
-                              append (Result, Each);
-                           end if;
-                        end loop;
-
-                        return to_String (Result);
-                     end;
+                     return as_Ada_string_Text (Attribute (the_Node, "stringval"));
                   end if;
 
                   --  A character literal of several characters ('ab') is an 'int' in C, in which GCC and

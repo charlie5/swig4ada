@@ -153,6 +153,15 @@ begin
                then
                   keep_the_Storage (Each, i, smart_Pointer_Words (to_String (Each.Components (i).my_Type.Name)));
                   Dropped := True;     -- The class may now be known.
+
+               --  One through a typedef, which the type may name as a class which is declared and never defined (the
+               --  typedef of an instance of a template which SWIG is not shown).
+               --
+               elsif      c_Variable.view (Each.Components (i)).smart_Words > 0
+                 and then Each.Components (i).my_Type.c_type_Kind /= c_Class
+               then
+                  keep_the_Storage (Each, i, c_Variable.view (Each.Components (i)).smart_Words);
+                  Dropped := True;
                end if;
             end loop;
          end if;

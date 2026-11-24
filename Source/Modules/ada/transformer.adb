@@ -913,9 +913,22 @@ is
                            new_ada_Enumeration     : constant ada_Type.elementary.scalar.discrete.enumeration.view
                              := ada_Type.elementary.scalar.discrete.enumeration.new_Item
                                   (the_declaration_Package,
-                                   (if is_moved_Out then unique_type_Name (Result.Package_top,
-                                                                           to_ada_Identifier (the_Class.Name & "_" & the_c_Type.Name))
-                                                    else to_ada_Identifier (the_c_Type.Name)));
+                                   (if    is_moved_Out
+                                   then unique_type_Name (Result.Package_top,
+                                                          to_ada_Identifier (the_Class.Name & "_" & the_c_Type.Name))
+
+                                   --  An enumeration of a namespace, which has no package, is in the top package, where
+                                   --  another may have its name (yaml-cpp's 'NodeType::value' and 'EmitterStyle::value').
+                                   --  The later one is named after its namespace as well. (Until 2026-11-25 the second
+                                   --  ended the run, as its array type was refused by the map of the Ada types.)
+                                   --
+                                   elsif      ada_Package."=" (ada_Package.view (the_declaration_Package), Result.Package_top)
+                                     and then unique_type_Name (Result.Package_top, to_ada_Identifier (the_c_Type.Name))
+                                              /= to_ada_Identifier (the_c_Type.Name)
+                                     and then the_c_Type.enum_Scope /= ""
+                                   then unique_type_Name (Result.Package_top,
+                                                          to_ada_Identifier (the_c_Type.enum_Scope & "_" & the_c_Type.Name))
+                                   else to_ada_Identifier (the_c_Type.Name)));
 
                            the_c_Literals          : constant c_type.enum_literal_vectors.Vector := the_c_Type.Literals;
                            Cursor                  :          c_type.enum_literal_Vectors.Cursor := the_c_Literals.First;
@@ -960,12 +973,16 @@ is
                                     function ada_literal_Name return unbounded_String
                                     --
                                     --  C is case sensitive, so a literal may differ only in case from the name
-                                    --  of its own enumeration (such as 'enum Hello {hi, hello};'). The literal is then prefixed.
+                                    --  of its own enumeration (such as 'enum Hello {hi, hello};'), or from that of another
+                                    --  type of its package (yaml-cpp's 'EMITTER_MANIP' has a literal 'Value', beside the type
+                                    --  'value' of its 'EmitterStyle'). The literal is then prefixed.
                                     --
                                     is
                                        the_Name : constant unbounded_String := ada_Utility.to_ada_Identifier (the_Literal.Name);
                                     begin
-                                       if to_Lower (to_String (the_Name)) = to_Lower (to_String (new_ada_Enumeration.Name))
+                                       if        to_Lower (to_String (the_Name)) = to_Lower (to_String (new_ada_Enumeration.Name))
+                                         or else (for some each_Type of the_declaration_Package.Types
+                                                  => to_Lower (to_String (each_Type.Name)) = to_Lower (to_String (the_Name)))
                                        then
                                           return "the_" & the_Name;
                                        else

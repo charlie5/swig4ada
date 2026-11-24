@@ -225,6 +225,12 @@ is
    --
    --  The size of an enumeration which names its underlying type ('enum Small : unsigned char'), or 0.
 
+   procedure enum_Scope_is                (Self : access Item;   Name : in unbounded_String);
+   function  enum_Scope                   (Self : access Item) return unbounded_String;
+   --
+   --  The innermost C++ namespace of an enumeration which is in no class ('NodeType' of 'YAML::NodeType::value'), or
+   --  "". The C model has no namespace but those of its classes.
+
 
    --  'array_Type' Attributes
    --
@@ -429,6 +435,7 @@ private
                Literals                   : enum_literal_vectors.Vector;
                transformed_literals_Names : unbounded_string_vectors.Vector;
                enum_Size                  : Natural := 0;
+               enum_Scope                 : unbounded_String;
 
             when function_Pointer =>
                accessed_Function          : access c_Function.item'Class;     -- Subprogram definition of an 'access subprogram' type declaration.

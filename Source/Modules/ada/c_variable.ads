@@ -33,6 +33,8 @@ is
          member_Name       : unbounded_String;    -- The name of a public member variable in the wrapper file, for a check of its place.
          is_ignored_Member : Boolean := False;    -- A member which the interface file ignores, and which only reserves its storage.
          Line              : Natural := 0;        -- The line on which a member variable is declared, where that is known.
+         smart_Words       : Natural := 0;        -- The addresses of a member which is a smart pointer of the standard library
+                                                  -- through a typedef ('using shared_memory_holder = std::shared_ptr<...>').
 
          is_Static        : Boolean := False;
          is_class_Pointer : Boolean := False;

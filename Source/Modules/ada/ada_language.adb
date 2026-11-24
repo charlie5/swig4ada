@@ -162,6 +162,7 @@ is
    function  character_Value (Position  : in String) return String;
    function  without_leading_Qualifiers (swig_Type : in String) return String;
    function  smart_Pointer_Words (type_Name : in String) return Natural;
+   function  as_Ada_string_Text  (the_String : in String) return String;
    procedure bind_constructors_of_abstract_Class (Self : access Item;   the_Class : in Node_Pointer);
    procedure bind_the_Director                   (Self : access Item;   the_Class : in Node_Pointer);
    procedure bind_other_base_Classes             (Self : access Item;   the_Class : in Node_Pointer);
@@ -659,6 +660,18 @@ is
                   when others =>
                      null;     -- The value is not a plain number.
                end;
+
+            --  A constant pointer to a string literal ('const char* const Message = "...";', of which yaml-cpp's
+            --  'ErrorMsg' has 55) is given the text, as a '#define' of a string is. (Until 2026-11-25 it was left out,
+            --  as it has no symbol.)
+            --
+            elsif      is_Constant
+              and then get_Attribute (the_Node, "stringval") /= null
+              and then new_Variable.array_Bounds.is_Empty
+              and then to_String (new_Variable.my_Type.Name) = "char*"
+            then
+               new_Variable.Value           := +as_Ada_string_Text (Attribute (the_Node, "stringval"));
+               new_Variable.is_empty_String := Attribute (the_Node, "stringval") = "";
             end if;
 
             --  A variable which is 'static', or constant and not 'extern', has no symbol outside its own file,
@@ -780,10 +793,80 @@ is
               & String' (+DOH_Pointer (the_doh_swig_Type))
               & "'");
 
-         new_c_Enum := c_type.new_Enum (Namespace => Self.current_c_Namespace,
-                                        Name      => the_Name);
+         --  The enumeration may have been used before it is declared, and then made a type which is not known: a
+         --  member of a class whose type is an enumeration of a structure nested in it (yaml-cpp's '_Tag', whose
+         --  'type' is a '_Tag::Type::value'), as the core moves the nested structure out after the class. The type
+         --  becomes the enumeration, as one which is used ahead of its class becomes the class. (Until 2026-11-25 it
+         --  stayed not known, as a swig type is registered once, and the member was left out.)
+         --
+         declare
+            use type c_Type.a_c_type_Kind;
+            Key : constant unbounded_String := +doh_Item (the_doh_swig_Type);
+         begin
+            if         Self.swig_type_Map_of_c_type.contains (Key)
+              and then Self.swig_type_Map_of_c_type.Element  (Key).c_type_Kind = c_Type.Unknown
+            then
+               new_c_Enum     := Self.swig_type_Map_of_c_type.Element (Key);
+               new_c_Enum.all := c_Type.Enum_construct (nameSpace => Self.current_c_Namespace,
+                                                        Name      => the_Name);
+               Self.add_new_c_Type (new_c_Enum);     -- Moved after its class, whose package must come first, as 'register'
+                                                     -- does nothing for a swig type which it has; and so are the types which
+                                                     -- were made with it.
+               --  Those types are named after the enumeration, as 'register' would have named them, and the enumeration
+               --  and they are known by their names. (A first form of this step left them their names of the type which
+               --  was not known, 'Tree<(int)>::types[]', by which no lookup found them, and the run ended.)
+               --
+               if not Self.name_Map_of_c_type.contains (the_Name)
+               then
+                  Self.name_Map_of_c_type.insert (the_Name, new_c_Enum);
+               end if;
+
+               declare
+                  type Prefix_array is array (Positive range <>) of unbounded_String;
+                  Prefixes : constant Prefix_array := [+"a.", +"p.", +"a.p.", +"p.p."];
+                  Suffixes : constant Prefix_array := [+"[]", +"*",  +"*[]",  +"**"];
+               begin
+                  for Each in Prefixes'Range
+                  loop
+                     if Self.swig_type_Map_of_c_type.contains (Prefixes (Each) & Key)
+                     then
+                        declare
+                           the_Type : constant c_Type.view      := Self.swig_type_Map_of_c_type.Element (Prefixes (Each) & Key);
+                           its_Name : constant unbounded_String := the_Name & Suffixes (Each);
+                        begin
+                           the_Type.Name_is (its_Name);
+
+                           if not Self.name_Map_of_c_type.contains (its_Name)
+                           then
+                              Self.name_Map_of_c_type.insert (its_Name, the_Type);
+                           end if;
+
+                           Self.add_new_c_Type (the_Type);
+                        end;
+                     end if;
+                  end loop;
+               end;
+            else
+               new_c_Enum := c_type.new_Enum (Namespace => Self.current_c_Namespace,
+                                              Name      => the_Name);
+            end if;
+         end;
+
          Self.register (new_c_Enum,
                         doh_SwigType (the_doh_swig_Type));
+
+         --  The innermost namespace of an enumeration which is in no class, by which it is named where another of the
+         --  top package has its name.
+         --
+         if Self.getCurrentClass = null
+         then
+            declare
+               Scope : constant String := +doh_Item (Swig_symbol_qualified (the_Node));
+               Last  : constant Natural := ada.Strings.fixed.Index (Scope, "::", Going => ada.Strings.Backward);
+            begin
+               new_c_Enum.enum_Scope_is (+(if Last = 0 then Scope else Scope (Last + 2 .. Scope'Last)));
+            end;
+         end if;
 
          --  An enumeration which names its underlying type is of the size of that type.
          --
@@ -1374,6 +1457,15 @@ is
 
             new_Variable.is_Static        := False;
             new_Variable.is_class_Pointer := is_Pointer;
+
+            --  A member whose type is a typedef of a smart pointer of the standard library is noted, as the prune step
+            --  knows such a pointer by the name of its type, which it sees no further than the typedef (yaml-cpp's
+            --  'Node::m_pMemory', a 'shared_memory_holder').
+            --
+            if smart_Pointer_Words (+doh_Item (swig_Type)) = 0
+            then
+               new_Variable.smart_Words := smart_Pointer_Words (+doh_Item (SwigType_typedef_resolve_all (swig_Type)));
+            end if;
 
             if bit_Field /= ""
             then
@@ -2270,6 +2362,32 @@ is
 
 
 
+   function as_Ada_string_Text (the_String : in String) return String
+   --
+   --  The text which a C string stands for (the core's 'stringval'), written so as to stand between the quotes of an
+   --  Ada string literal: a quote is doubled, and a control character is joined in by its position.
+   --
+   is
+      Result : unbounded_String;
+   begin
+      for Each of the_String
+      loop
+         if Each = '"'
+         then
+            append (Result, """""");
+         elsif Each < ' ' or else Each >= Character'Val (127)
+         then
+            append (Result, """ & Character'Val (" & ada.Strings.fixed.Trim (Natural'Image (Character'Pos (Each)), ada.Strings.Left) & ") & """);
+         else
+            append (Result, Each);
+         end if;
+      end loop;
+
+      return to_String (Result);
+   end as_Ada_string_Text;
+
+
+
    function character_Value (Position : in String) return String
    --
    --  A constant of type 'char' as Ada states it, given the number which C gives it. A negative
@@ -2502,6 +2620,23 @@ is
    is
       the_current_Module : constant swig_Module.swig_Module_view := Self.current_Module;
    begin
+      --  A type which was made, not known, before its declaration, and which the declaration has taken over, is moved
+      --  to the place of a new type, after the class which declares it, whose package must be made first.
+      --
+      if the_current_Module.C.new_c_Types.contains (new_Type)
+      then
+         the_current_Module.C.new_c_Types.delete (the_current_Module.C.new_c_Types.find_Index (new_Type));
+
+         declare
+            Place : constant Natural := the_current_Module.C.new_c_Declarations.find_Index (new_Type.all'Access);
+         begin
+            if Place /= 0
+            then
+               the_current_Module.C.new_c_Declarations.delete (Place);
+            end if;
+         end;
+      end if;
+
       the_current_Module.C.new_c_Types       .append (new_Type);
       the_current_Module.C.new_c_Declarations.append (new_Type.all'Access);
    end add_new_c_Type;
@@ -2772,6 +2907,28 @@ is
               and then Self.swig_type_Map_of_c_type.contains (+(the_Name (the_Name'First .. Colons - 1) & the_Name (Colons + 2 .. the_Name'Last)))
             then
                return Self.swig_type_Map_of_c_type.Element (+(the_Name (the_Name'First .. Colons - 1) & the_Name (Colons + 2 .. the_Name'Last)));
+            end if;
+         end;
+
+         --  A type of the C library which is named in the namespace 'std' ('std::size_t', 'std::int32_t', as the C++
+         --  headers have them) is the type itself, where that is a number which the module knows, or one of the
+         --  library's types of numbers (whose names end in '_t'). (Until 2026-11-25
+         --  it was not known: yaml-cpp's 'ostream_wrapper' lost four of its members so.)
+         --
+         declare
+            the_Name : constant String  := +swig_Type;
+            First    : constant Natural := ada.Strings.fixed.Index (the_Name, "std::");
+         begin
+            if         First /= 0
+              and then (        First = the_Name'First
+                        or else the_Name (First - 1) = '.')
+              and then ada.Strings.fixed.Index (the_Name (First + 5 .. the_Name'Last), "::") = 0
+              and then Self.swig_type_Map_of_c_type.contains (+the_Name (First + 5 .. the_Name'Last))
+              and then (        Self.swig_type_Map_of_c_type.Element (+the_Name (First + 5 .. the_Name'Last)).is_a_Number
+                        or else ada.Strings.fixed.Tail (the_Name, 2) = "_t")      -- 'ptrdiff_t', 'int32_t' ...
+              and then Self.swig_type_Map_of_c_type.contains (+(the_Name (the_Name'First .. First - 1) & the_Name (First + 5 .. the_Name'Last)))
+            then
+               return Self.swig_type_Map_of_c_type.Element (+(the_Name (the_Name'First .. First - 1) & the_Name (First + 5 .. the_Name'Last)));
             end if;
          end;
 

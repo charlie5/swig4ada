@@ -22,6 +22,7 @@ is
                    is_anonymous_Bits => False,
                    is_ignored_Member => False,
                    Line              => 0,
+                   smart_Words       => 0,
                    member_Name       => <>,
                    is_Static        => <>,
                    is_class_Pointer => <>,

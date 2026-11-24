@@ -1040,6 +1040,22 @@ is
    end enum_Size;
 
 
+
+   procedure enum_Scope_is (Self : access Item;   Name : in unbounded_String)
+   is
+   begin
+      Self.my.enum_Scope := Name;
+   end enum_Scope_is;
+
+
+
+   function enum_Scope (Self : access Item) return unbounded_String
+   is
+   begin
+      return Self.my.enum_Scope;
+   end enum_Scope;
+
+
    -------------------------
    --  'c_Class' Subprograms
    --
