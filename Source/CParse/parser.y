@@ -77,6 +77,10 @@ static Node    *currentOuterClass = 0; /* for nested classes */
    changes the layout of its class in a way which a language module cannot see from the parse tree. Each is
    noted on the node of the class ("has_virtual_base", "has_unnamed_member"). */
 static int      virtual_base_seen = 0;
+/* swig4ada: which of the bases is inherited virtually, as their places in the object depend on it: each such base
+   is noted on its specifier ("virtual"), and the list of their names on the node of the class ("virtualbaselist"),
+   beside "baselist". */
+static int      this_base_virtual = 0;
 static String  *last_cpptype = 0;
 static int      inherit_list = 0;
 static Parm    *template_parameters = 0;
@@ -4510,6 +4514,7 @@ cpp_class_decl: storage_class cpptype idcolon class_virt_specifier_opt inherit L
 		     Setattr($$,"baselist", Getattr($inherit,"public"));
 		     Setattr($$,"protectedbaselist", Getattr($inherit,"protected"));
 		     Setattr($$,"privatebaselist", Getattr($inherit,"private"));
+		     Setattr($$,"virtualbaselist", Getattr($inherit,"virtual"));     /* swig4ada */
 		   }
 		   Setattr($$,"allows_typedef","1");
 		   if (virtual_base_seen)
@@ -4783,6 +4788,7 @@ cpp_class_decl: storage_class cpptype idcolon class_virt_specifier_opt inherit L
 		 Setattr($$,"baselist", Getattr($inherit,"public"));
 		 Setattr($$,"protectedbaselist", Getattr($inherit,"protected"));
 		 Setattr($$,"privatebaselist", Getattr($inherit,"private"));
+		 Setattr($$,"virtualbaselist", Getattr($inherit,"virtual"));     /* swig4ada */
 	       }
 	       Setattr($$,"storage",$storage_class);
 	       Setattr($$,"unnamed",unnamed);
@@ -8234,13 +8240,18 @@ base_list      : base_specifier {
 		   List *lpublic = NewList();
 		   List *lprotected = NewList();
 		   List *lprivate = NewList();
+		   List *lvirtual = NewList();     /* swig4ada */
 		   Setattr(list,"public",lpublic);
 		   Setattr(list,"protected",lprotected);
 		   Setattr(list,"private",lprivate);
+		   Setattr(list,"virtual",lvirtual);
 		   Delete(lpublic);
 		   Delete(lprotected);
 		   Delete(lprivate);
+		   Delete(lvirtual);
 		   Append(Getattr(list,Getattr(base,"access")),name);
+		   if (Getattr(base,"virtual"))
+		     Append(Getattr(list,"virtual"),name);
 	           $$ = list;
                }
 
@@ -8249,6 +8260,8 @@ base_list      : base_specifier {
 		   Node *base = $base_specifier;
 		   Node *name = Getattr(base,"name");
 		   Append(Getattr(list,Getattr(base,"access")),name);
+		   if (Getattr(base,"virtual"))     /* swig4ada */
+		     Append(Getattr(list,"virtual"),name);
                    $$ = list;
                }
                ;
@@ -8271,6 +8284,10 @@ base_specifier : opt_virtual <intvalue>{
 		 if ($variadic_opt) {
 		   SwigType_add_variadic(Getattr($$, "name"));
 		 }
+		 if (this_base_virtual) {     /* swig4ada */
+		   Setattr($$, "virtual", "1");
+		   this_base_virtual = 0;
+		 }
                }
 	       | opt_virtual access_specifier <intvalue>{
 		 $$ = cparse_line;
@@ -8287,6 +8304,10 @@ base_specifier : opt_virtual <intvalue>{
 		 }
 		 if ($variadic_opt) {
 		   SwigType_add_variadic(Getattr($$, "name"));
+		 }
+		 if (this_base_virtual) {     /* swig4ada */
+		   Setattr($$, "virtual", "1");
+		   this_base_virtual = 0;
 		 }
                }
                ;
@@ -8334,7 +8355,7 @@ classkeyopt    : classkey
                | %empty
                ;
 
-opt_virtual    : VIRTUAL { virtual_base_seen = 1; }
+opt_virtual    : VIRTUAL { virtual_base_seen = 1; this_base_virtual = 1; }
                | %empty
                ;
 

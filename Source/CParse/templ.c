@@ -17,12 +17,15 @@
 
 static int template_debug = 0;
 
-const char *baselists[3];
+/* swig4ada: the list of the bases which are inherited virtually ("virtualbaselist", made by the parser) is patched
+   as the others are. */
+const char *baselists[4];
 
 void SwigType_template_init(void) {
   baselists[0] = "baselist";
   baselists[1] = "protectedbaselist";
   baselists[2] = "privatebaselist";
+  baselists[3] = "virtualbaselist";
 }
 
 void Swig_cparse_debug_templates(int x) {
@@ -196,7 +199,7 @@ static void cparse_template_expand(Node *templnode, Node *n, String *tname, Stri
     /* Patch base classes */
     {
       int b = 0;
-      for (b = 0; b < 3; ++b) {
+      for (b = 0; b < 4; ++b) {     /* swig4ada: 4, for "virtualbaselist". */
         List *bases = Getattr(n, baselists[b]);
         if (bases) {
           int i;
