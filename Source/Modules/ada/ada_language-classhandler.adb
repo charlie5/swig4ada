@@ -723,6 +723,15 @@ begin
    add_hidden_Members (Self, before => null);                              -- Those which follow the last member.
 
    bind_constructors_of_abstract_Class (Self, the_Node);
+
+   --  That step makes the constructor of a concrete class from a node of its own, which is of no module, and leaves
+   --  it the current node, of which 'current_Module' is worked out. The steps which follow ask which module they are
+   --  in, so the class is made the current node again. (Until 2026-11-24 it was not, and a second base of an abstract
+   --  class was given no 'as_<base>', as the class was taken for one of another module.)
+   --
+   Self.current_c_Node := doh_Node (the_Node);
+   locate (doh_Node (the_Node));
+
    bind_the_Director                   (Self, the_Node);
    bind_other_base_Classes             (Self, the_Node);
 
