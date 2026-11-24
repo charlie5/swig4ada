@@ -1,0 +1,1 @@
+cpp11_using_member_template.i:65: Warning 861: Unable to bind the function 'getImpl' of class 'Derived', as one of its types is not known.

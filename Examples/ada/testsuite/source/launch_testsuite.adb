@@ -1695,6 +1695,19 @@ begin
          put_Line ("pugixml is not installed, so the run-time case 'pugixml' is passed over.");
       end if;
 
+      --  Likewise TagLib, from the headers of its core: classes each of which holds the pointer to its
+      --  implementation, as a smart pointer of a private class. Its tester writes a wave file, reads, tags and
+      --  saves it, and has TagLib call a resolver of the types of files which is declared in Ada.
+      --
+      if ada.Directories.exists ("/usr/include/taglib/fileref.h")
+      then
+         run ("taglib",
+              Options => "-I/usr/include",
+              Library => "tag");
+      else
+         put_Line ("TagLib is not installed, so the run-time case 'taglib' is passed over.");
+      end if;
+
       --  Cases of upstream's suite, each with a tester written after upstream's test of it for Python.
       --
       new_Line;
@@ -1743,6 +1756,7 @@ begin
       run_Upstream ("enums",                      use_CPP => False);     -- Enumerations of C with a name, a typedef or neither.
       run_Upstream ("cpp11_alternate_function_syntax");     -- Member functions with a trailing return type.
       run_Upstream ("template_default_arg");      -- Templates and functions with default arguments.
+      run_Upstream ("cpp11_using_member_template");     -- A base whose member is a smart pointer of a type which is not bound, and which has no constructor in the binding.
    end if;
 
 

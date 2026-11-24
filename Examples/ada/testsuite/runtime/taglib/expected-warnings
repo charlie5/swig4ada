@@ -1,0 +1,70 @@
+tmap.h:80: Warning 861: Unable to bind the type 'std::initializer_list<(std::pair<(TagLib::String,TagLib::StringList)>)>', which is not known.
+tlist.h:100: Warning 861: Unable to bind the type 'TagLib::List<(TagLib::ByteVector)>::ConstIterator', which is not known.
+tmap.h:103: Warning 861: Unable to bind the type 'TagLib::Map<(TagLib::String,TagLib::Variant)>::ConstIterator', which is not known.
+tmap.h:91: Warning 861: Unable to bind the type 'TagLib::Map<(TagLib::String,TagLib::StringList)>::Iterator', which is not known.
+tmap.h:91: Warning 861: Unable to bind the type 'TagLib::Map<(TagLib::String,TagLib::Variant)>::Iterator', which is not known.
+tpropertymap.h:170: Warning 861: Unable to bind the type 'TagLib::PropertyMap::Iterator', which is not known.
+tlist.h:88: Warning 861: Unable to bind the type 'TagLib::List<(TagLib::String)>::Iterator', which is not known.
+tstring.h:249: Warning 861: Unable to bind the type 'TagLib::String::Iterator', which is not known.
+tmap.h:103: Warning 861: Unable to bind the type 'TagLib::Map<(TagLib::String,TagLib::StringList)>::ConstIterator', which is not known.
+tstring.h:259: Warning 861: Unable to bind the type 'TagLib::String::ConstIterator', which is not known.
+tlist.h:88: Warning 861: Unable to bind the type 'TagLib::List<(TagLib::ByteVector)>::Iterator', which is not known.
+tag.h:117: Warning 861: Unable to bind the type 'TagLib::List<(TagLib::VariantMap)>', which is not known.
+tlist.h:76: Warning 861: Unable to bind the type 'std::initializer_list<(TagLib::ByteVector)>', which is not known.
+tmap.h:80: Warning 861: Unable to bind the type 'std::initializer_list<(std::pair<(TagLib::String,TagLib::Variant)>)>', which is not known.
+tlist.h:100: Warning 861: Unable to bind the type 'TagLib::List<(TagLib::String)>::ConstIterator', which is not known.
+tlist.h:76: Warning 861: Unable to bind the type 'std::initializer_list<(TagLib::String)>', which is not known.
+tvariant.h:100: Warning 861: Unable to bind the type 'TagLib::List<(TagLib::Variant)>', which is not known.
+tvariant.h:192: Warning 861: Unable to bind the type 'TagLib::VariantList', which is not known.
+tvariant.h:82: Warning 861: Unable to bind the array type 'Type*[]', as its element type is not known.
+tvariant.h:82: Warning 861: Unable to bind the pointer type 'Type**', as the type it points to is not known.
+tfile.h:63: Warning 861: Unable to bind the array type 'Position*[]', as its element type is not known.
+tfile.h:63: Warning 861: Unable to bind the pointer type 'Position**', as the type it points to is not known.
+tstring.h:249: Warning 861: Unable to bind the function 'begin' of class 'String', as one of its types is not known.
+tstring.h:259: Warning 861: Unable to bind the function 'cbegin' of class 'String', as one of its types is not known.
+tstring.h:265: Warning 861: Unable to bind the function 'a_end' of class 'String', as one of its types is not known.
+tstring.h:277: Warning 861: Unable to bind the function 'cend' of class 'String', as one of its types is not known.
+tstringlist.h:65: Warning 861: Unable to bind the function 'construct' of class 'StringList', as one of its types is not known.
+tlist.h:76: Warning 861: Unable to bind the function 'construct' of class 'StringList_base', as one of its types is not known.
+tlist.h:88: Warning 861: Unable to bind the function 'begin' of class 'StringList_base', as one of its types is not known.
+tlist.h:100: Warning 861: Unable to bind the function 'cbegin' of class 'StringList_base', as one of its types is not known.
+tlist.h:106: Warning 861: Unable to bind the function 'a_end' of class 'StringList_base', as one of its types is not known.
+tlist.h:118: Warning 861: Unable to bind the function 'cend' of class 'StringList_base', as one of its types is not known.
+tlist.h:127: Warning 861: Unable to bind the function 'insert' of class 'StringList_base', as one of its types is not known.
+tlist.h:185: Warning 861: Unable to bind the function 'find' of class 'StringList_base', as one of its types is not known.
+tlist.h:195: Warning 861: Unable to bind the function 'cfind' of class 'StringList_base', as one of its types is not known.
+tlist.h:209: Warning 861: Unable to bind the function 'erase' of class 'StringList_base', as one of its types is not known.
+tlist.h:76: Warning 861: Unable to bind the function 'construct' of class 'ByteVectorList_base', as one of its types is not known.
+tlist.h:88: Warning 861: Unable to bind the function 'begin' of class 'ByteVectorList_base', as one of its types is not known.
+tlist.h:100: Warning 861: Unable to bind the function 'cbegin' of class 'ByteVectorList_base', as one of its types is not known.
+tlist.h:106: Warning 861: Unable to bind the function 'a_end' of class 'ByteVectorList_base', as one of its types is not known.
+tlist.h:118: Warning 861: Unable to bind the function 'cend' of class 'ByteVectorList_base', as one of its types is not known.
+tlist.h:127: Warning 861: Unable to bind the function 'insert' of class 'ByteVectorList_base', as one of its types is not known.
+tlist.h:185: Warning 861: Unable to bind the function 'find' of class 'ByteVectorList_base', as one of its types is not known.
+tlist.h:195: Warning 861: Unable to bind the function 'cfind' of class 'ByteVectorList_base', as one of its types is not known.
+tlist.h:209: Warning 861: Unable to bind the function 'erase' of class 'ByteVectorList_base', as one of its types is not known.
+tbytevectorlist.h:69: Warning 861: Unable to bind the function 'construct' of class 'ByteVectorList', as one of its types is not known.
+tvariant.h:100: Warning 861: Unable to bind the function 'construct' of class 'Variant', as one of its types is not known.
+tvariant.h:153: Warning 861: Unable to bind the function 'toList' of class 'Variant', as one of its types is not known.
+tvariant.h:153: Warning 861: Unable to bind the function 'toList' of class 'Variant', as one of its types is not known.
+tmap.h:80: Warning 861: Unable to bind the function 'construct' of class 'VariantMap', as one of its types is not known.
+tmap.h:91: Warning 861: Unable to bind the function 'begin' of class 'VariantMap', as one of its types is not known.
+tmap.h:103: Warning 861: Unable to bind the function 'cbegin' of class 'VariantMap', as one of its types is not known.
+tmap.h:109: Warning 861: Unable to bind the function 'a_end' of class 'VariantMap', as one of its types is not known.
+tmap.h:121: Warning 861: Unable to bind the function 'cend' of class 'VariantMap', as one of its types is not known.
+tmap.h:152: Warning 861: Unable to bind the function 'find' of class 'VariantMap', as one of its types is not known.
+tmap.h:171: Warning 861: Unable to bind the function 'erase' of class 'VariantMap', as one of its types is not known.
+tmap.h:80: Warning 861: Unable to bind the function 'construct' of class 'SimplePropertyMap', as one of its types is not known.
+tmap.h:91: Warning 861: Unable to bind the function 'begin' of class 'SimplePropertyMap', as one of its types is not known.
+tmap.h:103: Warning 861: Unable to bind the function 'cbegin' of class 'SimplePropertyMap', as one of its types is not known.
+tmap.h:109: Warning 861: Unable to bind the function 'a_end' of class 'SimplePropertyMap', as one of its types is not known.
+tmap.h:121: Warning 861: Unable to bind the function 'cend' of class 'SimplePropertyMap', as one of its types is not known.
+tmap.h:152: Warning 861: Unable to bind the function 'find' of class 'SimplePropertyMap', as one of its types is not known.
+tmap.h:171: Warning 861: Unable to bind the function 'erase' of class 'SimplePropertyMap', as one of its types is not known.
+tpropertymap.h:170: Warning 861: Unable to bind the function 'find' of class 'PropertyMap', as one of its types is not known.
+tag.h:117: Warning 861: Unable to bind the virtual function 'complexProperties' of class 'Tag', as one of its types is not known. 'unbound_virtual_4' holds its place.
+tag.h:124: Warning 861: Unable to bind the virtual function 'setComplexProperties' of class 'Tag', as one of its types is not known. 'unbound_virtual_5' holds its place.
+tfile.h:149: Warning 861: Unable to bind the virtual function 'complexProperties' of class 'File', as one of its types is not known. 'unbound_virtual_4' holds its place.
+tfile.h:156: Warning 861: Unable to bind the virtual function 'setComplexProperties' of class 'File', as one of its types is not known. 'unbound_virtual_5' holds its place.
+fileref.h:306: Warning 861: Unable to bind the function 'complexProperties' of class 'FileRef', as one of its types is not known.
+fileref.h:313: Warning 861: Unable to bind the function 'setComplexProperties' of class 'FileRef', as one of its types is not known.
