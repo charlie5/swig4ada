@@ -1722,6 +1722,18 @@ begin
          put_Line ("jsoncpp is not installed, so the run-time case 'jsoncpp' is passed over.");
       end if;
 
+      --  Likewise yaml-cpp: a node which holds a shared pointer, loaded from text and written out again, and a document
+      --  which is refused by an exception of the library's.
+      --
+      if ada.Directories.exists ("/usr/include/yaml-cpp/yaml.h")
+      then
+         run ("yamlcpp",
+              Options => "-I/usr/include",
+              Library => "yaml-cpp");
+      else
+         put_Line ("yaml-cpp is not installed, so the run-time case 'yamlcpp' is passed over.");
+      end if;
+
       --  Cases of upstream's suite, each with a tester written after upstream's test of it for Python.
       --
       new_Line;

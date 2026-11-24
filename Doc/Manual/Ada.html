@@ -391,7 +391,11 @@ calls it in Ada.
 A variable which has no symbol outside its own file cannot be imported: one which is
 <tt>static</tt> and, in C++, one which is constant and not <tt>extern</tt>.
 Where its value is worked out it is a constant of that value (a number, a
-<tt>bool</tt>, a <tt>char</tt>), and otherwise it is left out with a warning.
+<tt>bool</tt>, a <tt>char</tt>, or the text of a constant pointer to a string literal,
+<tt>const char* const NAME = "shapes";</tt>, as for a <tt>#define</tt>), and otherwise it is
+left out with a warning.
+A type of the C library which a header names in the namespace <tt>std</tt>
+(<tt>std::size_t</tt>, <tt>std::int32_t</tt>) is the type itself (<tt>interfaces.C.size_t</tt>).
 </p>
 
 <H3><a name="Ada_enums">41.4.3 Enumerations</a></H3>
