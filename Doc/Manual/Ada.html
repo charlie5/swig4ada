@@ -1008,7 +1008,12 @@ any other class template, so an instance must be named
 A container is a class which C++ constructs, so it is a limited record.
 <tt>std::pair</tt> and <tt>std::complex</tt> are plain records, which may be assigned and
 are returned as function results.
-The streams (<tt>std_iostream.i</tt>, <tt>std_sstream.i</tt>) are used by pointer only.
+The streams (<tt>std_iostream.i</tt>, <tt>std_sstream.i</tt>) are used by pointer only,
+whether a header names one by its typedef (<tt>std::ostream</tt>) or as the instance of its
+template (<tt>std::basic_ostream&lt;char, std::char_traits&lt;char&gt; &gt;</tt>).
+The iterator of a map (<tt>std::map&lt;K, T&gt;::iterator</tt>) is a class of the layout which
+GNU libstdc++ gives it, which must be named with <tt>%template</tt> where a header uses it
+(<tt>%template (Iterator) std::_Rb_tree_iterator&lt;std::pair&lt;const K, T&gt; &gt;;</tt>).
 </p>
 
 <p>

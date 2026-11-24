@@ -8,6 +8,8 @@ with
      jsoncpp.Reader,
      jsoncpp.ReaderErrors,
      jsoncpp.StructuredError,
+     jsoncpp.Strings,
+     jsoncpp.ValueConstIterator,
 
      swig.std_Strings,
      interfaces.C.Strings,
@@ -107,6 +109,22 @@ begin
       Value.get (Root, Name_Key, Missing'unchecked_Access, Member'unchecked_Access);
       Value.asString (Member, Text'unchecked_Access);
       check (to_Ada (Text) = "ada",                              "a member which is a string");
+
+      the_names_of_the_Members :
+      declare
+         Names : aliased Strings.Item;
+      begin
+         --  'Value::Members' is a typedef of a 'std::vector<String>' within the class, which the core could not follow
+         --  until the vector was named, after the header. It is returned by value.
+         --
+         Value.getMemberNames (Root, Names'unchecked_Access);
+         check (Strings.size (Names) = 3,                        "the names of its members are given, in a vector which is returned by value");
+         check (to_Ada (Strings.get (Names, 0).all) = "deep",    "in their order");
+         Strings.destruct_0 (Names);
+      end the_names_of_the_Members;
+
+      check (ValueConstIterator.Item'Size / 8 = size_of_const_iterator,
+             "an iterator has the size of its class, the iterator of the map which it holds among its members");
 
       writeString (Styled'unchecked_Access, Root'unchecked_Access, Text'unchecked_Access);
       check (ada.Strings.fixed.Index (to_Ada (Text), """name"" : ""ada""") /= 0,

@@ -6,6 +6,7 @@
 %include <std_except.i>      // The base of its exceptions, with the shape of GNU libstdc++.
 %include <std_iostream.i>
 %include <std_vector.i>
+%include <std_map.i>
 %include <std_deque.i>
 %include <std_stack.i>
 
@@ -31,6 +32,12 @@ namespace Json { typedef std::string String; }
 //
 %template (Strings)       std::vector<std::string>;
 %template (PathArguments) std::vector<Json::PathArgument>;
+
+//  The members of an object ('Value::ObjectValues'), and the iterator of a value's iterators, which is that of the
+//  map.
+//
+%template (ObjectMap)            std::map<Json::Value::CZString, Json::Value>;
+%template (ObjectValuesIterator) std::_Rb_tree_iterator<std::pair<const Json::Value::CZString, Json::Value> >;
 %include <json/reader.h>
 
 //  The containers of a reader: its stack of the values which it is reading ('Reader::Nodes'), its errors

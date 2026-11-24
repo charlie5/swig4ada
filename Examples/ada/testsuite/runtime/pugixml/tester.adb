@@ -2,6 +2,8 @@ with
      pugixml.xml_document,
      pugixml.xml_parse_result,
      pugixml.xml_node,
+     pugixml.xml_node_range,
+     pugixml.xml_node_iterator,
      pugixml.xml_attribute,
      pugixml.xml_text,
      pugixml.xpath_node,
@@ -72,6 +74,14 @@ begin
       check (+xml_text.get (xml_node.text (xml_node.child (Second, +Title'Access))) = "Rust",   "a text handle, of the class which the node class names and which names it");
       check (xml_node.empty (Third) /= 0,                  "the node after the last is the empty handle");
       check (+xml_node.name (xml_node.parent (Second)) = "library",   "a node gives its parent");
+
+      declare
+         Children : constant xml_node_range.Item := xml_node.children (Root);
+      begin
+         check (xml_node_range.empty (Children) = 0,                                     "a node gives the range of its children, by value");
+         check (+xml_node.name (xml_node_iterator.dereference (xml_node_range.the_begin (Children)).all) = "book",
+                "whose first iterator reaches the first of them");
+      end;
    end reading;
 
    searching :
