@@ -966,6 +966,19 @@ A template is bound once an instance of it is named with <tt>%template</tt>; the
 instance is then a class like any other, with the name which <tt>%template</tt> gives it.
 The <tt>%template</tt> line may follow the functions which use the instance, as it does
 where a header is included first.
+A member template of a class (a function, an operator or a constructor) is bound in the
+same way, by naming its instances within an <tt>%extend</tt> of the class:
+</p>
+
+<div class="code"><pre>
+%extend YAML::Node {
+  %template (Node)    Node&lt;int&gt;;                 // A constructor.
+  %template (as_int)  as&lt;int&gt;;
+  %template (child)   operator[]&lt;std::string&gt;;
+}
+</pre></div>
+
+<p>
 Namespaces are not reflected in the package names: a class <tt>geometry::Box</tt> is
 the package <tt>shapes.Box</tt>.
 The names which are imported from C++ take account of them.

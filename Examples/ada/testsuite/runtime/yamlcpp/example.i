@@ -41,6 +41,22 @@
 %include <yaml-cpp/node/ptr.h>
 %include <yaml-cpp/node/node.h>
 
+//  The member templates of a node, of which an instance is named for each type which the tester uses: a node is made
+//  from a value, a value is read from it ('as'), a child is found by its key ('operator[]'), and values are appended
+//  to a sequence ('push_back').
+//
+%extend YAML::Node {
+  %template (Node)        Node<int>;
+  %template (Node)        Node<std::string>;
+  %template (as_int)      as<int>;
+  %template (as_double)   as<double>;
+  %template (as_string)   as<std::string>;
+  %template (child)       operator[]<std::string>;
+  %template (child)       operator[]<int>;
+  %template (push_back)   push_back<int>;
+  %template (push_back)   push_back<std::string>;
+}
+
 //  The documents which 'LoadAll' gives.
 //
 %template (Nodes) std::vector<YAML::Node>;

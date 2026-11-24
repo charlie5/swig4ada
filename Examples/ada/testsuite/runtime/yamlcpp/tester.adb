@@ -26,6 +26,7 @@ is
        Checks;
 
    use type interfaces.C.int,
+            interfaces.C.double,
             interfaces.C.size_t,
             swig.bool,
             Emitter.Pointer;
@@ -61,6 +62,63 @@ begin
       Node.destruct_0 (Document);
       free (Text);
    end loading;
+
+   the_member_Templates :
+   declare
+      --  Instances of the member templates of a node, which the interface names: a child is found by its key or its
+      --  index ('operator[]'), its value is read as a number or a string ('as'), a node is made from a value, and a
+      --  value is appended to a sequence ('push_back').
+      --
+      Text     :         chars_ptr := new_String ("name: ada" & ASCII.LF & "list: [1, 2, 3]" & ASCII.LF & "pi: 3.5" & ASCII.LF);
+      Document : aliased Node.Item;
+
+      Name_Key : aliased std_String := to_std_String (interfaces.C.to_C ("name"));
+      List_Key : aliased std_String := to_std_String (interfaces.C.to_C ("list"));
+      Pi_Key   : aliased std_String := to_std_String (interfaces.C.to_C ("pi"));
+      Index    : aliased interfaces.C.int := 1;
+      Seven    : aliased interfaces.C.int := 7;
+      Four     : aliased interfaces.C.int := 4;
+
+      Name     : aliased Node.Item;
+      List     : aliased Node.Item;
+      Second   : aliased Node.Item;
+      Pi       : aliased Node.Item;
+      Again    : aliased Node.Item;
+      Its_Text : aliased std_String;
+      Built    : aliased Node.Item := Node.construct (Seven'unchecked_Access);
+   begin
+      Load (Text, Document'unchecked_Access);
+
+      Node.child (Document, Name_Key'unchecked_Access, Name'unchecked_Access);
+      Node.as_string (Name, Its_Text'unchecked_Access);
+      check (to_Ada (Its_Text) = "ada",              "a child is found by its key, and read as a string, by instances of member templates");
+
+      Node.child (Document, List_Key'unchecked_Access, List'unchecked_Access);
+      Node.child (List, Index'unchecked_Access, Second'unchecked_Access);
+      check (Node.as_int (Second) = 2,               "an element is found by its index, and read as a number");
+
+      Node.child (Document, Pi_Key'unchecked_Access, Pi'unchecked_Access);
+      check (Node.as_double (Pi) = 3.5,              "and as a real number");
+
+      check (Node.as_int (Built) = 7,                "a node is made from a value, by an instance of its constructor template");
+
+      Node.push_back (List, Four'unchecked_Access);
+      Node.child (Document, List_Key'unchecked_Access, Again'unchecked_Access);
+      check (Node.size (Again) = 4,                  "a value is appended to a sequence, which is a part of its document");
+
+      destruct (Its_Text);
+      destruct (Pi_Key);
+      destruct (List_Key);
+      destruct (Name_Key);
+      Node.destruct_0 (Built);
+      Node.destruct_0 (Again);
+      Node.destruct_0 (Pi);
+      Node.destruct_0 (Second);
+      Node.destruct_0 (List);
+      Node.destruct_0 (Name);
+      Node.destruct_0 (Document);
+      free (Text);
+   end the_member_Templates;
 
    all_the_Documents :
    declare
