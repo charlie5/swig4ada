@@ -1168,6 +1168,20 @@ is
 
 
 
+   procedure insert_Component (Self          : access Item;
+                               new_Component : access c_Variable.item'Class;
+                               Index         : in     Positive)
+   is
+   begin
+      make_Room (Self);
+
+      Self.my.Components (Index + 1 .. Self.my.component_Count + 1) := Self.my.Components (Index .. Self.my.component_Count);
+      Self.my.Components (Index)                                    := new_Component;
+      Self.my.component_Count                                       := Self.my.component_Count + 1;
+   end insert_Component;
+
+
+
    procedure remove_Component (Self  : access Item;
                                Index : in     Positive)
    is

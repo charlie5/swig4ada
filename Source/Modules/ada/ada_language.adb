@@ -160,6 +160,7 @@ is
    function  variable_Suffix (swig_Type : in String) return String;
    function  character_Value (Position  : in String) return String;
    function  without_leading_Qualifiers (swig_Type : in String) return String;
+   function  smart_Pointer_Words (type_Name : in String) return Natural;
    procedure bind_constructors_of_abstract_Class (Self : access Item;   the_Class : in Node_Pointer);
    procedure bind_other_base_Classes             (Self : access Item;   the_Class : in Node_Pointer);
    procedure add_hidden_Members                  (Self : access Item;   Before    : in Node_Pointer;   of_Class : in Node_Pointer := null);
@@ -2152,6 +2153,58 @@ is
 
       return swig_Type (First .. swig_Type'Last);
    end without_leading_Qualifiers;
+
+
+
+   function smart_Pointer_Words (type_Name : in String) return Natural
+   --
+   --  The number of addresses which an object of the type takes, where it is a smart pointer of the standard library
+   --  (as GNU libstdc++ has it): one for a 'std::unique_ptr' with the default deleter, two for a 'std::shared_ptr'
+   --  or a 'std::weak_ptr'. It is none for any other type.
+   --
+   is
+      function is_an_Instance_of (Template : in String) return Boolean
+      --
+      --  Whether the type is an instance of the template with one argument ('std::unique_ptr<(X)>').
+      --
+      is
+         Prefix : constant String  := Template & "<(";
+         Depth  :          Integer := 0;
+      begin
+         if        type_Name'Length <= Prefix'Length + 2
+           or else type_Name (type_Name'First .. type_Name'First + Prefix'Length - 1) /= Prefix
+           or else type_Name (type_Name'Last - 1 .. type_Name'Last)                  /= ")>"
+         then
+            return False;
+         end if;
+
+         for Each of type_Name (type_Name'First + Prefix'Length .. type_Name'Last - 2)
+         loop
+            case Each
+            is
+               when '(' | '<' => Depth := Depth + 1;
+               when ')' | '>' => Depth := Depth - 1;
+               when ','       => if Depth = 0 then return False; end if;     -- A second argument, such as a deleter.
+               when others    => null;
+            end case;
+         end loop;
+
+         return Depth = 0;
+      end is_an_Instance_of;
+
+   begin
+      if is_an_Instance_of ("std::unique_ptr")
+      then
+         return 1;
+
+      elsif        is_an_Instance_of ("std::shared_ptr")
+           or else is_an_Instance_of ("std::weak_ptr")
+      then
+         return 2;
+      end if;
+
+      return 0;
+   end smart_Pointer_Words;
 
 
 

@@ -204,6 +204,7 @@ is
       has_a_usable_Move     : Boolean := False;
       deletes_its_Copy      : Boolean := False;
       deletes_its_Move      : Boolean := False;
+      has_a_smart_Pointer   : Boolean := False;     -- Whose type may not be known, so that the test of its members does not see it.
    begin
       if not Self.in_cpp_Mode
       then
@@ -224,6 +225,13 @@ is
                         or else is_declared_Virtual (the_Child))     -- A virtual one is never trivial.
             then
                declares_a_Destructor := True;
+
+            elsif      Kind = "cdecl"     -- A member which is a smart pointer of the standard library, whose destructor is not trivial.
+              and then Attribute (the_Child, "decl")    = ""
+              and then Attribute (the_Child, "storage") /= "static"
+              and then smart_Pointer_Words (without_leading_Qualifiers (Attribute (the_Child, "type"))) > 0
+            then
+               has_a_smart_Pointer := True;
 
             elsif      Kind = "constructor"
               and then get_Attribute (the_Child, "template")     = null
@@ -271,6 +279,7 @@ is
       if        declares_a_Destructor
         or else declares_a_Copy
         or else declares_a_Move
+        or else has_a_smart_Pointer
         or else get_Attribute (the_Node, "has_virtual_base") /= null     -- Whose place the constructors of the class must set.
         or else (deletes_its_Copy and not has_a_usable_Move)
         or else (deletes_its_Move and not has_a_usable_Copy)

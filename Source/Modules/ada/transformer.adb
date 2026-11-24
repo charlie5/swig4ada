@@ -60,6 +60,26 @@ is
       end fetch_c_Type;
 
 
+      function is_never_constructed_in_Ada (the_Type : in c_Type.view) return Boolean
+      --
+      --  True for a class which C++ constructs, which is not virtual, and which has no constructor in the binding
+      --  (each of those which it has takes a type that is not known). GNAT takes such a type, which is limited and of
+      --  convention CPP, for one which cannot be the type of a component, so a base class or a member of it is bytes
+      --  of its size. (Found by a class of the suite whose one constructor takes a 'std::shared_ptr' of a type which
+      --  is not bound, once such a member was kept as storage, 2026-11-24.)
+      --
+      is
+         use type c_Type.a_c_type_Kind;
+         the_Class : constant c_Type.view := (if the_Type.c_type_Kind = c_Type.Typedef then the_Type.ultimate_base_Type
+                                                                                     else the_Type);
+      begin
+         return         the_Class.c_type_Kind = c_Type.c_Class
+               and then the_Class.is_constructed_by_Cpp
+               and then not the_Class.is_Virtual
+               and then (for all Each of c_nameSpace.view (the_Class.nameSpace).Subprograms => not Each.is_Constructor);
+      end is_never_constructed_in_Ada;
+
+
 
       procedure make_Unique (the_Package : in ada_Package.view)
       --
@@ -1087,9 +1107,16 @@ is
                                     --  In a type extension the component may not be where C++ has the base class (see the members
                                     --  which a derived class adds), so it only reserves storage, and 'as_<base>' reaches the base.
                                     --
-                                    the_ada_Record.add_Component (ada_Variable.new_ada_Variable (  to_ada_Identifier (Element (Cursor).Name)
-                                                                                                 & (if has_Parent then "_storage" else ""),
-                                                                                                 c_type_Map_of_ada_type.Element (Element (Cursor))));
+                                    declare
+                                       never_Constructed : constant Boolean := is_never_constructed_in_Ada (Element (Cursor));
+                                       the_Base          : constant ada_Variable.view
+                                         := ada_Variable.new_ada_Variable (  to_ada_Identifier (Element (Cursor).Name)
+                                                                           & (if has_Parent or never_Constructed then "_storage" else ""),
+                                                                           c_type_Map_of_ada_type.Element (Element (Cursor)));
+                                    begin
+                                       the_Base.is_raw_Storage := never_Constructed;
+                                       the_ada_Record.add_Component (the_Base);
+                                    end;
                                  elsif the_ada_Record.base_Classes.is_Empty
                                  then
                                     the_ada_Record.add_Base (c_type_Map_of_ada_type.Element (Element (Cursor)));
@@ -1126,11 +1153,14 @@ is
                                  if c_type_Map_of_ada_type.contains (Element (Cursor))
                                  then
                                     declare
-                                       the_Base : constant ada_Variable.view
-                                         := ada_Variable.new_ada_Variable (to_ada_Identifier (Element (Cursor).Name),
+                                       never_Constructed : constant Boolean := is_never_constructed_in_Ada (Element (Cursor));
+                                       the_Base          : constant ada_Variable.view
+                                         := ada_Variable.new_ada_Variable (  to_ada_Identifier (Element (Cursor).Name)
+                                                                           & (if never_Constructed then "_storage" else ""),
                                                                            c_type_Map_of_ada_type.Element (Element (Cursor)));
                                     begin
-                                       the_Base.is_base_Class := True;
+                                       the_Base.is_base_Class  := True;
+                                       the_Base.is_raw_Storage := never_Constructed;     -- It is reached by 'as_<base>'.
                                        the_ada_Record.add_Component (the_Base);
                                     end;
                                  else
@@ -1148,6 +1178,42 @@ is
                         add_Components :
                         declare
                            the_c_Components : constant c_type.record_Components := the_c_Type.Components;
+
+                           function is_a_Component_of_the_Parents (Name : in unbounded_String) return Boolean
+                           --
+                           --  Whether a parent of the record, or one of its parents, has a component of the name. A type
+                           --  extension cannot declare one, where a C++ class may have a member of the name of one of its
+                           --  base (each class of TagLib has its 'd').
+                           --
+                           is
+                              use ada.Characters.handling;
+                              the_Parents : ada_Type.Vector := the_ada_Record.base_Classes;
+                           begin
+                              while not the_Parents.is_Empty
+                              loop
+                                 declare
+                                    the_Parent : ada_Type.view := the_Parents.first_Element;
+                                 begin
+                                    while the_Parent.all in ada_Type.a_subType.item'Class     -- A typedef of a class.
+                                    loop
+                                       the_Parent := ada_Type.a_subType.view (the_Parent).base_Type;
+                                    end loop;
+
+                                    exit when the_Parent.all not in ada_Type.composite.a_record.item'Class;
+
+                                    if (for some Each of ada_Type.composite.a_record.view (the_Parent).Components
+                                        => to_Lower (to_String (Each.Name)) = to_Lower (to_String (Name)))
+                                    then
+                                       return True;
+                                    end if;
+
+                                    the_Parents := ada_Type.composite.a_record.view (the_Parent).base_Classes;
+                                 end;
+                              end loop;
+
+                              return False;
+                           end is_a_Component_of_the_Parents;
+
                         begin
                            for Each in the_c_Components'Range
                            loop
@@ -1174,6 +1240,33 @@ is
                                       and then not the_c_Components (Each).is_ignored_Member     -- Which is named so already.
                                     then
                                        the_Component.Name := the_Component.Name & "_storage";
+
+                                    elsif is_never_constructed_in_Ada (the_c_Components (Each).my_Type)
+                                      and then the_c_Components (Each).array_Bounds.is_Empty
+                                      and then not the_c_Components (Each).is_ignored_Member
+                                    then
+                                       the_Component.Name := the_Component.Name & "_storage";
+                                    end if;
+
+                                    if         is_never_constructed_in_Ada (the_c_Components (Each).my_Type)
+                                      and then the_c_Components (Each).array_Bounds.is_Empty
+                                    then
+                                       the_Component.is_raw_Storage := True;
+                                    end if;
+
+                                    if is_a_Component_of_the_Parents (the_Component.Name)
+                                    then
+                                       declare
+                                          Suffix : Positive := 2;
+                                       begin
+                                          while is_a_Component_of_the_Parents (the_Component.Name & "_" & ada.Strings.fixed.Trim (Positive'Image (Suffix),
+                                                                                                                                  ada.Strings.Left))
+                                          loop
+                                             Suffix := Suffix + 1;
+                                          end loop;
+
+                                          the_Component.Name := the_Component.Name & "_" & ada.Strings.fixed.Trim (Positive'Image (Suffix), ada.Strings.Left);
+                                       end;
                                     end if;
 
                                     the_ada_Record.add_Component (the_Component);

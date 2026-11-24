@@ -43,6 +43,50 @@ is
       end loop;
    end find_the_not_fully_known_Types;
 
+
+
+   procedure keep_the_Storage (of_Class : in c_Type.view;
+                               Index    : in Positive;
+                               Words    : in Positive)
+   --
+   --  Makes the member at the index storage of so many addresses, as it is a smart pointer of the standard library
+   --  whose type is not known. Such a member is most often the private pointer to the implementation of its class
+   --  ('std::unique_ptr<FilePrivate> d;', in each class of TagLib), whose loss would leave the record smaller than
+   --  the class, so that an object which Ada declares is too small for C++. The layout check of the class in the
+   --  wrapper checks its size. (That the class is one which C++ constructs is noted by the class handler.)
+   --
+   is
+      the_Member  : constant c_Variable.view := c_Variable.view (of_Class.Components (Index));
+      the_Address : constant c_Type.view     := Self.name_Map_of_c_type.Element (+"void*");
+   begin
+      if the_Member.member_Name /= ""     -- A public member, which a program may have used.
+      then
+         c_Declarable.warn (of_Class, not_Bound,   "The member '" & the_Member.Name & "' of class '" & of_Class.Name
+                                                 & "' is a smart pointer to a type which is not known, so it only reserves its storage.");
+      end if;
+
+      if not the_Member.is_ignored_Member
+      then
+         the_Member.Name              := the_Member.Name & "_storage";
+         the_Member.is_ignored_Member := True;
+      end if;
+
+      the_Member.my_Type := the_Address;
+
+      for Each in 2 .. Words
+      loop
+         declare
+            the_Word : constant c_Variable.view := c_Variable.new_c_Variable (the_Member.Name & "_" & ada.Strings.fixed.Trim (Integer'Image (Each),
+                                                                                                                             ada.Strings.Left),
+                                                                              the_Address);
+         begin
+            the_Word.is_ignored_Member := True;
+            the_Word.Line              := the_Member.Line;
+            of_Class.insert_Component (the_Word, Index => Index + Each - 1);
+         end;
+      end loop;
+   end keep_the_Storage;
+
 begin
    find_the_not_fully_known_Types;
 
@@ -51,7 +95,8 @@ begin
    --  is used through a pointer as before. (A member which the interface file ignores only reserves its
    --  storage, and may well have been ignored because its type cannot be bound. Until 2026-11-23 only such a
    --  member was left out: any other took its class with it, and every function which used the class. LevelDB's
-   --  'Iterator', which has a member of a private nested structure, was not bound at all.)
+   --  'Iterator', which has a member of a private nested structure, was not bound at all.) A member which is a
+   --  smart pointer of the standard library is kept as storage, as its size is known.
    --
    declare
       Dropped : Boolean := False;
@@ -64,6 +109,13 @@ begin
             loop
                if         not_fully_known_Types.contains (Each.Components (i).my_Type)
                  and then Each.Components (i).my_Type /= Each     -- Not the class itself, where that is what is not known.
+                 and then smart_Pointer_Words (to_String (Each.Components (i).my_Type.Name)) > 0
+               then
+                  keep_the_Storage (Each, i, smart_Pointer_Words (to_String (Each.Components (i).my_Type.Name)));
+                  Dropped := True;     -- The class may now be known.
+
+               elsif      not_fully_known_Types.contains (Each.Components (i).my_Type)
+                 and then Each.Components (i).my_Type /= Each
                then
                   c_Declarable.warn (Each, Layout,   (if Each.Components (i).is_ignored_Member
                                                       then "The ignored member '" & Each.Components (i).Name & "' of class '" & Each.Name
@@ -99,8 +151,9 @@ begin
       begin
          if i /= no_Index
          then
-            if (for all Letter of to_String (Each.Name) => Letter not in '*' | '[' | '&')     -- Not a pointer to, or an array of, such a type,
-            then                                                                          -- which would say the same again.
+            if          (for all Letter of to_String (Each.Name) => Letter not in '*' | '[' | '&')     -- Not a pointer to, or an array of, such a type,
+              and then smart_Pointer_Words (to_String (Each.Name)) = 0                            -- which would say the same again, nor a smart
+            then                                                                                  -- pointer, of which a member is kept as storage.
                c_Declarable.warn (Each, not_Bound, "Unable to bind the type '" & to_String (Each.Name) & "', which is not known.");
             else
                dlog ("Unable to bind unknown C type: " & Each.Name);

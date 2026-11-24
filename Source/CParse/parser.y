@@ -5234,7 +5234,14 @@ cpp_template_decl : TEMPLATE LESSTHAN template_parms GREATERTHAN requires_clause
 		}
 
 		/* Function template explicit instantiation definition */
-		| TEMPLATE cpp_alternate_rettype idcolon LPAREN parms RPAREN {
+		/* swig4ada: the function may be a member which is qualified ('template bool Variant::value (bool *ok) const;',
+		   of TagLib), which upstream's rule took for a syntax error. Each form takes the semicolon, which upstream's left
+		   to be read as an empty declaration, so that the parser need not choose until it is reached. */
+		| TEMPLATE cpp_alternate_rettype idcolon LPAREN parms RPAREN SEMI {
+			Swig_warning(WARN_PARSE_EXPLICIT_TEMPLATE, cparse_file, cparse_line, "Explicit template instantiation ignored.\n");
+                  $$ = 0; 
+		}
+		| TEMPLATE cpp_alternate_rettype idcolon LPAREN parms RPAREN cv_ref_qualifier SEMI {
 			Swig_warning(WARN_PARSE_EXPLICIT_TEMPLATE, cparse_file, cparse_line, "Explicit template instantiation ignored.\n");
                   $$ = 0; 
 		}
@@ -5246,7 +5253,12 @@ cpp_template_decl : TEMPLATE LESSTHAN template_parms GREATERTHAN requires_clause
                 }
 
 		/* Function template explicit instantiation declaration (extern template) */
-		| EXTERN TEMPLATE cpp_alternate_rettype idcolon LPAREN parms RPAREN {
+		/* swig4ada: likewise. */
+		| EXTERN TEMPLATE cpp_alternate_rettype idcolon LPAREN parms RPAREN SEMI {
+			Swig_warning(WARN_PARSE_EXTERN_TEMPLATE, cparse_file, cparse_line, "Extern template ignored.\n");
+                  $$ = 0; 
+		}
+		| EXTERN TEMPLATE cpp_alternate_rettype idcolon LPAREN parms RPAREN cv_ref_qualifier SEMI {
 			Swig_warning(WARN_PARSE_EXTERN_TEMPLATE, cparse_file, cparse_line, "Extern template ignored.\n");
                   $$ = 0; 
 		}

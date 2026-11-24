@@ -266,6 +266,10 @@ is
    --
    --  Places the component ahead of those at the end which are declared on a later line. In C the core gives the members which
    --  are declared with a structure that has no name ('struct { int val; } inner1, inner2;') after all of the others.
+   procedure insert_Component                    (Self : access Item;   new_Component : access c_Variable.item'Class;
+                                                                        Index         : in     Positive);
+   --
+   --  Places the component at the index, ahead of the one which was there.
    procedure remove_Component                    (Self : access Item;   Index         : in     Positive);
    function  component_Count                     (Self : access Item) return Natural;
    function  Components                          (Self : access Item) return record_Components;
