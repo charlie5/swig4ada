@@ -36,6 +36,7 @@
 <li><a href="#Ada_results">Functions which return a class</a>
 <li><a href="#Ada_inheritance">Inheritance</a>
 <li><a href="#Ada_deriving">Deriving from a C++ class in Ada</a>
+<li><a href="#Ada_directors">Directors</a>
 <li><a href="#Ada_overloading">Overloaded functions, templates and namespaces</a>
 <li><a href="#Ada_references">References</a>
 </ul>
@@ -100,8 +101,10 @@ record does not have the layout of the class.
 the Ada type. The others are reached through a function (see
 <a href="#Ada_inheritance">Inheritance</a>), and a function which overrides one of theirs
 cannot be overridden again in Ada.
-<li>Directors are not needed and not supported: a C++ class with virtual functions is
-derived from directly in Ada.
+<li>Directors are not needed for most virtual functions: a C++ class with virtual
+functions is derived from directly in Ada. A director is made only for a function which
+Ada cannot override so (see <a href="#Ada_directors">Directors</a>), and only of a function
+of the class itself, not one which it inherits.
 <li>A declaration which uses a type that SWIG has not been shown is left out of the
 binding, with a warning.
 <li>A pointer to a class member is not supported: a typedef of one, and whatever takes or
@@ -775,7 +778,8 @@ An Ada type may extend the record of a C++ class with virtual functions, and ove
 them.
 C++ then calls the Ada functions, as the object has a table of virtual functions which
 GNAT has made.
-No director class is involved.
+No director class is involved, but for the few functions of
+<a href="#Ada_directors">Directors</a>.
 </p>
 
 <div class="targetlang"><pre>
@@ -815,7 +819,67 @@ a concrete class which is derived from it, and it is that which <tt>construct</t
 makes; the Ada type then puts its own table of virtual functions in its place.
 </p>
 
-<H3><a name="Ada_overloading">41.5.6 Overloaded functions, templates and namespaces</a></H3>
+<H3><a name="Ada_directors">41.5.6 Directors</a></H3>
+
+
+<p>
+A virtual function which returns, by value, a class that C++ constructs, or which takes a
+plain structure by value, cannot be overridden by an Ada type which is derived from the
+class: C++ would call the Ada function with its arguments where its own ABI puts them, and
+the result through a hidden pointer which Ada does not expect.
+For a class which the interface file marks <tt>%feature("director")</tt>, as the other
+languages of SWIG require for any function to be overridden, the binding has a child
+package <tt>Director</tt> of the package of the class.
+Its <tt>Item</tt> is derived from that of the class, and has a primitive for each such
+function, which takes what the function of the class-wide type does (the result as a
+last parameter <tt>Result</tt>, a structure by reference).
+An Ada type which is derived from it may override each, and C++ then calls the Ada
+function: the wrapper file holds a class which is derived from the C++ class, and whose
+override of the function calls the primitive.
+A primitive which is not overridden does what the function of the class does, and an Ada
+function which overrides one may call it so (<tt>Speaker.Director.label
+(Speaker.Director.Item (Self), Result)</tt>). Where the function of the class is pure, the
+primitive is abstract.
+</p>
+
+<div class="code"><pre>
+%feature("director") Speaker;
+
+class Speaker {
+public:
+  virtual ~Speaker ();
+  virtual std::string speak (const std::string&amp; word);
+};
+</pre></div>
+
+<div class="targetlang"><pre>
+with voices.Speaker.Director, swig.std_Strings;
+
+package Parrots is
+
+   type Item is new voices.Speaker.Director.Item with null record;
+
+   overriding
+   procedure speak (Self   : in out Item;
+                    word   : in     swig.std_Strings.std_string_Pointer;
+                    Result : in     swig.std_Strings.std_string_Pointer);
+   pragma Convention (CPP, speak);
+
+end Parrots;
+</pre></div>
+
+<p>
+The Ada function gives its result by replacing the object which <tt>Result</tt> points to,
+as the procedures of a binding do (<tt>assign</tt>, of a string). That object is made by
+the default constructor of the class of the result, so a function whose result has no
+constructor which takes nothing cannot be overridden, and is warned of. The director has
+the constructors of the class, and a type derived from it is constructed by them, as from
+any class. A class which is not so marked, and the other virtual functions of one which
+is, are overridden in Ada as before; so are a class whose base SWIG has never been shown,
+and a function which the class inherits, which have no director.
+</p>
+
+<H3><a name="Ada_overloading">41.5.7 Overloaded functions, templates and namespaces</a></H3>
 
 
 <p>
@@ -833,8 +897,8 @@ A virtual function which returns, by value, a class that C++ constructs
 (<tt>virtual Status Put (...)</tt>), or which takes a plain structure by value, cannot be
 called through the table of virtual functions from Ada, as C++ takes its arguments
 otherwise than Ada gives them. It is a function of the class-wide type, which makes the
-virtual call, and <tt>unbound_virtual_&lt;n&gt;</tt> has its place; it cannot be overridden
-in Ada.
+virtual call, and <tt>unbound_virtual_&lt;n&gt;</tt> has its place; it is overridden in Ada
+through a director of the class (see <a href="#Ada_directors">Directors</a>).
 A member whose type SWIG is never shown is left out, with a warning, and the class is
 still bound: it is then used through a pointer to an object which C++ makes.
 Likewise the virtual functions of a class with a base class which SWIG is never shown
@@ -860,7 +924,7 @@ A typedef which a <tt>using</tt> declaration brings into another namespace, or w
 template declares, is followed to the type which it stands for.
 </p>
 
-<H3><a name="Ada_references">41.5.7 References</a></H3>
+<H3><a name="Ada_references">41.5.8 References</a></H3>
 
 
 <p>
