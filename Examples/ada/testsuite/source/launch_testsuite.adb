@@ -1669,6 +1669,7 @@ begin
       run ("library");             -- Further classes of the standard library: a multiset, a multimap, a complex number, a wide string, the streams.
       run ("library_c",            -- Further library files, in C: parameters which are input or output, the arguments of a program, a file, raw data.
            use_CPP => False);
+      run ("directors");           -- Virtual functions which Ada cannot call through the vtable, overridden in Ada through a director.
 
       --  A class library which nobody wrote as a test, bound from its own headers: LevelDB, where it is installed.
       --  Its tester writes, reads and walks a database, and gives it a comparator which is declared in Ada.

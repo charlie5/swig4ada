@@ -1,0 +1,1 @@
+example.h:39: Warning 861: Unable to let Ada override the function 'fixed' of class 'Speaker', as its result has no constructor which takes nothing.
