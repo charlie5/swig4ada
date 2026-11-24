@@ -1,15 +1,14 @@
-pugixml.hpp:1396: Warning 862: The base class 'std::exception' of class 'xpath_exception' is not known, and is ignored. The layout of the record does not match that of the class.
 pugixml.hpp:379: Warning 862: The member 'wide_stream' of class 'xml_writer_stream' has a type which is not known, so it is left out. The layout of the record does not match that of the class.
 pugixml.hpp:379: Warning 862: The member 'narrow_stream' of class 'xml_writer_stream' has a type which is not known, so it is left out. The layout of the record does not match that of the class.
-pugixml.hpp:1531: Warning 861: Unable to bind the type 'std::basic_string<(wchar_t)>', which is not known.
-pugixml.hpp:802: Warning 861: Unable to bind the type 'pugi::xml_object_range<(pugi::xml_attribute_iterator)>', which is not known.
-pugixml.hpp:801: Warning 861: Unable to bind the type 'pugi::xml_object_range<(pugi::xml_node_iterator)>', which is not known.
-pugixml.hpp:382: Warning 861: Unable to bind the type 'std::basic_ostream<(char)>', which is not known.
-pugixml.hpp:402: Warning 861: Unable to bind the type 'p.p.p.pugi::xml_attribute', which is not known.
-pugixml.hpp:383: Warning 861: Unable to bind the type 'std::basic_ostream<(wchar_t)>', which is not known.
-pugixml.hpp:1164: Warning 861: Unable to bind the type 'std::basic_istream<(wchar_t)>', which is not known.
 pugixml.hpp:1163: Warning 861: Unable to bind the type 'std::basic_istream<(char)>', which is not known.
 pugixml.hpp:806: Warning 861: Unable to bind the type 'pugi::xml_object_range<(pugi::xml_named_node_iterator)>', which is not known.
+pugixml.hpp:802: Warning 861: Unable to bind the type 'pugi::xml_object_range<(pugi::xml_attribute_iterator)>', which is not known.
+pugixml.hpp:1164: Warning 861: Unable to bind the type 'std::basic_istream<(wchar_t)>', which is not known.
+pugixml.hpp:1531: Warning 861: Unable to bind the type 'std::basic_string<(wchar_t)>', which is not known.
+pugixml.hpp:801: Warning 861: Unable to bind the type 'pugi::xml_object_range<(pugi::xml_node_iterator)>', which is not known.
+pugixml.hpp:402: Warning 861: Unable to bind the type 'p.p.p.pugi::xml_attribute', which is not known.
+pugixml.hpp:383: Warning 861: Unable to bind the type 'std::basic_ostream<(wchar_t)>', which is not known.
+pugixml.hpp:382: Warning 861: Unable to bind the type 'std::basic_ostream<(char)>', which is not known.
 pugixml.hpp:1535: Warning 861: Unable to bind the function 'as_wide', as its result type 'std::basic_string<(wchar_t)>' is not known.
 pugixml.hpp:1534: Warning 861: Unable to bind the function 'as_wide', as its result type 'std::basic_string<(wchar_t)>' is not known.
 pugixml.hpp:1531: Warning 861: Unable to bind the function 'as_utf8', as the type 'std::basic_string<(wchar_t)>*' of its parameter 'str' is not known.

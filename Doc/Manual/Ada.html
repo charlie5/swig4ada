@@ -944,8 +944,11 @@ through a director of the class (see <a href="#Ada_directors">Directors</a>).
 A member whose type SWIG is never shown is left out, with a warning, and the class is
 still bound: it is then used through a pointer to an object which C++ makes.
 Likewise the virtual functions of a class with a base class which SWIG is never shown
-(<tt>class E : public std::exception</tt>, with no library file for the base) are each
-called through the wrapper, as their places among those of the base are not known.
+(<tt>class E : public Base</tt>, where <tt>Base</tt> is in a header which is not included) are
+each called through the wrapper, as their places among those of the base are not known.
+For the standard exceptions, include <tt>std_except.i</tt>, which declares them with the
+shape of GNU libstdc++, so that a class derived from one is laid out and dispatches as any
+other.
 An operator is a function with a name: <tt>operator-&gt;</tt> is <tt>dereference</tt>,
 <tt>operator()</tt> is <tt>Functor</tt>, and where the interface file renames the others as
 upstream's examples do, <tt>operator+</tt> is <tt>Plus</tt> and <tt>operator==</tt> is
@@ -1035,6 +1038,15 @@ with swig.Exceptions;
 <tt>swig.Exceptions</tt> also has <tt>is_Pending</tt>, <tt>pending_Kind</tt>,
 <tt>pending_Message</tt> and <tt>clear</tt>.
 Generated code never calls <tt>check</tt> itself.
+</p>
+
+<p>
+With <tt>%include &lt;std_except.i&gt;</tt> a function which is declared to throw a standard
+exception records it by its kind, with its own <tt>what ()</tt>, and the standard exceptions
+(<tt>std::exception</tt>, which is <tt>the_exception</tt> in Ada, as <tt>exception</tt> is a
+reserved word, <tt>std::logic_error</tt>, <tt>std::runtime_error</tt> and those derived from
+them) are classes of the module, with their virtual functions in their places, so that an
+exception class of a library which is derived from one of them is bound whole.
 </p>
 
 <H2><a name="Ada_layout">41.8 Layout</a></H2>

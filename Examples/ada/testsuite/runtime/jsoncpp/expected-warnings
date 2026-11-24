@@ -1,4 +1,3 @@
-value.h:81: Warning 862: The base class 'std::exception' of class 'Exception' is not known, and is ignored. The layout of the record does not match that of the class.
 value.h:869: Warning 862: The member 'current_' of class 'ValueIteratorBase' has a type which is not known, so it is left out. The layout of the record does not match that of the class. Nothing else of the class says that C++ constructs it, so it is bound as a plain record, which is passed and returned as a C structure is; where what is not known has a destructor or a copy constructor of its own, C++ constructs the class, and its functions are bound wrongly.
 value.h:660: Warning 861: Unable to bind the type 'Json::Value::Members', which is not known.
 value.h:929: Warning 861: Unable to bind the type 'Json::Value::ObjectValues::iterator', which is not known.
@@ -11,5 +10,3 @@ value.h:660: Warning 861: Unable to bind the function 'getMemberNames' of class 
 example.i:1: Warning 862: Unable to lay out 'jsoncpp.StyledStreamWriter' as C++ does, as the size of one of its members is not known. Its record may not match the layout of its class.
 example.i:1: Warning 862: Unable to lay out 'jsoncpp.ValueIterator' as C++ does, as the size of one of its members is not known. Its record may not match the layout of its class.
 example.i:1: Warning 862: Unable to lay out 'jsoncpp.ValueConstIterator' as C++ does, as the size of one of its members is not known. Its record may not match the layout of its class.
-example.i:1: Warning 862: Unable to lay out 'jsoncpp.RuntimeError' as C++ does, as the size of one of its members is not known. Its record may not match the layout of its class.
-example.i:1: Warning 862: Unable to lay out 'jsoncpp.LogicError' as C++ does, as the size of one of its members is not known. Its record may not match the layout of its class.

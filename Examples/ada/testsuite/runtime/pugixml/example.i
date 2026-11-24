@@ -3,6 +3,7 @@
 %module pugixml
 
 %include <std_string.i>
+%include <std_except.i>      // The base of its exceptions, with the shape of GNU libstdc++.
 
 %{
 #include <pugixml.hpp>

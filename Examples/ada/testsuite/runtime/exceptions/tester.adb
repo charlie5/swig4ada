@@ -1,8 +1,11 @@
 with
      exceptions.Binding,
+     exceptions.the_exception,
+     exceptions.Failure,
+     exceptions.Plain,
 
      swig.Exceptions,
-     interfaces.C,
+     interfaces.C.Strings,
      ada.Exceptions,
 
      Checks;
@@ -75,6 +78,37 @@ begin
 
    check (require_positive (5) = 5,                "a later call works as usual");
    check (not swig.Exceptions.is_Pending,          "and leaves no exception pending");
+
+   classes_derived_from_standard_Exceptions :
+   declare
+      use exceptions,
+          interfaces.C.Strings;
+
+      Why         :         chars_ptr        := new_String ("disk full");
+      the_Failure : aliased Failure.Item := Failure.construct (Why, 28);
+      the_Plain   : aliased Plain.Item   := Plain.construct;
+
+      function Text (From : in chars_ptr) return String renames interfaces.C.Strings.Value;
+   begin
+      --  A class which is derived from 'std::runtime_error' or 'std::exception' has the layout of its class, a pointer
+      --  to its table and the message of the exception among it, and its virtual functions are in their places.
+      --
+      check (Failure.Item'Object_Size / 8 = size_of_failure,                       "a class derived from 'std::runtime_error' has the size of its class");
+      check (Failure.code (the_Failure'Access) = 28,                              "and C++ finds its member, after the message of its base");
+      check (Text (what_of (the_exception.Pointer'(the_Failure'unchecked_Access))) = "disk full",
+                                                                                  "C++ calls 'what' through the vtable");
+      check (Text (Failure.what (the_Failure'Access)) = "disk full",             "and so does Ada");
+      check (Failure.level (the_Failure'Access) = 2,                              "and a virtual function of its own, after those of its bases");
+
+      check (Plain.Item'Object_Size / 8 = size_of_plain,                          "a class derived from 'std::exception' has the size of its class");
+      check (Plain.n (the_Plain'Access) = 7,                                      "and C++ finds its member, after the pointer to its table");
+      check (Text (what_of (the_exception.Pointer'(the_Plain'unchecked_Access))) = "plain",
+                                                                                  "and its own 'what', through the vtable");
+
+      Plain.destruct_0   (the_Plain);
+      Failure.destruct_0 (the_Failure);
+      free (Why);
+   end classes_derived_from_standard_Exceptions;
 
    pragma Unreferenced (Result);
    finish;

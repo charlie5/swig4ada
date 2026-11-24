@@ -3,6 +3,7 @@
 %module jsoncpp
 
 %include <std_string.i>
+%include <std_except.i>      // The base of its exceptions, with the shape of GNU libstdc++.
 %include <std_iostream.i>
 %include <std_vector.i>
 %include <std_deque.i>
