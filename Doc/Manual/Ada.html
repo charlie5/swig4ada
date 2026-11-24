@@ -107,8 +107,8 @@ Ada cannot override so (see <a href="#Ada_directors">Directors</a>), and only of
 of the class itself, not one which it inherits.
 <li>A declaration which uses a type that SWIG has not been shown is left out of the
 binding, with a warning.
-<li>A pointer to a class member is not supported: a typedef of one, and whatever takes or
-returns one, is left out with a warning.
+<li>A pointer to a class member is laid out as the Itanium C++ ABI has it (GCC and Clang,
+on each machine but Windows). It can be given back to C++, not called through in Ada.
 <li>An object which C++ has made cannot be converted to a derived type in Ada, nor tested
 for membership of one (see <a href="#Ada_inheritance">Inheritance</a>).
 <li><tt>std::auto_ptr</tt> is not bound, and <tt>std::unique_ptr</tt> only where an
@@ -491,6 +491,29 @@ package shapes.Visitor is
    type Item is access function (arg_1 : in shapes.Shape.Pointer)
                                  return Interfaces.C.int;
    pragma Convention (C, Item);
+</pre></div>
+
+<p>
+A pointer to a class member is a record of the package <tt>swig</tt>: a pointer to a member
+function is <tt>swig.member_function_Pointer</tt> (two words: the address of the function, or
+its place in the table of virtual functions, and the adjustment of <tt>this</tt>), and a
+pointer to a member variable is <tt>swig.member_data_Pointer</tt> (its offset). A typedef of
+one is a subtype of it. Ada takes such a pointer from C++, as the result of a function, a
+variable or a constant, and gives it back, as C++ alone can call through it. A constant
+(<tt>%constant double (Shape::*AREAPT) (void) = &amp;Shape::area;</tt>) is an object which the
+wrapper defines, and is bound as a variable.
+</p>
+
+<div class="code"><pre>
+typedef double (Shape::*Measure) (void);
+Measure area_of ();
+double  measure (Shape* s, Measure m);
+</pre></div>
+
+<div class="targetlang"><pre>
+the_Area : constant shapes.Measure := shapes.Binding.area_of;
+...
+X := shapes.Binding.measure (the_Square'Unchecked_Access, the_Area);
 </pre></div>
 
 <H2><a name="Ada_basic_cpp_wrapping">41.5 Basic C++ wrapping</a></H2>
