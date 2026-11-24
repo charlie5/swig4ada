@@ -6,6 +6,7 @@
 
 %feature ("director") Speaker;
 %feature ("director") Voice;
+%feature ("director") Talker;
 
 %{
 #include "example.h"

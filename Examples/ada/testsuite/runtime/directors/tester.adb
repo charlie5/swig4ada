@@ -97,6 +97,23 @@ begin
       directors.Voice.destruct_0 (directors.Voice.Item (the_Choir));
    end of_an_abstract_Class;
 
+   of_a_derived_Class :
+   declare
+      the_Chatter : aliased Speakers.Chatter;
+   begin
+      say (the_Chatter'unchecked_Access, Word'unchecked_Access, Result'unchecked_Access);
+      check (to_Ada (Result) = "chatter says hi",                           "the director of a derived class lets Ada override a function which it inherits");
+
+      accent_of (the_Chatter'unchecked_Access, Result'unchecked_Access);
+      check (to_Ada (Result) = "broad",                                     "and one of its own");
+
+      label_of (the_Chatter'unchecked_Access, Result'unchecked_Access);
+      check (to_Ada (Result) = "speaker",                                   "and one which is not overridden does what the base does");
+
+      check (level_of (the_Chatter'unchecked_Access) = 3,                   "which the constructor of the class set up");
+      Speaker.destruct_0 (Speaker.Item (the_Chatter));
+   end of_a_derived_Class;
+
    destruct (Result);
    destruct (Word);
    finish;

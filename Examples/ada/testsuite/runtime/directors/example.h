@@ -62,3 +62,14 @@ public:
 
 inline std::string introduce (Voice* v) { return "I am " + v->name (); }
 inline int         pitch_of  (Voice* v) { return v->pitch (); }
+
+/* A class derived from one with a director, which has a director of its own: its director lets Ada override the
+   functions which it inherits, as well as its own. */
+class Talker : public Speaker
+{
+public:
+  Talker () : Speaker (3) {}
+  virtual std::string accent () { return "plain"; }
+};
+
+inline std::string accent_of (Talker* t) { return t->accent (); }

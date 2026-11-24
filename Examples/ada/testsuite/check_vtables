@@ -99,7 +99,7 @@ def ada_class(Spec):
     Text   = re.sub(r"--[^\n]*", "", open(Spec, errors="replace").read())
     Public = re.split(r"\nprivate\n", Text)[0]
     Header = re.search(r"\npackage\s+([\w.]+)\s+is", Public)
-    Type   = re.search(r"type Item is\s+(abstract\s+)?(tagged|new\s+([\w.]+)\.Item\s+with)", Public)
+    Type   = re.search(r"type Item is\s+(abstract\s+)?(tagged|new\s+([\w.]+)\.Item\s+with)", Public, re.I)     # A spec which is not pretty printed has '.item'.
 
     if not Header or not Type:
         return None

@@ -1,6 +1,7 @@
 with
      directors.Speaker.Director,
      directors.Voice.Director,
+     directors.Talker.Director,
      directors.Label,
      directors.Point,
      swig.std_Strings,
@@ -59,5 +60,20 @@ is
 
    pragma Convention (CPP, name);
    pragma Convention (CPP, pitch);
+
+
+
+   type Chatter is new Talker.Director.Item with null record;     -- Of a class which inherits the functions of its director.
+
+   overriding
+   procedure speak  (Self   : in out Chatter;
+                     word   : in     std_string_Pointer;
+                     Result : in     std_string_Pointer);
+   overriding
+   procedure accent (Self   : in out Chatter;
+                     Result : in     std_string_Pointer);
+
+   pragma Convention (CPP, speak);
+   pragma Convention (CPP, accent);
 
 end Speakers;

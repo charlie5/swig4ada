@@ -81,4 +81,26 @@ is
       return 440;
    end pitch;
 
+
+
+   overriding
+   procedure speak (Self   : in out Chatter;
+                    word   : in     std_string_Pointer;
+                    Result : in     std_string_Pointer)
+   is
+      pragma Unreferenced (Self);
+   begin
+      assign (Result.all, to_C ("chatter says " & to_Ada (word.all)));
+   end speak;
+
+
+   overriding
+   procedure accent (Self   : in out Chatter;
+                     Result : in     std_string_Pointer)
+   is
+      pragma Unreferenced (Self);
+   begin
+      assign (Result.all, to_C ("broad"));
+   end accent;
+
 end Speakers;
