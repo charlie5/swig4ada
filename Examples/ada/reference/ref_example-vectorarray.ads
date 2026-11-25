@@ -2,6 +2,7 @@
 --
 with Interfaces.C;
 with ref_example.Vector;
+with ref_example.VectorArray_Pointer;
 with Interfaces.C;
 use Interfaces.C;
 with Interfaces.C.Pointers;
@@ -26,7 +27,7 @@ package ref_example.VectorArray is
 
    -- Pointer
    --
-   type Pointer is access all ref_example.VectorArray.Item;
+   subtype Pointer is ref_example.VectorArray_Pointer.Pointer;
 
    -- Pointer_Array
    --

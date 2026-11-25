@@ -2,6 +2,7 @@
 --
 with class_example.Shape;
 with interfaces.c;
+with class_example.Square_Pointer;
 with Interfaces.C;
 
 use  Interfaces.C;
@@ -37,7 +38,7 @@ type Item is new class_example.Shape.item with
 
    -- Pointer
    -- 
-   type Pointer is access all class_example.Square.Item'Class;
+   subtype Pointer is class_example.Square_Pointer.Pointer;
 
    -- Pointer_Array
    -- 

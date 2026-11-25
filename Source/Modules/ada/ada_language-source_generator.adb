@@ -784,6 +784,97 @@ is
 
 
    Generated : ada_Package.Vector;     -- The packages whose specs are made, or are being made (see 'generate').
+   Known     : String_Vectors.Vector;  -- The qualified name of every package of the modules, in lower case (see 'generate').
+
+
+   function pointer_Package (the_Package : access ada_Package.item'Class) return String
+   --
+   --  The name of the package which declares the pointer type of the class of a package ('foo.Node_Pointer'), where the
+   --  class has one, and "" otherwise. A class which C++ constructs, or which is virtual or abstract, has a pointer type
+   --  which is a plain access type ('access all foo.Node.Item'Class'), which needs no more than a limited view of the
+   --  class: it is declared in a package of its own beside that of the class, with such a view, so that any package may
+   --  have the whole of it, and name the one type. (Until 2026-11-25 a package which had only a limited view of the class
+   --  could not name it, and wrote an anonymous access type, which GNAT 16 does not let a result of be converted to a
+   --  named pointer type at run time: the accessibility check failed.)
+   --
+   is
+   begin
+      if        the_Package = null
+        or else the_Package.cpp_class_Type = null
+        or else the_Package.cpp_class_Type.is_Union
+        or else not (        the_Package.cpp_class_Type.is_Abstract
+                     or else the_Package.cpp_class_Type.is_tagged_Type
+                     or else the_Package.cpp_class_Type.is_Nontrivial)
+      then
+         return "";
+      end if;
+
+      for each_Type of the_Package.Types     -- The class has a pointer type, which is the one which the package declares.
+      loop
+         if         each_Type.all in ada_Type.a_subType.item'Class
+           and then each_Type.Name = "Pointer"
+           and then ada_Type.a_subType.view (each_Type).base_Type.all in ada_Type.elementary.an_access.to_type.interfaces_c_pointer.item'Class
+           and then ada_Type.elementary.an_access.to_type.view (ada_Type.a_subType.view (each_Type).base_Type).accessed_Type
+                    = ada_Type.view (the_Package.cpp_class_Type)
+         then
+            --  The name is given a number where a package has it already (a class 'Box_Pointer' beside 'Box', as
+            --  'smart_pointer_inherit' has).
+            --
+            declare
+               Name   : constant String := to_String (the_Package.qualified_Name) & "_Pointer";
+               Suffix :          Natural := 1;
+            begin
+               loop
+                  declare
+                     Candidate : constant String := (if Suffix = 1 then Name
+                                                                   else Name & "_" & ada.Strings.fixed.Trim (Suffix'Image, ada.Strings.Left));
+                  begin
+                     if not Known.contains (to_Lower (Candidate))
+                     then
+                        return Candidate;
+                     end if;
+                  end;
+
+                  Suffix := Suffix + 1;
+               end loop;
+            end;
+         end if;
+      end loop;
+
+      return "";
+   end pointer_Package;
+
+
+
+   function sibling_Pointer (the_Type : in ada_Type.view) return String
+   --
+   --  The name of the pointer package of the class which a pointer type points to (see 'pointer_Package'), or "" where
+   --  the type is no such pointer.
+   --
+   is
+   begin
+      if        the_Type = null
+        or else the_Type.resolved_Type = null
+        or else the_Type.resolved_Type.all not in ada_Type.elementary.an_access.to_Type.item'Class
+        or else to_Lower (to_String (the_Type.qualified_Name)) = "interfaces.c.strings.chars_ptr"
+      then
+         return "";
+      end if;
+
+      declare
+         the_accessed_Type : constant ada_Type.view := ada_Type.elementary.an_access.to_Type.view (the_Type.resolved_Type).accessed_Type;
+      begin
+         if         the_accessed_Type /= null
+           and then the_accessed_Type.declaration_Package /= null
+           and then the_accessed_Type.declaration_Package.cpp_class_Type /= null
+           and then ada_Type.view (the_accessed_Type.declaration_Package.cpp_class_Type) = the_accessed_Type
+         then
+            return pointer_Package (the_accessed_Type.declaration_Package);
+         end if;
+
+         return "";
+      end;
+   end sibling_Pointer;
 
 
    function origin_Package (the_Subprogram : access ada_Subprogram.item'Class) return ada_Package.view
@@ -1126,6 +1217,12 @@ is
                   append (the_Source,
                           qualified_Name (ada_Type.elementary.an_access.to_type.view (Self.return_Type.resolved_Type).accessed_Type));
                end if;
+            elsif      sibling_Pointer (Self.return_Type) /= ""
+              and then context_Package.Context.limited_Withs
+                         (ada_Type.elementary.an_access.to_Type.view (Self.return_Type.resolved_Type).accessed_Type.declaration_Package.all'Access)
+            then   -- The pointer type of the class is declared beside it (see 'pointer_Package').
+               append (the_Source,  sibling_Pointer (Self.return_Type) & ".Pointer");
+
             elsif      Self.return_Type.resolved_Type.all in ada_Type.elementary.an_access.to_Type.item'Class
               and then context_Package.Context.limited_Withs
                          (ada_Type.elementary.an_access.to_Type.view (Self.return_Type.resolved_Type).accessed_Type.declaration_Package.all'Access)
@@ -1302,7 +1399,14 @@ is
                      default_Terminator := +"0";
                   end if;
 
-                  if is_Abstract or is_Limited   -- Abstract and limited types cannot be used with interfaces.C.Pointers.
+                  if         (is_Abstract or is_Limited)
+                    and then Self.Name = "Pointer"
+                    and then pointer_Package (Self.declaration_Package) /= ""
+                    and then accessed_Type = ada_Type.view (Self.declaration_Package.cpp_class_Type)
+                  then   -- Declared beside the class, so that a package with a limited view of it may name it (see 'pointer_Package').
+                     return "   subtype Pointer is " & pointer_Package (Self.declaration_Package) & ".Pointer;";
+
+                  elsif is_Abstract or is_Limited   -- Abstract and limited types cannot be used with interfaces.C.Pointers.
                   then
                      --  A pointer to a virtual class may point to an object of any class derived from
                      --  it, as it may in C++, and a call through it dispatches.
@@ -2127,6 +2231,53 @@ is
                                          the_Package.all'Access,
                                          null_unbounded_String));
 
+         --  The packages of the pointer types of classes, beside them (see 'pointer_Package'): that of the class of this
+         --  package, and that of each class which a function returns a pointer to, through a limited view of its package.
+         --  A parameter is left an anonymous access, which takes the 'Access of an object which a subprogram declares.
+         --
+         declare
+            Named : String_Vectors.Vector;
+
+            procedure with_the_pointer_Package (Name : in String)
+            is
+            begin
+               if         Name /= ""
+                 and then not Named.contains (Name)
+               then
+                  Named.append (Name);
+                  append (spec_Source, "with " & Name & ";" & NL);
+               end if;
+            end with_the_pointer_Package;
+
+            function through_a_limited_View (the_Subprogram : in ada_Subprogram.view;
+                                             the_Type       : in ada_Type.view) return String
+            is
+               the_Origin      : constant ada_Package.view := origin_Package (the_Subprogram);
+               context_Package : constant ada_Package.view := (if the_Origin /= null then the_Origin else ada_Package.view (the_Package));
+            begin
+               if sibling_Pointer (the_Type) = ""
+               then
+                  return "";
+               end if;
+
+               return (if context_Package.Context.limited_Withs
+                            (ada_Type.elementary.an_access.to_Type.view (the_Type.resolved_Type).accessed_Type.declaration_Package.all'Access)
+                       then sibling_Pointer (the_Type)
+                       else "");
+            end through_a_limited_View;
+
+         begin
+            with_the_pointer_Package (pointer_Package (the_Package));
+
+            for each_Subprogram of all_Subprograms
+            loop
+               if each_Subprogram.is_Function
+               then
+                  with_the_pointer_Package (through_a_limited_View (each_Subprogram, each_Subprogram.return_Type));
+               end if;
+            end loop;
+         end;
+
          if the_Context.Withs (the_ada_Lang.Package_swig_std_strings)
          then   -- The wrapper must then hold the functions which that package imports (see 'top').
             the_ada_Lang.uses_std_Strings := True;
@@ -2847,6 +2998,35 @@ is
 
 
 
+   procedure emit_pointer_Spec (the_Package : access ada_Package.item'Class)
+   --
+   --  The package of the pointer type of the class of a package, beside it (see 'pointer_Package'), with a limited view
+   --  of it.
+   --
+   is
+      Name   : constant String := pointer_Package (the_Package);
+      Source :          unbounded_String;
+   begin
+      if Name = ""
+      then
+         return;
+      end if;
+
+      append (Source,  "-- This file is generated by SWIG. Please do not modify by hand." & NL
+                     & "--"                                                               & NL
+                     & "limited with " & the_Package.qualified_Name & ";"                & NL
+                     & NL
+                     & "package " & Name & " is"                                          & NL
+                     & "   type Pointer is access all " & the_Package.qualified_Name & ".Item"
+                     & (if the_Package.cpp_class_Type.is_tagged_Type then "'Class" else "") & ";" & NL
+                     & "end " & Name & ";"                                                & NL);
+
+      write_Spec (for_Package => +Name,
+                  Source      => Source);
+   end emit_pointer_Spec;
+
+
+
    procedure emit_guard_Spec (the_Package : access ada_Package.item'Class)
    --
    --  Emits a 'Guards' child package for a C++ class which has a virtual destructor.
@@ -3171,6 +3351,16 @@ is
    procedure generate (Self : access ada_Language.item)
    is
    begin
+      Known.clear;
+
+      for each_Package of Self.c_namespace_Map_of_ada_Package
+      loop
+         if not Known.contains (to_Lower (to_String (each_Package.qualified_Name)))
+         then
+            Known.append (to_Lower (to_String (each_Package.qualified_Name)));
+         end if;
+      end loop;
+
       emit_Spec (Self.Module_top.Ada.Package_top,              Self.in_cpp_Mode,  with_IC_Pointers => False, the_ada_Lang => Self);
       emit_Spec (Self.Module_top.Ada.Package_binding,          Self.in_cpp_Mode,  with_IC_Pointers => False, the_ada_Lang => Self);
       emit_Spec (Self.Module_top.Ada.Package_pointers,         Self.in_cpp_Mode,  with_IC_Pointers => True,  the_ada_Lang => Self);
@@ -3207,6 +3397,7 @@ is
             end if;
 
             emit_Spec          (the_Package,  Self.in_cpp_Mode,  with_IC_Pointers => True, the_ada_Lang => Self);
+            emit_pointer_Spec  (the_Package);
             emit_guard_Spec    (the_Package);
             emit_director_Spec (the_Package,  the_ada_Lang => Self);
          end emit_after_its_Bases;
@@ -3224,6 +3415,7 @@ is
             the_Package : constant ada_Package.view := Self.c_namespace_Map_of_ada_Package.Element (Each.nameSpace.all'Access);
          begin
             emit_Spec          (the_Package,  Self.in_cpp_Mode,  with_IC_Pointers => True, the_ada_Lang => Self);
+            emit_pointer_Spec  (the_Package);
             emit_guard_Spec    (the_Package);
             emit_director_Spec (the_Package,  the_ada_Lang => Self);
          end;

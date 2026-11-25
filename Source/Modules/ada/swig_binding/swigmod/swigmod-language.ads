@@ -8,6 +8,7 @@ with swig_Core;
 with swig_Core.Pointers;
 with swigmod.Dispatcher;
 with swigmod.Pointers;
+with swigmod.Language_Pointer;
 with Interfaces.C;
 use Interfaces.C;
 with Interfaces.C.Pointers;
@@ -54,7 +55,7 @@ package swigmod.Language is
 
    -- Pointer
    --
-   type Pointer is access all swigmod.Language.Item'Class;
+   subtype Pointer is swigmod.Language_Pointer.Pointer;
 
    -- Pointer_Array
    --

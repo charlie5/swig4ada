@@ -2,6 +2,7 @@
 --
 with Interfaces.C;
 with swig_Core.Pointers;
+with swigmod.Dispatcher_Pointer;
 with Interfaces.C;
 use Interfaces.C;
 with Interfaces.C.Pointers;
@@ -33,7 +34,7 @@ package swigmod.Dispatcher is
 
    -- Pointer
    --
-   type Pointer is access all swigmod.Dispatcher.Item'Class;
+   subtype Pointer is swigmod.Dispatcher_Pointer.Pointer;
 
    -- Pointer_Array
    --

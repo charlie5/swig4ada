@@ -2,6 +2,7 @@
 --
 with Interfaces.C;
 with swig.std_Strings;
+with string_example.aaa_Pointer;
 with Interfaces.C;
 use Interfaces.C;
 with Interfaces.C.Pointers;
@@ -26,7 +27,7 @@ package string_example.aaa is
 
    -- Pointer
    --
-   type Pointer is access all string_example.aaa.Item;
+   subtype Pointer is string_example.aaa_Pointer.Pointer;
 
    -- Pointer_Array
    --
