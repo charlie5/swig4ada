@@ -363,6 +363,9 @@ private
    function  demand_c_Type_for (Self : access Item;   swig_Type : in doh_swigType)     return   c_Type.view;
    procedure add_new_c_Type    (Self : access Item;   new_Type  : in c_Type.view);
 
+   function  known_in_another_template_Form
+                               (Self : access Item;   Named     : in unbounded_String) return   c_Type.view;
+
    function  current_Module    (Self : access Item)                                    return swig_Module.swig_Module_view;
    function  demand_Module     (Self : access Item;   Named     : in unbounded_String) return swig_Module.swig_Module_view;
 

@@ -34,7 +34,11 @@ namespace std {
         void*        _M_node;
     };
 
-    template<class K, class T, class Compare = std::less<K> > class map {
+    // The allocator is a parameter of the template, with its default, as it is of a vector ('std_vector.i').
+    //
+    template<class T> class allocator;
+
+    template<class K, class T, class Compare = std::less<K>, class Alloc = std::allocator<std::pair<const K, T> > > class map {
         // add typemaps here
       public:
         typedef _Rb_tree_iterator<std::pair<const K, T> >        iterator;

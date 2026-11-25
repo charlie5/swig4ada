@@ -86,6 +86,25 @@ is
          end if;
       end name_after_the_Class;
 
+      procedure enter_by_its_own_Name
+      --
+      --  Enters the class, and the types which were made with it, by the name of the class, where it was known by
+      --  another.
+      --
+      is
+         type Prefix_array is array (Positive range <>) of unbounded_String;
+         Prefixes : constant Prefix_array := [+"", +"a.", +"p.", +"a.p.", +"p.p.", +"r.", +"r.q(const).", +"p.q(const).", +"z."];
+      begin
+         for Prefix of Prefixes
+         loop
+            if         Self.swig_type_Map_of_c_type.contains (Prefix & Known_as)
+              and then not Self.swig_type_Map_of_c_type.contains (Prefix & its_Form)
+            then
+               Self.swig_type_Map_of_c_type.insert (Prefix & its_Form, Self.swig_type_Map_of_c_type.Element (Prefix & Known_as));
+            end if;
+         end loop;
+      end enter_by_its_own_Name;
+
    begin
       if         Known_as /= ""
         and then Self.swig_type_Map_of_c_type.Element (+Known_as).c_type_Kind = c_Type.Unknown
@@ -107,19 +126,7 @@ is
          --
          if Known_as not in its_Form | full_Form
          then
-            declare
-               type Prefix_array is array (Positive range <>) of unbounded_String;
-               Prefixes : constant Prefix_array := [+"", +"a.", +"p.", +"a.p.", +"p.p.", +"r.", +"r.q(const).", +"p.q(const).", +"z."];
-            begin
-               for Prefix of Prefixes
-               loop
-                  if         Self.swig_type_Map_of_c_type.contains (Prefix & Known_as)
-                    and then not Self.swig_type_Map_of_c_type.contains (Prefix & its_Form)
-                  then
-                     Self.swig_type_Map_of_c_type.insert (Prefix & its_Form, Self.swig_type_Map_of_c_type.Element (Prefix & Known_as));
-                  end if;
-               end loop;
-            end;
+            enter_by_its_own_Name;
          end if;
 
          if not Self.name_Map_of_c_type.contains (+class_Name)
@@ -127,11 +134,16 @@ is
             Self.name_Map_of_c_type.insert (+class_Name, new_c_Class);
          end if;
 
-      elsif Self.swig_type_Map_of_c_type.contains (+DOH_Pointer (node_Type))
-      then   -- The class has been 'forward' declared.
-         new_c_Class     := Self.swig_type_Map_of_c_type.Element (+DOH_Pointer (node_Type));      -- Get the 'opaque' c type.
+      elsif Known_as in its_Form | full_Form
+      then   -- The class has been 'forward' declared, by either name (a typedef of the instance ahead of its '%template',
+             -- which the core gives with the default arguments of its template: 'using Args = std::vector<PathArgument>;').
+         new_c_Class     := Self.swig_type_Map_of_c_type.Element (+Known_as);                    -- Get the 'opaque' c type.
          new_c_Class.all := c_Type.c_Class_construct (Namespace => Self.current_c_Namespace,      -- Morph it to a c class.
                                                       Name      => new_c_Class.Name);
+         if Known_as /= its_Form
+         then
+            enter_by_its_own_Name;
+         end if;
 
          --  A class may be declared in an imported module and defined in the module which imports it. It remains
          --  a class of the module which declared it, whose own binding knows it only as an incomplete class, so

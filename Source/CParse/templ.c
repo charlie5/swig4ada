@@ -784,6 +784,14 @@ static void resolve_partial_args(SwigType *concrete, SwigType *partialtype, Parm
   /* Multiple substitutions: structurally decompose the template wrapper. */
   List *pp_inner = SwigType_templateargslist(partialtype);
   List *c_inner = SwigType_templateargslist(concrete);
+  /* swig4ada: an instance with fewer arguments than the partial specialisation names is taken with the default
+     arguments of its template given, as does_parm_match() matched it. */
+  if (pp_inner && c_inner && Len(c_inner) < Len(pp_inner)) {
+    SwigType *full = Swig_symbol_template_deftype(concrete, 0);
+    Delete(c_inner);
+    c_inner = SwigType_templateargslist(full);
+    Delete(full);
+  }
   if (pp_inner && c_inner)
     resolve_partial_arglists(c_inner, pp_inner, templateparms_p, templateparmsraw);
   Delete(pp_inner);
@@ -1270,6 +1278,20 @@ static EMatch does_parm_match(SwigType *type, SwigType *partial_parm_type, Symta
 
             String *pp_templateargs = SwigType_templateargs(pp_qt);
             List *pp_parms = SwigType_parmlist(pp_templateargs);
+
+            /* swig4ada: the core leaves out the arguments of an instance which are those of the template's defaults
+               (std::vector<(int)> for std::vector<(int,std::allocator<(int)>)>), which a partial specialisation may
+               name (template <typename T, typename A> struct convert<std::vector<T, A>>, of yaml-cpp). Where the
+               counts differ, the instance is taken with its default arguments given. */
+            if (Len(parms) < Len(pp_parms)) {
+              SwigType *full = Swig_symbol_template_deftype(qt, tscope);
+              String *full_templateargs = SwigType_templateargs(full);
+              Delete(parms);
+              Delete(templateargs);
+              templateargs = full_templateargs;
+              parms = SwigType_parmlist(templateargs);
+              Delete(full);
+            }
 
             if (template_debug) {
               Printf(stdout,

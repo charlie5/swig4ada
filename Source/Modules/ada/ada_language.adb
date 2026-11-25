@@ -2918,6 +2918,97 @@ is
 
 
 
+   function known_in_another_template_Form (Self : access Item;   Named : in unbounded_String) return c_Type.view
+   --
+   --  The type of a name which holds a template instance in one of its two forms, with the default arguments of its
+   --  template given or without them, where the module knows the type by the other form; null where it does not. (The
+   --  name is an unbounded string, as a primitive of the type, which is of convention CPP, is given a 'String' with no
+   --  bounds.)
+   --
+   is
+      the_Name : constant String := to_String (Named);
+   begin
+      for Each in 1 .. Natural (Self.template_full_Forms.Length)
+      loop
+         declare
+            full_Form : constant String  := Self.template_full_Forms.Element (Each);
+            First     : constant Natural := ada.Strings.fixed.Index (the_Name, full_Form);
+         begin
+            if First /= 0
+            then
+               declare
+                  plain_Name : constant unbounded_String := +(  the_Name (the_Name'First .. First - 1)
+                                                              & Self.template_plain_Forms.Element (Each)
+                                                              & the_Name (First + full_Form'Length .. the_Name'Last));
+               begin
+                  if Self.swig_type_Map_of_c_type.contains (plain_Name)
+                  then
+                     return Self.swig_type_Map_of_c_type.Element (plain_Name);
+                  end if;
+               end;
+            end if;
+         end;
+
+         --  Likewise the other way about: an instance which was first used by its full name is known by that.
+         --
+         declare
+            plain_Form : constant String  := Self.template_plain_Forms.Element (Each);
+            First      : constant Natural := ada.Strings.fixed.Index (the_Name, plain_Form);
+         begin
+            if First /= 0
+            then
+               declare
+                  full_Name : constant unbounded_String := +(  the_Name (the_Name'First .. First - 1)
+                                                             & Self.template_full_Forms.Element (Each)
+                                                             & the_Name (First + plain_Form'Length .. the_Name'Last));
+               begin
+                  if Self.swig_type_Map_of_c_type.contains (full_Name)
+                  then
+                     return Self.swig_type_Map_of_c_type.Element (full_Name);
+                  end if;
+               end;
+            end if;
+         end;
+      end loop;
+
+      --  The name may hold an instance with some of the default arguments given and not others (the copy
+      --  constructor of a vector of vectors, whose own allocator the core gives and not that of the vector within
+      --  it). With all of them given, as the full form of an instance is made, the full form is found in it.
+      --
+      declare
+         all_Defaults : constant String := +doh_Item (Swig_symbol_template_deftype (SwigType_Pointer (to_Doh (the_Name)), null));
+      begin
+         if all_Defaults /= the_Name
+         then
+            for Each in 1 .. Natural (Self.template_full_Forms.Length)
+            loop
+               declare
+                  full_Form : constant String  := Self.template_full_Forms.Element (Each);
+                  First     : constant Natural := ada.Strings.fixed.Index (all_Defaults, full_Form);
+               begin
+                  if First /= 0
+                  then
+                     declare
+                        plain_Name : constant unbounded_String := +(  all_Defaults (all_Defaults'First .. First - 1)
+                                                                    & Self.template_plain_Forms.Element (Each)
+                                                                    & all_Defaults (First + full_Form'Length .. all_Defaults'Last));
+                     begin
+                        if Self.swig_type_Map_of_c_type.contains (plain_Name)
+                        then
+                           return Self.swig_type_Map_of_c_type.Element (plain_Name);
+                        end if;
+                     end;
+                  end if;
+               end;
+            end loop;
+         end if;
+      end;
+
+      return null;
+   end known_in_another_template_Form;
+
+
+
    function demand_c_Type_for (Self : access Item;   swig_Type : in doh_swigType) return c_Type.view
    is
       use type C.int;
@@ -2948,50 +3039,12 @@ is
          --  The type may name a template instance with the default arguments of its template given.
          --
          declare
-            the_Name : constant String := +swig_Type;
+            in_its_other_Form : constant c_Type.view := Self.known_in_another_template_Form (+String'(+swig_Type));
          begin
-            for Each in 1 .. Natural (Self.template_full_Forms.Length)
-            loop
-               declare
-                  full_Form : constant String  := Self.template_full_Forms.Element (Each);
-                  First     : constant Natural := ada.Strings.fixed.Index (the_Name, full_Form);
-               begin
-                  if First /= 0
-                  then
-                     declare
-                        plain_Name : constant unbounded_String := +(  the_Name (the_Name'First .. First - 1)
-                                                                    & Self.template_plain_Forms.Element (Each)
-                                                                    & the_Name (First + full_Form'Length .. the_Name'Last));
-                     begin
-                        if Self.swig_type_Map_of_c_type.contains (plain_Name)
-                        then
-                           return Self.swig_type_Map_of_c_type.Element (plain_Name);
-                        end if;
-                     end;
-                  end if;
-               end;
-
-               --  Likewise the other way about: an instance which was first used by its full name is known by that.
-               --
-               declare
-                  plain_Form : constant String  := Self.template_plain_Forms.Element (Each);
-                  First      : constant Natural := ada.Strings.fixed.Index (the_Name, plain_Form);
-               begin
-                  if First /= 0
-                  then
-                     declare
-                        full_Name : constant unbounded_String := +(  the_Name (the_Name'First .. First - 1)
-                                                                   & Self.template_full_Forms.Element (Each)
-                                                                   & the_Name (First + plain_Form'Length .. the_Name'Last));
-                     begin
-                        if Self.swig_type_Map_of_c_type.contains (full_Name)
-                        then
-                           return Self.swig_type_Map_of_c_type.Element (full_Name);
-                        end if;
-                     end;
-                  end if;
-               end;
-            end loop;
+            if in_its_other_Form /= null
+            then
+               return in_its_other_Form;
+            end if;
          end;
 
          --  A name which is written from the outermost scope ('::FooType') is that of the type with no such mark.
@@ -3093,6 +3146,15 @@ is
               and then Self.swig_type_Map_of_c_type.contains (+without_leading_Qualifiers (Resolved))
             then
                return Self.swig_type_Map_of_c_type.Element (+without_leading_Qualifiers (Resolved));
+
+            --  The core may give an instance within the name with the default arguments of its template, where the
+            --  module knows it without them ('__normal_iterator<node**, std::vector<node*, std::allocator<node*> > >',
+            --  through a typedef of 'std::vector<node*>').
+            --
+            elsif      Resolved /= String'(+swig_Type)
+              and then Self.known_in_another_template_Form (+Resolved) /= null
+            then
+               return Self.known_in_another_template_Form (+Resolved);
             end if;
          end;
 

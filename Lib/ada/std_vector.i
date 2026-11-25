@@ -21,9 +21,14 @@ namespace __gnu_cxx {
     };
 }
 
+// The allocator is a parameter of the template, with its default, as C++ has it, so that a partial specialisation
+// of a header which names it ('template <typename T, typename A> struct convert<std::vector<T, A>>', of yaml-cpp)
+// is one of which an instance of a vector is a case. It is an empty base of the vector, of no storage.
+//
 namespace std {
-    
-    template<class T> class vector {
+    template<class T> class allocator;
+
+    template<class T, class Alloc = std::allocator<T> > class vector {
       public:
         // The typedefs of the class, by which a header may name its types ('std::vector<int*>::const_reference').
         // The members below are declared with the types themselves.

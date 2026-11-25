@@ -239,11 +239,18 @@ begin
             end;
 
          else
-            if Self.swig_type_Map_of_c_type.contains (the_swig_Type)
+            --  The base may be a template instance which the core gives with the default arguments of its template
+            --  ('std::vector<(double,std::allocator<(double)>)>' for 'typedef std::vector<double> DblVector;'),
+            --  where the module knows it without them, or the other way about.
+            --
+            if        Self.swig_type_Map_of_c_type.contains (the_swig_Type)
+              or else Self.known_in_another_template_Form (the_swig_Type) /= null
             then
                dlog ("swig_type_Map_of_c_type.contains " & the_swig_Type);
                declare
-                  the_base_Type : constant c_Type.view := Self.swig_type_Map_of_c_type.Element (the_swig_Type);
+                  the_base_Type : constant c_Type.view := (if Self.swig_type_Map_of_c_type.contains (the_swig_Type)
+                                                           then Self.swig_type_Map_of_c_type.Element (the_swig_Type)
+                                                           else Self.known_in_another_template_Form (the_swig_Type));
                begin
                   if "_" & the_type_Name = the_swig_Type
                   then
