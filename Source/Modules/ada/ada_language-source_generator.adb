@@ -59,6 +59,37 @@ is
    subtype subType_view         is ada_Type.a_subType.view;
    subtype subType_class        is ada_Type.a_subType.item'Class;
 
+
+
+   function pointed_Class (of_an_Array : in ada_Type.view) return ada_Type.view
+   --
+   --  The class which the elements of an array type point to, where the array is of pointers to a class
+   --  ('btDbvtNode* childs[2]'), and null otherwise.
+   --
+   is
+   begin
+      if         of_an_Array /= null
+        and then of_an_Array.all in ada_Type.composite.an_array.item'Class
+      then
+         declare
+            the_Element : constant ada_Type.view := ada_Type.composite.an_array.view (of_an_Array).element_Type;
+         begin
+            if         the_Element /= null
+              and then the_Element.resolved_Type /= null
+              and then the_Element.resolved_Type.all in ada_Type.elementary.an_access.to_Type.item'Class
+              and then ada_Type.elementary.an_access.to_Type.view (the_Element.resolved_Type).accessed_Type /= null
+              and then ada_Type.elementary.an_access.to_Type.view (the_Element.resolved_Type).accessed_Type.all in ada_Type.composite.a_record.item'Class
+            then
+               return ada_Type.elementary.an_access.to_Type.view (the_Element.resolved_Type).accessed_Type;
+            end if;
+         end;
+      end if;
+
+      return null;
+   end pointed_Class;
+
+
+
    subtype Access_to_Type_view  is ada_Type.elementary.an_access.to_type.view;
    subtype Access_to_Type_class is ada_Type.elementary.an_access.to_type.item'Class;
 
@@ -70,6 +101,132 @@ is
 
    subtype ic_Pointer_view      is ada_Type.elementary.an_access.to_type.interfaces_c_pointer.view;
    subtype ic_Pointer_class     is ada_Type.elementary.an_access.to_type.interfaces_c_pointer.Item'Class;
+
+
+
+   Generated : ada_Package.Vector;     -- The packages whose specs are made, or are being made (see 'generate').
+   Known     : String_Vectors.Vector;  -- The qualified name of every package of the modules, in lower case (see 'generate').
+
+
+   function pointer_Package (the_Package : access ada_Package.item'Class) return String
+   --
+   --  The name of the package which declares the pointer type of the class of a package ('foo.Node_Pointer'), where the
+   --  class has one, and "" otherwise. A class which C++ constructs, or which is virtual or abstract, has a pointer type
+   --  which is a plain access type ('access all foo.Node.Item'Class'), which needs no more than a limited view of the
+   --  class: it is declared in a package of its own beside that of the class, with such a view, so that any package may
+   --  have the whole of it, and name the one type. (Until 2026-11-25 a package which had only a limited view of the class
+   --  could not name it, and wrote an anonymous access type, which GNAT 16 does not let a result of be converted to a
+   --  named pointer type at run time: the accessibility check failed.)
+   --
+   is
+   begin
+      if        the_Package = null
+        or else the_Package.cpp_class_Type = null
+        or else the_Package.cpp_class_Type.is_Union
+        or else not (        the_Package.cpp_class_Type.is_Abstract
+                     or else the_Package.cpp_class_Type.is_tagged_Type
+                     or else the_Package.cpp_class_Type.is_Nontrivial)
+      then
+         return "";
+      end if;
+
+      for each_Type of the_Package.Types     -- The class has a pointer type, which is the one which the package declares.
+      loop
+         if         each_Type.all in ada_Type.a_subType.item'Class
+           and then each_Type.Name = "Pointer"
+           and then ada_Type.a_subType.view (each_Type).base_Type.all in ada_Type.elementary.an_access.to_type.interfaces_c_pointer.item'Class
+           and then ada_Type.elementary.an_access.to_type.view (ada_Type.a_subType.view (each_Type).base_Type).accessed_Type
+                    = ada_Type.view (the_Package.cpp_class_Type)
+         then
+            --  The name is given a number where a package has it already (a class 'Box_Pointer' beside 'Box', as
+            --  'smart_pointer_inherit' has).
+            --
+            declare
+               Name   : constant String := to_String (the_Package.qualified_Name) & "_Pointer";
+               Suffix :          Natural := 1;
+            begin
+               loop
+                  declare
+                     Candidate : constant String := (if Suffix = 1 then Name
+                                                                   else Name & "_" & ada.Strings.fixed.Trim (Suffix'Image, ada.Strings.Left));
+                  begin
+                     if not Known.contains (to_Lower (Candidate))
+                     then
+                        return Candidate;
+                     end if;
+                  end;
+
+                  Suffix := Suffix + 1;
+               end loop;
+            end;
+         end if;
+      end loop;
+
+      return "";
+   end pointer_Package;
+
+
+
+   function sibling_Pointer (the_Type : in ada_Type.view) return String
+   --
+   --  The name of the pointer package of the class which a pointer type points to (see 'pointer_Package'), or "" where
+   --  the type is no such pointer.
+   --
+   is
+   begin
+      if        the_Type = null
+        or else the_Type.resolved_Type = null
+        or else the_Type.resolved_Type.all not in ada_Type.elementary.an_access.to_Type.item'Class
+        or else to_Lower (to_String (the_Type.qualified_Name)) = "interfaces.c.strings.chars_ptr"
+      then
+         return "";
+      end if;
+
+      declare
+         the_accessed_Type : constant ada_Type.view := ada_Type.elementary.an_access.to_Type.view (the_Type.resolved_Type).accessed_Type;
+      begin
+         if         the_accessed_Type /= null
+           and then the_accessed_Type.declaration_Package /= null
+           and then the_accessed_Type.declaration_Package.cpp_class_Type /= null
+           and then ada_Type.view (the_accessed_Type.declaration_Package.cpp_class_Type) = the_accessed_Type
+         then
+            return pointer_Package (the_accessed_Type.declaration_Package);
+         end if;
+
+         return "";
+      end;
+   end sibling_Pointer;
+
+
+
+   function name_in (the_Package : access ada_Package.item'Class;   the_Type : in ada_Type.view) return unbounded_String
+   --
+   --  The name by which a package names a type: its own, or, where it is the pointer type of a class which has a
+   --  pointer package ('bullet.btCollisionObject.Pointer') and the package has only a limited view of that of the
+   --  class, which cannot show it, the type of the pointer package ('bullet.btCollisionObject_Pointer.Pointer'), of which
+   --  it is a subtype (see 'pointer_Package'). So a package which holds an array of pointers to a class which holds the
+   --  array can have a pointer to such a pointer ('btAlignedObjectArray<const btCollisionObject*>', of Bullet).
+   --
+   is
+   begin
+      if sibling_Pointer (the_Type) /= ""
+      then
+         declare
+            the_class_Package : constant ada_Package.view
+              := ada_Package.view (ada_Type.elementary.an_access.to_Type.view (the_Type.resolved_Type).accessed_Type.declaration_Package);
+         begin
+            if         the_class_Package /= ada_Package.view (the_Package)
+              and then the_Package.Context.limited_Withs (the_class_Package)
+            then
+               return +(sibling_Pointer (the_Type) & ".Pointer");
+            end if;
+         end;
+      end if;
+
+      return (if the_Type = null then null_unbounded_String else the_Type.qualified_Name);
+   end name_in;
+
+
 
    NL : constant String := new_line_Token;
 
@@ -461,13 +618,15 @@ is
                        and then ada_type.a_Subtype.view (the_Component.my_Type).base_Type.all in ic_Pointer_Class
                      then
                         type_Modifier := to_unbounded_String ("access");
-                        type_Name     := ada_Type.elementary.an_access.to_type.view (ada_type.a_Subtype.view (the_Component.my_type).base_type).accessed_Type.qualified_Name;
+                        type_Name     := name_in (Self.declaration_Package,
+                                                  ada_Type.elementary.an_access.to_type.view (ada_type.a_Subtype.view (the_Component.my_type).base_type).accessed_Type);
 
                      elsif      the_Component.my_type.resolved_Type.all in ada_Type.elementary.an_access.to_type.item'Class
                        and then ada_Type.elementary.an_access.to_type.view (the_Component.my_type.resolved_Type).accessed_Type.qualified_Name /= "Character"
                      then
                         type_Modifier := to_unbounded_String ("access");
-                        type_Name     := ada_Type.elementary.an_access.to_type.view (the_Component.my_type.resolved_Type).accessed_Type.qualified_Name;
+                        type_Name     := name_in (Self.declaration_Package,
+                                                  ada_Type.elementary.an_access.to_type.view (the_Component.my_type.resolved_Type).accessed_Type);
 
                      else
                         if the_Component.bit_Field = -1
@@ -496,6 +655,54 @@ is
                            type_Name := to_unbounded_String (virtual_base_Storage (the_Component.my_Type,
                                                                                    in_an_Extension => not Self.base_Classes.is_Empty));
                         end if;
+                     end if;
+
+                     --  An array of pointers to a class of a package which this one has a limited view of (a package which
+                     --  leads back here: 'btDbvtNode* childs[2]', in the union of 'btDbvtNode' which it holds) cannot be of
+                     --  the array type of that package. It has a type of its own, of anonymous access types, declared ahead
+                     --  of the record (2026-11-25; until then the two specs each needed the other).
+                     --
+                     if         Natural (Length (the_Component.array_Bounds)) = 1
+                       and then the_Component.array_Bounds.first_Element >= 0
+                       and then pointed_Class (the_Component.my_Type) /= null
+                       and then ada_Package.view (pointed_Class (the_Component.my_Type).declaration_Package) /= ada_Package.view (Self.declaration_Package)
+                       and then Self.declaration_Package.Context.limited_Withs (ada_Package.view (pointed_Class (the_Component.my_Type).declaration_Package))
+                     then
+                        declare
+                           the_Class : constant ada_Type.view := pointed_Class (the_Component.my_Type);
+                        begin
+                           type_Name     := the_Component.Name & "_Array";
+                           type_Modifier := to_unbounded_String ("aliased");
+
+                           insert (the_Source,
+                                   record_Start,
+                                     NL & "   type " & to_String (type_Name) & " is array (interfaces.C.size_t range 0 .."
+                                   & Natural'Image (the_Component.array_Bounds.first_Element) & ") of access "
+                                   & to_String (the_Class.qualified_Name)
+                                   & (if ada_Type.composite.a_record.view (the_Class).is_tagged_Type then "'Class" else "") & ";"
+                                   & NL & "   pragma Convention (C, " & to_String (type_Name) & ");" & NL);
+
+                           multi_dimensional := True;     -- Its bounds are those of its type.
+                        end;
+
+                     --  Likewise an array of pointers to the class itself ('btDbvntNode* childs[2]', in 'btDbvntNode'), whose
+                     --  array type of pointers follows the record: an array of addresses, as a pointer to a later type of
+                     --  the package is.
+                     --
+                     elsif      Natural (Length (the_Component.array_Bounds)) = 1
+                       and then the_Component.array_Bounds.first_Element >= 0
+                       and then pointed_Class (the_Component.my_Type) = ada_Type.view (Self)
+                     then
+                        type_Name     := the_Component.Name & "_Array";
+                        type_Modifier := to_unbounded_String ("aliased");
+
+                        insert (the_Source,
+                                record_Start,
+                                  NL & "   type " & to_String (type_Name) & " is array (interfaces.C.size_t range 0 .."
+                                & Natural'Image (the_Component.array_Bounds.first_Element) & ") of system.Address;"
+                                & NL & "   pragma Convention (C, " & to_String (type_Name) & ");" & NL);
+
+                        multi_dimensional := True;
                      end if;
 
                      if Natural (Length (the_Component.array_Bounds)) > 1
@@ -715,7 +922,7 @@ is
 
 
 
-   function  representation_Text (Self : in ada_Type.view) return String
+   function  representation_Text (Self : in ada_Type.view;   in_cpp_Mode : in Boolean) return String
    is
       the_Source : unbounded_String;
    begin
@@ -768,6 +975,20 @@ is
             end if;
 
 
+            --  A class of C++ with no members has a size of one byte, and is laid out so as a member of another
+            --  ('btAlignedAllocator<T, 16> m_allocator;', in each vector of Bullet), where a null record has none:
+            --  each member after such a one was out of its place, and the record of the class which holds it smaller
+            --  than its class (2026-11-25). A base with no members takes no room, and is no component (see the
+            --  transformer). A structure of C with no members has no size, as GCC has it.
+            --
+            if         in_cpp_Mode
+              and then the_Record.component_Count = 0
+              and then not the_Record.is_tagged_Type
+              and then not needs_Layout (the_Record)
+            then
+               append (the_Source,  "   for " & the_Record.Name & "'Size use 8;" & NL);
+            end if;
+
             if             the_Record.is_constructed_by_Cpp
               and then not the_Record.is_interface_Type
             then
@@ -781,100 +1002,6 @@ is
       return to_String (the_Source);
    end representation_Text;
 
-
-
-   Generated : ada_Package.Vector;     -- The packages whose specs are made, or are being made (see 'generate').
-   Known     : String_Vectors.Vector;  -- The qualified name of every package of the modules, in lower case (see 'generate').
-
-
-   function pointer_Package (the_Package : access ada_Package.item'Class) return String
-   --
-   --  The name of the package which declares the pointer type of the class of a package ('foo.Node_Pointer'), where the
-   --  class has one, and "" otherwise. A class which C++ constructs, or which is virtual or abstract, has a pointer type
-   --  which is a plain access type ('access all foo.Node.Item'Class'), which needs no more than a limited view of the
-   --  class: it is declared in a package of its own beside that of the class, with such a view, so that any package may
-   --  have the whole of it, and name the one type. (Until 2026-11-25 a package which had only a limited view of the class
-   --  could not name it, and wrote an anonymous access type, which GNAT 16 does not let a result of be converted to a
-   --  named pointer type at run time: the accessibility check failed.)
-   --
-   is
-   begin
-      if        the_Package = null
-        or else the_Package.cpp_class_Type = null
-        or else the_Package.cpp_class_Type.is_Union
-        or else not (        the_Package.cpp_class_Type.is_Abstract
-                     or else the_Package.cpp_class_Type.is_tagged_Type
-                     or else the_Package.cpp_class_Type.is_Nontrivial)
-      then
-         return "";
-      end if;
-
-      for each_Type of the_Package.Types     -- The class has a pointer type, which is the one which the package declares.
-      loop
-         if         each_Type.all in ada_Type.a_subType.item'Class
-           and then each_Type.Name = "Pointer"
-           and then ada_Type.a_subType.view (each_Type).base_Type.all in ada_Type.elementary.an_access.to_type.interfaces_c_pointer.item'Class
-           and then ada_Type.elementary.an_access.to_type.view (ada_Type.a_subType.view (each_Type).base_Type).accessed_Type
-                    = ada_Type.view (the_Package.cpp_class_Type)
-         then
-            --  The name is given a number where a package has it already (a class 'Box_Pointer' beside 'Box', as
-            --  'smart_pointer_inherit' has).
-            --
-            declare
-               Name   : constant String := to_String (the_Package.qualified_Name) & "_Pointer";
-               Suffix :          Natural := 1;
-            begin
-               loop
-                  declare
-                     Candidate : constant String := (if Suffix = 1 then Name
-                                                                   else Name & "_" & ada.Strings.fixed.Trim (Suffix'Image, ada.Strings.Left));
-                  begin
-                     if not Known.contains (to_Lower (Candidate))
-                     then
-                        return Candidate;
-                     end if;
-                  end;
-
-                  Suffix := Suffix + 1;
-               end loop;
-            end;
-         end if;
-      end loop;
-
-      return "";
-   end pointer_Package;
-
-
-
-   function sibling_Pointer (the_Type : in ada_Type.view) return String
-   --
-   --  The name of the pointer package of the class which a pointer type points to (see 'pointer_Package'), or "" where
-   --  the type is no such pointer.
-   --
-   is
-   begin
-      if        the_Type = null
-        or else the_Type.resolved_Type = null
-        or else the_Type.resolved_Type.all not in ada_Type.elementary.an_access.to_Type.item'Class
-        or else to_Lower (to_String (the_Type.qualified_Name)) = "interfaces.c.strings.chars_ptr"
-      then
-         return "";
-      end if;
-
-      declare
-         the_accessed_Type : constant ada_Type.view := ada_Type.elementary.an_access.to_Type.view (the_Type.resolved_Type).accessed_Type;
-      begin
-         if         the_accessed_Type /= null
-           and then the_accessed_Type.declaration_Package /= null
-           and then the_accessed_Type.declaration_Package.cpp_class_Type /= null
-           and then ada_Type.view (the_accessed_Type.declaration_Package.cpp_class_Type) = the_accessed_Type
-         then
-            return pointer_Package (the_accessed_Type.declaration_Package);
-         end if;
-
-         return "";
-      end;
-   end sibling_Pointer;
 
 
    function origin_Package (the_Subprogram : access ada_Subprogram.item'Class) return ada_Package.view
@@ -1115,18 +1242,19 @@ is
                         then
                            append (the_Source,  qualified_Name (ada_Type.elementary.an_access.to_type.view (the_Parameter.my_Type.resolved_Type).accessed_Type.declaration_Package) & "_Pointer");
                         else
-                           append (the_Source,  qualified_Name (ada_Type.elementary.an_access.to_type.view (the_Parameter.my_Type.resolved_Type).accessed_Type));
+                           append (the_Source,  name_in (declaration_Package, ada_Type.elementary.an_access.to_type.view (the_Parameter.my_Type.resolved_Type).accessed_Type));
                         end if;
                      else
-                        append (the_Source, qualified_Name (the_Parameter.my_Type.resolved_Type));
+                        append (the_Source, name_in (declaration_Package, the_Parameter.my_Type.resolved_Type));
                      end if;
 
                   else
                      if limited_Pointer_base_Type = null
                      then
-                        append (the_Source,  the_Parameter.my_Type.qualified_Name);
+                        append (the_Source,  name_in (declaration_Package, the_Parameter.my_Type));
                      else
-                        append (the_Source,  limited_Pointer_base_Type.qualified_Name);
+                        append (the_Source,  name_in (declaration_Package, limited_Pointer_base_Type));     -- A pointer to a pointer, through a
+                                                                                                             -- limited view, names that of the pointer package.
 
                         if         limited_Pointer_base_Type.all in ada_Type.composite.a_record.item'Class
                           and then limited_Pointer_base_Type.declaration_Package.models_a_virtual_cpp_Class
@@ -1215,7 +1343,7 @@ is
                           qualified_Name (ada_Type.elementary.an_access.to_type.view (Self.return_Type.resolved_Type).accessed_Type.declaration_Package) & "_Pointer");
                else
                   append (the_Source,
-                          qualified_Name (ada_Type.elementary.an_access.to_type.view (Self.return_Type.resolved_Type).accessed_Type));
+                          name_in (declaration_Package, ada_Type.elementary.an_access.to_type.view (Self.return_Type.resolved_Type).accessed_Type));
                end if;
             elsif      sibling_Pointer (Self.return_Type) /= ""
               and then context_Package.Context.limited_Withs
@@ -1228,7 +1356,7 @@ is
                          (ada_Type.elementary.an_access.to_Type.view (Self.return_Type.resolved_Type).accessed_Type.declaration_Package.all'Access)
             then   -- Only a limited view of the package of the accessed type is had, in which its pointer type cannot be seen.
                append (the_Source,
-                       "access " & qualified_Name (ada_Type.elementary.an_access.to_Type.view (Self.return_Type.resolved_Type).accessed_Type));
+                       "access " & name_in (declaration_Package, ada_Type.elementary.an_access.to_Type.view (Self.return_Type.resolved_Type).accessed_Type));
 
                if         ada_Type.elementary.an_access.to_Type.view (Self.return_Type.resolved_Type).accessed_Type.all in ada_Type.composite.a_record.item'Class
                  and then ada_Type.elementary.an_access.to_Type.view (Self.return_Type.resolved_Type).accessed_Type.declaration_Package.models_a_virtual_cpp_Class
@@ -2152,6 +2280,13 @@ is
                   with_of_system_Required := True;
                end if;
 
+               if         the_Type.all in ada_Type.composite.a_Record.item'Class
+                 and then (for some Each in 1 .. a_Record_view (the_Type).component_Count
+                           => pointed_Class (a_Record_view (the_Type).Components (Each).my_Type) = the_Type)
+               then   -- An array of pointers to the record itself is one of addresses (see 'ada_Record_private_declaration_Text').
+                  with_of_system_Required := True;
+               end if;
+
                if the_Type.all in ada_Type.composite.a_Record.item'Class
                then
                   declare
@@ -2173,6 +2308,14 @@ is
                                                is_access => True,
                                                in_a_Ring => leads_to_this_Package (ada_Package.view (Access_to_Type_view (subType_view (the_component_Type).base_Type)
                                                                                                        .accessed_Type.declaration_Package)));
+
+                           elsif      pointed_Class (the_component_Type) /= null
+                             and then ada_Package.view (pointed_Class (the_component_Type).declaration_Package) /= ada_Package.view (the_Package)
+                             and then leads_to_this_Package (ada_Package.view (pointed_Class (the_component_Type).declaration_Package))
+                           then   -- An array of pointers to a class of a package which leads back here, which a limited view serves.
+                              the_Context.add (pointed_Class (the_component_Type),
+                                               is_access => True,
+                                               in_a_Ring => True);
 
                            elsif      the_component_Type.resolved_Type /= null
                              and then the_component_Type.resolved_Type.all in Access_to_Type_class
@@ -2266,8 +2409,54 @@ is
                        else "");
             end through_a_limited_View;
 
+            procedure with_what_names (the_Type : in ada_Type.view)
+            --
+            --  Withs the pointer package which an access to the type names (see 'name_in').
+            --
+            is
+            begin
+               if         the_Type /= null
+                 and then the_Type.resolved_Type /= null
+                 and then the_Type.resolved_Type.all in ada_Type.elementary.an_access.to_Type.item'Class
+               then
+                  declare
+                     the_accessed_Type : constant ada_Type.view := ada_Type.elementary.an_access.to_Type.view (the_Type.resolved_Type).accessed_Type;
+                  begin
+                     if         the_accessed_Type /= null
+                       and then name_in (the_Package, the_accessed_Type) /= the_accessed_Type.qualified_Name
+                     then
+                        with_the_pointer_Package (pointer_Package (the_accessed_Type.declaration_Package));
+                     end if;
+                  end;
+               end if;
+            end with_what_names;
+
          begin
             with_the_pointer_Package (pointer_Package (the_Package));
+
+            for each_Type of all_Types
+            loop
+               if each_Type.all in ada_Type.composite.a_record.item'Class
+               then
+                  for Each in 1 .. ada_Type.composite.a_record.view (each_Type).component_Count
+                  loop
+                     with_what_names (ada_Type.composite.a_record.view (each_Type).Components (Each).my_Type);
+                  end loop;
+               end if;
+            end loop;
+
+            for each_Subprogram of all_Subprograms
+            loop
+               for each_Parameter of each_Subprogram.Parameters
+               loop
+                  with_what_names (each_Parameter.my_Type);
+               end loop;
+
+               if each_Subprogram.is_Function
+               then
+                  with_what_names (each_Subprogram.return_Type);
+               end if;
+            end loop;
 
             for each_Subprogram of all_Subprograms
             loop
@@ -2518,7 +2707,7 @@ is
                append (spec_Source,  declaration_Text (the_Type, the_ada_Lang) & NL & NL);
 
                declare
-                  the_representation_Text : constant String := representation_Text (the_Type);
+                  the_representation_Text : constant String := representation_Text (the_Type, in_cpp_Mode);
                begin
                   if the_representation_Text /= ""
                   then
@@ -2555,7 +2744,7 @@ is
                   append (spec_Source,  declaration_Text (the_Type, the_ada_Lang) & NL & NL);
 
                   declare
-                     the_representation_Text : constant String := representation_Text (the_Type);
+                     the_representation_Text : constant String := representation_Text (the_Type, in_cpp_Mode);
                   begin
                      if the_representation_Text /= ""
                      then

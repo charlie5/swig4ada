@@ -62,8 +62,19 @@ is
       end resolved_Name;
 
 
-      Known_as  : constant String := (if    Self.swig_type_Map_of_c_type.contains (+its_Form)  then its_Form
-                                      elsif Self.swig_type_Map_of_c_type.contains (+full_Form) then full_Form
+      --  An instance whose arguments are typedefs ('btAlignedAllocator<btScalar, 16>') is named by the core with the
+      --  typedefs resolved where a template uses it ('btAlignedAllocator<(float,16)>', as the member of the instance
+      --  'btAlignedObjectArray<btScalar>' is), and so is known by that name too (2026-11-25; until then such a member
+      --  was of a type which is not known, and was left out).
+      --
+      resolved_Form : constant String := +doh_Item (SwigType_typedef_resolve_all (SwigType_Pointer (node_Type)));
+
+      Known_as  : constant String := (if    Self.swig_type_Map_of_c_type.contains (+its_Form)      then its_Form
+                                      elsif Self.swig_type_Map_of_c_type.contains (+full_Form)     then full_Form
+                                      elsif resolved_Form /= its_Form
+                                        and then Self.swig_type_Map_of_c_type.contains (+resolved_Form)
+                                        and then Self.swig_type_Map_of_c_type.Element  (+resolved_Form).c_type_Kind = c_Type.Unknown
+                                                                                                   then resolved_Form
                                       else  resolved_Name);
 
 
@@ -164,6 +175,25 @@ is
                                             Name      => +class_Name);
          Self.register (new_c_Class,
                         doh_SwigType (node_Type));
+      end if;
+
+      --  The class, and its pointer, array and reference types, by the name with the typedefs of its arguments resolved.
+      --
+      if resolved_Form /= its_Form
+      then
+         declare
+            type Prefix_array is array (Positive range <>) of unbounded_String;
+            Prefixes : constant Prefix_array := [+"", +"a.", +"p.", +"a.p.", +"p.p.", +"r.", +"r.q(const).", +"p.q(const).", +"z."];
+         begin
+            for Prefix of Prefixes
+            loop
+               if         Self.swig_type_Map_of_c_type.contains (Prefix & its_Form)
+                 and then not Self.swig_type_Map_of_c_type.contains (Prefix & resolved_Form)
+               then
+                  Self.swig_type_Map_of_c_type.insert (Prefix & resolved_Form, Self.swig_type_Map_of_c_type.Element (Prefix & its_Form));
+               end if;
+            end loop;
+         end;
       end if;
    end make_the_Class;
 

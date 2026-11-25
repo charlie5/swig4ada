@@ -13,6 +13,8 @@ package enum_example.Foo is
       null;
    end record;
 
+   for Item'Size use 8;
+
    -- Item_Array
    --
    type Item_Array is

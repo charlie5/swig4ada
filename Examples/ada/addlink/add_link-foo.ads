@@ -13,6 +13,8 @@ package add_link.Foo is
       null;
    end record;
 
+   for Item'Size use 8;
+
    -- Item_Array
    --
    type Item_Array is

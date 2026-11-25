@@ -1331,7 +1331,10 @@ is
            and then get_Attribute (the_Node, "defaultargs") = null
            and then Attribute (the_Node, "feature:extend")  = ""
          then
-            --  Such an overload is a virtual function of C++ all the same, and has its place in the vtable.
+            --  Such an overload is a virtual function of C++ all the same, and has its place in the vtable. Its place
+            --  holder is not abstract, though the function is pure: a class which defines the function cannot have it
+            --  told apart either, so that its definition is left out, and the class would else be abstract in Ada
+            --  (Bullet's 'btCollisionDispatcher', of the two 'getInternalManifoldPool' of 'btDispatcher', one 'const').
             --
             declare
                the_Placeholder : constant c_Function.view := c_Function.new_c_Function (+function_Name,
@@ -1340,7 +1343,6 @@ is
                the_Placeholder.Parameters.append (c_Parameter.new_c_Parameter (the_Name => +"Self",
                                                                                the_Type => Self.current_c_Class.all'Access));
                the_Placeholder.is_Virtual     := True;
-               the_Placeholder.is_Abstract    := is_pure_Virtual;
                the_Placeholder.is_Placeholder := True;
 
                Self.current_c_Class.nameSpace.add (the_Placeholder.all'Access);
