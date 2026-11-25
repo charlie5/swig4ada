@@ -654,6 +654,7 @@
 //%typemap (adatype)             SWIGTYPE []                "$adaclassname"
 
 %typemap (ctype)               SWIGTYPE *                 "void *"
+%typemap (ctype)               SWIGTYPE *const            "void *"     // A pointer which is constant is passed as any pointer is.
 //%typemap (adatype)             SWIGTYPE *                 "$adaclassname"
 
 %typemap (ctype)               SWIGTYPE &                 "void *"
@@ -665,7 +666,8 @@
 // pointer to a class member
 
 %typemap (ctype, out="swig_ada_member< $1_ltype >")         // Ada passes the record of 'swig' which it takes the pointer for
-                               SWIGTYPE (CLASS::*)         "void *"     // by reference, and takes it as a result as C returns a structure.
+                               SWIGTYPE (CLASS::*),        // by reference, and takes it as a result as C returns a structure.
+                               SWIGTYPE (CLASS::*const)    "void *"     // One which is itself constant is passed so too, and not as a pointer.
 //%typemap (adatype)             SWIGTYPE (CLASS::*)         "$adaclassname"
 
 
@@ -912,7 +914,9 @@
 // generic pointers and references 
 
 %typemap (in)                                   SWIGTYPE *                 %{ $1 = ($1_ltype)$input; %}
-%typemap (in)                                   SWIGTYPE (CLASS::*)        %{ $1 = *($&1_ltype) $input; %}
+%typemap (in)                                   SWIGTYPE *const            %{ $1 = ($1_ltype)$input; %}
+%typemap (in)                                   SWIGTYPE (CLASS::*),
+                                                SWIGTYPE (CLASS::*const)   %{ $1 = *($&1_ltype) $input; %}
 
 %typemap (in)                                   SWIGTYPE & 
 %{ 
@@ -1009,8 +1013,8 @@
 
 
 
-%typemap (out)               SWIGTYPE *,  SWIGTYPE &,  SWIGTYPE &&      %{ $result = (void *) $1;      %} 
-%typemap (out)               SWIGTYPE (CLASS::*)          %{ $result.value = $1; %} 
+%typemap (out)               SWIGTYPE *,  SWIGTYPE *const,  SWIGTYPE &,  SWIGTYPE &&      %{ $result = (void *) $1;      %} 
+%typemap (out)               SWIGTYPE (CLASS::*),  SWIGTYPE (CLASS::*const)          %{ $result.value = $1; %} 
 
 
 
@@ -1096,10 +1100,12 @@
 
 %typecheck (SWIG_TYPECHECK_POINTER)     SWIGTYPE, 
                                         SWIGTYPE *, 
+                                        SWIGTYPE *const, 
                                         SWIGTYPE &, 
                                         SWIGTYPE &&, 
                                         SWIGTYPE [],
-                                        SWIGTYPE (CLASS::*)           ""
+                                        SWIGTYPE (CLASS::*),
+                                        SWIGTYPE (CLASS::*const)      ""
 
 
 

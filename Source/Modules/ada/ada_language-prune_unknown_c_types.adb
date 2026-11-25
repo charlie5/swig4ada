@@ -8,7 +8,11 @@ is
    Count                 : Natural := 0;
 
 
-   procedure find_the_not_fully_known_Types
+   procedure find_the_not_fully_known_Types (through_Members : in Boolean := True)
+   --
+   --  Without 'through_Members', a class is not taken to be not fully known for one of its members, as is the case
+   --  when it is asked which members are left out: such a member is left out, and the class is then known.
+   --
    is
    begin
       -- Build a list of all types which are unknown or which depend on types that are not fully known.
@@ -28,7 +32,8 @@ is
 
          for Each of Self.name_Map_of_c_type
          loop
-            if not not_fully_known_Types.contains (Each)
+            if         not not_fully_known_Types.contains (Each)
+              and then (through_Members or else Each.c_type_Kind /= c_Class)
             then
                for i in 1 .. Integer (not_fully_known_Types.Length)
                loop
@@ -100,8 +105,7 @@ begin
    --  smart pointer of the standard library is kept as storage, as its size is known.
    --
    declare
-      Dropped : Boolean := False;
-      Warned  : c_Type.Vector;     -- The classes with virtual bases which have been warned of.
+      Warned : c_Type.Vector;     -- The classes with virtual bases which have been warned of.
    begin
       for Each of Self.name_Map_of_c_type
       loop
@@ -153,7 +157,6 @@ begin
                  and then smart_Pointer_Words (to_String (Each.Components (i).my_Type.Name)) > 0
                then
                   keep_the_Storage (Each, i, smart_Pointer_Words (to_String (Each.Components (i).my_Type.Name)));
-                  Dropped := True;     -- The class may now be known.
 
                --  One through a typedef, which the type may name as a class which is declared and never defined (the
                --  typedef of an instance of a template which SWIG is not shown).
@@ -162,18 +165,19 @@ begin
                  and then Each.Components (i).my_Type.c_type_Kind /= c_Class
                then
                   keep_the_Storage (Each, i, c_Variable.view (Each.Components (i)).smart_Words);
-                  Dropped := True;
                end if;
             end loop;
          end if;
       end loop;
 
-      if Dropped
-      then
-         not_fully_known_Types.clear;
-         find_the_not_fully_known_Types;
-         Dropped := False;
-      end if;
+      --  A member is left out where its type is not known, or leads to one which is not known other than through the
+      --  members of a class: a class which is not fully known only for a member of its own has that member left out,
+      --  and is then known, so that a member which is a pointer to it is kept. (Until 2026-11-25 the members of every
+      --  class were left out on the account of all of them at once, and in a ring tinyxml2's 'XMLNode' lost its
+      --  pointers to nodes, as 'XMLDocument', to which it points, had members of types which are not known.)
+      --
+      not_fully_known_Types.clear;
+      find_the_not_fully_known_Types (through_Members => False);
 
       for Each of Self.name_Map_of_c_type
       loop
@@ -193,17 +197,13 @@ begin
                                                    & Each.kind_is_a_Guess);
                   Each.lose_Layout;
                   Each.remove_Component (i);
-                  Dropped := True;
                end if;
             end loop;
          end if;
       end loop;
 
-      if Dropped
-      then
-         not_fully_known_Types.clear;
-         find_the_not_fully_known_Types;
-      end if;
+      not_fully_known_Types.clear;
+      find_the_not_fully_known_Types;
    end;
 
    -- Rid not fully known C types from top module.

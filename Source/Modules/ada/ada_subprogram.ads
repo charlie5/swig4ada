@@ -30,6 +30,7 @@ is
          is_Virtual         : Boolean := False;
          is_Abstract        : Boolean := False;
          is_Overriding      : Boolean := False;
+         Overridden         : access Item'Class;     -- The function which this one overrides, where the transformer found it.
          returns_an_Access  : Boolean := False;
 
          is_to_view_Conversion    : Boolean := False;

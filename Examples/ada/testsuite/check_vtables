@@ -127,10 +127,10 @@ def ada_class(Spec):
             Types  = [re.sub(r"\s+", "", re.sub(r"^.*?:\s*(?:in\s+out|in|access)?", "", One, flags=re.S)).lower() for One in Others.split(";") if One.strip()]
             Primitives.append((Match.group(1), tuple(Types)))
 
-    return Package, Parent, Primitives
+    return Package, Parent, Primitives, Text
 
 
-def cpp_names(Wrapper):
+def cpp_names(Wrapper, Case):
     """The C++ name of each class of a wrapper, by the name which it is bound by: the wrapper of the
        destructor of a class 'X' is 'Ada_delete_<name>', and declares its argument as 'X *arg1'."""
     Text  = open(Wrapper, errors="replace").read()
@@ -138,6 +138,28 @@ def cpp_names(Wrapper):
 
     for Match in re.finditer(r"Ada_delete_(\w+)\s*\(\s*void \* a_arg1\s*\)\s*\{\s*(.*?)\s*\*arg1 = ", Text, re.S):
         Names[Match.group(1).lower()] = Match.group(2).replace(" ", "")
+
+    #  A class whose destructor is not public has no such function (the nodes of tinyxml2, which their document
+    #  deletes): it is named by the functions of the wrapper which its spec imports, by a pragma or an aspect, and
+    #  which take an object as their first argument ('X *arg1 = 0 ;', set from 'a_arg1'). The class is the one which
+    #  most of them take, as a static function may take another.
+    #
+    Functions = {}
+
+    for Match in re.finditer(r"\bAda_(\w+)\s*\(\s*void \* a_arg1\b[^{]*\{(.*?)\n\}", Text, re.S):
+        Self = re.search(r"\n\s*([\w:<>,() ]+?)\s*\*arg1 = 0 ;.*?\barg1 = \(\1 \*\)a_arg1;", Match.group(2), re.S)
+
+        if Self:
+            Functions[Match.group(1)] = Self.group(1).replace(" ", "")
+
+    for Package, Class in Specs.items():
+        Module, _, Bound = Package.partition(".")
+
+        if (not is_Suite or Module == Case.lower()) and Bound and "." not in Bound and Bound not in Names:
+            Taken = [Functions[Symbol] for Symbol in re.findall(r'"Ada_(\w+)"', Class[3]) if Symbol in Functions]
+
+            if Taken:
+                Names[Bound] = max(set(Taken), key=Taken.count)
 
     #  The director of a class (the package 'Director' of that of the class) is the class which the wrapper declares
     #  after a comment which names the class.
@@ -183,7 +205,7 @@ def may_be_same(Theirs, Ours):
 def slots(Package):
     """The places of the vtable of a type, as Ada has them: those of its parent, with what it overrides in
        the place of what is overridden, and then its own in the order of their declaration."""
-    Package, Parent, Primitives = Specs[Package.lower()]
+    Package, Parent, Primitives, _ = Specs[Package.lower()]
     Slots = list(slots(Parent)) if Parent and Parent.lower() in Specs else []
 
     Inherited = len(Slots)
@@ -230,7 +252,7 @@ Checked, Differences, Report = 0, [], []
 for Wrapper in Wrappers:
     Case   = os.path.basename(Wrapper)[:-len("_wrap.cxx")]
     Tables = cpp_vtables(Dumps[Case])
-    Names  = cpp_names(Wrapper)
+    Names  = cpp_names(Wrapper, Case)
 
     for Package in sorted(Specs):
         Module, _, Class = Package.partition(".")

@@ -1154,9 +1154,47 @@ is
       add_ada_Type_for_each_c_Type_pass_2 :
       declare
          use c_Type.Vectors;
+
+         --  Each class is filled in after its base classes, as a function which overrides is matched with the one which
+         --  it overrides among the functions of its parents, and its place holders are numbered after theirs. A class may
+         --  come ahead of its bases in the list of the types, where it was declared ahead of them (tinyxml2 declares
+         --  'class XMLText;' and its like before 'XMLNode'). Until 2026-11-25 such a class was filled in first, and its
+         --  overrides were matched with nothing.
+         --
+         in_Order : c_Type.Vector;
+
+         procedure add_after_its_Bases (the_c_Type : in c_Type.view)
+         is
+            use type c_Type.a_c_type_Kind;
+         begin
+            if in_Order.contains (the_c_Type)
+            then
+               return;
+            end if;
+
+            if the_c_Type.c_type_Kind = c_Type.c_Class
+            then
+               for each_Base of the_c_Type.base_Classes
+               loop
+                  if         From.new_c_Types.contains (each_Base)
+                    and then not in_Order.contains (each_Base)
+                  then
+                     add_after_its_Bases (each_Base);
+                  end if;
+               end loop;
+            end if;
+
+            in_Order.append (the_c_Type);
+         end add_after_its_Bases;
+
          Cursor : c_Type.Cursor;
       begin
-         Cursor := From.new_c_Types.First;
+         for each_Type of From.new_c_Types
+         loop
+            add_after_its_Bases (each_Type);
+         end loop;
+
+         Cursor := in_Order.First;
 
          while has_Element (Cursor)
          loop
@@ -1582,6 +1620,7 @@ is
                                                             => Each.Parameters.Element (Place).my_Type = the_ada_subProgram.Parameters.Element (Place).my_Type)
                                                 then
                                                    the_ada_subProgram.return_Type := Each.return_Type;
+                                                   the_ada_subProgram.Overridden  := Each;
                                                    is_Found                       := True;
                                                    exit;
                                                 end if;
@@ -1625,6 +1664,7 @@ is
                                                 if Candidate /= null
                                                 then
                                                    the_ada_subProgram.return_Type := Candidate.return_Type;
+                                                   the_ada_subProgram.Overridden  := Candidate;
                                                    is_Found                       := True;
 
                                                    if Candidates = 1

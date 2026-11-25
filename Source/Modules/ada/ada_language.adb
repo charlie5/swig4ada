@@ -1522,6 +1522,27 @@ is
             declare
                Status : C.int with Unreferenced;
             begin
+               --  A member of a class which cannot be assigned (whose assignment operator is private or deleted) is
+               --  read and not written. The core says so of the member (its 'allocate' step marks it immutable) where
+               --  it has met that class first, which it has not where the class is a template instance named after the
+               --  class of the member ('DynArray<const char*, 10> _stack;' of tinyxml2's 'XMLPrinter', and the
+               --  '%template' after the header): the set function then assigned through an operator which is declared
+               --  and never defined, and a program did not link.
+               --
+               declare
+                  Resolved  : constant SwigType_Pointer := SwigType_typedef_resolve_all (swig_Type);
+                  the_Class : constant Node_Pointer     := (if SwigType_type (Resolved) = T_USER
+                                                            then Swig_symbol_clookup (DOHs.const_String_or_char_ptr.Item (Resolved), null)
+                                                            else null);
+               begin
+                  if         the_Class /= null
+                    and then Attribute (the_Class, "nodeType") = "class"
+                    and then Attribute (the_Class, "allocate:noassign") /= ""
+                  then
+                     set_Attribute (the_Node, "feature:immutable", "1");
+                  end if;
+               end;
+
                Self.accessor_member_Name  := variable_Name;
                Self.variable_wrapper_flag := True;
 

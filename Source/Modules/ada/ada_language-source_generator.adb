@@ -555,7 +555,17 @@ is
                               append (the_Source, ",");
                            end if;
 
-                           append (the_Source, "0 .." & Natural'Image (Element (the_component.array_Bounds, Each)));
+                           --  A dimension of no elements (one which could not be worked out, or a flexible array member,
+                           --  'int data[];') has the upper bound -1. The index is modular, so '0 .. -1' would be all of
+                           --  'size_t' (until 2026-11-25 it was so, and the record of tinyxml2's 'Block' was of 2**64 items):
+                           --  the range is written '1 .. 0'.
+                           --
+                           if Element (the_component.array_Bounds, Each) < 0
+                           then
+                              append (the_Source, "1 .. 0");
+                           else
+                              append (the_Source, "0 .." & Natural'Image (Element (the_component.array_Bounds, Each)));
+                           end if;
                         end loop;
 
                         append (the_Source, ")");
@@ -773,6 +783,71 @@ is
 
 
 
+   Generated : ada_Package.Vector;     -- The packages whose specs are made, or are being made (see 'generate').
+
+
+   function origin_Package (the_Subprogram : access ada_Subprogram.item'Class) return ada_Package.view
+   --
+   --  The package of the function which the subprogram overrides, at the root of what overrides what, where its spec
+   --  has been made; null otherwise. Ada requires an override to have the profile of what it overrides, so where that
+   --  takes or returns a pointer through a limited view of a package ('access tinyxml2.XMLText.Item'Class') so must the
+   --  override, though its own package has the whole of that one, and where it names the pointer type
+   --  ('tinyxml2.XMLVisitor.Pointer') so must the override, though its own package would have only a limited view of
+   --  that one. (Until 2026-11-25 each package chose for itself, and the specs of tinyxml2's nodes did not compile.)
+   --
+   is
+      the_Origin : access ada_Subprogram.item'Class := the_Subprogram;
+   begin
+      while the_Origin.Overridden /= null
+      loop
+         the_Origin := the_Origin.Overridden;
+      end loop;
+
+      if        the_Origin = the_Subprogram
+        or else the_Origin.Parameters.is_Empty
+      then
+         return null;
+      end if;
+
+      declare
+         the_Package : constant ada_Package.view := ada_Package.view (the_Origin.Parameters.first_Element.my_Type.declaration_Package);
+      begin
+         return (if Generated.contains (the_Package) then the_Package else null);
+      end;
+   end origin_Package;
+
+
+
+   function is_named_by_the_Origin (the_Subprogram : access ada_Subprogram.item'Class;
+                                    the_Type       : in     ada_Type.view) return Boolean
+   --
+   --  Whether the subprogram overrides one whose package names the pointer type ('tinyxml2.XMLVisitor.Pointer'), having
+   --  the whole of the package of the type, so that the package of the subprogram must have the whole of it too. That
+   --  is safe: the package has the whole of its parent's, which has the whole of the type's, so the type's cannot have
+   --  the whole of this one.
+   --
+   is
+      the_Origin : constant ada_Package.view := origin_Package (the_Subprogram);
+   begin
+      if        the_Origin = null
+        or else the_Type   = null
+        or else the_Type.resolved_Type.all not in ada_Type.elementary.an_access.to_Type.item'Class
+        or else to_Lower (the_Type.qualified_Name) = "interfaces.c.strings.chars_ptr"
+      then
+         return False;
+      end if;
+
+      declare
+         the_type_Package : constant ada_Package.view := ada_Package.view (the_Type.resolved_Type.declaration_Package);
+      begin
+         return          the_type_Package /= the_Origin
+                and then the_Origin.Context.Withs (the_type_Package)
+                and then not the_Origin.Context.limited_Withs (the_type_Package);
+      end;
+   end is_named_by_the_Origin;
+
+
+
    function specification_Source (Self                : access ada_Subprogram.item'Class;
                                   declaration_Package : access ada_Package   .item'Class;
                                   using_Name          : in     unbounded_String;
@@ -787,6 +862,13 @@ is
       all_Parameters : constant ada_Parameter.Vector := Self.Parameters;
       num_Parameters : constant Natural              := Natural (all_Parameters.length);
       has_Parameters : constant Boolean              := num_Parameters > 0;
+
+      --  Whose view of the packages of the other types decides how a pointer is written: that of the function which is
+      --  overridden, where this one overrides (see 'origin_Package').
+      --
+      the_Origin      : constant        ada_Package.view       := origin_Package (Self);
+      context_Package : constant access ada_Package.item'Class := (if the_Origin /= null then the_Origin.all'Access
+                                                                                         else declaration_Package);
 
    begin
       append (the_Source,  NL & NL);
@@ -837,7 +919,7 @@ is
                     :=          the_Parameter.my_Type.resolved_Type.all in ada_type.elementary.an_Access.to_Subprogram.item'Class
                        and then to_Lower (the_Parameter.my_Type.resolved_Type.qualified_Name) /= "interfaces.c.strings.chars_ptr";
 
-                  Type_is_from_limited_With : constant Boolean := declaration_Package.Context.limited_Withs (parameter_type_Package);
+                  Type_is_from_limited_With : constant Boolean := context_Package.Context.limited_Withs (parameter_type_Package);
                   limited_Pointer_base_Type : ada_Type.view;
 
                   is_the_self_Parameter : Boolean;
@@ -1045,7 +1127,7 @@ is
                           qualified_Name (ada_Type.elementary.an_access.to_type.view (Self.return_Type.resolved_Type).accessed_Type));
                end if;
             elsif      Self.return_Type.resolved_Type.all in ada_Type.elementary.an_access.to_Type.item'Class
-              and then declaration_Package.Context.limited_Withs
+              and then context_Package.Context.limited_Withs
                          (ada_Type.elementary.an_access.to_Type.view (Self.return_Type.resolved_Type).accessed_Type.declaration_Package.all'Access)
             then   -- Only a limited view of the package of the accessed type is had, in which its pointer type cannot be seen.
                append (the_Source,
@@ -1822,7 +1904,13 @@ is
                loop
                   the_Parameter := Element (Cursor);
 
-                  if    the_Parameter.is_Pointer
+                  if         the_Parameter.Name /= "Self"
+                    and then is_named_by_the_Origin (the_Subprogram, the_Parameter.my_Type)
+                  then
+                     the_Context.add (the_Parameter.my_Type,
+                                      is_access => False);
+
+                  elsif the_Parameter.is_Pointer
                     and the_Parameter.my_Type.all in ada_type.composite.a_Record.item'Class
                   then
                      the_Context.add (the_Parameter.my_Type,
@@ -1859,7 +1947,12 @@ is
                declare
                   the_return_Type : constant ada_Type.view := the_Subprogram.return_Type;
                begin
-                  if    the_return_Type.all in ada_type.elementary.an_Access.to_Type.item'Class
+                  if is_named_by_the_Origin (the_Subprogram, the_return_Type)
+                  then
+                     the_Context.add (the_return_Type,
+                                      is_access => False);
+
+                  elsif the_return_Type.all in ada_type.elementary.an_Access.to_Type.item'Class
                     and the_return_Type.qualified_Name /= "interfaces.c.strings.chars_ptr"
                   then
                      the_Context.add (ada_Type.elementary.an_access.to_type.view (the_Subprogram.return_Type).accessed_Type,
@@ -3083,16 +3176,45 @@ is
       emit_Spec (Self.Module_top.Ada.Package_pointers,         Self.in_cpp_Mode,  with_IC_Pointers => True,  the_ada_Lang => Self);
       emit_Spec (Self.Module_top.Ada.Package_pointer_pointers, Self.in_cpp_Mode,  with_IC_Pointers => True,  the_ada_Lang => Self);
 
+      --  The package of a class is made after those of its base classes, so that an override is written with the view
+      --  of the other packages which the function which it overrides has (see 'origin_Package').
+      --
       declare
-         use ada_package.Vectors;
-         Cursor : ada_package.vector_Cursor := Self.Module_top.Ada.new_Packages.First;
+         procedure emit_after_its_Bases (the_Package : in ada_Package.view)
+         is
+         begin
+            if Generated.contains (the_Package)
+            then
+               return;
+            end if;
+
+            Generated.append (the_Package);     -- Before its bases, so that each is made once.
+
+            if the_Package.cpp_class_Type /= null
+            then
+               for each_Base of the_Package.cpp_class_Type.base_Classes
+               loop
+                  declare
+                     the_base_Package : constant ada_Package.view := ada_Package.view (each_Base.declaration_Package);
+                  begin
+                     if         Self.Module_top.Ada.new_Packages.contains (the_base_Package)
+                       and then not Generated.contains (the_base_Package)
+                     then
+                        emit_after_its_Bases (the_base_Package);
+                     end if;
+                  end;
+               end loop;
+            end if;
+
+            emit_Spec          (the_Package,  Self.in_cpp_Mode,  with_IC_Pointers => True, the_ada_Lang => Self);
+            emit_guard_Spec    (the_Package);
+            emit_director_Spec (the_Package,  the_ada_Lang => Self);
+         end emit_after_its_Bases;
+
       begin
-         while has_Element (Cursor)
+         for each_Package of Self.Module_top.Ada.new_Packages
          loop
-            emit_Spec          (Element (Cursor),  Self.in_cpp_Mode,  with_IC_Pointers => True, the_ada_Lang => Self);
-            emit_guard_Spec    (Element (Cursor));
-            emit_director_Spec (Element (Cursor),  the_ada_Lang => Self);
-            next (Cursor);
+            emit_after_its_Bases (each_Package);
          end loop;
       end;
 

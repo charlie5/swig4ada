@@ -942,6 +942,7 @@ static void add_symbols_copy(Node *n) {
     add_oldname = Getattr(n,"sym:name");
     if ((add_oldname) || (Getattr(n,"sym:needs_symtab"))) {
       int old_inclass = -1;
+      int old_cplus_mode = cplus_mode;   /* swig4ada: restored after a nested class, whose default access is its own. */
       Node *oldCurrentOuterClass = 0;
       if (add_oldname) {
 	DohIncref(add_oldname);
@@ -1006,6 +1007,9 @@ static void add_symbols_copy(Node *n) {
       if (Equal(nodeType(n), "class")) {
 	inclass = old_inclass;
 	currentOuterClass = oldCurrentOuterClass;
+	/* swig4ada: the members of the class which hold this one keep the access which they were declared with (a
+	   member of a template instance after a private nested structure was taken to be public, and given a wrapper). */
+	cplus_mode = old_cplus_mode;
       }
     } else {
       if (Equal(nodeType(n), "extend")) {
