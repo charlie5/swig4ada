@@ -15,6 +15,31 @@ is
    destruct_Symbol : unbounded_String;     -- The function of the wrapper which destructs an object, where there is one.
    delete_Symbol   : unbounded_String;     -- The function of the wrapper which destructs an object and frees it, likewise.
    class_cpp_Name  : constant String := (if Self.in_cpp_Mode then +DOH_Pointer (get_Attribute (Self.getCurrentClass, "name")) else "");
+
+   function deletes_privately return Boolean
+   --
+   --  Whether the class declares an 'operator delete' which is not public, as one which is made only on the stack
+   --  does (Bullet's 'btCollisionObjectWrapper', by 'BT_DECLARE_STACK_ONLY_OBJECT', which declares it and never
+   --  defines it). An object of it is then not deleted, and the core's function of the wrapper which deletes one is
+   --  not made: it would not link. The object is destructed in its place, by the function which the module makes.
+   --
+   is
+      the_Child : Node_Pointer := first_Child (Self.getCurrentClass);
+   begin
+      while the_Child /= null
+      loop
+         if         Attribute (the_Child, "name") = "operator delete"
+           and then Attribute (the_Child, "access") in "private" | "protected"
+         then
+            return True;
+         end if;
+
+         the_Child := next_Sibling (the_Child);
+      end loop;
+
+      return False;
+   end deletes_privately;
+
 begin
    if not Self.in_cpp_Mode
    then
@@ -93,7 +118,8 @@ begin
    locate (doh_Node (the_Node));
 
    if not (   check_Attribute (the_Node, "access", "protected")
-           or check_Attribute (the_Node, "access", "private"))
+           or check_Attribute (the_Node, "access", "private")
+           or deletes_privately)
    then
       Status := swigMod.Language.item (Self.all).destructorHandler (the_node);
    end if;
