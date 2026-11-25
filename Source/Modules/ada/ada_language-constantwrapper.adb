@@ -245,71 +245,35 @@ is
 
 
 
-   function has_an_integer_Operand (the_Text : in String) return Boolean
+   function is_a_plain_Number (the_Text : in String) return Boolean
    --
-   --  Whether the expression, as Ada will have it, has an operand which is an integer: a number with neither a point
-   --  nor an exponent ('2', '0x10'), or the name of an integer constant which is known.
+   --  Whether the text is a number alone, with a sign or within brackets ('(6.0221367e23)', '-1.5').
    --
    is
-      Place : Positive := the_Text'First;
+      First : Positive := the_Text'First;
+      Last  : Natural  := the_Text'Last;
    begin
-      while Place <= the_Text'Last
       loop
-         if the_Text (Place) in '0' .. '9'
-         then
-            declare
-               First : constant Positive := Place;
+         while First <= Last and then the_Text (First) in ' ' | '+' | '-' loop   First := First + 1;   end loop;
+         while Last >= First and then the_Text (Last)  =  ' '             loop   Last  := Last  - 1;   end loop;
 
-               function is_Based return Boolean     -- '0x10', or '16#10#' of Ada, in which an 'E' is a digit.
-               is (        Place - First >= 2
-                   and then (   the_Text (First + 1) in 'x' | 'X'
-                             or else ada.Strings.fixed.Index (the_Text (First .. Place - 1), "#") /= 0));
-            begin
-               while      Place <= the_Text'Last
-                 and then (        the_Text (Place) in '0' .. '9' | 'a' .. 'z' | 'A' .. 'Z' | '_' | '.' | '#'
-                           or else (    the_Text (Place) in '+' | '-'          -- The sign of an exponent.
-                                    and then the_Text (Place - 1) in 'e' | 'E'
-                                    and then not is_Based))
-               loop
-                  Place := Place + 1;
-               end loop;
-
-               declare
-                  the_Number : constant String  := the_Text (First .. Place - 1);
-                  has_Point  : constant Boolean := ada.Strings.fixed.Index (the_Number, ".") /= 0;
-               begin
-                  if not has_Point
-                    and then (        is_Based
-                              or else ada.Strings.fixed.Index (the_Number, ada.Strings.Maps.to_Set ("eE")) = 0)
-                  then
-                     return True;
-                  end if;
-               end;
-            end;
-
-         elsif the_Text (Place) in 'a' .. 'z' | 'A' .. 'Z' | '_'
-         then
-            declare
-               First : constant Positive := Place;
-            begin
-               while Place <= the_Text'Last and then the_Text (Place) in '0' .. '9' | 'a' .. 'z' | 'A' .. 'Z' | '_' | '.' | ':'
-               loop
-                  Place := Place + 1;
-               end loop;
-
-               if Self.integer_symbol_value_Map.contains (+the_Text (First .. Place - 1))
-               then
-                  return True;
-               end if;
-            end;
-
-         else
-            Place := Place + 1;
-         end if;
+         exit when not (    First < Last
+                        and then the_Text (First) = '('
+                        and then the_Text (Last)  = ')');
+         First := First + 1;
+         Last  := Last  - 1;
       end loop;
 
-      return False;
-   end has_an_integer_Operand;
+      declare
+         the_Number : Long_Float with Unreferenced;
+      begin
+         the_Number := Long_Float'Value (the_Text (First .. Last));
+         return True;
+      exception
+         when Constraint_Error =>
+            return False;
+      end;
+   end is_a_plain_Number;
 
 
 
@@ -533,7 +497,7 @@ begin
             then
                declare
                   is_worked_Out : Boolean := False;
-                  the_Value     : Long_Float;
+                  the_Value     : c_Expressions.a_Real;
                begin
                   begin     -- It is kept for a later real constant whose value names this one ('const double x = D_EPS * 3;').
                      the_Value     := c_Expressions.real_Value_of (to_String (value_Text),
@@ -549,14 +513,15 @@ begin
 
                   make_Real (value_Text);
 
-                  --  An expression which has an operand that is an integer, a number or a constant, is given its value, as
-                  --  Ada takes no integer as an operand of a real type ('#define TWICE (EPS * 2)' gave '(1.0e-6*2)', which
-                  --  did not compile, until 2026-11-25). Any other is given as it is written, which keeps its precision.
+                  --  An expression which is worked out is given its value, as C works it out (each operation in 'float'
+                  --  or 'double'), where Ada would work it out exactly and round it once, and takes no integer as an
+                  --  operand of a real type ('#define TWICE (EPS * 2)' gave '(1.0e-6*2)', which did not compile, until
+                  --  2026-11-25). A number is given as it is written, which both round alike.
                   --
                   if         is_worked_Out
-                    and then has_an_integer_Operand (to_String (value_Text))
+                    and then not is_a_plain_Number (to_String (value_Text))
                   then
-                     value_Text := +c_Expressions.real_Image (the_Value);
+                     value_Text := +c_Expressions.real_Image (the_Value.Value);
                   end if;
                end;
 

@@ -35,8 +35,14 @@ is
    -- A name is sought with the namespace ahead of it first, and then as it is written.
 
 
+   type a_Real is
+      record
+         Value     : Long_Float;
+         is_Single : Boolean;     -- Whether it is of C's 'float', in which an operation of two such is worked out.
+      end record;
+
    package real_value_Maps is new ada.Containers.hashed_Maps (unbounded_String,
-                                                              Long_Float,
+                                                              a_Real,
                                                               ada.Strings.unbounded.Hash,
                                                               "=");
    --
@@ -46,12 +52,14 @@ is
    function real_Value_of (the_Expression : in String;
                            known_Reals    : in real_value_Maps  .Map;
                            known_Integers : in symbol_value_Maps.Map;
-                           Namespace      : in unbounded_String) return Long_Float;
+                           Namespace      : in unbounded_String) return a_Real;
    --
    -- The value of an expression which is a real number: of numbers, of the names of values which are known, of the
-   -- signs, of '+', '-', '*' and '/', and of brackets. The casts are removed first. A division of two integers is
-   -- that of C, which truncates ('1 / 3' is 0, and '1.0 / 3' a third). 'Constraint_Error' is raised for an
-   -- expression which cannot be worked out.
+   -- signs, of '+', '-', '*' and '/', and of brackets. The casts are removed first. Each operation is worked out in
+   -- the type in which C works it out (on a machine whose 'FLT_EVAL_METHOD' is 0, as x86-64 and AArch64 are): one of
+   -- two integers in an integer, which truncates a division ('1 / 3' is 0, and '1.0 / 3' a third), one with a
+   -- 'double' in 'double', and any other, which has a 'float' ('1.0f / 7', 'eps * 2' where 'eps' is a 'float'), in
+   -- 'float'. 'Constraint_Error' is raised for an expression which cannot be worked out.
 
 
    function real_Image (the_Value : in Long_Float) return String;

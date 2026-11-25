@@ -919,12 +919,14 @@ is
    function real_Value_of (the_Expression : in String;
                            known_Reals    : in real_value_Maps  .Map;
                            known_Integers : in symbol_value_Maps.Map;
-                           Namespace      : in unbounded_String) return Long_Float
+                           Namespace      : in unbounded_String) return a_Real
    is
+      type a_Kind is (an_Integer, a_Single, a_Double);     -- The type of an operand in C, from the narrowest.
+
       type an_Operand is
          record
-            Value      : Long_Float;
-            is_Integer : Boolean;     -- Whether it is of an integer type in C, as a division of two such truncates.
+            Value : Long_Float;
+            Kind  : a_Kind;
          end record;
 
       Text  : constant String  := without_Casts (the_Expression, known_Integers, Namespace);
@@ -950,27 +952,75 @@ is
       end next_Character;
 
 
+      function applied (Operator : in Character;   Left, Right : in an_Operand) return an_Operand
+      --
+      --  The operator applied to the two operands, in the type of the wider, as C applies it.
+      --
+      is
+         Kind : constant a_Kind := a_Kind'Max (Left.Kind, Right.Kind);
+      begin
+         if Operator = '/' and then Right.Value = 0.0
+         then
+            raise Constraint_Error with "'" & Text & "' divides by zero.";
+         end if;
+
+         case Kind
+         is
+            when an_Integer =>
+               return (case Operator
+                       is
+                          when '+'    => (Left.Value + Right.Value, Kind),
+                          when '-'    => (Left.Value - Right.Value, Kind),
+                          when '*'    => (Left.Value * Right.Value, Kind),
+                          when others => (Long_Float'Truncation (Left.Value / Right.Value), Kind));
+
+            when a_Single =>
+               declare
+                  L : constant Float := Float (Left .Value);     -- An integer is converted to the 'float', as C converts it.
+                  R : constant Float := Float (Right.Value);
+               begin
+                  return (case Operator
+                          is
+                             when '+'    => (Long_Float (L + R), Kind),
+                             when '-'    => (Long_Float (L - R), Kind),
+                             when '*'    => (Long_Float (L * R), Kind),
+                             when others => (Long_Float (L / R), Kind));
+               end;
+
+            when a_Double =>
+               return (case Operator
+                       is
+                          when '+'    => (Left.Value + Right.Value, Kind),
+                          when '-'    => (Left.Value - Right.Value, Kind),
+                          when '*'    => (Left.Value * Right.Value, Kind),
+                          when others => (Left.Value / Right.Value, Kind));
+         end case;
+      end applied;
+
+
       function Sum return an_Operand;
 
 
       function Number return an_Operand
       --
       --  A literal of decimal digits, with its fraction, exponent and suffix ('2', '0.5', '1e-6', '2.5f', '10UL').
+      --  A real literal is a 'double' unless it has the suffix of a 'float' ('l' gives a 'long double', which is
+      --  taken for a 'double').
       --
       is
-         First      : constant Positive := Place;
-         is_Integer :          Boolean  := True;
+         First : constant Positive := Place;
+         Kind  :          a_Kind   := an_Integer;
       begin
          while Place <= Text'Last and then Text (Place) in '0' .. '9' | '.'
          loop
-            if Text (Place) = '.' then   is_Integer := False;   end if;
+            if Text (Place) = '.' then   Kind := a_Double;   end if;
             Place := Place + 1;
          end loop;
 
          if Place <= Text'Last and then Text (Place) in 'e' | 'E'
          then
-            is_Integer := False;
-            Place      := Place + 1;
+            Kind  := a_Double;
+            Place := Place + 1;
 
             if Place <= Text'Last and then Text (Place) in '+' | '-' then   Place := Place + 1;   end if;
 
@@ -985,8 +1035,9 @@ is
          begin
             if         Place <= Text'Last
               and then Text (Place) in 'f' | 'F'
-              and then not is_Integer
+              and then Kind = a_Double
             then
+               Kind  := a_Single;
                Place := Place + 1;
             end if;
 
@@ -1000,10 +1051,15 @@ is
                raise Constraint_Error with "'" & Text & "' has a number which is not decimal.";
             end if;
 
-            return (Value      => Long_Float'Value ((if Digits_Text (Digits_Text'First) = '.' then "0" else "")
-                                                    & Digits_Text
-                                                    & (if Digits_Text (Digits_Text'Last) = '.' then "0" else "")),
-                    is_Integer => is_Integer);
+            declare
+               the_Literal : constant String := (if Digits_Text (Digits_Text'First) = '.' then "0" else "")
+                                                & Digits_Text
+                                                & (if Digits_Text (Digits_Text'Last) = '.' then "0" else "");
+            begin
+               return (Value => (if Kind = a_Single then Long_Float (Float'Value (the_Literal))     -- Rounded once, as C rounds
+                                                    else Long_Float'Value (the_Literal)),           -- it, and not through a 'double'.
+                       Kind  => Kind);
+            end;
          end;
       end Number;
 
@@ -1031,11 +1087,15 @@ is
             loop
                if known_Reals.contains (Each)
                then
-                  return (known_Reals.Element (Each), is_Integer => False);
+                  declare
+                     the_Real : constant a_Real := known_Reals.Element (Each);
+                  begin
+                     return (the_Real.Value, (if the_Real.is_Single then a_Single else a_Double));
+                  end;
 
                elsif known_Integers.contains (Each)
                then
-                  return (Long_Float'Value (Image (known_Integers.Element (Each))), is_Integer => True);
+                  return (Long_Float'Value (Image (known_Integers.Element (Each))), an_Integer);
                end if;
             end loop;
 
@@ -1054,7 +1114,7 @@ is
                declare
                   the_Operand : constant an_Operand := Factor;
                begin
-                  return (-the_Operand.Value, the_Operand.is_Integer);
+                  return (-the_Operand.Value, the_Operand.Kind);
                end;
 
             when '+' =>
@@ -1092,37 +1152,17 @@ is
          Result : an_Operand := Factor;
       begin
          loop
-            case next_Character
-            is
-               when '*' =>
-                  Place := Place + 1;
-                  declare
-                     Right : constant an_Operand := Factor;
-                  begin
-                     Result := (Result.Value * Right.Value,   Result.is_Integer and Right.is_Integer);
-                  end;
+            declare
+               Operator : constant Character := next_Character;
+            begin
+               exit when Operator not in '*' | '/';
 
-               when '/' =>
-                  Place := Place + 1;
-                  declare
-                     Right : constant an_Operand := Factor;
-                  begin
-                     if Right.Value = 0.0
-                     then
-                        raise Constraint_Error with "'" & Text & "' divides by zero.";
-
-                     elsif Result.is_Integer and Right.is_Integer
-                     then
-                        Result := (Long_Float'Truncation (Result.Value / Right.Value),   is_Integer => True);
-                     else
-                        Result := (Result.Value / Right.Value,   is_Integer => False);
-                     end if;
-                  end;
-
-               when others =>
-                  return Result;
-            end case;
+               Place  := Place + 1;
+               Result := applied (Operator, Result, Factor);
+            end;
          end loop;
+
+         return Result;
       end Product;
 
 
@@ -1131,28 +1171,17 @@ is
          Result : an_Operand := Product;
       begin
          loop
-            case next_Character
-            is
-               when '+' =>
-                  Place := Place + 1;
-                  declare
-                     Right : constant an_Operand := Product;
-                  begin
-                     Result := (Result.Value + Right.Value,   Result.is_Integer and Right.is_Integer);
-                  end;
+            declare
+               Operator : constant Character := next_Character;
+            begin
+               exit when Operator not in '+' | '-';
 
-               when '-' =>
-                  Place := Place + 1;
-                  declare
-                     Right : constant an_Operand := Product;
-                  begin
-                     Result := (Result.Value - Right.Value,   Result.is_Integer and Right.is_Integer);
-                  end;
-
-               when others =>
-                  return Result;
-            end case;
+               Place  := Place + 1;
+               Result := applied (Operator, Result, Product);
+            end;
          end loop;
+
+         return Result;
       end Sum;
 
 
@@ -1164,7 +1193,8 @@ is
          raise Constraint_Error with "'" & Text & "' cannot be worked out as a real number.";
       end if;
 
-      return the_Result.Value;
+      return (Value     => the_Result.Value,
+              is_Single => the_Result.Kind = a_Single);
    end real_Value_of;
 
 

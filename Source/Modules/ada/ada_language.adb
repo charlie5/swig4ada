@@ -160,7 +160,7 @@ is
      renames cpp_Mangling.Symbol;
    function  variable_Suffix (swig_Type : in String) return String;
    function  character_Value (Position  : in String) return String;
-   function  real_Value      (Self : access Item;   value_Text : in String;   Name : in unbounded_String) return String;
+   function  real_Value      (Self : access Item;   value_Text : in String;   Name : in unbounded_String;   of_Type : in c_Type.view) return String;
    function  without_leading_Qualifiers (swig_Type : in String) return String;
    function  smart_Pointer_Words (type_Name : in String) return Natural;
    function  as_Ada_string_Text  (the_String : in String) return String;
@@ -656,7 +656,7 @@ is
               and then new_Variable.my_Type.is_a_Real
             then
                begin
-                  new_Variable.Value := +real_Value (Self, value_Text, Name => new_Variable.Name);
+                  new_Variable.Value := +real_Value (Self, value_Text, Name => new_Variable.Name, of_Type => new_Variable.my_Type);
                exception
                   when others =>
                      null;     -- The value is not a plain number.
@@ -1696,7 +1696,8 @@ is
 
                elsif new_Variable.my_Type.is_a_Real
                then
-                  new_Variable.Value := +real_Value (Self, value_Text, Name => Self.current_class_namespace_Prefix & new_Variable.Name);
+                  new_Variable.Value := +real_Value (Self, value_Text, Name    => Self.current_class_namespace_Prefix & new_Variable.Name,
+                                                                         of_Type => new_Variable.my_Type);
                end if;
             exception
                when others =>
@@ -2492,23 +2493,26 @@ is
 
 
 
-   function real_Value (Self : access Item;   value_Text : in String;   Name : in unbounded_String) return String
+   function real_Value (Self : access Item;   value_Text : in String;   Name : in unbounded_String;   of_Type : in c_Type.view) return String
    --
    --  The value of a real constant, as Ada writes it, where it can be worked out: a number less its casts
    --  ('(ai_real) 1e-6', of Assimp, 'static_cast<double> (0.5)') and its suffix ('2.5f'), or an expression of such
    --  numbers and of the constants which are known ('eps * 2'; until 2026-11-25 such a constant was left out). The
    --  value is kept, by 'Name', for a later constant whose value names this one. Raises where it cannot be worked out.
    --  It is given with as many digits as give back the 'double' of C exactly ('real_Image'; until later on 2026-11-25
-   --  with 15, which need not).
+   --  with 15, which need not). It is kept as a 'float' where 'of_Type' is one, so that a later constant which names
+   --  it is worked out in 'float', as C works it out.
    --
    is
-      the_Value : constant Long_Float := c_Expressions.real_Value_of (value_Text,
-                                                                      Self.real_symbol_value_Map,
-                                                                      Self.integer_symbol_value_Map,
-                                                                      Self.current_class_namespace_Prefix);
+      the_Value : constant c_Expressions.a_Real := c_Expressions.real_Value_of (value_Text,
+                                                                                Self.real_symbol_value_Map,
+                                                                                Self.integer_symbol_value_Map,
+                                                                                Self.current_class_namespace_Prefix);
+      the_Type  : constant c_Type.view          := (if c_Type."=" (of_Type.c_type_Kind, c_Type.Typedef) then of_Type.ultimate_base_Type else of_Type);
    begin
-      Self.real_symbol_value_Map.include (Name, the_Value);
-      return c_Expressions.real_Image (the_Value);
+      Self.real_symbol_value_Map.include (Name, (Value     => the_Value.Value,
+                                                 is_Single => the_Type /= null and then the_Type.Name = "float"));
+      return c_Expressions.real_Image (the_Value.Value);
    end real_Value;
 
 
