@@ -2498,6 +2498,8 @@ is
    --  ('(ai_real) 1e-6', of Assimp, 'static_cast<double> (0.5)') and its suffix ('2.5f'), or an expression of such
    --  numbers and of the constants which are known ('eps * 2'; until 2026-11-25 such a constant was left out). The
    --  value is kept, by 'Name', for a later constant whose value names this one. Raises where it cannot be worked out.
+   --  It is given with as many digits as give back the 'double' of C exactly ('real_Image'; until later on 2026-11-25
+   --  with 15, which need not).
    --
    is
       the_Value : constant Long_Float := c_Expressions.real_Value_of (value_Text,
@@ -2506,7 +2508,7 @@ is
                                                                       Self.current_class_namespace_Prefix);
    begin
       Self.real_symbol_value_Map.include (Name, the_Value);
-      return ada.Strings.fixed.Trim (Long_Float'Image (the_Value), ada.Strings.Both);
+      return c_Expressions.real_Image (the_Value);
    end real_Value;
 
 

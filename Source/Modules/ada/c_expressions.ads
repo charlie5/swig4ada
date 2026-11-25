@@ -54,6 +54,12 @@ is
    -- expression which cannot be worked out.
 
 
+   function real_Image (the_Value : in Long_Float) return String;
+   --
+   -- The value as an Ada literal, of the fewest significant digits (15, 16 or 17) which give it back exactly: a
+   -- constant of C's 'double' is so the same number in Ada.
+
+
    function without_Casts (the_Expression : in String;
                            known_Symbols  : in symbol_value_Maps.Map;
                            Namespace      : in unbounded_String) return String;

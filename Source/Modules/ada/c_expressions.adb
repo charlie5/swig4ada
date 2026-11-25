@@ -4,6 +4,7 @@ with
 
      ada.Strings.Maps,
      ada.Strings.fixed,
+     ada.Long_Float_Text_IO,
      ada.Characters.handling,
      ada.Containers.Vectors,
      interfaces.C,
@@ -886,6 +887,31 @@ is
                                               the_expression_Type);
       return the_expression_Value;
    end Value_of;
+
+
+
+
+   function real_Image (the_Value : in Long_Float) return String
+   is
+      Buffer : String (1 .. 40);
+   begin
+      for Significant in 15 .. 17
+      loop
+         ada.Long_Float_Text_IO.put (Buffer, the_Value, Aft => Significant - 1, Exp => 3);
+
+         declare
+            the_Image : constant String := ada.Strings.fixed.Trim (Buffer, ada.Strings.Both);
+         begin
+            if        Significant = 17                      -- Which always gives it back.
+              or else Long_Float'Value (the_Image) = the_Value
+            then
+               return the_Image;
+            end if;
+         end;
+      end loop;
+
+      raise Program_Error;     -- Not reached.
+   end real_Image;
 
 
 

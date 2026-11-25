@@ -556,7 +556,7 @@ begin
                   if         is_worked_Out
                     and then has_an_integer_Operand (to_String (value_Text))
                   then
-                     value_Text := +ada.Strings.fixed.Trim (Long_Float'Image (the_Value), ada.Strings.Both);
+                     value_Text := +c_Expressions.real_Image (the_Value);
                   end if;
                end;
 
