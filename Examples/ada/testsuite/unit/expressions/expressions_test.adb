@@ -174,7 +174,10 @@ begin
       the_Integers : symbol_value_Maps.Map;
 
       function real_Value (Expression : in String;   Namespace : in String := "") return Long_Float
-      is (real_Value_of (Expression, the_Reals, the_Integers, +Namespace));
+      is (real_Value_of (Expression, the_Reals, the_Integers, +Namespace).Value);
+
+      function is_Single (Expression : in String) return Boolean
+      is (real_Value_of (Expression, the_Reals, the_Integers, +"").is_Single);
 
       function is_about (Value : in Long_Float;   Expected : in Long_Float) return Boolean
       is (abs (Value - Expected) <= abs Expected * 1.0e-15);
@@ -192,7 +195,8 @@ begin
       end is_refused_as_Real;
 
    begin
-      the_Reals   .insert (+"EPS",   1.0e-6);
+      the_Reals   .insert (+"EPS",   (1.0e-6, is_Single => False));
+      the_Reals   .insert (+"FEPS",  (Long_Float (Float'Value ("1.0e-6")), is_Single => True));     -- Not static (see below).
       the_Integers.insert (+"COUNT", discrete.to_Integer (12));
 
       --  The values are those which GCC gives.
@@ -224,6 +228,25 @@ begin
          check (Long_Float'Value (real_Image (One / Three)) = One / Three,          "a third is given with the digits which give it back");
          check (real_Image (One / Three)'Length > real_Image (0.5)'Length,          "which are more than 15");
          check (Long_Float'Value (real_Image (Tenth * Three)) = Tenth * Three,      "as is three tenths, worked out, which is not 0.3");
+      end;
+
+      declare
+         One   : Float      := 1.0;     -- As above.
+         Three : Float      := 3.0;
+         Seven : Float      := 7.0;
+         Feps  : Float      := 1.0e-6;
+         D_One : Long_Float := 1.0;
+         Tenth : Float      := 0.1;     -- A static 'Float'' (0.1)' within a larger expression would not be rounded.
+      begin
+         check (real_Value ("1.0f / 7 * 3.0f") = Long_Float (One / Seven * Three),  "an expression of floats is worked out in float");
+         check (real_Value ("1.0f / 7 * 3.0f") /= Long_Float (Float (D_One / 7.0 * 3.0)),
+                "which is not the double rounded once, as GCC gives it (0.428571463, not 0.428571433)");
+         check (real_Value ("FEPS * 3") = Long_Float (Feps * Three),                "a known float is a float");
+         check (is_Single ("FEPS * 3"),                                             "and so is the result");
+         check (not is_Single ("1.0f / 7 * 3.0"),                                   "an operation with a double is in double");
+         check (real_Value ("1.0f / 7 * 3.0") = Long_Float (One / Seven) * 3.0,     "of the float which is worked out before it");
+         check (real_Value ("0.1f") = Long_Float (Tenth),                           "a literal of float is rounded to float");
+         check (not is_Single ("7 / 2"),                                            "and an integer is no float");
       end;
    end reals;
 
