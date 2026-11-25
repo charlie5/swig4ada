@@ -10,7 +10,13 @@
 
 namespace std {
 
-    template<class K, class T, class Compare = std::less<K> > class multimap {
+    // The allocator is a parameter of the template, with its default, as C++ has it, so that a partial specialisation
+    // of a header which names it ('template <typename T, typename A> struct convert<std::list<T, A>>', of yaml-cpp) is
+    // one of which an instance is a case (see 'std_vector.i').
+    //
+    template<class T> class allocator;
+
+    template<class K, class T, class Compare = std::less<K>, class Alloc = std::allocator<std::pair<const K, T> > > class multimap {
       public:
         // The data members are those of the GNU libstdc++ implementation, so that
         // the Ada record has the layout of the C++ object.
