@@ -214,6 +214,42 @@ is
 
 
 
+   function evaluated_as_Real (value_Text : in unbounded_String;   the_Value : out gmp.discrete.Integer) return Boolean
+   --
+   --  True where the value of a constant of an integer type is an expression which has real numbers in it, which a
+   --  cast makes an integer ('((int) 2.5 * 2)', which the core types as an 'int'), and which can be worked out: as C
+   --  works it out, and truncated, as C converts it. (Until 2026-11-26 such a constant was left out.)
+   --
+   is
+      function Cast_to (type_Name : in String) return c_Expressions.a_Cast
+      is (cast_to_Type (Self, type_Name));
+
+      the_Real : Long_Float;
+   begin
+      --  It may raise, and so is worked out here, and not in the declarations, whose exceptions the handler below
+      --  would not catch.
+      --
+      the_Real := c_Expressions.real_Value_of (to_String (value_Text),
+                                               Self.real_symbol_value_Map,
+                                               Self.integer_symbol_value_Map,
+                                               Self.current_class_namespace_Prefix,
+                                               Cast_to'Access).Value;
+
+      if abs the_Real >= 2.0 ** 63
+      then
+         return False;
+      end if;
+
+      the_Value := gmp.discrete.to_Integer (long_long_Integer (Long_Float'Truncation (the_Real)));
+      return True;
+
+   exception
+      when others =>
+         return False;
+   end evaluated_as_Real;
+
+
+
    function as_written_in_Ada (value_Text : in unbounded_String;   the_Value : in gmp.discrete.Integer) return unbounded_String
    --
    --  The text of an integer value which has been worked out: in the base in which the constant is written.
@@ -478,7 +514,9 @@ begin
       else
          if         is_Numeric
            and then the_Type.Name /= "char"                -- A character is given as it is written, or by its position.
-           and then Evaluated (value_Text, the_Value)
+           and then (        Evaluated (value_Text, the_Value)
+                     or else (    the_Type.is_an_Integer
+                              and then evaluated_as_Real (value_Text, the_Value)))
          then
             value_Text := as_written_in_Ada (value_Text, the_Value);
             Self.integer_symbol_value_Map.include (the_Name, the_Value);     -- For a later constant whose value names this one.

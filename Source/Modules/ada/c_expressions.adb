@@ -297,6 +297,36 @@ is
 
 
 
+   function integer_type_Size (type_Name : in String) return Natural
+   --
+   --  The size in bytes of a standard integer type of C, on the machine which generates the binding, or 0 where the
+   --  name is of none.
+   --
+   is
+      Unit : constant := C.char'Size;
+   begin
+      if    type_Name in "char" | "signed char" | "unsigned char"
+                       | "int8_t" | "uint8_t"                                                then   return 1;
+      elsif type_Name in "short" | "unsigned short" | "short int" | "unsigned short int"
+                       | "int16_t" | "uint16_t"                                              then   return C.short'Size / Unit;
+      elsif type_Name in "int" | "signed int" | "unsigned int" | "unsigned" | "signed"
+                       | "int32_t" | "uint32_t"                                              then   return C.int'Size   / Unit;
+      elsif type_Name in "long" | "unsigned long" | "long int" | "unsigned long int"
+                       | "ptrdiff_t" | "ssize_t" | "intptr_t" | "uintptr_t"                  then   return C.long'Size  / Unit;
+      elsif type_Name in "long long" | "unsigned long long" | "int64_t" | "uint64_t"         then   return long_long_Integer'Size / Unit;
+      elsif type_Name = "size_t"                                                             then   return C.size_t'Size / Unit;
+      else                                                                                          return 0;
+      end if;
+   end integer_type_Size;
+
+
+
+   function is_unsigned_Type (type_Name : in String) return Boolean
+   is (   (type_Name'Length > 8 and then type_Name (type_Name'First .. type_Name'First + 7) = "unsigned")
+       or else type_Name in "unsigned" | "size_t" | "uintptr_t" | "uint8_t" | "uint16_t" | "uint32_t" | "uint64_t");
+
+
+
    function without_Casts (the_Expression : in String;
                            known_Symbols  : in symbol_value_Maps.Map;
                            Namespace      : in unbounded_String) return String
@@ -352,6 +382,98 @@ is
 
          return Before >= 6 and then Slice (Pad, Before - 5, Before) = "sizeof";
       end follows_sizeof;
+
+
+      function applied_the_Cast (Open, After : in Positive;   type_Name : in String) return Boolean
+      --
+      --  Applies a cast to a standard integer type ('(unsigned) -1', '(unsigned char) (x + 1)'), which begins at 'Open'
+      --  and whose operand begins at 'After', as C applies it: the value of the operand is made one of the type,
+      --  modulo its size, and the cast and its operand are replaced by it. (Until 2026-11-26 the cast was removed, and
+      --  '(unsigned) -1' was -1.) False where the type is no standard integer type, or the operand is not worked out.
+      --
+      is
+         Name  : constant String  := ada.Strings.fixed.Trim (type_Name, ada.Strings.Both);
+         Bytes : constant Natural := integer_type_Size (Name);
+         Last  :          Natural := After;
+      begin
+         if Bytes = 0 and then Name /= "bool"
+         then
+            return False;
+         end if;
+
+         --  The operand: what is in brackets, or a sign and a number or name.
+         --
+         if Element (Pad, After) = '('
+         then
+            declare
+               Depth : Natural := 0;
+            begin
+               for Place in After .. Length (Pad)
+               loop
+                  if    Element (Pad, Place) = '(' then   Depth := Depth + 1;
+                  elsif Element (Pad, Place) = ')' then   Depth := Depth - 1;
+                  end if;
+
+                  if Depth = 0 then   Last := Place;   exit;   end if;
+               end loop;
+
+               if Depth /= 0 then   return False;   end if;
+            end;
+         else
+            while Last <= Length (Pad) and then Element (Pad, Last) in '-' | '+' | '~' | ' '
+            loop
+               Last := Last + 1;
+            end loop;
+
+            if Last <= Length (Pad) and then Element (Pad, Last) = '''
+            then   -- A character, within its quotes.
+               Last := Index (Pad, "'", Last + 1);
+               if Last = 0 then   return False;   end if;
+            else
+               while Last <= Length (Pad) and then (is_name_Character (Element (Pad, Last)) or else Element (Pad, Last) = ':')
+               loop
+                  Last := Last + 1;
+               end loop;
+
+               Last := Last - 1;
+            end if;
+         end if;
+
+         declare
+            the_Value : discrete.Integer;
+         begin
+            the_Value := Value_of (unbounded_Slice (Pad, After, Last), known_Symbols, Namespace);     -- Which may raise.
+
+            if Name = "bool"
+            then
+               the_Value := to_Integer (if the_Value = to_Integer (0) then 0 else 1);
+            else
+               declare
+                  Modulus : constant discrete.Integer := to_Integer (2) ** long_long_Integer (Bytes * 8);
+               begin
+                  the_Value := the_Value - (the_Value / Modulus) * Modulus;
+
+                  if the_Value < to_Integer (0)
+                  then
+                     the_Value := the_Value + Modulus;
+                  end if;
+
+                  if         not is_unsigned_Type (Name)
+                    and then not (the_Value < Modulus / to_Integer (2))
+                  then
+                     the_Value := the_Value - Modulus;
+                  end if;
+               end;
+            end if;
+
+            replace_Slice (Pad, Open, Last, "(" & Image (the_Value) & ")");
+            return True;
+         end;
+
+      exception
+         when others =>
+            return False;
+      end applied_the_Cast;
 
    begin
       --  The named casts: the name and its type are removed, which leaves the operand in its brackets.
@@ -443,12 +565,22 @@ is
                     and then the_Name (the_Name'First) in 'a' .. 'z' | 'A' .. 'Z' | '_'
                     and then (for all Char of the_Name => is_name_Character (Char) or else Char in ' ' | ':')
                     and then After /= 0
-                    and then (is_name_Character (Element (Pad, After)) or else Element (Pad, After) in '(' | ''')
+                    and then (is_name_Character (Element (Pad, After)) or else Element (Pad, After) in '(' | ''' | '-' | '+' | '~')
                     and then not known_Symbols.contains (+the_Name)
                     and then not known_Symbols.contains (Namespace & the_Name)
                     and then not follows_sizeof (Open)
                   then
-                     delete (Pad, Open, Close);
+                     if applied_the_Cast (Open, After, the_Name)
+                     then
+                        null;
+
+                     elsif Element (Pad, After) in '-' | '+' | '~'
+                     then   -- A name in brackets ahead of a sign need be no type ('(X) - 1'), and is left as it is.
+                        From := Open + 1;
+
+                     else   -- A cast to a type which is no standard integer type, or of an operand which is not worked
+                        delete (Pad, Open, Close);     -- out, leaves the value as it is.
+                     end if;
                   else
                      From := Open + 1;
                   end if;

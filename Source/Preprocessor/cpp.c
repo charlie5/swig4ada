@@ -1396,10 +1396,35 @@ static DOH *Preprocessor_replace(DOH *s, DOH *line_file) {
  * function contains the heuristic that determines whether or not a macro
  * definition passes through the preprocessor as a constant declaration.
  * ----------------------------------------------------------------------------- */
+/* swig4ada: whether a word is one of a standard type of C, which may be the type of a cast within a constant. */
+static int is_cast_type_word(String *word) {
+  static const char *const words[] = { "float", "double", "char", "short", "int", "long", "unsigned", "signed", "bool", "_Bool", 0 };
+  int i;
+  for (i = 0; words[i]; i++)
+    if (Equal(word, words[i]))
+      return 1;
+  return 0;
+}
+
+/* swig4ada: whether a token begins the operand of a cast. */
+static int begins_an_operand(int c) {
+  return (c == SWIG_TOKEN_LPAREN) || (c == SWIG_TOKEN_MINUS) || (c == SWIG_TOKEN_PLUS)
+      || (c >= SWIG_TOKEN_FLOAT && c <= SWIG_TOKEN_CHAR) || (c == SWIG_TOKEN_LONGLONG) || (c == SWIG_TOKEN_ULONGLONG);
+}
+
 static int checkpp_id(DOH *s) {
   int c;
   int hastok = 0;
   Scanner *scan = id_scan;
+  /* swig4ada: the tokens, so that a cast to a standard type ('(float) 1.0 / 7', '(unsigned long) -1') is no
+     unresolved identifier, and the macro is a constant, as it is in C. Any other identifier still keeps it out
+     (a macro which names a type, '#define INT unsigned int', among them), as does a cast with nothing after it. */
+  enum { max_tokens = 256 };
+  int tokens[max_tokens];
+  String *texts[max_tokens];
+  int count = 0;
+  int i;
+  int result = 0;
 
   Seek(s, 0, SEEK_SET);
 
@@ -1409,12 +1434,34 @@ static int checkpp_id(DOH *s) {
   Scanner_push(scan, s);
   while ((c = Scanner_token(scan))) {
     hastok = 1;
-    if ((c == SWIG_TOKEN_ID) || (c == SWIG_TOKEN_LBRACE) || (c == SWIG_TOKEN_RBRACE))
-      return 1;
+    if ((c == SWIG_TOKEN_LBRACE) || (c == SWIG_TOKEN_RBRACE) || (c == SWIG_TOKEN_ID && count == max_tokens)) {
+      result = 1;
+      break;
+    }
+    if (count < max_tokens) {
+      tokens[count] = c;
+      texts[count] = (c == SWIG_TOKEN_ID) ? Copy(Scanner_text(scan)) : 0;
+      count++;
+    }
   }
   if (!hastok)
-    return 1;
-  return 0;
+    result = 1;
+
+  for (i = 0; i < count && !result; i++) {
+    if (tokens[i] == SWIG_TOKEN_LPAREN) {
+      int j = i + 1;
+      while (j < count && tokens[j] == SWIG_TOKEN_ID && is_cast_type_word(texts[j]))
+        j++;
+      if (j > i + 1 && j + 1 < count && tokens[j] == SWIG_TOKEN_RPAREN && begins_an_operand(tokens[j + 1]))
+        i = j;          /* The cast, which is passed over. */
+    } else if (tokens[i] == SWIG_TOKEN_ID) {
+      result = 1;
+    }
+  }
+
+  for (i = 0; i < count; i++)
+    Delete(texts[i]);
+  return result;
 }
 
 /* addline().  Utility function for adding lines to a chunk */
