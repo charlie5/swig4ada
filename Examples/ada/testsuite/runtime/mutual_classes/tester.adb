@@ -18,7 +18,8 @@ is
        interfaces.C,
        Checks;
 
-   use type Pet.Pointer;
+   use type Pet.Pointer,
+            Leaf.Pointer;     -- A result through a limited view is of the pointer type of the class (see 'pointer_Package').
 
    the_Owner : aliased Owner.Item := Owner.construct;
    the_Pet   : aliased Pet  .Item := Pet  .construct;

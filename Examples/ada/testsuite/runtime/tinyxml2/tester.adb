@@ -96,19 +96,17 @@ begin
 
    changing :
    declare
-      --  A result which is an anonymous access ('NewElement', whose package has a limited view of that of the
-      --  element) is not converted to a named pointer type, whose accessibility GNAT checks at run time: the
-      --  pointer is taken of the object.
+      --  A result which is a pointer to a class which its package has only a limited view of ('NewElement') is of the
+      --  pointer type of the class all the same, and is converted to that of a parent as any pointer is.
       --
-      the_Root    : constant access XMLElement.Item'Class := XMLDocument.RootElement (the_Document'Access);
-      New_One     : constant access XMLElement.Item'Class := XMLDocument.NewElement  (the_Document'Access, +Added'Access);
-      the_New_One : constant        XMLNode.Pointer       := New_One.all'unchecked_Access;
-      Inserted    :                 XMLNode.Pointer;
+      the_Root : constant XMLElement.Pointer := XMLDocument.RootElement (the_Document'Access);
+      New_One  : constant XMLElement.Pointer := XMLDocument.NewElement  (the_Document'Access, +Added'Access);
+      Inserted :          XMLNode.Pointer;
    begin
       XMLElement.SetAttribute (New_One.all, +Kind'Access, +Novel'Access);
-      Inserted := XMLNode.InsertEndChild (the_Root, the_New_One);
+      Inserted := XMLNode.InsertEndChild (the_Root, XMLNode.Pointer (New_One));
 
-      check (Inserted = the_New_One,                                  "an element which the document makes is added to its root");
+      check (Inserted = XMLNode.Pointer (New_One),                    "an element which the document makes is added to its root");
       check (XMLNode.ChildElementCount (the_Root) = 3,                "which then has three child elements");
    end changing;
 
