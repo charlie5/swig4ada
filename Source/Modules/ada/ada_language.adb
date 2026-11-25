@@ -1200,6 +1200,21 @@ is
       Self.current_c_Node := doh_Node (the_Node);
       locate (doh_Node (the_Node));
 
+      --  A class with an 'operator->' is a smart pointer, which the core gives every function of the class which it
+      --  points to, those which that class inherits among them. C++ inherits no 'operator=': a class has one of its
+      --  own, which hides those of its bases, so that one which the class pointed to has from a base is called on
+      --  that class and does not compile (yaml-cpp's iterator, which points to an 'iterator_value', derived from a
+      --  'Node' whose instances of 'operator=<T>' the interface names). An assignment through a smart pointer is
+      --  left out, as the module does not know which class the function is a member of; the object is assigned
+      --  through its own class.
+      --
+      if         C."/=" (Self.is_smart_Pointer, 0)
+        and then ada.Strings.fixed.Index (function_Name, "operator =") = 1
+      then
+         unindent_Log;
+         return SWIG_OK;
+      end if;
+
       if not Self.following_a_using_Declaration     -- Whose functions are no members of the class, and have no place among them.
       then
          add_hidden_Virtuals (Self, before => the_Node);
@@ -2431,11 +2446,14 @@ is
             return False;
          end if;
 
-         --  A type which is found and is not known (as 'demand_c_Type_for' makes one) says nothing: it is sought as
-         --  below.
+         --  A type which is found and is not known (as 'demand_c_Type_for' makes one), or a typedef of one (yaml-cpp's
+         --  'const_iterator', a 'using' of an instance which is named later), says nothing: it is sought as below.
          --
          if         Self.swig_type_Map_of_c_type.contains (+Pad)
            and then Self.swig_type_Map_of_c_type.Element  (+Pad).c_type_Kind /= c_Type.Unknown
+           and then not (         Self.swig_type_Map_of_c_type.Element (+Pad).c_type_Kind = c_Type.Typedef
+                         and then Self.swig_type_Map_of_c_type.Element (+Pad).ultimate_base_Type /= null
+                         and then Self.swig_type_Map_of_c_type.Element (+Pad).ultimate_base_Type.c_type_Kind = c_Type.Unknown)
          then
             return Self.swig_type_Map_of_c_type.Element (+Pad).is_constructed_by_Cpp;
          end if;
@@ -2445,7 +2463,11 @@ is
          --  was missed, and the function was bound as an Ada function.
          --
          declare
-            Resolved : constant unbounded_String := +doh_Item (SwigType_typedef_resolve_all (SwigType_Pointer (Pad)));
+            Resolved : constant unbounded_String := +without_leading_Qualifiers (+doh_Item (SwigType_typedef_resolve_all (SwigType_Pointer (Pad))));
+            --
+            --  Less its qualifiers, as the name may stand for a type which has one ('value_type' of an
+            --  'iterator_base<const iterator_value>').
+
          begin
             if         Self.swig_type_Map_of_c_type.contains (Resolved)
               and then Self.swig_type_Map_of_c_type.Element  (Resolved).c_type_Kind /= c_Type.Unknown
@@ -2468,14 +2490,31 @@ is
                                                            then Prefix (Prefix'First .. Prefix'Last - 1)
                                                            else Prefix);
                   the_Template : constant Node_Pointer := Swig_symbol_clookup (DOHs.const_String_or_char_ptr.Item (to_Doh (the_Name)), null);
-                  the_Child    :          Node_Pointer;
-               begin
-                  if         the_Template /= null
-                    and then Attribute (the_Template, "nodeType")     = "template"
-                    and then Attribute (the_Template, "templatetype") = "class"
-                  then
-                     the_Child := first_Child (the_Template);
 
+                  function is_constructed (the_Class : in Node_Pointer) return Boolean
+                  --
+                  --  Whether the declarations of a class template (or of a partial specialisation of one) make each of
+                  --  its instances a class which C++ constructs.
+                  --
+                  is
+                     the_Child : Node_Pointer := first_Child (the_Class);
+
+                     function in_the_Template (the_Type : in SwigType_Pointer) return SwigType_Pointer
+                     --
+                     --  The type of a member of the template as it is written within the template ('shared_memory_holder'),
+                     --  qualified in the scope of the template, as the core is otherwise asked of it in the current scope.
+                     --
+                     is
+                     begin
+                        if get_Attribute (the_Class, "symtab") /= null
+                        then
+                           return Swig_symbol_type_qualify (the_Type, Symtab_Pointer (get_Attribute (the_Class, "symtab")));
+                        else
+                           return the_Type;
+                        end if;
+                     end in_the_Template;
+
+                  begin
                      while the_Child /= null
                      loop
                         if         Attribute (the_Child, "nodeType")       = "destructor"
@@ -2486,8 +2525,68 @@ is
                            return True;
                         end if;
 
+                        --  Likewise where it has a member which is a smart pointer of the standard library, as written or
+                        --  through a typedef, whose destructor is not trivial (yaml-cpp's 'iterator_base', which holds a
+                        --  'shared_memory_holder', and which 'Node::begin' returns before the interface can name it).
+                        --
+                        if         Attribute (the_Child, "nodeType") = "cdecl"
+                          and then Attribute (the_Child, "decl")     = ""
+                          and then Attribute (the_Child, "storage") /= "static"
+                          and then get_Attribute (the_Child, "type") /= null
+                          and then (        smart_Pointer_Words (without_leading_Qualifiers (Attribute (the_Child, "type"))) > 0
+                                    or else smart_Pointer_Words (without_leading_Qualifiers (+doh_Item (SwigType_typedef_resolve_all
+                                                                                                           (in_the_Template (SwigType_Pointer (get_Attribute (the_Child, "type")))))))
+                                            > 0)
+                        then
+                           return True;
+                        end if;
+
                         the_Child := next_Sibling (the_Child);
                      end loop;
+
+                     return False;
+                  end is_constructed;
+
+               begin
+                  if         the_Template /= null
+                    and then Attribute (the_Template, "nodeType")      = "template"
+                    and then Attribute (the_Template, "templatetype") in "class" | "classforward"     -- Which is declared alone.
+                  then
+                     if first_Child (the_Template) /= null
+                     then
+                        return is_constructed (the_Template);
+                     end if;
+
+                     --  A template which is declared alone ('template <typename> class function;') has its instances from
+                     --  its partial specialisations ('function<RET(ARGS...)>', of 'std_function.i'), which tell where each
+                     --  of them does: where they differ, which applies is not worked out here.
+                     --
+                     declare
+                        use type DOH_Pointer;
+                        Partials : constant DOH_Pointer := DOH_Pointer (get_Attribute (the_Template, "partials"));
+                     begin
+                        if         Partials /= null
+                          and then DohLen (Partials) > 0
+                        then
+                           for Each in 0 .. DohLen (Partials) - 1
+                           loop
+                              declare
+                                 the_Partial : constant Node_Pointer     -- Which is named within the scope of the template.
+                                   := Swig_symbol_clookup (DOHs.const_String_or_char_ptr.Item (get_Attribute (Node_Pointer (DohGetitem (Partials, Each)),
+                                                                                                              "templcsymname")),
+                                                           Symtab_Pointer (get_Attribute (the_Template, "sym:symtab")));
+                              begin
+                                 if        the_Partial = null
+                                   or else not is_constructed (the_Partial)
+                                 then
+                                    return False;
+                                 end if;
+                              end;
+                           end loop;
+
+                           return True;
+                        end if;
+                     end;
                   end if;
                end;
             end if;
@@ -2985,6 +3084,15 @@ is
               and then Self.swig_type_Map_of_c_type.contains (+Resolved)
             then
                return Self.swig_type_Map_of_c_type.Element (+Resolved);
+
+            --  The name may stand for a type with a qualifier, which makes no difference to a value of it (a typedef
+            --  of a template parameter, 'iterator_base<const iterator_value>::value_type').
+            --
+            elsif      Resolved /= String'(+swig_Type)
+              and then without_leading_Qualifiers (Resolved) /= Resolved
+              and then Self.swig_type_Map_of_c_type.contains (+without_leading_Qualifiers (Resolved))
+            then
+               return Self.swig_type_Map_of_c_type.Element (+without_leading_Qualifiers (Resolved));
             end if;
          end;
 

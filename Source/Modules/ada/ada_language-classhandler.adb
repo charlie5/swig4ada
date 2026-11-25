@@ -283,10 +283,13 @@ is
             then
                declares_a_Destructor := True;
 
-            elsif      Kind = "cdecl"     -- A member which is a smart pointer of the standard library, whose destructor is not trivial.
-              and then Attribute (the_Child, "decl")    = ""
-              and then Attribute (the_Child, "storage") /= "static"
-              and then smart_Pointer_Words (without_leading_Qualifiers (Attribute (the_Child, "type"))) > 0
+            elsif      Kind = "cdecl"     -- A member which is a smart pointer of the standard library, whose destructor is not trivial,
+              and then Attribute (the_Child, "decl")    = ""     -- as written or through a typedef ('shared_memory_holder', of
+              and then Attribute (the_Child, "storage") /= "static"     -- yaml-cpp's iterator, which was taken for a plain record).
+              and then (        smart_Pointer_Words (without_leading_Qualifiers (Attribute (the_Child, "type"))) > 0
+                        or else smart_Pointer_Words (without_leading_Qualifiers (+doh_Item (SwigType_typedef_resolve_all
+                                                                                               (SwigType_Pointer (get_Attribute (the_Child, "type"))))))
+                                > 0)
             then
                has_a_smart_Pointer := True;
 

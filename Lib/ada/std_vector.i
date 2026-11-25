@@ -12,6 +12,15 @@
 #include <stdexcept>
 %}
 
+// The iterators of a vector, as GNU libstdc++ has them: a pointer to an element. A header may name one
+// ('std::vector<T>::iterator', as a member of a class), and an instance must then be named with '%template'.
+//
+namespace __gnu_cxx {
+    template<class P, class C> struct __normal_iterator {
+        P            _M_current;
+    };
+}
+
 namespace std {
     
     template<class T> class vector {
@@ -24,6 +33,8 @@ namespace std {
         typedef const T*      const_pointer;
         typedef T&            reference;
         typedef const T&      const_reference;
+        typedef __gnu_cxx::__normal_iterator<T*, std::vector<T> >        iterator;
+        typedef __gnu_cxx::__normal_iterator<const T*, std::vector<T> >  const_iterator;
 
         void*           impl_M_start;
 	void*           impl_M_finish;

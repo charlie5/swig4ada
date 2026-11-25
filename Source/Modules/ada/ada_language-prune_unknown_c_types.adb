@@ -71,7 +71,8 @@ is
          the_Member.is_ignored_Member := True;
       end if;
 
-      the_Member.my_Type := the_Address;
+      the_Member.my_Type     := the_Address;
+      the_Member.smart_Words := 0;     -- Which is done once: the prune step may pass over the classes again.
 
       for Each in 2 .. Words
       loop

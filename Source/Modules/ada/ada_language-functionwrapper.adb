@@ -669,6 +669,22 @@ begin
          Swig_typemap_attach_parms (const_String (-"ctype"),  the_Parameters, the_function_Wrapper);  -- Attach the non-standard typemaps to the parameter list.
          Swig_typemap_attach_parms (const_String (-"imtype"), the_Parameters, the_function_Wrapper);
 
+         --  A result which replaces an object of the caller is of its type less a qualifier which the type has through
+         --  a typedef ('iterator_base<const iterator_value>::value_type', which is a 'const iterator_value'): the object
+         --  is constructed in place of the caller's, which a constant type would not allow.
+         --
+         if result_by_Parameter
+         then
+            declare
+               Resolved : constant String := +doh_Item (SwigType_typedef_resolve_all (SwigType_Pointer (get_Attribute (the_Node, "type"))));
+            begin
+               if without_leading_Qualifiers (Resolved) /= Resolved
+               then
+                  c_return_Type := +doh_Item (SwigType_str (SwigType_Pointer (to_Doh (without_leading_Qualifiers (Resolved))), null));
+               end if;
+            end;
+         end if;
+
          begin_the_Definition;
 
          emit_parameter_variables (the_Parameters,

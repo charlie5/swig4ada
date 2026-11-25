@@ -180,6 +180,20 @@ is
                then
                   return True;
                end if;
+
+               --  Nor that of a literal of an enumeration of the package (yaml-cpp's 'NodeType::value' has 'Map', and
+               --  'node_iterator_type<node>' a typedef 'map').
+               --
+               if Each.all in ada_Type.elementary.scalar.discrete.enumeration.item'Class
+               then
+                  for each_Literal of ada_Type.elementary.scalar.discrete.enumeration.view (Each).Literals
+                  loop
+                     if to_Lower (to_String (each_Literal.Name)) = to_Lower (to_String (the_Name))
+                     then
+                        return True;
+                     end if;
+                  end loop;
+               end if;
             end loop;
 
             for Each of Result.new_Packages     -- A type cannot have the name of a child package, either.

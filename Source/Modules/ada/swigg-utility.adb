@@ -174,27 +174,48 @@ is
 
    procedure strip_all_qualifiers (Self : in out Text)
    is
-      Pad       : Text renames Self;
-      the_Index : Natural;
+      Pad : Text renames Self;
 
-      procedure rid (the_Token : in String)
+      procedure rid (the_Token : in String;   in_Arguments_too : in Boolean := False)
+      --
+      --  Removes the token wherever it is but, for a qualifier, within the arguments of a template ('<(...)>'): a
+      --  qualifier there is a part of the argument ('iterator_base<(q(const).iterator_value)>' is another instance than
+      --  'iterator_base<(iterator_value)>'), and is kept. (Until 2026-11-25 it was removed as well, so that a function
+      --  of yaml-cpp's 'const_iterator' which returns the iterator itself was taken to return the other.)
+      --
       is
+         Depth : Natural := 0;
+         Each  : Positive := 1;
       begin
+         while Each <= Length (Pad)
          loop
-            the_Index := Index (Pad, the_Token);
-            exit when the_Index = 0;
+            if Each < Length (Pad) and then Slice (Pad, Each, Each + 1) = "<("
+            then
+               Depth := Depth + 1;
+               Each  := Each  + 2;
 
-            replace_Slice (Pad, the_Index,
-                                the_Index + the_Token'Length - 1,
-                                "");
+            elsif Each < Length (Pad) and then Slice (Pad, Each, Each + 1) = ")>" and then Depth > 0
+            then
+               Depth := Depth - 1;
+               Each  := Each  + 2;
+
+            elsif      (Depth = 0 or else in_Arguments_too)
+              and then Each + the_Token'Length - 1 <= Length (Pad)
+              and then Slice (Pad, Each, Each + the_Token'Length - 1) = the_Token
+            then
+               replace_Slice (Pad, Each, Each + the_Token'Length - 1, "");
+
+            else
+               Each := Each + 1;
+            end if;
          end loop;
       end rid;
 
    begin
       rid ("q(const).");
       rid ("q(volatile).");
-      rid ("struct ");
-      rid ("enum ");
+      rid ("struct ", in_Arguments_too => True);     -- Which names the same type.
+      rid ("enum ",   in_Arguments_too => True);
    end strip_all_qualifiers;
 
 
