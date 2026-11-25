@@ -21,6 +21,18 @@
 #define TWICE_MINUS (- - 5)
 #define OCTAL       0755
 #define OCTAL_SUM   (010 + 1)
+#define CAST_SEVENTH     ((float) 1.0 / 7 * 3.0f)     /* Worked out in 'float', as C works it out. */
+#define DOUBLE_SEVENTH   (1.0 / 7 * 3.0)
+#define CAST_TRUNCATED   ((int) 2.5 * 2)
+#define CAST_ALL_ONES    ((unsigned) -1)
+#define CAST_BYTE        ((unsigned char) 300)
+#define CAST_SIGNED_BYTE ((signed char) 200)
+
+typedef float real_t;
+
+const real_t real_eps      = (real_t) 1e-6;
+const real_t real_more     = real_eps * 3;
+const float  float_seventh = 1.0f / 7 * 3.0f;
 
 const int      limit   = 100;
 const double   epsilon = 0.25;
@@ -66,3 +78,11 @@ inline int   c_octal_sum ()                 { return OCTAL_SUM; }
 inline int   octal_mark ()                  { return (int) Eighth; }
 inline const char* quoted_text ()           { return QUOTED; }
 inline const char* tabbed_text ()           { return TABBED; }
+inline float       c_cast_seventh ()        { return CAST_SEVENTH; }
+inline double      c_double_seventh ()      { return DOUBLE_SEVENTH; }
+inline int         c_cast_truncated ()      { return CAST_TRUNCATED; }
+inline unsigned    c_cast_all_ones ()       { return CAST_ALL_ONES; }
+inline int         c_cast_byte ()           { return CAST_BYTE; }
+inline int         c_cast_signed_byte ()    { return CAST_SIGNED_BYTE; }
+inline float       c_real_more ()           { return real_more; }
+inline float       c_float_seventh ()       { return float_seventh; }

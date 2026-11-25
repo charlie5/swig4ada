@@ -92,7 +92,13 @@ is
       (+"int (7) * 2",                                           14),
       (+"unsigned long (1) << 4",                                16),
       (+"(1 + 2) * 3",                                            9),     -- Brackets which are no cast.
-      (+"sizeof (int) * 2",                                       8)      -- Nor is the operand of 'sizeof'.
+      (+"sizeof (int) * 2",                                       8),     -- Nor is the operand of 'sizeof'.
+      (+"(unsigned) -1",                                 4294967295),     -- A cast to an integer type is applied: modulo its size,
+      (+"(unsigned) -1 >> 4",                             268435455),     -- before an operator which follows it,
+      (+"(unsigned char) 300",                                   44),
+      (+"(signed char) 200",                                    -56),     -- into the range of a signed type,
+      (+"(unsigned short) (65536 + 3)",                           3),     -- to an operand in brackets,
+      (+"(bool) 7",                                               1)      -- and to 'bool', which is 0 or 1.
         ];
 
    No_Symbols : symbol_value_Maps.Map;
@@ -156,6 +162,7 @@ begin
       check (Value_of ("geometry::MAX * 2", the_Symbols) = 128,                   "a name which is given with its scope is sought as it is written");
       check (Value_of ("Shape::COUNT + 1", the_Symbols) = 13,                     "and then by its last part, as a literal is known by its own name");
       check (Value_of ("Shape::COUNT", the_Symbols, Namespace => "Shape::") = 12, "within its own class too");
+      check (Value_of ("(COUNT) - 1", the_Symbols) = 11,                          "a known value in brackets ahead of a sign is no cast");
    end names;
 
    refusals :

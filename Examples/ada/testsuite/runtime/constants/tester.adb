@@ -113,6 +113,24 @@ begin
       check (Octals'Enum_Rep (Ninth) = 9 and Octals'Enum_Rep (Sixteenth) = 16,   "whose next literal follows it");
    end written_constants;
 
+   real_constants :
+   begin
+      check (CAST_SEVENTH   = c_cast_seventh,                       "an expression of 'float' with a cast is the 'float' which C++ has");
+      check (DOUBLE_SEVENTH = c_double_seventh,                     "and one of 'double' the 'double'");
+      check (real_more      = c_real_more,                          "a constant of a typedef of 'float' which names another");
+      check (float_seventh  = c_float_seventh,                      "a 'float' worked out in 'float'");
+      check (interfaces.C.C_float (DOUBLE_SEVENTH) /= c_cast_seventh,
+             "which is not the 'double' rounded once");
+   end real_constants;
+
+   integer_casts :
+   begin
+      check (CAST_TRUNCATED = 4 and CAST_TRUNCATED = c_cast_truncated,                      "a real number cast to an integer is truncated");
+      check (CAST_ALL_ONES = 4294967295 and CAST_ALL_ONES = c_cast_all_ones,                "-1 cast to 'unsigned' is the largest");
+      check (int (CAST_BYTE) = 44 and int (CAST_BYTE) = c_cast_byte,                       "a cast to 'unsigned char' is modulo its size");
+      check (int (CAST_SIGNED_BYTE) = -56 and int (CAST_SIGNED_BYTE) = c_cast_signed_byte, "and one to 'signed char' within its range");
+   end integer_casts;
+
    character_enumerations :
    begin
       check (mark_number (Comma) = 44 and mark_number (Capital) = 65,   "an enumeration whose values are characters");

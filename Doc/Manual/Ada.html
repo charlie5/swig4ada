@@ -387,7 +387,9 @@ shape_count : aliased Interfaces.C.int;
 A constant whose value cannot be worked out, and cannot be written as an Ada
 expression (one which uses <tt>?:</tt>, say), is left out with a warning.
 A cast does not stand in the way: <tt>(size_t) 10</tt>, <tt>size_t (10)</tt> and
-<tt>static_cast&lt;size_t&gt; (10)</tt> are each 10.
+<tt>static_cast&lt;size_t&gt; (10)</tt> are each 10, and a cast to a standard type is
+applied as C applies it: <tt>(unsigned) -1</tt> is 4294967295, <tt>(int) 2.5 * 2</tt> is 4,
+and <tt>(float) 1.0 / 7</tt> is worked out in <tt>float</tt>.
 A real number is worked out likewise, from numbers and the constants which are known,
 with <tt>+</tt>, <tt>-</tt>, <tt>*</tt>, <tt>/</tt> and brackets, as C works it out
 (<tt>7 / 2 + 0.25</tt> is 3.25), so <tt>const real later = eps * 2;</tt> is a constant
