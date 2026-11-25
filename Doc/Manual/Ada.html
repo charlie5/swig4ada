@@ -208,6 +208,10 @@ The general options of SWIG apply as usual, among them <tt>-I</tt>, <tt>-D</tt>,
 <tt>-outdir</tt>, <tt>-o</tt> and <tt>-w</tt>.
 The symbols <tt>SWIGADA</tt> and <tt>SWIGAda</tt> are defined when an interface file
 is read, for conditional compilation.
+SWIG's parser does not read GCC's attributes, which a library's headers may put in a macro
+of their own (<tt>__attribute__((visibility("default")))</tt>); an interface file makes them
+nothing for SWIG's reading with <tt>#define __attribute__(x)</tt>, which changes nothing of
+what the wrapper includes.
 </p>
 
 <H3><a name="Ada_compiling">41.2.3 Compiling and linking</a></H3>

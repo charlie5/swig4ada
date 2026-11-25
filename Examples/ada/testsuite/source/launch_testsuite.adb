@@ -1782,6 +1782,18 @@ begin
          put_Line ("Bullet is not installed, so the run-time case 'bullet' is passed over.");
       end if;
 
+      --  Likewise Assimp, from its headers: an importer which reads a scene of plain structures with arrays, and a
+      --  progress handler and a log stream which are derived in Ada and which Assimp calls back.
+      --
+      if ada.Directories.exists ("/usr/include/assimp/Importer.hpp")
+      then
+         run ("assimp",
+              Options => "-I/usr/include",
+              Library => "assimp");
+      else
+         put_Line ("Assimp is not installed, so the run-time case 'assimp' is passed over.");
+      end if;
+
       --  Cases of upstream's suite, each with a tester written after upstream's test of it for Python.
       --
       new_Line;
