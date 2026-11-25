@@ -1,6 +1,0 @@
-pugixml.hpp:402: Warning 861: Unable to bind the type 'p.p.p.pugi::xml_attribute', which is not known.
-pugixml.hpp:402: Warning 861: Unable to bind the function pointer type 'unspecified_bool_type', as one of its types has no Ada type.
-pugixml.hpp:402: Warning 861: Unable to bind the array type 'unspecified_bool_type[]', as its element type is not known.
-pugixml.hpp:402: Warning 861: Unable to bind the pointer type 'unspecified_bool_type*', as the type it points to is not known.
-pugixml.hpp:402: Warning 861: Unable to bind the array type 'unspecified_bool_type*[]', as its element type is not known.
-pugixml.hpp:402: Warning 861: Unable to bind the pointer type 'unspecified_bool_type**', as the type it points to is not known.

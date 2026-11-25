@@ -287,7 +287,8 @@ is declared in a child package is here too, as the top package cannot see its ch
 <td><tt>shapes.&lt;class&gt;</tt></td>
 <td>One package for each structure, union and class, and for each type of pointer to a
 function. The type itself is <tt>Item</tt>, with <tt>Item_Array</tt>, <tt>Pointer</tt>,
-<tt>Pointer_Array</tt> and <tt>Pointer_Pointer</tt>, and the member functions follow.</td>
+<tt>Pointer_Array</tt> and <tt>Pointer_Pointer</tt>, and the member functions follow.
+A pointer of three levels or more (<tt>T***</tt>) is a <tt>swig.void_ptr</tt>, an address.</td>
 </tr>
 
 <tr>

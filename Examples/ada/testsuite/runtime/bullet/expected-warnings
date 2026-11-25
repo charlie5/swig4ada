@@ -1,20 +1,6 @@
 btScalar.h:404: Warning 861: Unable to bind the variable 'btInfinityMask', which has no symbol outside its file, being 'static' or constant, and no value which can be worked out.
-btAlignedAllocator.h:93: Warning 861: Unable to bind the type 'p.btAlignedAllocator<(p.q(const).btCollisionObject,16)>::const_pointer', which is not known.
-btAlignedAllocator.h:93: Warning 861: Unable to bind the type 'p.btAlignedAllocator<(p.btRigidBody,16)>::const_pointer', which is not known.
-btAlignedAllocator.h:93: Warning 861: Unable to bind the type 'p.btAlignedAllocator<(p.btTypedConstraint,16)>::const_pointer', which is not known.
-btAlignedAllocator.h:93: Warning 861: Unable to bind the type 'p.btAlignedAllocator<(p.btPersistentManifold,16)>::const_pointer', which is not known.
-btAlignedAllocator.h:93: Warning 861: Unable to bind the type 'p.btAlignedAllocator<(p.q(const).btDbvtNode,16)>::const_pointer', which is not known.
-btAlignedAllocator.h:93: Warning 861: Unable to bind the type 'p.btAlignedAllocator<(p.btCollisionObject,16)>::const_pointer', which is not known.
 btCollisionDispatcher.h:55: Warning 861: Unable to bind the type 'p.a(MAX_BROADPHASE_COLLISION_TYPES).p.btCollisionAlgorithmCreateFunc', which is not known.
-btAlignedAllocator.h:93: Warning 861: Unable to bind the type 'p.btAlignedAllocator<(p.btActionInterface,16)>::const_pointer', which is not known.
 btCollisionDispatcher.h:55: Warning 861: Unable to bind the function 'set_m_doubleDispatchContactPoints' of class 'btCollisionDispatcher', as one of its types is not known.
 btCollisionDispatcher.h:57: Warning 861: Unable to bind the function 'set_m_doubleDispatchClosestPoints' of class 'btCollisionDispatcher', as one of its types is not known.
-btAlignedAllocator.h:93: Warning 861: Unable to bind the function 'allocate' of class 'btCollisionObjectArray_allocator', as one of its types is not known.
-btAlignedAllocator.h:93: Warning 861: Unable to bind the function 'allocate' of class 'btConstCollisionObjectArray_allocator', as one of its types is not known.
-btAlignedAllocator.h:93: Warning 861: Unable to bind the function 'allocate' of class 'btRigidBodyArray_allocator', as one of its types is not known.
-btAlignedAllocator.h:93: Warning 861: Unable to bind the function 'allocate' of class 'btTypedConstraintArray_allocator', as one of its types is not known.
-btAlignedAllocator.h:93: Warning 861: Unable to bind the function 'allocate' of class 'btPersistentManifoldArray_allocator', as one of its types is not known.
-btAlignedAllocator.h:93: Warning 861: Unable to bind the function 'allocate' of class 'btActionInterfaceArray_allocator', as one of its types is not known.
 btAlignedAllocator.h:88: Warning 861: Unable to bind the function 'address' of class 'btIntArray_allocator', as Ada cannot tell it from another of its name.
 btAlignedAllocator.h:88: Warning 861: Unable to bind the function 'address' of class 'btScalarArray_allocator', as Ada cannot tell it from another of its name.
-btAlignedAllocator.h:93: Warning 861: Unable to bind the function 'allocate' of class 'btDbvtNodeArray_allocator', as one of its types is not known.
