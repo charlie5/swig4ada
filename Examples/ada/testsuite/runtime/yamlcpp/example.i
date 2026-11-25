@@ -8,6 +8,7 @@
 %include <std_vector.i>
 %include <std_pair.i>
 %include <std_iostream.i>
+%include <std_map.i>
 
 %{
 #include <yaml-cpp/yaml.h>
@@ -40,6 +41,12 @@
 %include <yaml-cpp/exceptions.h>
 %include <yaml-cpp/node/type.h>
 %include <yaml-cpp/node/ptr.h>
+//  A node has a 'begin' and an 'end' which are 'const', and others which are not, which are one profile in Ada; those which are
+//  not give an iterator through which a value is assigned to an element, and are named apart.
+//
+%rename (mutable_begin) YAML::Node::begin ();
+%rename (mutable_end)   YAML::Node::end ();
+
 %include <yaml-cpp/node/node.h>
 
 //  The member templates of a node, of which an instance is named for each type which the tester uses: a node is made
@@ -104,6 +111,28 @@
   %template (same_as)      operator==<const YAML::detail::iterator_value>;
   %template (differs_from) operator!=<const YAML::detail::iterator_value>;
 }
+
+%extend YAML::detail::iterator_base<YAML::detail::iterator_value> {
+  %template (same_as)      operator==<YAML::detail::iterator_value>;
+  %template (differs_from) operator!=<YAML::detail::iterator_value>;
+}
+
+//  The conversions of a value to and from a node, which yaml-cpp's 'as' and the constructor template of a node use: a
+//  structure of the class template 'convert', specialised for each type, of two static functions, 'encode', which makes
+//  a node of a value, and 'decode', which reads one into a value and says whether it could. An instance is named for
+//  each type which the tester uses, among them a vector and a map, whose conversions are partial specialisations.
+//
+%template (Ints)   std::vector<int>;
+%template (Counts) std::map<std::string, int>;
+
+%include <yaml-cpp/node/convert.h>
+
+%template (int_conversion)    YAML::convert<int>;
+%template (double_conversion) YAML::convert<double>;
+%template (bool_conversion)   YAML::convert<bool>;
+%template (string_conversion) YAML::convert<std::string>;
+%template (ints_conversion)   YAML::convert<std::vector<int> >;
+%template (counts_conversion) YAML::convert<std::map<std::string, int> >;
 
 //  A document which is not well formed is refused by an exception ('YAML::ParserException'), which the wrapper records.
 //  It is caught as the standard exception which it is derived from, whose 'throws' typemap ('std_except.i') records its

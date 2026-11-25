@@ -5,7 +5,15 @@ with
      yamlcpp.Mark,
      yamlcpp.Emitter,
      yamlcpp.const_value_iterator,
+     yamlcpp.value_iterator,
      yamlcpp.iterator_value,
+     yamlcpp.Ints,
+     yamlcpp.Counts,
+     yamlcpp.int_conversion,
+     yamlcpp.bool_conversion,
+     yamlcpp.string_conversion,
+     yamlcpp.ints_conversion,
+     yamlcpp.counts_conversion,
      ada.Strings.unbounded,
 
      swig.std_Strings,
@@ -29,6 +37,7 @@ is
        Checks;
 
    use type interfaces.C.int,
+            interfaces.C.unsigned,
             interfaces.C.double,
             interfaces.C.size_t,
             swig.bool,
@@ -179,6 +188,54 @@ begin
          const_value_iterator.destruct_0 (Key);
       end iterating;
 
+      changing_through_an_Iterator :
+      declare
+         --  The iterators which are not 'const' ('mutable_begin' and 'mutable_end') give elements which are parts of
+         --  the document, so that a value which is assigned to one ('assign') changes the document. Each element of
+         --  the sequence is doubled.
+         --
+         use type value_iterator.Pointer;
+
+         First, Last : aliased value_iterator.Item;
+         Same        :         value_iterator.Pointer;
+         Changed     :         Node.Pointer;
+         Fourth      : aliased Node.Item;
+         Index       : aliased interfaces.C.int := 3;
+         Count       :         Natural          := 0;
+      begin
+         Node.mutable_begin (Again, First'unchecked_Access);
+         Node.mutable_end   (Again, Last 'unchecked_Access);
+
+         while value_iterator.differs_from (First, Last'unchecked_Access) /= 0
+         loop
+            declare
+               Element : aliased iterator_value.Item;
+               Doubled : aliased interfaces.C.int;
+            begin
+               value_iterator.current (First, Element'unchecked_Access);
+               Doubled := 2 * Node.as_int (Element.Node);
+               Changed := Node.assign (Element.Node, Doubled'unchecked_Access);
+               Count   := Count + 1;
+               iterator_value.destruct_0 (Element);
+            end;
+
+            Same := value_iterator.next (First);
+         end loop;
+
+         check (Count = 4 and Same = First'unchecked_Access,
+                "a sequence is walked by the iterators which are not 'const', which give themselves back");
+         check (value_iterator.same_as (First, Last'unchecked_Access) /= 0,
+                "until the first is the same as the last");
+
+         Node.child (Document, List_Key'unchecked_Access, List'unchecked_Access);
+         Node.child (List, Index'unchecked_Access, Fourth'unchecked_Access);
+         check (Node.as_int (Fourth) = 8,           "and a value which is assigned to an element is in the document");
+
+         Node.destruct_0 (Fourth);
+         value_iterator.destruct_0 (Last);
+         value_iterator.destruct_0 (First);
+      end changing_through_an_Iterator;
+
       assigning_through_an_Element :
       declare
          --  The overload of 'operator[]' which is not 'const' ('element') gives a node which is a part of its
@@ -224,6 +281,91 @@ begin
       Node.destruct_0 (Document);
       free (Text);
    end the_member_Templates;
+
+   the_Conversions :
+   declare
+      --  The conversions of a value to and from a node, which 'as' and the constructor template of a node use: an
+      --  instance of the class template 'convert' for each type, whose 'encode' makes a node of a value and whose
+      --  'decode' reads a node into a value and says whether it could. Those of a vector and a map are instances of
+      --  partial specialisations which name the allocator of the container.
+      --
+      Text       :         chars_ptr := new_String (  "list: [1, 2, 3]"      & ASCII.LF
+                                                    & "counts: {a: 1, b: 2}" & ASCII.LF
+                                                    & "flag: true"           & ASCII.LF
+                                                    & "name: ada"            & ASCII.LF);
+      Document   : aliased Node.Item;
+
+      List_Key   : aliased std_String := to_std_String (interfaces.C.to_C ("list"));
+      Counts_Key : aliased std_String := to_std_String (interfaces.C.to_C ("counts"));
+      Flag_Key   : aliased std_String := to_std_String (interfaces.C.to_C ("flag"));
+      Name_Key   : aliased std_String := to_std_String (interfaces.C.to_C ("name"));
+      B_Key      : aliased std_String := to_std_String (interfaces.C.to_C ("b"));
+
+      List       : aliased Node.Item;
+      Counted    : aliased Node.Item;
+      Flag       : aliased Node.Item;
+      Name       : aliased Node.Item;
+      Encoded    : aliased Node.Item;
+      Sequence   : aliased Node.Item;
+
+      Seven      : aliased interfaces.C.int := 7;
+      Back       : aliased interfaces.C.int := 0;
+      Truth      : aliased swig.bool        := 0;
+      Its_Text   : aliased std_String;
+      Numbers    : aliased Ints  .Item;
+      the_Counts : aliased Counts.Item;
+   begin
+      Load (Text, Document'unchecked_Access);
+
+      Node.child (Document, List_Key  'unchecked_Access, List   'unchecked_Access);
+      Node.child (Document, Counts_Key'unchecked_Access, Counted'unchecked_Access);
+      Node.child (Document, Flag_Key  'unchecked_Access, Flag   'unchecked_Access);
+      Node.child (Document, Name_Key  'unchecked_Access, Name   'unchecked_Access);
+
+      int_conversion.encode (Seven'unchecked_Access, Encoded'unchecked_Access);
+      check (Node.as_int (Encoded) = 7,                                       "a number is encoded as a node, by an instance of 'convert'");
+      check (int_conversion.decode (Encoded'unchecked_Access, Back'unchecked_Access) /= 0 and Back = 7,
+             "and decoded from it");
+      check (int_conversion.decode (Name'unchecked_Access, Back'unchecked_Access) = 0,
+             "a node which is no number is refused");
+
+      check (bool_conversion.decode (Flag'unchecked_Access, Truth'unchecked_Access) /= 0 and Truth /= 0,
+             "a boolean is decoded, by a function of the library");
+      check (string_conversion.decode (Name'unchecked_Access, Its_Text'unchecked_Access) /= 0 and to_Ada (Its_Text) = "ada",
+             "and a string");
+
+      check (ints_conversion.decode (List'unchecked_Access, Numbers'unchecked_Access) /= 0,
+             "a sequence is decoded into a vector, by an instance of a partial specialisation");
+      check (Ints.size (Numbers) = 3 and Ints.get (Numbers, 2).all = 3,     "which has its elements");
+
+      Ints.add (Numbers, Seven'unchecked_Access);
+      ints_conversion.encode (Numbers'unchecked_Access, Sequence'unchecked_Access);
+      check (Node.IsSequence (Sequence) /= 0 and Node.size (Sequence) = 4,  "a vector is encoded as a sequence");
+
+      check (counts_conversion.decode (Counted'unchecked_Access, the_Counts'unchecked_Access) /= 0,
+             "a map is decoded into a map, by an instance of a partial specialisation");
+      check (Counts.size (the_Counts) = 2 and Counts.get (the_Counts, B_Key'unchecked_Access).all = 2,
+             "which has its elements");
+      check (counts_conversion.decode (List'unchecked_Access, the_Counts'unchecked_Access) = 0,
+             "a sequence is not decoded into a map");
+
+      Counts.destruct_0 (the_Counts);
+      Ints  .destruct_0 (Numbers);
+      destruct (Its_Text);
+      Node.destruct_0 (Sequence);
+      Node.destruct_0 (Encoded);
+      Node.destruct_0 (Name);
+      Node.destruct_0 (Flag);
+      Node.destruct_0 (Counted);
+      Node.destruct_0 (List);
+      destruct (B_Key);
+      destruct (Name_Key);
+      destruct (Flag_Key);
+      destruct (Counts_Key);
+      destruct (List_Key);
+      Node.destruct_0 (Document);
+      free (Text);
+   end the_Conversions;
 
    all_the_Documents :
    declare
