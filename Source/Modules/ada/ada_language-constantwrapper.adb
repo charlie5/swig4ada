@@ -498,12 +498,16 @@ begin
                declare
                   is_worked_Out : Boolean := False;
                   the_Value     : c_Expressions.a_Real;
+
+                  function Cast_to (type_Name : in String) return c_Expressions.a_Cast
+                  is (cast_to_Type (Self, type_Name));
                begin
                   begin     -- It is kept for a later real constant whose value names this one ('const double x = D_EPS * 3;').
                      the_Value     := c_Expressions.real_Value_of (to_String (value_Text),
                                                                    Self.real_symbol_value_Map,
                                                                    Self.integer_symbol_value_Map,
-                                                                   Self.current_class_namespace_Prefix);
+                                                                   Self.current_class_namespace_Prefix,
+                                                                   Cast_to'Access);
                      is_worked_Out := True;
                      Self.real_symbol_value_Map.include (the_Name, the_Value);
                   exception

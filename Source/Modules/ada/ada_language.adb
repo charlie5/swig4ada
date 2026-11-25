@@ -161,6 +161,7 @@ is
    function  variable_Suffix (swig_Type : in String) return String;
    function  character_Value (Position  : in String) return String;
    function  enum_Value      (Self : access Item;   of_Type : in c_Type.view;   value_Text : in String) return String;
+   function  cast_to_Type    (Self : access Item;   type_Name : in String) return c_Expressions.a_Cast;
    function  real_Value      (Self : access Item;   value_Text : in String;   Name : in unbounded_String;   of_Type : in c_Type.view) return String;
    function  without_leading_Qualifiers (swig_Type : in String) return String;
    function  smart_Pointer_Words (type_Name : in String) return Natural;
@@ -2528,6 +2529,37 @@ is
 
 
 
+   function cast_to_Type (Self : access Item;   type_Name : in String) return c_Expressions.a_Cast
+   --
+   --  What a cast to the type of the module which is so named does to a value ('ai_real', a typedef of 'float', makes
+   --  it a 'float'), for 'c_Expressions.real_Value_of'.
+   --
+   is
+      use c_Expressions;
+      Name : constant unbounded_String := +ada.Strings.fixed.Trim (type_Name, ada.Strings.Both);
+   begin
+      if not Self.swig_type_Map_of_c_type.contains (Name)
+      then
+         return not_a_Type;
+      end if;
+
+      declare
+         the_Type : constant c_Type.view := Self.swig_type_Map_of_c_type.Element (Name);
+         the_Base : constant c_Type.view := (if c_Type."=" (the_Type.c_type_Kind, c_Type.Typedef) then the_Type.ultimate_base_Type else the_Type);
+      begin
+         if    the_Base = null                                    then   return not_a_Type;
+         elsif the_Base.Name = "float"                            then   return to_Single;
+         elsif the_Base.is_a_Real                                 then   return to_Double;
+         elsif the_Base.Name = "bool"                             then   return to_Boolean;
+         elsif        the_Base.is_an_Integer
+               or else c_Type."=" (the_Base.c_type_Kind, c_Type.Enum) then   return to_Integer;
+         else                                                            return not_a_Type;
+         end if;
+      end;
+   end cast_to_Type;
+
+
+
    function real_Value (Self : access Item;   value_Text : in String;   Name : in unbounded_String;   of_Type : in c_Type.view) return String
    --
    --  The value of a real constant, as Ada writes it, where it can be worked out: a number less its casts
@@ -2539,10 +2571,14 @@ is
    --  it is worked out in 'float', as C works it out.
    --
    is
+      function Cast_to (type_Name : in String) return c_Expressions.a_Cast
+      is (cast_to_Type (Self, type_Name));
+
       the_Value : constant c_Expressions.a_Real := c_Expressions.real_Value_of (value_Text,
                                                                                 Self.real_symbol_value_Map,
                                                                                 Self.integer_symbol_value_Map,
-                                                                                Self.current_class_namespace_Prefix);
+                                                                                Self.current_class_namespace_Prefix,
+                                                                                Cast_to'Access);
       the_Type  : constant c_Type.view          := (if c_Type."=" (of_Type.c_type_Kind, c_Type.Typedef) then of_Type.ultimate_base_Type else of_Type);
    begin
       Self.real_symbol_value_Map.include (Name, (Value     => the_Value.Value,

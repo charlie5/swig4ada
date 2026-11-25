@@ -49,10 +49,26 @@ is
    -- The values of the real constants which are known, by name.
 
 
+   type a_Cast is (not_a_Type, to_Integer, to_Boolean, to_Single, to_Double);
+   --
+   -- What a cast to a type does to a value, by the kind of the type: a name which is no type is 'not_a_Type'.
+
+   function standard_Cast (type_Name : in String) return a_Cast;
+   --
+   -- That of a standard type of C ('float', 'unsigned long', 'size_t', ...).
+
+
    function real_Value_of (the_Expression : in String;
                            known_Reals    : in real_value_Maps  .Map;
                            known_Integers : in symbol_value_Maps.Map;
-                           Namespace      : in unbounded_String) return a_Real;
+                           Namespace      : in unbounded_String;
+                           Cast_to        : access function (type_Name : in String) return a_Cast := null) return a_Real;
+   --
+   -- A cast is applied as C applies it, to the operand which follows it ('(float) 1.0 / 3' is worked out in 'float'),
+   -- in each of its forms: '(T) x', 'T (x)' and 'static_cast<T> (x)'. The kind of a type is given by 'Cast_to' (which
+   -- may know the typedefs of the module), or by 'standard_Cast' where it is null or says 'not_a_Type'; a name in
+   -- brackets ahead of an operand which neither knows is taken for a cast to a type which is not known, and leaves the
+   -- value as it is.
    --
    -- The value of an expression which is a real number: of numbers, of the names of values which are known, of the
    -- signs, of '+', '-', '*' and '/', and of brackets. The casts are removed first. Each operation is worked out in

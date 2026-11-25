@@ -916,10 +916,32 @@ is
 
 
 
+   function standard_Cast (type_Name : in String) return a_Cast
+   is
+      Name : constant String := ada.Strings.fixed.Trim (type_Name, ada.Strings.Both);
+   begin
+      if    Name = "float"                                 then   return to_Single;
+      elsif Name in "double" | "long double"               then   return to_Double;
+      elsif Name = "bool"                                  then   return to_Boolean;
+      elsif Name in "char"     | "signed char"   | "unsigned char"
+                  | "short"    | "unsigned short" | "int"  | "unsigned" | "unsigned int" | "signed" | "signed int"
+                  | "long"     | "unsigned long" | "long long" | "unsigned long long"
+                  | "size_t"   | "ptrdiff_t"     | "ssize_t"   | "intptr_t" | "uintptr_t"
+                  | "int8_t"   | "int16_t"       | "int32_t"   | "int64_t"
+                  | "uint8_t"  | "uint16_t"      | "uint32_t"  | "uint64_t"
+                  | "std::size_t" | "std::ptrdiff_t"         then   return to_Integer;
+      else                                                        return not_a_Type;
+      end if;
+   end standard_Cast;
+
+
+
+
    function real_Value_of (the_Expression : in String;
                            known_Reals    : in real_value_Maps  .Map;
                            known_Integers : in symbol_value_Maps.Map;
-                           Namespace      : in unbounded_String) return a_Real
+                           Namespace      : in unbounded_String;
+                           Cast_to        : access function (type_Name : in String) return a_Cast := null) return a_Real
    is
       type a_Kind is (an_Integer, a_Single, a_Double);     -- The type of an operand in C, from the narrowest.
 
@@ -929,11 +951,35 @@ is
             Kind  : a_Kind;
          end record;
 
-      Text  : constant String  := without_Casts (the_Expression, known_Integers, Namespace);
+      Text  : constant String  := the_Expression;
       Place :          Natural := Text'First;
 
       function is_name_Character (the_Character : in Character) return Boolean
       is (the_Character in 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' | ':');
+
+      function Cast_of (type_Name : in String) return a_Cast
+      is
+         the_Cast : a_Cast := (if Cast_to = null then not_a_Type else Cast_to (type_Name));
+      begin
+         if the_Cast = not_a_Type
+         then
+            the_Cast := standard_Cast (type_Name);
+         end if;
+
+         return the_Cast;
+      end Cast_of;
+
+      function is_a_known_Value (the_Name : in String) return Boolean
+      is (        known_Reals   .contains (+the_Name) or else known_Reals   .contains (Namespace & the_Name)
+          or else known_Integers.contains (+the_Name) or else known_Integers.contains (Namespace & the_Name));
+
+      function cast (the_Cast : in a_Cast;   Value : in Long_Float;   is_Integer : in Boolean) return Long_Float
+      is (case the_Cast
+          is
+             when to_Integer => (if is_Integer then Value else Long_Float'Truncation (Value)),
+             when to_Boolean => (if Value /= 0.0 then 1.0 else 0.0),
+             when to_Single  => Long_Float (Float (Value)),
+             when others     => Value);
 
       procedure skip_Spaces
       is
@@ -998,7 +1044,34 @@ is
       end applied;
 
 
+      function cast (the_Cast : in a_Cast;   the_Operand : in an_Operand) return an_Operand
+      is (case the_Cast
+          is
+             when to_Integer | to_Boolean => (cast (the_Cast, the_Operand.Value, the_Operand.Kind = an_Integer), an_Integer),
+             when to_Single               => (cast (the_Cast, the_Operand.Value, False),                          a_Single),
+             when to_Double               => (the_Operand.Value,                                                  a_Double),
+             when not_a_Type              => the_Operand);
+
+
       function Sum return an_Operand;
+
+      function Factor return an_Operand;
+
+
+      function next_starts_an_Operand (After : in Positive) return Boolean
+      --
+      --  Whether what follows 'After' begins an operand, as what follows a cast does.
+      --
+      is
+         Next : Positive := After;
+      begin
+         while Next <= Text'Last and then Text (Next) = ' '
+         loop
+            Next := Next + 1;
+         end loop;
+
+         return Next <= Text'Last and then Text (Next) in '0' .. '9' | '.' | 'a' .. 'z' | 'A' .. 'Z' | '_' | '(' | '-' | '+';
+      end next_starts_an_Operand;
 
 
       function Number return an_Operand
@@ -1076,6 +1149,65 @@ is
             Place := Place + 1;
          end loop;
 
+         --  A type of more than one word ('unsigned long (x)', 'long double (x)').
+         --
+         while      Place <= Text'Last
+           and then Text (Place) = ' '
+           and then standard_Cast (Text (First .. Place - 1)) /= not_a_Type
+         loop
+            declare
+               Next : Positive := Place;
+            begin
+               while Next <= Text'Last and then Text (Next) = ' ' loop   Next := Next + 1;   end loop;
+
+               declare
+                  Last : Natural := Next;
+               begin
+                  while Last <= Text'Last and then is_name_Character (Text (Last)) loop   Last := Last + 1;   end loop;
+                  exit when Last = Next or else standard_Cast (Text (First .. Place - 1) & " " & Text (Next .. Last - 1)) = not_a_Type;
+                  Place := Last;
+               end;
+            end;
+         end loop;
+
+         declare
+            the_Name : constant String  := ada.Strings.fixed.Trim (Text (First .. Place - 1), ada.Strings.Both);
+         begin
+            --  A cast which is named ('static_cast<float> (x)'): its type in angle brackets, and its operand in brackets.
+            --
+            if the_Name in "static_cast" | "reinterpret_cast" | "const_cast"
+            then
+               if next_Character /= '<'
+               then
+                  raise Constraint_Error with "'" & Text & "' has a cast with no type.";
+               end if;
+
+               declare
+                  Open  : constant Positive := Place;
+                  Close : constant Natural  := ada.Strings.fixed.Index (Text (Open .. Text'Last), ">");
+               begin
+                  if Close = 0 then   raise Constraint_Error with "'" & Text & "' has a cast with no type.";   end if;
+
+                  Place := Close + 1;
+
+                  if next_Character /= '('
+                  then
+                     raise Constraint_Error with "'" & Text & "' has a cast with no operand.";
+                  end if;
+
+                  return cast (Cast_of (Text (Open + 1 .. Close - 1)), Factor);
+               end;
+
+            --  A cast in the form of a call ('float (x)'), where the name is a type.
+            --
+            elsif      Cast_of (the_Name) /= not_a_Type
+              and then not is_a_known_Value (the_Name)
+              and then next_Character = '('
+            then
+               return cast (Cast_of (the_Name), Factor);
+            end if;
+         end;
+
          declare
             the_Name : constant String  := Text (First .. Place - 1);
             Colons   : constant Natural := ada.Strings.fixed.Index (the_Name, "::", Going => ada.Strings.Backward);
@@ -1122,6 +1254,30 @@ is
                return Factor;
 
             when '(' =>
+               --  A cast ('(float) 1.0', '(ai_real) 1e-6'): a name in brackets which is a type, or which is no known
+               --  value and is followed by an operand.
+               --
+               declare
+                  Close : constant Natural := ada.Strings.fixed.Index (Text (Place .. Text'Last), ")");
+               begin
+                  if Close /= 0
+                  then
+                     declare
+                        the_Name : constant String := ada.Strings.fixed.Trim (Text (Place + 1 .. Close - 1), ada.Strings.Both);
+                     begin
+                        if         the_Name /= ""
+                          and then the_Name (the_Name'First) in 'a' .. 'z' | 'A' .. 'Z' | '_'
+                          and then (for all Char of the_Name => is_name_Character (Char) or else Char = ' ')
+                          and then not is_a_known_Value (the_Name)
+                          and then next_starts_an_Operand (Close + 1)
+                        then
+                           Place := Close + 1;
+                           return cast (Cast_of (the_Name), Factor);
+                        end if;
+                     end;
+                  end if;
+               end;
+
                Place := Place + 1;
                declare
                   the_Operand : constant an_Operand := Sum;
