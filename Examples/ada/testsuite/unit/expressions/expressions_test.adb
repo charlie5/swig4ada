@@ -214,6 +214,17 @@ begin
       check (is_refused_as_Real ("0x10 * 1.5"),                                     "and a number which is not decimal");
       check (is_refused_as_Real ("1.0 / 0"),                                        "and a division by zero");
       check (is_refused_as_Real ("(1.0 + 2"),                                       "and a bracket which is not closed");
+
+      declare
+         One   : Long_Float := 1.0;     -- Variables, so that each value is worked out at run time, as C works it out.
+         Three : Long_Float := 3.0;
+         Tenth : Long_Float := 0.1;
+      begin
+         check (real_Image (0.5) = "5.00000000000000E-01",                          "a value which 15 digits give back has 15");
+         check (Long_Float'Value (real_Image (One / Three)) = One / Three,          "a third is given with the digits which give it back");
+         check (real_Image (One / Three)'Length > real_Image (0.5)'Length,          "which are more than 15");
+         check (Long_Float'Value (real_Image (Tenth * Three)) = Tenth * Three,      "as is three tenths, worked out, which is not 0.3");
+      end;
    end reals;
 
    finish;
