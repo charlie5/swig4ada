@@ -20,9 +20,19 @@ with
      bullet.btSequentialImpulseConstraintSolver,
      bullet.btConstraintSolver,
      bullet.btDiscreteDynamicsWorld,
+     bullet.btCollisionWorld,
+     bullet.btPoint2PointConstraint,
+     bullet.btTypedConstraint,
+     bullet.ClosestRayResultCallback,
+     bullet.RayResultCallback,
+     bullet.ContactResultCallback,
 
      Motions,
+     Contacts,
 
+     system,
+
+     swig,
      interfaces.C,
      Checks;
 
@@ -32,7 +42,9 @@ procedure Tester
 --  A binding to Bullet, made from its own headers: its vectors, quaternions and transforms (plain structures, and
 --  classes which C++ constructs), shapes of a hierarchy of classes with virtual functions, rigid bodies, and a world
 --  which is made of its collision configuration, dispatcher, broadphase and solver, all of which Ada declares. A
---  sphere falls under gravity, onto a plane, and a motion state which is declared in Ada is told where it is.
+--  sphere falls under gravity, onto a plane, and a motion state which is declared in Ada is told where it is. Another
+--  is held by a constraint where it begins. A ray is cast through the world, and the contacts of a body are given to a
+--  callback which is declared in Ada.
 --
 is
    use bullet,
@@ -41,7 +53,9 @@ is
 
    use type interfaces.C.int,
             interfaces.C.size_t,
-            interfaces.C.C_float;     -- 'btScalar'.
+            interfaces.C.C_float,     -- 'btScalar'.
+            swig.bool,
+            system.Address;
 
    function bytes (Bits : in Natural) return interfaces.C.size_t is (interfaces.C.size_t (Bits / 8));
 
@@ -121,12 +135,28 @@ begin
                                                                                                          None'unchecked_Access);
          Ball        : aliased btRigidBody.Item := btRigidBody.construct (Ball_Info  'unchecked_Access);
          Floor       : aliased btRigidBody.Item := btRigidBody.construct (Ground_Info'unchecked_Access);
+
+         --  A second sphere, away from the first, which a constraint holds at the point where it begins.
+         --
+         Lamp_State  : aliased btDefaultMotionState.Item;
+         Lamp_Info   : aliased btRigidBodyConstructionInfo.Item := btRigidBodyConstructionInfo.construct (1.0, Lamp_State'unchecked_Access,
+                                                                                                         Sphere'unchecked_Access,
+                                                                                                         Inertia'unchecked_Access);
+         Lamp        : aliased btRigidBody.Item := btRigidBody.construct (Lamp_Info'unchecked_Access);
+         Lamp_Place  : aliased btVector3.Item   := value (5.0, 10.0, 0.0);
+         Centre      : aliased btVector3.Item   := value (0.0,  0.0, 0.0);
+         Hook        : aliased btPoint2PointConstraint.Item := btPoint2PointConstraint.construct (Lamp'unchecked_Access, Centre'unchecked_Access);
       begin
          check (near (btVector3.getY (btRigidBody.getCenterOfMassPosition (Ball'Access).all).all, 10.0),
                 "a body begins where a motion state which Ada declares says, which Bullet asks through the vtable");
 
          btDiscreteDynamicsWorld.addRigidBody (World, Ball 'unchecked_Access);
          btDiscreteDynamicsWorld.addRigidBody (World, Floor'unchecked_Access);
+
+         btRigidBody.translate (Lamp, Lamp_Place'unchecked_Access);
+         btPoint2PointConstraint.setPivotB (Hook, Lamp_Place'unchecked_Access);     -- The point in the world at which it is held.
+         btDiscreteDynamicsWorld.addRigidBody  (World, Lamp'unchecked_Access);
+         btDiscreteDynamicsWorld.addConstraint (World, Hook'unchecked_Access);
 
          for Each in 1 .. 60
          loop
@@ -146,10 +176,64 @@ begin
          end loop;
 
          check (near (Motion.Height, 1.0, Within => 0.05),          "the sphere comes to rest on the plane: " & btScalar'Image (Motion.Height));
+         check (near (btVector3.getY (btRigidBody.getCenterOfMassPosition (Lamp'Access).all).all, 10.0, Within => 0.05),
+                "a sphere which a constraint holds stays where it is held: "
+                & btScalar'Image (btVector3.getY (btRigidBody.getCenterOfMassPosition (Lamp'Access).all).all));
+
+         casting_a_Ray :
+         declare
+            From : aliased btVector3.Item := value (0.0,  10.0, 0.0);
+            To   : aliased btVector3.Item := value (0.0, -10.0, 0.0);
+            Ray  : aliased ClosestRayResultCallback.Item := ClosestRayResultCallback.construct (From'unchecked_Access, To'unchecked_Access);
+         begin
+            btDiscreteDynamicsWorld.rayTest (World, From'unchecked_Access, To'unchecked_Access, Ray'unchecked_Access);
+
+            check (RayResultCallback.hasHit (Ray'Access) /= 0,       "a ray which Ada declares is cast through the world, and hits");
+            check (near (btVector3.getY (ClosestRayResultCallback.m_hitPointWorld (Ray'Access).all).all, 2.0, Within => 0.05),
+                   "the top of the sphere, which rests on the plane");
+            check (Ray.m_collisionObject.all'Address = Ball'Address, "and says it is the sphere that it hit");
+
+            ClosestRayResultCallback.destruct_0 (Ray);
+         end casting_a_Ray;
+
+         contacts_of_a_Body :
+         declare
+            --  A sphere which does not move, put where it overlaps the one which the constraint holds (Bullet gives no
+            --  contact of a sphere which rests on a plane, as C++ shows too).
+            --
+            Probe_State : aliased btDefaultMotionState.Item;
+            Probe_Info  : aliased btRigidBodyConstructionInfo.Item := btRigidBodyConstructionInfo.construct (0.0, Probe_State'unchecked_Access,
+                                                                                                          Sphere'unchecked_Access,
+                                                                                                          None'unchecked_Access);
+            Probe       : aliased btRigidBody.Item := btRigidBody.construct (Probe_Info'unchecked_Access);
+            Probe_Place : aliased btVector3.Item   := value (6.5, 10.0, 0.0);
+            Touches     : aliased Contacts.Counter;
+         begin
+            btRigidBody.translate (Probe, Probe_Place'unchecked_Access);
+            btDiscreteDynamicsWorld.addRigidBody (World, Probe'unchecked_Access);
+
+            btCollisionWorld.contactTest (World, Lamp'unchecked_Access, Touches'unchecked_Access);
+
+            check (Touches.Points >= 1,                               "the contacts of a body are given to a callback which Ada declares");
+            check (Touches.Other = Probe'Address,                      "with the body which it touches");
+            check (near (Touches.Distance, -0.5, Within => 0.05),      "and how far the two overlap");
+
+            btDiscreteDynamicsWorld.removeRigidBody (World, Probe'unchecked_Access);
+
+            ContactResultCallback.destruct_0 (ContactResultCallback.Item (Touches));
+            btRigidBody.destruct_0 (Probe);
+            btDefaultMotionState.destruct_0 (Probe_State);
+         end contacts_of_a_Body;
+
+         btDiscreteDynamicsWorld.removeConstraint (World, Hook'unchecked_Access);
+         btDiscreteDynamicsWorld.removeRigidBody  (World, Lamp'unchecked_Access);
 
          btDiscreteDynamicsWorld.removeRigidBody (World, Floor'unchecked_Access);
          btDiscreteDynamicsWorld.removeRigidBody (World, Ball 'unchecked_Access);
 
+         btPoint2PointConstraint.destruct_0 (Hook);
+         btRigidBody.destruct_0 (Lamp);
+         btDefaultMotionState.destruct_0 (Lamp_State);
          btRigidBody.destruct_0 (Floor);
          btRigidBody.destruct_0 (Ball);
       end;

@@ -52,6 +52,7 @@
 %include <BulletCollision/NarrowPhaseCollision/btManifoldPoint.h>
 %include <BulletCollision/NarrowPhaseCollision/btPersistentManifold.h>
 %include <BulletCollision/CollisionDispatch/btCollisionObject.h>
+%include <BulletCollision/CollisionDispatch/btCollisionObjectWrapper.h>
 %include <BulletCollision/CollisionDispatch/btCollisionCreateFunc.h>
 %include <BulletCollision/CollisionDispatch/btCollisionConfiguration.h>
 %include <BulletCollision/CollisionDispatch/btDefaultCollisionConfiguration.h>
@@ -63,6 +64,9 @@
 %include <BulletDynamics/ConstraintSolver/btSolverBody.h>
 %include <BulletDynamics/ConstraintSolver/btSolverConstraint.h>
 %include <BulletDynamics/ConstraintSolver/btTypedConstraint.h>
+%include <BulletDynamics/ConstraintSolver/btJacobianEntry.h>
+%include <BulletDynamics/ConstraintSolver/btPoint2PointConstraint.h>
+%include <BulletDynamics/ConstraintSolver/btHingeConstraint.h>
 %include <BulletDynamics/ConstraintSolver/btConstraintSolver.h>
 //  The solver declares the forms of its row solvers for SSE, which a build of Bullet without SSE (as this one is)
 //  does not define, so that a program which is linked with its binding would not link.
