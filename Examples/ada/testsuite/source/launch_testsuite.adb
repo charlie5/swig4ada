@@ -414,17 +414,21 @@ is
 
 
 
-   procedure run (the_Case : in String;   use_CPP  : in Boolean := True;
-                                          Imported : in String  := "";
-                                          Options  : in String  := "";
-                                          Input    : in String  := "";
-                                          Library  : in String  := "")
+   procedure run (the_Case : in String;   use_CPP     : in Boolean := True;
+                                          Imported    : in String  := "";
+                                          Options     : in String  := "";
+                                          Input       : in String  := "";
+                                          Library     : in String  := "";
+                                          Also_Link   : in String  := "";
+                                          Cxx_Options : in String  := "")
    --
    --  Generates the binding of a run-time case, builds its tester and runs it. 'Imported' names an
    --  interface file of the case ('base' for 'base.i') whose module the case imports, and which is
    --  generated first. 'Options' are further options of the generator. 'Input' is the interface file, as it is
    --  named from the folder in which the case is built, where it is not the 'example.i' of the case.
    --  'Library' names a library of the system which the case binds, and with which its tester is linked.
+   --  'Also_Link' names the further libraries of one which is several ('BulletCollision,LinearMath'), by commas.
+   --  'Cxx_Options' are further switches of the C++ compiler for the wrapper, by commas ('-I/usr/include/bullet').
    --
    --  The warnings which the Ada module gives (those numbered from 861) must be those of the file
    --  'expected-warnings' of the case, each less the folder of its file. A case with no such file must give none.
@@ -437,6 +441,19 @@ is
 
       Build : constant String := "runtime-build/" & the_Case;
       Log   : constant String := "runtime-build/" & the_Case & ".log";
+
+      function as_Switches (Names : in String) return String
+      --
+      --  The switches of the linker for libraries named by commas ('-lBulletCollision,-lLinearMath'), as the
+      --  project takes them ('LINK').
+      --
+      is
+         Comma : constant Natural := ada.Strings.fixed.Index (Names, ",");
+      begin
+         return (if Comma = 0 then "-l" & Names
+                              else "-l" & Names (Names'First .. Comma - 1) & "," & as_Switches (Names (Comma + 1 .. Names'Last)));
+      end as_Switches;
+
    begin
       put_Line ("Running the run-time case '" & the_Case & "'.");
       runtime_Cases := runtime_Cases + 1;
@@ -462,6 +479,8 @@ is
                   & " && echo 'Building.'"
                   & " && gprbuild -q -p -P ../../runtime/runtime_test.gpr -XCASE=" & the_Case & (if use_CPP then "" else " -XBOUND_LANGUAGE=C")
                   &          (if Library = "" then "" else " -XLIBRARY=" & Library)
+                  &          (if Also_Link   = "" then "" else " -XLINK="        & as_Switches (Also_Link))
+                  &          (if Cxx_Options = "" then "" else " -XCXX_OPTIONS=" & Cxx_Options)
                   & " && echo 'Running.'"
                   & " && ./tester",
                   Log)
@@ -1745,6 +1764,22 @@ begin
               Library => "tinyxml2");
       else
          put_Line ("tinyxml2 is not installed, so the run-time case 'tinyxml2' is passed over.");
+      end if;
+
+      --  Likewise Bullet, from its headers: its vectors and transforms, shapes and rigid bodies of hierarchies of classes
+      --  with virtual functions, and a world which steps them, all of which Ada declares, with a motion state which is
+      --  derived in Ada and which Bullet calls back. Its library is three, and its headers name each other from their
+      --  own folder.
+      --
+      if ada.Directories.exists ("/usr/include/bullet/btBulletDynamicsCommon.h")
+      then
+         run ("bullet",
+              Options     => "-I/usr/include/bullet",
+              Library     => "BulletDynamics",
+              Also_Link   => "BulletCollision,LinearMath",
+              Cxx_Options => "-I/usr/include/bullet");
+      else
+         put_Line ("Bullet is not installed, so the run-time case 'bullet' is passed over.");
       end if;
 
       --  Cases of upstream's suite, each with a tester written after upstream's test of it for Python.

@@ -2,7 +2,9 @@
 --
 --  The launcher generates the binding of the case into 'runtime-build/<case>' and then
 --  builds this project with '-XCASE=<case>', and with '-XBOUND_LANGUAGE=C' for a case which binds C.
---  A case which binds a library of the system names it by '-XLIBRARY=<name>', and is linked with it.
+--  A case which binds a library of the system names it by '-XLIBRARY=<name>', and is linked with it, and with
+--  the switches of '-XLINK', by commas, where the library is several ('-XLINK=-lBulletCollision,-lLinearMath').
+--  '-XCXX_OPTIONS' gives further switches of the C++ compiler, by commas ('-XCXX_OPTIONS=-I/usr/include/bullet').
 --
 project Runtime_Test is
 
@@ -10,6 +12,8 @@ project Runtime_Test is
    Lang     := external ("BOUND_LANGUAGE", "C++");
    Build    := "../runtime-build/" & the_Case;
    Library  := external ("LIBRARY", "");
+   Link     := external_as_list ("LINK", ",");
+   Cxx      := external_as_list ("CXX_OPTIONS", ",");
 
    for Languages   use ("Ada", Lang);
    for Main        use ("tester.adb");
@@ -34,7 +38,7 @@ project Runtime_Test is
       for Default_Switches ("ada") use ("-g", "-gnat2022", "-gnata", "-fsanitize=address");
       for Default_Switches ("c++") use ("-g", "-fno-access-control", "-fsanitize=address", "-fno-omit-frame-pointer",
                                         "-I" & Runtime_Test'Project_Dir & the_Case,
-                                        "-I" & Runtime_Test'Project_Dir & "../../../test-suite");     -- For a case of upstream's suite.
+                                        "-I" & Runtime_Test'Project_Dir & "../../../test-suite") & Cxx;     -- For a case of upstream's suite.
       for Default_Switches ("c")   use ("-g", "-std=gnu17", "-fsanitize=address", "-fno-omit-frame-pointer",
                                         "-I" & Runtime_Test'Project_Dir & the_Case,
                                         "-I" & Runtime_Test'Project_Dir & "../../../test-suite");
@@ -42,8 +46,8 @@ project Runtime_Test is
 
    package Linker is
       case Library is
-         when ""     => for Default_Switches ("ada") use ("-fsanitize=address");
-         when others => for Default_Switches ("ada") use ("-fsanitize=address", "-l" & Library);
+         when ""     => for Default_Switches ("ada") use ("-fsanitize=address") & Link;
+         when others => for Default_Switches ("ada") use ("-fsanitize=address", "-l" & Library) & Link;
       end case;
    end Linker;
 
