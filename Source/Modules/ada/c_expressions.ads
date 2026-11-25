@@ -35,6 +35,25 @@ is
    -- A name is sought with the namespace ahead of it first, and then as it is written.
 
 
+   package real_value_Maps is new ada.Containers.hashed_Maps (unbounded_String,
+                                                              Long_Float,
+                                                              ada.Strings.unbounded.Hash,
+                                                              "=");
+   --
+   -- The values of the real constants which are known, by name.
+
+
+   function real_Value_of (the_Expression : in String;
+                           known_Reals    : in real_value_Maps  .Map;
+                           known_Integers : in symbol_value_Maps.Map;
+                           Namespace      : in unbounded_String) return Long_Float;
+   --
+   -- The value of an expression which is a real number: of numbers, of the names of values which are known, of the
+   -- signs, of '+', '-', '*' and '/', and of brackets. The casts are removed first. A division of two integers is
+   -- that of C, which truncates ('1 / 3' is 0, and '1.0 / 3' a third). 'Constraint_Error' is raised for an
+   -- expression which cannot be worked out.
+
+
    function without_Casts (the_Expression : in String;
                            known_Symbols  : in symbol_value_Maps.Map;
                            Namespace      : in unbounded_String) return String;

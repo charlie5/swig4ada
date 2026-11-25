@@ -3,6 +3,7 @@ with
      Logger,
 
      ada.Strings.Maps,
+     ada.Strings.fixed,
      ada.Characters.handling,
      ada.Containers.Vectors,
      interfaces.C,
@@ -885,6 +886,260 @@ is
                                               the_expression_Type);
       return the_expression_Value;
    end Value_of;
+
+
+
+
+   function real_Value_of (the_Expression : in String;
+                           known_Reals    : in real_value_Maps  .Map;
+                           known_Integers : in symbol_value_Maps.Map;
+                           Namespace      : in unbounded_String) return Long_Float
+   is
+      type an_Operand is
+         record
+            Value      : Long_Float;
+            is_Integer : Boolean;     -- Whether it is of an integer type in C, as a division of two such truncates.
+         end record;
+
+      Text  : constant String  := without_Casts (the_Expression, known_Integers, Namespace);
+      Place :          Natural := Text'First;
+
+      function is_name_Character (the_Character : in Character) return Boolean
+      is (the_Character in 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' | ':');
+
+      procedure skip_Spaces
+      is
+      begin
+         while Place <= Text'Last and then Text (Place) = ' '
+         loop
+            Place := Place + 1;
+         end loop;
+      end skip_Spaces;
+
+      function next_Character return Character
+      is
+      begin
+         skip_Spaces;
+         return (if Place > Text'Last then ASCII.NUL else Text (Place));
+      end next_Character;
+
+
+      function Sum return an_Operand;
+
+
+      function Number return an_Operand
+      --
+      --  A literal of decimal digits, with its fraction, exponent and suffix ('2', '0.5', '1e-6', '2.5f', '10UL').
+      --
+      is
+         First      : constant Positive := Place;
+         is_Integer :          Boolean  := True;
+      begin
+         while Place <= Text'Last and then Text (Place) in '0' .. '9' | '.'
+         loop
+            if Text (Place) = '.' then   is_Integer := False;   end if;
+            Place := Place + 1;
+         end loop;
+
+         if Place <= Text'Last and then Text (Place) in 'e' | 'E'
+         then
+            is_Integer := False;
+            Place      := Place + 1;
+
+            if Place <= Text'Last and then Text (Place) in '+' | '-' then   Place := Place + 1;   end if;
+
+            while Place <= Text'Last and then Text (Place) in '0' .. '9'
+            loop
+               Place := Place + 1;
+            end loop;
+         end if;
+
+         declare
+            Digits_Text : constant String := Text (First .. Place - 1);
+         begin
+            if         Place <= Text'Last
+              and then Text (Place) in 'f' | 'F'
+              and then not is_Integer
+            then
+               Place := Place + 1;
+            end if;
+
+            while Place <= Text'Last and then Text (Place) in 'u' | 'U' | 'l' | 'L'     -- That of an integer, or of a 'long double'.
+            loop
+               Place := Place + 1;
+            end loop;
+
+            if Place <= Text'Last and then is_name_Character (Text (Place))
+            then
+               raise Constraint_Error with "'" & Text & "' has a number which is not decimal.";
+            end if;
+
+            return (Value      => Long_Float'Value ((if Digits_Text (Digits_Text'First) = '.' then "0" else "")
+                                                    & Digits_Text
+                                                    & (if Digits_Text (Digits_Text'Last) = '.' then "0" else "")),
+                    is_Integer => is_Integer);
+         end;
+      end Number;
+
+
+      function Named return an_Operand
+      --
+      --  The value of a name, sought with the namespace ahead of it, as it is written, and by its last part.
+      --
+      is
+         First : constant Positive := Place;
+      begin
+         while Place <= Text'Last and then is_name_Character (Text (Place))
+         loop
+            Place := Place + 1;
+         end loop;
+
+         declare
+            the_Name : constant String  := Text (First .. Place - 1);
+            Colons   : constant Natural := ada.Strings.fixed.Index (the_Name, "::", Going => ada.Strings.Backward);
+            Names    : constant array (1 .. 3) of unbounded_String := [Namespace & the_Name,
+                                                                         +the_Name,
+                                                                         +(if Colons = 0 then the_Name else the_Name (Colons + 2 .. the_Name'Last))];
+         begin
+            for Each of Names
+            loop
+               if known_Reals.contains (Each)
+               then
+                  return (known_Reals.Element (Each), is_Integer => False);
+
+               elsif known_Integers.contains (Each)
+               then
+                  return (Long_Float'Value (Image (known_Integers.Element (Each))), is_Integer => True);
+               end if;
+            end loop;
+
+            raise Constraint_Error with "'" & the_Name & "' is not known.";
+         end;
+      end Named;
+
+
+      function Factor return an_Operand
+      is
+      begin
+         case next_Character
+         is
+            when '-' =>
+               Place := Place + 1;
+               declare
+                  the_Operand : constant an_Operand := Factor;
+               begin
+                  return (-the_Operand.Value, the_Operand.is_Integer);
+               end;
+
+            when '+' =>
+               Place := Place + 1;
+               return Factor;
+
+            when '(' =>
+               Place := Place + 1;
+               declare
+                  the_Operand : constant an_Operand := Sum;
+               begin
+                  if next_Character /= ')'
+                  then
+                     raise Constraint_Error with "'" & Text & "' has a bracket which is not closed.";
+                  end if;
+
+                  Place := Place + 1;
+                  return the_Operand;
+               end;
+
+            when '0' .. '9' | '.' =>
+               return Number;
+
+            when 'a' .. 'z' | 'A' .. 'Z' | '_' | ':' =>
+               return Named;
+
+            when others =>
+               raise Constraint_Error with "'" & Text & "' cannot be worked out as a real number.";
+         end case;
+      end Factor;
+
+
+      function Product return an_Operand
+      is
+         Result : an_Operand := Factor;
+      begin
+         loop
+            case next_Character
+            is
+               when '*' =>
+                  Place := Place + 1;
+                  declare
+                     Right : constant an_Operand := Factor;
+                  begin
+                     Result := (Result.Value * Right.Value,   Result.is_Integer and Right.is_Integer);
+                  end;
+
+               when '/' =>
+                  Place := Place + 1;
+                  declare
+                     Right : constant an_Operand := Factor;
+                  begin
+                     if Right.Value = 0.0
+                     then
+                        raise Constraint_Error with "'" & Text & "' divides by zero.";
+
+                     elsif Result.is_Integer and Right.is_Integer
+                     then
+                        Result := (Long_Float'Truncation (Result.Value / Right.Value),   is_Integer => True);
+                     else
+                        Result := (Result.Value / Right.Value,   is_Integer => False);
+                     end if;
+                  end;
+
+               when others =>
+                  return Result;
+            end case;
+         end loop;
+      end Product;
+
+
+      function Sum return an_Operand
+      is
+         Result : an_Operand := Product;
+      begin
+         loop
+            case next_Character
+            is
+               when '+' =>
+                  Place := Place + 1;
+                  declare
+                     Right : constant an_Operand := Product;
+                  begin
+                     Result := (Result.Value + Right.Value,   Result.is_Integer and Right.is_Integer);
+                  end;
+
+               when '-' =>
+                  Place := Place + 1;
+                  declare
+                     Right : constant an_Operand := Product;
+                  begin
+                     Result := (Result.Value - Right.Value,   Result.is_Integer and Right.is_Integer);
+                  end;
+
+               when others =>
+                  return Result;
+            end case;
+         end loop;
+      end Sum;
+
+
+      the_Result : constant an_Operand := Sum;
+
+   begin
+      if next_Character /= ASCII.NUL
+      then
+         raise Constraint_Error with "'" & Text & "' cannot be worked out as a real number.";
+      end if;
+
+      return the_Result.Value;
+   end real_Value_of;
 
 
 end c_Expressions;

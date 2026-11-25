@@ -244,6 +244,7 @@ private
          c_namespace_Map_of_ada_Package : swig_Module.c_namespace_Maps_of_ada_Package.Map;
 
          integer_symbol_value_Map       : aliased symbol_value_Maps.Map;
+         real_symbol_value_Map          :         c_Expressions.real_value_Maps.Map;     -- For a later real constant whose value names one.
 
          --  Modules
          --

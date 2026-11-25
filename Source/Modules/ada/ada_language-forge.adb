@@ -88,6 +88,7 @@ is
 
                                    anonymous_enum_Count     => 0,
                                    integer_symbol_value_Map => symbol_value_maps.empty_Map,
+                                   real_symbol_value_Map    => c_Expressions.real_value_Maps.empty_Map,
 
                                    f_runtime                => null,
                                    f_header                 => null,

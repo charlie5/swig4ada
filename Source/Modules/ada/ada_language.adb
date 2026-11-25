@@ -160,7 +160,7 @@ is
      renames cpp_Mangling.Symbol;
    function  variable_Suffix (swig_Type : in String) return String;
    function  character_Value (Position  : in String) return String;
-   function  real_Value      (Self : access Item;   value_Text : in String) return String;
+   function  real_Value      (Self : access Item;   value_Text : in String;   Name : in unbounded_String) return String;
    function  without_leading_Qualifiers (swig_Type : in String) return String;
    function  smart_Pointer_Words (type_Name : in String) return Natural;
    function  as_Ada_string_Text  (the_String : in String) return String;
@@ -656,7 +656,7 @@ is
               and then new_Variable.my_Type.is_a_Real
             then
                begin
-                  new_Variable.Value := +real_Value (Self, value_Text);
+                  new_Variable.Value := +real_Value (Self, value_Text, Name => new_Variable.Name);
                exception
                   when others =>
                      null;     -- The value is not a plain number.
@@ -1696,7 +1696,7 @@ is
 
                elsif new_Variable.my_Type.is_a_Real
                then
-                  new_Variable.Value := +real_Value (Self, value_Text);
+                  new_Variable.Value := +real_Value (Self, value_Text, Name => Self.current_class_namespace_Prefix & new_Variable.Name);
                end if;
             exception
                when others =>
@@ -2492,35 +2492,21 @@ is
 
 
 
-   function real_Value (Self : access Item;   value_Text : in String) return String
+   function real_Value (Self : access Item;   value_Text : in String;   Name : in unbounded_String) return String
    --
-   --  The value of a real constant, as Ada writes it, where it is a number: less its casts ('(ai_real) 1e-6', of
-   --  Assimp, 'static_cast<double> (0.5)'), its brackets and the suffix of a 'float' ('2.5f'). Raises where it is no
-   --  number (an expression of other constants, which is not worked out).
+   --  The value of a real constant, as Ada writes it, where it can be worked out: a number less its casts
+   --  ('(ai_real) 1e-6', of Assimp, 'static_cast<double> (0.5)') and its suffix ('2.5f'), or an expression of such
+   --  numbers and of the constants which are known ('eps * 2'; until 2026-11-25 such a constant was left out). The
+   --  value is kept, by 'Name', for a later constant whose value names this one. Raises where it cannot be worked out.
    --
    is
-      Plain : unbounded_String := +c_Expressions.without_Casts (value_Text,
-                                                                 Self.integer_symbol_value_Map,
-                                                                 Self.current_class_namespace_Prefix);
+      the_Value : constant Long_Float := c_Expressions.real_Value_of (value_Text,
+                                                                      Self.real_symbol_value_Map,
+                                                                      Self.integer_symbol_value_Map,
+                                                                      Self.current_class_namespace_Prefix);
    begin
-      Plain := +ada.Strings.fixed.Trim (+Plain, ada.Strings.Both);
-
-      while      Length (Plain) >= 2
-        and then Element (Plain, 1) = '('
-        and then Element (Plain, Length (Plain)) = ')'
-        and then ada.Strings.fixed.Index (Slice (Plain, 2, Length (Plain) - 1), "(") = 0
-      loop
-         Plain := +ada.Strings.fixed.Trim (Slice (Plain, 2, Length (Plain) - 1), ada.Strings.Both);
-      end loop;
-
-      if         Length (Plain) >= 2
-        and then Element (Plain, Length (Plain))     in 'f' | 'F' | 'l' | 'L'
-        and then Element (Plain, Length (Plain) - 1) in '0' .. '9' | '.'
-      then
-         Plain := +Slice (Plain, 1, Length (Plain) - 1);
-      end if;
-
-      return ada.Strings.fixed.Trim (Long_Float'Image (Long_Float'Value (+Plain)), ada.Strings.Both);
+      Self.real_symbol_value_Map.include (Name, the_Value);
+      return ada.Strings.fixed.Trim (Long_Float'Image (the_Value), ada.Strings.Both);
    end real_Value;
 
 
