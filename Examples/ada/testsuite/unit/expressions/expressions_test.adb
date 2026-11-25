@@ -248,6 +248,33 @@ begin
          check (real_Value ("0.1f") = Long_Float (Tenth),                           "a literal of float is rounded to float");
          check (not is_Single ("7 / 2"),                                            "and an integer is no float");
       end;
+
+      declare
+         One   : Float      := 1.0;     -- As above.
+         Three : Float      := 3.0;
+         Seven : Float      := 7.0;
+         D_One : Long_Float := 1.0;
+
+         function Cast_to (type_Name : in String) return a_Cast
+         is (if type_Name = "real" then to_Single else not_a_Type);     -- A typedef of 'float', as a module knows it.
+
+         function cast_Value (Expression : in String) return Long_Float
+         is (real_Value_of (Expression, the_Reals, the_Integers, +"", Cast_to'Access).Value);
+      begin
+         --  The values are those which G++ gives.
+         --
+         check (real_Value ("(float) 1.0 / 7 * 3.0f")              = Long_Float (One / Seven * Three),  "a cast to float applies to the operand which follows it");
+         check (cast_Value ("(real) 1.0 / 7 * 3.0f")               = Long_Float (One / Seven * Three),  "as does a cast to a typedef of float which the module knows");
+         check (real_Value ("float (1.0) / 7 * 3.0f")              = Long_Float (One / Seven * Three),  "and one in the form of a call");
+         check (real_Value ("static_cast<float> (1.0) / 7 * 3.0f") = Long_Float (One / Seven * Three),  "and one which is named");
+         check (real_Value ("(float) (1.0 / 7) * 3.0f")            = Long_Float (Float (D_One / 7.0) * Three),
+                "a cast of an expression in brackets rounds it");
+         check (real_Value ("(double) 1.0f / 7 * 3.0f")            = D_One / 7.0 * 3.0,                 "a cast to double makes a double");
+         check (real_Value ("(int) 2.5 * 2")                       = 4.0,                               "a cast to an integer truncates");
+         check (real_Value ("(unsigned long) 7.9 / 2")             = 3.0,                               "and makes an integer, whose division truncates");
+         check (real_Value ("(ai_real) 1e-6")                      = 1.0e-6,                            "a cast to a type which is not known leaves the value");
+         check (real_Value ("(EPS) * 2")                           = 2.0e-6,                            "a known value in brackets is no cast");
+      end;
    end reals;
 
    finish;
