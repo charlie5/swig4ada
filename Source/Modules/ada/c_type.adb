@@ -447,6 +447,21 @@ is
 
 
 
+   function is_a_Real (Self : access Item) return Boolean
+   --
+   --  Whether a constant of the type is given its value, as a real number. (Until 2026-11-25 only one of 'float' or
+   --  'double' was, so that 'static const ai_real ai_epsilon = (ai_real) 1e-6;', of Assimp, was left out.)
+   --
+   is
+      the_Type : constant c_Type.view := (if Self.my.c_type_Kind = Typedef then Self.ultimate_base_Type else Self.all'Access);
+   begin
+      return          the_Type /= null
+             and then (        the_Type.is_a_standard_Real
+                       or else to_String (the_Type.Name) = "long double");
+   end is_a_Real;
+
+
+
    function is_a_Number (Self : access Item) return Boolean
    is
    begin

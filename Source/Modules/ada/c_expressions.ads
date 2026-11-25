@@ -35,6 +35,14 @@ is
    -- A name is sought with the namespace ahead of it first, and then as it is written.
 
 
+   function without_Casts (the_Expression : in String;
+                           known_Symbols  : in symbol_value_Maps.Map;
+                           Namespace      : in unbounded_String) return String;
+   --
+   -- The expression less its casts, which do not change the value of a constant: '(mytype) 10', 'static_cast< T >(10)'
+   -- and 'int (10)' are each '10' (the last within its brackets).
+
+
    function sizeof_Value (expression_Type : in unbounded_String;
                           known_Symbols   : in symbol_value_Maps.Map;
                           Namespace       : in unbounded_String) return Natural;

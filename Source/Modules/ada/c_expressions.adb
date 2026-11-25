@@ -309,9 +309,10 @@ is
 
       named_Casts    : constant Names := [+"static_cast", +"reinterpret_cast", +"const_cast"];
       standard_Types : constant Names := [+"unsigned long long", +"unsigned long", +"unsigned short", +"unsigned char",     -- The longer names first.
-                                          +"unsigned int",       +"long long",     +"signed char",
+                                          +"unsigned int",       +"long long",     +"signed char",    +"long double",
                                           +"unsigned",           +"long",          +"short",          +"int",
-                                          +"char",               +"bool",          +"size_t"];
+                                          +"char",               +"bool",          +"size_t",         +"double",
+                                          +"float"];
 
       Pad : unbounded_String := +the_Expression;
 
