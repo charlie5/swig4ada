@@ -1022,6 +1022,9 @@ with the layout of the GNU libstdc++ string, with functions to make one from a
 <tt>c_str</tt>, <tt>Length</tt>, <tt>assign</tt>, <tt>destruct</tt>).
 The functions which that package needs are added to the wrapper wherever a binding uses
 a string, whether or not the interface file includes <tt>std_string.i</tt>.
+A header which names a string as an instance of its template
+(<tt>std::basic_string&lt;char&gt;</tt>, or <tt>std::basic_string&lt;wchar_t&gt;</tt> for the
+<tt>wstring</tt> of <tt>std_wstring.i</tt>) names the same type.
 </p>
 
 <p>

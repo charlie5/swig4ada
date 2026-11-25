@@ -9,10 +9,13 @@ with
      pugixml.xpath_node,
      pugixml.xml_tree_walker,
      pugixml.xml_writer,
+     pugixml.wstring,
+     pugixml.Binding,
 
      Collectors,
 
      swig,
+     swig.std_Strings,
      interfaces.C.Strings,
      ada.Strings.fixed,
      ada.Strings.unbounded,
@@ -140,6 +143,28 @@ begin
       the_Writer.Text := null_unbounded_String;
       xml_writer.destruct_0 (xml_writer.Item (the_Writer));
    end a_writer_declared_in_Ada;
+
+   wide_Strings :
+   declare
+      --  pugixml converts to and from wide strings, which it names as instances of 'std::basic_string'. They are the
+      --  classes of the library files ('std::string' and the 'wstring' of 'std_wstring.i'), which C++ returns by value.
+      --
+      use swig.std_Strings;
+
+      Narrow : aliased std_String := to_std_String (to_C ("ada"));
+      Wide   : aliased wstring.Item;
+      Back   : aliased std_String;
+   begin
+      Binding.as_wide (Narrow'unchecked_Access, Wide'unchecked_Access);
+      check (wstring.length (Wide) = 3,   "a string is converted to a wide string, of the class of 'std_wstring.i', which C++ returns by value");
+
+      Binding.as_utf8 (Wide'unchecked_Access, Back'unchecked_Access);
+      check (to_Ada (Back) = "ada",       "and back");
+
+      destruct (Back);
+      wstring.destruct_0 (Wide);
+      destruct (Narrow);
+   end wide_Strings;
 
    xml_document.destruct (the_Document);
    finish;
