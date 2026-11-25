@@ -6,4 +6,4 @@ type.h:12: Warning 861: Unable to bind the array type 'value*[]', as its element
 type.h:12: Warning 861: Unable to bind the pointer type 'value**', as the type it points to is not known.
 node_iterator.h:22: Warning 861: Unable to bind the array type 'value*[]', as its element type is not known.
 node_iterator.h:22: Warning 861: Unable to bind the pointer type 'value**', as the type it points to is not known.
-node_iterator.h:59: Warning 862: The member 'm_ref' of class 'proxy' is of a class which is not defined, so its size is not known. The layout of the record does not match that of the class.
+node_iterator.h:59: Warning 862: The member 'm_ref_storage' of class 'proxy' is of a class which is not defined, so its size is not known. The layout of the record does not match that of the class.

@@ -24,7 +24,6 @@ tstring.h:249: Warning 861: Unable to bind the function 'begin' of class 'String
 tstring.h:259: Warning 861: Unable to bind the function 'cbegin' of class 'String', as one of its types is not known.
 tstring.h:265: Warning 861: Unable to bind the function 'a_end' of class 'String', as one of its types is not known.
 tstring.h:277: Warning 861: Unable to bind the function 'cend' of class 'String', as one of its types is not known.
-tstringlist.h:65: Warning 861: Unable to bind the function 'construct' of class 'StringList', as one of its types is not known.
 tlist.h:76: Warning 861: Unable to bind the function 'construct' of class 'StringList_base', as one of its types is not known.
 tlist.h:88: Warning 861: Unable to bind the function 'begin' of class 'StringList_base', as one of its types is not known.
 tlist.h:100: Warning 861: Unable to bind the function 'cbegin' of class 'StringList_base', as one of its types is not known.
@@ -34,6 +33,7 @@ tlist.h:127: Warning 861: Unable to bind the function 'insert' of class 'StringL
 tlist.h:185: Warning 861: Unable to bind the function 'find' of class 'StringList_base', as one of its types is not known.
 tlist.h:195: Warning 861: Unable to bind the function 'cfind' of class 'StringList_base', as one of its types is not known.
 tlist.h:209: Warning 861: Unable to bind the function 'erase' of class 'StringList_base', as one of its types is not known.
+tstringlist.h:65: Warning 861: Unable to bind the function 'construct' of class 'StringList', as one of its types is not known.
 tlist.h:76: Warning 861: Unable to bind the function 'construct' of class 'ByteVectorList_base', as one of its types is not known.
 tlist.h:88: Warning 861: Unable to bind the function 'begin' of class 'ByteVectorList_base', as one of its types is not known.
 tlist.h:100: Warning 861: Unable to bind the function 'cbegin' of class 'ByteVectorList_base', as one of its types is not known.

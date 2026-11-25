@@ -801,6 +801,13 @@ A base class may have a function which takes or returns a pointer to a class tha
 derived from it.
 The package of the base then has only a limited view of that of the derived class, and
 names the pointer as <tt>access shapes.Circle.Item'Class</tt>.
+A virtual function which overrides another writes each such pointer as the function which
+it overrides does, as Ada requires the two profiles to conform.
+A function which returns such an anonymous access type gives a result which GNAT will
+not convert to a named pointer type at run time (an accessibility check fails); where a
+named pointer is wanted, it is taken of the object
+(<tt>the_Element : constant XMLNode.Pointer := New_One.all'unchecked_Access;</tt>).
+A pointer which is itself constant (<tt>const Node* const</tt>) is passed as any pointer is.
 </p>
 
 <p>

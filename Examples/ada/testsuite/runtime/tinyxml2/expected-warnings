@@ -1,0 +1,12 @@
+tinyxml2.h:434: Warning 863: Unable to evaluate the value '(4*1024)/ITEM_SIZE' of the enumeration literal 'ITEMS_PER_BLOCK', which is given the value 0.
+tinyxml2.h:440: Warning 863: Unable to evaluate the array dimension 'static_cast< size_t >(sizeof(tinyxml2::XMLElement))' of 'itemData_storage', whose length is taken to be unknown.
+tinyxml2.h:444: Warning 863: Unable to evaluate the array dimension 'tinyxml2::MemPoolT< sizeof(tinyxml2::XMLElement) >::ITEMS_PER_BLOCK' of 'items_storage', whose length is taken to be unknown.
+tinyxml2.h:434: Warning 863: Unable to evaluate the value '(4*1024)/ITEM_SIZE' of the enumeration literal 'ITEMS_PER_BLOCK', which is given the value 0.
+tinyxml2.h:440: Warning 863: Unable to evaluate the array dimension 'static_cast< size_t >(sizeof(tinyxml2::XMLAttribute))' of 'itemData_storage', whose length is taken to be unknown.
+tinyxml2.h:444: Warning 863: Unable to evaluate the array dimension 'tinyxml2::MemPoolT< sizeof(tinyxml2::XMLAttribute) >::ITEMS_PER_BLOCK' of 'items_storage', whose length is taken to be unknown.
+tinyxml2.h:434: Warning 863: Unable to evaluate the value '(4*1024)/ITEM_SIZE' of the enumeration literal 'ITEMS_PER_BLOCK', which is given the value 0.
+tinyxml2.h:440: Warning 863: Unable to evaluate the array dimension 'static_cast< size_t >(sizeof(tinyxml2::XMLText))' of 'itemData_storage', whose length is taken to be unknown.
+tinyxml2.h:444: Warning 863: Unable to evaluate the array dimension 'tinyxml2::MemPoolT< sizeof(tinyxml2::XMLText) >::ITEMS_PER_BLOCK' of 'items_storage', whose length is taken to be unknown.
+tinyxml2.h:434: Warning 863: Unable to evaluate the value '(4*1024)/ITEM_SIZE' of the enumeration literal 'ITEMS_PER_BLOCK', which is given the value 0.
+tinyxml2.h:440: Warning 863: Unable to evaluate the array dimension 'static_cast< size_t >(sizeof(tinyxml2::XMLComment))' of 'itemData_storage', whose length is taken to be unknown.
+tinyxml2.h:444: Warning 863: Unable to evaluate the array dimension 'tinyxml2::MemPoolT< sizeof(tinyxml2::XMLComment) >::ITEMS_PER_BLOCK' of 'items_storage', whose length is taken to be unknown.

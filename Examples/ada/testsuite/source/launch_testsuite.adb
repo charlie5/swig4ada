@@ -1734,6 +1734,19 @@ begin
          put_Line ("yaml-cpp is not installed, so the run-time case 'yamlcpp' is passed over.");
       end if;
 
+      --  Likewise tinyxml2, from its one header: a document which owns its nodes, which are of a hierarchy of classes
+      --  with virtual functions and are reached by pointer, a printer which Ada declares, and a visitor which is
+      --  derived in Ada and which tinyxml2 calls back.
+      --
+      if ada.Directories.exists ("/usr/include/tinyxml2.h")
+      then
+         run ("tinyxml2",
+              Options => "-I/usr/include",
+              Library => "tinyxml2");
+      else
+         put_Line ("tinyxml2 is not installed, so the run-time case 'tinyxml2' is passed over.");
+      end if;
+
       --  Cases of upstream's suite, each with a tester written after upstream's test of it for Python.
       --
       new_Line;
