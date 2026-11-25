@@ -421,6 +421,24 @@ is
 
 
 
+   function is_an_Integer (Self : access Item) return Boolean
+   --
+   --  Whether a constant of the type is given its value, as an integer which is worked out. (Until 2026-11-25 only a
+   --  standard integer was, so that 'static constexpr size_t AI_MAXLEN = 1024;', of Assimp, had none, and the length of
+   --  an array of it was not known.)
+   --
+   is
+      the_Type : constant c_Type.view := (if Self.my.c_type_Kind = Typedef then Self.ultimate_base_Type else Self.all'Access);
+   begin
+      return          the_Type /= null
+             and then (        the_Type.is_a_standard_Integer
+                       or else to_String (the_Type.Name) in "size_t"  | "ptrdiff_t" | "ssize_t"   | "intptr_t" | "uintptr_t"
+                                                          | "int8_t"  | "int16_t"   | "int32_t"   | "int64_t"
+                                                          | "uint8_t" | "uint16_t"  | "uint32_t"  | "uint64_t");
+   end is_an_Integer;
+
+
+
    function is_a_standard_Real (Self : access Item) return Boolean
    is
    begin

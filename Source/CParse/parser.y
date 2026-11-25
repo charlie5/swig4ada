@@ -3583,6 +3583,10 @@ c_declaration   : c_decl {
 		      if (s) {
 			if (Strstr(s, "thread_local")) {
 			  Insert(s,0,"externc ");
+			} else if (Strncmp(s, "static", 6) == 0) {
+			  /* swig4ada: a declaration which is 'static' keeps its storage: it has no symbol, which 'extern "C"' does
+			     not change, and a constant of it keeps its value ('static constexpr size_t AI_MAXLEN = 1024;', of
+			     Assimp, was taken for a variable of the library). */
 			} else if (!Equal(s, "typedef")) {
 			  Setattr(n,"storage","externc");
 			}

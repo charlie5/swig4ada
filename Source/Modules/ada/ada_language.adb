@@ -611,7 +611,7 @@ is
             if         is_Constant
               and then value_Text /= ""
               and then new_Variable.array_Bounds.is_Empty
-              and then (        new_Variable.my_Type.is_a_standard_Integer
+              and then (        new_Variable.my_Type.is_an_Integer
                         or else to_String (new_Variable.my_Type.Name) in "bool" | "signed char" | "unsigned char")     -- Which are numbers too.
             then
                declare
@@ -1649,7 +1649,7 @@ is
            and then new_Variable.array_Bounds.is_Empty
          then
             begin
-               if        new_Variable.my_Type.is_a_standard_Integer
+               if        new_Variable.my_Type.is_an_Integer
                  or else to_String (new_Variable.my_Type.Name) in "bool" | "signed char" | "unsigned char"     -- Which are numbers too.
                then
                   new_Variable.Value := +Image (resolved_c_integer_Expression (Self, +value_Text,
@@ -3230,6 +3230,58 @@ is
               and then Self.known_in_another_template_Form (+Resolved) /= null
             then
                return Self.known_in_another_template_Form (+Resolved);
+            end if;
+         end;
+
+         --  A template instance which a template names with the typedefs of its arguments resolved ('aiMatrix4x4t<(float)>',
+         --  as a constructor of Assimp's 'aiMatrix3x3t' names it) may be known by a name which has them ('aiMatrix4x4t<
+         --  (ai_real)>', which a typedef named first): the type of that name is it, and it is entered by this one too.
+         --  (Until 2026-11-25 a second type was made, which stayed one that is not known when the class took over the
+         --  first, and the functions which took it were left out.)
+         --
+         declare
+            the_Name  : constant String := +swig_Type;
+            Found_Key :          unbounded_String;
+         begin
+            if         ada.Strings.fixed.Index (the_Name, "<(") /= 0
+              and then (the_Name'Length < 2 or else the_Name (the_Name'First + 1) /= '.')     -- Not 'p.', 'r.', 'a.' ...
+            then
+               for Cursor in Self.swig_type_Map_of_c_type.Iterate
+               loop
+                  declare
+                     use swig_type_Maps_of_c_type;
+                     the_Key : constant String := to_String (Key (Cursor));
+                  begin
+                     if         ada.Strings.fixed.Index (the_Key, "<(") /= 0
+                       and then the_Key /= the_Name
+                       and then not (the_Key'Length > 2 and then the_Key (the_Key'First + 1) = '.')
+                       and then String'(+doh_Item (SwigType_typedef_resolve_all (SwigType_Pointer (to_Doh (the_Key))))) = the_Name
+                     then
+                        the_Type  := Element (Cursor);
+                        Found_Key := Key (Cursor);
+                        exit;
+                     end if;
+                  end;
+               end loop;
+
+               if the_Type /= null
+               then   -- Once the map is no longer being walked, with the forms which were made with the type.
+                  declare
+                     type Prefix_array is array (Positive range <>) of unbounded_String;
+                     Prefixes : constant Prefix_array := [+"", +"a.", +"p.", +"a.p.", +"p.p.", +"r.", +"r.q(const).", +"p.q(const).", +"z."];
+                  begin
+                     for Prefix of Prefixes
+                     loop
+                        if         Self.swig_type_Map_of_c_type.contains (Prefix & Found_Key)
+                          and then not Self.swig_type_Map_of_c_type.contains (Prefix & the_Name)
+                        then
+                           Self.swig_type_Map_of_c_type.insert (Prefix & the_Name, Self.swig_type_Map_of_c_type.Element (Prefix & Found_Key));
+                        end if;
+                     end loop;
+                  end;
+
+                  return the_Type;
+               end if;
             end if;
          end;
 

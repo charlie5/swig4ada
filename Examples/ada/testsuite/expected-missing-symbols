@@ -1,12 +1,9 @@
 Ada_do_test
-_ZN13module_traits8categoryE
 _ZN1B16should_be_stringE
 _ZN3fooIdE4testE
 _ZN3fooIiE4testE
-_ZN3ns16Traits1cE
 _ZN3oss6ModuleINS_7etraitsEE1PE
 _ZN5Piece13SimpleJust123E
-_ZN5Piece14AsYouExpect123E
 _ZN5Piece20SimpleAsYouExpect123E
 _ZN5Piece4kOk2E
 _ZN5Piece7Just123E

@@ -2287,6 +2287,22 @@ is
                   with_of_system_Required := True;
                end if;
 
+               --  Likewise a pointer to a type which the package declares after the record (a pointer to the pointer of
+               --  the class itself, 'aiNode** mChildren' of Assimp), which is an address (until 2026-11-25 'System' was
+               --  with'ed for it only where the class was virtual).
+               --
+               if         the_Type.all in ada_Type.composite.a_Record.item'Class
+                 and then (for some Each in 1 .. a_Record_view (the_Type).component_Count
+                           =>          a_Record_view (the_Type).Components (Each).my_Type.resolved_Type /= null
+                              and then a_Record_view (the_Type).Components (Each).my_Type.resolved_Type.all in Access_to_Type_class
+                              and then Access_to_Type_view (a_Record_view (the_Type).Components (Each).my_Type.resolved_Type).accessed_Type /= null
+                              and then Access_to_Type_view (a_Record_view (the_Type).Components (Each).my_Type.resolved_Type).accessed_Type /= the_Type
+                              and then ada_Package.view (Access_to_Type_view (a_Record_view (the_Type).Components (Each).my_Type.resolved_Type)
+                                                           .accessed_Type.declaration_Package) = ada_Package.view (the_Package))
+               then
+                  with_of_system_Required := True;
+               end if;
+
                if the_Type.all in ada_Type.composite.a_Record.item'Class
                then
                   declare

@@ -96,6 +96,7 @@ begin
 
          the_doh_swigType : constant SwigType_Pointer :=  SwigType_Pointer (get_Attribute (the_Node, "type"));
          the_swig_Type    : constant swig_Type        := +doh_Item (the_doh_swigType);
+         resolved_Base    : constant swig_Type        := +doh_Item (SwigType_typedef_resolve_all (the_doh_swigType));
 
          Pad              :          SwigType_Pointer with Unreferenced;
          use type C.int;
@@ -243,9 +244,16 @@ begin
             --  ('std::vector<(double,std::allocator<(double)>)>' for 'typedef std::vector<double> DblVector;'),
             --  where the module knows it without them, or the other way about.
             --
+            --  Or one which is known by its name with the typedefs of its arguments resolved, as a template has named it
+            --  ('aiMatrix4x4t<(float)>' for 'typedef aiMatrix4x4t<ai_real> aiMatrix4x4;', of Assimp, which a constructor
+            --  of 'aiMatrix3x3t' named first), which the class then takes over (see 'make_the_Class'). (Until 2026-11-25 a
+            --  second type was made for it, which the class took over, and the first stayed one which is not known.)
+            --
             if        Self.swig_type_Map_of_c_type.contains (the_swig_Type)
               or else Self.swig_type_Map_of_c_type.contains (+as_a_standard_String (to_String (the_swig_Type)))     -- 'std::basic_string<(char)>'.
               or else Self.known_in_another_template_Form (the_swig_Type) /= null
+              or else (         ada.Strings.unbounded.Index (the_swig_Type, "<(") /= 0
+                       and then Self.swig_type_Map_of_c_type.contains (resolved_Base))
             then
                dlog ("swig_type_Map_of_c_type.contains " & the_swig_Type);
                declare
@@ -253,7 +261,9 @@ begin
                                                            then  Self.swig_type_Map_of_c_type.Element (the_swig_Type)
                                                            elsif Self.swig_type_Map_of_c_type.contains (+as_a_standard_String (to_String (the_swig_Type)))
                                                            then  Self.swig_type_Map_of_c_type.Element (+as_a_standard_String (to_String (the_swig_Type)))
-                                                           else  Self.known_in_another_template_Form (the_swig_Type));
+                                                           elsif Self.known_in_another_template_Form (the_swig_Type) /= null
+                                                           then  Self.known_in_another_template_Form (the_swig_Type)
+                                                           else  Self.swig_type_Map_of_c_type.Element (resolved_Base));
                begin
                   if "_" & the_type_Name = the_swig_Type
                   then

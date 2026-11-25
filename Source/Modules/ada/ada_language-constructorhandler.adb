@@ -376,7 +376,7 @@ begin
                                    & (if the_Parameters = "" then "" else ",   " & the_Parameters) & ")"                   & NL
                                    & "{"                                                                                   & NL
                                    & to_String (ignored_Code)
-                                   & "  new (self) " & to_String (Self.Shim.Name) & " (" & to_String (plain_call_Args) & ");" & NL     -- Its constructor takes what this function does.
+                                   & "  ::new (self) " & to_String (Self.Shim.Name) & " (" & to_String (plain_call_Args) & ");" & NL     -- Its constructor takes what this function does.
                                    & "}"                                                                                   & NL);
             end;
          else

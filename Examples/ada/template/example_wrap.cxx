@@ -187,14 +187,16 @@
 #  include <new>
 
 /* Replaces an object of the caller by a result which C++ has just made: the object is destructed, and the
-   result is moved (or, before C++11, copied) into its place. The assignment of the class is not used. */
+   result is moved (or, before C++11, copied) into its place. The assignment of the class is not used. The placement
+   is the global one ('::new'), as a class may declare an 'operator new' of its own, which hides it (Assimp's classes,
+   through 'AllocateFromAssimpHeap'). */
 template <typename T> static void swig_ada_replace (T* target, T& value)
 {
   target->~T ();
 #  if __cplusplus >= 201103L
-  new (target) T (static_cast<T &&> (value));
+  ::new (target) T (static_cast<T &&> (value));
 #  else
-  new (target) T (value);
+  ::new (target) T (value);
 #  endif
 }
 

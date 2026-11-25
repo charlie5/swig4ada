@@ -252,13 +252,42 @@ is
    is
       use swigg.Utility;
    begin
-      if         Length (value_Text) >= 2                                              -- A suffix which says
-        and then Element (value_Text, Length (value_Text))     in 'f' | 'F' | 'l' | 'L'   -- that a literal is a
-        and then Element (value_Text, Length (value_Text) - 1) in '0' .. '9' | '.'        -- 'float' ('4.0f').
-        and then Index (value_Text, "0x") = 0
-      then
-         delete (value_Text, Length (value_Text), Length (value_Text));
-      end if;
+      --  The suffix which says that a literal is a 'float' ('4.0f'), of each literal of an expression ('((3.14f)*2.0f)',
+      --  of Assimp's 'AI_MATH_TWO_PI_F'; until 2026-11-25 only that of the last was taken off, and the spec did not
+      --  compile). A hexadecimal literal, whose digits may be letters, is left as it is.
+      --
+      declare
+         the_Text : constant String := to_String (value_Text);
+         Result   : unbounded_String;
+         is_Hex   : Boolean         := False;     -- Within a hexadecimal literal.
+      begin
+         for Each in the_Text'Range
+         loop
+            if         Each < the_Text'Last
+              and then the_Text (Each) = '0'
+              and then the_Text (Each + 1) in 'x' | 'X'
+              and then (Each = the_Text'First or else the_Text (Each - 1) not in '0' .. '9' | '.')
+            then
+               is_Hex := True;
+            elsif the_Text (Each) not in '0' .. '9' | 'a' .. 'f' | 'A' .. 'F' | 'x' | 'X' | '.'
+            then
+               is_Hex := False;
+            end if;
+
+            if         not is_Hex
+              and then the_Text (Each) in 'f' | 'F' | 'l' | 'L'
+              and then Each > the_Text'First
+              and then the_Text (Each - 1) in '0' .. '9' | '.'
+              and then (Each = the_Text'Last or else the_Text (Each + 1) not in 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_')
+            then
+               null;     -- The suffix.
+            else
+               append (Result, the_Text (Each));
+            end if;
+         end loop;
+
+         value_Text := Result;
+      end;
 
       replace_Integer_with_Float (value_Text);
 

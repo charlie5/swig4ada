@@ -499,7 +499,7 @@ is
                          & (if the_Constructor.construction_Parameters = "" then +"" else ",   " & the_Constructor.construction_Parameters) & ")" & NL
                          & "{" & NL
                          & the_Constructor.construction_Code
-                         & "  new (self) " & the_Name & " (" & the_Constructor.construction_Names & ");" & NL
+                         & "  ::new (self) " & the_Name & " (" & the_Constructor.construction_Names & ");" & NL
                          & "}" & NL & NL);
 
       the_Constructor.director_Symbol := the_Symbol;

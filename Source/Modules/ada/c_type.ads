@@ -175,6 +175,8 @@ is
    function  is_ultimately_Unsigned (Self : access Item) return Boolean;
 
    function  is_a_standard_Integer  (Self : access Item) return Boolean;     -- 'int', 'long', 'short', 'long long', or one of them unsigned.
+   function  is_an_Integer          (Self : access Item) return Boolean;     -- One of those, 'size_t', 'ptrdiff_t', a fixed width integer
+                                                                            -- ('int32_t'), or a typedef of any.
    function  is_a_standard_Real     (Self : access Item) return Boolean;     -- 'float' or 'double'.
    function  is_a_Number            (Self : access Item) return Boolean;     -- Either of those, or a 'char' with a sign, 'size_t', 'bool' or 'long double'.
 

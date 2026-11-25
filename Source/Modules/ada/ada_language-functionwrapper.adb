@@ -476,7 +476,7 @@ begin
                      print_to (wrapper_Code,   "  {"                                                                                     & NL
                                              & "    typedef " & to_String (c_return_Type) & " swig_ada_result_type;"                    & NL
                                              & "    a_result->~swig_ada_result_type ();"                                                 & NL
-                                             & "    new (a_result) swig_ada_result_type (*(&result));"                                   & NL
+                                             & "    ::new (a_result) swig_ada_result_type (*(&result));"                                   & NL
                                              & "  }"                                                                                     & NL);
                   elsif the_typeMap /= ""
                   then
