@@ -22,6 +22,9 @@ with
      bullet.btDiscreteDynamicsWorld,
      bullet.btCollisionWorld,
      bullet.btPoint2PointConstraint,
+     bullet.btHingeConstraint,
+     bullet.btIDebugDraw,
+     bullet.btDynamicsWorld,
      bullet.btTypedConstraint,
      bullet.ClosestRayResultCallback,
      bullet.RayResultCallback,
@@ -29,11 +32,13 @@ with
 
      Motions,
      Contacts,
+     Watchers,
 
      system,
 
      swig,
      interfaces.C,
+     ada.Numerics.Elementary_Functions,
      Checks;
 
 
@@ -43,8 +48,9 @@ procedure Tester
 --  classes which C++ constructs), shapes of a hierarchy of classes with virtual functions, rigid bodies, and a world
 --  which is made of its collision configuration, dispatcher, broadphase and solver, all of which Ada declares. A
 --  sphere falls under gravity, onto a plane, and a motion state which is declared in Ada is told where it is. Another
---  is held by a constraint where it begins. A ray is cast through the world, and the contacts of a body are given to a
---  callback which is declared in Ada.
+--  is held by a constraint where it begins, and another swings on a hinge. Ada is given each tick of the world, by a
+--  pointer to a function, and draws the world, by a drawer which is derived in Ada. A ray is cast through the world,
+--  and the contacts of a body are given to a callback which is declared in Ada.
 --
 is
    use bullet,
@@ -61,6 +67,14 @@ is
 
    function near (Left, Right : in btScalar;   Within : in btScalar := 0.01) return Boolean
    is (abs (Left - Right) <= Within);
+
+   function identity_Rotation return btQuaternion.Item
+   is
+      Zero : aliased btScalar := 0.0;
+      One  : aliased btScalar := 1.0;
+   begin
+      return btQuaternion.construct (Zero'unchecked_Access, Zero'unchecked_Access, Zero'unchecked_Access, One'unchecked_Access);
+   end identity_Rotation;
 
    function value (X, Y, Z : in btScalar) return btVector3.Item
    is
@@ -146,6 +160,31 @@ begin
          Lamp_Place  : aliased btVector3.Item   := value (5.0, 10.0, 0.0);
          Centre      : aliased btVector3.Item   := value (0.0,  0.0, 0.0);
          Hook        : aliased btPoint2PointConstraint.Item := btPoint2PointConstraint.construct (Lamp'unchecked_Access, Centre'unchecked_Access);
+
+         --  A third, which swings on a hinge two to its left about the axis 'z'. It begins where it is put, as the hinge
+         --  is placed in the world by where its body is when it is made.
+         --
+         Door_Place  : aliased btVector3.Item     := value (20.0, 10.0, 0.0);
+         Upright     : aliased btQuaternion.Item  := identity_Rotation;
+         Door_Start  : aliased btTransform.Item   := btTransform.construct (Upright'unchecked_Access, Door_Place'unchecked_Access);
+         Door_State  : aliased btDefaultMotionState.Item := btDefaultMotionState.construct (Door_Start'unchecked_Access);
+         Door_Info   : aliased btRigidBodyConstructionInfo.Item := btRigidBodyConstructionInfo.construct (1.0, Door_State'unchecked_Access,
+                                                                                                         Sphere'unchecked_Access,
+                                                                                                         Inertia'unchecked_Access);
+         Door        : aliased btRigidBody.Item := btRigidBody.construct (Door_Info'unchecked_Access);
+         Left        : aliased btVector3.Item   := value (-2.0,  0.0, 0.0);
+         Axis        : aliased btVector3.Item   := value ( 0.0,  0.0, 1.0);
+         Hinge       : aliased btHingeConstraint.Item := btHingeConstraint.construct (Door'unchecked_Access, Left'unchecked_Access, Axis'unchecked_Access);
+
+         function distance_of_the_Door return btScalar
+         is
+            Place : constant btVector3.Pointer := btRigidBody.getCenterOfMassPosition (Door'Access);
+            X     : constant btScalar          := btVector3.getX (Place.all).all - 18.0;
+            Y     : constant btScalar          := btVector3.getY (Place.all).all - 10.0;
+         begin
+            return btScalar (ada.Numerics.Elementary_Functions.Sqrt (Float (X * X + Y * Y)));
+         end distance_of_the_Door;
+
       begin
          check (near (btVector3.getY (btRigidBody.getCenterOfMassPosition (Ball'Access).all).all, 10.0),
                 "a body begins where a motion state which Ada declares says, which Bullet asks through the vtable");
@@ -158,12 +197,19 @@ begin
          btDiscreteDynamicsWorld.addRigidBody  (World, Lamp'unchecked_Access);
          btDiscreteDynamicsWorld.addConstraint (World, Hook'unchecked_Access);
 
+         btDiscreteDynamicsWorld.addRigidBody  (World, Door 'unchecked_Access);
+         btDiscreteDynamicsWorld.addConstraint (World, Hinge'unchecked_Access);
+
+         btDynamicsWorld.setInternalTickCallback (World, Watchers.on_Tick'Access);
+
          for Each in 1 .. 60
          loop
             Steps := btDiscreteDynamicsWorld.stepSimulation (World'Access, 1.0 / 60.0, 1, 1.0 / 60.0);
          end loop;
 
          check (Steps = 1,                                         "a world which Ada declares steps the bodies");
+         check (Watchers.Ticks = 60 and near (Watchers.Last_Step, 1.0 / 60.0, Within => 0.0001),
+                "and gives each tick to a function of Ada, by a pointer to it");
          check (near (btVector3.getY (btRigidBody.getCenterOfMassPosition (Ball'Access).all).all, 4.9167),
                 "and the sphere falls under gravity as C++ has it: "
                 & btScalar'Image (btVector3.getY (btRigidBody.getCenterOfMassPosition (Ball'Access).all).all));
@@ -179,6 +225,24 @@ begin
          check (near (btVector3.getY (btRigidBody.getCenterOfMassPosition (Lamp'Access).all).all, 10.0, Within => 0.05),
                 "a sphere which a constraint holds stays where it is held: "
                 & btScalar'Image (btVector3.getY (btRigidBody.getCenterOfMassPosition (Lamp'Access).all).all));
+
+         check (abs (btHingeConstraint.getHingeAngle (Hinge'Access)) > 0.5,
+                "a body on a hinge swings down: " & btScalar'Image (btHingeConstraint.getHingeAngle (Hinge'Access)));
+         check (near (distance_of_the_Door, 2.0, Within => 0.05),  "and keeps its distance from the hinge: " & btScalar'Image (distance_of_the_Door));
+
+         drawing :
+         declare
+            Pen : aliased Watchers.Drawer;
+         begin
+            Watchers.setDebugMode (Pen, btIDebugDraw.DebugDrawModes'Enum_Rep (btIDebugDraw.DBG_DrawWireframe));
+            btCollisionWorld.setDebugDrawer (btCollisionWorld.Item (World), Pen'unchecked_Access);
+            btDiscreteDynamicsWorld.debugDrawWorld (World);
+
+            check (Pen.Lines > 0,                                      "the world is drawn through a drawer which is derived in Ada:" & Pen.Lines'Image & " lines");
+
+            btCollisionWorld.setDebugDrawer (btCollisionWorld.Item (World), null);
+            btIDebugDraw.destruct_0 (btIDebugDraw.Item (Pen));
+         end drawing;
 
          casting_a_Ray :
          declare
@@ -225,12 +289,17 @@ begin
             btDefaultMotionState.destruct_0 (Probe_State);
          end contacts_of_a_Body;
 
+         btDiscreteDynamicsWorld.removeConstraint (World, Hinge'unchecked_Access);
+         btDiscreteDynamicsWorld.removeRigidBody  (World, Door 'unchecked_Access);
          btDiscreteDynamicsWorld.removeConstraint (World, Hook'unchecked_Access);
          btDiscreteDynamicsWorld.removeRigidBody  (World, Lamp'unchecked_Access);
 
          btDiscreteDynamicsWorld.removeRigidBody (World, Floor'unchecked_Access);
          btDiscreteDynamicsWorld.removeRigidBody (World, Ball 'unchecked_Access);
 
+         btHingeConstraint.destruct_0 (Hinge);
+         btRigidBody.destruct_0 (Door);
+         btDefaultMotionState.destruct_0 (Door_State);
          btPoint2PointConstraint.destruct_0 (Hook);
          btRigidBody.destruct_0 (Lamp);
          btDefaultMotionState.destruct_0 (Lamp_State);
