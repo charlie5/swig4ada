@@ -244,13 +244,16 @@ begin
             --  where the module knows it without them, or the other way about.
             --
             if        Self.swig_type_Map_of_c_type.contains (the_swig_Type)
+              or else Self.swig_type_Map_of_c_type.contains (+as_a_standard_String (to_String (the_swig_Type)))     -- 'std::basic_string<(char)>'.
               or else Self.known_in_another_template_Form (the_swig_Type) /= null
             then
                dlog ("swig_type_Map_of_c_type.contains " & the_swig_Type);
                declare
-                  the_base_Type : constant c_Type.view := (if Self.swig_type_Map_of_c_type.contains (the_swig_Type)
-                                                           then Self.swig_type_Map_of_c_type.Element (the_swig_Type)
-                                                           else Self.known_in_another_template_Form (the_swig_Type));
+                  the_base_Type : constant c_Type.view := (if    Self.swig_type_Map_of_c_type.contains (the_swig_Type)
+                                                           then  Self.swig_type_Map_of_c_type.Element (the_swig_Type)
+                                                           elsif Self.swig_type_Map_of_c_type.contains (+as_a_standard_String (to_String (the_swig_Type)))
+                                                           then  Self.swig_type_Map_of_c_type.Element (+as_a_standard_String (to_String (the_swig_Type)))
+                                                           else  Self.known_in_another_template_Form (the_swig_Type));
                begin
                   if "_" & the_type_Name = the_swig_Type
                   then

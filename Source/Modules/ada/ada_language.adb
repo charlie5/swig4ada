@@ -1903,6 +1903,44 @@ is
 
 
 
+   function as_a_standard_String (Name : in String) return String
+   --
+   --  The name with each instance of 'std::basic_string' of 'char' or 'wchar_t' given as the class which the module
+   --  knows it by, 'std::string' or 'std::wstring' ('std::basic_string<(wchar_t)>', with its traits and allocator or
+   --  without them, as pugixml names its strings). Until 2026-11-25 such a name was not known: pugixml's 'string_t' was
+   --  an opaque type, and 'as_utf8', which returns one by value, a function which returned it as a plain record.
+   --
+   is
+      type Spelling is record
+         Template : unbounded_String;
+         Class    : unbounded_String;
+      end record;
+
+      Spellings : constant array (1 .. 4) of Spelling
+        := [(+"std::basic_string<(char,std::char_traits<(char)>,std::allocator<(char)>)>",          +"std::string"),
+            (+"std::basic_string<(wchar_t,std::char_traits<(wchar_t)>,std::allocator<(wchar_t)>)>", +"std::wstring"),
+            (+"std::basic_string<(char)>",                                                          +"std::string"),
+            (+"std::basic_string<(wchar_t)>",                                                       +"std::wstring")];
+
+      Result : unbounded_String := +Name;
+   begin
+      for Each of Spellings
+      loop
+         loop
+            declare
+               First : constant Natural := ada.Strings.unbounded.Index (Result, to_String (Each.Template));
+            begin
+               exit when First = 0;
+               ada.Strings.unbounded.replace_Slice (Result, First, First + Length (Each.Template) - 1, to_String (Each.Class));
+            end;
+         end loop;
+      end loop;
+
+      return to_String (Result);
+   end as_a_standard_String;
+
+
+
    overriding
    function typedefHandler (Self : access Item;
                             N    : in     Node_Pointer) return C.int
@@ -2455,9 +2493,11 @@ is
       declare
          --  The type less the qualifiers of the result itself, which make no difference ('const Foo f ();'). Those within
          --  it are part of the type ('vector<shared_ptr<const Foo>>' is another type than one of 'Foo'). Until
-         --  2026-11-22 the type was looked up with its qualifiers, and a constant result was missed.
+         --  2026-11-22 the type was looked up with its qualifiers, and a constant result was missed. A standard string is
+         --  sought as the class which the module knows it by, where it is named as an instance of its template (pugixml's
+         --  'as_wide', of 'std::basic_string<wchar_t>'; see 'as_a_standard_String').
          --
-         Pad : constant doh_swigType := doh_swigType (to_Doh (without_leading_Qualifiers (+doh_Item (the_swig_Type))));
+         Pad : constant doh_swigType := doh_swigType (to_Doh (as_a_standard_String (without_leading_Qualifiers (+doh_Item (the_swig_Type)))));
       begin
          if        SwigType_isPointer          (SwigType_Pointer (Pad)) /= 0
            or else SwigType_isReference        (SwigType_Pointer (Pad)) /= 0
@@ -3057,6 +3097,18 @@ is
 
    exception
       when constraint_Error =>   -- No element in map.
+         --  It may name a standard string as an instance of its template (see 'as_a_standard_String').
+         --
+         declare
+            the_String : constant String := as_a_standard_String (+swig_Type);
+         begin
+            if         the_String /= String'(+swig_Type)
+              and then Self.swig_type_Map_of_c_type.contains (+the_String)
+            then
+               return Self.swig_type_Map_of_c_type.Element (+the_String);
+            end if;
+         end;
+
          --  The type may name a template instance with the default arguments of its template given.
          --
          declare
