@@ -14,6 +14,8 @@ with
      yamlcpp.string_conversion,
      yamlcpp.ints_conversion,
      yamlcpp.counts_conversion,
+     yamlcpp.IntList,
+     yamlcpp.list_conversion,
      ada.Strings.unbounded,
 
      swig.std_Strings,
@@ -314,6 +316,7 @@ begin
       Its_Text   : aliased std_String;
       Numbers    : aliased Ints  .Item;
       the_Counts : aliased Counts.Item;
+      the_List   : aliased yamlcpp.IntList.Item;
    begin
       Load (Text, Document'unchecked_Access);
 
@@ -349,6 +352,12 @@ begin
       check (counts_conversion.decode (List'unchecked_Access, the_Counts'unchecked_Access) = 0,
              "a sequence is not decoded into a map");
 
+      check (list_conversion.decode (List'unchecked_Access, the_List'unchecked_Access) /= 0,
+             "a sequence is decoded into a list, by a partial specialisation which names the allocator of the list");
+      check (yamlcpp.IntList.size (the_List) = 3 and yamlcpp.IntList.back (the_List).all = 3,
+             "which has its elements");
+
+      yamlcpp.IntList.destruct_0 (the_List);
       Counts.destruct_0 (the_Counts);
       Ints  .destruct_0 (Numbers);
       destruct (Its_Text);

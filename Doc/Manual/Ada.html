@@ -1051,7 +1051,8 @@ so is that of a vector (<tt>__gnu_cxx::__normal_iterator&lt;T*, std::vector&lt;T
 A library's own iterator is used through its operators, which the interface names
 (<tt>%rename (next) Iterator::operator++ ();</tt>, and the instances of
 <tt>operator==</tt> and <tt>operator!=</tt> in an <tt>%extend</tt>).
-A vector and a map have their allocator as a parameter of the template, with its default, so
+Each container (a vector, a list, a deque, a map, a set and their like) has its allocator as a
+parameter of the template, with its default, so
 that a partial specialisation of a library which names it
 (<tt>template &lt;typename T, typename A&gt; struct convert&lt;std::vector&lt;T, A&gt;&gt;</tt>)
 is instantiated for a vector which is named without it

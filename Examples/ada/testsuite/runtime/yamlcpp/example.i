@@ -9,6 +9,7 @@
 %include <std_pair.i>
 %include <std_iostream.i>
 %include <std_map.i>
+%include <std_list.i>
 
 %{
 #include <yaml-cpp/yaml.h>
@@ -124,6 +125,7 @@
 //
 %template (Ints)   std::vector<int>;
 %template (Counts) std::map<std::string, int>;
+%template (IntList) std::list<int>;
 
 %include <yaml-cpp/node/convert.h>
 
@@ -133,6 +135,7 @@
 %template (string_conversion) YAML::convert<std::string>;
 %template (ints_conversion)   YAML::convert<std::vector<int> >;
 %template (counts_conversion) YAML::convert<std::map<std::string, int> >;
+%template (list_conversion)   YAML::convert<std::list<int> >;
 
 //  A document which is not well formed is refused by an exception ('YAML::ParserException'), which the wrapper records.
 //  It is caught as the standard exception which it is derived from, whose 'throws' typemap ('std_except.i') records its
