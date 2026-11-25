@@ -1,3 +1,2 @@
-defs.h:302: Warning 861: Unable to bind the variable 'ai_epsilon', which has no symbol outside its file, being 'static' or constant, and no value which can be worked out.
 Importer.hpp:524: Warning 861: Unable to bind the type 'std::exception_ptr', which is not known.
 Importer.hpp:524: Warning 861: Unable to bind the function 'GetException' of class 'Importer', as one of its types is not known.
