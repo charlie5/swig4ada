@@ -2364,6 +2364,20 @@ is
 
 
 
+   function without_all_Qualifiers (swig_Type : in String) return String
+   --
+   --  The swig type with each qualifier taken off but those within the arguments of a template, as a type is entered
+   --  ('strip_all_qualifiers' of 'swigg.Utility', which 'register' applies).
+   --
+   is
+      the_Type : doh_swigType := doh_swigType (doh_Copy (doh_Item (to_Doh (swig_Type))));
+   begin
+      swigg.Utility.strip_all_qualifiers (the_Type);
+      return +the_Type;
+   end without_all_Qualifiers;
+
+
+
    function without_leading_Qualifiers (swig_Type : in String) return String
    --
    --  The swig type less the qualifiers which it begins with ('q(const).Foo' is 'Foo'), and no others.
@@ -3230,6 +3244,18 @@ is
               and then Self.known_in_another_template_Form (+Resolved) /= null
             then
                return Self.known_in_another_template_Form (+Resolved);
+
+            --  A qualifier within it, as a typedef of a template instance whose argument is a pointer gives (Bullet's
+            --  'btAlignedAllocator<const T*, 16>::reference', which is 'r.p.q(const).T'), makes no other type of it
+            --  here, as a type is entered with its qualifiers taken off ('register'). (Until 2026-11-25 such a typedef
+            --  was not known, and the functions of the allocators which used one were left out.)
+            --
+            elsif      Resolved /= String'(+swig_Type)
+              and then Self.swig_type_Map_of_c_type.contains (+without_all_Qualifiers (Resolved))
+            then
+               the_Type := Self.swig_type_Map_of_c_type.Element (+without_all_Qualifiers (Resolved));
+               Self.swig_type_Map_of_c_type.insert (+String'(+swig_Type), the_Type);     -- A later step may seek it by this name (the
+               return the_Type;                                                         -- resolution of the function pointers).
             end if;
          end;
 
