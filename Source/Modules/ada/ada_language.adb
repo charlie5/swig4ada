@@ -3331,6 +3331,33 @@ is
             end if;
          end;
 
+         --  A pointer of three levels or more, as the core resolves it ('Element ***', a pointer to the 'const_pointer'
+         --  of Bullet's 'btAlignedAllocator<btCollisionObject*, 16>'), is an address, as a 'void*' is: only 'char' has a
+         --  third level of its own. (Until 2026-11-25 such a type was not known, and what used it was left out.)
+         --
+         declare
+            the_Name : constant String  := without_all_Qualifiers (+doh_Item (SwigType_typedef_resolve_all (SwigType_Pointer (swig_Type))));
+            Levels   :          Natural := 0;
+            Place    :          Positive := the_Name'First;
+         begin
+            while      Place + 1 <= the_Name'Last
+              and then the_Name (Place)     in 'p' | 'r' | 'z'
+              and then the_Name (Place + 1) = '.'
+            loop
+               Levels := Levels + 1;
+               Place  := Place  + 2;
+            end loop;
+
+            if         the_Type = null
+              and then Levels >= 3
+              and then Self.swig_type_Map_of_c_type.contains (+"p.void")
+            then
+               the_Type := Self.swig_type_Map_of_c_type.Element (+"p.void");
+               Self.swig_type_Map_of_c_type.insert (+String'(+swig_Type), the_Type);     -- As above.
+               return the_Type;
+            end if;
+         end;
+
          if the_Type = null
          then   -- C type has not yet been declared, so create it as an 'unknown' C type.
             the_Type := c_type.new_unknown_Type;        -- 'Unknown' type is a mutable variant record, so it can be morphed.
