@@ -160,6 +160,7 @@ is
      renames cpp_Mangling.Symbol;
    function  variable_Suffix (swig_Type : in String) return String;
    function  character_Value (Position  : in String) return String;
+   function  enum_Value      (Self : access Item;   of_Type : in c_Type.view;   value_Text : in String) return String;
    function  real_Value      (Self : access Item;   value_Text : in String;   Name : in unbounded_String;   of_Type : in c_Type.view) return String;
    function  without_leading_Qualifiers (swig_Type : in String) return String;
    function  smart_Pointer_Words (type_Name : in String) return Natural;
@@ -605,10 +606,13 @@ is
             new_Variable.my_Type := Self.demand_c_Type_for (doh_swigType (to_Doh (to_String (the_swig_type_Name))));     -- An unknown type is pruned later.
          end;
 
-         if Self.in_cpp_Mode
+         --  A constant with a value ('const int Size = 2;') has no symbol in C++, so it is given its value, as is one
+         --  which is 'static' in C ('static const int Size = 2;'; until 2026-11-26 it was left out). Any other constant
+         --  of C has a symbol, and is imported.
+         --
+         if        Self.in_cpp_Mode
+           or else has_no_Symbol
          then
-            --  A constant with a value ('const int Size = 2;') has no symbol in C++, so it is given its value.
-            --
             if         is_Constant
               and then value_Text /= ""
               and then new_Variable.array_Bounds.is_Empty
@@ -653,6 +657,18 @@ is
             elsif      is_Constant
               and then value_Text /= ""
               and then new_Variable.array_Bounds.is_Empty
+              and then c_Type."=" (new_Variable.my_Type.c_type_Kind, c_Type.Enum)
+            then   -- (Until 2026-11-26 such a constant was left out, in C and in C++, but for a static member.)
+               begin
+                  new_Variable.Value := +enum_Value (Self, new_Variable.my_Type, value_Text);
+               exception
+                  when others =>
+                     null;
+               end;
+
+            elsif      is_Constant
+              and then value_Text /= ""
+              and then new_Variable.array_Bounds.is_Empty
               and then new_Variable.my_Type.is_a_Real
             then
                begin
@@ -675,6 +691,10 @@ is
                new_Variable.is_empty_String := Attribute (the_Node, "stringval") = "";
             end if;
 
+         end if;
+
+         if Self.in_cpp_Mode
+         then
             --  A variable which is 'static', or constant and not 'extern', has no symbol outside its own file,
             --  so it cannot be imported. Where it has no value which is worked out, it is left out.
             --
@@ -716,10 +736,13 @@ is
             end if;
 
          elsif has_no_Symbol
-         then   -- In C a constant has a symbol, and a 'static' variable has none.
-            warn (not_Bound, "Unable to bind the variable '" & to_String (the_Name) & "', which is 'static' and so has no symbol outside its file.");
-            unindent_Log;
-            return SWIG_OK;
+         then   -- In C a constant has a symbol, and a 'static' variable has none, so it is left out unless it has a value.
+            if new_Variable.Value = ""
+            then
+               warn (not_Bound, "Unable to bind the variable '" & to_String (the_Name) & "', which is 'static' and so has no symbol outside its file, and no value which can be worked out.");
+               unindent_Log;
+               return SWIG_OK;
+            end if;
 
          elsif full_Name /= to_String (the_Name)
          then
@@ -1664,35 +1687,8 @@ is
                                                                                                           Self.current_class_namespace_Prefix)));
 
                elsif c_Type."=" (new_Variable.my_Type.c_type_Kind, c_Type.Enum)
-               then   -- A value of an enumeration is given by its number ('static const Colour first = Red;'), where that is not negative.
-                  declare
-                     --  The value is most often a literal of the enumeration, which may be named with its scope ('Counter::Down').
-                     --
-                     Colons      : constant Natural := ada.Strings.fixed.Index (value_Text, "::", Going => ada.Strings.Backward);
-                     the_Literal : constant String  := (if Colons = 0 then value_Text else value_Text (Colons + 2 .. value_Text'Last));
-                     is_Found    :          Boolean := False;
-                  begin
-                     for Each of new_Variable.my_Type.Literals
-                     loop
-                        if Each.Name = the_Literal
-                        then
-                           new_Variable.Value := +Image (Each.Value);
-                           is_Found           := True;
-                        end if;
-                     end loop;
-
-                     if not is_Found
-                     then
-                        new_Variable.Value := +Image (resolved_c_integer_Expression (Self, +value_Text,
-                                                                                           Self.integer_symbol_value_Map,
-                                                                                           Self.current_class_namespace_Prefix));
-                     end if;
-
-                     if not (for all Each of to_String (new_Variable.Value) => Each in '0' .. '9')
-                     then   -- A negative number is not one which is given by its position, so the constant is imported.
-                        new_Variable.Value := null_unbounded_String;
-                     end if;
-                  end;
+               then
+                  new_Variable.Value := +enum_Value (Self, new_Variable.my_Type, value_Text);
 
                elsif new_Variable.my_Type.is_a_Real
                then
@@ -2490,6 +2486,45 @@ is
    begin
       return "interfaces.c.char'Val (" & ada.Strings.fixed.Trim (the_Position'Image, ada.Strings.Left) & ")";
    end character_Value;
+
+
+
+   function enum_Value (Self : access Item;   of_Type : in c_Type.view;   value_Text : in String) return String
+   --
+   --  The value of a constant of an enumeration, given by its number ('static const Colour first = Red;'), where that
+   --  is not negative, as one which is negative is not given by its position; otherwise "". The value is most often a
+   --  literal of the enumeration, which may be named with its scope ('Counter::Down'). Raises where it is neither a
+   --  literal nor an expression which can be worked out.
+   --
+   is
+      Colons      : constant Natural := ada.Strings.fixed.Index (value_Text, "::", Going => ada.Strings.Backward);
+      the_Literal : constant String  := (if Colons = 0 then value_Text else value_Text (Colons + 2 .. value_Text'Last));
+      the_Value   : unbounded_String;
+      is_Found    : Boolean          := False;
+   begin
+      for Each of of_Type.Literals
+      loop
+         if Each.Name = the_Literal
+         then
+            the_Value := +Image (Each.Value);
+            is_Found  := True;
+         end if;
+      end loop;
+
+      if not is_Found
+      then
+         the_Value := +Image (resolved_c_integer_Expression (Self, +value_Text,
+                                                                  Self.integer_symbol_value_Map,
+                                                                  Self.current_class_namespace_Prefix));
+      end if;
+
+      if not (for all Each of to_String (the_Value) => Each in '0' .. '9')
+      then
+         return "";
+      end if;
+
+      return to_String (the_Value);
+   end enum_Value;
 
 
 
