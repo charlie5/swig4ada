@@ -387,6 +387,10 @@ A constant whose value cannot be worked out, and cannot be written as an Ada
 expression (one which uses <tt>?:</tt>, say), is left out with a warning.
 A cast does not stand in the way: <tt>(size_t) 10</tt>, <tt>size_t (10)</tt> and
 <tt>static_cast&lt;size_t&gt; (10)</tt> are each 10.
+A real number is worked out likewise, from numbers and the constants which are known,
+with <tt>+</tt>, <tt>-</tt>, <tt>*</tt>, <tt>/</tt> and brackets, as C works it out
+(<tt>7 / 2 + 0.25</tt> is 3.25), so <tt>const real later = eps * 2;</tt> is a constant
+of twice the value of <tt>eps</tt>.
 </p>
 
 <p>

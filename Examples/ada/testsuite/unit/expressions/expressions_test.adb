@@ -168,5 +168,53 @@ begin
       check (is_Refused ("1.5 + 2"),                                              "and a real number");
    end refusals;
 
+   reals :
+   declare
+      the_Reals    : real_value_Maps.Map;
+      the_Integers : symbol_value_Maps.Map;
+
+      function real_Value (Expression : in String;   Namespace : in String := "") return Long_Float
+      is (real_Value_of (Expression, the_Reals, the_Integers, +Namespace));
+
+      function is_about (Value : in Long_Float;   Expected : in Long_Float) return Boolean
+      is (abs (Value - Expected) <= abs Expected * 1.0e-15);
+
+      function is_refused_as_Real (Expression : in String) return Boolean
+      is
+         Unused : Long_Float;
+      begin
+         Unused := real_Value (Expression);
+         return False;
+
+      exception
+         when Constraint_Error =>
+            return True;
+      end is_refused_as_Real;
+
+   begin
+      the_Reals   .insert (+"EPS",   1.0e-6);
+      the_Integers.insert (+"COUNT", discrete.to_Integer (12));
+
+      --  The values are those which GCC gives.
+      --
+      check (is_about (real_Value ("0.5"),                          0.5),           "a real number is itself");
+      check (is_about (real_Value ("(float) 2.5f"),                 2.5),           "less its cast and its suffix");
+      check (is_about (real_Value ("static_cast<double> (1e-6)"),   1.0e-6),        "and a cast which is named");
+      check (is_about (real_Value ("1.0 / 3"),                      1.0 / 3.0),     "a division of a real by an integer is real");
+      check (is_about (real_Value ("7 / 2 + 0.25"),                 3.25),          "and one of two integers truncates");
+      check (is_about (real_Value ("-(2.5 * 2)"),                  -5.0),           "a sign applies to its brackets");
+      check (is_about (real_Value ("1 - 2 + 3.0"),                  2.0),           "operators of a level are applied from the left");
+      check (is_about (real_Value ("2.0 + 3 * 4"),                 14.0),           "and a product before a sum");
+      check (is_about (real_Value ("EPS * 2"),                      2.0e-6),        "a known real stands for its value");
+      check (is_about (real_Value ("COUNT / 5.0"),                  2.4),           "as does a known integer");
+      check (is_about (real_Value ("Shape::EPS + 1"),               1.000001),      "a name with its scope is sought by its last part");
+
+      check (is_refused_as_Real ("UNKNOWN * 2"),                                    "a name which is not known is refused");
+      check (is_refused_as_Real ("pow (2.0, 3)"),                                   "as is the call of a function");
+      check (is_refused_as_Real ("0x10 * 1.5"),                                     "and a number which is not decimal");
+      check (is_refused_as_Real ("1.0 / 0"),                                        "and a division by zero");
+      check (is_refused_as_Real ("(1.0 + 2"),                                       "and a bracket which is not closed");
+   end reals;
+
    finish;
 end expressions_Test;
