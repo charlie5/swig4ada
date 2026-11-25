@@ -58,14 +58,41 @@ template <class T> struct swig_ada_is_constructed <T, true>
 '''
 
 
-def cpp_names(Wrapper):
+def cpp_names(Wrapper, Case):
     """The C++ name of each class of a wrapper, by the name which it is bound by: the wrapper of the
-       destructor of a class 'X' is 'Ada_delete_<name>', and declares its argument as 'X *arg1'."""
+       destructor of a class 'X' is 'Ada_delete_<name>', and declares its argument as 'X *arg1'. A class whose
+       destructor is not public, or is deleted, has no such function: it is named by the functions of the wrapper
+       which its spec imports and which take an object as their first argument ('X *arg1 = 0 ;', set from
+       'a_arg1'), the class which most of them take, as a static function may take another (as './check_vtables'
+       does, 2026-11-25)."""
     Text  = open(Wrapper, errors="replace").read()
     Names = {}
 
     for Match in re.finditer(r"Ada_delete_(\w+)\s*\(\s*void \* a_arg1\s*\)\s*\{\s*(.*?)\s*\*arg1 = ", Text, re.S):
         Names[Match.group(1).lower()] = Match.group(2).strip()
+
+    Functions = {}
+
+    for Match in re.finditer(r"\bAda_(\w+)\s*\(\s*void \* a_arg1\b[^{]*\{(.*?)\n\}", Text, re.S):
+        Self = re.search(r"\n\s*([\w:<>,() ]+?)\s*\*arg1 = 0 ;.*?\barg1 = \(\1 \*\)a_arg1;", Match.group(2), re.S)
+
+        if Self:
+            Functions[Match.group(1)] = Self.group(1).strip()
+
+    for Each in os.listdir(Generated):
+        if not Each.endswith(".ads") or (is_Suite and not Each.lower().startswith(Case.lower() + "-")):
+            continue
+
+        Bound = Each[:-len(".ads")].split("-", 1)[-1].lower() if "-" in Each else None
+
+        if not Bound or "-" in Bound or Bound in Names:
+            continue
+
+        Spec  = open(os.path.join(Generated, Each), errors="replace").read()
+        Taken = [Functions[Symbol] for Symbol in re.findall(r'"Ada_(\w+)"', Spec) if Symbol in Functions]
+
+        if Taken:
+            Names[Bound] = max(set(Taken), key=Taken.count)
 
     return Names
 
@@ -86,7 +113,7 @@ def check(Wrapper):
     """Compiles the assertions of one case. Gives the classes which were asked of, those of which the compiler
        says otherwise than the binding, and whether the compiler could answer at all."""
     Case  = os.path.basename(Wrapper)[:-len("_wrap.cxx")]
-    Names = cpp_names(Wrapper)
+    Names = cpp_names(Wrapper, Case)
     Asked = []
     Lines = [f'#include "{Wrapper}"', Traits]
 
