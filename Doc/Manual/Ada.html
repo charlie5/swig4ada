@@ -1037,7 +1037,11 @@ whether a header names one by its typedef (<tt>std::ostream</tt>) or as the inst
 template (<tt>std::basic_ostream&lt;char, std::char_traits&lt;char&gt; &gt;</tt>).
 The iterator of a map (<tt>std::map&lt;K, T&gt;::iterator</tt>) is a class of the layout which
 GNU libstdc++ gives it, which must be named with <tt>%template</tt> where a header uses it
-(<tt>%template (Iterator) std::_Rb_tree_iterator&lt;std::pair&lt;const K, T&gt; &gt;;</tt>).
+(<tt>%template (Iterator) std::_Rb_tree_iterator&lt;std::pair&lt;const K, T&gt; &gt;;</tt>), and
+so is that of a vector (<tt>__gnu_cxx::__normal_iterator&lt;T*, std::vector&lt;T&gt; &gt;</tt>).
+A library's own iterator is used through its operators, which the interface names
+(<tt>%rename (next) Iterator::operator++ ();</tt>, and the instances of
+<tt>operator==</tt> and <tt>operator!=</tt> in an <tt>%extend</tt>).
 </p>
 
 <p>

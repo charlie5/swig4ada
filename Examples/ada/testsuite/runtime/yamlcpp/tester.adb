@@ -4,6 +4,9 @@ with
      yamlcpp.Nodes,
      yamlcpp.Mark,
      yamlcpp.Emitter,
+     yamlcpp.const_value_iterator,
+     yamlcpp.iterator_value,
+     ada.Strings.unbounded,
 
      swig.std_Strings,
      swig.Exceptions,
@@ -106,6 +109,75 @@ begin
       Node.push_back (List, Four'unchecked_Access);
       Node.child (Document, List_Key'unchecked_Access, Again'unchecked_Access);
       check (Node.size (Again) = 4,                  "a value is appended to a sequence, which is a part of its document");
+
+      iterating :
+      declare
+         --  A sequence is walked by its iterators, which C++ makes and Ada declares, and the elements are added up.
+         --  The key of each element of a map is reached through the pair of nodes of which an 'iterator_value' is
+         --  made.
+         --
+         use ada.Strings.unbounded;
+         use type const_value_iterator.Pointer;
+
+         First, Last : aliased const_value_iterator.Item;     -- Of the sequence.
+         Key,   Done : aliased const_value_iterator.Item;     -- Of the map. (An iterator which is destructed is not used again:
+                                                             -- 'the_begin' replaces the object which it is given.)
+         Same        :         const_value_iterator.Pointer;
+         Sum         :         interfaces.C.int := 0;
+         Count       :         Natural          := 0;
+         Keys        :         unbounded_String;
+      begin
+         Node.the_begin (Again, First'unchecked_Access);
+         Node.a_end     (Again, Last 'unchecked_Access);
+
+         while const_value_iterator.differs_from (First, Last'unchecked_Access) /= 0
+         loop
+            declare
+               Element : aliased iterator_value.Item;
+            begin
+               const_value_iterator.current (First, Element'unchecked_Access);
+               Sum   := Sum + Node.as_int (Element.Node);
+               Count := Count + 1;
+               iterator_value.destruct_0 (Element);
+            end;
+
+            Same := const_value_iterator.next (First);
+
+            if Count = 1
+            then
+               check (Same = First'unchecked_Access, "the iterator advances, and gives itself back");
+            end if;
+         end loop;
+
+         check (Count = 4 and Sum = 1 + 2 + 3 + 4,   "a sequence is walked by its iterators, which Ada declares");
+         check (const_value_iterator.same_as (First, Last'unchecked_Access) /= 0,
+                "until the first is the same as the last");
+
+         const_value_iterator.destruct_0 (Last);
+         const_value_iterator.destruct_0 (First);
+
+         Node.the_begin (Document, Key 'unchecked_Access);
+         Node.a_end     (Document, Done'unchecked_Access);
+
+         while const_value_iterator.differs_from (Key, Done'unchecked_Access) /= 0
+         loop
+            declare
+               Element : aliased iterator_value.Item;
+            begin
+               const_value_iterator.current (Key, Element'unchecked_Access);
+               Node.as_string (Element.key_value.first, Its_Text'unchecked_Access);
+               append (Keys, to_Ada (Its_Text) & " ");
+               iterator_value.destruct_0 (Element);
+            end;
+
+            Same := const_value_iterator.next (Key);
+         end loop;
+
+         check (to_String (Keys) = "name list pi ",  "a map is walked, and the key of each element read: " & to_String (Keys));
+
+         const_value_iterator.destruct_0 (Done);
+         const_value_iterator.destruct_0 (Key);
+      end iterating;
 
       assigning_through_an_Element :
       declare

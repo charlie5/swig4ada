@@ -6,6 +6,7 @@
 %include <std_string.i>
 %include <std_except.i>
 %include <std_vector.i>
+%include <std_pair.i>
 %include <std_iostream.i>
 
 %{
@@ -70,6 +71,39 @@
 //  The documents which 'LoadAll' gives.
 //
 %template (Nodes) std::vector<YAML::Node>;
+
+//  The iterators of a node ('begin' and 'end', of which the 'const' ones are kept), from the headers of yaml-cpp's
+//  implementation, which declare them: an iterator holds a 'node_iterator' (the iterators of the vectors of the nodes
+//  of a sequence and a map, as GNU libstdc++ has them, of 'std_vector.i') and the shared pointer to the memory of its
+//  document, and gives an 'iterator_value', which is a node and a pair of nodes (the key and the value of an element of
+//  a map). Its operators are named: '++' is 'next', '*' is 'current', and the instances of the templates '==' and '!='
+//  for an iterator of its own kind are 'same_as' and 'differs_from'.
+//
+%template (key_value)            std::pair<YAML::Node, YAML::Node>;
+
+%rename (next)    YAML::detail::iterator_base::operator++ ();
+%rename (current) YAML::detail::iterator_base::operator* () const;
+
+%include <yaml-cpp/node/detail/iterator_fwd.h>
+%include <yaml-cpp/node/detail/node_iterator.h>
+%include <yaml-cpp/node/detail/iterator.h>
+%include <yaml-cpp/node/iterator.h>
+
+%template (node_ptr_pair)        std::pair<YAML::detail::node*, YAML::detail::node*>;
+%template (node_seq)             std::vector<YAML::detail::node*>;
+%template (node_map)             std::vector<std::pair<YAML::detail::node*, YAML::detail::node*> >;
+%template (node_seq_iterator)    __gnu_cxx::__normal_iterator<YAML::detail::node**, std::vector<YAML::detail::node*> >;
+%template (node_map_iterator)    __gnu_cxx::__normal_iterator<std::pair<YAML::detail::node*, YAML::detail::node*>*,
+                                                              std::vector<std::pair<YAML::detail::node*, YAML::detail::node*> > >;
+%template (node_iterator_types)  YAML::detail::node_iterator_type<YAML::detail::node>;
+%template (node_iterator)        YAML::detail::node_iterator_base<YAML::detail::node>;
+%template (value_iterator)       YAML::detail::iterator_base<YAML::detail::iterator_value>;
+%template (const_value_iterator) YAML::detail::iterator_base<const YAML::detail::iterator_value>;
+
+%extend YAML::detail::iterator_base<const YAML::detail::iterator_value> {
+  %template (same_as)      operator==<const YAML::detail::iterator_value>;
+  %template (differs_from) operator!=<const YAML::detail::iterator_value>;
+}
 
 //  A document which is not well formed is refused by an exception ('YAML::ParserException'), which the wrapper records.
 //  It is caught as the standard exception which it is derived from, whose 'throws' typemap ('std_except.i') records its
