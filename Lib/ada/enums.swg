@@ -13,12 +13,14 @@
 
 
 
-%typemap (in)                           const enum SWIGTYPE & ($*1_ltype  temp)
-%{ 
-   temp = *($1_ltype)$input; 
-   $1 = &temp; 
-//   temp = ($*1_ltype)$input; 
-//   $1 = &temp; 
+//  The reference is to the object of the caller, which Ada passes by pointer, as for a number (an enumeration of
+//  convention C has the size of an 'int', or of the type which it names, as in C++). Until 2026-11-26 it was to a copy
+//  of it in the wrapper, so that a function which returns the reference which it is given returned the address of
+//  that copy, which was gone ('director_enum').
+//
+%typemap (in)                           const enum SWIGTYPE &
+%{
+   $1 = ($1_ltype) $input;
 %}
 
 

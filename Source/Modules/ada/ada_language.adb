@@ -824,9 +824,22 @@ is
          --  becomes the enumeration, as one which is used ahead of its class becomes the class. (Until 2026-11-25 it
          --  stayed not known, as a swig type is registered once, and the member was left out.)
          --
+         --  The type is sought as 'register' enters it, with 'enum ' taken off ('enum ForwardEnum2' is 'ForwardEnum2'): an
+         --  enumeration of C which is declared ahead, and whose declaration the core gives after a function which uses it,
+         --  stayed not known until 2026-11-26 ('enum_forward').
+         --
          declare
             use type c_Type.a_c_type_Kind;
-            Key : constant unbounded_String := +doh_Item (the_doh_swig_Type);
+
+            function plain_Key return unbounded_String
+            is
+               the_Key : doh_Item := doh_Copy (doh_Item (the_doh_swig_Type));
+            begin
+               swigg.Utility.strip_all_qualifiers (the_Key);
+               return +the_Key;
+            end plain_Key;
+
+            Key : constant unbounded_String := plain_Key;
          begin
             if         Self.swig_type_Map_of_c_type.contains (Key)
               and then Self.swig_type_Map_of_c_type.Element  (Key).c_type_Kind = c_Type.Unknown
@@ -1848,6 +1861,11 @@ is
 
          declare
             class_Name : constant unbounded_String := +used_Name (used_Name'First .. Colons - 1);
+
+            --  The base may be named through an alias template ('using XIdentity<X>::m;', where 'XIdentity<T>' is 'T'),
+            --  which the core resolves. (Until 2026-11-26 such a declaration was passed over.)
+            --
+            Resolved : constant unbounded_String := +String'(+doh_Item (SwigType_typedef_resolve_all (SwigType_Pointer (to_Doh (to_String (class_Name))))));
          begin
             if Self.swig_type_Map_of_c_type.contains (class_Name)
             then
@@ -1856,6 +1874,10 @@ is
             elsif Self.name_Map_of_c_type.contains (class_Name)
             then
                return Self.name_Map_of_c_type.Element (class_Name);
+
+            elsif Self.swig_type_Map_of_c_type.contains (Resolved)
+            then
+               return Self.swig_type_Map_of_c_type.Element (Resolved);
             else
                return null;
             end if;
@@ -1899,6 +1921,37 @@ is
         or else Self.getCurrentClass = null
         or else Attribute (the_Node, "access") in "private" | "protected"
       then
+         return SWIG_OK;
+      end if;
+
+      --  An inheriting constructor ('using BaseClass::BaseClass;') gives the class a constructor for each of those of the
+      --  base, which the core makes, named after the class, as the children of the declaration. Each is handed on as the
+      --  core's own handler does, wherever the base is, as a constructor is one of the class itself. (Until 2026-11-26
+      --  only a function was followed, and such a class had no constructor, 'cpp11_inheriting_constructors'.) The flag
+      --  is read as the core's 'GetFlag' reads it, "0" being false, as the core sets it so where the declaration names
+      --  a function of one base which has the name of another base ('using First::Second;').
+      --
+      if Attribute (the_Node, "usingctor") not in "" | "0"
+      then
+         the_Child := first_Child (the_Node);
+
+         while the_Child /= null
+         loop
+            if         Attribute (the_Child, "nodeType") = "constructor"
+              and then Attribute (the_Child, "feature:ignore") = ""
+            then
+               declare
+                  the_Copy : constant DOH_Pointer := doh_Copy (DOH_Pointer (the_Child));
+                  Unused   : C.int with Unreferenced;
+               begin
+                  Unused := DohSetattr (the_Copy, DOH_Pointer (to_Doh ("parentNode")), DOH_Pointer (Self.getCurrentClass));
+                  Status := Self.emit_one (Node_Pointer (the_Copy));
+               end;
+            end if;
+
+            the_Child := next_Sibling (the_Child);
+         end loop;
+
          return SWIG_OK;
       end if;
 
