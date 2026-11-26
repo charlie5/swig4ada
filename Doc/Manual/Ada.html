@@ -1018,10 +1018,17 @@ each called through the wrapper, as their places among those of the base are not
 For the standard exceptions, include <tt>std_except.i</tt>, which declares them with the
 shape of GNU libstdc++, so that a class derived from one is laid out and dispatches as any
 other.
-An operator is a function with a name: <tt>operator-&gt;</tt> is <tt>dereference</tt>,
-<tt>operator()</tt> is <tt>Functor</tt>, and where the interface file renames the others as
-upstream's examples do, <tt>operator+</tt> is <tt>Plus</tt> and <tt>operator==</tt> is
-<tt>EqualEqual</tt>.
+An operator is a function with a name: <tt>operator-&gt;</tt> is <tt>dereference</tt>, and
+another has the name which the interface file gives it, as upstream's examples give
+<tt>operator+</tt> the name <tt>Plus</tt> and <tt>operator()</tt> the name <tt>Functor</tt>
+(<tt>%rename(Functor) operator ();</tt>); one which is given no name is left out, with
+warning 503 (<tt>std_function.i</tt> names the <tt>operator()</tt> of <tt>std::function</tt>
+<tt>call</tt>).
+A class with an <tt>operator-&gt;</tt> is a smart pointer, and is given the member
+functions and the member variables of the class which it points to, called and reached
+through it: a member variable <tt>x</tt> is read by <tt>x (Self)</tt> and set by
+<tt>set_x (Self, ...)</tt>, the second where the smart pointer gives a pointer which is not
+constant.
 One which is a friend of its class is a function of <tt>shapes.Binding</tt> with both
 operands as parameters, and one which returns an object gives it through <tt>Result</tt>.
 </p>

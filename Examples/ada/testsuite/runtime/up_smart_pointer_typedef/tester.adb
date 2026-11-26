@@ -10,8 +10,8 @@ with
 procedure Tester
 --
 --  The case 'smart_pointer_typedef' of upstream's suite, after its Python test: a smart pointer whose 'operator->'
---  returns a typedef of a pointer. The smart pointer is given the functions of the class which it points to; a member
---  variable of that class is reached through 'dereference'.
+--  returns a typedef of a pointer. The smart pointer is given the functions and the member variables of the class which
+--  it points to, as functions ('x' and 'set_x').
 --
 is
    use smart_pointer_typedef,
@@ -25,8 +25,9 @@ is
 begin
    check (Bar.dereference (the_Bar) = the_Foo'unchecked_Access,        "'operator->' gives the object which is pointed to");
 
-   Bar.dereference (the_Bar).x := 3;
-   check (Bar.getx (the_Bar) = 3,                                       "a function of that class, through the smart pointer");
+   Bar.set_x (the_Bar, 3);
+   check (Bar.getx (the_Bar) = 3,                                       "a member variable of that class is set through the smart pointer");
+   check (Bar.x (the_Bar) = 3 and the_Foo.x = 3,                        "and read, and is that of the object pointed to");
 
    Bar.dereference (the_Bar).x := 4;
    check (Foo.getx (Bar.dereference (the_Bar).all) = 4,                 "and through what 'operator->' gives");
