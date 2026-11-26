@@ -301,6 +301,11 @@ union YYSTYPE
      * cast applied to an unary operator.
      */
     int	    unary_arg_type;
+    /* swig4ada: the type code of an expression which is the name of a standard type ('unsigned', 'short'), or of one
+     * in brackets, which is then a cast where an operator with a unary form follows it ('(unsigned) -1' is parsed as
+     * '(unsigned)' less 1); 0 for any other.
+     */
+    int     standard_type;
     String *qualifier;
     String *refqualifier;
     String *bitfield;
@@ -355,7 +360,7 @@ union YYSTYPE
     Node       *last;
   } nodebuilder;
 
-#line 359 "CParse/parser.h"
+#line 364 "CParse/parser.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

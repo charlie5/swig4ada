@@ -1955,6 +1955,11 @@ static String *add_qualifier_to_declarator(SwigType *type, SwigType *qualifier) 
      * cast applied to an unary operator.
      */
     int	    unary_arg_type;
+    /* swig4ada: the type code of an expression which is the name of a standard type ('unsigned', 'short'), or of one
+     * in brackets, which is then a cast where an operator with a unary form follows it ('(unsigned) -1' is parsed as
+     * '(unsigned)' less 1); 0 for any other.
+     */
+    int     standard_type;
     String *qualifier;
     String *refqualifier;
     String *bitfield;
@@ -7526,6 +7531,13 @@ expr           : valexpr
 		 $$ = default_dtype;
 		 $$.val = $type;
 		 $$.type = T_UNKNOWN;
+		 {
+		   int code = SwigType_type($type);     /* swig4ada */
+		   if (code != T_USER && code != T_UNKNOWN && code != T_VOID && code != T_STRING && code != T_WSTRING
+		       && !SwigType_ispointer($type) && !SwigType_isreference($type) && !SwigType_isrvalue_reference($type)
+		       && !SwigType_isarray($type) && !SwigType_isqualifier($type) && !SwigType_isfunction($type))
+		     $$.standard_type = code;
+		 }
 		 /* Check if value is in scope */
 		 n = Swig_symbol_clookup($type,0);
 		 if (n) {
@@ -7797,6 +7809,7 @@ valexpr        : exprsimple
 		    $$.stringval = Copy($expr.stringval);
 		    $$.numval = Copy($expr.numval);
 		    $$.type = $expr.type;
+		    $$.standard_type = $expr.standard_type;     /* swig4ada */
 	       }
 
 /* A few common casting operations */
@@ -7950,13 +7963,25 @@ exprnum        :  NUM_INT
 
 exprcompound   : expr[lhs] PLUS expr[rhs] {
 		 $$ = default_dtype;
-		 $$.val = NewStringf("%s+%s", $lhs.val, $rhs.val);
-		 $$.type = promote($lhs.type,$rhs.type);
+		 if ($lhs.val && Char($lhs.val)[0] == '(' && $lhs.standard_type) {
+		   /* swig4ada: a standard type in brackets is a cast of the operand with its sign, of that type. */
+		   $$.val = NewStringf("%s +%s", $lhs.val, $rhs.val);
+		   $$.type = $lhs.standard_type;
+		 } else {
+		   $$.val = NewStringf("%s+%s", $lhs.val, $rhs.val);
+		   $$.type = promote($lhs.type,$rhs.type);
+		 }
 	       }
                | expr[lhs] MINUS expr[rhs] {
 		 $$ = default_dtype;
-		 $$.val = NewStringf("%s-%s", $lhs.val, $rhs.val);
-		 $$.type = promote($lhs.type,$rhs.type);
+		 if ($lhs.val && Char($lhs.val)[0] == '(' && $lhs.standard_type) {
+		   /* swig4ada: likewise. */
+		   $$.val = NewStringf("%s -%s", $lhs.val, $rhs.val);
+		   $$.type = $lhs.standard_type;
+		 } else {
+		   $$.val = NewStringf("%s-%s", $lhs.val, $rhs.val);
+		   $$.type = promote($lhs.type,$rhs.type);
+		 }
 	       }
                | expr[lhs] STAR expr[rhs] {
 		 $$ = default_dtype;

@@ -1409,6 +1409,7 @@ static int is_cast_type_word(String *word) {
 /* swig4ada: whether a token begins the operand of a cast. */
 static int begins_an_operand(int c) {
   return (c == SWIG_TOKEN_LPAREN) || (c == SWIG_TOKEN_MINUS) || (c == SWIG_TOKEN_PLUS)
+      || (c == SWIG_TOKEN_NOT) || (c == SWIG_TOKEN_LNOT)
       || (c >= SWIG_TOKEN_FLOAT && c <= SWIG_TOKEN_CHAR) || (c == SWIG_TOKEN_LONGLONG) || (c == SWIG_TOKEN_ULONGLONG);
 }
 

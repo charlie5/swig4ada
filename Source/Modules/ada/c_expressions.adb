@@ -420,7 +420,7 @@ is
                if Depth /= 0 then   return False;   end if;
             end;
          else
-            while Last <= Length (Pad) and then Element (Pad, Last) in '-' | '+' | '~' | ' '
+            while Last <= Length (Pad) and then Element (Pad, Last) in '-' | '+' | '~' | '!' | ' '
             loop
                Last := Last + 1;
             end loop;
@@ -582,7 +582,7 @@ is
                     and then the_Name (the_Name'First) in 'a' .. 'z' | 'A' .. 'Z' | '_'
                     and then (for all Char of the_Name => is_name_Character (Char) or else Char in ' ' | ':')
                     and then After /= 0
-                    and then (is_name_Character (Element (Pad, After)) or else Element (Pad, After) in '(' | ''' | '-' | '+' | '~')
+                    and then (is_name_Character (Element (Pad, After)) or else Element (Pad, After) in '(' | ''' | '-' | '+' | '~' | '!')
                     and then not known_Symbols.contains (+the_Name)
                     and then not known_Symbols.contains (Namespace & the_Name)
                     and then not follows_sizeof (Open)
@@ -591,7 +591,7 @@ is
                      then
                         null;
 
-                     elsif Element (Pad, After) in '-' | '+' | '~'
+                     elsif Element (Pad, After) in '-' | '+' | '~' | '!'
                      then   -- A name in brackets ahead of a sign need be no type ('(X) - 1'), and is left as it is.
                         From := Open + 1;
 
