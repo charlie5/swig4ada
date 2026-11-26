@@ -1,0 +1,2 @@
+namespace_virtual_method.i:13: Warning 861: Unable to bind the array type 'Foo*[]', as its element type is not known.
+namespace_virtual_method.i:13: Warning 861: Unable to bind the pointer type 'Foo**', as the type it points to is not known.

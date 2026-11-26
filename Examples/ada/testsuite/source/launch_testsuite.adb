@@ -1843,6 +1843,16 @@ begin
       run_Upstream ("cpp11_alternate_function_syntax");     -- Member functions with a trailing return type.
       run_Upstream ("template_default_arg");      -- Templates and functions with default arguments.
       run_Upstream ("cpp11_using_member_template");     -- A base whose member is a smart pointer of a type which is not bound, and which has no constructor in the binding.
+      run_Upstream ("abstract_typedef2");         -- A pure virtual function of a template whose result is a typedef of a pointer.
+      run_Upstream ("namespace_virtual_method");  -- A virtual function which takes a class of another namespace, declared and not defined.
+      run_Upstream ("operbool");                  -- A conversion operator to 'bool', renamed.
+      run_Upstream ("overload_copy");             -- A default constructor and a copy constructor.
+      run_Upstream ("template_static");           -- Static members of the instances of a class template, and a static member function template.
+      run_Upstream ("global_ns_arg");             -- A typedef named from the outermost scope.
+      run_Upstream ("using1");                    -- A typedef of a class, through an alias of a namespace and a using directive.
+      run_Upstream ("using2");                    -- And through a using declaration.
+      run_Upstream ("typedef_typedef");           -- A typemap of a typedef which is named through a typedef of its class.
+      run_Upstream ("fvirtual");                  -- An override and an overload of a virtual function, which is virtual too.
    end if;
 
 
