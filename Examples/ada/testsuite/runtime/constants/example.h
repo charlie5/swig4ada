@@ -27,6 +27,9 @@
 #define CAST_ALL_ONES    ((unsigned) -1)
 #define CAST_BYTE        ((unsigned char) 300)
 #define CAST_SIGNED_BYTE ((signed char) 200)
+#define CAST_SHORT_MINUS ((short) -1)                 /* Of the type of the cast, where the operand has a sign. */
+#define CAST_LONG_NOT    ((long) ~0)
+#define CAST_NOT_ZERO    ((unsigned) !0)
 
 typedef float real_t;
 
@@ -92,6 +95,9 @@ inline int         c_cast_truncated ()      { return CAST_TRUNCATED; }
 inline unsigned    c_cast_all_ones ()       { return CAST_ALL_ONES; }
 inline int         c_cast_byte ()           { return CAST_BYTE; }
 inline int         c_cast_signed_byte ()    { return CAST_SIGNED_BYTE; }
+inline short       c_cast_short_minus ()    { return CAST_SHORT_MINUS; }
+inline long        c_cast_long_not ()       { return CAST_LONG_NOT; }
+inline unsigned    c_cast_not_zero ()       { return CAST_NOT_ZERO; }
 inline float       c_real_more ()           { return real_more; }
 inline float       c_float_seventh ()       { return float_seventh; }
 inline unsigned    c_named_all_ones ()      { return named_all_ones; }

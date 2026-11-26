@@ -98,6 +98,8 @@ is
       (+"(unsigned char) 300",                                   44),
       (+"(signed char) 200",                                    -56),     -- into the range of a signed type,
       (+"(unsigned short) (65536 + 3)",                           3),     -- to an operand in brackets,
+      (+"(unsigned char) ~0",                                   255),     -- to an operand with a complement or a negation,
+      (+"(unsigned) !0",                                          1),
       (+"(bool) 7",                                               1),     -- and to 'bool', which is 0 or 1;
       (+"static_cast<unsigned> (-1)",                    4294967295),     -- in each of its forms,
       (+"short (70000) + 1",                                   4465),

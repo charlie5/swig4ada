@@ -133,6 +133,16 @@ begin
       check (int (call_short) = 4465 and int (call_short) = c_call_short,                 "and one in the form of a call");
       check (int (call_byte) = 44 and int (call_byte) = c_call_byte,                      "a cast to a typedef of an integer type");
       check (byte_sum = 46 and byte_sum = c_cast_byte_sum,                                "in brackets too");
+
+      --  A '#define' of a cast is of the type of the cast, where its operand has a sign ('Size is that of no named number).
+      --
+      check (CAST_ALL_ONES'Size    = interfaces.C.unsigned'Size,                         "a '#define' of a cast is of its type");
+      check (CAST_SHORT_MINUS = -1 and CAST_SHORT_MINUS = c_cast_short_minus
+             and CAST_SHORT_MINUS'Size = interfaces.C.short'Size,                         "and with a minus");
+      check (CAST_LONG_NOT = -1    and CAST_LONG_NOT = c_cast_long_not
+             and CAST_LONG_NOT'Size    = interfaces.C.long'Size,                          "and with a complement");
+      check (CAST_NOT_ZERO = 1     and CAST_NOT_ZERO = c_cast_not_zero
+             and CAST_NOT_ZERO'Size    = interfaces.C.unsigned'Size,                      "and with a negation");
    end integer_casts;
 
    character_enumerations :
