@@ -1713,6 +1713,25 @@ is
             end if;
 
             new_Variable.link_Symbol := +the_Symbol;
+
+            --  A static member of a template instance ('template<class T> int foo<T>::test = 0;') is made by C++ only where
+            --  something uses it, and nothing else of the wrapper does, so the wrapper refers to it: until 2026-11-26 a
+            --  program which used one did not link ('template_static'). One with a value in its class ('static const int
+            --  size = sizeof... (Args);') has no definition unless one is written outside the class, which the wrapper
+            --  cannot know of, and is not referred to.
+            --
+            if         SwigType_istemplate (SwigType_Pointer (get_Attribute (Self.getCurrentClass, "name"))) /= 0
+              and then value_Text = ""
+            then
+               declare
+                  cpp_Class : constant String := +doh_Item (SwigType_namestr (SwigType_Pointer (get_Attribute (Self.getCurrentClass, "name"))));
+                  Member    : constant String := Attribute (the_Node, "name");
+               begin
+                  print_to (DOH_Pointer (Self.f_Ada),   "extern ""C"" void * const "
+                                                      & to_String (wrapper_Symbol (Self, "swig_ada_keep_" & cpp_Class & "_" & Member))
+                                                      & " = (void *) &" & cpp_Class & "::" & Member & ";" & NL & NL);
+               end;
+            end if;
          end if;
 
          Self.Module_top.C.new_c_Variables.append (new_Variable);
