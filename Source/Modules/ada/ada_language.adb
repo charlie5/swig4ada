@@ -1579,6 +1579,31 @@ is
                Self.accessor_member_Name  := null_unbounded_String;
             end;
          end if;
+
+      --  A member variable of the class which a smart pointer points to is read and set through the smart pointer, by
+      --  functions of the wrapper which the core makes, as for the other languages ('b->x'): 'x (Self)' and 'set_x (Self,
+      --  ...)' of the smart pointer, the second where the smart pointer gives a pointer which is not constant. (Until
+      --  2026-11-26 such a member was passed over, and was reached only through 'dereference'.) A member of a class of the
+      --  standard library is not, nor one which a class inherits from such a class, as a library file declares those of
+      --  GNU libstdc++ for the layout alone ('_M_impl').
+      --
+      elsif      Self.is_smart_Pointer /= 0
+        and then Attribute (the_Node, "feature:extend") = ""
+        and then Self.current_Module = Self.Module_top'Access
+        and then (         parent_Node (the_Node) = null
+                  or else ada.Strings.fixed.Index (Attribute (parent_Node (the_Node), "name"), "std::") /= 1)
+      then
+         declare
+            Status : C.int with Unreferenced;
+         begin
+            Self.accessor_member_Name  := variable_Name;
+            Self.variable_wrapper_flag := True;
+
+            Status := swigMod.Language.item (Self.all).memberVariableHandler (the_Node);
+
+            Self.variable_wrapper_flag := False;
+            Self.accessor_member_Name  := null_unbounded_String;
+         end;
       end if;
 
       unindent_Log;
