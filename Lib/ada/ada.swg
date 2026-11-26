@@ -1174,6 +1174,13 @@
 
 
 
+// The function call operator, which has no name of its own, is 'call' ('Functor.call (the_Functor, 1)'), as Python's
+// library names it '__call__'. An interface file which renames it ('%rename(Functor) operator ();') gives it that name.
+
+%rename("call", "notmatch$template$templatetype"="cdecl") operator ();
+
+
+
 
 
 
