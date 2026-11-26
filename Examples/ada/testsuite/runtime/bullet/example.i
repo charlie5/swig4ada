@@ -20,12 +20,14 @@
 %include <LinearMath/btDefaultMotionState.h>
 //  The searches of Bullet's vector, and 'remove', which uses one, need the elements to be compared ('operator==' or
 //  'operator<'), which the elements of some of its instances cannot be (a 'btSolverBody'): C++ instantiates a member
-//  of a template only where it is used, and the wrapper uses each. They are left out of every instance.
+//  of a template only where it is used, and the wrapper uses each. They are left out of every instance, and so is the
+//  'operator()' of its comparator 'less', which is 'call' in Ada and compares by 'operator<'.
 //
 %ignore btAlignedObjectArray::findBinarySearch;
 %ignore btAlignedObjectArray::findLinearSearch;
 %ignore btAlignedObjectArray::findLinearSearch2;
 %ignore btAlignedObjectArray::remove;
+%ignore btAlignedObjectArray::less::operator();
 
 %include <LinearMath/btAlignedObjectArray.h>
 %include <LinearMath/btThreads.h>
