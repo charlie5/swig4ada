@@ -98,7 +98,10 @@ is
       (+"(unsigned char) 300",                                   44),
       (+"(signed char) 200",                                    -56),     -- into the range of a signed type,
       (+"(unsigned short) (65536 + 3)",                           3),     -- to an operand in brackets,
-      (+"(bool) 7",                                               1)      -- and to 'bool', which is 0 or 1.
+      (+"(bool) 7",                                               1),     -- and to 'bool', which is 0 or 1;
+      (+"static_cast<unsigned> (-1)",                    4294967295),     -- in each of its forms,
+      (+"short (70000) + 1",                                   4465),
+      (+"static_cast<signed char> (100 + 100)",                 -56)
         ];
 
    No_Symbols : symbol_value_Maps.Map;

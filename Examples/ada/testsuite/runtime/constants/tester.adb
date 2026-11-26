@@ -129,6 +129,10 @@ begin
       check (CAST_ALL_ONES = 4294967295 and CAST_ALL_ONES = c_cast_all_ones,                "-1 cast to 'unsigned' is the largest");
       check (int (CAST_BYTE) = 44 and int (CAST_BYTE) = c_cast_byte,                       "a cast to 'unsigned char' is modulo its size");
       check (int (CAST_SIGNED_BYTE) = -56 and int (CAST_SIGNED_BYTE) = c_cast_signed_byte, "and one to 'signed char' within its range");
+      check (named_all_ones = 4294967295 and named_all_ones = c_named_all_ones,            "a cast which is named");
+      check (int (call_short) = 4465 and int (call_short) = c_call_short,                 "and one in the form of a call");
+      check (int (call_byte) = 44 and int (call_byte) = c_call_byte,                      "a cast to a typedef of an integer type");
+      check (byte_sum = 46 and byte_sum = c_cast_byte_sum,                                "in brackets too");
    end integer_casts;
 
    character_enumerations :

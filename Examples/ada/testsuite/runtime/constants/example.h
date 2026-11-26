@@ -34,6 +34,14 @@ const real_t real_eps      = (real_t) 1e-6;
 const real_t real_more     = real_eps * 3;
 const float  float_seventh = 1.0f / 7 * 3.0f;
 
+const unsigned named_all_ones = static_cast<unsigned> (-1);     /* The other forms of a cast. */
+const short    call_short     = short (70000) + 1;
+
+typedef unsigned char byte_t;
+
+const byte_t   call_byte      = byte_t (300);                   /* Through a typedef. */
+const int      byte_sum       = (byte_t) 301 + 1;
+
 const int      limit   = 100;
 const double   epsilon = 0.25;
 
@@ -86,3 +94,7 @@ inline int         c_cast_byte ()           { return CAST_BYTE; }
 inline int         c_cast_signed_byte ()    { return CAST_SIGNED_BYTE; }
 inline float       c_real_more ()           { return real_more; }
 inline float       c_float_seventh ()       { return float_seventh; }
+inline unsigned    c_named_all_ones ()      { return named_all_ones; }
+inline int         c_call_short ()          { return call_short; }
+inline int         c_call_byte ()           { return call_byte; }
+inline int         c_cast_byte_sum ()       { return byte_sum; }
