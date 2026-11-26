@@ -1863,6 +1863,16 @@ begin
       run_Upstream ("abstract_typedef");          -- A pure virtual function defined, privately, through typedefs of its class and parameter.
       run_Upstream ("overload_rename");           -- Constructors with default arguments, one of them renamed.
       run_Upstream ("extend_template_ns");        -- Functions which '%extend' adds to an instance in a namespace.
+      run_Upstream ("copyctor");                  -- '%copyctor', beside a constructor from another class and an instance of a constructor template.
+      run_Upstream ("funcptr_cpp");               -- Constants which are pointers to functions of types with no typedef, called by C++.
+      run_Upstream ("smart_pointer_typedef");     -- A smart pointer whose 'operator->' returns a typedef of a pointer.
+      run_Upstream ("smart_pointer_multi");       -- Smart pointers which give others, by value and by reference.
+      run_Upstream ("pointer_reference");         -- A reference to a constant pointer, as a parameter and a result.
+      run_Upstream ("cpp17_nested_namespaces");   -- Classes and functions of nested namespaces, in the form of C++17 and the older.
+      run_Upstream ("cpp11_alias_templates");     -- Functions which return instances of alias templates.
+      run_Upstream ("template_extend2");          -- A function which '%extend' adds to each of two instances.
+      run_Upstream ("functors");                  -- Classes with an 'operator()', which has no name in Ada.
+      run_Upstream ("overload_extend");           -- Overloads which '%extend' adds, one in the place of a member.
    end if;
 
 
