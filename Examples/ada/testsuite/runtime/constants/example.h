@@ -39,6 +39,7 @@ const float  float_seventh = 1.0f / 7 * 3.0f;
 
 const unsigned named_all_ones = static_cast<unsigned> (-1);     /* The other forms of a cast. */
 const short    call_short     = short (70000) + 1;
+const unsigned call_unsigned  = unsigned (-1);                   /* Which the core writes 'unsigned int(-1)'. */
 
 typedef unsigned char byte_t;
 
@@ -102,5 +103,6 @@ inline float       c_real_more ()           { return real_more; }
 inline float       c_float_seventh ()       { return float_seventh; }
 inline unsigned    c_named_all_ones ()      { return named_all_ones; }
 inline int         c_call_short ()          { return call_short; }
+inline unsigned    c_call_unsigned ()       { return call_unsigned; }
 inline int         c_call_byte ()           { return call_byte; }
 inline int         c_cast_byte_sum ()       { return byte_sum; }

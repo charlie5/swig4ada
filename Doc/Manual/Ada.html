@@ -372,6 +372,9 @@ is an Ada constant with that value, which SWIG works out from the C expression:
 #define MAX_SIDES 12
 #define MASK      (0xF0 | (1 &lt;&lt; 2))
 #define NAME      "shapes"
+#define SCALE     2.5
+#define ALL_ONES  ((unsigned) -1)
+#define SEVENTH   ((float) 1.0 / 7)
 extern int shape_count;
 </pre></div>
 
@@ -380,20 +383,60 @@ MAX_SIDES   : constant := 12;
 MASK        : constant := 244;
 NAME        : aliased constant Interfaces.C.Strings.chars_ptr
             := Interfaces.C.Strings.New_String ("shapes");
+SCALE       : aliased constant Interfaces.C.double   := 2.5;
+ALL_ONES    : aliased constant Interfaces.C.unsigned := 4294967295;
+SEVENTH     : aliased constant Interfaces.C.C_float  := 1.428571492433548E-01;
 shape_count : aliased Interfaces.C.int;
 </pre></div>
 
 <p>
-A constant whose value cannot be worked out, and cannot be written as an Ada
-expression (one which uses <tt>?:</tt>, say), is left out with a warning.
-A cast does not stand in the way: <tt>(size_t) 10</tt>, <tt>size_t (10)</tt> and
-<tt>static_cast&lt;size_t&gt; (10)</tt> are each 10, and a cast to a standard type is
-applied as C applies it: <tt>(unsigned) -1</tt> is 4294967295, <tt>(int) 2.5 * 2</tt> is 4,
-and <tt>(float) 1.0 / 7</tt> is worked out in <tt>float</tt>.
-A real number is worked out likewise, from numbers and the constants which are known,
-with <tt>+</tt>, <tt>-</tt>, <tt>*</tt>, <tt>/</tt> and brackets, as C works it out
-(<tt>7 / 2 + 0.25</tt> is 3.25), so <tt>const real later = eps * 2;</tt> is a constant
-of twice the value of <tt>eps</tt>.
+A constant of type <tt>int</tt> is a named number, which may be used as any integer.
+A constant of any other type is a constant of the Ada type of its C type: of the type
+which is declared, for a <tt>const</tt> or a <tt>%constant</tt>, and for a <tt>#define</tt>
+of the type of its value, as C would give it (a cast gives its own type, so
+<tt>ALL_ONES</tt> is an <tt>unsigned</tt>, and a literal with the suffix <tt>f</tt> is a
+<tt>float</tt>).
+</p>
+
+<p>
+The value is worked out as C works it out, from numbers (decimal, octal, hexadecimal or
+binary), characters, <tt>sizeof</tt> a standard type, the constants which are known
+(those of the module, of the enumerations and of earlier <tt>#define</tt>s), and the
+operators of C, applied with C's precedence.
+A cast is applied as C applies it, in each of its forms: <tt>(unsigned) -1</tt>,
+<tt>static_cast&lt;unsigned&gt; (-1)</tt> and <tt>unsigned (-1)</tt> are each 4294967295,
+as a cast to an integer type is modulo the size of the type and within its range
+(<tt>(signed char) 200</tt> is -56), a cast to <tt>bool</tt> gives 0 or 1, and a cast of a
+real number to an integer type truncates it (<tt>(int) 2.5 * 2</tt> is 4).
+A typedef of the module is applied as the type which it names (with
+<tt>typedef unsigned char byte_t;</tt>, <tt>byte_t (300)</tt> is 44), and a cast to a
+type which is not known, such as an enumeration, leaves the value as it is.
+</p>
+
+<p>
+A real number is worked out likewise, with <tt>+</tt>, <tt>-</tt>, <tt>*</tt>, <tt>/</tt>
+and brackets, each operation in the type in which C works it out: of two integers in an
+integer, which truncates a division (<tt>7 / 2 + 0.25</tt> is 3.25), of a <tt>double</tt> in
+<tt>double</tt>, and otherwise, where it has a <tt>float</tt>, in <tt>float</tt>
+(<tt>1.0f / 7 * 3.0f</tt> is not the <tt>double</tt> <tt>1.0 / 7 * 3.0</tt> rounded to
+<tt>float</tt>, and SWIG gives the value which C gives).
+This is as C works it out on a machine whose <tt>FLT_EVAL_METHOD</tt> is 0, as x86-64 and
+AArch64 are.
+So <tt>const real later = eps * 2;</tt> is a constant of twice the value of <tt>eps</tt>.
+The value is written with the fewest digits, of 15, 16 or 17, which give back the
+<tt>double</tt> exactly, so a constant is the same number in Ada as in C.
+SWIG works the value out, and does not leave it to Ada as an expression, because Ada works
+out a static expression exactly and rounds it once, which need not give C's value.
+</p>
+
+<p>
+A constant whose value cannot be worked out is given as it is written, where that is made
+of numbers and of constants of the module; otherwise (an expression which uses
+<tt>?:</tt> or calls a function, say) it is left out with a warning.
+A real constant whose value is beyond the range of its type (<tt>#define HUGE_VAL 1.0e10000</tt>,
+which C takes for infinity) is left out with a warning too.
+A <tt>#define</tt> which names something other than a value, such as a type
+(<tt>#define INT unsigned int</tt>) or a pointer (<tt>(char *) 0</tt>), is no constant.
 </p>
 
 <p>
