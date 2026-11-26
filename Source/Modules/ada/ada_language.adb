@@ -3454,6 +3454,60 @@ is
             end if;
          end;
 
+         --  A type which is entered by its name less its qualifiers, as 'register' enters one ('p.f(r.int,int).int', for
+         --  the type of a parameter, where the type of a '%constant' is 'p.f(r.q(const).int,int).int'), is that type.
+         --  (Until 2026-11-26 another was made, which 'register' then refused, so that it was held by nothing and stayed
+         --  not known: such a constant was left out, 'funcptr_cpp'.)
+         --
+         if         the_Type = null
+           and then without_all_Qualifiers (+swig_Type) /= String'(+swig_Type)
+           and then Self.swig_type_Map_of_c_type.contains (+without_all_Qualifiers (+swig_Type))
+         then
+            the_Type := Self.swig_type_Map_of_c_type.Element (+without_all_Qualifiers (+swig_Type));
+
+            if not Self.swig_type_Map_of_c_type.contains (+String'(+swig_Type))
+            then
+               Self.swig_type_Map_of_c_type.insert (+String'(+swig_Type), the_Type);
+            end if;
+
+            return the_Type;
+         end if;
+
+         --  A name which the core resolves to a template instance which is not known yet (an alias template, 'Box<(int)>'
+         --  for 'Container<(int)>', named by a function ahead of the '%template' of the instance) is the type which is made
+         --  for that instance, which the class takes over when it is declared (see 'make_the_Class'). (Until 2026-11-26 a
+         --  type of this name was made, which nothing took over, and the functions which used it were left out,
+         --  'cpp11_alias_templates'.) Only a name of another template is so: an instance whose arguments are typedefs
+         --  ('Base<(INTEGER)>' for 'Base<(int)>') is the one which its class takes over by either name (above).
+         --
+         declare
+            the_Name : constant String := +swig_Type;
+            Resolved : constant String := +doh_Item (SwigType_typedef_resolve_all (SwigType_Pointer (swig_Type)));
+
+            function template_Name (Name : in String) return String
+            is (if ada.Strings.fixed.Index (Name, "<(") = 0 then Name
+                                                             else Name (Name'First .. ada.Strings.fixed.Index (Name, "<(") - 1));
+         begin
+            if         the_Type = null
+              and then Resolved /= the_Name
+              and then ada.Strings.fixed.Index (Resolved, "<(") /= 0
+              and then template_Name (Resolved) /= template_Name (the_Name)
+              and then Resolved (Resolved'Last) = '>'                                         -- Each an instance, and not a type
+              and then the_Name (the_Name'Last) = '>'                                         -- of one ('...::const_iterator').
+              and then (Resolved'Length < 2 or else Resolved (Resolved'First + 1) /= '.')     -- Not 'p.', 'r.', 'a.' ...
+              and then (the_Name'Length < 2 or else the_Name (the_Name'First + 1) /= '.')
+            then
+               the_Type := Self.demand_c_Type_for (doh_swigType (to_Doh (Resolved)));
+
+               if not Self.swig_type_Map_of_c_type.contains (+the_Name)
+               then
+                  Self.swig_type_Map_of_c_type.insert (+the_Name, the_Type);
+               end if;
+
+               return the_Type;
+            end if;
+         end;
+
          if the_Type = null
          then   -- C type has not yet been declared, so create it as an 'unknown' C type.
             the_Type := c_type.new_unknown_Type;        -- 'Unknown' type is a mutable variant record, so it can be morphed.

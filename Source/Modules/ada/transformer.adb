@@ -1087,11 +1087,16 @@ is
                                     end;
                                  else
                                     --  The array of an array type which has a package of its own ('typedef T mpz_t [1];') is the 'Item_Array'
-                                    --  of that package, which its pointer type takes. A class has its 'Item_Array' already.
+                                    --  of that package, which its pointer type takes. A class has its 'Item_Array' already, so the array of
+                                    --  an array type which is declared in the package of a class ('typedef volatile SomeType **mycrazyarray[5];',
+                                    --  of pointers) is named after that type (until 2026-11-26 it was 'Item_Array' too, and the run ended).
                                     --
                                     new_ada_Array := ada_Type.composite.an_array.new_Item (the_element_Type.declaration_Package,
-                                                                                           (if the_element_Type.all in ada_Type.composite.an_array.item'Class
+                                                                                           (if    the_element_Type.all in ada_Type.composite.an_array.item'Class
+                                                                                              and the_element_Type.Name = "Item"
                                                                                             then +"Item_Array"
+                                                                                            elsif the_element_Type.all in ada_Type.composite.an_array.item'Class
+                                                                                            then  the_element_Type.Name & "_array"
                                                                                             else +"Items"),
                                                                                            the_array_dimension_upper_Bounds => the_ada_array_Bounds,
                                                                                            element_type                     => the_element_Type);

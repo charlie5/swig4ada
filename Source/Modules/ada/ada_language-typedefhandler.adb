@@ -56,6 +56,9 @@ begin
    Self.current_c_Node := doh_Node (the_Node);
    locate (doh_Node (the_Node));
 
+   --  An instance of an alias template ('%template () Boxed<int>;') has no name, and is passed over: a name which uses
+   --  it is found through the core, as the instance which it stands for (see 'demand_c_Type_for'; 2026-11-26).
+   --
    if        (         Self.prior_c_Declaration     /= null
               and then Self.prior_c_Declaration.Name = String'(+the_doh_type_Name)
               and then not (         not Self.c_class_Stack.is_Empty                                     -- The declaration before is one of
@@ -65,6 +68,8 @@ begin
      or else Self.swig_type_Map_of_c_type.contains (known_Name)
      or else hides_another_Type
      or else is_of_a_standard_Class
+     or else (         Attribute (the_Node, "aliastemplate") /= ""
+              and then ada.Strings.fixed.Index (String'(+the_doh_type_Name), "<(") /= 0)
    then
       dlog (+"Skipping typedef.");
 
