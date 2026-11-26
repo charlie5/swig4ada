@@ -1,0 +1,2 @@
+typedef_funcptr.i:1: Warning 861: Unable to bind the constant 'addf', whose value 'addf' does not name a function of its package.
+typedef_funcptr.i:1: Warning 861: Unable to bind the constant 'subf', whose value 'subf' does not name a function of its package.

@@ -1873,6 +1873,16 @@ begin
       run_Upstream ("template_extend2");          -- A function which '%extend' adds to each of two instances.
       run_Upstream ("functors");                  -- Classes with an 'operator()', which has no name in Ada.
       run_Upstream ("overload_extend");           -- Overloads which '%extend' adds, one in the place of a member.
+      run_Upstream ("cpp11_inheriting_constructors");     -- Constructors which a class inherits by 'using', in a class and an instance.
+      run_Upstream ("cpp11_alias_template_inheritance");  -- 'using' declarations which name a function, an overload and constructors through an alias template.
+      run_Upstream ("abstract_basecast");         -- A reference to the abstract base of a class, through which it dispatches.
+      run_Upstream ("director_enum");             -- Virtual functions of enumerations, one overridden in Ada.
+      run_Upstream ("cpp14_auto_return_type");    -- Functions whose result is 'auto', declared again with their types.
+      run_Upstream ("li_cpointer_cpp");           -- The functions and class of 'cpointer.i'.
+      run_Upstream ("enum_forward",               use_CPP => False);     -- Enumerations of C declared ahead, one of them three times.
+      run_Upstream ("typedef_funcptr");           -- Pointers to functions of typedefs, given functions of Ada.
+      run_Upstream ("cpp11_uniform_initialization");      -- Variables and members initialised in braces, a vector among them.
+      run_Upstream ("template_templated_constructors");   -- Instances of constructor templates, of a class and of instances.
    end if;
 
 

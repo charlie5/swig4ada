@@ -1,0 +1,4 @@
+cpp11_uniform_initialization.i:44: Warning 861: Unable to bind the variable 'arr1', which has no symbol outside its file, being 'static' or constant, and no value which can be worked out.
+cpp11_uniform_initialization.i:45: Warning 861: Unable to bind the variable 'arr2', which has no symbol outside its file, being 'static' or constant, and no value which can be worked out.
+cpp11_uniform_initialization.i:46: Warning 861: Unable to bind the variable 'arr3', which has no symbol outside its file, being 'static' or constant, and no value which can be worked out.
+cpp11_uniform_initialization.i:47: Warning 861: Unable to bind the variable 'arr4', which has no symbol outside its file, being 'static' or constant, and no value which can be worked out.
