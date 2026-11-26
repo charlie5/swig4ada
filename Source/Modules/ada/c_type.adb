@@ -432,7 +432,8 @@ is
    begin
       return          the_Type /= null
              and then (        the_Type.is_a_standard_Integer
-                       or else to_String (the_Type.Name) in "size_t"  | "ptrdiff_t" | "ssize_t"   | "intptr_t" | "uintptr_t"
+                       or else to_String (the_Type.Name) in "signed char" | "unsigned char"     -- Which a typedef may name ('byte_t').
+                                                          | "size_t"  | "ptrdiff_t" | "ssize_t"   | "intptr_t" | "uintptr_t"
                                                           | "int8_t"  | "int16_t"   | "int32_t"   | "int64_t"
                                                           | "uint8_t" | "uint16_t"  | "uint32_t"  | "uint64_t");
    end is_an_Integer;

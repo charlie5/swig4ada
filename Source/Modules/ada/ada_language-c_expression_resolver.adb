@@ -11,7 +11,10 @@ is
                                            Namespace       : in     unbounded_String) return gmp.discrete.Integer
    is
       --  A type of the module which is followed by brackets is a cast ('mytype (10)'), which the evaluator cannot
-      --  tell from the call of a function, as it knows no types. The name is removed here, where they are known.
+      --  tell from the call of a function, as it knows no types. Where it stands for a standard type of C ('short',
+      --  or a typedef of 'unsigned char'), it is written as a cast to that type in brackets ('(short) (70000)'), which
+      --  the evaluator applies; a cast in brackets to a typedef ('(uchar) 300') is written so too. Any other type is
+      --  removed. (Until 2026-11-26 every such type was removed, and 'short (70000)' was 70000.)
       --
       use type c_Type.a_c_type_Kind;
 
@@ -29,6 +32,29 @@ is
       begin
          return is_Known (+Name) or else is_Known (Namespace & Name);
       end is_a_Type;
+
+      function standard_Name (Name : in String) return String
+      --
+      --  The name of the standard type of C which the type of the module so named stands for, or "".
+      --
+      is
+         Key : constant unbounded_String := (if Self.swig_type_Map_of_c_type.contains (+Name) then +Name else Namespace & Name);
+      begin
+         if not Self.swig_type_Map_of_c_type.contains (Key)
+         then
+            return "";
+         end if;
+
+         declare
+            the_Type : constant c_Type.view := Self.swig_type_Map_of_c_type.Element (Key);
+            the_Base : constant c_Type.view := (if the_Type.c_type_Kind = c_Type.Typedef then the_Type.ultimate_base_Type else the_Type);
+         begin
+            return (if         the_Base /= null
+                      and then the_Base.c_type_Kind = c_Type.standard_c_Type
+                    then to_String (the_Base.Name)
+                    else "");
+         end;
+      end standard_Name;
 
    begin
       while From <= Length (Pad)
@@ -56,7 +82,32 @@ is
                  and then Element (Pad, After) = '('
                  and then is_a_Type (Slice (Pad, From, Last))
                then
-                  delete (Pad, From, After - 1);
+                  declare
+                     Standard : constant String := standard_Name (Slice (Pad, From, Last));
+                  begin
+                     if Standard = ""
+                     then
+                        delete (Pad, From, After - 1);
+                     else
+                        replace_Slice (Pad, From, After - 1, "(" & Standard & ") ");
+                        From := From + Standard'Length + 3;
+                     end if;
+                  end;
+
+               elsif      From > 1                                                                         -- A typedef in brackets,
+                 and then Element (Pad, From - 1) = '('                                                    -- which the evaluator
+                 and then After <= Length (Pad)                                                            -- does not know.
+                 and then Element (Pad, After) = ')'
+                 and then Self.swig_type_Map_of_c_type.contains (+Slice (Pad, From, Last))
+                 and then Self.swig_type_Map_of_c_type.Element (+Slice (Pad, From, Last)).c_type_Kind = c_Type.Typedef
+                 and then standard_Name (Slice (Pad, From, Last)) /= ""
+               then
+                  declare
+                     Standard : constant String := standard_Name (Slice (Pad, From, Last));
+                  begin
+                     replace_Slice (Pad, From, Last, Standard);
+                     From := From + Standard'Length;
+                  end;
                else
                   From := Last + 1;
                end if;

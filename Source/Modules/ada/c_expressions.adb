@@ -506,7 +506,19 @@ is
                end loop;
 
                exit when Close = 0;
-               delete (Pad, First, Close);
+
+               declare
+                  Operand : constant Natural := (if Close = Length (Pad) then 0 else next_Significant (Close + 1));
+               begin
+                  if         Operand /= 0
+                    and then Element (Pad, Operand) = '('
+                    and then applied_the_Cast (First, Operand, Slice (Pad, Open + 1, Close - 1))
+                  then
+                     null;     -- 'static_cast<unsigned> (-1)' is applied as '(unsigned) -1' is (since 2026-11-26).
+                  else
+                     delete (Pad, First, Close);
+                  end if;
+               end;
             end;
          end loop;
       end loop;
@@ -531,7 +543,12 @@ is
                     and then Element (Pad, After) = '('
                     and then (First = 1 or else not is_name_Character (Element (Pad, First - 1)))
                   then
-                     delete (Pad, First, After - 1);
+                     if applied_the_Cast (First, After, to_String (Each))
+                     then   -- 'unsigned char (300)' is applied as '(unsigned char) 300' is (since 2026-11-26).
+                        From := First + 1;
+                     else
+                        delete (Pad, First, After - 1);
+                     end if;
                   else
                      From := First + 1;
                   end if;
