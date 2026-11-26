@@ -249,11 +249,15 @@ begin
             --  of 'aiMatrix3x3t' named first), which the class then takes over (see 'make_the_Class'). (Until 2026-11-25 a
             --  second type was made for it, which the class took over, and the first stayed one which is not known.)
             --
+            --  Or a name which a 'using' declaration brings in ('typedef string Streeng;' after 'using std::string;'),
+            --  which the core resolves. (Until 2026-11-26 the resolved name was sought for a template instance alone,
+            --  and such a typedef was an opaque type, so that a function which took or returned it by value was bound
+            --  as one of an address, 'li_std_pair_using'.)
+            --
             if        Self.swig_type_Map_of_c_type.contains (the_swig_Type)
               or else Self.swig_type_Map_of_c_type.contains (+as_a_standard_String (to_String (the_swig_Type)))     -- 'std::basic_string<(char)>'.
               or else Self.known_in_another_template_Form (the_swig_Type) /= null
-              or else (         ada.Strings.unbounded.Index (the_swig_Type, "<(") /= 0
-                       and then Self.swig_type_Map_of_c_type.contains (resolved_Base))
+              or else Self.swig_type_Map_of_c_type.contains (resolved_Base)
             then
                dlog ("swig_type_Map_of_c_type.contains " & the_swig_Type);
                declare
