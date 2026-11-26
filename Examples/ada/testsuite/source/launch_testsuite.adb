@@ -1853,6 +1853,16 @@ begin
       run_Upstream ("using2");                    -- And through a using declaration.
       run_Upstream ("typedef_typedef");           -- A typemap of a typedef which is named through a typedef of its class.
       run_Upstream ("fvirtual");                  -- An override and an overload of a virtual function, which is virtual too.
+      run_Upstream ("director_default");          -- A director of a virtual function with a default argument, and constructors with one.
+      run_Upstream ("director_minimal");          -- A virtual function which a class derived in Ada overrides.
+      run_Upstream ("li_cdata_cpp");              -- Raw data, which 'cdata.i' reads.
+      run_Upstream ("li_std_pair_using");         -- Pairs of strings named through 'using' declarations, and a typedef of what one brings in.
+      run_Upstream ("typedef_inherit_using");     -- Functions of a base which 'using' names, through a typedef of the base too.
+      run_Upstream ("using_nested_member_typedef");     -- A protected function of a nested class which 'using' makes public, through typedefs.
+      run_Upstream ("template_default_cache");    -- Instances of one template, of the classes of two namespaces, named by typedefs of one name.
+      run_Upstream ("abstract_typedef");          -- A pure virtual function defined, privately, through typedefs of its class and parameter.
+      run_Upstream ("overload_rename");           -- Constructors with default arguments, one of them renamed.
+      run_Upstream ("extend_template_ns");        -- Functions which '%extend' adds to an instance in a namespace.
    end if;
 
 
